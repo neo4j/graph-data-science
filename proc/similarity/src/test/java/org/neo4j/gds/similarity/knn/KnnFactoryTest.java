@@ -132,6 +132,7 @@ class KnnFactoryTest {
         return ImmutableKnnBaseConfig.builder()
             .nodeWeightProperty("knn")
             .initialSampler(initialSampler)
+            .similarityThreshold(0.8)
             .build();
     }
 

@@ -39,6 +39,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
@@ -66,9 +67,19 @@ class KnnTest {
         "  (a { knn: 1.2 } )" +
         ", (b { knn: 1.1 } )" +
         ", (c { knn: 42.0 } )";
-
     @Inject
     private Graph graph;
+
+    @GdlGraph(graphNamePrefix = "simThreshold")
+    private static final String nodeCreateQuery =
+        "CREATE " +
+        "  (alice:Person {age: 23})" +
+        " ,(carol:Person {age: 24})" +
+        " ,(eve:Person {age: 34})" +
+        " ,(bob:Person {age: 30})";
+    @Inject
+    private TestGraph simThresholdGraph;
+
 
     @Inject
     private IdFunction idFunction;
@@ -120,19 +131,54 @@ class KnnTest {
         assertCorrectNeighborList(result, nodeBId, nodeAId, nodeCId);
         assertCorrectNeighborList(result, nodeCId, nodeAId, nodeBId);
     }
-
     private void assertCorrectNeighborList(
         Knn.Result result,
         long nodeId,
         long... expectedNeighbors
     ) {
+        var actualSimilarityPairs=result.neighborList().get(nodeId).similarityStream(nodeId);
         var actualNeighbors = result.neighborsOf(nodeId).toArray();
         assertThat(actualNeighbors)
             .doesNotContain(nodeId)
             .containsAnyOf(expectedNeighbors)
             .doesNotHaveDuplicates()
-            .isSortedAccordingTo(Comparator.naturalOrder())
             .hasSizeLessThanOrEqualTo(expectedNeighbors.length);
+        assertThat(actualSimilarityPairs)
+            .isSortedAccordingTo(Comparator.comparingDouble((s)->-s.similarity));
+    }
+
+    @Test
+    void shouldFilterResultsOfLowSimilarity() {
+
+        var knnConfig = ImmutableKnnBaseConfig.builder()
+            .nodeWeightProperty("age")
+            .concurrency(1)
+            .randomSeed(19L)
+            .similarityThreshold(0.14)
+            .topK(2)
+            .build();
+        var knnContext = ImmutableKnnContext.builder().build();
+
+        var knn = new Knn(simThresholdGraph, knnConfig, knnContext);
+        var result = knn.compute();
+
+        assertThat(result).isNotNull();
+        assertThat(result.size()).isEqualTo(4);
+
+        long nodeAliceId = simThresholdGraph.toMappedNodeId("alice");
+        long nodeBobId = simThresholdGraph.toMappedNodeId("bob");
+        long nodeEveId = simThresholdGraph.toMappedNodeId("eve");
+        long nodeCarolId = simThresholdGraph.toMappedNodeId("carol");
+
+        assertCorrectNeighborList(result, nodeAliceId, nodeCarolId);
+        assertCorrectNeighborList(result, nodeCarolId, nodeAliceId, nodeBobId);
+        assertCorrectNeighborList(result, nodeBobId, nodeEveId, nodeCarolId);
+        assertCorrectNeighborList(result, nodeEveId, nodeBobId);
+    }
+
+    private void assertEmptyNeighborList(Knn.Result result, long nodeId) {
+        var actualNeighbors = result.neighborsOf(nodeId).toArray();
+        assertThat(actualNeighbors).isEmpty();
     }
 
     @ParameterizedTest
@@ -150,7 +196,6 @@ class KnnTest {
             knnContext
         );
         var result = knn.compute();
-
         assertThat(result)
             .isNotNull()
             .extracting(Knn.Result::size)
