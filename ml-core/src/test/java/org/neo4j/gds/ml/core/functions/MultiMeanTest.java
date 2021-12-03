@@ -58,19 +58,7 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
 
     @Test
     void shouldAverageUnweighted() {
-        // a    a
-        // b    b
-        // c
-        // d
         // (a)--(b), (c), (b)--(d)
-
-        double[] matrix = {
-            1, 2,
-            4, 5,
-            5, 2,
-            6, -1
-        };
-
         int[][] adj = new int[2][];
         adj[0] = new int[] {1};
         adj[1] = new int[] {0, 3};
@@ -82,52 +70,61 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
             2.5, 3.5
         }, 3, 2);
 
-        var data = Constant.matrix(matrix, 4, 2);
-        var mean = new MultiMean(data, TestBatchNeighbors.of(batchIds, adj));
+        var embeddings = Constant.matrix(new double[]{
+            1, 2,
+            4, 5,
+            5, 2,
+            6, -1
+        }, 4, 2);
+        var mean = new MultiMean(embeddings, TestBatchNeighbors.of(batchIds, adj));
 
         assertThat(ctx.forward(mean)).isEqualTo(expected);
     }
 
     @Test
     void testGradientWithDuplicateBatchIds() {
-        double[] matrix = {
-            1, 2,
-            4, 5,
-            3, 6
-        };
-
+        // (a)--(b)
         int[][] adj = new int[2][];
         adj[0] = new int[] {1};
         adj[1] = new int[] {0};
         int[] batchIds = {0, 1, 0};
+        TestBatchNeighbors unweightedGraph = TestBatchNeighbors.of(batchIds, adj);
 
-        Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 2));
+        var embeddings = new Matrix(new double[]{
+            1, 2,
+            4, 5,
+            3, 6
+        }, 3, 2);
+        Weights<Matrix> weights = new Weights<>(embeddings);
 
         finiteDifferenceShouldApproximateGradient(
             weights,
-            new ElementSum(List.of(new MultiMean(weights, TestBatchNeighbors.of(batchIds, adj))))
+            new ElementSum(List.of(new MultiMean(weights, unweightedGraph)))
         );
     }
 
 
     @Test
     void testGradientUnweighted() {
-        double[] matrix = {
-            1, 2,
-            4, 5,
-            3, 6
-        };
-
+        // (a)--(b), (a)->(c)
         int[][] adj = new int[2][];
         adj[0] = new int[] {1};
         adj[1] = new int[] {0, 2};
         int[] batchIds = {0, 1};
 
-        Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 2));
+        TestBatchNeighbors unweightedGraph = TestBatchNeighbors.of(batchIds, adj);
+
+        var embeddings = new Matrix(new double[]{
+            1, 2,
+            4, 5,
+            3, 6
+        }, 3, 2);
+
+        Weights<Matrix> weights = new Weights<>(embeddings);
 
         finiteDifferenceShouldApproximateGradient(
             weights,
-            new ElementSum(List.of(new MultiMean(weights, TestBatchNeighbors.of(batchIds, adj))))
+            new ElementSum(List.of(new MultiMean(weights, unweightedGraph)))
         );
     }
 

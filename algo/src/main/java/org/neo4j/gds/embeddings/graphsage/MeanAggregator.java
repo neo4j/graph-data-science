@@ -51,7 +51,7 @@ public class MeanAggregator implements Aggregator {
 
     @Override
     public Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, SubGraph subGraph) {
-        Variable<Matrix> means = new MultiMean( previousLayerRepresentations, subGraph);
+        Variable<Matrix> means = new MultiMean(previousLayerRepresentations, subGraph);
 
         Variable<Matrix> product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
         return activationFunction.apply(product);

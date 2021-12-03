@@ -59,12 +59,12 @@ public class MultiMean extends SingleParentVariable<Matrix> {
 
             // TODO Replace this with the sum of weights instead to normalize the weights
             // degree + the node itself
-            int numberOfEntries = neighbors.length + 1;
+            int closedNeighborHoodDegree = neighbors.length + 1;
 
             // initialize mean row with parent row for nodeId in batch
             for (int col = 0; col < cols; col++) {
                 double sourceColEntry = parentData.dataAt(batchNodeId, col);
-                resultMeans.addDataAt(batchIdx, col, sourceColEntry / numberOfEntries);
+                resultMeans.addDataAt(batchIdx, col, sourceColEntry / closedNeighborHoodDegree);
             }
 
             // fetch rows from neighbors and update mean
@@ -72,7 +72,7 @@ public class MultiMean extends SingleParentVariable<Matrix> {
                 double relationshipWeight = subGraph.relationshipWeight(batchNodeId, neighbor);
                 for (int col = 0; col < cols; col++) {
                     double neighborColEntry = parentData.dataAt(neighbor, col) * relationshipWeight;
-                    resultMeans.addDataAt(batchIdx, col, neighborColEntry / numberOfEntries);
+                    resultMeans.addDataAt(batchIdx, col, neighborColEntry / closedNeighborHoodDegree);
                 }
             }
         }
@@ -95,25 +95,26 @@ public class MultiMean extends SingleParentVariable<Matrix> {
         for (int batchIdx = 0; batchIdx < batchIds.length; batchIdx++) {
             var batchNodeId = batchIds[batchIdx];
             int[] neighbors = subGraph.neighbors(batchNodeId);
-            int numberOfEntries = neighbors.length + 1;
+            int closedNeighborhoodDegree = neighbors.length + 1;
 
+            // TODO init array once with sampleSize (max number of neighbors)
             double[] cachedNeighborWeights = new double[neighbors.length];
 
             for (int i = 0; i < neighbors.length; i++) {
                 cachedNeighborWeights[i] = subGraph.relationshipWeight(batchNodeId, neighbors[i]);
             }
 
-            // TODO try to divide by numberOfEntries once instead of on every update
+            // TODO try to divide by closedNeighborhoodDegree once instead of on every update
 
             for (int col = 0; col < cols; col++) {
                 for (int neighborIndex = 0; neighborIndex < neighbors.length; neighborIndex++) {
                     int neighbor = neighbors[neighborIndex];
-                    double neighborGradient = (multiMeanGradient.dataAt(batchIdx, col) * cachedNeighborWeights[neighborIndex] / numberOfEntries);
+                    double neighborGradient = (multiMeanGradient.dataAt(batchIdx, col) * cachedNeighborWeights[neighborIndex] / closedNeighborhoodDegree);
 
                     resultGradient.addDataAt(neighbor * cols + col, neighborGradient);
                 }
 
-                resultGradient.addDataAt(batchNodeId, col, multiMeanGradient.dataAt(batchIdx, col) / numberOfEntries);
+                resultGradient.addDataAt(batchNodeId, col, multiMeanGradient.dataAt(batchIdx, col) / closedNeighborhoodDegree);
             }
         }
 

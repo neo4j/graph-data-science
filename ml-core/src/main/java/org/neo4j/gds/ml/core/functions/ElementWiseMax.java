@@ -39,6 +39,7 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
     int[nodes][neighbours] adjacencyMatrix
  */
 public class ElementWiseMax extends SingleParentVariable<Matrix> {
+    public static final int INVALID_NEIGHBOR = -1;
     private final Variable<Matrix> parent;
     private final BatchNeighbors batchNeighbors;
 
@@ -107,7 +108,7 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
                 double thisCellData = thisData.dataAt(row, col);
 
                 var minDiffToCellData = Double.MAX_VALUE;
-                var maxNeighbor = -1;
+                var maxNeighbor = INVALID_NEIGHBOR;
                 var maxNeighborWeight = Double.NaN;
 
                 for (int i = 0; i < neighbors.length; i++) {
@@ -125,7 +126,7 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
                     }
                 }
 
-                if (maxNeighbor == -1) {
+                if (maxNeighbor == INVALID_NEIGHBOR) {
                     assert neighbors.length == 0;
                     continue;
                 }
