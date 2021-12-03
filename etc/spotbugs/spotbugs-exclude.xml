@@ -660,5 +660,8 @@
     <Match>
         <Bug pattern="SSCU_SUSPICIOUS_SHADED_CLASS_USE"/>
     </Match>
+    <Match>
+        <Bug pattern="AOM_ABSTRACT_OVERRIDDEN_METHOD"/>
+    </Match>
 
 </FindBugsFilter>
