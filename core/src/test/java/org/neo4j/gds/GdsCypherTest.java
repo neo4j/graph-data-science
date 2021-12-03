@@ -530,18 +530,18 @@ class GdsCypherTest {
         //@formatter:off
         return
             "{" +
-            "FooNode: {" +
-            "label: 'Foo', " +
-            "properties: {" +
-            "nodeProp: {" +
-            "property: 'NodePropertyName', " +
-            "defaultValue: 42.1337" +
-            "}, " +
-            "GlobalNodeProp: {" +
-            "property: 'GlobalNodeProp'" +
-            "}" +
-            "}" +
-            "}" +
+              "FooNode: {" +
+                "label: 'Foo', " +
+                "properties: {" +
+                  "nodeProp: {" +
+                    "property: 'NodePropertyName', " +
+                    "defaultValue: 42.1337" +
+                  "}, " +
+                  "GlobalNodeProp: {" +
+                    "property: 'GlobalNodeProp'" +
+                  "}" +
+                "}" +
+              "}" +
             "}";
         //@formatter:on
     }
@@ -550,30 +550,30 @@ class GdsCypherTest {
         //@formatter:off
         return
             "{" +
-            "Rel: {" +
-            "type: 'TYPE', " +
-            "properties: {" +
-            "global: {" +
-            "property: 'RelProp'" +
-            "}" +
-            "}" +
-            "}, " +
-            "BarRel: {" +
-            "type: 'Bar', " +
-            "orientation: 'UNDIRECTED', " +
-            "aggregation: 'SINGLE', " +
-            "properties: {" +
-            "relProp: {" +
-            "property: 'RelationshipPropertyName', " +
-            "defaultValue: 1337, " +
-            "aggregation: 'MAX'" +
-            "}, " +
-            "global: {" +
-            "property: 'RelProp', " +
-            "aggregation: 'SINGLE'" +
-            "}" +
-            "}" +
-            "}" +
+              "Rel: {" +
+                "type: 'TYPE', " +
+                "properties: {" +
+                  "global: {" +
+                    "property: 'RelProp'" +
+                  "}" +
+                "}" +
+              "}, " +
+              "BarRel: {" +
+                "type: 'Bar', " +
+                "orientation: 'UNDIRECTED', " +
+                "aggregation: 'SINGLE', " +
+                "properties: {" +
+                  "relProp: {" +
+                    "property: 'RelationshipPropertyName', " +
+                    "defaultValue: 1337, " +
+                    "aggregation: 'MAX'" +
+                  "}, " +
+                  "global: {" +
+                    "property: 'RelProp', " +
+                    "aggregation: 'SINGLE'" +
+                  "}" +
+                "}" +
+              "}" +
             "}";
         //@formatter:on
     }
@@ -645,18 +645,4 @@ class GdsCypherTest {
         );
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
