@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -44,7 +43,7 @@ public class ProcedureExecutor<
     CONFIG extends AlgoBaseConfig
 > {
 
-    private final ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> configParser;
+    private final ProcConfigParser<CONFIG> configParser;
     private final MemoryUsageValidator memoryUsageValidator;
     private final BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn;
     private final Validator<CONFIG> validator;
@@ -56,7 +55,7 @@ public class ProcedureExecutor<
     private final AllocationTracker allocationTracker;
 
     ProcedureExecutor(
-        ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> configParser,
+        ProcConfigParser<CONFIG> configParser,
         MemoryUsageValidator memoryUsageValidator,
         BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn,
         Validator<CONFIG> validator,
@@ -89,20 +88,18 @@ public class ProcedureExecutor<
     }
 
     protected AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
-        Object graphNameOrConfig,
+        String graphName,
         Map<String, Object> configuration,
         boolean releaseAlgorithm,
         boolean releaseTopology
     ) {
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
 
-        Pair<CONFIG, Optional<String>> input = configParser.processInput(graphNameOrConfig, configuration);
-        var config = input.getOne();
-        var maybeGraphName = input.getTwo();
+        CONFIG config = configParser.processInput(configuration);
 
         setAlgorithmMetaDataToTransaction(config);
 
-        var graphStoreLoader = graphStoreLoaderFn.apply(config, maybeGraphName);
+        var graphStoreLoader = graphStoreLoaderFn.apply(config, Optional.of(graphName));
         var procedureMemoryEstimation = new ProcedureMemoryEstimation<>(graphStoreLoader, algorithmFactory);
         var memoryEstimationInBytes = memoryUsageValidator.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation);
 

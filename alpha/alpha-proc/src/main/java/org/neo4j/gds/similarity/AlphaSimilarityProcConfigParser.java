@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity;
 
-import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.ProcConfigParser;
 import org.neo4j.gds.RelationshipProjections;
@@ -40,13 +39,13 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJE
 import static org.neo4j.gds.similarity.AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
 import static org.neo4j.gds.similarity.AlphaSimilarityProc.removeGraph;
 
-public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> implements ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> {
+public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> implements ProcConfigParser<CONFIG> {
 
-    private final ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> configParser;
+    private final ProcConfigParser<CONFIG> configParser;
     private final NamedDatabaseId databaseId;
 
     AlphaSimilarityProcConfigParser(
-        ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> configParser,
+        ProcConfigParser<CONFIG> configParser,
         NamedDatabaseId databaseId
     ) {
         this.configParser = configParser;
@@ -64,9 +63,7 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> im
     }
 
     @Override
-    public Pair<CONFIG, Optional<String>> processInput(
-        Object __, Map<String, Object> configuration
-    ) {
+    public CONFIG processInput(Map<String, Object> configuration) {
         // We will tell the rest of the system that we are in named graph mode, with a fake graph name
         var graphName = SIMILARITY_FAKE_GRAPH_NAME;
 
@@ -89,7 +86,7 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> im
         );
         // And finally we call super in named graph mode
         try {
-            return configParser.processInput(graphName, configuration);
+            return configParser.processInput(configuration);
         } catch (RuntimeException e) {
             removeGraph(username(), this.databaseId);
             throw e;

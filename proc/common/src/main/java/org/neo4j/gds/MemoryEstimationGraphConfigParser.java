@@ -23,11 +23,10 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class MemoryEstimationGraphConfigParser implements ProcConfigParser<GraphCreateConfig, GraphCreateConfig> {
+public class MemoryEstimationGraphConfigParser {
 
     private final String username;
 
@@ -35,27 +34,19 @@ public class MemoryEstimationGraphConfigParser implements ProcConfigParser<Graph
         this.username = username;
     }
 
-    @Override
     public String username() {
         return username;
     }
 
-    @Override
-    public GraphCreateConfig processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
+    public GraphCreateConfig processInput(Object graphNameOrConfig) {
         if (graphNameOrConfig instanceof Map) {
             var createConfigMap = (Map<String, Object>) graphNameOrConfig;
             var createConfigMapWrapper = CypherMapWrapper.create(createConfigMap);
-            return newConfig(Optional.empty(), createConfigMapWrapper);
+            return GraphCreateConfig.createImplicit(username(), createConfigMapWrapper);
         }
         throw new IllegalArgumentException(formatWithLocale(
             "Could not parse input. Expected a configuration map, but got %s.",
             graphNameOrConfig.getClass().getSimpleName()
         ));
     }
-
-    @Override
-    public GraphCreateConfig newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        return GraphCreateConfig.createImplicit(username(), config);
-    }
-
 }

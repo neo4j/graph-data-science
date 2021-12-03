@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity;
 
-import org.eclipse.collections.api.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -186,11 +185,7 @@ public abstract class AlphaSimilarityProcTest<
     @Test
     void shouldNotLoadAnything() {
         applyOnProcedure(proc -> {
-            Pair<? extends SimilarityConfig, Optional<String>> input = proc.configParser().processInput(
-                SIMILARITY_FAKE_GRAPH_NAME,
-                minimalViableConfig()
-            );
-            assertEquals(SIMILARITY_FAKE_GRAPH_NAME, input.getTwo().get());
+            var config = proc.configParser().processInput(minimalViableConfig());
             assertTrue(GraphStoreCatalog.exists(getUsername(), db.databaseId(), SIMILARITY_FAKE_GRAPH_NAME));
             GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(
                 getUsername(),

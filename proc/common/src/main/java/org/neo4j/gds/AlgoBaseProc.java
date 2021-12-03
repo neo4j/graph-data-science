@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.eclipse.collections.api.tuple.Pair;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
@@ -37,6 +36,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
@@ -47,8 +48,8 @@ public abstract class AlgoBaseProc<
         return this.getClass().getSimpleName();
     }
 
-    public ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> configParser() {
-        return new DefaultProcConfigParser<>(username(), AlgoBaseProc.this::newConfig);
+    public ProcConfigParser<CONFIG> configParser() {
+        return new AlgoConfigParser<>(username(), AlgoBaseProc.this::newConfig);
     }
 
     public ProcedureMemoryEstimation<ALGO, ALGO_RESULT, CONFIG> procedureMemoryEstimation(GraphStoreLoader graphStoreLoader) {
@@ -105,26 +106,25 @@ public abstract class AlgoBaseProc<
         Object graphNameOrConfig,
         Map<String, Object> configuration
     ) {
-        Pair<CONFIG, Optional<String>> configAndGraphName = configParser().processInput(
-            graphNameOrConfig,
-            configuration
-        );
-
-        var config = configAndGraphName.getOne();
-        var maybeGraphName = configAndGraphName.getTwo();
+        CONFIG algoConfig = configParser().processInput(configuration);
 
         GraphStoreLoader graphStoreLoader;
 
-        if (maybeGraphName.isEmpty()) {
+        if (graphNameOrConfig instanceof Map) {
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(username());
-            var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfig, configuration);
+            var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfig);
 
             graphStoreLoader = GraphStoreLoader.implicitGraphLoader(this::username, this::graphLoaderContext, graphCreateConfig);
+        } else if (graphNameOrConfig instanceof String) {
+            graphStoreLoader = new GraphStoreFromCatalogLoader((String) graphNameOrConfig, algoConfig, username(), databaseId(), isGdsAdmin());
         } else {
-            graphStoreLoader = new GraphStoreFromCatalogLoader(maybeGraphName.get(), config, username(), databaseId(), isGdsAdmin());
+            throw new IllegalArgumentException(formatWithLocale(
+                "Expected `graphNameOrConfig` to be of type String or Map, but got",
+                graphNameOrConfig.getClass().getSimpleName()
+            ));
         }
 
-        MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(graphStoreLoader).memoryEstimation(config);
+        MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(graphStoreLoader).memoryEstimation(algoConfig);
         return Stream.of(
             new MemoryEstimateResult(memoryTreeWithDimensions)
         );

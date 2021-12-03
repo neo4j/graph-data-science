@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.walking;
 
-import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.ImmutableComputationResult;
 import org.neo4j.gds.MutateProc;
@@ -61,15 +60,11 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     ) {
         ImmutableComputationResult.Builder<CollapsePath, Relationships, CollapsePathConfig> builder = ImmutableComputationResult.builder();
 
-        Pair<CollapsePathConfig, Optional<String>> input = configParser().processInput(
-            graphName,
-            configuration
-        );
-        var config = input.getOne();
+        CollapsePathConfig config = configParser().processInput(configuration);
 
         GraphStore graphStore;
         var validator = validator();
-        var graphStoreLoader = graphStoreLoader(config, input.getTwo());
+        var graphStoreLoader = graphStoreLoader(config, Optional.of(graphName));
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
             var graphCreateConfig = graphStoreLoader.graphCreateConfig();
             validator.validateConfigsBeforeLoad(graphCreateConfig, config);
