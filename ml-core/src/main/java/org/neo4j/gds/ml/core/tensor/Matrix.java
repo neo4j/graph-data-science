@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.core.tensor;
 
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
 import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.Dimensions;
@@ -26,6 +28,8 @@ import org.neo4j.gds.ml.core.Dimensions;
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
+import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
+import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Matrix extends Tensor<Matrix> {
@@ -42,6 +46,10 @@ public class Matrix extends Tensor<Matrix> {
         super(data, Dimensions.matrix(rows, cols));
         this.rows = rows;
         this.columns = cols;
+    }
+
+    public static Matrix of(DMatrixRMaj matrix) {
+        return  new Matrix(matrix.data, matrix.numRows, matrix.numCols);
     }
 
     public Matrix(int rows, int cols) {
@@ -113,6 +121,28 @@ public class Matrix extends Tensor<Matrix> {
             sum.data[i] = localData[i] + b.data[i];
         }
         return sum;
+    }
+
+    private DMatrixRMaj toEjml() {
+        return DMatrixRMaj.wrap(this.dimension(ROWS_INDEX), this.dimension(COLUMNS_INDEX), this.data());
+    }
+
+    public Matrix multiply(Matrix other) {
+        DMatrixRMaj result = new DMatrixRMaj(this.rows, other.cols());
+        MatrixMatrixMult_DDRM.mult_reorder(this.toEjml(), other.toEjml(), result);
+        return Matrix.of(result);
+    }
+
+    public Matrix multiplyTransB(Matrix other) {
+        DMatrixRMaj result = new DMatrixRMaj(this.rows, other.rows);
+        MatrixMatrixMult_DDRM.multTransB(this.toEjml(), other.toEjml(), result);
+        return Matrix.of(result);
+    }
+
+    public Matrix multiplyTransA(Matrix other) {
+        DMatrixRMaj prod = new DMatrixRMaj(this.cols(), other.cols());
+        MatrixMatrixMult_DDRM.multTransA_reorder(this.toEjml(), other.toEjml(), prod);
+        return Matrix.of(prod);
     }
 
     @Override

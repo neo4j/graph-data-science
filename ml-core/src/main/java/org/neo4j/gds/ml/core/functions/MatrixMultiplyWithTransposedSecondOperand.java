@@ -19,14 +19,11 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
 import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
@@ -57,43 +54,17 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        Tensor<?> t1 = ctx.data(A);
-        Tensor<?> t2 = ctx.data(B);
-        return multiplyTransB(t1, t2);
+        return ctx.data(A).multiplyTransB(ctx.data(B));
     }
 
     @Override
     public Matrix gradient(Variable<?> parent, ComputationContext ctx) {
-        Tensor<?> gradient = ctx.gradient(this);
+        var gradient = ctx.gradient(this);
         if (parent == A) {
-            return multiply(gradient, ctx.data(B));
+            return gradient.multiply(ctx.data(B));
         } else {
-            return multiplyTransA(gradient, ctx.data(A));
+            return gradient.multiplyTransA(ctx.data(A));
         }
-    }
-
-    private Matrix multiply(Tensor<?> t1, Tensor<?> t2) {
-        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(ROWS_INDEX), t1.dimension(COLUMNS_INDEX), t1.data());
-        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(ROWS_INDEX), t2.dimension(COLUMNS_INDEX), t2.data());
-        DMatrixRMaj prod = new DMatrixRMaj(m1.numRows, m2.numCols);
-        MatrixMatrixMult_DDRM.mult_reorder(m1, m2, prod);
-        return new Matrix(prod.getData(), prod.numRows, prod.numCols);
-    }
-
-    private Matrix multiplyTransB(Tensor<?> t1, Tensor<?> t2) {
-        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(ROWS_INDEX), t1.dimension(COLUMNS_INDEX), t1.data());
-        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(ROWS_INDEX), t2.dimension(COLUMNS_INDEX), t2.data());
-        DMatrixRMaj prod = new DMatrixRMaj(m1.numRows, m2.numRows);
-        MatrixMatrixMult_DDRM.multTransB(m1, m2, prod);
-        return new Matrix(prod.getData(), prod.numRows, prod.numCols);
-    }
-
-    private Matrix multiplyTransA(Tensor<?> t1, Tensor<?> t2) {
-        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(ROWS_INDEX), t1.dimension(COLUMNS_INDEX), t1.data());
-        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(ROWS_INDEX), t2.dimension(COLUMNS_INDEX), t2.data());
-        DMatrixRMaj prod = new DMatrixRMaj(m1.numCols, m2.numCols);
-        MatrixMatrixMult_DDRM.multTransA_reorder(m1, m2, prod);
-        return new Matrix(prod.getData(), prod.numRows, prod.numCols);
     }
 
     public static MatrixMultiplyWithTransposedSecondOperand of(Variable<Matrix> A, Variable<Matrix> B) {
