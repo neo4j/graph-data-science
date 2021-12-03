@@ -79,7 +79,7 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
 
         int[] batchIds = {1, 0};
 
-        Variable<Matrix> max = new ElementWiseMax(parent, new TestBatchNeighbors(batchIds, adjacencyMatrix));
+        Variable<Matrix> max = new ElementWiseMax(parent, TestBatchNeighbors.of(batchIds, adjacencyMatrix));
 
         var expected = new Matrix(new double[]{
             9, 4, 3,    // Node 1
@@ -107,7 +107,7 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
 
         ElementSum sum = new ElementSum(List.of(new ElementWiseMax(
             weights,
-            new TestBatchNeighbors(batchIds, adjacencyMatrix)
+            TestBatchNeighbors.of(batchIds, adjacencyMatrix)
         )));
         Variable<Scalar> loss = new ConstantScale<>(sum, 2);
         finiteDifferenceShouldApproximateGradient(weights, loss);
@@ -125,7 +125,7 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
             new int[]{0, 1}
         };
 
-        ElementSum loss = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(adjacencyMatrix))));
+        ElementSum loss = new ElementSum(List.of(new ElementWiseMax(weights, TestBatchNeighbors.of(adjacencyMatrix))));
 
         ComputationContext ctx = new ComputationContext();
 
@@ -151,7 +151,7 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
 
         Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 1));
 
-        ElementSum loss = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(batchIds, adj))));
+        ElementSum loss = new ElementSum(List.of(new ElementWiseMax(weights, TestBatchNeighbors.of(batchIds, adj))));
 
         ComputationContext ctx = new ComputationContext();
 

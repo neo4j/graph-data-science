@@ -38,7 +38,7 @@ public class MultiMean extends SingleParentVariable<Matrix> {
         this.subGraph = subGraph;
         this.parentVariable = parentVariable;
 
-        // TODO assert  parent.dimension(Dimensions.ROWS_INDEX) >= subGraph.nodeCount()
+        assert parentVariable.dimension(Dimensions.ROWS_INDEX) >= subGraph.nodeCount() : "Expecting a row for each node in the subgraph";
     }
 
     @Override

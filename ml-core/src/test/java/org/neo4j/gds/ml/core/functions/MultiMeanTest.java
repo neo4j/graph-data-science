@@ -83,7 +83,7 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
         }, 3, 2);
 
         var data = Constant.matrix(matrix, 4, 2);
-        var mean = new MultiMean(data, new TestBatchNeighbors(batchIds, adj));
+        var mean = new MultiMean(data, TestBatchNeighbors.of(batchIds, adj));
 
         assertThat(ctx.forward(mean)).isEqualTo(expected);
     }
@@ -105,7 +105,7 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
 
         finiteDifferenceShouldApproximateGradient(
             weights,
-            new ElementSum(List.of(new MultiMean(weights, new TestBatchNeighbors(batchIds, adj))))
+            new ElementSum(List.of(new MultiMean(weights, TestBatchNeighbors.of(batchIds, adj))))
         );
     }
 
@@ -127,7 +127,7 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
 
         finiteDifferenceShouldApproximateGradient(
             weights,
-            new ElementSum(List.of(new MultiMean(weights, new TestBatchNeighbors(batchIds, adj))))
+            new ElementSum(List.of(new MultiMean(weights, TestBatchNeighbors.of(batchIds, adj))))
         );
     }
 

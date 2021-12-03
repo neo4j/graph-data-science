@@ -110,6 +110,10 @@ public final class SubGraph implements BatchNeighbors {
         return mappedBatchNodeIds;
     }
 
+    public int nodeCount() {
+        return originalNodeIds.length;
+    }
+
     public long[] originalNodeIds() {
         return originalNodeIds;
     }
