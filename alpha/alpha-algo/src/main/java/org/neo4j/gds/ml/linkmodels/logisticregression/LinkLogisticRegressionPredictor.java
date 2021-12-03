@@ -52,14 +52,14 @@ public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase 
     }
 
     public double predictedProbability(long sourceId, long targetId) {
-        var weightsArray = modelData.weights().data().data();
+        var weightsArray = modelData.weights().data();
         var features = features(sourceId, targetId);
         var affinity = 0D;
-        var biasIndex = weightsArray.length - 1;
+        var biasIndex = weightsArray.totalSize() - 1;
         for (int i = 0; i < biasIndex; i++) {
-            affinity += weightsArray[i] * features[i];
+            affinity += weightsArray.dataAt(i) * features[i];
         }
-        var bias = weightsArray[biasIndex];
+        var bias = weightsArray.dataAt(biasIndex);
         return Sigmoid.sigmoid(affinity + bias);
     }
 }
