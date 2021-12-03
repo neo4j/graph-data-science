@@ -20,7 +20,6 @@
 package org.neo4j.gds.beta.pregel.cc;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
 import org.neo4j.gds.AlgorithmFactory;
@@ -71,7 +70,7 @@ public final class ComputationStreamProc extends PregelStreamProc<ComputationAlg
     }
 
     @Override
-    protected PregelProcedureConfig newConfig(String username, Optional<String> graphName, CypherMapWrapper config) {
+    protected PregelProcedureConfig newConfig(String username, CypherMapWrapper config) {
         return PregelProcedureConfig.of(config);
     }
 
