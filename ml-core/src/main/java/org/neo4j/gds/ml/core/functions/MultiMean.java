@@ -26,6 +26,10 @@ import org.neo4j.gds.ml.core.subgraph.BatchNeighbors;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
+import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
+import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
+
+
 public class MultiMean extends SingleParentVariable<Matrix> {
     private final BatchNeighbors subGraph;
     private final Variable<Matrix> parentVariable;
@@ -34,11 +38,11 @@ public class MultiMean extends SingleParentVariable<Matrix> {
         Variable<Matrix> parentVariable,
         BatchNeighbors subGraph
     ) {
-        super(parentVariable, Dimensions.matrix(subGraph.batchSize(), parentVariable.dimension(1)));
+        super(parentVariable, Dimensions.matrix(subGraph.batchSize(), parentVariable.dimension(COLUMNS_INDEX)));
         this.subGraph = subGraph;
         this.parentVariable = parentVariable;
 
-        assert parentVariable.dimension(Dimensions.ROWS_INDEX) >= subGraph.nodeCount() : "Expecting a row for each node in the subgraph";
+        assert parentVariable.dimension(ROWS_INDEX) >= subGraph.nodeCount() : "Expecting a row for each node in the subgraph";
     }
 
     @Override
@@ -48,7 +52,7 @@ public class MultiMean extends SingleParentVariable<Matrix> {
         int[] batchIds = subGraph.batchIds();
         int batchSize = batchIds.length;
 
-        int cols = parentVariable.dimension(1);
+        int cols = parentVariable.dimension(COLUMNS_INDEX);
 
         var resultMeans = Matrix.create(0, batchSize, cols);
 
@@ -71,8 +75,8 @@ public class MultiMean extends SingleParentVariable<Matrix> {
             for (int neighbor : neighbors) {
                 double relationshipWeight = subGraph.relationshipWeight(batchNodeId, neighbor);
                 for (int col = 0; col < cols; col++) {
-                    double neighborColEntry = parentData.dataAt(neighbor, col) * relationshipWeight;
-                    resultMeans.addDataAt(batchIdx, col, neighborColEntry / closedNeighborHoodDegree);
+                    double neighborColData = parentData.dataAt(neighbor, col) * relationshipWeight;
+                    resultMeans.addDataAt(batchIdx, col, neighborColData / closedNeighborHoodDegree);
                 }
             }
         }
@@ -98,23 +102,29 @@ public class MultiMean extends SingleParentVariable<Matrix> {
             int closedNeighborhoodDegree = neighbors.length + 1;
 
             // TODO init array once with sampleSize (max number of neighbors)
-            double[] cachedNeighborWeights = new double[neighbors.length];
+            double[] cachedWeights = new double[neighbors.length];
 
             for (int i = 0; i < neighbors.length; i++) {
-                cachedNeighborWeights[i] = subGraph.relationshipWeight(batchNodeId, neighbors[i]);
+                cachedWeights[i] = subGraph.relationshipWeight(batchNodeId, neighbors[i]);
             }
 
             // TODO try to divide by closedNeighborhoodDegree once instead of on every update
 
             for (int col = 0; col < cols; col++) {
+                // pass gradient to batchNode's data
+                resultGradient.addDataAt(
+                    batchNodeId,
+                    col,
+                    multiMeanGradient.dataAt(batchIdx, col) / closedNeighborhoodDegree
+                );
+
+                // propagate gradient to neighbors' data
                 for (int neighborIndex = 0; neighborIndex < neighbors.length; neighborIndex++) {
                     int neighbor = neighbors[neighborIndex];
-                    double neighborGradient = (multiMeanGradient.dataAt(batchIdx, col) * cachedNeighborWeights[neighborIndex] / closedNeighborhoodDegree);
+                    double neighborGradient = multiMeanGradient.dataAt(batchIdx, col) * cachedWeights[neighborIndex];
 
-                    resultGradient.addDataAt(neighbor * cols + col, neighborGradient);
+                    resultGradient.addDataAt(neighbor * cols + col, neighborGradient / closedNeighborhoodDegree);
                 }
-
-                resultGradient.addDataAt(batchNodeId, col, multiMeanGradient.dataAt(batchIdx, col) / closedNeighborhoodDegree);
             }
         }
 
