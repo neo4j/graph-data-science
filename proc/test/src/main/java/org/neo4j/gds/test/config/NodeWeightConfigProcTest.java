@@ -32,7 +32,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.test.config.ConfigProcTestHelpers.GRAPH_NAME;
 
 public final class NodeWeightConfigProcTest {
 
@@ -74,7 +73,7 @@ public final class NodeWeightConfigProcTest {
             assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
                     graphStore,
                     null,
-                    proc.configParser().newConfig(GRAPH_NAME, config.withString("nodeWeightProperty", "notA"))
+                    proc.configParser().processInput(config.withString("nodeWeightProperty", "notA").toMap())
                 )
             )
                 .hasMessageContaining("Node weight property")
@@ -97,9 +96,10 @@ public final class NodeWeightConfigProcTest {
             assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
                     graphStore,
                     null,
-                    proc.configParser().newConfig(GRAPH_NAME, config
+                    proc.configParser().processInput(config
                         .withString("nodeWeightProperty", "foo")
                         .withEntry("nodeLabels", List.of("Node"))
+                        .toMap()
                     )
                 )
             )
@@ -114,7 +114,7 @@ public final class NodeWeightConfigProcTest {
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("defaultNodeWeightProperty", () -> {
-            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, config);
+            var algoConfig = proc.configParser().processInput(config.toMap());
             assertThat(algoConfig.nodeWeightProperty()).isNull();
         });
     }
@@ -125,7 +125,7 @@ public final class NodeWeightConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("whitespaceNodeWeightProperty", () -> {
             var nodeWeightConfig = config.withString("nodeWeightProperty", "");
-            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, nodeWeightConfig);
+            var algoConfig = proc.configParser().processInput(nodeWeightConfig.toMap());
             assertThat(algoConfig.nodeWeightProperty()).isNull();
         });
     }
@@ -136,7 +136,7 @@ public final class NodeWeightConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("whitespaceNodeWeightProperty", () -> {
             var nodeWeightConfig = config.withString("nodeWeightProperty", " a");
-            assertThatThrownBy(() -> proc.configParser().newConfig(GRAPH_NAME, nodeWeightConfig))
+            assertThatThrownBy(() -> proc.configParser().processInput(nodeWeightConfig.toMap()))
                 .hasMessage("`nodeWeightProperty` must not end or begin with whitespace characters, but got ` a`.");
         });
     }
@@ -146,7 +146,7 @@ public final class NodeWeightConfigProcTest {
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("unspecifiedNodeWeightProperty", () -> {
-            assertThatThrownBy(() -> proc.configParser().newConfig(GRAPH_NAME, config.withoutEntry("nodeWeightProperty")))
+            assertThatThrownBy(() -> proc.configParser().processInput(config.withoutEntry("nodeWeightProperty").toMap()))
                 .hasMessageContaining("nodeWeightProperty")
                 .hasMessageContaining("mandatory");
         });
@@ -159,7 +159,7 @@ public final class NodeWeightConfigProcTest {
         var graphStore = GdlFactory.of("(:A {nw: 1})").build().graphStore();
         return DynamicTest.dynamicTest("validNodeWeightProperty", () -> {
             var nodeWeightConfig = config.withString("nodeWeightProperty", "nw");
-            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, nodeWeightConfig);
+            var algoConfig = proc.configParser().processInput(nodeWeightConfig.toMap());
             assertThat(algoConfig.nodeWeightProperty()).isEqualTo("nw");
 
             var validator = new Validator<>(proc.getValidationConfig());

@@ -28,7 +28,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.test.config.ConfigProcTestHelpers.GRAPH_NAME;
 
 public final class IterationsConfigProcTest {
 
@@ -57,12 +56,12 @@ public final class IterationsConfigProcTest {
         return DynamicTest.dynamicTest("invalidMaxIterations", () -> {
             assertThatThrownBy(() -> proc
                 .configParser()
-                .newConfig(GRAPH_NAME, config.withNumber("maxIterations", 0)))
+                .processInput(config.withNumber("maxIterations", 0).toMap()))
                 .hasMessageContaining("maxIterations")
                 .hasMessageContaining("0");
             assertThatThrownBy(() -> proc
                 .configParser()
-                .newConfig(GRAPH_NAME, config.withNumber("maxIterations", -10)))
+                .processInput(config.withNumber("maxIterations", -10).toMap()))
                 .hasMessageContaining("maxIterations")
                 .hasMessageContaining("-10");
         });
@@ -74,7 +73,7 @@ public final class IterationsConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("validMaxIterations", () -> {
             var iterationsConfig = config.withNumber("maxIterations", 3);
-            var algoConfig = ((IterationsConfig) proc.configParser().newConfig(GRAPH_NAME, iterationsConfig));
+            var algoConfig = ((IterationsConfig) proc.configParser().processInput(iterationsConfig.toMap()));
             assertThat(algoConfig.maxIterations()).isEqualTo(3);
         });
     }

@@ -48,7 +48,6 @@ import org.neo4j.gds.test.config.NodeWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -188,7 +187,7 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
                 CypherMapWrapper invalidConfig = CypherMapWrapper.create(configMap)
                     .withNumber("topK", 0)
                     .withNumber("sampleRate", 0.0);
-                proc.configParser().newConfig(Optional.of(graphName), invalidConfig);
+                proc.configParser().processInput(invalidConfig.toMap());
             })
             .withMessageContainingAll("`topK`", "0", "[1, 2147483647]")
             .withMessageContainingAll("`sampleRate`", "0.00", "(0.00, 1.00]"));

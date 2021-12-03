@@ -19,16 +19,9 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.CypherMapWrapper;
-
 import java.util.Map;
-import java.util.Optional;
 
+@FunctionalInterface
 public interface ProcConfigParser<CONFIG> {
-    String username();
-
     CONFIG processInput(Map<String, Object> configuration);
-
-    // TODO remove this
-    CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config);
 }

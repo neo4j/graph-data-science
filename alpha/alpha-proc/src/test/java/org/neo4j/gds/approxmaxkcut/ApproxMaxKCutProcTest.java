@@ -37,8 +37,6 @@ import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends BaseProcTest implements
@@ -141,7 +139,7 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
     void testK() {
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map("k", 18)));
         applyOnProcedure(proc -> {
-            CONFIG approxMaxKCutConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
+            CONFIG approxMaxKCutConfig = proc.configParser().processInput(config.toMap());
             assertEquals(18, approxMaxKCutConfig.k());
         });
     }
@@ -150,7 +148,7 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
     void testIterations() {
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map("iterations", 87)));
         applyOnProcedure(proc -> {
-            CONFIG approxMaxKCutConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
+            CONFIG approxMaxKCutConfig = proc.configParser().processInput(config.toMap());
             assertEquals(87, approxMaxKCutConfig.iterations());
         });
     }
@@ -162,7 +160,7 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
             31
         )));
         applyOnProcedure(proc -> {
-            CONFIG approxMaxKCutConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
+            CONFIG approxMaxKCutConfig = proc.configParser().processInput(config.toMap());
             assertEquals(31, approxMaxKCutConfig.vnsMaxNeighborhoodOrder());
         });
     }
@@ -176,7 +174,7 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
             1
         )));
         applyOnProcedure(proc -> {
-            CONFIG approxMaxKCutConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
+            CONFIG approxMaxKCutConfig = proc.configParser().processInput(config.toMap());
             assertEquals(42L, approxMaxKCutConfig.randomSeed().get());
         });
     }

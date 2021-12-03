@@ -23,14 +23,12 @@ import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.ProcConfigParser;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.similarity.nil.NullGraphStore;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
@@ -41,25 +39,18 @@ import static org.neo4j.gds.similarity.AlphaSimilarityProc.removeGraph;
 
 public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> implements ProcConfigParser<CONFIG> {
 
+    private final String username;
     private final ProcConfigParser<CONFIG> configParser;
     private final NamedDatabaseId databaseId;
 
     AlphaSimilarityProcConfigParser(
+        String username,
         ProcConfigParser<CONFIG> configParser,
         NamedDatabaseId databaseId
     ) {
+        this.username = username;
         this.configParser = configParser;
         this.databaseId = databaseId;
-    }
-
-    @Override
-    public String username() {
-        return configParser.username();
-    }
-
-    @Override
-    public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        return configParser.newConfig(graphName, config);
     }
 
     @Override
@@ -77,7 +68,7 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> im
         // We put the fake graph store into the graph catalog
         GraphStoreCatalog.set(
             ImmutableGraphCreateFromStoreConfig.of(
-                username(),
+                username,
                 graphName,
                 NodeProjections.ALL,
                 RelationshipProjections.ALL
@@ -88,7 +79,7 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> im
         try {
             return configParser.processInput(configuration);
         } catch (RuntimeException e) {
-            removeGraph(username(), this.databaseId);
+            removeGraph(username, this.databaseId);
             throw e;
         }
     }

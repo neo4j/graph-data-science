@@ -24,7 +24,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 
 public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConfigParser<CONFIG> {
 
@@ -44,20 +43,10 @@ public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConf
     }
 
     @Override
-    public String username() {
-        return this.username;
-    }
-
-    @Override
     public CONFIG processInput(Map<String, Object> configuration) {
-        CypherMapWrapper algoConfig = CypherMapWrapper.create(configuration);
-        return newConfig(Optional.empty(), algoConfig);
-    }
-
-    @Override
-    public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        CONFIG algoConfig = newConfigFunction.apply(username, config);
-        validateConfig(config, algoConfig.configKeys());
+        CypherMapWrapper cypherMapWrapper = CypherMapWrapper.create(configuration);
+        CONFIG algoConfig = newConfigFunction.apply(username, cypherMapWrapper);
+        validateConfig(cypherMapWrapper, algoConfig.configKeys());
         return algoConfig;
     }
 

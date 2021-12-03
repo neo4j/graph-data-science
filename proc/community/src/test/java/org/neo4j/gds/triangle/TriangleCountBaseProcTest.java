@@ -34,8 +34,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -95,7 +93,7 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
         applyOnProcedure(proc -> {
             IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> proc.configParser().newConfig(Optional.of("g"), config)
+                () -> proc.configParser().processInput(config.toMap())
             );
 
             String message = exception.getMessage();

@@ -28,7 +28,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.test.config.ConfigProcTestHelpers.GRAPH_NAME;
 
 public final class ToleranceConfigProcTest {
 
@@ -49,7 +48,7 @@ public final class ToleranceConfigProcTest {
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("invalidTolerance", () -> {
-            assertThatThrownBy(() -> proc.configParser().newConfig(GRAPH_NAME, config.withNumber("tolerance", -0.1)))
+            assertThatThrownBy(() -> proc.configParser().processInput(config.withNumber("tolerance", -0.1).toMap()))
                 .hasMessageContaining("tolerance")
                 .hasMessageContaining("-0.1");
         });
@@ -61,7 +60,7 @@ public final class ToleranceConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("validTolerance", () -> {
             var toleranceConfig = config.withNumber("tolerance", 42.42);
-            var algoConfig = ((ToleranceConfig) proc.configParser().newConfig(GRAPH_NAME, toleranceConfig));
+            var algoConfig = ((ToleranceConfig) proc.configParser().processInput(toleranceConfig.toMap()));
             assertThat(algoConfig.tolerance()).isEqualTo(42.42);
         });
     }
