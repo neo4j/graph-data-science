@@ -46,11 +46,11 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
     @Description(GRAPHSAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.train", mode = Mode.READ)
     public Stream<TrainResult> train(
-        @Name(value = "graphName") String graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return trainAndStoreModelWithResult(
-            graphNameOrConfig, configuration,
+            graphName, configuration,
             (model, result) -> new TrainResult(
                 model,
                 result.computeMillis(),

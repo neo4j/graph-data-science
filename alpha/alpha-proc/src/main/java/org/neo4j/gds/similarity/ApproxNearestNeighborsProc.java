@@ -137,7 +137,7 @@ public class ApproxNearestNeighborsProc extends AlphaSimilarityProc<ApproxNeares
         Map<String, Object> configuration
     ) {
         ComputationResult<ApproxNearestNeighborsAlgorithm<SimilarityInput>, SimilarityAlgorithmResult, ApproximateNearestNeighborsConfig> computationResult = compute(
-            "__empty__",
+            SIMILARITY_FAKE_GRAPH_NAME,
             configuration
         );
 
