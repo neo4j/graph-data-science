@@ -27,6 +27,14 @@ public interface BatchNeighbors {
         return batchIds().length;
     }
 
+    /**
+     *
+     * @return the number of nodes contained. This should be the number of distinct nodes in {@link org.neo4j.gds.ml.core.subgraph.BatchNeighbors#batchIds()} + the number of distinct neighbors.
+     */
+    int nodeCount();
+
+    int degree(int batchId);
+
     int[] neighbors(int batchId);
 
     double relationshipWeight(int src, int trg);

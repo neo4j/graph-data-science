@@ -32,7 +32,6 @@ import org.neo4j.gds.ml.core.NeighborhoodFunction;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Scalar;
 
 import java.util.List;
 
@@ -59,27 +58,24 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
     @Inject
     TestGraph graph;
 
-
     @Test
     void testApplyUnweighted() {
-        var parent = new Weights<>(new Matrix(new double[]{
+        // (b)->(a), (b)->(b), (b)->(c)
+        var adjacencyMatrix = new int[2][3];
+        adjacencyMatrix[0] = new int[]{};
+        adjacencyMatrix[1] = new int[]{0, 1, 2};
+
+        int[] batchIds = {1, 0};
+        var unweightedGraph = TestBatchNeighbors.of(batchIds, adjacencyMatrix);
+
+        var parent = Constant.matrix(new double[]{
             1, 2, 3,
             5, 2, 1,
             9, 4, 2,
             1, 1, 1
-        }, 4, 3));
+        }, 4, 3);
 
-        var adjacencyMatrix = new int[2][3];
-
-        // Node 0 --> no neighbours
-        adjacencyMatrix[0] = new int[]{};
-
-        // Node 1 --> three neighbours
-        adjacencyMatrix[1] = new int[]{0, 1, 2};
-
-        int[] batchIds = {1, 0};
-
-        Variable<Matrix> max = new ElementWiseMax(parent, new TestBatchNeighbors(batchIds, adjacencyMatrix));
+        Variable<Matrix> max = new ElementWiseMax(parent, unweightedGraph);
 
         var expected = new Matrix(new double[]{
             9, 4, 3,    // Node 1
@@ -97,35 +93,38 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
             1, 3, 2
         }, 3, 3));
 
+        // (b)->(a), (b)->(b), (b)->(c)
         int[][] adjacencyMatrix = {
             new int[]{},
             new int[]{0, 1, 2},
             new int[]{}
         };
-
         int[] batchIds = {1, 2, 0};
+        var unweightedGraph = TestBatchNeighbors.of(batchIds, adjacencyMatrix);
 
-        ElementSum sum = new ElementSum(List.of(new ElementWiseMax(
+        var loss = new ElementSum(List.of(new ElementWiseMax(
             weights,
-            new TestBatchNeighbors(batchIds, adjacencyMatrix)
+            unweightedGraph
         )));
-        Variable<Scalar> loss = new ConstantScale<>(sum, 2);
+
         finiteDifferenceShouldApproximateGradient(weights, loss);
     }
 
     @Test
     void shouldApproximateGradientWithSmallDiffBetweenNeighbors() {
+        // (a)->(a), (b)->(a), (b)->(b)
+        int[][] adjacencyMatrix = {
+            new int[]{0},
+            new int[]{0, 1}
+        };
+        var unweightedGraph = TestBatchNeighbors.of(adjacencyMatrix);
+
         var weights = new Weights<>(new Matrix(new double[]{
             1.0000009,
             1.0000004
         }, 2, 1));
 
-        int[][] adjacencyMatrix = {
-            new int[]{0},
-            new int[]{0, 1}
-        };
-
-        ElementSum loss = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(adjacencyMatrix))));
+        var loss = new ElementSum(List.of(new ElementWiseMax(weights, unweightedGraph)));
 
         ComputationContext ctx = new ComputationContext();
 
@@ -142,16 +141,16 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
 
     @Test
     void testUnweightedGradientWithUnorderedBatchIds() {
-        double[] matrix = {1, 4, 3};
-
+        // (a)->(c), (b)->(b), (b)->(b)
         int[][] adj = new int[2][];
         adj[0] = new int[]{2};
         adj[1] = new int[]{0, 1};
         int[] batchIds = {1};
+        TestBatchNeighbors unweightedGraph = TestBatchNeighbors.of(batchIds, adj);
 
-        Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 1));
+        Weights<Matrix> weights = new Weights<>(new Matrix(new double[]{1, 4, 3}, 3, 1));
 
-        ElementSum loss = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(batchIds, adj))));
+        var loss = new ElementSum(List.of(new ElementWiseMax(weights, unweightedGraph)));
 
         ComputationContext ctx = new ComputationContext();
 

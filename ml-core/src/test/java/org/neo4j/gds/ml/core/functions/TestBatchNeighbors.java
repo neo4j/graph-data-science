@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
+import com.carrotsearch.hppc.IntHashSet;
 import org.neo4j.gds.ml.core.subgraph.BatchNeighbors;
 
 import java.util.stream.IntStream;
@@ -27,14 +28,29 @@ class TestBatchNeighbors implements BatchNeighbors {
 
     private final int[][] neighbors;
     private final int[] batchIds;
+    private final int numberOfNodes;
 
-    TestBatchNeighbors(int[] batchIds, int[][] neighbors) {
+    TestBatchNeighbors(int[] batchIds, int[][] neighbors, int numberOfDistinctNodes) {
         this.neighbors = neighbors;
         this.batchIds = batchIds;
+        this.numberOfNodes = numberOfDistinctNodes;
     }
 
-    TestBatchNeighbors(int[][] neighbors) {
-        this(IntStream.range(0, neighbors.length).toArray(), neighbors);
+    static TestBatchNeighbors of(int[] batchIds, int[][] neighborLists) {
+        var distinctNodeIds = new IntHashSet();
+
+       distinctNodeIds.addAll(batchIds);
+
+        for (int[] neighbors : neighborLists) {
+            distinctNodeIds.addAll(neighbors);
+        }
+
+
+        return new TestBatchNeighbors(batchIds, neighborLists, distinctNodeIds.size());
+    }
+
+    static TestBatchNeighbors of(int[][] neighbors) {
+        return of(IntStream.range(0, neighbors.length).toArray(), neighbors);
     }
 
     @Override
@@ -55,5 +71,15 @@ class TestBatchNeighbors implements BatchNeighbors {
     @Override
     public int batchSize() {
         return batchIds.length;
+    }
+
+    @Override
+    public int nodeCount() {
+        return numberOfNodes;
+    }
+
+    @Override
+    public int degree(int batchId) {
+        return neighbors[batchId].length;
     }
 }

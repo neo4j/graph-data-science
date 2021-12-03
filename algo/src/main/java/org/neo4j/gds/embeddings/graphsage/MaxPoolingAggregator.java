@@ -71,7 +71,7 @@ public class MaxPoolingAggregator implements Aggregator {
         Variable<Matrix> biasedWeightedPreviousLayer = new MatrixVectorSum(weightedPreviousLayer, bias);
         Variable<Matrix> neighborhoodActivations = activationFunction.apply(biasedWeightedPreviousLayer);
 
-        Variable<Matrix> elementwiseMax =new ElementWiseMax(neighborhoodActivations, subGraph);
+        Variable<Matrix> elementwiseMax = new ElementWiseMax(neighborhoodActivations, subGraph);
 
 
         Variable<Matrix> selfPreviousLayer = new Slice(previousLayerRepresentations, subGraph.batchIds());
