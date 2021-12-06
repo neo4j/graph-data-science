@@ -33,18 +33,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class NeighborListTest {
 
     @Test
-    void shouldKeepMaxValues() {
+    void shouldKeepMaxValuesOrderedByPriority() {
         long[] expected = {6L, 5L, 2L};
 
         NeighborList queue = new NeighborList(3);
         SplittableRandom splittableRandom = new SplittableRandom();
 
         assertEquals(1, queue.add(0, Double.MIN_VALUE, splittableRandom));
-        assertEquals(1, queue.add(6, 6.0, splittableRandom));
+        assertEquals(1, queue.add(2, 4.0, splittableRandom));
         assertEquals(1, queue.add(1, 1.0, splittableRandom));
         assertEquals(1, queue.add(5, 5.0, splittableRandom));
-        assertEquals(1, queue.add(2, 4.0, splittableRandom));
-        assertEquals(0, queue.add(4, 2.0, splittableRandom));
+        assertEquals(1, queue.add(4, 2.0, splittableRandom));
+        assertEquals(1, queue.add(6, 6.0, splittableRandom));
         assertEquals(0, queue.add(3, 3.0, splittableRandom));
 
         long[] actual = queue.elements().toArray();
