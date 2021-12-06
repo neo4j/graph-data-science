@@ -23,7 +23,6 @@ import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.logging.AbstractLog;
 import org.neo4j.logging.Log;
-import org.neo4j.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,7 +33,6 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@SuppressWarnings("removal")
 public class TestLog extends AbstractLog {
     public static final String DEBUG = "debug";
     public static final String INFO = "info";
@@ -83,127 +81,76 @@ public class TestLog extends AbstractLog {
     }
 
     @Override
-    public Logger debugLogger() {
-        return new TestLogger(DEBUG, messages);
-    }
-
-    @Override
-    public Logger infoLogger() {
-        return new TestLogger(INFO, messages);
-    }
-
-    @Override
-    public Logger warnLogger() {
-        return new TestLogger(WARN, messages);
-    }
-
-    @Override
-    public Logger errorLogger() {
-        return new TestLogger(ERROR, messages);
-    }
-
-    @Override
     public void debug(String message) {
-        debugLogger().log(message);
+        logMessage(DEBUG, message);
     }
 
     @Override
     public void debug(String message, Throwable throwable) {
-        debugLogger().log(message, throwable);
+        debug(formatWithLocale("%s - %s", message, throwable.getMessage()));
     }
 
     @Override
     public void debug(String format, Object... arguments) {
-        debugLogger().log(format, arguments);
+        debug(formatWithLocale(format, arguments));
     }
 
     @Override
     public void info(String message) {
-        infoLogger().log(message);
+        logMessage(INFO, message);
     }
 
     @Override
     public void info(String message, Throwable throwable) {
-        infoLogger().log(message, throwable);
+        info(formatWithLocale("%s - %s", message, throwable.getMessage()));
     }
 
     @Override
     public void info(String format, Object... arguments) {
-        infoLogger().log(format, arguments);
+        info(formatWithLocale(format, arguments));
     }
 
     @Override
     public void warn(String message) {
-        warnLogger().log(message);
+        logMessage(WARN, message);
     }
 
     @Override
     public void warn(String message, Throwable throwable) {
-        warnLogger().log(message, throwable);
+        warn(formatWithLocale("%s - %s", message, throwable.getMessage()));
     }
 
     @Override
     public void warn(String format, Object... arguments) {
-        warnLogger().log(format, arguments);
+        warn(formatWithLocale(format, arguments));
     }
 
     @Override
     public void error(String message) {
-        errorLogger().log(message);
+        logMessage(ERROR, message);
     }
 
     @Override
     public void error(String message, Throwable throwable) {
-        errorLogger().log(message, throwable);
+        error(formatWithLocale("%s - %s", message, throwable.getMessage()));
     }
 
     @Override
     public void error(String format, Object... arguments) {
-        errorLogger().log(format, arguments);
+        error(formatWithLocale(format, arguments));
     }
 
-    @Override
     public void bulk(Consumer<Log> consumer) {
-        consumer.accept(this);
+        // this is a bit of a hack as in neo <= 4.4
+        // this method still exist while on neo 5.x
+        // it does not, so we cannot annotate it
     }
 
-    class TestLogger implements Logger {
-        private final String level;
-        private final ConcurrentMap<String, ConcurrentLinkedQueue<String>> messages;
-
-
-        TestLogger(String level, ConcurrentMap<String, ConcurrentLinkedQueue<String>> messages) {
-            this.level = level;
-            this.messages = messages;
-        }
-
-        @Override
-        public void log(String message) {
-            logMessage(message);
-        }
-
-        @Override
-        public void log(String message, Throwable throwable) {
-            logMessage(message + " - " + throwable.getMessage());
-        }
-
-        @Override
-        public void log(String format, Object... arguments) {
-            log(formatWithLocale(format, arguments));
-        }
-
-        @Override
-        public void bulk(Consumer<Logger> consumer) {
-            consumer.accept(this);
-        }
-
-        private void logMessage(String message) {
-            ConcurrentLinkedQueue<String> messageList = messages.computeIfAbsent(
-                level,
-                (ignore) -> new ConcurrentLinkedQueue<>()
-            );
-            messageList.add(message);
-        }
+    private void logMessage(String level, String message) {
+        messages.computeIfAbsent(
+            level,
+            (ignore) -> new ConcurrentLinkedQueue<>()
+        ).add(message);
     }
 }
 
