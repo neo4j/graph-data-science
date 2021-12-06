@@ -26,7 +26,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -88,15 +87,16 @@ public interface MemoryEstimateTest<ALGORITHM extends Algorithm<ALGORITHM, RESUL
             getProcedureMethods(proc)
                 .filter(procMethod -> getProcedureMethodName(procMethod).endsWith(".estimate"))
                 .forEach(estimateMethod -> {
-                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()
+                    Map<String, Object> algoConfig = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+                    Map<String, Object> graphCreateConfig = CypherMapWrapper.empty()
                         .withEntry(GraphCreateFromStoreConfig.NODE_PROJECTION_KEY, NodeProjections.all())
                         .withEntry(GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, relationshipProjections())
                         .withNumber("nodeCount", 100_000_000L)
-                        .withNumber("relationshipCount", 20_000_000_000L))
+                        .withNumber("relationshipCount", 20_000_000_000L)
                         .withoutEntry("nodeProperties")
                         .toMap();
                     try {
-                        Stream<MemoryEstimateResult> result = (Stream) estimateMethod.invoke(proc, config, Collections.emptyMap());
+                        Stream<MemoryEstimateResult> result = (Stream) estimateMethod.invoke(proc, graphCreateConfig, algoConfig);
                         result.forEach(row -> {
                             assertEquals(100_000_000L, row.nodeCount);
                             assertEquals(20_000_000_000L, row.relationshipCount);

@@ -89,31 +89,30 @@ public abstract class AlgoBaseProc<
     }
 
     protected Stream<MemoryEstimateResult> computeEstimate(
-        Object graphNameOrConfig,
-        Map<String, Object> configuration
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
     ) {
 
-        CONFIG algoConfig;
+        CONFIG algoConfig = configParser().processInput(algoConfiguration);
         GraphDimensions graphDimensions;
         Optional<MemoryEstimation> memoryEstimation;
 
-        if (graphNameOrConfig instanceof Map) {
+        if (graphNameOrConfiguration instanceof Map) {
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(username());
-            var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfig);
+            var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfiguration);
             var graphStoreCreator = graphCreateConfig.isFictitiousLoading()
                 ? new FictitiousGraphStoreLoader(graphCreateConfig)
                 : new GraphStoreFromDatabaseLoader(graphCreateConfig, username(), graphLoaderContext());
 
-            var graphAndAlgoConfig = (Map<String, Object>) graphNameOrConfig;
+            var graphAndAlgoConfig = (Map<String, Object>) graphNameOrConfiguration;
             graphCreateConfig.configKeys().forEach(graphAndAlgoConfig::remove);
 
             algoConfig = configParser().processInput(graphAndAlgoConfig);
             graphDimensions = graphStoreCreator.graphDimensions();
             memoryEstimation = Optional.of(graphStoreCreator.memoryEstimation());
-        } else if (graphNameOrConfig instanceof String) {
-            algoConfig = configParser().processInput(configuration);
+        } else if (graphNameOrConfiguration instanceof String) {
             graphDimensions = new GraphStoreFromCatalogLoader(
-                (String) graphNameOrConfig,
+                (String) graphNameOrConfiguration,
                 algoConfig,
                 username(),
                 databaseId(),
@@ -123,8 +122,8 @@ public abstract class AlgoBaseProc<
             memoryEstimation = Optional.empty();
         } else {
             throw new IllegalArgumentException(formatWithLocale(
-                "Expected `graphNameOrConfig` to be of type String or Map, but got",
-                graphNameOrConfig.getClass().getSimpleName()
+                "Expected `graphNameOrConfiguration` to be of type String or Map, but got",
+                graphNameOrConfiguration.getClass().getSimpleName()
             ));
         }
 
