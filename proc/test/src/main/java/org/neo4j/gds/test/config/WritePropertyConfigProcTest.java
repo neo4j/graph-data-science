@@ -63,10 +63,7 @@ public final class WritePropertyConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("nullWriteProperty", () -> {
             assertThatThrownBy(() -> proc.configParser().processInput(config.withString("writeProperty", null).toMap()))
-                .hasMessageContaining("writeProperty")
-                .hasMessageContaining("null")
-                .hasMessageContaining("type")
-                .hasMessageContaining("String");
+                .hasMessageContaining("No value specified for the mandatory configuration parameter `writeProperty`");
         });
     }
 
