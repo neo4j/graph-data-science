@@ -60,6 +60,7 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
     public Matrix apply(ComputationContext ctx) {
         var result = new Matrix(nodeIds.length, projectedFeatureDimension);
 
+        // TODO rewrite this into one mxm per label (with a read-only lazy feature matrix per label)
         for (int batchIdx = 0; batchIdx < nodeIds.length; batchIdx++) {
             long nodeId = nodeIds[batchIdx];
             NodeLabel label = labels[batchIdx];
@@ -72,6 +73,8 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
                 weights.data(),
                 wrappedNodeFeatureVector,
                 productVector,
+                // TODO is filter not too simple to map the input feature dimension to the projectedDimension?
+                //      we should instead assert that the nodeFeature vector is not larger
                 index -> (index < projectedFeatureDimension)
             );
 
