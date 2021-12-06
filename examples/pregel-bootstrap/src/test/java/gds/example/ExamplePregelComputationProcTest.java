@@ -52,10 +52,9 @@ class ExamplePregelComputationProcTest extends BaseProcTest {
 
     @Test
     void stream() {
-        var createQuery = GdsCypher.call()
-            .loadEverything()
-            .graphCreate("graph")
-            .yields();
+        var createQuery = GdsCypher.call("graph")
+                .graphCreate()
+                .yields();
         runQuery(createQuery);
 
         // GdsCypher creates procedure statements, such as:
@@ -63,8 +62,7 @@ class ExamplePregelComputationProcTest extends BaseProcTest {
         //  maxIterations: 10
         // }) YIELD nodeId, values
 
-        var query = GdsCypher.call()
-            .explicitCreation("graph")
+        var query = GdsCypher.call("graph")
             .algo("pregel", "example")
             .streamMode()
             .addParameter("maxIterations", 10)
