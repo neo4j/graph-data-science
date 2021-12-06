@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.extension.GdlGraph;
 
 import java.util.HashMap;
@@ -47,7 +48,7 @@ class ExamplePregelComputationProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(MY_TEST_GRAPH);
-        registerProcedures(ExamplePregelComputationStreamProc.class);
+        registerProcedures(ExamplePregelComputationStreamProc.class, GraphCreateProc.class);
     }
 
     @Test
