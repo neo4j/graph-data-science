@@ -129,7 +129,7 @@ public class GraphSageModelTrainer {
         for (int epoch = 1; epoch <= epochs; epoch++) {
             progressTracker.beginSubTask();
 
-            double newLoss = trainEpoch(batchTasks, epoch);
+            double newLoss = trainEpoch(batchTasks);
             epochLosses.add(newLoss);
             progressTracker.endSubTask();
             if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
@@ -143,7 +143,7 @@ public class GraphSageModelTrainer {
         return ModelTrainResult.of(epochLosses, converged, this.layers);
     }
 
-    private double trainEpoch(List<BatchTask> batchTasks, int epoch) {
+    private double trainEpoch(List<BatchTask> batchTasks) {
         List<Weights<? extends Tensor<?>>> weights = getWeights();
 
         var updater = new AdamOptimizer(weights, learningRate);
@@ -293,10 +293,12 @@ public class GraphSageModelTrainer {
     }
 
     private List<Weights<? extends Tensor<?>>> getWeights() {
-        List<Weights<? extends Tensor<?>>> weights = new ArrayList<>(labelProjectionWeights);
-        weights.addAll(Arrays.stream(layers)
-            .flatMap(layer -> layer.weights().stream())
-            .collect(Collectors.toList()));
+        var weights = new ArrayList<Weights<? extends Tensor<?>>>(labelProjectionWeights);
+
+        for (Layer layer : layers) {
+            weights.addAll(layer.weights());
+        }
+
         return weights;
     }
 
