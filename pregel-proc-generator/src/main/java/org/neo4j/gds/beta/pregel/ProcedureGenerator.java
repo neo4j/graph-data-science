@@ -118,7 +118,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
     }
 
     private MethodSpec procMethod() {
-        var methodBuilder = procMethodSignature("", "", procExecMode());
+        var methodBuilder = procMethodSignature(procExecMode());
         pregelSpec.description().ifPresent(description -> methodBuilder.addAnnotation(
             AnnotationSpec.builder(Description.class)
                 .addMember("value", "$S", description)
@@ -131,7 +131,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
     }
 
     private MethodSpec procEstimateMethod() {
-        return procMethodSignature("Estimate", ".estimate", Mode.READ)
+        return estimateMethodSignature()
             .addAnnotation(AnnotationSpec.builder(Description.class)
                 .addMember("value", "$T.ESTIMATE_DESCRIPTION", BaseProc.class)
                 .build()
@@ -141,28 +141,19 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .build();
     }
 
-    @NotNull
-    private MethodSpec.Builder procMethodSignature(String methodNameSuffix, String procedureSuffix, Mode procExecMode) {
-        var graphParameterType = methodNameSuffix.equals("Estimate")
-            ? Object.class
-            : String.class;
-
-        var graphParameterName = methodNameSuffix.equals("Estimate")
-            ? "graphNameOrConfig"
-            : "graphName";
-
-        return MethodSpec.methodBuilder(procGdsMode().lowerCase() + methodNameSuffix)
+    private MethodSpec.@NotNull Builder procMethodSignature(Mode procExecMode) {
+        return MethodSpec.methodBuilder(procGdsMode().lowerCase())
             .addAnnotation(AnnotationSpec.builder(Procedure.class)
                 .addMember(
                     "name",
                     "$S",
-                    formatWithLocale("%s.%s%s", pregelSpec.procedureName(), procGdsMode().lowerCase(), procedureSuffix)
+                    formatWithLocale("%s.%s", pregelSpec.procedureName(), procGdsMode().lowerCase())
                 )
                 .addMember("mode", "$T.$L", Mode.class, procExecMode)
                 .build()
             )
             .addModifiers(Modifier.PUBLIC)
-            .addParameter(ParameterSpec.builder(graphParameterType, graphParameterName)
+            .addParameter(ParameterSpec.builder(String.class, "graphName")
                 .addAnnotation(AnnotationSpec.builder(Name.class)
                     .addMember("value", "$S", "graphName")
                     .build())
@@ -172,6 +163,32 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addAnnotation(AnnotationSpec.builder(Name.class)
                     .addMember("value", "$S", "configuration")
                     .addMember("defaultValue", "$S", "{}")
+                    .build())
+                .build());
+    }
+
+    @NotNull
+    private MethodSpec.Builder estimateMethodSignature() {
+        return MethodSpec.methodBuilder("estimate")
+            .addAnnotation(AnnotationSpec.builder(Procedure.class)
+                .addMember(
+                    "name",
+                    "$S",
+                    formatWithLocale("%s.%s.estimate", pregelSpec.procedureName(), procGdsMode().lowerCase())
+                )
+                .addMember("mode", "$T.$L", Mode.class, Mode.READ)
+                .build()
+            )
+            .addModifiers(Modifier.PUBLIC)
+            .addParameter(ParameterSpec.builder(Object.class, "graphNameOrConfiguration")
+                .addAnnotation(AnnotationSpec.builder(Name.class)
+                    .addMember("value", "$S", "graphNameOrConfiguration")
+                    .build())
+                .build())
+            .addParameter(ParameterSpec
+                .builder(ParameterizedTypeName.get(Map.class, String.class, Object.class), "algoConfiguration")
+                .addAnnotation(AnnotationSpec.builder(Name.class)
+                    .addMember("value", "$S", "algoConfiguration")
                     .build())
                 .build());
     }
