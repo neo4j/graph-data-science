@@ -51,7 +51,7 @@ public final class CommunityDbCreator implements DbCreator {
 
     @SuppressWarnings("deprecation")
     private static DatabaseManagementServiceBuilder builder(Path storeDir) {
-        return new DatabaseManagementServiceBuilder(storeDir.toFile())
+        return new DatabaseManagementServiceBuilder(storeDir)
             .setConfig(Settings.procedureUnrestricted(), List.of("gds.*"))
             .setConfig(Settings.udc(), false)
             .setConfig(Settings.boltEnabled(), false)
