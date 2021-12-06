@@ -26,6 +26,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public interface GraphStoreLoader {
     GraphCreateConfig graphCreateConfig();
@@ -38,7 +39,7 @@ public interface GraphStoreLoader {
 
     static GraphStoreLoader implicitGraphLoader(
         String username,
-        GraphLoaderContext graphLoaderContext,
+        Supplier<GraphLoaderContext> graphLoaderContext,
         GraphCreateConfig graphCreateConfig
     ) {
         if (graphCreateConfig.isFictitiousLoading()) {
@@ -47,7 +48,7 @@ public interface GraphStoreLoader {
             return new GraphStoreFromDatabaseLoader(
                 graphCreateConfig,
                 username,
-                graphLoaderContext
+                graphLoaderContext.get()
             );
         }
     }

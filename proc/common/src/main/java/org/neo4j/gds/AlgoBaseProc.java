@@ -86,16 +86,20 @@ public abstract class AlgoBaseProc<
         Object graphNameOrConfig,
         Map<String, Object> configuration
     ) {
-        CONFIG algoConfig = configParser().processInput(configuration);
-
         GraphStoreLoader graphStoreLoader;
+        CONFIG algoConfig;
 
         if (graphNameOrConfig instanceof Map) {
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(username());
             var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfig);
 
-            graphStoreLoader = GraphStoreLoader.implicitGraphLoader(username(), graphLoaderContext(), graphCreateConfig);
+            var configMap = (Map<String, Object>) graphNameOrConfig;
+            graphCreateConfig.configKeys().forEach(configMap::remove);
+            algoConfig = configParser().processInput(configMap);
+
+            graphStoreLoader = GraphStoreLoader.implicitGraphLoader(username(), this::graphLoaderContext, graphCreateConfig);
         } else if (graphNameOrConfig instanceof String) {
+            algoConfig = configParser().processInput(configuration);
             graphStoreLoader = new GraphStoreFromCatalogLoader((String) graphNameOrConfig, algoConfig, username(), databaseId(), isGdsAdmin());
         } else {
             throw new IllegalArgumentException(formatWithLocale(
