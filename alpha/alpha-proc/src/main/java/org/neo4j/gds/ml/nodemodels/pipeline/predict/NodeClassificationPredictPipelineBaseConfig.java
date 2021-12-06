@@ -31,6 +31,7 @@ import org.neo4j.gds.model.ModelConfig;
 public interface NodeClassificationPredictPipelineBaseConfig extends AlgoBaseConfig, ModelConfig {
     boolean includePredictedProbabilities();
 
+    // TODO make this a parameter
     String graphName();
 
     @Value.Default

@@ -42,6 +42,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
 
     double DEFAULT_THRESHOLD = 0.0;
 
+    //TODO make this a parameter
     String graphName();
 
     @Value.Default
