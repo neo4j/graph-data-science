@@ -197,6 +197,69 @@ class MatrixTest {
     }
 
     @Test
+    void sumPerColumn() {
+        var matrix = new Matrix(new double[] {
+            1, 2, 3,
+            4, 5, 6
+        }, 2, 3);
+
+        assertThat(matrix.sumPerColumn()).isEqualTo(new Vector(5, 7, 9));
+    }
+
+    @Test
+    void multiply() {
+        var matrix =  new Matrix(new double[] {1, 2, 3, 4, 5, 6}, 3, 2);
+        var otherMatrix =  new Matrix(new double[] {1, 2, 3, 4, 5, 6}, 2, 3);
+
+        assertThat(matrix.multiply(otherMatrix)).isEqualTo(new Matrix(new double[]{
+            9.0, 12.0, 15.0,
+            19.0, 26.0, 33.0,
+            29.0, 40.0, 51.0
+        }, 3, 3));
+    }
+
+    @Test
+    void multiplyTransB() {
+        var matrix =  new Matrix(new double[] {1, 2, 3, 4, 5, 6}, 3, 2);
+        var otherMatrix =  new Matrix(new double[] {1, 2, 3, 4, 5, 6}, 3, 2);
+
+        assertThat(matrix.multiplyTransB(otherMatrix)).isEqualTo(new Matrix(new double[]{
+            5.0, 11.0, 17.0,
+            11.0, 25.0, 39.0,
+            17.0, 39.0, 61.0
+        }, 3, 3));
+    }
+
+    @Test
+    void multiplyTransA() {
+        var matrix =  new Matrix(new double[] {1, 2, 3, 4, 5, 6}, 2, 3);
+        var otherMatrix =  new Matrix(new double[] {1, 2, 3, 4, 5, 6}, 2, 3);
+
+        assertThat(matrix.multiplyTransA(otherMatrix)).isEqualTo(new Matrix(new double[]{
+            17.0, 22.0, 27.0,
+            22.0, 29.0, 36.0,
+            27.0, 36.0, 45.0
+        }, 3, 3));
+    }
+
+    @Test
+    void sumBroadcastColumnWise() {
+        var matrix = new Matrix(new double[] {
+            1, 2, 3,
+            4, 5, 6
+        }, 2, 3);
+
+        var vector = new Vector(0.5, 2.5, 1.0);
+
+        var expected = new Matrix(new double[] {
+            1.5, 4.5, 4.0,
+            4.5, 7.5, 7.0
+        }, 2, 3);
+
+        assertThat(matrix.sumBroadcastColumnWise(vector)).isEqualTo(expected);
+    }
+
+    @Test
     void failSettingInvalidRow() {
         var matrix = Matrix.create(0, 3, 2);
         assertThatThrownBy(() -> matrix.setRow(1, new double[]{42}))

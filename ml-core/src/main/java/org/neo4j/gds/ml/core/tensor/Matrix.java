@@ -141,7 +141,10 @@ public class Matrix extends Tensor<Matrix> {
         return Matrix.of(prod);
     }
 
-    public Matrix sumBroadcast(Vector vector) {
+    /**
+     * C[a, b] = A[a, b] + v[b]
+     */
+    public Matrix sumBroadcastColumnWise(Vector vector) {
         var result = this.createWithSameDimensions();
 
         for(int row = 0; row < rows; row++) {

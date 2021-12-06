@@ -50,7 +50,7 @@ public class MatrixVectorSum extends AbstractVariable<Matrix> {
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        return ctx.data(matrix).sumBroadcast(ctx.data(vector));
+        return ctx.data(matrix).sumBroadcastColumnWise(ctx.data(vector));
     }
 
     @Override
