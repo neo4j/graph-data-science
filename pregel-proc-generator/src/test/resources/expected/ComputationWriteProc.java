@@ -62,7 +62,7 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> writeEstimate(@Name("graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
-        return computeEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

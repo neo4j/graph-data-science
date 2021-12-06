@@ -58,10 +58,10 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     @Procedure(name = "gds.alpha.ml.nodeClassification.train.estimate", mode = Mode.READ)
     @Description("Trains a node classification model")
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

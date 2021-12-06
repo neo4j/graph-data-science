@@ -46,11 +46,11 @@ public class EigenvectorStatsProc extends PageRankStatsProc {
     @Override
     @Procedure(value = "gds.eigenvector.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateStats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return super.estimateStats(graphNameOrConfig, configuration);
+        return super.estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

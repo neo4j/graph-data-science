@@ -60,7 +60,7 @@ public final class ComputationStreamProc extends PregelStreamProc<ComputationAlg
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> streamEstimate(@Name("graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
-        return computeEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

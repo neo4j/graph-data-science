@@ -50,10 +50,10 @@ public class ApproxMaxKCutStreamProc extends StreamProc<ApproxMaxKCut, ApproxMax
     @Procedure(value = "gds.alpha.maxkcut.stream.estimate", mode = READ)
     @Description(APPROX_MAX_K_CUT_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

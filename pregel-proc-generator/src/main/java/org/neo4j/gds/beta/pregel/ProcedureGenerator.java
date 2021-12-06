@@ -136,7 +136,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addMember("value", "$T.ESTIMATE_DESCRIPTION", BaseProc.class)
                 .build()
             )
-            .addStatement("return computeEstimate(graphNameOrConfig, configuration)", procGdsMode().lowerCase())
+            .addStatement("return computeEstimate(graphNameOrConfiguration, algoConfiguration)", procGdsMode().lowerCase())
             .returns(ParameterizedTypeName.get(Stream.class, MemoryEstimateResult.class))
             .build();
     }

@@ -51,11 +51,11 @@ public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dij
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> writeEstimate(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

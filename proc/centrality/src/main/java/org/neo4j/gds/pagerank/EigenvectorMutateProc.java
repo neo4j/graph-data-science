@@ -47,10 +47,10 @@ public class EigenvectorMutateProc extends PageRankMutateProc {
     @Procedure(value = "gds.eigenvector.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return super.estimate(graphNameOrConfig, configuration);
+        return super.estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
