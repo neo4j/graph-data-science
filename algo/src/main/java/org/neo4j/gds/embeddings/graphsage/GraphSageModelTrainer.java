@@ -76,7 +76,7 @@ public class GraphSageModelTrainer {
     private final int maxSearchDepth;
     private final Function<Graph, List<LayerConfig>> layerConfigsFunction;
     private final FeatureFunction featureFunction;
-    private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
+    private final Collection<Weights<Matrix>> labelProjectionWeights;
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
     private final int batchSize;
@@ -90,7 +90,7 @@ public class GraphSageModelTrainer {
         ExecutorService executor,
         ProgressTracker progressTracker,
         FeatureFunction featureFunction,
-        Collection<Weights<? extends Tensor<?>>> labelProjectionWeights
+        Collection<Weights<Matrix>> labelProjectionWeights
     ) {
         this.layerConfigsFunction = graph -> config.layerConfigs(firstLayerColumns(config, graph));
         this.batchSize = config.batchSize();

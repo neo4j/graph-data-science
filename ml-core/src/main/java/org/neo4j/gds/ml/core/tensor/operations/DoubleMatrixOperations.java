@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.core.tensor.operations;
 
 import org.ejml.MatrixDimensionException;
-import org.ejml.data.DMatrix1Row;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.function.IntPredicate;
 
@@ -31,36 +31,47 @@ public final class DoubleMatrixOperations {
      *
      * @see <a href="https://github.com/lessthanoptimal/ejml/blob/v0.39/main/ejml-ddense/src/org/ejml/dense/row/mult/MatrixMatrixMult_DDRM.java#L317">MatrixMatrixMult_DDRM#multTransB</a>
      */
-    public static void multTransB(DMatrix1Row a, DMatrix1Row b, DMatrix1Row c, IntPredicate mask) {
-        if (a == c || b == c)
+    public static void multTransB(Matrix a, Matrix b, Matrix c, IntPredicate mask) {
+        if (a == c || b == c) {
             throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
-        else if (a.numCols != b.numCols) {
+        }
+
+        int rowsA = a.rows();
+        int colsA = a.cols();
+        int rowsB = b.rows();
+        int colsB = b.cols();
+
+        if (colsA != colsB) {
             throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
         }
-        c.reshape(a.numRows, b.numRows);
+
+
+        if (c.rows() != rowsA || c.cols() != rowsB) {
+            throw new MatrixDimensionException("The matrix 'c` does not have compatible dimensions.");
+        }
 
         int aIndexStart = 0;
         int cIndex = 0;
 
-        for (int xA = 0; xA < a.numRows; xA++) {
-            int end = aIndexStart + b.numCols;
+        for (int xA = 0; xA < rowsA; xA++) {
+            int end = aIndexStart + colsB;
             int indexB = 0;
-            for (int xB = 0; xB < b.numRows; xB++) {
+            for (int xB = 0; xB < rowsB; xB++) {
                 if (mask.test(cIndex)) {
                     int indexA = aIndexStart;
                     double total = 0;
 
                     while (indexA < end) {
-                        total += a.get(indexA++) * b.get(indexB++);
+                        total += a.dataAt(indexA++) * b.dataAt(indexB++);
                     }
 
-                    c.set(cIndex, total);
+                    c.setDataAt(cIndex, total);
                 } else {
-                    indexB += b.numCols;
+                    indexB += colsB;
                 }
                 cIndex++;
             }
-            aIndexStart += a.numCols;
+            aIndexStart += colsA;
         }
     }
 

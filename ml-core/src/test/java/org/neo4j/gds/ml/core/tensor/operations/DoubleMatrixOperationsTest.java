@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.ml.core.tensor.operations;
 
-import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.Arrays;
 import java.util.function.IntPredicate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class DoubleMatrixOperationsTest {
 
@@ -37,19 +37,19 @@ class DoubleMatrixOperationsTest {
         var raw = new double[size * size];
         Arrays.fill(raw, 42);
 
-        var matrix = DMatrixRMaj.wrap(size, size, raw);
-        var maskedResult = new DMatrixRMaj(size, size);
+        var matrix = new Matrix(raw, size, size);
+        var maskedResult = new Matrix(size, size);
         IntPredicate mask = index -> index < size / 2;
         DoubleMatrixOperations.multTransB(matrix, matrix, maskedResult, mask);
 
-        var originalResult = maskedResult.createLike();
-        MatrixMatrixMult_DDRM.multTransB(matrix, matrix, originalResult);
+        var originalResult = maskedResult.createWithSameDimensions().toEjml();
+        MatrixMatrixMult_DDRM.multTransB(matrix.toEjml(), matrix.toEjml(), originalResult);
 
-        for (int index = 0; index < originalResult.data.length; index++) {
+        for (int index = 0; index < originalResult.getNumElements(); index++) {
             if (mask.test(index)) {
-                assertEquals(originalResult.get(index), maskedResult.get(index));
+                assertThat(maskedResult.dataAt(index)).isEqualTo(originalResult.get(index));
             } else {
-                assertEquals(0, maskedResult.get(index));
+                assertThat(maskedResult.dataAt(index)).isEqualTo(0);
             }
         }
     }

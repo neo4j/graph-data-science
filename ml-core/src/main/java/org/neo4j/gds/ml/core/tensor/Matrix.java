@@ -186,7 +186,7 @@ public class Matrix extends Tensor<Matrix> {
         return Dimensions.isVector(dimensions);
     }
 
-    private DMatrixRMaj toEjml() {
+    public DMatrixRMaj toEjml() {
         return DMatrixRMaj.wrap(this.dimension(ROWS_INDEX), this.dimension(COLUMNS_INDEX), this.data());
     }
 }
