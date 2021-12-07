@@ -32,7 +32,8 @@ For more details please refer to <<algorithms-syntax>>.
 [source, cypher, role=noplay]
 ----
 CALL gds[.<tier>].<algorithm>.<execution-mode>.estimate(
-  graphNameOrConfig: String or Map, configuration: Map
+  graphNameOrConfig: String or Map,
+  configuration: Map
 ) YIELD
   nodeCount: Integer,
   relationshipCount: Integer,
@@ -49,8 +50,8 @@ CALL gds[.<tier>].<algorithm>.<execution-mode>.estimate(
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type          | Default   | Optional  | Description
-| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or the algorithm configuration in the case of an anonymous graph.
-| configuration     | Map           | {}        | yes       | If the first parameter is the name of a projected graph, this parameter is the algorithm config, otherwise it needs to be null or an empty map.
+| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or a configuration to create a graph.
+| configuration     | Map           | -         | no        | The configuration of the algorithm.
 |===
 
 The configuration map accepts the same configuration parameters as the estimated algorithm.
