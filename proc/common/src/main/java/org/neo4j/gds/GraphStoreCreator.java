@@ -19,27 +19,8 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 public interface GraphStoreCreator extends GraphStoreLoader {
     MemoryEstimation memoryEstimation();
-
-
-    static GraphStoreCreator of(
-        String username,
-        GraphLoaderContext graphLoaderContext,
-        GraphCreateConfig graphCreateConfig
-    ) {
-        if (graphCreateConfig.isFictitiousLoading()) {
-            return new FictitiousGraphStoreLoader(graphCreateConfig);
-        } else {
-            return new GraphStoreFromDatabaseLoader(
-                graphCreateConfig,
-                username,
-                graphLoaderContext
-            );
-        }
-    }
 }

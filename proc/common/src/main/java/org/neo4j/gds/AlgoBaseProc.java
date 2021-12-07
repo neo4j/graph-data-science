@@ -92,19 +92,26 @@ public abstract class AlgoBaseProc<
         Object graphNameOrConfig,
         Map<String, Object> configuration
     ) {
-        CONFIG algoConfig = configParser().processInput(configuration);
 
+        CONFIG algoConfig;
         GraphDimensions graphDimensions;
         Optional<MemoryEstimation> memoryEstimation;
 
         if (graphNameOrConfig instanceof Map) {
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(username());
             var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfig);
-            var graphStoreCreator = GraphStoreCreator.of(username(), graphLoaderContext(), graphCreateConfig);
+            var graphStoreCreator = graphCreateConfig.isFictitiousLoading()
+                ? new FictitiousGraphStoreLoader(graphCreateConfig)
+                : new GraphStoreFromDatabaseLoader(graphCreateConfig, username(), graphLoaderContext());
 
+            var graphAndAlgoConfig = (Map<String, Object>) graphNameOrConfig;
+            graphCreateConfig.configKeys().forEach(graphAndAlgoConfig::remove);
+
+            algoConfig = configParser().processInput(graphAndAlgoConfig);
             graphDimensions = graphStoreCreator.graphDimensions();
             memoryEstimation = Optional.of(graphStoreCreator.memoryEstimation());
         } else if (graphNameOrConfig instanceof String) {
+            algoConfig = configParser().processInput(configuration);
             graphDimensions = new GraphStoreFromCatalogLoader(
                 (String) graphNameOrConfig,
                 algoConfig,
@@ -128,9 +135,7 @@ public abstract class AlgoBaseProc<
             algoConfig
         );
 
-        return Stream.of(
-            new MemoryEstimateResult(memoryTreeWithDimensions)
-        );
+        return Stream.of(new MemoryEstimateResult(memoryTreeWithDimensions));
     }
 
     public ValidationConfiguration<CONFIG> getValidationConfig() {
