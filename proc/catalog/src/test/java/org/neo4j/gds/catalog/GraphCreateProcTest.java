@@ -129,6 +129,19 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
+    void listProperties() {
+        var cypherProjection =
+            "CALL gds.graph.create.cypher('g', " +
+            "  'RETURN 0 AS id, [1.0, 2.0] AS list', " +
+            "  'RETURN 0 AS source, 1 AS target LIMIT 0'" +
+            ") YIELD nodeCount";
+
+        assertCypherResult(cypherProjection, List.of(
+            Map.of("nodeCount", 1L)
+        ));
+    }
+
+    @Test
     void createNativeProjection() {
         String graphName = "name";
 
