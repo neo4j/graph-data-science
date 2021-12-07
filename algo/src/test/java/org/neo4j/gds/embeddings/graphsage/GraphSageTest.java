@@ -52,7 +52,6 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.stream.LongStream;
 
@@ -217,7 +216,6 @@ class GraphSageTest {
         var log = new TestLog();
         var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
             graph,
-            Optional.empty(),
             streamConfig,
             AllocationTracker.empty(),
             log,

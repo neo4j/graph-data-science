@@ -76,12 +76,12 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return MODULARITY_OPTIMIZATION_TASK_NAME;
     }
 
     @Override
-    protected ModularityOptimization build(
+    public ModularityOptimization build(
         Graph graph,
         T configuration,
         AllocationTracker allocationTracker,

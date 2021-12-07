@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -56,7 +55,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
     }
 
     @Override
-    protected Task progressTask(Graph graph, CONFIG config) {
+    public Task progressTask(GraphStore graphStore, CONFIG config) {
         var trainingPipeline = getTrainedNCPipelineModel(
             modelCatalog,
             config.modelName(),
@@ -71,7 +70,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
                 () -> List.of(Tasks.leaf("step")),
                 trainingPipeline.nodePropertySteps().size()
             ),
-            innerFactory.progressTask(graph,innerConfig(config))
+            innerFactory.progressTask(graphStore.getUnion(), innerConfig(config))
         );
     }
 
@@ -85,13 +84,12 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "Node Classification Predict Pipeline";
     }
 
     @Override
-    protected NodeClassificationPredictPipelineExecutor build(
-        Graph graph,
+    public NodeClassificationPredictPipelineExecutor build(
         GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,

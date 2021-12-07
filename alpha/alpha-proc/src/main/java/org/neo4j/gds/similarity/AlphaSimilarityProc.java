@@ -128,12 +128,12 @@ abstract class AlphaSimilarityProc
     protected final GraphAlgorithmFactory<ALGO, CONFIG> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return AlphaSimilarityProc.this.taskName();
             }
 
             @Override
-            protected ALGO build(
+            public ALGO build(
                 Graph graph,
                 CONFIG configuration,
                 AllocationTracker allocationTracker,

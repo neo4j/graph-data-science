@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateProc;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -39,6 +38,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.values.storable.NumberType;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -65,22 +65,29 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     }
 
     @Override
-    protected GraphAlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> algorithmFactory() {
+    protected GraphStoreAlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> algorithmFactory() {
         return new GraphStoreAlgorithmFactory<>() {
 
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return "SplitRelationships";
             }
 
             @Override
-            protected SplitRelationships build(
-                Graph graph,
+            public SplitRelationships build(
                 GraphStore graphStore,
                 SplitRelationshipsMutateConfig configuration,
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
+                Optional<String> weightProperty = configuration != null
+                    ? Optional.ofNullable(configuration.relationshipWeightProperty())
+                    : Optional.empty();
+
+                Collection<NodeLabel> nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
+                Collection<RelationshipType> relationshipTypes = configuration.internalRelationshipTypes(graphStore);
+
+                var graph = graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
                 var masterGraph = graph;
                 if (!configuration.nonNegativeRelationshipTypes().isEmpty()) {
                     masterGraph = graphStore.getGraph(

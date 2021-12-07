@@ -39,7 +39,6 @@ import org.neo4j.logging.NullLog;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -201,7 +200,6 @@ class NodeClassificationTrainTest {
         var factory = new NodeClassificationTrainAlgorithmFactory();
         var algorithm = factory.build(
             graph,
-            Optional.empty(),
             config,
             AllocationTracker.empty(),
             log,
@@ -420,7 +418,6 @@ class NodeClassificationTrainTest {
 
         Supplier<NodeClassificationTrain> algoSupplier = () -> new NodeClassificationTrainAlgorithmFactory().build(
             graph,
-            Optional.empty(),
             config,
             AllocationTracker.empty(),
             NullLog.getInstance(),

@@ -44,12 +44,12 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
     private static final String KNN_BASE_TASK_NAME = "Knn";
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return KNN_BASE_TASK_NAME;
     }
 
     @Override
-    protected Knn build(
+    public Knn build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

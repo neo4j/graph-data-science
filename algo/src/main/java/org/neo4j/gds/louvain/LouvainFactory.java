@@ -47,12 +47,12 @@ import java.util.List;
 public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgorithmFactory<Louvain, CONFIG> {
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "Louvain";
     }
 
     @Override
-    protected Louvain build(
+    public Louvain build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

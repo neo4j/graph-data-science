@@ -34,12 +34,12 @@ import java.util.List;
 public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorithmFactory<FastRP, CONFIG> {
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "FastRP";
     }
 
     @Override
-    protected FastRP build(
+    public FastRP build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

@@ -52,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
@@ -395,7 +394,6 @@ class GraphSageAlgorithmFactoryTest {
         var multiLabelAlgo = new GraphSageTrainAlgorithmFactory()
             .build(
                 GdlGraphs.EMPTY,
-                Optional.empty(),
                 multiLabelConfig,
                 AllocationTracker.empty(),
                 NullLog.getInstance(),
@@ -413,7 +411,6 @@ class GraphSageAlgorithmFactoryTest {
         var singleLabelAlgo = new GraphSageTrainAlgorithmFactory()
             .build(
                 GdlGraphs.EMPTY,
-                Optional.empty(),
                 singleLabelConfig,
                 AllocationTracker.empty(),
                 NullLog.getInstance(),

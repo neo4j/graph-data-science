@@ -42,12 +42,12 @@ public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends Gr
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "ApproxMaxKCut";
     }
 
     @Override
-    protected ApproxMaxKCut build(
+    public ApproxMaxKCut build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

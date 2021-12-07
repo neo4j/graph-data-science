@@ -43,12 +43,12 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "LinkPrediction";
     }
 
     @Override
-    protected LinkPredictionPredict build(
+    public LinkPredictionPredict build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

@@ -34,12 +34,12 @@ public class ConductanceFactory<CONFIG extends ConductanceConfig> extends GraphA
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "Conductance";
     }
 
     @Override
-    protected Conductance build(
+    public Conductance build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

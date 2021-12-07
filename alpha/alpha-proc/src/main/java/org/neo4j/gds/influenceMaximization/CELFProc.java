@@ -93,12 +93,12 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
     protected GraphAlgorithmFactory<CELF, InfluenceMaximizationConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return "CELF";
             }
 
             @Override
-            protected CELF build(
+            public CELF build(
                 Graph graph,
                 InfluenceMaximizationConfig configuration,
                 AllocationTracker allocationTracker,

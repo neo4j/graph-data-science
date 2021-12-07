@@ -78,12 +78,12 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
     protected GraphAlgorithmFactory<Traverse, TraverseConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return "Traverse";
             }
 
             @Override
-            protected Traverse build(
+            public Traverse build(
                 Graph graph,
                 TraverseConfig configuration,
                 AllocationTracker allocationTracker,

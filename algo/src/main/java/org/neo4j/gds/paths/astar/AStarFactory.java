@@ -41,12 +41,12 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> extends Gr
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "AStar";
     }
 
     @Override
-    protected AStar build(
+    public AStar build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

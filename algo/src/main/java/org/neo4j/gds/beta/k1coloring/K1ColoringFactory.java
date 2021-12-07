@@ -40,7 +40,7 @@ public class K1ColoringFactory<T extends K1ColoringConfig> extends GraphAlgorith
     private static final String K1_COLORING_TASK_NAME = "K1Coloring";
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return K1_COLORING_TASK_NAME;
     }
 

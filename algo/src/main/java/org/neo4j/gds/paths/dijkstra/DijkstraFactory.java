@@ -42,7 +42,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "Dijkstra";
     }
 
@@ -63,7 +63,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
     public static <T extends ShortestPathBaseConfig> DijkstraFactory<T> sourceTarget() {
         return new DijkstraFactory<>() {
             @Override
-            protected Dijkstra build(
+            public Dijkstra build(
                 Graph graph,
                 T configuration,
                 AllocationTracker allocationTracker,
@@ -83,7 +83,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
     public static <T extends AllShortestPathsBaseConfig> DijkstraFactory<T> singleSource() {
         return new DijkstraFactory<>() {
             @Override
-            protected Dijkstra build(
+            public Dijkstra build(
                 Graph graph,
                 T configuration,
                 AllocationTracker allocationTracker,

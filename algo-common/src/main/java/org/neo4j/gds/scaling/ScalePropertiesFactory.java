@@ -34,12 +34,12 @@ public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConf
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "ScaleProperties";
     }
 
     @Override
-    protected ScaleProperties build(
+    public ScaleProperties build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

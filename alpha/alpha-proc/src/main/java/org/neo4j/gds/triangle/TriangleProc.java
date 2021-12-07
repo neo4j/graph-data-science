@@ -87,12 +87,12 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     protected GraphAlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return "TriangleStream";
             }
 
             @Override
-            protected TriangleStream build(
+            public TriangleStream build(
                 Graph graph,
                 TriangleCountBaseConfig configuration,
                 AllocationTracker allocationTracker,

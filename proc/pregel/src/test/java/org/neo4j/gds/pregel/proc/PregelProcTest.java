@@ -292,12 +292,12 @@ public class PregelProcTest extends BaseProcTest {
             return new GraphAlgorithmFactory<>() {
 
                 @Override
-                protected String taskName() {
+                public String taskName() {
                     return "CompositeTestAlgorithm";
                 }
 
                 @Override
-                protected CompositeTestAlgorithm build(
+                public CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
                     AllocationTracker allocationTracker,
@@ -359,12 +359,12 @@ public class PregelProcTest extends BaseProcTest {
             return new GraphAlgorithmFactory<>() {
 
                 @Override
-                protected String taskName() {
+                public String taskName() {
                     return "CompositeTestAlgorithm";
                 }
 
                 @Override
-                protected CompositeTestAlgorithm build(
+                public CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
                     AllocationTracker allocationTracker,
@@ -425,12 +425,12 @@ public class PregelProcTest extends BaseProcTest {
             return new GraphAlgorithmFactory<>() {
 
                 @Override
-                protected String taskName() {
+                public String taskName() {
                     return "CompositeTestAlgorithm";
                 }
 
                 @Override
-                protected CompositeTestAlgorithm build(
+                public CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
                     AllocationTracker allocationTracker,

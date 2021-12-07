@@ -39,7 +39,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> extends GraphAlgorithmFactory<NodeSimilarity, CONFIG> {
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "NodeSimilarity";
     }
 

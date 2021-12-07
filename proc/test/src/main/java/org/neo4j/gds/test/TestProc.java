@@ -75,12 +75,12 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
         return new GraphAlgorithmFactory<>() {
 
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return "TestAlgorithm";
             }
 
             @Override
-            protected TestAlgorithm build(
+            public TestAlgorithm build(
                 Graph graph,
                 TestConfig configuration,
                 AllocationTracker allocationTracker,

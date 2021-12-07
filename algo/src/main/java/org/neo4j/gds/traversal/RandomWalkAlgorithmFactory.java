@@ -35,12 +35,12 @@ import java.util.ArrayList;
 
 public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> extends GraphAlgorithmFactory<RandomWalk, CONFIG> {
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "RandomWalk";
     }
 
     @Override
-    protected RandomWalk build(
+    public RandomWalk build(
         Graph graph,
         RandomWalkBaseConfig configuration,
         AllocationTracker allocationTracker,

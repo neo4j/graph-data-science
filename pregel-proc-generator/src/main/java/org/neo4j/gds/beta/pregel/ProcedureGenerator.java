@@ -224,7 +224,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
             )
             .addMethod(MethodSpec.methodBuilder("taskName")
                 .addAnnotation(Override.class)
-                .addModifiers(Modifier.PROTECTED)
+                .addModifiers(Modifier.PUBLIC)
                 .returns(String.class)
                 .addStatement("return $T.class.getSimpleName()", algorithmClassName)
                 .build()

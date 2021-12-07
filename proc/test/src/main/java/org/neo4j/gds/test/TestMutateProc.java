@@ -80,12 +80,12 @@ public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, Tes
         return new GraphAlgorithmFactory<>() {
 
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return "TestAlgorithm";
             }
 
             @Override
-            protected TestAlgorithm build(
+            public TestAlgorithm build(
                 Graph graph,
                 TestMutateConfig configuration,
                 AllocationTracker allocationTracker,

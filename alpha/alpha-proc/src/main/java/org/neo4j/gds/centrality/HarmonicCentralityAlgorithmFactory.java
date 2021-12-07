@@ -29,12 +29,12 @@ import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
 
 class HarmonicCentralityAlgorithmFactory extends GraphAlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> {
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "HarmonicCentrality";
     }
 
     @Override
-    protected HarmonicCentrality build(
+    public HarmonicCentrality build(
         Graph graph,
         HarmonicCentralityConfig configuration,
         AllocationTracker allocationTracker,

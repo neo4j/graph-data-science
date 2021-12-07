@@ -40,12 +40,12 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "Node classification predict";
     }
 
     @Override
-    protected NodeClassificationPredict build(
+    public NodeClassificationPredict build(
         Graph graph,
         NodeClassificationPredictConfig configuration,
         AllocationTracker allocationTracker,

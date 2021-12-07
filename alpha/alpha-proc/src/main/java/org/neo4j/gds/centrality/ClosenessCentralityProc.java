@@ -130,12 +130,12 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
     protected GraphAlgorithmFactory<MSClosenessCentrality, ClosenessCentralityConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return "ClosenessCentrality";
             }
 
             @Override
-            protected MSClosenessCentrality build(
+            public MSClosenessCentrality build(
                 Graph graph,
                 ClosenessCentralityConfig configuration,
                 AllocationTracker allocationTracker,

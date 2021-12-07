@@ -341,10 +341,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var log = new TestLog();
             var progressTracker = new TestProgressTracker(
-                new LinkPredictionTrainPipelineAlgorithmFactory(caller, modelCatalog).progressTask(
-                    graphStore.getUnion(),
-                    config
-                ),
+                new LinkPredictionTrainPipelineAlgorithmFactory(caller, modelCatalog).progressTask(graphStore, config),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE

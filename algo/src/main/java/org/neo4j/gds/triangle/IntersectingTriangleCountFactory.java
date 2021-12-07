@@ -36,12 +36,12 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
     private static final String INTERSECTING_TRIANGLE_COUNT_TASK_NAME = IntersectingTriangleCount.class.getSimpleName();
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return INTERSECTING_TRIANGLE_COUNT_TASK_NAME;
     }
 
     @Override
-    protected IntersectingTriangleCount build(
+    public IntersectingTriangleCount build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

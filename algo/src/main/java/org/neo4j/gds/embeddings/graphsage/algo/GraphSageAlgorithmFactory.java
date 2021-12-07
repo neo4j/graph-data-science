@@ -49,7 +49,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return GraphSage.class.getSimpleName();
     }
 

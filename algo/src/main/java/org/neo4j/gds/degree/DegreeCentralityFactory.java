@@ -36,12 +36,12 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> exte
     private static final String DEGREE_CENTRALITY_TASK_NAME = "DegreeCentrality";
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return DEGREE_CENTRALITY_TASK_NAME;
     }
 
     @Override
-    protected DegreeCentrality build(
+    public DegreeCentrality build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

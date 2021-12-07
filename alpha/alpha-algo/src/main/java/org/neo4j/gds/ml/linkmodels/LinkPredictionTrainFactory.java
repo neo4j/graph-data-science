@@ -35,12 +35,12 @@ public class LinkPredictionTrainFactory extends GraphAlgorithmFactory<LinkPredic
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "LinkPredictionTrain";
     }
 
     @Override
-    protected LinkPredictionTrain build(
+    public LinkPredictionTrain build(
         Graph graph,
         LinkPredictionTrainConfig configuration,
         AllocationTracker allocationTracker,

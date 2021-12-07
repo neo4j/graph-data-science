@@ -54,12 +54,12 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends Grap
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "Yens";
     }
 
     @Override
-    protected Yens build(
+    public Yens build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

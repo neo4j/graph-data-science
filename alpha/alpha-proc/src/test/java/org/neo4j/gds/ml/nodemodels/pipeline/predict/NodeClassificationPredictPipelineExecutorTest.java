@@ -233,8 +233,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
             var log = new TestLog();
             var progressTracker = new TestProgressTracker(
-                new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, caller)
-                    .progressTask(graphStore.getUnion(), config),
+                new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, caller).progressTask(graphStore, config),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE
@@ -285,7 +284,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 .build();
 
             var algo = factory.build(
-                null,
                 graphStore,
                 streamConfig,
                 AllocationTracker.empty(),

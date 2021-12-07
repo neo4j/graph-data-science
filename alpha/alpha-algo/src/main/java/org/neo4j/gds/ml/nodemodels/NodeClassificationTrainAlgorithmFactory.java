@@ -47,7 +47,7 @@ public class NodeClassificationTrainAlgorithmFactory extends GraphAlgorithmFacto
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return NodeClassificationTrain.taskName();
     }
 

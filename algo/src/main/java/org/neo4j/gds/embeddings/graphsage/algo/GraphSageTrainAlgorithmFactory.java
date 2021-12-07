@@ -47,7 +47,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return GraphSageTrain.class.getSimpleName();
     }
 

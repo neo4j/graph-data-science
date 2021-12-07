@@ -70,12 +70,12 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
     protected GraphAlgorithmFactory<MSBFSASPAlgorithm, AllShortestPathsConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return "MSBFSASPAlgorithm";
             }
 
             @Override
-            protected MSBFSASPAlgorithm build(
+            public MSBFSASPAlgorithm build(
                 Graph graph,
                 AllShortestPathsConfig configuration,
                 AllocationTracker allocationTracker,

@@ -75,12 +75,12 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return mode.name();
     }
 
     @Override
-    protected PageRankAlgorithm build(
+    public PageRankAlgorithm build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

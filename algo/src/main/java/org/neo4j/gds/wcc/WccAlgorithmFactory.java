@@ -36,12 +36,12 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Gra
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "WCC";
     }
 
     @Override
-    protected Wcc build(
+    public Wcc build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

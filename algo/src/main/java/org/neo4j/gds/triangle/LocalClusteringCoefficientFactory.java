@@ -34,12 +34,12 @@ import java.util.ArrayList;
 public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoefficientBaseConfig> extends GraphAlgorithmFactory<LocalClusteringCoefficient, CONFIG> {
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "LocalClusteringCoefficient";
     }
 
     @Override
-    protected LocalClusteringCoefficient build(
+    public LocalClusteringCoefficient build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

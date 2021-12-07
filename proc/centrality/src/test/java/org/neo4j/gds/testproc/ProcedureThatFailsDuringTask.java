@@ -57,12 +57,12 @@ public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm,
     protected GraphAlgorithmFactory<FailingAlgorithm, DummyConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<FailingAlgorithm, DummyConfig>() {
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return "Failing Algorithm";
             }
 
             @Override
-            protected FailingAlgorithm build(
+            public FailingAlgorithm build(
                 Graph graph,
                 DummyConfig configuration,
                 AllocationTracker allocationTracker,

@@ -41,12 +41,12 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> extends GraphAlgorithmFactory<LabelPropagation, CONFIG> {
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "LabelPropagation";
     }
 
     @Override
-    protected LabelPropagation build(
+    public LabelPropagation build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

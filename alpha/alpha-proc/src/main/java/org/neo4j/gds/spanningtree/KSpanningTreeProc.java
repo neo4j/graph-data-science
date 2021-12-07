@@ -143,12 +143,12 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
     protected GraphAlgorithmFactory<KSpanningTree, KSpanningTreeConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return "KSpanningTree";
             }
 
             @Override
-            protected Task progressTask(
+            public Task progressTask(
                 Graph graph, KSpanningTreeConfig config
             ) {
                 return Tasks.task(
@@ -160,7 +160,7 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
             }
 
             @Override
-            protected KSpanningTree build(
+            public KSpanningTree build(
                 Graph graph,
                 KSpanningTreeConfig configuration,
                 AllocationTracker allocationTracker,

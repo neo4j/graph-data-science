@@ -39,12 +39,12 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBaseConfig> extends GraphAlgorithmFactory<BetweennessCentrality, CONFIG> {
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "BetweennessCentrality";
     }
 
     @Override
-    protected BetweennessCentrality build(
+    public BetweennessCentrality build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,
