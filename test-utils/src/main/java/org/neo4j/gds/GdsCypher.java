@@ -203,7 +203,7 @@ public abstract class GdsCypher {
         List<String> yields
     ) {
         var procedureName = procedureName(algoNamespace, algoName, executionMode, specialExecution);
-        var queryArguments = queryArguments(graphName, parameters);
+        var queryArguments = queryArguments(graphName, parameters, specialExecution == SpecialExecution.ESTIMATE);
         var yieldsFields = yieldsFields(yields);
 
         var query = Cypher.call(procedureName).withArgs(queryArguments);
@@ -270,12 +270,13 @@ public abstract class GdsCypher {
 
     private static Expression[] queryArguments(
         String graphName,
-        Map<String, Object> parameters
+        Map<String, Object> parameters,
+        boolean isEstimationMode
     ) {
         var queryArguments = new ArrayList<Expression>();
         queryArguments.add(Cypher.literalOf(graphName));
 
-        if (!parameters.isEmpty()) {
+        if (!parameters.isEmpty() || isEstimationMode) {
             queryArguments.add(Objects.requireNonNullElseGet(toExpression(parameters), Cypher::mapOf));
         }
 
