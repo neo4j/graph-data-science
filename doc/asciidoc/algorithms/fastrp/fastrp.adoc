@@ -29,7 +29,7 @@ This means that two nodes that have similar neighborhoods should be assigned sim
 Conversely, two nodes that are not similar should be not be assigned similar embedding vectors.
 
 The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
-Moreover, in GDS it is possible to use node properties for the creation of these _initial random vectors_ in a way described <<algorithms-embeddings-fastrp-extended,below>>.
+Moreover, in GDS it is possible to use node properties for the creation of these _initial random vectors_ in a way described <<algorithms-embeddings-fastrp-examples-properties,below>>.
 We will also use _projection of a node_ synonymously with the initial random vector of a node.
 
 Starting with these random vectors and iteratively averaging over node neighborhoods, the algorithm constructs a sequence of _intermediate embeddings_ image:equations/fastrp/fastrp1.svg[e n to the ith] for each node _n_.
