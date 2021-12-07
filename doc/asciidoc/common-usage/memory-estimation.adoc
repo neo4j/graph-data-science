@@ -50,12 +50,15 @@ CALL gds[.<tier>].<algorithm>.<execution-mode>.estimate(
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type          | Default   | Optional  | Description
-| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or a configuration to create a graph.
+| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or a <<estimate-procedure-graph-create-config, configuration to create a graph>>.
 | configuration     | Map           | -         | no        | The configuration of the algorithm.
 |===
 
 The configuration map accepts the same configuration parameters as the estimated algorithm.
 See the specific algorithm documentation for more information.
+
+In contrast to procedures that execute algorithms, for memory estimation it is possible to define a <<estimate-procedure-graph-create-config, graph creation config>>.
+With this it is possible to measure the memory consumption of creating a graph and executing the algorithm at the same time.
 
 .Results
 [opts="header",cols="1m,1,6"]
@@ -72,6 +75,25 @@ See the specific algorithm documentation for more information.
 | heapPercentageMax     | Float     | The maximum percentage of the configured maximum heap required.
 |===
 
+
+[[estimate-procedure-graph-create-config]]
+=== Graph creation configuration
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                                                        | Type                          | Default                | Optional | Description
+| <<node-projection-syntax, node projection>>                 | String, List of String or Map | null                   | yes      | The node projection used for anonymous graph creation via a Native projection.
+| <<relationship-projection-syntax, relationship projection>> | String, List of String or Map | null                   | yes      | The relationship projection used for anonymous graph creation a Native projection.
+| nodeQuery                                                   | String                        | null                   | yes      | The Cypher query used to select the nodes for anonymous graph creation via a Cypher projection.
+| relationshipQuery                                           | String                        | null                   | yes      | The Cypher query used to select the relationships for anonymous graph creation via a Cypher projection.
+| nodeProperties                                              | String, List of String or Map | null                   | yes      | The node properties to project during anonymous graph creation.
+| relationshipProperties                                      | String, List of String or Map | null                   | yes      | The relationship properties to project during anonymous graph creation.
+| <<common-configuration-concurrency,concurrency>>            | Integer                       | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency                                             | Integer                       | value of 'concurrency' | yes      | The number of concurrent threads used for creating the graph.
+| <<common-configuration-write-concurrency,writeConcurrency>> | Integer                       | value of 'concurrency' | yes      | WRITE mode only: The number of concurrent threads used for writing the result.
+| <<common-configuration-write-property,writeProperty>>       | String                        | n/a                    | no       | WRITE mode only: The {entity} property to which the {result} is written to.
+|===
 
 [[estimate-procedure-graph]]
 == Estimating memory requirements for graphs
