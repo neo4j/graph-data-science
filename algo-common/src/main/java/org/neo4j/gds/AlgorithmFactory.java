@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -32,43 +30,32 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
-import java.util.Optional;
-
-public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
-
-    public final ALGO build(
-        Graph graph,
-        Optional<GraphStore> maybeGraphStore,
+interface AlgorithmFactory<G, ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
+    default ALGO build(
+        G graphOrGraphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         Log log,
         TaskRegistryFactory taskRegistryFactory
     ) {
-        var progressTask = progressTask(graph, configuration);
+        var progressTask = progressTask(graphOrGraphStore, configuration);
         var progressTracker = new TaskProgressTracker(
             progressTask,
             log,
             configuration.concurrency(),
             taskRegistryFactory
         );
-        return maybeGraphStore
-            .map(graphStore -> build(graph, graphStore, configuration, allocationTracker, progressTracker))
-            .orElseGet(() -> build(graph, configuration, allocationTracker, progressTracker));
+        return build(graphOrGraphStore, configuration, allocationTracker, progressTracker);
     }
 
-    /**
-     * Returns an estimation about the memory consumption of that algorithm. The memory estimation can be used to
-     * compute the actual consumption depending on {@link org.neo4j.gds.core.GraphDimensions} and concurrency.
-     *
-     * @return memory estimation
-     * @see org.neo4j.gds.core.utils.mem.MemoryEstimations
-     * @see org.neo4j.gds.core.utils.mem.MemoryEstimation#estimate(org.neo4j.gds.core.GraphDimensions, int)
-     */
-    public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        throw new MemoryEstimationNotImplementedException();
-    }
+    ALGO build(
+        G graphOrGraphStore,
+        CONFIG configuration,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
+    );
 
-    protected Task progressTask(Graph graph, CONFIG config) {
+    default Task progressTask(G graphOrGraphStore, CONFIG config) {
         return Tasks.leaf(taskName());
     }
 
@@ -78,25 +65,24 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
      *
      * @return the name of the task that logs progress
      */
-    protected abstract String taskName();
-
-    protected ALGO build(
-        Graph graph,
-        GraphStore graphStore,
-        CONFIG configuration,
-        AllocationTracker allocationTracker,
-        ProgressTracker progressTracker
-    ) {
-        return build(graph, configuration, allocationTracker, progressTracker);
-    }
+    String taskName();
 
     /**
-     * Builds the algorithm class.
+     * Returns an estimation about the memory consumption of that algorithm. The memory estimation can be used to
+     * compute the actual consumption depending on {@link org.neo4j.gds.core.GraphDimensions} and concurrency.
+     *
+     * @return memory estimation
+     * @see org.neo4j.gds.core.utils.mem.MemoryEstimations
+     * @see org.neo4j.gds.core.utils.mem.MemoryEstimation#estimate(org.neo4j.gds.core.GraphDimensions, int)
      */
-    protected abstract ALGO build(
-        Graph graph,
-        CONFIG configuration,
-        AllocationTracker allocationTracker,
-        ProgressTracker progressTracker
-    );
+    default MemoryEstimation memoryEstimation(CONFIG configuration) {
+        throw new MemoryEstimationNotImplementedException();
+    }
+
+    ALGO accept(Visitor<ALGO, CONFIG> visitor);
+
+    interface Visitor<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
+        ALGO graph(GraphAlgorithmFactory<ALGO, CONFIG> graphAlgorithmFactory);
+        ALGO graphStore(GraphStoreAlgorithmFactory<ALGO, CONFIG> graphStoreAlgorithmFactory);
+    }
 }

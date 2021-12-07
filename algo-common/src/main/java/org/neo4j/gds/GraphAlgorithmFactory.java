@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
-public abstract class GraphStoreAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig>
-    implements AlgorithmFactory<GraphStore, ALGO, CONFIG> {
+public abstract class GraphAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig>
+    implements AlgorithmFactory<Graph, ALGO, CONFIG> {
 
     @Override
     public ALGO accept(Visitor<ALGO, CONFIG> visitor) {
-        return visitor.graphStore(this);
+        return visitor.graph(this);
     }
 }
