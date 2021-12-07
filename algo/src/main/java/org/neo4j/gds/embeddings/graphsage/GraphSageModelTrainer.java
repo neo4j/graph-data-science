@@ -65,7 +65,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageModelTrainer {
     private final long randomSeed;
-    private Layer[] layers;
     private final boolean useWeights;
     private final double learningRate;
     private final double tolerance;
@@ -76,7 +75,7 @@ public class GraphSageModelTrainer {
     private final int maxSearchDepth;
     private final Function<Graph, List<LayerConfig>> layerConfigsFunction;
     private final FeatureFunction featureFunction;
-    private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
+    private final Collection<Weights<Matrix>> labelProjectionWeights;
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
     private final int batchSize;
@@ -90,7 +89,7 @@ public class GraphSageModelTrainer {
         ExecutorService executor,
         ProgressTracker progressTracker,
         FeatureFunction featureFunction,
-        Collection<Weights<? extends Tensor<?>>> labelProjectionWeights
+        Collection<Weights<Matrix>> labelProjectionWeights
     ) {
         this.layerConfigsFunction = graph -> config.layerConfigs(firstLayerColumns(config, graph));
         this.batchSize = config.batchSize();
@@ -112,15 +111,19 @@ public class GraphSageModelTrainer {
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
         progressTracker.beginSubTask();
 
-        this.layers = layerConfigsFunction.apply(graph).stream()
+        var layers = layerConfigsFunction.apply(graph).stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
 
-        var weights = getWeights();
+        var weights = new ArrayList<Weights<? extends Tensor<?>>>(labelProjectionWeights);
+        for (Layer layer : layers) {
+            weights.addAll(layer.weights());
+        }
+
         var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
-            batch -> new BatchTask(lossFunction(batch, graph, features), weights, tolerance)
+            batch -> new BatchTask(lossFunction(batch, graph, features, layers), weights, tolerance)
         );
 
         double previousLoss = Double.MAX_VALUE;
@@ -129,7 +132,7 @@ public class GraphSageModelTrainer {
         for (int epoch = 1; epoch <= epochs; epoch++) {
             progressTracker.beginSubTask();
 
-            double newLoss = trainEpoch(batchTasks, epoch);
+            double newLoss = trainEpoch(batchTasks, weights);
             epochLosses.add(newLoss);
             progressTracker.endSubTask();
             if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
@@ -140,12 +143,10 @@ public class GraphSageModelTrainer {
         }
         progressTracker.endSubTask();
 
-        return ModelTrainResult.of(epochLosses, converged, this.layers);
+        return ModelTrainResult.of(epochLosses, converged, layers);
     }
 
-    private double trainEpoch(List<BatchTask> batchTasks, int epoch) {
-        List<Weights<? extends Tensor<?>>> weights = getWeights();
-
+    private double trainEpoch(List<BatchTask> batchTasks, List<Weights<? extends Tensor<?>>> weights) {
         var updater = new AdamOptimizer(weights, learningRate);
 
         double totalLoss = Double.NaN;
@@ -224,7 +225,7 @@ public class GraphSageModelTrainer {
         }
     }
 
-    private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features) {
+    private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features, Layer[] layers) {
         var batchLocalRandomSeed = getBatchIndex(batch, graph.nodeCount()) + randomSeed;
 
         var neighbours = neighborBatch(graph, batch, batchLocalRandomSeed).toArray();
@@ -241,7 +242,7 @@ public class GraphSageModelTrainer {
             )
         ).toArray();
 
-        Variable<Matrix> embeddingVariable = embeddings(graph, useWeights, totalBatch, features, this.layers, featureFunction);
+        Variable<Matrix> embeddingVariable = embeddings(graph, useWeights, totalBatch, features, layers, featureFunction);
 
         Variable<Scalar> lossFunction = new GraphSageLoss(
             useWeights ? graph::relationshipProperty : UNWEIGHTED,
@@ -290,14 +291,6 @@ public class GraphSageModelTrainer {
             .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, Math.pow(graph.degree(nodeId), 0.75)));
 
         return sampler.sample(degreeWeightedNodes, nodeCount, batchSize, sample -> !neighbours.contains(sample));
-    }
-
-    private List<Weights<? extends Tensor<?>>> getWeights() {
-        List<Weights<? extends Tensor<?>>> weights = new ArrayList<>(labelProjectionWeights);
-        weights.addAll(Arrays.stream(layers)
-            .flatMap(layer -> layer.weights().stream())
-            .collect(Collectors.toList()));
-        return weights;
     }
 
     private static int getBatchIndex(Partition partition, long nodeCount) {

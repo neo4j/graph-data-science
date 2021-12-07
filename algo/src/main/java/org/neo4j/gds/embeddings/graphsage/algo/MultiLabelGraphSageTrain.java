@@ -29,7 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -96,7 +96,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     public void release() {
     }
 
-    private static Map<NodeLabel, Weights<? extends Tensor<?>>> makeWeightsByLabel(
+    private static Map<NodeLabel, Weights<Matrix>> makeWeightsByLabel(
         GraphSageTrainConfig config,
         MultiLabelFeatureExtractors multiLabelFeatureExtractors
     ) {

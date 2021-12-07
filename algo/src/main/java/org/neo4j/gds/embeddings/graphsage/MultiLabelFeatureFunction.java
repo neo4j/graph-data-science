@@ -19,29 +19,28 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.functions.LabelwiseFeatureProjection;
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.functions.LabelwiseFeatureProjection;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.Map;
 
 public class MultiLabelFeatureFunction implements FeatureFunction {
 
-    private final Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel;
+    private final Map<NodeLabel, Weights<Matrix>> weightsByLabel;
     private final int projectedFeatureDimension;
 
-    public MultiLabelFeatureFunction(Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel, int projectedFeatureDimension) {
+    public MultiLabelFeatureFunction(Map<NodeLabel, Weights<Matrix>> weightsByLabel, int projectedFeatureDimension) {
         this.weightsByLabel = weightsByLabel;
         this.projectedFeatureDimension = projectedFeatureDimension;
     }
 
-    public Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel() {
+    public Map<NodeLabel, Weights<Matrix>> weightsByLabel() {
         return this.weightsByLabel;
     }
 

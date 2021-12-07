@@ -20,17 +20,16 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.FiniteDifferenceTest;
-import org.neo4j.gds.ml.core.helper.L2Norm;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.FiniteDifferenceTest;
+import org.neo4j.gds.ml.core.helper.L2Norm;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +59,7 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
         var nodeIds = new long[]{0, 1, 2};
         var labels = new NodeLabel[nodeIds.length];
         for (int i = 0; i < nodeIds.length; i++) {
-            labels[i] = graph.nodeLabels(nodeIds[i]).stream().findFirst().get();
+            labels[i] = graph.nodeLabels(nodeIds[i]).stream().findFirst().orElseThrow();
         }
 
         var features = HugeObjectArray.of(
@@ -69,7 +68,7 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
             new double[]{15.0}
         );
 
-        Map<NodeLabel, Weights<? extends Tensor<?>>> nodeLabelWeightsMap = makeWeights();
+        Map<NodeLabel, Weights<Matrix>> nodeLabelWeightsMap = makeWeights();
         var projection = new LabelwiseFeatureProjection(
             nodeIds,
             features,
@@ -94,7 +93,7 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
         var nodeIds = new long[]{0, 1, 2};
         var labels = new NodeLabel[nodeIds.length];
         for (int i = 0; i < nodeIds.length; i++) {
-            labels[i] = graph.nodeLabels(nodeIds[i]).stream().findFirst().get();
+            labels[i] = graph.nodeLabels(nodeIds[i]).stream().findFirst().orElseThrow();
         }
 
         var features = HugeObjectArray.of(
@@ -102,7 +101,7 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
             new double[]{3.0, 5.0},
             new double[]{15.0}
         );
-        Map<NodeLabel, Weights<? extends Tensor<?>>> nodeLabelWeightsMap = makeWeights();
+        Map<NodeLabel, Weights<Matrix>> nodeLabelWeightsMap = makeWeights();
         var projection = new LabelwiseFeatureProjection(
             nodeIds,
             features,
@@ -125,7 +124,7 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
         return 1E-6;
     }
 
-    private Map<NodeLabel, Weights<? extends Tensor<?>>> makeWeights() {
+    private Map<NodeLabel, Weights<Matrix>> makeWeights() {
         // design the new feature space so it has 5 features which are in order: restaurant.numEmployees, restaurant.rating, dish.numIngredients, dish.rating, customer.numPurchases
         // this makes it so that its easy to inspect that projection is correct, because any vector is just inserted at some offset into the projected vector
         Weights<Matrix> restaurantWeights = new Weights<>(new Matrix(

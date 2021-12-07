@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
-import org.ejml.data.DMatrix1Row;
-import org.ejml.data.DMatrixRMaj;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.AbstractVariable;
@@ -39,14 +37,14 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
 
     private final long[] nodeIds;
     private final HugeObjectArray<double[]> features;
-    private final Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel;
+    private final Map<NodeLabel, Weights<Matrix>> weightsByLabel;
     private final int projectedFeatureDimension;
     private final NodeLabel[] labels;
 
     public LabelwiseFeatureProjection(
         long[] nodeIds,
         HugeObjectArray<double[]> features,
-        Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel,
+        Map<NodeLabel, Weights<Matrix>> weightsByLabel,
         int projectedFeatureDimension,
         NodeLabel[] labels
     ) {
@@ -61,22 +59,27 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
     @Override
     public Matrix apply(ComputationContext ctx) {
         var result = new Matrix(nodeIds.length, projectedFeatureDimension);
-        IntStream.range(0, nodeIds.length).forEach(i -> {
-            long nodeId = nodeIds[i];
-            NodeLabel label = labels[i];
-            Weights<? extends Tensor<?>> weights = weightsByLabel.get(label);
+
+        // TODO rewrite this into one mxm per label (with a read-only lazy feature matrix per label)
+        for (int batchIdx = 0; batchIdx < nodeIds.length; batchIdx++) {
+            long nodeId = nodeIds[batchIdx];
+            NodeLabel label = labels[batchIdx];
+            Weights<Matrix> weights = weightsByLabel.get(label);
             double[] nodeFeatures = features.get(nodeId);
 
-            DMatrix1Row wrappedWeights = DMatrixRMaj.wrap(
-                weights.dimension(Dimensions.ROWS_INDEX),
-                weights.dimension(Dimensions.COLUMNS_INDEX),
-                weights.data().data()
+            var wrappedNodeFeatureVector = new Matrix(nodeFeatures, 1, nodeFeatures.length);
+            var productVector = new Matrix(weights.dimension(0), 1);
+            DoubleMatrixOperations.multTransB(
+                weights.data(),
+                wrappedNodeFeatureVector,
+                productVector,
+                // TODO is filter not too simple to map the input feature dimension to the projectedDimension?
+                //      we should instead assert that the nodeFeature vector is not larger
+                index -> (index < projectedFeatureDimension)
             );
-            var wrappedNodeFeatureVector = DMatrixRMaj.wrap(1, nodeFeatures.length, nodeFeatures);
-            var productVector = new DMatrixRMaj(weights.dimension(0), 1);
-            DoubleMatrixOperations.multTransB(wrappedWeights, wrappedNodeFeatureVector, productVector, index -> (index < projectedFeatureDimension));
-            result.setRow(i, productVector.data);
-        });
+
+            result.setRow(batchIdx, productVector.data());
+        }
         return result;
     }
 

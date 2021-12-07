@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-
-import java.util.stream.IntStream;
 
 public class SingleLabelFeatureFunction implements FeatureFunction {
 
@@ -33,17 +31,14 @@ public class SingleLabelFeatureFunction implements FeatureFunction {
     public Variable<Matrix> apply(
         Graph graph, long[] nodeIds, HugeObjectArray<double[]> features
     ) {
-        int dimension = features.get(0).length;
-        double[] data = new double[Math.multiplyExact(nodeIds.length, dimension)];
-        IntStream
-            .range(0, nodeIds.length)
-            .forEach(nodeOffset -> System.arraycopy(
-                features.get(nodeIds[nodeOffset]),
-                0,
-                data,
-                nodeOffset * dimension,
-                dimension
-            ));
-        return Constant.matrix(data, nodeIds.length, dimension);
+        int featureDimension = features.get(0).length;
+        int batchLength = nodeIds.length;
+        var batchFeatures = new Matrix(batchLength, featureDimension);
+
+        for (int batchIdx = 0; batchIdx < batchLength; batchIdx++) {
+            batchFeatures.setRow(batchIdx, features.get(nodeIds[batchIdx]));
+        }
+
+        return new Constant<>(batchFeatures);
     }
 }
