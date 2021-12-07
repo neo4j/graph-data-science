@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.test;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -76,8 +76,8 @@ public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, Tes
     }
 
     @Override
-    protected AlgorithmFactory<TestAlgorithm, TestMutateConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
+    protected GraphAlgorithmFactory<TestAlgorithm, TestMutateConfig> algorithmFactory() {
+        return new GraphAlgorithmFactory<>() {
 
             @Override
             protected String taskName() {

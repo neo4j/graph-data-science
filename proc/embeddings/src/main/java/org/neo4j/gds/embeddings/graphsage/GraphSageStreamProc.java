@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -102,7 +102,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     }
 
     @Override
-    protected AlgorithmFactory<GraphSage, GraphSageStreamConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<GraphSage, GraphSageStreamConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>(modelCatalog);
     }
 

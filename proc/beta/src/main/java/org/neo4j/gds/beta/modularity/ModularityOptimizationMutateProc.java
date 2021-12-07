@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.modularity;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -80,7 +80,7 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
     }
 
     @Override
-    protected AlgorithmFactory<ModularityOptimization, ModularityOptimizationMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationMutateConfig> algorithmFactory() {
         return new ModularityOptimizationFactory<>();
     }
 

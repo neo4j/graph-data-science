@@ -20,7 +20,7 @@
 package org.neo4j.gds.degree;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -64,7 +64,7 @@ public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentral
     }
 
     @Override
-    protected AlgorithmFactory<DegreeCentrality, DegreeCentralityMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<DegreeCentrality, DegreeCentralityMutateConfig> algorithmFactory() {
         return new DegreeCentralityFactory<>();
     }
 

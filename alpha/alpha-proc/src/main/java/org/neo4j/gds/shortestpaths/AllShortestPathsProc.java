@@ -20,7 +20,7 @@
 package org.neo4j.gds.shortestpaths;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -67,8 +67,8 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
     }
 
     @Override
-    protected AlgorithmFactory<MSBFSASPAlgorithm, AllShortestPathsConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
+    protected GraphAlgorithmFactory<MSBFSASPAlgorithm, AllShortestPathsConfig> algorithmFactory() {
+        return new GraphAlgorithmFactory<>() {
             @Override
             protected String taskName() {
                 return "MSBFSASPAlgorithm";

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
@@ -83,7 +83,7 @@ public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult,
     }
 
     @Override
-    protected AlgorithmFactory<Knn, KnnStreamConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Knn, KnnStreamConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 }

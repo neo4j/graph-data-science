@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -70,7 +70,7 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
     }
 
     @Override
-    protected AlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
     }
 

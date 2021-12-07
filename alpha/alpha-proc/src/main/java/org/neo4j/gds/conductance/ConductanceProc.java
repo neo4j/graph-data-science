@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.conductance;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.impl.conductance.Conductance;
 import org.neo4j.gds.impl.conductance.ConductanceConfig;
 import org.neo4j.gds.impl.conductance.ConductanceFactory;
@@ -30,7 +30,7 @@ public final class ConductanceProc {
 
     private ConductanceProc() {}
 
-    static <CONFIG extends ConductanceConfig> AlgorithmFactory<Conductance, CONFIG> algorithmFactory() {
+    static <CONFIG extends ConductanceConfig> GraphAlgorithmFactory<Conductance, CONFIG> algorithmFactory() {
         return new ConductanceFactory<>();
     }
 }

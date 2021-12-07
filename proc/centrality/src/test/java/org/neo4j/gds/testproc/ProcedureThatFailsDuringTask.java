@@ -20,7 +20,7 @@
 package org.neo4j.gds.testproc;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -54,8 +54,8 @@ public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm,
     }
 
     @Override
-    protected AlgorithmFactory<FailingAlgorithm, DummyConfig> algorithmFactory() {
-        return new AlgorithmFactory<FailingAlgorithm, DummyConfig>() {
+    protected GraphAlgorithmFactory<FailingAlgorithm, DummyConfig> algorithmFactory() {
+        return new GraphAlgorithmFactory<FailingAlgorithm, DummyConfig>() {
             @Override
             protected String taskName() {
                 return "Failing Algorithm";

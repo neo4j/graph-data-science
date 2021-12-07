@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -39,7 +39,7 @@ import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver.res
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 
-public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> extends AlgorithmFactory<GraphSage, CONFIG> {
+public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> extends GraphAlgorithmFactory<GraphSage, CONFIG> {
 
     private final ModelCatalog modelCatalog;
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.centrality;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.closeness.HarmonicCentralityConfig;
 import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
 
-class HarmonicCentralityAlgorithmFactory extends AlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> {
+class HarmonicCentralityAlgorithmFactory extends GraphAlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> {
     @Override
     protected String taskName() {
         return "HarmonicCentrality";

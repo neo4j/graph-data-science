@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -47,8 +46,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
     }
 
     @Override
-    protected NodeClassificationTrainPipelineExecutor build(
-        Graph graph,
+    public NodeClassificationTrainPipelineExecutor build(
         GraphStore graphStore,
         NodeClassificationPipelineTrainConfig configuration,
         AllocationTracker allocationTracker,
@@ -77,12 +75,12 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "Node Classification Train Pipeline";
     }
 
     @Override
-    public Task progressTask(Graph graph, NodeClassificationPipelineTrainConfig config) {
+    public Task progressTask(GraphStore graphStore, NodeClassificationPipelineTrainConfig config) {
         var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(
             this.modelCatalog,
             config.pipeline(),

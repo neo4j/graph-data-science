@@ -26,8 +26,8 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -207,7 +207,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
     private MethodSpec algorithmFactoryMethod(ClassName algorithmClassName) {
         TypeSpec anonymousFactoryType = TypeSpec.anonymousClassBuilder("")
             .superclass(ParameterizedTypeName.get(
-                ClassName.get(AlgorithmFactory.class),
+                ClassName.get(GraphAlgorithmFactory.class),
                 algorithmClassName,
                 pregelSpec.configTypeName()
             ))
@@ -252,7 +252,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)
             .returns(ParameterizedTypeName.get(
-                ClassName.get(AlgorithmFactory.class),
+                ClassName.get(GraphAlgorithmFactory.class),
                 algorithmClassName,
                 pregelSpec.configTypeName()
             ))

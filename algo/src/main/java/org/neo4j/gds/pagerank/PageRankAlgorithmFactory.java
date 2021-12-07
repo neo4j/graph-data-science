@@ -21,7 +21,7 @@ package org.neo4j.gds.pagerank;
 
 import com.carrotsearch.hppc.LongScatterSet;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Pregel;
@@ -42,7 +42,7 @@ import java.util.function.LongToDoubleFunction;
 import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.ARTICLE_RANK;
 import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.EIGENVECTOR;
 
-public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends AlgorithmFactory<PageRankAlgorithm, CONFIG> {
+public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends GraphAlgorithmFactory<PageRankAlgorithm, CONFIG> {
 
     static <CONFIG extends PageRankConfig> Task pagerankProgressTask(Graph graph, CONFIG config) {
         return Pregel.progressTask(graph, config, "PageRank");

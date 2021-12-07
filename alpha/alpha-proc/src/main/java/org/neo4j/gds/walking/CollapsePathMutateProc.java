@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.walking;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.ImmutableComputationResult;
 import org.neo4j.gds.MutateProc;
@@ -164,7 +164,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     }
 
     @Override
-    protected AlgorithmFactory<CollapsePath, CollapsePathConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<CollapsePath, CollapsePathConfig> algorithmFactory() {
         throw new UnsupportedOperationException("CollapsePath does not support the AlgorithmFactory");
     }
 

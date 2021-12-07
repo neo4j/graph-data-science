@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.common.CentralityStreamResult;
@@ -78,7 +78,7 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
     }
 
     @Override
-    protected AlgorithmFactory<PageRankAlgorithm, PageRankStreamConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<PageRankAlgorithm, PageRankStreamConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>();
     }
 

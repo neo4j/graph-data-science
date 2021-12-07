@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -111,7 +111,7 @@ public class NodeClassificationPipelineMutateProc
     }
 
     @Override
-    protected AlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig> algorithmFactory() {
         return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this);
     }
 

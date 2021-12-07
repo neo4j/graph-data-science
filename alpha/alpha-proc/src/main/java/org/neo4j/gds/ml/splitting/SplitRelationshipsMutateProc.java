@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.RelationshipType;
@@ -65,7 +65,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     }
 
     @Override
-    protected AlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> algorithmFactory() {
         return new GraphStoreAlgorithmFactory<>() {
 
             @Override

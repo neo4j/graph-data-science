@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -70,7 +70,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
     }
 
     @Override
-    protected AlgorithmFactory<Knn, KnnStatsConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Knn, KnnStatsConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 

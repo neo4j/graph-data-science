@@ -20,7 +20,7 @@
 package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -90,8 +90,8 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
     }
 
     @Override
-    protected AlgorithmFactory<CELF, InfluenceMaximizationConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
+    protected GraphAlgorithmFactory<CELF, InfluenceMaximizationConfig> algorithmFactory() {
+        return new GraphAlgorithmFactory<>() {
             @Override
             protected String taskName() {
                 return "CELF";

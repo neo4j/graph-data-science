@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.HdrHistogram.ConcurrentDoubleHistogram;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -134,7 +134,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     }
 
     @Override
-    protected AlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineMutateConfig> algorithmFactory() {
         return new LinkPredictionPredictPipelineAlgorithmFactory<>(this, modelCatalog);
     }
 

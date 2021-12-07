@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.spanningtree;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
@@ -140,8 +140,8 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
     }
 
     @Override
-    protected AlgorithmFactory<KSpanningTree, KSpanningTreeConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
+    protected GraphAlgorithmFactory<KSpanningTree, KSpanningTreeConfig> algorithmFactory() {
+        return new GraphAlgorithmFactory<>() {
             @Override
             protected String taskName() {
                 return "KSpanningTree";

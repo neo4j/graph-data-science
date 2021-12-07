@@ -46,7 +46,7 @@ public class ProcedureExecutor<
     private final ProcConfigParser<CONFIG> configParser;
     private final MemoryUsageValidator memoryUsageValidator;
     private final Validator<CONFIG> validator;
-    private final AlgorithmFactory<ALGO, CONFIG> algorithmFactory;
+    private final GraphAlgorithmFactory<ALGO, CONFIG> algorithmFactory;
     private final KernelTransaction ktx;
     private final Log log;
     private final TaskRegistryFactory taskRegistryFactory;
@@ -60,7 +60,7 @@ public class ProcedureExecutor<
         ProcConfigParser<CONFIG> configParser,
         MemoryUsageValidator memoryUsageValidator,
         Validator<CONFIG> validator,
-        AlgorithmFactory<ALGO, CONFIG> algorithmFactory,
+        GraphAlgorithmFactory<ALGO, CONFIG> algorithmFactory,
         KernelTransaction ktx,
         Log log,
         TaskRegistryFactory taskRegistryFactory,

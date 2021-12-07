@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -67,7 +67,7 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
     }
 
     @Override
-    protected AlgorithmFactory<LabelPropagation, LabelPropagationStreamConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<LabelPropagation, LabelPropagationStreamConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
     }
 

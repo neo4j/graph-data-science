@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -84,7 +84,7 @@ public class NodeClassificationPredictMutateProc
     }
 
     @Override
-    protected AlgorithmFactory<NodeClassificationPredict, NodeClassificationMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<NodeClassificationPredict, NodeClassificationMutateConfig> algorithmFactory() {
         return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
     }
 

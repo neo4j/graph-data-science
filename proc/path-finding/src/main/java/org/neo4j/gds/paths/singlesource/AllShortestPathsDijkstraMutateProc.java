@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.singlesource;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.MutateResult;
 import org.neo4j.gds.paths.ShortestPathMutateProc;
@@ -63,7 +63,7 @@ public class AllShortestPathsDijkstraMutateProc extends ShortestPathMutateProc<D
     }
 
     @Override
-    protected AlgorithmFactory<Dijkstra, AllShortestPathsDijkstraMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraMutateConfig> algorithmFactory() {
         return DijkstraFactory.singleSource();
     }
 }

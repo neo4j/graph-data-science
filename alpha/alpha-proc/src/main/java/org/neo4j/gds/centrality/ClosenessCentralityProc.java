@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.centrality;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -127,8 +127,8 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
     }
 
     @Override
-    protected AlgorithmFactory<MSClosenessCentrality, ClosenessCentralityConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
+    protected GraphAlgorithmFactory<MSClosenessCentrality, ClosenessCentralityConfig> algorithmFactory() {
+        return new GraphAlgorithmFactory<>() {
             @Override
             protected String taskName() {
                 return "ClosenessCentrality";

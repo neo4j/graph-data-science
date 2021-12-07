@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.ShortestPathStreamProc;
 import org.neo4j.gds.paths.StreamResult;
@@ -63,7 +63,7 @@ public class ShortestPathYensStreamProc extends ShortestPathStreamProc<Yens, Sho
     }
 
     @Override
-    protected AlgorithmFactory<Yens, ShortestPathYensStreamConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Yens, ShortestPathYensStreamConfig> algorithmFactory() {
         return new YensFactory<>();
     }
 }

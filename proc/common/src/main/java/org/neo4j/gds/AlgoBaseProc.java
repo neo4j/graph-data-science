@@ -62,7 +62,7 @@ public abstract class AlgoBaseProc<
         CypherMapWrapper config
     );
 
-    protected abstract AlgorithmFactory<ALGO, CONFIG> algorithmFactory();
+    protected abstract GraphAlgorithmFactory<ALGO, CONFIG> algorithmFactory();
 
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         String graphName,
@@ -160,7 +160,7 @@ public abstract class AlgoBaseProc<
     private MemoryTreeWithDimensions procedureMemoryEstimation(
         GraphDimensions dimensions,
         Optional<MemoryEstimation> maybeGraphMemoryEstimation,
-        AlgorithmFactory<ALGO, CONFIG> algorithmFactory,
+        GraphAlgorithmFactory<ALGO, CONFIG> algorithmFactory,
         CONFIG config
     ) {
         MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");

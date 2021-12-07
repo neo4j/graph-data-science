@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -97,7 +97,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     }
 
     @Override
-    protected AlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>(modelCatalog);
     }
 

@@ -20,7 +20,7 @@
 package org.neo4j.gds.betweenness;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -71,7 +71,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     }
 
     @Override
-    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityStatsConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityStatsConfig> algorithmFactory() {
         return BetweennessCentralityProc.algorithmFactory();
     }
 

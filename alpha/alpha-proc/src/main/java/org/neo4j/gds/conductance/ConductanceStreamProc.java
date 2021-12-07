@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.conductance;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -64,7 +64,7 @@ public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.R
     }
 
     @Override
-    protected AlgorithmFactory<Conductance, ConductanceStreamConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Conductance, ConductanceStreamConfig> algorithmFactory() {
         return ConductanceProc.algorithmFactory();
     }
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -97,7 +97,7 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     }
 
     @Override
-    protected AlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> algorithmFactory() {
         return new NodeClassificationTrainAlgorithmFactory();
     }
 
