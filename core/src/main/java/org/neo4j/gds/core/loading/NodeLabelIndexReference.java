@@ -53,7 +53,7 @@ public class NodeLabelIndexReference implements NodeReference {
     public long relationshipReference() {
         dataRead.singleNode(labelIndexCursor.nodeReference(), nodeCursor);
         if (nodeCursor.next()) {
-            return Neo4jProxy.relationshipsReference(nodeCursor);
+            return nodeCursor.relationshipsReference();
         } else {
             return Read.NO_ID;
         }

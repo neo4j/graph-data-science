@@ -22,11 +22,11 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.graphdb.TransactionFailureException;
 import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.api.KernelTransactions;
 
 import java.util.ArrayList;
@@ -68,7 +68,7 @@ class TerminationTest extends BaseProcTest {
         Map<String, Long> map = new HashMap<>();
         kernelTransactions.activeTransactions().forEach(kth -> {
             String query = kth.executingQuery()
-                .map(Neo4jProxy::queryText)
+                .map(ExecutingQuery::rawQueryText)
                 .orElse("");
             map.put(query, kth.lastTransactionTimestampWhenStarted());
         });
@@ -97,7 +97,8 @@ class TerminationTest extends BaseProcTest {
         runnables.add(() -> {
             try {
                 Thread.sleep(2000);
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+            }
             terminateTransaction(findQueryTxId());
         });
 
@@ -110,13 +111,13 @@ class TerminationTest extends BaseProcTest {
     void test() {
         assertThrows(
             (Class<? extends Throwable>) TransactionFailureException.class,
-                () -> {
-                    try {
-                        executeAndKill();
-                    } catch (RuntimeException e) {
-                        throw e.getCause();
-                    }
+            () -> {
+                try {
+                    executeAndKill();
+                } catch (RuntimeException e) {
+                    throw e.getCause();
                 }
+            }
         );
     }
 

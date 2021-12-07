@@ -36,8 +36,13 @@ import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.kernel.lifecycle.LifeSupport;
+import org.neo4j.logging.Level;
+import org.neo4j.logging.NullLogProvider;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.NullLogService;
+import org.neo4j.logging.internal.SimpleLogService;
+import org.neo4j.logging.log4j.Log4jLogProvider;
+import org.neo4j.logging.log4j.LogConfig;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -78,7 +83,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         Optional<NeoNodeProperties> neoNodeProperties
     ) {
         super(graphStore, config, neoNodeProperties);
-        this.neo4jHome = Neo4jProxy.homeDirectory(api.databaseLayout());
+        this.neo4jHome = api.databaseLayout().getNeo4jLayout().homeDirectory();
         this.config = config;
         this.fs = api.getDependencyResolver().resolveDependency(FileSystemAbstraction.class);
     }
@@ -95,7 +100,12 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
             LogService logService;
             if (config.enableDebugLog()) {
                 var storeInternalLogPath = databaseConfig.get(Settings.storeInternalLogPath());
-                logService = Neo4jProxy.logProviderForStoreAndRegister(storeInternalLogPath, fs, lifeSupport);
+                var neo4jLoggerContext = LogConfig.createBuilder(fs, storeInternalLogPath, Level.INFO).build();
+                var simpleLogService = new SimpleLogService(
+                    NullLogProvider.getInstance(),
+                    new Log4jLogProvider(neo4jLoggerContext)
+                );
+                logService = lifeSupport.add(simpleLogService);
             } else {
                 logService = NullLogService.getInstance();
             }
@@ -105,7 +115,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
 
             Input input = Neo4jProxy.batchInputFrom(graphStoreInput);
 
-            var metaDataPath = Neo4jProxy.metadataStore(databaseLayout);
+            var metaDataPath = databaseLayout.metadataStore();
             var dbExists = Files.exists(metaDataPath) && Files.isReadable(metaDataPath);
             if (dbExists) {
                 throw new IllegalArgumentException(formatWithLocale(

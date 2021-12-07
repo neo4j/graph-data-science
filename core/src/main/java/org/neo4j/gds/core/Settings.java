@@ -29,6 +29,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.config.Setting;
 
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.List;
@@ -105,7 +106,19 @@ public final class Settings {
     }
 
     public static Setting<Boolean> onlineBackupEnabled() {
-        return Neo4jProxy.onlineBackupEnabled();
+        try {
+            Class<?> onlineSettingsClass = Class.forName(
+                "com.neo4j.configuration.OnlineBackupSettings");
+            var onlineBackupEnabled = MethodHandles
+                .lookup()
+                .findStaticGetter(onlineSettingsClass, "online_backup_enabled", Setting.class)
+                .invoke();
+            //noinspection unchecked
+            return (Setting<Boolean>) onlineBackupEnabled;
+        } catch (Throwable e) {
+            throw new IllegalStateException(
+                "The online_backup_enabled setting requires Neo4j Enterprise Edition to be available.");
+        }
     }
 
     public static Setting<List<String>> procedureUnrestricted() {
@@ -125,7 +138,7 @@ public final class Settings {
     }
 
     public static Setting<Long> memoryTransactionMaxSize() {
-        return Neo4jProxy.memoryTransactionMaxSize();
+        return GraphDatabaseSettings.memory_transaction_max_size;
     }
 
     private Settings() {

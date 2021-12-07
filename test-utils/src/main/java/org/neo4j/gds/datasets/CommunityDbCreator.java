@@ -49,7 +49,6 @@ public final class CommunityDbCreator implements DbCreator {
         return Neo4jProxy.newDb(dbms);
     }
 
-    @SuppressWarnings("deprecation")
     private static DatabaseManagementServiceBuilder builder(Path storeDir) {
         return new DatabaseManagementServiceBuilder(storeDir)
             .setConfig(Settings.procedureUnrestricted(), List.of("gds.*"))

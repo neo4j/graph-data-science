@@ -43,7 +43,7 @@ public final class NodeCursorReference implements NodeReference {
 
     @Override
     public long relationshipReference() {
-        return Neo4jProxy.relationshipsReference(nodeCursor);
+        return nodeCursor.relationshipsReference();
     }
 
     @Override

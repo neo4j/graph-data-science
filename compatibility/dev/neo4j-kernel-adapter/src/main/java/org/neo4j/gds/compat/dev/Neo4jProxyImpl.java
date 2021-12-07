@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.compat.dev;
 
-import org.apache.commons.io.output.WriterOutputStream;
-import org.eclipse.collections.api.factory.Sets;
 import org.neo4j.common.EntityType;
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
@@ -46,9 +44,6 @@ import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.Monitor;
-import org.neo4j.internal.batchimport.cache.LongArray;
-import org.neo4j.internal.batchimport.cache.NumberArrayFactory;
-import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
@@ -71,10 +66,8 @@ import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.TokenPredicate;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
-import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
-import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
@@ -84,51 +77,27 @@ import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.internal.schema.SchemaDescriptors;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.pagecache.PageCache;
-import org.neo4j.io.pagecache.PageCursor;
-import org.neo4j.io.pagecache.PagedFile;
-import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.database.DatabaseIdRepository;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
-import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
-import org.neo4j.kernel.lifecycle.LifeSupport;
-import org.neo4j.logging.Level;
-import org.neo4j.logging.Log;
-import org.neo4j.logging.LogTimeZone;
-import org.neo4j.logging.NullLogProvider;
 import org.neo4j.logging.internal.LogService;
-import org.neo4j.logging.internal.SimpleLogService;
-import org.neo4j.logging.log4j.Log4jLogProvider;
-import org.neo4j.logging.log4j.LogConfig;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.LocalMemoryTracker;
 import org.neo4j.memory.MemoryPools;
 import org.neo4j.procedure.Mode;
-import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.values.storable.ValueGroup;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.lang.invoke.MethodHandles;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -161,14 +130,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public AccessMode newRestrictedAccessMode(
-        AccessMode original,
-        AccessMode.Static restricting
-    ) {
-        return new RestrictedAccessMode(original, restricting);
-    }
-
-    @Override
     public String username(AuthSubject subject) {
         return subject.executingUser();
     }
@@ -195,27 +156,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         KernelTransaction kernelTransaction
     ) {
         return recordStore.getHighestPossibleIdInUse(kernelTransaction.cursorContext());
-    }
-
-    @Override
-    public PageCursor pageFileIO(PagedFile pagedFile, long pageId, int pageFileFlags) throws IOException {
-        return pagedFile.io(pageId, pageFileFlags, CursorContext.NULL);
-    }
-
-    @Override
-    public PagedFile pageCacheMap(
-        PageCache pageCache,
-        File file,
-        int pageSize,
-        String databaseName,
-        OpenOption... openOptions
-    ) throws IOException {
-        return pageCache.map(file.toPath(), pageSize, databaseName, Sets.immutable.of(openOptions));
-    }
-
-    @Override
-    public Path pagedFile(PagedFile pagedFile) {
-        return pagedFile.path();
     }
 
     @Override
@@ -303,39 +243,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public long relationshipsReference(NodeCursor nodeCursor) {
-        return nodeCursor.relationshipsReference();
-    }
-
-    @Override
     public boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
         return NodeLabelIndexLookupImpl.hasNodeLabelIndex(kernelTransaction);
-    }
-
-    @Override
-    public void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
-        var nodeLabelIndexDescriptor = NodeLabelIndexLookupImpl.findUsableMatchingIndex(
-            kernelTransaction,
-            SchemaDescriptors.forAnyEntityTokens(EntityType.NODE)
-        );
-
-        if (nodeLabelIndexDescriptor == IndexDescriptor.NO_INDEX) {
-            throw new IllegalStateException("There is no index that can back a node label scan.");
-        }
-
-        try {
-            var read = kernelTransaction.dataRead();
-            var session = read.tokenReadSession(nodeLabelIndexDescriptor);
-            read.nodeLabelScan(
-                session,
-                cursor,
-                IndexQueryConstraints.unordered(true),
-                new TokenPredicate(label),
-                kernelTransaction.cursorContext()
-            );
-        } catch (KernelException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -376,21 +285,9 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         }
     }
 
-
     @Override
     public <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
         return new ScanBasedStoreScanImpl<>(scan, batchSize);
-    }
-
-    @Override
-    public void nodeIndexScan(
-        Read dataRead, IndexReadSession index, NodeValueIndexCursor cursor, IndexOrder indexOrder, boolean needsValues
-    ) throws Exception {
-        var indexQueryConstraints = indexOrder == IndexOrder.NONE
-            ? IndexQueryConstraints.unordered(needsValues)
-            : IndexQueryConstraints.constrained(indexOrder, needsValues);
-
-        dataRead.nodeIndexScan(index, cursor, indexQueryConstraints);
     }
 
     @Override
@@ -437,16 +334,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public OffHeapLongArray newOffHeapLongArray(long length, long defaultValue, long base) {
-        return new OffHeapLongArray(length, defaultValue, base, EmptyMemoryTracker.INSTANCE);
-    }
-
-    @Override
-    public LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue) {
-        return numberArrayFactory.newLongArray(size, defaultValue, EmptyMemoryTracker.INSTANCE);
-    }
-
-    @Override
     public MemoryTrackerProxy memoryTrackerProxy(KernelTransaction kernelTransaction) {
         return MemoryTrackerProxyImpl.of(kernelTransaction.memoryTracker());
     }
@@ -464,30 +351,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             grabSizeInBytes,
             "setting"
         ));
-    }
-
-    @Override
-    public LogService logProviderForStoreAndRegister(
-        Path storeLogPath,
-        FileSystemAbstraction fs,
-        LifeSupport lifeSupport
-    ) {
-        var neo4jLoggerContext = LogConfig.createBuilder(fs, storeLogPath, Level.INFO).build();
-        var simpleLogService = new SimpleLogService(
-            NullLogProvider.getInstance(),
-            new Log4jLogProvider(neo4jLoggerContext)
-        );
-        return lifeSupport.add(simpleLogService);
-    }
-
-    @Override
-    public Path metadataStore(DatabaseLayout databaseLayout) {
-        return databaseLayout.metadataStore();
-    }
-
-    @Override
-    public Path homeDirectory(DatabaseLayout databaseLayout) {
-        return databaseLayout.getNeo4jLayout().homeDirectory();
     }
 
     @Override
@@ -552,62 +415,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public String queryText(ExecutingQuery query) {
-        return query.rawQueryText();
-    }
-
-    @Override
-    public Log logger(
-        Level level,
-        ZoneId zoneId,
-        DateTimeFormatter dateTimeFormatter,
-        String category,
-        PrintWriter writer
-    ) {
-        var outStream = new WriterOutputStream(writer, StandardCharsets.UTF_8);
-        return this.logger(level, zoneId, dateTimeFormatter, category, outStream);
-    }
-
-    @Override
-    public Log logger(
-        Level level,
-        ZoneId zoneId,
-        DateTimeFormatter dateTimeFormatter,
-        String category,
-        OutputStream outputStream
-    ) {
-        var logTimeZone = Arrays
-            .stream(LogTimeZone.values())
-            .filter(tz -> tz.getZoneId().equals(zoneId))
-            .findAny()
-            .orElseThrow(() -> new IllegalArgumentException("Can only log in UTC or " + LogTimeZone.SYSTEM.getZoneId()));
-        var context = LogConfig
-            .createBuilder(outputStream, level)
-            .withCategory(category != null)
-            .withTimezone(logTimeZone)
-            .build();
-
-        return new Log4jLogProvider(context).getLog(category != null ? category : "");
-    }
-
-    @Override
-    public Setting<Boolean> onlineBackupEnabled() {
-        try {
-            Class<?> onlineSettingsClass = Class.forName(
-                "com.neo4j.configuration.OnlineBackupSettings");
-            var onlineBackupEnabled = MethodHandles
-                .lookup()
-                .findStaticGetter(onlineSettingsClass, "online_backup_enabled", Setting.class)
-                .invoke();
-            //noinspection unchecked
-            return (Setting<Boolean>) onlineBackupEnabled;
-        } catch (Throwable e) {
-            throw new IllegalStateException(
-                "The online_backup_enabled setting requires Neo4j Enterprise Edition to be available.");
-        }
-    }
-
-    @Override
     public Setting<String> additionalJvm() {
         return BootloaderSettings.additional_jvm;
     }
@@ -623,41 +430,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public Setting<Long> memoryTransactionMaxSize() {
-        return GraphDatabaseSettings.memory_transaction_max_size;
-    }
-
-    @Override
-    public JobRunnerImpl runnerFromScheduler(JobScheduler scheduler, Group group) {
-        return new JobRunnerImpl(scheduler, group);
-    }
-
-    @Override
     public ExecutionMonitor invisibleExecutionMonitor() {
         return ExecutionMonitor.INVISIBLE;
-    }
-
-    @Override
-    public UserFunctionSignature userFunctionSignature(
-        QualifiedName name,
-        List<FieldSignature> inputSignature,
-        Neo4jTypes.AnyType type,
-        String deprecated,
-        String[] allowed,
-        String description,
-        String category,
-        boolean caseInsensitive
-    ) {
-        return new UserFunctionSignature(
-            name,
-            inputSignature,
-            type,
-            deprecated,
-            allowed,
-            description,
-            category,
-            caseInsensitive
-        );
     }
 
     @Override

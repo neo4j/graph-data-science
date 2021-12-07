@@ -28,9 +28,6 @@ import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
-import org.neo4j.internal.batchimport.cache.LongArray;
-import org.neo4j.internal.batchimport.cache.NumberArrayFactory;
-import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
@@ -45,43 +42,25 @@ import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
-import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
-import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.pagecache.PageCache;
-import org.neo4j.io.pagecache.PageCursor;
-import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.database.DatabaseIdRepository;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
-import org.neo4j.kernel.lifecycle.LifeSupport;
-import org.neo4j.logging.Level;
-import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
-import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -103,7 +82,6 @@ public final class Neo4jProxy {
         IMPL = neo4jProxyFactory.load();
         var log = LogBuilders.outputStreamLog(
             System.out,
-            Optional.empty(),
             Optional.empty(),
             Optional.empty(),
             Optional.empty()
@@ -135,13 +113,6 @@ public final class Neo4jProxy {
         return IMPL.accessMode(customAccessMode);
     }
 
-    public static AccessMode newRestrictedAccessMode(
-        AccessMode original,
-        AccessMode.Static restricting
-    ) {
-        return IMPL.newRestrictedAccessMode(original, restricting);
-    }
-
     public static String username(AuthSubject subject) {
         return IMPL.username(subject);
     }
@@ -162,29 +133,6 @@ public final class Neo4jProxy {
         KernelTransaction kernelTransaction
     ) {
         return IMPL.getHighestPossibleIdInUse(recordStore, kernelTransaction);
-    }
-
-    public static PageCursor pageFileIO(
-        PagedFile pagedFile,
-        long pageId,
-        int pageFileFlags
-    ) throws IOException {
-        return IMPL.pageFileIO(pagedFile, pageId, pageFileFlags);
-    }
-
-    public static PagedFile pageCacheMap(
-        PageCache pageCache,
-        File file,
-        int pageSize,
-        String databaseName,
-        OpenOption... openOptions
-    )
-    throws IOException {
-        return IMPL.pageCacheMap(pageCache, file, pageSize, databaseName, openOptions);
-    }
-
-    public static Path pagedFile(PagedFile pagedFile) {
-        return IMPL.pagedFile(pagedFile);
     }
 
     public static List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
@@ -245,16 +193,8 @@ public final class Neo4jProxy {
         return IMPL.allocateNodeValueIndexCursor(kernelTransaction);
     }
 
-    public static long relationshipsReference(NodeCursor nodeCursor) {
-        return IMPL.relationshipsReference(nodeCursor);
-    }
-
     public static boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
         return IMPL.hasNodeLabelIndex(kernelTransaction);
-    }
-
-    public static void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
-        IMPL.nodeLabelScan(kernelTransaction, label, cursor);
     }
 
     public static StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
@@ -267,16 +207,6 @@ public final class Neo4jProxy {
 
     public static <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
         return IMPL.scanToStoreScan(scan, batchSize);
-    }
-
-    public static void nodeIndexScan(
-        Read dataRead,
-        IndexReadSession index,
-        NodeValueIndexCursor cursor,
-        IndexOrder indexOrder,
-        boolean needsValues
-    ) throws Exception {
-        IMPL.nodeIndexScan(dataRead, index, cursor, indexOrder, needsValues);
     }
 
     public static CompatIndexQuery rangeIndexQuery(
@@ -308,14 +238,6 @@ public final class Neo4jProxy {
         return IMPL.compositeNodeCursor(cursors, labelIds);
     }
 
-    public static OffHeapLongArray newOffHeapLongArray(long length, long defaultValue, long base) {
-        return IMPL.newOffHeapLongArray(length, defaultValue, base);
-    }
-
-    public static LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue) {
-        return IMPL.newChunkedLongArray(numberArrayFactory, size, defaultValue);
-    }
-
     public static MemoryTrackerProxy memoryTrackerProxy(KernelTransaction kernelTransaction) {
         return IMPL.memoryTrackerProxy(kernelTransaction);
     }
@@ -328,22 +250,6 @@ public final class Neo4jProxy {
     @TestOnly
     public static MemoryTrackerProxy limitedMemoryTrackerProxy(long limitInBytes, long grabSizeInBytes) {
         return IMPL.limitedMemoryTracker(limitInBytes, grabSizeInBytes);
-    }
-
-    public static LogService logProviderForStoreAndRegister(
-        Path storeLogPath,
-        FileSystemAbstraction fs,
-        LifeSupport lifeSupport
-    ) throws IOException {
-        return IMPL.logProviderForStoreAndRegister(storeLogPath, fs, lifeSupport);
-    }
-
-    public static Path metadataStore(DatabaseLayout databaseLayout) {
-        return IMPL.metadataStore(databaseLayout);
-    }
-
-    public static Path homeDirectory(DatabaseLayout databaseLayout) {
-        return IMPL.homeDirectory(databaseLayout);
     }
 
     public static BatchImporter instantiateBatchImporter(
@@ -382,34 +288,6 @@ public final class Neo4jProxy {
         return IMPL.batchInputFrom(compatInput);
     }
 
-    public static String queryText(ExecutingQuery query) {
-        return IMPL.queryText(query);
-    }
-
-    public static Log logger(
-        Level level,
-        ZoneId zoneId,
-        DateTimeFormatter dateTimeFormatter,
-        String category,
-        PrintWriter writer
-    ) {
-        return IMPL.logger(level, zoneId, dateTimeFormatter, category, writer);
-    }
-
-    public static Log logger(
-        Level level,
-        ZoneId zoneId,
-        DateTimeFormatter dateTimeFormatter,
-        String category,
-        OutputStream outputStream
-    ) {
-        return IMPL.logger(level, zoneId, dateTimeFormatter, category, outputStream);
-    }
-
-    public static Setting<Boolean> onlineBackupEnabled() {
-        return IMPL.onlineBackupEnabled();
-    }
-
     public static Setting<String> additionalJvm() {
         return IMPL.additionalJvm();
     }
@@ -424,38 +302,8 @@ public final class Neo4jProxy {
         return (T) IMPL.pageCacheMemoryValue(value);
     }
 
-    public static Setting<Long> memoryTransactionMaxSize() {
-        return IMPL.memoryTransactionMaxSize();
-    }
-
-    public static JobRunner runnerFromScheduler(JobScheduler scheduler, Group group) {
-        return IMPL.runnerFromScheduler(scheduler, group);
-    }
-
     public static ExecutionMonitor invisibleExecutionMonitor() {
         return IMPL.invisibleExecutionMonitor();
-    }
-
-    public static UserFunctionSignature userFunctionSignature(
-        QualifiedName name,
-        List<FieldSignature> inputSignature,
-        Neo4jTypes.AnyType type,
-        String deprecated,
-        String[] allowed,
-        String description,
-        String category,
-        boolean caseInsensitive
-    ) {
-        return IMPL.userFunctionSignature(
-            name,
-            inputSignature,
-            type,
-            deprecated,
-            allowed,
-            description,
-            category,
-            caseInsensitive
-        );
     }
 
     public static ProcedureSignature procedureSignature(

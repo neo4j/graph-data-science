@@ -35,6 +35,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.Read;
@@ -174,7 +175,8 @@ public final class IndexedNodePropertyImporter extends StatementAction {
                 }
                 // do a single threaded scan if:
                 // feature flag was off, or concurrency is 1, or the thread pool is not usable, or we couldn't find a valid range
-                Neo4jProxy.nodeIndexScan(read, indexReadSession, indexCursor, IndexOrder.NONE, true);
+                var indexQueryConstraints = IndexQueryConstraints.unordered(true);
+                read.nodeIndexScan(indexReadSession, indexCursor, indexQueryConstraints);
             }
             importFromCursor(indexCursor, propertyOffset);
         }
@@ -224,7 +226,13 @@ public final class IndexedNodePropertyImporter extends StatementAction {
                 }
                 var jobs = new ArrayList<IndexedNodePropertyImporter>(this.concurrency);
                 while (minValue < maxValue) {
-                    var query = Neo4jProxy.rangeIndexQuery(this.propertyId, minValue, true, minValue + batchSize, false);
+                    var query = Neo4jProxy.rangeIndexQuery(
+                        this.propertyId,
+                        minValue,
+                        true,
+                        minValue + batchSize,
+                        false
+                    );
                     jobs.add(new IndexedNodePropertyImporter(this, query));
                     minValue += batchSize;
                 }

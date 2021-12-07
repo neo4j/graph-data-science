@@ -53,7 +53,7 @@ public class TestLog extends AbstractLog {
                     fragment,
                     level,
                     StringJoining.joinInGivenOrder(messages.get(level).stream(), "\n")
-            ))
+                ))
             .isTrue();
     }
 
