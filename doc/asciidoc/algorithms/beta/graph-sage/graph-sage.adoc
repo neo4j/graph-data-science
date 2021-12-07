@@ -22,6 +22,16 @@ For more information on this algorithm see:
 * https://arxiv.org/pdf/1706.02216.pdf[William L. Hamilton, Rex Ying, and Jure Leskovec. "Inductive Representation Learning on Large Graphs." 2018.^]
 * https://arxiv.org/pdf/1911.10232.pdf[Amit Pande, Kai Ni and Venkataramani Kini. "SWAG: Item Recommendations using Convolutions on Weighted Graphs." 2019.^]
 
+[[algorithms-embeddings-graph-sage-considerations]]
+== Considerations
+
+If you are embedding a graph that has an isolated node, the aggregation step in GraphSAGE can only draw information from the node itself.
+When all the properties of that node are `0.0`, and the activation function is ReLU, this leads to an all-zero vector for that node.
+However, since GraphSAGE normalizes node embeddings using the L2-norm, and a zero vector cannot be normalized, we assign all-zero embeddings to such nodes under these special circumstances.
+In scenarios where you generate all-zero embeddings for orphan nodes, that may have impacts on downstream tasks such as nearest neighbor or other similarity algorithms. It may be more appropriate to filter out these disconnected nodes prior to running GraphSAGE.
+
+When doing memory estimation of the training, the feature dimension is computed as if each feature property is scalar.
+
 [[algorithms-embeddings-graph-sage-syntax]]
 == Syntax
 
@@ -558,12 +568,3 @@ CALL gds.beta.graphSage.write(
 |===
 --
 
-[[algorithms-embeddings-graph-sage-caveats]]
-== Caveats
-
-If you are embedding a graph that has an isolated node, the aggregation step in GraphSAGE can only draw information from the node itself.
-When all the properties of that node are `0.0`, and the activation function is relu, this leads to an all-zero vector for that node.
-However, since GraphSAGE normalizes node embeddings using the L2-norm, and a zero vector cannot be normalized, we assign all-zero embeddings to such nodes under these special circumstances.
-In scenarios where you generate all-zero embeddings for orphan nodes, that may have impacts on downstream tasks such as nearest neighbor or other similarity algorithms. It may be more appropriate to filter out these disconnected nodes prior to running GraphSAGE.
-
-When running `gds.beta.graphSage.train.estimate`, the feature dimension is computed as if each feature property is scalar.
