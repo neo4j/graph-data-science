@@ -3,10 +3,11 @@
 :entity: node
 :result: score
 :algorithm: Eigenvector Centrality
+:algorithm-name: Eigenvector Centrality
 
 [abstract]
 --
-This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library.
+This section describes the Eigenvector Centrality algorithm in the Neo4j Graph Data Science library.
 --
 
 :directed:
@@ -217,7 +218,6 @@ include::specific-configuration.adoc[]
 [[algorithms-eigenvector-centrality-examples]]
 == Examples
 
-:algorithm-name: {algorithm}
 :graph-description: web network
 :image-file: page-rank-graph.svg
 include::../shared/examples-intro.adoc[]
