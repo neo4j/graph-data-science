@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
@@ -89,7 +89,7 @@ public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgor
             }
 
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return ComputationAlgorithm.class.getSimpleName();
             }
 
