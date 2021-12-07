@@ -23,9 +23,13 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.Result;
+import org.neo4j.kernel.impl.util.ValueUtils;
+import org.neo4j.values.AnyValue;
+import org.neo4j.values.storable.ArrayValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
 import org.neo4j.values.storable.Values;
+import org.neo4j.values.virtual.ListValue;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,8 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
@@ -112,20 +116,57 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         for (String propertyKey : propertyColumns) {
             Object valueObject = CypherLoadingUtils.getProperty(row, propertyKey);
             if (valueObject != null) {
-                var value = Values.of(valueObject);
-                if (value.valueGroup() == ValueGroup.NUMBER || value.valueGroup() == ValueGroup.NUMBER_ARRAY) {
-                    propertyValues.put(propertyKey, value);
+                var value = ValueUtils.of(valueObject);
+                if (value.isSequenceValue()) {
+                    var array = castToNumericArrayOrFail(value);
+                    propertyValues.put(propertyKey, array);
+                } else if (value instanceof Value) {
+                    var storableValue = (Value) value;
+                    if (storableValue.valueGroup() != ValueGroup.NUMBER) {
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Unsupported GDS node property of type `%s`.",
+                            storableValue.getTypeName()
+                        ));
+                    }
+                    propertyValues.put(propertyKey, storableValue);
                 } else {
                     throw new IllegalArgumentException(formatWithLocale(
-                        "Unsupported type [%s] of value %s. Please use a numeric property.",
-                        value.valueGroup(),
-                        value
+                        "Unsupported GDS node property of type `%s`.",
+                        value.getTypeName()
                     ));
                 }
             }
         }
 
         return propertyValues;
+    }
+
+    private ArrayValue castToNumericArrayOrFail(AnyValue value) {
+        ArrayValue array;
+        if (value instanceof ListValue) {
+            var listValue = (ListValue) value;
+            if (listValue.isEmpty()) {
+                // encode as long array
+                return Values.longArray(new long[0]);
+            }
+            var itemValueGroup = listValue.itemValueRepresentation().valueGroup();
+            if (itemValueGroup != ValueGroup.NUMBER) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Only lists of numbers are possible as GDS node properties, but found a list with values of group `%s`.",
+                    itemValueGroup
+                ));
+            }
+            array = listValue.itemValueRepresentation().arrayOf(listValue);
+        } else {
+             array = ((ArrayValue) value);
+             if (array.valueGroup() != ValueGroup.NUMBER_ARRAY) {
+                 throw new IllegalArgumentException(formatWithLocale(
+                     "Only lists of numbers are possible as GDS node properties, but found a list of group `%s`.",
+                     array.valueGroup()
+                 ));
+             }
+        }
+        return array;
     }
 
     long rows() {
