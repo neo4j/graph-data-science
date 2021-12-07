@@ -4,6 +4,7 @@
 
 :algorithm: Scale Properties
 :entity: node
+:result: scaled properties
 
 [abstract]
 --
@@ -208,8 +209,6 @@ In the following examples we will demonstrate how to scale the node properties o
 [[algorithms-scale-properties-examples-stream]]
 === Stream
 
-:result: scaled properties
-:entity: node
 :stream-details: Note that the output is always a single list property, containing all scaled node properties in the input order.
 include::../../shared/examples-stream-intro.adoc[]
 
