@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -128,6 +129,75 @@ class CypherFactoryTest extends BaseTest {
         String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
 
         loadAndTestGraph(nodeStatement, relStatement);
+    }
+
+    @Test
+    void doubleListNodeProperty() {
+        var nodeQuery = "RETURN 0 AS id, [1.3, 3.7] AS list";
+
+        var builder = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery(nodeQuery)
+            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
+
+        var graph = applyInTransaction(db, tx -> builder.build().graph());
+        assertThat(graph.nodeProperties("list").doubleArrayValue(0)).containsExactly(1.3, 3.7);
+    }
+
+    @Test
+    void longListNodeProperty() {
+        var nodeQuery = "RETURN 0 AS id, [1, 2] AS list";
+
+        var builder = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery(nodeQuery)
+            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
+
+        var graph = applyInTransaction(db, tx -> builder.build().graph());
+        assertThat(graph.nodeProperties("list").longArrayValue(0)).containsExactly(1L, 2L);
+    }
+
+    @Test
+    void emptyList() {
+        var nodeQuery = "RETURN 0 AS id, [] AS list";
+
+        var builder = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery(nodeQuery)
+            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
+
+        var graph = applyInTransaction(db, tx -> builder.build().graph());
+        assertThat(graph.nodeProperties("list").longArrayValue(0)).isEmpty();
+    }
+
+    @Test
+    void failsOnBadMixedList() {
+        var nodeQuery = "RETURN 0 AS id, [1, 2, true] AS list";
+
+        var builder = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery(nodeQuery)
+            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
+
+        assertThatThrownBy(() -> applyInTransaction(db, tx -> builder.build().graph()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Only lists of numbers are possible as GDS node properties")
+            .hasMessageContaining("UNKNOWN"); // there is no known type for the union of number and boolean
+    }
+
+    @Test
+    void failsOnBadUniformList() {
+        var nodeQuery = "RETURN 0 AS id, ['forty', 'two'] AS list";
+
+        var builder = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery(nodeQuery)
+            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
+
+        assertThatThrownBy(() -> applyInTransaction(db, tx -> builder.build().graph()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Only lists of numbers are possible as GDS node properties")
+            .hasMessageContaining("TEXT");
     }
 
     @Test
