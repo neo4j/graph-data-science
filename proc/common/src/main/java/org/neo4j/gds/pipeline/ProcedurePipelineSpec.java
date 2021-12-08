@@ -19,18 +19,13 @@
  */
 package org.neo4j.gds.pipeline;
 
+import org.neo4j.gds.AlgoConfigParser;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.DefaultProcConfigParser;
-import org.neo4j.gds.GraphStoreLoader;
-import org.neo4j.gds.MemoryUsageValidator;
 import org.neo4j.gds.NewConfigFunction;
 import org.neo4j.gds.ProcConfigParser;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.gds.validation.Validator;
-
-import java.util.Optional;
-import java.util.function.BiFunction;
 
 public class ProcedurePipelineSpec<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -39,22 +34,19 @@ public class ProcedurePipelineSpec<
 > implements PipelineSpec<ALGO, ALGO_RESULT, CONFIG> {
 
     private final String username;
-    private final BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn;
-    private final MemoryUsageValidator memoryUsageValidator;
+    private final GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory;
 
     public ProcedurePipelineSpec(
         String username,
-        BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn,
-        MemoryUsageValidator memoryUsageValidator
+        GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory
     ) {
         this.username = username;
-        this.graphStoreLoaderFn = graphStoreLoaderFn;
-        this.memoryUsageValidator = memoryUsageValidator;
+        this.graphCreationFactory = graphCreationFactory;
     }
 
     @Override
     public ProcConfigParser<CONFIG> configParser(NewConfigFunction<CONFIG> newConfigFunction) {
-        return new DefaultProcConfigParser<>(username, newConfigFunction);
+        return new AlgoConfigParser<>(username, newConfigFunction);
     }
 
     @Override
@@ -64,6 +56,6 @@ public class ProcedurePipelineSpec<
 
     @Override
     public GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory() {
-        return new ProcedureGraphCreationFactory<>(graphStoreLoaderFn, memoryUsageValidator);
+        return graphCreationFactory;
     }
 }

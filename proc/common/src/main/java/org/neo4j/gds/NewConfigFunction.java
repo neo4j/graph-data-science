@@ -20,16 +20,11 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-
-import java.util.Optional;
 
 public interface NewConfigFunction<CONFIG extends AlgoBaseConfig> {
     CONFIG apply(
         String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     );
 }

@@ -89,7 +89,6 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
             ", (h)-[{w: 1.0d}]->(i)";
     }
 
-
     @Test
     void testMutateAndWriteWithSeeding() throws Exception {
         registerProcedures(WccWriteProc.class);

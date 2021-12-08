@@ -49,7 +49,7 @@ public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccM
     private final AllocationTracker allocationTracker;
     private final Log log;
 
-    public WccMutateSpec(
+    WccMutateSpec(
         ProcedureCallContext callContext,
         AllocationTracker allocationTracker,
         Log log
@@ -66,7 +66,7 @@ public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccM
 
     @Override
     public NewConfigFunction<WccMutateConfig> newConfigFunction() {
-        return (__, graphName, maybeImplicitCreate, config) -> WccMutateConfig.of(graphName, maybeImplicitCreate, config);
+        return (__, config) -> WccMutateConfig.of(config);
     }
 
     @Override

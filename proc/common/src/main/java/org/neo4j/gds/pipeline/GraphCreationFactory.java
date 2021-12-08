@@ -22,13 +22,11 @@ package org.neo4j.gds.pipeline;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
-import java.util.Optional;
-
 @FunctionalInterface
 public interface GraphCreationFactory<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig
 > {
-    GraphCreation<ALGO, ALGO_RESULT, CONFIG> create(CONFIG config, Optional<String> maybeGraphName);
+    GraphCreation<ALGO, ALGO_RESULT, CONFIG> create(CONFIG config, String graphName);
 }

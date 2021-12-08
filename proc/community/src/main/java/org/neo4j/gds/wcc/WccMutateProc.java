@@ -21,13 +21,13 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MemoryUsageValidator;
 import org.neo4j.gds.ProcedureExecutor;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -48,21 +48,23 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var mutateSpec = new WccMutateSpec(callContext, allocationTracker(), log);
-        var pipelineSpec = new ProcedurePipelineSpec<Wcc, DisjointSetStruct, WccMutateConfig>(
+        var pipelineSpec = new ProcedurePipelineSpec<>(
             username(),
-            this::graphStoreLoader,
-            new MemoryUsageValidator(log, api)
+            graphCreationFactory()
         );
 
-        return ProcedureExecutor.fromSpecs(
-            mutateSpec,
-            pipelineSpec,
+        return new ProcedureExecutor<>(
+            pipelineSpec.configParser(this::newConfig),
+            pipelineSpec.validator(mutateSpec.validationConfig()),
+            algorithmFactory(),
             transaction,
             log,
             taskRegistryFactory,
             procName(),
-            allocationTracker()
-        ).compute(graphNameOrConfig, configuration, true, true);
+            allocationTracker(),
+            mutateSpec.computationResultConsumer(),
+            pipelineSpec.graphCreationFactory()
+        ).compute(graphName, configuration, true, true);
     }
 
     @Procedure(value = "gds.wcc.mutate.estimate", mode = READ)
@@ -81,7 +83,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
 
     @Override
     protected GraphAlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory() {
-        return null;
+        return new WccAlgorithmFactory<>();
     }
 
     @SuppressWarnings("unused")

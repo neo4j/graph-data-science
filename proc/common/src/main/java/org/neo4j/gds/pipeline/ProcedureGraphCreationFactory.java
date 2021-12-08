@@ -24,7 +24,6 @@ import org.neo4j.gds.GraphStoreLoader;
 import org.neo4j.gds.MemoryUsageValidator;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class ProcedureGraphCreationFactory<
@@ -33,11 +32,11 @@ public class ProcedureGraphCreationFactory<
     CONFIG extends AlgoBaseConfig
 > implements GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> {
 
-    private final BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn;
+    private final BiFunction<CONFIG, String, GraphStoreLoader> graphStoreLoaderFn;
     private final MemoryUsageValidator memoryUsageValidator;
 
     public ProcedureGraphCreationFactory(
-        BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn,
+        BiFunction<CONFIG, String, GraphStoreLoader> graphStoreLoaderFn,
         MemoryUsageValidator memoryUsageValidator
     ) {
         this.graphStoreLoaderFn = graphStoreLoaderFn;
@@ -45,7 +44,7 @@ public class ProcedureGraphCreationFactory<
     }
 
     @Override
-    public GraphCreation<ALGO, ALGO_RESULT, CONFIG> create(CONFIG config, Optional<String> maybeGraphName) {
-        return new ProcedureGraphCreation<>(graphStoreLoaderFn, memoryUsageValidator, config, maybeGraphName);
+    public GraphCreation<ALGO, ALGO_RESULT, CONFIG> create(CONFIG config, String graphName) {
+        return new ProcedureGraphCreation<>(graphStoreLoaderFn.apply(config, graphName), memoryUsageValidator, config);
     }
 }

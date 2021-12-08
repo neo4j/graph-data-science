@@ -32,6 +32,9 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GraphCreationFactory;
+import org.neo4j.gds.pipeline.ProcedureGraphCreationFactory;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.gds.validation.Validator;
@@ -140,20 +143,31 @@ public abstract class AlgoBaseProc<
         return new Validator<>(getValidationConfig());
     }
 
-    private ProcedureExecutor<ALGO, ALGO_RESULT, CONFIG> procedureExecutor() {
+    private ProcedureExecutor<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> procedureExecutor() {
         return new ProcedureExecutor<>(
             configParser(),
-            memoryUsageValidator(),
             validator(),
             algorithmFactory(),
             transaction,
             log,
             taskRegistryFactory,
             procName(),
-            username(),
-            databaseId(),
-            isGdsAdmin(),
-            allocationTracker()
+            allocationTracker(),
+            ComputationResultConsumer.identity(),
+            graphCreationFactory()
+        );
+    }
+
+    protected GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory() {
+        return new ProcedureGraphCreationFactory<>(
+            (config, graphName) -> new GraphStoreFromCatalogLoader(
+                graphName,
+                config,
+                username(),
+                databaseId(),
+                isGdsAdmin()
+            ),
+            memoryUsageValidator()
         );
     }
 

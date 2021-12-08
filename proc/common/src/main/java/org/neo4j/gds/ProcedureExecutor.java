@@ -22,17 +22,16 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GraphCreationFactory;
 import org.neo4j.gds.validation.Validator;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.logging.Log;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -40,51 +39,46 @@ import java.util.function.Supplier;
 public class ProcedureExecutor<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
-    CONFIG extends AlgoBaseConfig
+    CONFIG extends AlgoBaseConfig,
+    RESULT
 > {
 
     private final ProcConfigParser<CONFIG> configParser;
-    private final MemoryUsageValidator memoryUsageValidator;
     private final Validator<CONFIG> validator;
     private final AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory;
     private final KernelTransaction ktx;
     private final Log log;
     private final TaskRegistryFactory taskRegistryFactory;
     private final String procName;
-    private final String username;
-    private final NamedDatabaseId databaseId;
-    private final boolean isGdsAdmin;
     private final AllocationTracker allocationTracker;
+    private final ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> computationResultConsumer;
+    private final GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory;
 
-    ProcedureExecutor(
+    public ProcedureExecutor(
         ProcConfigParser<CONFIG> configParser,
-        MemoryUsageValidator memoryUsageValidator,
         Validator<CONFIG> validator,
         AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory,
         KernelTransaction ktx,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
         String procName,
-        String username,
-        NamedDatabaseId databaseId,
-        boolean isGdsAdmin,
-        AllocationTracker allocationTracker
+        AllocationTracker allocationTracker,
+        ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> computationResultConsumer,
+        GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory
     ) {
         this.configParser = configParser;
-        this.memoryUsageValidator = memoryUsageValidator;
         this.validator = validator;
         this.algorithmFactory = algorithmFactory;
         this.ktx = ktx;
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;
         this.procName = procName;
-        this.username = username;
-        this.databaseId = databaseId;
-        this.isGdsAdmin = isGdsAdmin;
         this.allocationTracker = allocationTracker;
+        this.computationResultConsumer = computationResultConsumer;
+        this.graphCreationFactory = graphCreationFactory;
     }
 
-    protected AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
+    public RESULT compute(
         String graphName,
         Map<String, Object> configuration,
         boolean releaseAlgorithm,
@@ -96,20 +90,23 @@ public class ProcedureExecutor<
 
         setAlgorithmMetaDataToTransaction(config);
 
-        var graphStoreLoader = new GraphStoreFromCatalogLoader(graphName, config, username, databaseId, isGdsAdmin);
-        var procedureMemoryEstimation = new ProcedureMemoryEstimation<>(graphStoreLoader.graphDimensions(), algorithmFactory);
-        var memoryEstimationInBytes = memoryUsageValidator.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation);
+        var graphCreation = graphCreationFactory.create(config, graphName);
+
+        var memoryEstimationInBytes = graphCreation.validateMemoryEstimation(algorithmFactory);
 
         GraphStore graphStore;
         Graph graph;
 
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
-            graphStore = graphStore(config, graphStoreLoader);
-            graph = createGraph(graphStore, config);
+            var graphCreateConfig = graphCreation.graphCreateConfig();
+            validator.validateConfigsBeforeLoad(graphCreateConfig, config);
+            graphStore = graphCreation.graphStore();
+            validator.validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
+            graph = graphCreation.createGraph(graphStore);
         }
 
         if (graph.isEmpty()) {
-            return builder
+            return computationResultConsumer.consume(builder
                 .isGraphEmpty(true)
                 .graph(graph)
                 .graphStore(graphStore)
@@ -117,7 +114,7 @@ public class ProcedureExecutor<
                 .computeMillis(0)
                 .result(null)
                 .algorithm(null)
-                .build();
+                .build());
         }
 
         ALGO algo = newAlgorithm(graph, graphStore, config, allocationTracker);
@@ -128,22 +125,13 @@ public class ProcedureExecutor<
 
         log.info(procName + ": overall memory usage %s", allocationTracker.getUsageString());
 
-        return builder
+        return computationResultConsumer.consume(builder
             .graph(graph)
             .graphStore(graphStore)
             .algorithm(algo)
             .result(result)
             .config(config)
-            .build();
-    }
-
-    private GraphStore graphStore(CONFIG config, GraphStoreLoader graphStoreLoader) {
-        var graphCreateConfig = graphStoreLoader.graphCreateConfig();
-        validator.validateConfigsBeforeLoad(graphCreateConfig, config);
-        var graphStore = graphStoreLoader.graphStore();
-        validator.validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
-
-        return graphStore;
+            .build());
     }
 
     private ALGO_RESULT executeAlgorithm(
@@ -194,17 +182,6 @@ public class ProcedureExecutor<
                 }
             })
             .withTerminationFlag(terminationFlag);
-    }
-
-    private Graph createGraph(GraphStore graphStore, CONFIG config) {
-        Optional<String> weightProperty = config instanceof RelationshipWeightConfig
-            ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
-            : Optional.empty();
-
-        Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
-        Collection<RelationshipType> relationshipTypes = config.internalRelationshipTypes(graphStore);
-
-        return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
     }
 
     private void setAlgorithmMetaDataToTransaction(CONFIG algoConfig) {

@@ -35,7 +35,6 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 public class ProcedureGraphCreation<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -48,12 +47,11 @@ public class ProcedureGraphCreation<
     private final CONFIG config;
 
     ProcedureGraphCreation(
-        BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn,
+        GraphStoreLoader graphStoreLoader,
         MemoryUsageValidator memoryUsageValidator,
-        CONFIG config,
-        Optional<String> maybeGraphName
+        CONFIG config
     ) {
-        this.graphStoreLoader = graphStoreLoaderFn.apply(config, maybeGraphName);
+        this.graphStoreLoader = graphStoreLoader;
         this.memoryUsageValidator = memoryUsageValidator;
         this.config = config;
     }
@@ -82,7 +80,10 @@ public class ProcedureGraphCreation<
 
     @Override
     public MemoryRange validateMemoryEstimation(AlgorithmFactory<ALGO, CONFIG> algorithmFactory) {
-        var procedureMemoryEstimation = new ProcedureMemoryEstimation<>(graphStoreLoader, algorithmFactory);
+        var procedureMemoryEstimation = new ProcedureMemoryEstimation<>(
+            graphStoreLoader.graphDimensions(),
+            algorithmFactory
+        );
         return memoryUsageValidator.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation);
     }
 }
