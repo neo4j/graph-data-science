@@ -63,11 +63,8 @@ public class ExamplePregelComputation implements PregelComputation<ExamplePregel
     @SuppressWarnings("immutables:subtype")
     public interface ExampleConfig extends PregelProcedureConfig {
 
-        static ExamplePregelComputation.ExampleConfig of(
-                Optional<String> graphName,
-                CypherMapWrapper userConfig
-        ) {
-            return new ExampleConfigImpl(graphName, userConfig);
+        static ExamplePregelComputation.ExampleConfig of(CypherMapWrapper userConfig) {
+            return new ExampleConfigImpl(userConfig);
         }
     }
 }
