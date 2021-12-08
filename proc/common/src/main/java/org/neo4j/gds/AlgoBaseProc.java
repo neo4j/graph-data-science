@@ -27,23 +27,16 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
-import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.GraphCreationFactory;
+import org.neo4j.gds.pipeline.MemoryEstimtationExecutor;
 import org.neo4j.gds.pipeline.ProcedureGraphCreationFactory;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.gds.validation.Validator;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -95,44 +88,15 @@ public abstract class AlgoBaseProc<
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        CONFIG algoConfig = configParser().processInput(algoConfiguration);
-        GraphDimensions graphDimensions;
-        Optional<MemoryEstimation> memoryEstimation;
-
-        if (graphNameOrConfiguration instanceof Map) {
-            var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(username());
-            var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfiguration);
-            var graphStoreCreator = graphCreateConfig.isFictitiousLoading()
-                ? new FictitiousGraphStoreLoader(graphCreateConfig)
-                : new GraphStoreFromDatabaseLoader(graphCreateConfig, username(), graphLoaderContext());
-
-            graphDimensions = graphStoreCreator.graphDimensions();
-            memoryEstimation = Optional.of(graphStoreCreator.memoryEstimation());
-        } else if (graphNameOrConfiguration instanceof String) {
-            graphDimensions = new GraphStoreFromCatalogLoader(
-                (String) graphNameOrConfiguration,
-                algoConfig,
-                username(),
-                databaseId(),
-                isGdsAdmin()
-            ).graphDimensions();
-
-            memoryEstimation = Optional.empty();
-        } else {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Expected `graphNameOrConfiguration` to be of type String or Map, but got",
-                graphNameOrConfiguration.getClass().getSimpleName()
-            ));
-        }
-
-        MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(
-            graphDimensions,
-            memoryEstimation,
+        return new MemoryEstimtationExecutor<>(
+            configParser(),
             algorithmFactory(),
-            algoConfig
-        );
+            this::graphLoaderContext,
+            username(),
+            this::databaseId,
+            isGdsAdmin()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
 
-        return Stream.of(new MemoryEstimateResult(memoryTreeWithDimensions));
     }
 
     public ValidationConfiguration<CONFIG> getValidationConfig() {
@@ -169,22 +133,6 @@ public abstract class AlgoBaseProc<
             ),
             memoryUsageValidator()
         );
-    }
-
-    private MemoryTreeWithDimensions procedureMemoryEstimation(
-        GraphDimensions dimensions,
-        Optional<MemoryEstimation> maybeGraphMemoryEstimation,
-        AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory,
-        CONFIG config
-    ) {
-        MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
-
-        maybeGraphMemoryEstimation.map(graphEstimation -> estimationBuilder.add("graph", graphEstimation));
-
-        estimationBuilder.add("algorithm", algorithmFactory.memoryEstimation(config));
-
-        MemoryTree memoryTree = estimationBuilder.build().estimate(dimensions, config.concurrency());
-        return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
 
     @ValueClass
