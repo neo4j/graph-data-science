@@ -25,6 +25,7 @@ import org.neo4j.gds.ProcedureExecutor;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.pipeline.MemoryEstimtationExecutor;
 import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -73,7 +74,20 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        var mutateSpec = new WccMutateSpec(callContext, allocationTracker(), log);
+        var pipelineSpec = new ProcedurePipelineSpec<>(
+            username(),
+            graphCreationFactory()
+        );
+
+        return new MemoryEstimtationExecutor<>(
+            pipelineSpec.configParser(mutateSpec.newConfigFunction()),
+            mutateSpec.algorithmFactory(),
+            this::graphLoaderContext,
+            this::databaseId,
+            username(),
+            isGdsAdmin()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

@@ -60,8 +60,8 @@ public class MemoryEstimtationExecutor<
         ProcConfigParser<CONFIG> configParser,
         AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory,
         Supplier<GraphLoaderContext> graphLoaderContextSupplier,
-        String username,
         Supplier<NamedDatabaseId> databaseIdSupplier,
+        String username,
         boolean isGdsAdmin
     ) {
         this.configParser = configParser;

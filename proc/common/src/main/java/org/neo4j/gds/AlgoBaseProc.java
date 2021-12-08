@@ -92,8 +92,8 @@ public abstract class AlgoBaseProc<
             configParser(),
             algorithmFactory(),
             this::graphLoaderContext,
-            username(),
             this::databaseId,
+            username(),
             isGdsAdmin()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
 
