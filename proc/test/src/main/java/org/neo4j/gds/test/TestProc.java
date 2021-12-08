@@ -21,10 +21,7 @@ package org.neo4j.gds.test;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -72,29 +69,7 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
 
     @Override
     protected GraphAlgorithmFactory<TestAlgorithm, TestConfig> algorithmFactory() {
-        return new GraphAlgorithmFactory<>() {
-
-            @Override
-            public String taskName() {
-                return "TestAlgorithm";
-            }
-
-            @Override
-            public TestAlgorithm build(
-                Graph graph,
-                TestConfig configuration,
-                AllocationTracker allocationTracker,
-                ProgressTracker progressTracker
-            ) {
-                return new TestAlgorithm(
-                    graph,
-                    allocationTracker,
-                    0L,
-                    progressTracker,
-                    configuration.throwInCompute()
-                );
-            }
-        };
+        return new TestAlgorithmFactory();
     }
 
     static class TestAlgoResultBuilder extends AbstractResultBuilder<TestResult> {

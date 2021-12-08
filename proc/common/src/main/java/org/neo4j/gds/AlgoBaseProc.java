@@ -28,9 +28,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.pipeline.GraphCreationFactory;
-import org.neo4j.gds.pipeline.MemoryEstimtationExecutor;
-import org.neo4j.gds.pipeline.ProcedureGraphCreationFactory;
+import org.neo4j.gds.pipeline.MemoryEstimationExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.gds.validation.Validator;
@@ -88,7 +86,7 @@ public abstract class AlgoBaseProc<
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimtationExecutor<>(
+        return new MemoryEstimationExecutor<>(
             configParser(),
             algorithmFactory(),
             this::graphLoaderContext,
