@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.beta.filter.expression;
 
-
 import org.opencypher.v9_0.parser.javacc.Cypher;
 import org.opencypher.v9_0.parser.javacc.CypherCharStream;
 import org.opencypher.v9_0.parser.javacc.ParseException;
@@ -28,8 +27,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ExpressionParser {
 
-    public static Expression parse(String cypher) throws ParseException {
-        var astFactory = new GdsASTFactory();
+    public static Expression parse(String cypher, ValidationContext validationContext) throws ParseException {
+        var astFactory = new GdsASTFactory(validationContext);
         var exceptionFactory = new ExceptionFactory();
         var charstream = new CypherCharStream(cypher);
 
