@@ -92,7 +92,6 @@ public abstract class AlgoBaseProc<
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-
         CONFIG algoConfig = configParser().processInput(algoConfiguration);
         GraphDimensions graphDimensions;
         Optional<MemoryEstimation> memoryEstimation;
@@ -104,10 +103,6 @@ public abstract class AlgoBaseProc<
                 ? new FictitiousGraphStoreLoader(graphCreateConfig)
                 : new GraphStoreFromDatabaseLoader(graphCreateConfig, username(), graphLoaderContext());
 
-            var graphAndAlgoConfig = (Map<String, Object>) graphNameOrConfiguration;
-            graphCreateConfig.configKeys().forEach(graphAndAlgoConfig::remove);
-
-            algoConfig = configParser().processInput(graphAndAlgoConfig);
             graphDimensions = graphStoreCreator.graphDimensions();
             memoryEstimation = Optional.of(graphStoreCreator.memoryEstimation());
         } else if (graphNameOrConfiguration instanceof String) {
