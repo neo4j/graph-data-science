@@ -38,7 +38,7 @@ public class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO
     extends MutateComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> {
 
     public interface NodePropertiesFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig> {
-        NodeProperties nodeProperties(
+        NodeProperties apply(
             AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
             String resultProperty,
             AllocationTracker allocationTracker
@@ -69,7 +69,7 @@ public class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO
 
         var nodeProperties = List.of(ImmutableNodeProperty.of(
             computationResult.config().mutateProperty(),
-            this.nodePropertiesFunction.nodeProperties(computationResult, mutatePropertyConfig.mutateProperty(), allocationTracker)
+            this.nodePropertiesFunction.apply(computationResult, mutatePropertyConfig.mutateProperty(), allocationTracker)
         ));
 
         if (graph instanceof NodeFilteredGraph) {

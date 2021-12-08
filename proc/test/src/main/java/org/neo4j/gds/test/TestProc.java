@@ -97,26 +97,6 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
         };
     }
 
-    static class TestAlgoResultBuilder extends AbstractResultBuilder<TestResult> {
-
-        long relationshipCount = 0;
-
-        @Override
-        public TestResult build() {
-            return new TestResult(
-                createMillis,
-                computeMillis,
-                relationshipCount,
-                config.toMap()
-            );
-        }
-
-        TestAlgoResultBuilder withRelationshipCount(long relationshipCount) {
-            this.relationshipCount = relationshipCount;
-            return this;
-        }
-    }
-
     public static final class TestResult {
 
         public long createMillis;
