@@ -55,7 +55,7 @@ public class MultipleNodeLabelIndexReference implements NodeReference {
     public long relationshipReference() {
         dataRead.singleNode(compositeNodeCursor.nodeReference(), nodeCursor);
         if (nodeCursor.next()) {
-            return Neo4jProxy.relationshipsReference(nodeCursor);
+            return nodeCursor.relationshipsReference();
         } else {
             return Read.NO_ID;
         }

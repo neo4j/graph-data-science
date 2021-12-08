@@ -27,9 +27,6 @@ import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
-import org.neo4j.internal.batchimport.cache.LongArray;
-import org.neo4j.internal.batchimport.cache.NumberArrayFactory;
-import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
@@ -44,43 +41,25 @@ import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
-import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
-import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.pagecache.PageCache;
-import org.neo4j.io.pagecache.PageCursor;
-import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.database.DatabaseIdRepository;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
-import org.neo4j.kernel.lifecycle.LifeSupport;
-import org.neo4j.logging.Level;
-import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
-import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,8 +72,6 @@ public interface Neo4jProxyApi {
     void cacheDatabaseId(DatabaseIdRepository.Caching databaseIdRepository, NamedDatabaseId namedDatabaseId);
 
     AccessMode accessMode(CustomAccessMode customAccessMode);
-
-    AccessMode newRestrictedAccessMode(AccessMode original, AccessMode.Static restricting);
 
     String username(AuthSubject subject);
 
@@ -109,22 +86,6 @@ public interface Neo4jProxyApi {
         RecordStore<? extends AbstractBaseRecord> recordStore,
         KernelTransaction kernelTransaction
     );
-
-    PageCursor pageFileIO(
-        PagedFile pagedFile,
-        long pageId,
-        int pageFileFlags
-    ) throws IOException;
-
-    PagedFile pageCacheMap(
-        PageCache pageCache,
-        File file,
-        int pageSize,
-        String databaseName,
-        OpenOption... openOptions
-    ) throws IOException;
-
-    Path pagedFile(PagedFile pagedFile);
 
     List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
         KernelTransaction transaction,
@@ -162,11 +123,7 @@ public interface Neo4jProxyApi {
 
     NodeValueIndexCursor allocateNodeValueIndexCursor(KernelTransaction kernelTransaction);
 
-    long relationshipsReference(NodeCursor nodeCursor);
-
     boolean hasNodeLabelIndex(KernelTransaction kernelTransaction);
-
-    void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor);
 
     StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
         KernelTransaction transaction,
@@ -175,14 +132,6 @@ public interface Neo4jProxyApi {
     );
 
     <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize);
-
-    void nodeIndexScan(
-        Read dataRead,
-        IndexReadSession index,
-        NodeValueIndexCursor cursor,
-        IndexOrder indexOrder,
-        boolean needsValues
-    ) throws Exception;
 
     CompatIndexQuery rangeIndexQuery(
         int propertyKeyId,
@@ -205,10 +154,6 @@ public interface Neo4jProxyApi {
 
     CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds);
 
-    OffHeapLongArray newOffHeapLongArray(long length, long defaultValue, long base);
-
-    LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue);
-
     MemoryTrackerProxy memoryTrackerProxy(KernelTransaction kernelTransaction);
 
     @TestOnly
@@ -216,16 +161,6 @@ public interface Neo4jProxyApi {
 
     @TestOnly
     MemoryTrackerProxy limitedMemoryTracker(long limitInBytes, long grabSizeInBytes);
-
-    LogService logProviderForStoreAndRegister(
-        Path storeLogPath,
-        FileSystemAbstraction fs,
-        LifeSupport lifeSupport
-    ) throws IOException;
-
-    Path metadataStore(DatabaseLayout databaseLayout);
-
-    Path homeDirectory(DatabaseLayout databaseLayout);
 
     BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
@@ -245,48 +180,13 @@ public interface Neo4jProxyApi {
 
     Input batchInputFrom(CompatInput compatInput);
 
-    String queryText(ExecutingQuery query);
-
-    Log logger(
-        Level level,
-        ZoneId zoneId,
-        DateTimeFormatter dateTimeFormatter,
-        String category,
-        PrintWriter writer
-    );
-
-    Log logger(
-        Level level,
-        ZoneId zoneId,
-        DateTimeFormatter dateTimeFormatter,
-        String category,
-        OutputStream outputStream
-    );
-
-    Setting<Boolean> onlineBackupEnabled();
-
     Setting<String> additionalJvm();
 
     Setting<?> pageCacheMemory();
 
     Object pageCacheMemoryValue(String value);
 
-    Setting<Long> memoryTransactionMaxSize();
-
-    JobRunner runnerFromScheduler(JobScheduler scheduler, Group group);
-
     ExecutionMonitor invisibleExecutionMonitor();
-
-    UserFunctionSignature userFunctionSignature(
-        QualifiedName name,
-        List<FieldSignature> inputSignature,
-        Neo4jTypes.AnyType type,
-        String deprecated,
-        String[] allowed,
-        String description,
-        String category,
-        boolean caseInsensitive
-    );
 
     ProcedureSignature procedureSignature(
         QualifiedName name,

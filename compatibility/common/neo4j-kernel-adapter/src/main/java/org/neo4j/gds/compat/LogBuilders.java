@@ -19,39 +19,44 @@
  */
 package org.neo4j.gds.compat;
 
+import org.apache.commons.io.output.WriterOutputStream;
 import org.immutables.builder.Builder;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
+import org.neo4j.logging.LogTimeZone;
+import org.neo4j.logging.log4j.Log4jLogProvider;
+import org.neo4j.logging.log4j.LogConfig;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
+import java.util.Arrays;
 import java.util.Optional;
 
 public final class LogBuilders {
-
-    private static final DateTimeFormatter DATE_TIME_FORMATTER =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ", Locale.ENGLISH);
 
     @Builder.Factory
     public static Log outputStreamLog(
         @Builder.Parameter OutputStream outputStream,
         Optional<Level> level,
         Optional<ZoneId> zoneId,
-        Optional<DateTimeFormatter> dateTimeFormatter,
         Optional<String> category
     ) {
-        return Neo4jProxy.logger(
-            level.orElse(Level.INFO),
-            zoneId.orElse(ZoneOffset.UTC),
-            dateTimeFormatter.orElse(DATE_TIME_FORMATTER),
-            category.orElse(null),
-            outputStream
-        );
+        var logTimeZone = Arrays
+            .stream(LogTimeZone.values())
+            .filter(tz -> tz.getZoneId().equals(zoneId.orElse(ZoneOffset.UTC)))
+            .findAny()
+            .orElseThrow(() -> new IllegalArgumentException("Can only log in UTC or " + LogTimeZone.SYSTEM.getZoneId()));
+        var context = LogConfig
+            .createBuilder(outputStream, level.orElse(Level.INFO))
+            .withCategory(category.isPresent())
+            .withTimezone(logTimeZone)
+            .build();
+
+        return new Log4jLogProvider(context).getLog(category.orElse(""));
     }
 
     @Builder.Factory
@@ -59,17 +64,17 @@ public final class LogBuilders {
         @Builder.Parameter Writer writer,
         Optional<Level> level,
         Optional<ZoneId> zoneId,
-        Optional<DateTimeFormatter> dateTimeFormatter,
         Optional<String> category
     ) {
-        return Neo4jProxy.logger(
-            level.orElse(Level.INFO),
-            zoneId.orElse(ZoneOffset.UTC),
-            dateTimeFormatter.orElse(DATE_TIME_FORMATTER),
-            category.orElse(null),
-            writer instanceof PrintWriter
-                ? (PrintWriter) writer
-                : new PrintWriter(writer)
+        PrintWriter printWriter = writer instanceof PrintWriter
+            ? (PrintWriter) writer
+            : new PrintWriter(writer);
+        var outStream = new WriterOutputStream(printWriter, StandardCharsets.UTF_8);
+        return outputStreamLog(
+            outStream,
+            level,
+            zoneId,
+            category
         );
     }
 

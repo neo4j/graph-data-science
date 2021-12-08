@@ -25,6 +25,7 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -135,7 +136,7 @@ public final class TransactionContext {
      * A new instance is returned, {@code this} instance remains untouched.
      */
     public TransactionContext withRestrictedAccess(AccessMode.Static accessMode) {
-        var restrictedMode = Neo4jProxy.newRestrictedAccessMode(securityContext.mode(), accessMode);
+        var restrictedMode = new RestrictedAccessMode(securityContext.mode(), accessMode);
         var newContext = securityContext.withMode(restrictedMode);
         return new TransactionContext(api, newContext);
     }
