@@ -35,6 +35,6 @@ public interface GraphCreation<
     GraphStore graphStore();
     Graph createGraph(GraphStore graphStore);
     GraphCreateConfig graphCreateConfig();
-    MemoryRange validateMemoryEstimation(AlgorithmFactory<ALGO, CONFIG> algorithmFactory);
+    MemoryRange validateMemoryEstimation(AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory);
 
 }

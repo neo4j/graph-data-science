@@ -29,9 +29,10 @@ public interface AlgorithmSpec<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig,
-    RESULT
+    RESULT,
+    ALGO_FACTORY extends AlgorithmFactory<?, ALGO, CONFIG>
 > {
-    AlgorithmFactory<ALGO, CONFIG> algorithmFactory();
+    ALGO_FACTORY algorithmFactory();
 
     NewConfigFunction<CONFIG> newConfigFunction();
 

@@ -54,7 +54,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         );
 
         return new ProcedureExecutor<>(
-            pipelineSpec.configParser(this::newConfig),
+            pipelineSpec.configParser(mutateSpec.newConfigFunction()),
             pipelineSpec.validator(mutateSpec.validationConfig()),
             algorithmFactory(),
             transaction,

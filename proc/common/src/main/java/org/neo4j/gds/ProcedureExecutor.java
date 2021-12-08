@@ -33,7 +33,6 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.logging.Log;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public class ProcedureExecutor<

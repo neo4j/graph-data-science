@@ -20,7 +20,6 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.NewConfigFunction;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
@@ -43,7 +42,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>> {
+public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>, WccAlgorithmFactory<WccMutateConfig>> {
 
     private final ProcedureCallContext callContext;
     private final AllocationTracker allocationTracker;
@@ -60,7 +59,7 @@ public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccM
     }
 
     @Override
-    public AlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory() {
+    public WccAlgorithmFactory<WccMutateConfig> algorithmFactory() {
         return new WccAlgorithmFactory<>();
     }
 

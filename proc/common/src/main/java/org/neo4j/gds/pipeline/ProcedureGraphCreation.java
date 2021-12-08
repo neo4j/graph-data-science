@@ -79,7 +79,7 @@ public class ProcedureGraphCreation<
     }
 
     @Override
-    public MemoryRange validateMemoryEstimation(AlgorithmFactory<ALGO, CONFIG> algorithmFactory) {
+    public MemoryRange validateMemoryEstimation(AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory) {
         var procedureMemoryEstimation = new ProcedureMemoryEstimation<>(
             graphStoreLoader.graphDimensions(),
             algorithmFactory
