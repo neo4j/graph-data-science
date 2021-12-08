@@ -31,12 +31,12 @@ class ProcedureMemoryEstimation<
     CONFIG extends AlgoBaseConfig
 > {
 
-    private final AlgorithmFactory<ALGO, CONFIG> algorithmFactory;
+    private final AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory;
     private final GraphDimensions graphDimensions;
 
     ProcedureMemoryEstimation(
         GraphDimensions graphDimensions,
-        AlgorithmFactory<ALGO, CONFIG> algorithmFactory
+        AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory
     ) {
         this.graphDimensions = graphDimensions;
         this.algorithmFactory = algorithmFactory;

@@ -21,7 +21,7 @@ package org.neo4j.gds.betweenness;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -70,7 +70,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
     }
 
     @Override
-    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityMutateConfig> algorithmFactory() {
         return BetweennessCentralityProc.algorithmFactory();
     }
 

@@ -20,7 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -31,17 +31,17 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> extends AlgorithmFactory<IntersectingTriangleCount, CONFIG> {
+public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> extends GraphAlgorithmFactory<IntersectingTriangleCount, CONFIG> {
 
     private static final String INTERSECTING_TRIANGLE_COUNT_TASK_NAME = IntersectingTriangleCount.class.getSimpleName();
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return INTERSECTING_TRIANGLE_COUNT_TASK_NAME;
     }
 
     @Override
-    protected IntersectingTriangleCount build(
+    public IntersectingTriangleCount build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

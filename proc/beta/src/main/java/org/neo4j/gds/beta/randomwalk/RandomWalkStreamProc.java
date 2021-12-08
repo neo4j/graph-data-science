@@ -20,8 +20,8 @@
 package org.neo4j.gds.beta.randomwalk;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.PathFactory;
@@ -95,7 +95,7 @@ public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]
     }
 
     @Override
-    protected AlgorithmFactory<RandomWalk, RandomWalkStreamConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<RandomWalk, RandomWalkStreamConfig> algorithmFactory() {
         return new RandomWalkAlgorithmFactory<>();
     }
 

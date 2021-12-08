@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.beta.node2vec;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -71,7 +71,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
     }
 
     @Override
-    protected AlgorithmFactory<Node2Vec, Node2VecWriteConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Node2Vec, Node2VecWriteConfig> algorithmFactory() {
         return new Node2VecAlgorithmFactory<>();
     }
 

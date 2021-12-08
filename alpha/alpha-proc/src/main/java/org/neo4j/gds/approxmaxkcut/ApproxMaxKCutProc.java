@@ -20,7 +20,7 @@
 package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutFactory;
@@ -32,7 +32,7 @@ public final class ApproxMaxKCutProc {
 
     private ApproxMaxKCutProc() {}
 
-    static <CONFIG extends ApproxMaxKCutConfig> AlgorithmFactory<ApproxMaxKCut, CONFIG> algorithmFactory() {
+    static <CONFIG extends ApproxMaxKCutConfig> GraphAlgorithmFactory<ApproxMaxKCut, CONFIG> algorithmFactory() {
         return new ApproxMaxKCutFactory<>();
     }
 

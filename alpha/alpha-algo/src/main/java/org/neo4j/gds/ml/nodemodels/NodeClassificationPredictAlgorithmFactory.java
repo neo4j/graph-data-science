@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 
-public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassificationPredictConfig> extends AlgorithmFactory<NodeClassificationPredict, CONFIG> {
+public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassificationPredictConfig> extends GraphAlgorithmFactory<NodeClassificationPredict, CONFIG> {
 
     private final ModelCatalog modelCatalog;
 
@@ -40,12 +40,12 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "Node classification predict";
     }
 
     @Override
-    protected NodeClassificationPredict build(
+    public NodeClassificationPredict build(
         Graph graph,
         NodeClassificationPredictConfig configuration,
         AllocationTracker allocationTracker,

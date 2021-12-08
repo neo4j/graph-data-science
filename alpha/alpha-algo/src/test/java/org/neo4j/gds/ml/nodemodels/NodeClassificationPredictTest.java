@@ -44,7 +44,6 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPred
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Percentage.withPercentage;
@@ -238,7 +237,6 @@ class NodeClassificationPredictTest {
         var log = new TestLog();
         var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory<>(modelCatalog).build(
             graph,
-            Optional.empty(),
             ImmutableNodeClassificationMutateConfig.builder()
                 .mutateProperty("foo")
                 .modelName(modelName)

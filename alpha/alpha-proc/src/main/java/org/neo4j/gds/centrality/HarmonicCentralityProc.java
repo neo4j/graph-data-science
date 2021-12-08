@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.centrality;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -137,7 +137,7 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
     }
 
     @Override
-    protected AlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> algorithmFactory() {
         return new HarmonicCentralityAlgorithmFactory();
     }
 

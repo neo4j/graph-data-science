@@ -22,8 +22,8 @@ package org.neo4j.gds.beta.pregel.cc;
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.beta.pregel.Pregel;
@@ -76,8 +76,8 @@ public final class ComputationStreamProc extends PregelStreamProc<ComputationAlg
     }
 
     @Override
-    protected AlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory() {
-        return new AlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
+    protected GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory() {
+        return new GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
             @Override
             public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,
                                               AllocationTracker allocationTracker, ProgressTracker progressTracker) {
@@ -85,7 +85,7 @@ public final class ComputationStreamProc extends PregelStreamProc<ComputationAlg
             }
 
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return ComputationAlgorithm.class.getSimpleName();
             }
 

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.beta.node2vec;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -72,7 +72,7 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
     }
 
     @Override
-    protected AlgorithmFactory<Node2Vec, Node2VecMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Node2Vec, Node2VecMutateConfig> algorithmFactory() {
         return new Node2VecAlgorithmFactory<>();
     }
 

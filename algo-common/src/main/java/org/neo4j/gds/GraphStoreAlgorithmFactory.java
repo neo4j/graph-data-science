@@ -19,29 +19,14 @@
  */
 package org.neo4j.gds;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public abstract class GraphStoreAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> extends AlgorithmFactory<ALGO, CONFIG> {
-
-    @SuppressFBWarnings(value = "AOM_ABSTRACT_OVERRIDDEN_METHOD")
-    @Override
-    protected abstract ALGO build(
-        Graph graph,
-        GraphStore graphStore,
-        CONFIG configuration,
-        AllocationTracker allocationTracker,
-        ProgressTracker progressTracker
-    );
+public abstract class GraphStoreAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig>
+    implements AlgorithmFactory<GraphStore, ALGO, CONFIG> {
 
     @Override
-    protected ALGO build(
-        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
-    ) {
-        throw new IllegalStateException("Missing parameter `GraphStore`. Please call overwrite of this method.");
+    public ALGO accept(Visitor<ALGO, CONFIG> visitor) {
+        return visitor.graphStore(this);
     }
 }

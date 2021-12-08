@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -82,7 +82,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     }
 
     @Override
-    protected AlgorithmFactory<GraphSage, GraphSageWriteConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<GraphSage, GraphSageWriteConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>(modelCatalog);
     }
 

@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.ProcConfigParser;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.CatalogRequest;
@@ -125,15 +125,15 @@ abstract class AlphaSimilarityProc
     abstract String taskName();
 
     @Override
-    protected final AlgorithmFactory<ALGO, CONFIG> algorithmFactory() {
-        return new AlgorithmFactory<>() {
+    protected final GraphAlgorithmFactory<ALGO, CONFIG> algorithmFactory() {
+        return new GraphAlgorithmFactory<>() {
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return AlphaSimilarityProc.this.taskName();
             }
 
             @Override
-            protected ALGO build(
+            public ALGO build(
                 Graph graph,
                 CONFIG configuration,
                 AllocationTracker allocationTracker,

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -62,7 +62,7 @@ public class ApproxMaxKCutStreamProc extends StreamProc<ApproxMaxKCut, ApproxMax
     }
 
     @Override
-    protected AlgorithmFactory<ApproxMaxKCut, ApproxMaxKCutStreamConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<ApproxMaxKCut, ApproxMaxKCutStreamConfig> algorithmFactory() {
         return ApproxMaxKCutProc.algorithmFactory();
     }
 

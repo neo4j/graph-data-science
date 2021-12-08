@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.beta.node2vec;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -72,7 +72,7 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Flo
     }
 
     @Override
-    protected AlgorithmFactory<Node2Vec, Node2VecStreamConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Node2Vec, Node2VecStreamConfig> algorithmFactory() {
         return new Node2VecAlgorithmFactory<>();
     }
 

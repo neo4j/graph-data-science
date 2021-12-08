@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -57,7 +57,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
     }
 
     @Override
-    protected AlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory() {
+    protected GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory() {
         return new LinkPredictionTrainPipelineAlgorithmFactory(this, modelCatalog);
     }
 

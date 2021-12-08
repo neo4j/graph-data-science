@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -40,14 +40,14 @@ import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 
-public final class GraphSageTrainAlgorithmFactory extends AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> {
+public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> {
 
     public GraphSageTrainAlgorithmFactory() {
         super();
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return GraphSageTrain.class.getSimpleName();
     }
 

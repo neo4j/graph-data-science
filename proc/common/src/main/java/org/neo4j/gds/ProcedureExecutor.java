@@ -46,7 +46,7 @@ public class ProcedureExecutor<
     private final ProcConfigParser<CONFIG> configParser;
     private final MemoryUsageValidator memoryUsageValidator;
     private final Validator<CONFIG> validator;
-    private final AlgorithmFactory<ALGO, CONFIG> algorithmFactory;
+    private final AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory;
     private final KernelTransaction ktx;
     private final Log log;
     private final TaskRegistryFactory taskRegistryFactory;
@@ -60,7 +60,7 @@ public class ProcedureExecutor<
         ProcConfigParser<CONFIG> configParser,
         MemoryUsageValidator memoryUsageValidator,
         Validator<CONFIG> validator,
-        AlgorithmFactory<ALGO, CONFIG> algorithmFactory,
+        AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory,
         KernelTransaction ktx,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
@@ -182,7 +182,17 @@ public class ProcedureExecutor<
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(ktx);
         return algorithmFactory
-            .build(graph, Optional.of(graphStore), config, allocationTracker, log, taskRegistryFactory)
+            .accept(new AlgorithmFactory.Visitor<>() {
+                @Override
+                public ALGO graph(GraphAlgorithmFactory<ALGO, CONFIG> graphAlgorithmFactory) {
+                    return graphAlgorithmFactory.build(graph, config, allocationTracker, log, taskRegistryFactory);
+                }
+
+                @Override
+                public ALGO graphStore(GraphStoreAlgorithmFactory<ALGO, CONFIG> graphStoreAlgorithmFactory) {
+                    return graphStoreAlgorithmFactory.build(graphStore, config, allocationTracker, log, taskRegistryFactory);
+                }
+            })
             .withTerminationFlag(terminationFlag);
     }
 

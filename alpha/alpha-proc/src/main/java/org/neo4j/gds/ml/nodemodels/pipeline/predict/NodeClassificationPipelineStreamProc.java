@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
@@ -113,9 +113,7 @@ public class NodeClassificationPipelineStreamProc
     }
 
     @Override
-    protected AlgorithmFactory<
-        NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig
-        > algorithmFactory()
+    protected GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig> algorithmFactory()
     {
         return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this);
     }

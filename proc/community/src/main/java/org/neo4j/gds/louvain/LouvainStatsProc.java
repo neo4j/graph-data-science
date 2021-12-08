@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -73,7 +73,7 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
     }
 
     @Override
-    protected AlgorithmFactory<Louvain, LouvainStatsConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Louvain, LouvainStatsConfig> algorithmFactory() {
         return new LouvainFactory<>();
     }
 

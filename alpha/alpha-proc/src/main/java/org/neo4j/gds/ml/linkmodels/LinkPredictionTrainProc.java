@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.MLTrainResult;
@@ -101,7 +101,7 @@ public class LinkPredictionTrainProc extends
     }
 
     @Override
-    protected AlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
         return new LinkPredictionTrainFactory();
     }
 }

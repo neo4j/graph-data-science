@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -39,17 +39,17 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
-public class KnnFactory<CONFIG extends KnnBaseConfig> extends AlgorithmFactory<Knn, CONFIG> {
+public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFactory<Knn, CONFIG> {
 
     private static final String KNN_BASE_TASK_NAME = "Knn";
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return KNN_BASE_TASK_NAME;
     }
 
     @Override
-    protected Knn build(
+    public Knn build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

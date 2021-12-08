@@ -20,7 +20,7 @@
 package org.neo4j.gds.degree;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -31,17 +31,17 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> extends AlgorithmFactory<DegreeCentrality, CONFIG> {
+public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> extends GraphAlgorithmFactory<DegreeCentrality, CONFIG> {
 
     private static final String DEGREE_CENTRALITY_TASK_NAME = "DegreeCentrality";
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return DEGREE_CENTRALITY_TASK_NAME;
     }
 
     @Override
-    protected DegreeCentrality build(
+    public DegreeCentrality build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

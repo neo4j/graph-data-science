@@ -21,7 +21,7 @@ package org.neo4j.gds.louvain;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
@@ -67,7 +67,7 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
     }
 
     @Override
-    protected AlgorithmFactory<Louvain, LouvainStreamConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Louvain, LouvainStreamConfig> algorithmFactory() {
         return new LouvainFactory<>();
     }
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -44,15 +44,15 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 
-public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmFactory<Louvain, CONFIG> {
+public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgorithmFactory<Louvain, CONFIG> {
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "Louvain";
     }
 
     @Override
-    protected Louvain build(
+    public Louvain build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

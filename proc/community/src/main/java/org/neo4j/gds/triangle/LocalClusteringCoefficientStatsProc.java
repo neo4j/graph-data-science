@@ -20,7 +20,7 @@
 package org.neo4j.gds.triangle;
 
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -78,7 +78,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     }
 
     @Override
-    protected AlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStatsConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStatsConfig> algorithmFactory() {
         return new LocalClusteringCoefficientFactory<>();
     }
 

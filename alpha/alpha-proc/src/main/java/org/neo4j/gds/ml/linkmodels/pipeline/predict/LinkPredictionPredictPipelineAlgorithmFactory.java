@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -47,7 +46,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
     }
 
     @Override
-    protected Task progressTask(Graph graph, CONFIG config) {
+    public Task progressTask(GraphStore graphStore, CONFIG config) {
         var trainingPipeline = getTrainedLPPipelineModel(modelCatalog, config.modelName(), config.username())
             .customInfo()
             .trainingPipeline();
@@ -60,19 +59,18 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
                 trainingPipeline.nodePropertySteps().size()
             ),
         config.isApproximateStrategy()
-            ? Tasks.task("approximate link prediction", KnnFactory.knnTaskTree(graph, config.approximateConfig()))
-            : Tasks.leaf("exhaustive link prediction", graph.nodeCount())
+            ? Tasks.task("approximate link prediction", KnnFactory.knnTaskTree(graphStore.getUnion(), config.approximateConfig()))
+            : Tasks.leaf("exhaustive link prediction", graphStore.nodeCount())
         );
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "Link Prediction Predict Pipeline";
     }
 
     @Override
-    protected LinkPredictionPredictPipelineExecutor build(
-        Graph graph,
+    public LinkPredictionPredictPipelineExecutor build(
         GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,

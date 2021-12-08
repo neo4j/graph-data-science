@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -70,7 +70,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
     }
 
     @Override
-    protected AlgorithmFactory<LabelPropagation, LabelPropagationStatsConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<LabelPropagation, LabelPropagationStatsConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
     }
 

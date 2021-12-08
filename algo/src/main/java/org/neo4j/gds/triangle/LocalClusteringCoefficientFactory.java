@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -31,15 +31,15 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.ArrayList;
 
-public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoefficientBaseConfig> extends AlgorithmFactory<LocalClusteringCoefficient, CONFIG> {
+public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoefficientBaseConfig> extends GraphAlgorithmFactory<LocalClusteringCoefficient, CONFIG> {
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "LocalClusteringCoefficient";
     }
 
     @Override
-    protected LocalClusteringCoefficient build(
+    public LocalClusteringCoefficient build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

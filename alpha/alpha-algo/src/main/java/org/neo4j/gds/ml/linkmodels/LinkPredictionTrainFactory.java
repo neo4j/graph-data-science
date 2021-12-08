@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -28,19 +28,19 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.Training;
 
-public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> {
+public class LinkPredictionTrainFactory extends GraphAlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> {
 
     LinkPredictionTrainFactory() {
         super();
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "LinkPredictionTrain";
     }
 
     @Override
-    protected LinkPredictionTrain build(
+    public LinkPredictionTrain build(
         Graph graph,
         LinkPredictionTrainConfig configuration,
         AllocationTracker allocationTracker,

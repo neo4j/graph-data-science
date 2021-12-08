@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -79,7 +79,7 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     }
 
     @Override
-    protected AlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineStreamConfig> algorithmFactory() {
+    protected GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineStreamConfig> algorithmFactory() {
         return new LinkPredictionPredictPipelineAlgorithmFactory<>(this, modelCatalog);
     }
 

@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
@@ -287,17 +287,17 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+        protected GraphAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
 
-            return new AlgorithmFactory<>() {
+            return new GraphAlgorithmFactory<>() {
 
                 @Override
-                protected String taskName() {
+                public String taskName() {
                     return "CompositeTestAlgorithm";
                 }
 
                 @Override
-                protected CompositeTestAlgorithm build(
+                public CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
                     AllocationTracker allocationTracker,
@@ -355,16 +355,16 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
-            return new AlgorithmFactory<>() {
+        protected GraphAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+            return new GraphAlgorithmFactory<>() {
 
                 @Override
-                protected String taskName() {
+                public String taskName() {
                     return "CompositeTestAlgorithm";
                 }
 
                 @Override
-                protected CompositeTestAlgorithm build(
+                public CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
                     AllocationTracker allocationTracker,
@@ -421,16 +421,16 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
-            return new AlgorithmFactory<>() {
+        protected GraphAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+            return new GraphAlgorithmFactory<>() {
 
                 @Override
-                protected String taskName() {
+                public String taskName() {
                     return "CompositeTestAlgorithm";
                 }
 
                 @Override
-                protected CompositeTestAlgorithm build(
+                public CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
                     AllocationTracker allocationTracker,

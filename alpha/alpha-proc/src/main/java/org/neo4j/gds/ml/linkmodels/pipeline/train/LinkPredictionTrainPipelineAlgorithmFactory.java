@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -45,7 +44,6 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
 
     @Override
     public LinkPredictionTrainPipelineExecutor build(
-        Graph graph,
         GraphStore graphStore,
         LinkPredictionTrainConfig trainConfig,
         AllocationTracker allocationTracker,
@@ -65,12 +63,12 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "Link Prediction Train Pipeline";
     }
 
     @Override
-    public Task progressTask(Graph graph, LinkPredictionTrainConfig config) {
+    public Task progressTask(GraphStore graphStore, LinkPredictionTrainConfig config) {
         var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(modelCatalog, config.pipeline(), config.username());
 
         return Tasks.task(

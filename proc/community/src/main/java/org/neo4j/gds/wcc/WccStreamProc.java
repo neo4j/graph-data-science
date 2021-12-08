@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
@@ -71,7 +71,7 @@ public class WccStreamProc extends StreamProc<
     }
 
     @Override
-    protected AlgorithmFactory<Wcc, WccStreamConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Wcc, WccStreamConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
     }
 

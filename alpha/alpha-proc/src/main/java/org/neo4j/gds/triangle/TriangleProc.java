@@ -20,7 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -84,15 +84,15 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     }
 
     @Override
-    protected AlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
+    protected GraphAlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory() {
+        return new GraphAlgorithmFactory<>() {
             @Override
-            protected String taskName() {
+            public String taskName() {
                 return "TriangleStream";
             }
 
             @Override
-            protected TriangleStream build(
+            public TriangleStream build(
                 Graph graph,
                 TriangleCountBaseConfig configuration,
                 AllocationTracker allocationTracker,

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -132,7 +132,7 @@ public class NodeClassificationPipelineWriteProc
     }
 
     @Override
-    protected AlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig> algorithmFactory() {
+    protected GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig> algorithmFactory() {
         return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this);
     }
 

@@ -20,7 +20,7 @@
 package org.neo4j.gds.paths.dijkstra;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -34,7 +34,7 @@ import org.neo4j.gds.paths.ShortestPathBaseConfig;
 
 import java.util.Optional;
 
-public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWeightConfig> extends AlgorithmFactory<Dijkstra, T> {
+public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWeightConfig> extends GraphAlgorithmFactory<Dijkstra, T> {
 
     @Override
     public MemoryEstimation memoryEstimation(T configuration) {
@@ -42,7 +42,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
     }
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "Dijkstra";
     }
 
@@ -63,7 +63,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
     public static <T extends ShortestPathBaseConfig> DijkstraFactory<T> sourceTarget() {
         return new DijkstraFactory<>() {
             @Override
-            protected Dijkstra build(
+            public Dijkstra build(
                 Graph graph,
                 T configuration,
                 AllocationTracker allocationTracker,
@@ -83,7 +83,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
     public static <T extends AllShortestPathsBaseConfig> DijkstraFactory<T> singleSource() {
         return new DijkstraFactory<>() {
             @Override
-            protected Dijkstra build(
+            public Dijkstra build(
                 Graph graph,
                 T configuration,
                 AllocationTracker allocationTracker,

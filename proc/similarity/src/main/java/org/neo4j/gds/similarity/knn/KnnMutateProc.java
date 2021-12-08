@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Relationships;
@@ -80,7 +80,7 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, KnnMutate
     }
 
     @Override
-    protected AlgorithmFactory<Knn, KnnMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<Knn, KnnMutateConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 

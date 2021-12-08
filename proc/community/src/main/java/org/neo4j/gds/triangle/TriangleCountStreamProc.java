@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -91,7 +91,7 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountStreamConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<IntersectingTriangleCount, TriangleCountStreamConfig> algorithmFactory() {
         return new IntersectingTriangleCountFactory<>();
     }
 

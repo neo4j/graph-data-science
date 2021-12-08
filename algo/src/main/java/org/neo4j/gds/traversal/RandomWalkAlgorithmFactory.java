@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.traversal;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -33,14 +33,14 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.ArrayList;
 
-public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> extends AlgorithmFactory<RandomWalk, CONFIG> {
+public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> extends GraphAlgorithmFactory<RandomWalk, CONFIG> {
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "RandomWalk";
     }
 
     @Override
-    protected RandomWalk build(
+    public RandomWalk build(
         Graph graph,
         RandomWalkBaseConfig configuration,
         AllocationTracker allocationTracker,

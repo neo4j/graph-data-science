@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -73,7 +73,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
     }
 
     @Override
-    protected AlgorithmFactory<K1Coloring, K1ColoringWriteConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<K1Coloring, K1ColoringWriteConfig> algorithmFactory() {
         return new K1ColoringFactory<>();
     }
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -36,15 +36,15 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBaseConfig> extends AlgorithmFactory<BetweennessCentrality, CONFIG> {
+public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBaseConfig> extends GraphAlgorithmFactory<BetweennessCentrality, CONFIG> {
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return "BetweennessCentrality";
     }
 
     @Override
-    protected BetweennessCentrality build(
+    public BetweennessCentrality build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

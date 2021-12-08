@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
@@ -35,12 +35,12 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 
-public class K1ColoringFactory<T extends K1ColoringConfig> extends AlgorithmFactory<K1Coloring, T> {
+public class K1ColoringFactory<T extends K1ColoringConfig> extends GraphAlgorithmFactory<K1Coloring, T> {
 
     private static final String K1_COLORING_TASK_NAME = "K1Coloring";
 
     @Override
-    protected String taskName() {
+    public String taskName() {
         return K1_COLORING_TASK_NAME;
     }
 

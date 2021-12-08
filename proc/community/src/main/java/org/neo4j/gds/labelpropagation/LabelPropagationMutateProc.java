@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -63,7 +63,7 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
     }
 
     @Override
-    protected AlgorithmFactory<LabelPropagation, LabelPropagationMutateConfig> algorithmFactory() {
+    protected GraphAlgorithmFactory<LabelPropagation, LabelPropagationMutateConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
     }
 
