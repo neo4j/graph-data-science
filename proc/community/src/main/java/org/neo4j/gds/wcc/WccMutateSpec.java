@@ -20,29 +20,19 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.NewConfigFunction;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.MutatePropertyConfig;
-import org.neo4j.gds.core.huge.FilteredNodeProperties;
-import org.neo4j.gds.core.huge.NodeFilteredGraph;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.pipeline.AlgorithmSpec;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>, WccAlgorithmFactory<WccMutateConfig>> {
+class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>, WccAlgorithmFactory<WccMutateConfig>> {
 
     private final ProcedureCallContext callContext;
     private final AllocationTracker allocationTracker;
@@ -70,75 +60,18 @@ public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccM
 
     @Override
     public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>> computationResultConsumer() {
-        return computationResult -> {
-            var resultBuilder = WccProc.resultBuilder(
-                new WccMutateProc.MutateResult.Builder(
-                    callContext,
-                    computationResult.config().concurrency(),
-                    allocationTracker
-                ),
-                computationResult
-            );
-            var config = computationResult.config();
-
-            AbstractResultBuilder<WccMutateProc.MutateResult> builder = resultBuilder
-                .withCreateMillis(computationResult.createMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withNodeCount(computationResult.graph().nodeCount())
-                .withConfig(config);
-
-            if (computationResult.isGraphEmpty()) {
-                return Stream.of(builder.build());
-            } else {
-                updateGraphStore(builder, computationResult);
-                computationResult.graph().releaseProperties();
-                return Stream.of(builder.build());
-            }
-        };
+        return new MutatePropertyComputationResultConsumer<>(WccProc::nodeProperties, this::resultBuilder, log, allocationTracker);
     }
 
-    private void updateGraphStore(
-        AbstractResultBuilder<?> resultBuilder,
-        AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult
-    ) {
-        Graph graph = computationResult.graph();
-
-        var nodeProperties = List.of(ImmutableNodeProperty.of(
-            computationResult.config().mutateProperty(),
-            WccProc.nodeProperties(computationResult, computationResult.config().mutateProperty(), allocationTracker)
-        ));
-
-        if (graph instanceof NodeFilteredGraph) {
-            nodeProperties = nodeProperties.stream().map(nodeProperty ->
-                    ImmutableNodeProperty.of(
-                        nodeProperty.propertyKey(),
-                        new FilteredNodeProperties.OriginalToFilteredNodeProperties(
-                            nodeProperty.properties(),
-                            (NodeFilteredGraph) graph
-                        )
-                    )
-                )
-                .collect(Collectors.toList());
-        }
-
-        MutatePropertyConfig mutatePropertyConfig = computationResult.config();
-
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            log.debug("Updating in-memory graph store");
-            GraphStore graphStore = computationResult.graphStore();
-            Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
-
-            nodeProperties.forEach(nodeProperty -> {
-                for (NodeLabel label : labelsToUpdate) {
-                    graphStore.addNodeProperty(
-                        label,
-                        nodeProperty.propertyKey(),
-                        nodeProperty.properties()
-                    );
-                }
-            });
-
-            resultBuilder.withNodePropertiesWritten(nodeProperties.size() * computationResult.graph().nodeCount());
-        }
+    private AbstractCommunityResultBuilder<WccMutateProc.MutateResult> resultBuilder(AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult) {
+        return WccProc.resultBuilder(
+            new WccMutateProc.MutateResult.Builder(
+                callContext,
+                computationResult.config().concurrency(),
+                allocationTracker
+            ),
+            computationResult
+        );
     }
+
 }

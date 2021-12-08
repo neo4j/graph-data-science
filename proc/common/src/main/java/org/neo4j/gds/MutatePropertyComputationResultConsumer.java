@@ -19,63 +19,71 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodeProperties;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
-import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.logging.Log;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class MutatePropertyProc<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
-    ALGO_RESULT,
-    PROC_RESULT,
-    CONFIG extends MutatePropertyConfig> extends MutateProc<ALGO, ALGO_RESULT, PROC_RESULT, CONFIG> {
+public class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig, RESULT>
+    extends MutateComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> {
 
-    @Override
-    protected NodeProperties nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        throw new UnsupportedOperationException(
-            "Mutate procedures must implement either `nodeProperties` or `nodePropertyList`.");
+    public interface NodePropertiesFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig> {
+        NodeProperties nodeProperties(
+            AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
+            String resultProperty,
+            AllocationTracker allocationTracker
+        );
     }
 
-    protected List<NodeProperty> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        return List.of(ImmutableNodeProperty.of(
-            computationResult.config().mutateProperty(),
-            nodeProperties(computationResult)
-        ));
+    private final NodePropertiesFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertiesFunction;
+    private final AllocationTracker allocationTracker;
+
+    public MutatePropertyComputationResultConsumer(
+        NodePropertiesFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertiesFunction,
+        ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction,
+        Log log,
+        AllocationTracker allocationTracker
+    ) {
+        super(resultBuilderFunction, log);
+        this.nodePropertiesFunction = nodePropertiesFunction;
+        this.allocationTracker = allocationTracker;
     }
 
     @Override
     protected void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
+        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
-        Graph graph = computationResult.graph();
+        var graph = computationResult.graph();
+        MutatePropertyConfig mutatePropertyConfig = computationResult.config();
 
-        var nodeProperties = nodePropertyList(computationResult);
+        var nodeProperties = List.of(ImmutableNodeProperty.of(
+            computationResult.config().mutateProperty(),
+            this.nodePropertiesFunction.nodeProperties(computationResult, mutatePropertyConfig.mutateProperty(), allocationTracker)
+        ));
 
         if (graph instanceof NodeFilteredGraph) {
             nodeProperties = nodeProperties.stream().map(nodeProperty ->
-                ImmutableNodeProperty.of(
-                    nodeProperty.propertyKey(),
-                    new FilteredNodeProperties.OriginalToFilteredNodeProperties(
-                        nodeProperty.properties(),
-                        (NodeFilteredGraph) graph
+                    ImmutableNodeProperty.of(
+                        nodeProperty.propertyKey(),
+                        new FilteredNodeProperties.OriginalToFilteredNodeProperties(
+                            nodeProperty.properties(),
+                            (NodeFilteredGraph) graph
+                        )
                     )
                 )
-            )
                 .collect(Collectors.toList());
         }
-
-        MutatePropertyConfig mutatePropertyConfig = computationResult.config();
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             log.debug("Updating in-memory graph store");
