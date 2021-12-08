@@ -79,13 +79,6 @@ public abstract class EvaluationContext {
 
         @Override
         ValueType getValueType(String propertyKey) {
-            graphStore.nodes().forEachNodeLabel(nodeId, (nodeLabel -> {
-                if (graphStore.hasNodeProperty(nodeLabel, propertyKey)) {
-                    typeForPropertyReference.set(graphStore.nodePropertyType(nodeLabel, propertyKey));
-                    return false;
-                }
-                return true;
-            }));
 
             return typeForPropertyReference.get();
         }

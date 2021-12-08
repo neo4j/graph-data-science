@@ -38,6 +38,10 @@ public interface Expression {
     @Value.Derived
     double evaluate(EvaluationContext context);
 
+    default String debugString() {
+        return toString();
+    }
+
     @Value.Derived
     default ValidationContext validate(ValidationContext context) {
         return context;
@@ -195,7 +199,6 @@ public interface Expression {
 
         @ValueClass
         interface And extends BinaryExpression {
-
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
@@ -203,6 +206,7 @@ public interface Expression {
                     ? TRUE
                     : FALSE;
             }
+
         }
 
         @ValueClass
@@ -215,6 +219,7 @@ public interface Expression {
                     ? TRUE
                     : FALSE;
             }
+
         }
 
         @ValueClass
@@ -227,6 +232,7 @@ public interface Expression {
                     ? TRUE
                     : FALSE;
             }
+
         }
 
         interface BinaryArithmeticExpression extends BinaryExpression {
@@ -238,9 +244,12 @@ public interface Expression {
 
                 if (lhs().valueType(context) == ValueType.LONG && rhs().valueType(context) == ValueType.LONG) {
                     return evaluateLong(Double.doubleToLongBits(lhsValue), Double.doubleToLongBits(rhsValue));
+                } else if (lhs().valueType(context) == ValueType.DOUBLE && rhs().valueType(context) == ValueType.DOUBLE) {
+                    return evaluateDouble(lhsValue, rhsValue);
+                } else {
+                    throw new IllegalArgumentException(
+                        "Comparing incompatible types long and double: " + this.debugString());
                 }
-
-                return evaluateDouble(lhsValue, rhsValue);
             }
 
             double evaluateLong(long lhsValue, long rhsValue);
@@ -260,6 +269,11 @@ public interface Expression {
             default double evaluateDouble(double lhsValue, double rhsValue) {
                 return Math.abs(lhsValue - rhsValue) < EPSILON ? TRUE : FALSE;
             }
+
+            @Override
+            default String debugString() {
+                return lhs().debugString() + " = " + rhs().debugString();
+            }
         }
 
         @ValueClass
@@ -273,6 +287,11 @@ public interface Expression {
             @Override
             default double evaluateDouble(double lhsValue, double rhsValue) {
                 return Math.abs(lhsValue - rhsValue) > EPSILON ? TRUE : FALSE;
+            }
+
+            @Override
+            default String debugString() {
+                return lhs().debugString() + " <> " + rhs().debugString();
             }
         }
 
@@ -288,6 +307,11 @@ public interface Expression {
             default double evaluateDouble(double lhsValue, double rhsValue) {
                 return (lhsValue - rhsValue) > EPSILON ? TRUE : FALSE;
             }
+
+            @Override
+            default String debugString() {
+                return lhs().debugString() + " > " + rhs().debugString();
+            }
         }
 
         @ValueClass
@@ -301,6 +325,11 @@ public interface Expression {
             @Override
             default double evaluateDouble(double lhsValue, double rhsValue) {
                 return lhsValue > rhsValue || Math.abs(lhsValue - rhsValue) < EPSILON ? TRUE : FALSE;
+            }
+
+            @Override
+            default String debugString() {
+                return lhs().debugString() + " >= " + rhs().debugString();
             }
         }
 
@@ -318,6 +347,11 @@ public interface Expression {
             default double evaluateDouble(double lhsValue, double rhsValue) {
                 return (rhsValue - lhsValue) > EPSILON ? TRUE : FALSE;
             }
+
+            @Override
+            default String debugString() {
+                return lhs().debugString() + " < " + rhs().debugString();
+            }
         }
 
         @ValueClass
@@ -332,11 +366,15 @@ public interface Expression {
             default double evaluateDouble(double lhsValue, double rhsValue) {
                 return lhsValue < rhsValue || (rhsValue - lhsValue) > -EPSILON ? TRUE : FALSE;
             }
+
+            @Override
+            default String debugString() {
+                return lhs().debugString() + " <= " + rhs().debugString();
+            }
         }
     }
 
     interface Literal extends Expression {
-
         @ValueClass
         interface LongLiteral extends Literal {
             long value();
@@ -351,6 +389,9 @@ public interface Expression {
             default double evaluate(EvaluationContext context) {
                 return Double.longBitsToDouble(value());
             }
+
+            @Override
+            default String debugString() {return Long.toString(value());}
         }
 
         @ValueClass
@@ -362,6 +403,9 @@ public interface Expression {
             default double evaluate(EvaluationContext context) {
                 return value();
             }
+
+            default String debugString() {return Double.toString(value());}
+
         }
 
         @ValueClass
