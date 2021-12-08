@@ -47,26 +47,26 @@ class ExpressionEvaluatorTest {
 
     @Test
     void trueLiteral() throws ParseException {
-        var expr = ExpressionParser.parse("TRUE");
-        assertThat(expr.evaluate(EMPTY_CONTEXT)).isEqualTo(TRUE);
+        var expr = ExpressionParser.parse("TRUE", ExpressionParserTest.EMPTY_VALIDATION_CONTEXT);
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(TRUE);
     }
 
     @Test
     void falseLiteral() throws ParseException {
-        var expr = ExpressionParser.parse("FALSE");
-        assertThat(expr.evaluate(EMPTY_CONTEXT)).isEqualTo(FALSE);
+        var expr = ExpressionParser.parse("FALSE", ExpressionParserTest.EMPTY_VALIDATION_CONTEXT);
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(FALSE);
     }
 
     @Property
     void longLiteral(@ForAll long input) throws ParseException {
-        var expr = ExpressionParser.parse(Long.toString(input));
-        assertThat(expr.evaluate(EMPTY_CONTEXT)).isEqualTo(input);
+        var expr = ExpressionParser.parse(Long.toString(input), ExpressionParserTest.EMPTY_VALIDATION_CONTEXT);
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(input);
     }
 
     @Property
     void doubleLiteral(@ForAll double input) throws ParseException {
-        var expr = ExpressionParser.parse(Double.toString(input));
-        assertThat(expr.evaluate(EMPTY_CONTEXT)).isEqualTo(input);
+        var expr = ExpressionParser.parse(Double.toString(input), ExpressionParserTest.EMPTY_VALIDATION_CONTEXT);
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(input);
     }
 
     @Property
@@ -77,8 +77,11 @@ class ExpressionEvaluatorTest {
             : compare > 0
                 ? "%f > %f"
                 : "%f = %f";
-        var expr = ExpressionParser.parse(formatWithLocale(expression, left, right));
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isTrue();
+        var expr = ExpressionParser.parse(
+            formatWithLocale(expression, left, right),
+            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
     @Property
@@ -86,8 +89,11 @@ class ExpressionEvaluatorTest {
         @ForAll @DoubleRange(max = 1E10, maxIncluded = false) double left,
         @ForAll @DoubleRange(min = 1E10, minIncluded = false) double right
     ) throws ParseException {
-        var expr = ExpressionParser.parse(formatWithLocale("%f < %f", left, right));
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isTrue();
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%f < %f", left, right),
+            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
     @Property
@@ -95,8 +101,11 @@ class ExpressionEvaluatorTest {
         @ForAll @DoubleRange(max = 1E10) double left,
         @ForAll @DoubleRange(min = 1E10) double right
     ) throws ParseException {
-        var expr = ExpressionParser.parse(formatWithLocale("%f <= %f", left, right));
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isTrue();
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%f <= %f", left, right),
+            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
     @Property
@@ -104,8 +113,11 @@ class ExpressionEvaluatorTest {
         @ForAll @DoubleRange(min = 1E10, minIncluded = false) double left,
         @ForAll @DoubleRange(max = 1E10, maxIncluded = false) double right
     ) throws ParseException {
-        var expr = ExpressionParser.parse(formatWithLocale("%f > %f", left, right));
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isTrue();
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%f > %f", left, right),
+            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
     @Property
@@ -113,14 +125,20 @@ class ExpressionEvaluatorTest {
         @ForAll @DoubleRange(min = 1E10) double left,
         @ForAll @DoubleRange(max = 1E10) double right
     ) throws ParseException {
-        var expr = ExpressionParser.parse(formatWithLocale("%f >= %f", left, right));
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isTrue();
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%f >= %f", left, right),
+            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
     @Property
     void equal(@ForAll double value) throws ParseException {
-        var expr = ExpressionParser.parse(formatWithLocale("%f = %f", value, value));
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isTrue();
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%f = %f", value, value),
+            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
     @Property
@@ -128,25 +146,31 @@ class ExpressionEvaluatorTest {
         @ForAll @DoubleRange(min = 1E10, minIncluded = false) double left,
         @ForAll @DoubleRange(max = 1E10, maxIncluded = false) double right
     ) throws ParseException {
-        var expr = ExpressionParser.parse(formatWithLocale("%f <> %f", left, right));
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isTrue();
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%f <> %f", left, right),
+            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
 
-        expr = ExpressionParser.parse(formatWithLocale("%f != %f", left, right));
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isTrue();
+        expr = ExpressionParser.parse(
+            formatWithLocale("%f != %f", left, right),
+            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"NOT TRUE", "NOT (1337 > 42)"})
     void notTrue(String cypher) throws ParseException {
-        var expr = ExpressionParser.parse(cypher);
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isFalse();
+        var expr = ExpressionParser.parse(cypher, ExpressionParserTest.EMPTY_VALIDATION_CONTEXT);
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isFalse();
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"NOT FALSE", "NOT (1337 < 42)"})
     void notFalse(String cypher) throws ParseException {
-        var expr = ExpressionParser.parse(cypher);
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isTrue();
+        var expr = ExpressionParser.parse(cypher, ExpressionParserTest.EMPTY_VALIDATION_CONTEXT);
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
     @ParameterizedTest
@@ -157,8 +181,11 @@ class ExpressionEvaluatorTest {
         "true,true,true"
     })
     void and(boolean left, boolean right, boolean expected) throws ParseException {
-        var expr = ExpressionParser.parse(formatWithLocale("%s AND %s", left, right));
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isEqualTo(expected);
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%s AND %s", left, right),
+            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isEqualTo(expected);
     }
 
     @ParameterizedTest
@@ -169,8 +196,11 @@ class ExpressionEvaluatorTest {
         "true,true,true"
     })
     void or(boolean left, boolean right, boolean expected) throws ParseException {
-        var expr = ExpressionParser.parse(formatWithLocale("%s OR %s", left, right));
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isEqualTo(expected);
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%s OR %s", left, right),
+            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isEqualTo(expected);
     }
 
     @ParameterizedTest
@@ -181,17 +211,25 @@ class ExpressionEvaluatorTest {
         "true,true,false"
     })
     void xor(boolean left, boolean right, boolean expected) throws ParseException {
-        var expr = ExpressionParser.parse(formatWithLocale("%s XOR %s", left, right));
-        assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isEqualTo(expected);
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%s XOR %s", left, right),
+            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isEqualTo(expected);
     }
 
     @ParameterizedTest
     @CsvSource(value = {
-        "foo,42",
-        "bar,1.337"
+        "foo,42,LONG",
+        "bar,1.337,DOUBLE"
     })
-    void property(String propertyKey, double propertyValue) throws ParseException {
-        var expr = ExpressionParser.parse("n." + propertyKey);
+    void property(String propertyKey, double propertyValue, ValueType propertyType) throws ParseException {
+        var validationContext = ImmutableValidationContext.builder()
+            .context(ValidationContext.Context.NODE)
+            .putAvailablePropertiesWithType(propertyKey, propertyType)
+            .build();
+
+        var expr = ExpressionParser.parse("n." + propertyKey, validationContext);
         var context = ImmutableTestContext.builder().propertyKey(propertyKey).propertyValue(propertyValue).build();
         assertThat(expr.evaluate(context) == propertyValue).isTrue();
     }
@@ -210,19 +248,21 @@ class ExpressionEvaluatorTest {
     @MethodSource("org.neo4j.gds.beta.filter.expression.ExpressionEvaluatorTest#hasLabelInput")
     void hasLabelsOrTypes(Iterable<String> actual, Collection<String> requested, boolean expected) throws ParseException {
         var labelExpression = requested.stream().map(label -> ":" + label).collect(Collectors.joining());
-        var expr = ExpressionParser.parse("n" + labelExpression);
-        var context = ImmutableTestContext.builder().addAllLabelsOrTypes(actual).build();
-        assertThat(expr.evaluate(context) == TRUE).isEqualTo(expected);
+
+        var validationContext = ImmutableValidationContext.builder()
+            .context(ValidationContext.Context.NODE)
+            .addAllAvailableLabelsOrTypes(actual)
+            .build();
+
+        var expr = ExpressionParser.parse("n" + labelExpression, validationContext);
+
+        var evaluationContext = ImmutableTestContext.builder().addAllLabelsOrTypes(actual).build();
+        assertThat(expr.evaluate(evaluationContext) == TRUE).isEqualTo(expected);
     }
 
-    private static final EvaluationContext EMPTY_CONTEXT = new EvaluationContext() {
+    private static final EvaluationContext EMPTY_EVALUATION_CONTEXT = new EvaluationContext() {
         @Override
-        double getProperty(String propertyKey) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        ValueType getValueType(String propertyKey) {
+        double getProperty(String propertyKey, ValueType valueType) {
             throw new UnsupportedOperationException();
         }
 
@@ -250,17 +290,12 @@ class ExpressionEvaluatorTest {
             return List.of();
         }
 
+        // TODO: do we need some test that actually use the valueType?
         @Override
         @Value.Derived
-        double getProperty(String propertyKey) {
+        double getProperty(String propertyKey, ValueType valueType) {
             assertThat(propertyKey).isEqualTo(propertyKey());
             return propertyValue();
-        }
-
-        @Override
-        ValueType getValueType(String propertyKey) {
-            assertThat(propertyKey).isEqualTo(propertyKey());
-            return ValueType.DOUBLE;
         }
 
         @Override

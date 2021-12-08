@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.annotation.ValueClass;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
-import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -42,7 +41,7 @@ class ExpressionValidationTest {
         var context = ImmutableTestValidationContext.builder().context(NODE).build();
 
         assertThatExceptionOfType(SemanticErrors.class)
-            .isThrownBy(() -> ImmutableVariable.of(variableName).validate(context).validate())
+            .isThrownBy(() -> ImmutableVariable.builder().name(variableName).build().validate(context).validate())
             .withMessageContaining(formatWithLocale("Invalid variable `%s`. Only `n` is allowed for nodes", variableName));
     }
 
@@ -52,7 +51,7 @@ class ExpressionValidationTest {
         var context = ImmutableTestValidationContext.builder().context(RELATIONSHIP).build();
 
         assertThatExceptionOfType(SemanticErrors.class)
-            .isThrownBy(() -> ImmutableVariable.of(variableName).validate(context).validate())
+            .isThrownBy(() -> ImmutableVariable.builder().name(variableName).build().validate(context).validate())
             .withMessageContaining(formatWithLocale("Invalid variable `%s`. Only `r` is allowed for relationships", variableName));
     }
 
@@ -61,7 +60,13 @@ class ExpressionValidationTest {
         var context = ImmutableTestValidationContext.builder().addAvailableProperties("bar").build();
 
         assertThatExceptionOfType(SemanticErrors.class)
-            .isThrownBy(() -> ImmutableProperty.of(ImmutableVariable.of("n"), "baz").validate(context).validate())
+            .isThrownBy(() -> ImmutableProperty
+                .builder()
+                .in(ImmutableVariable.builder().name("n").build())
+                .propertyKey("baz")
+                .build()
+                .validate(context)
+                .validate())
             .withMessageContaining("Unknown property `baz`. Did you mean `bar`?");
     }
 
@@ -70,20 +75,24 @@ class ExpressionValidationTest {
         var context = ImmutableTestValidationContext.builder().addAvailableLabelsOrTypes("foo", "bar").build();
 
         assertThatExceptionOfType(SemanticErrors.class)
-            .isThrownBy(() -> ImmutableHasLabelsOrTypes.of(ImmutableVariable.of("n"), List.of("foo", "baz")).validate(context).validate())
+            .isThrownBy(() -> ImmutableHasLabelsOrTypes.builder()
+                .in(ImmutableVariable.builder().name("n").build())
+                .addLabelsOrTypes("foo", "baz").build()
+                .validate(context).validate()
+            )
             .withMessageContaining("Unknown label `baz`. Did you mean `bar`?");
     }
 
     @Test
     void multipleErrors() throws ParseException {
         var expressionString = "n:Baz AND n.foo = 42";
-        var expr = ExpressionParser.parse(expressionString);
-
         var context = ImmutableTestValidationContext.builder()
             .context(RELATIONSHIP)
             .addAvailableLabelsOrTypes("Foo", "Bar")
             .addAvailableProperties("bar", "foot")
             .build();
+
+        var expr = ExpressionParser.parse(expressionString, context);
 
         assertThatExceptionOfType(SemanticErrors.class)
             .isThrownBy(() -> expr.validate(context).validate())
@@ -113,5 +122,4 @@ class ExpressionValidationTest {
             return Set.of();
         }
     }
-
 }

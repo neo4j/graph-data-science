@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -49,21 +50,21 @@ public class EvaluationContextTest {
 
     private static Stream<Arguments> nodesPositive() {
         return Stream.of(
-            Arguments.of("a", "p1", 42.0, List.of()),
-            Arguments.of("a", "p1", 42.0, List.of("A")),
-            Arguments.of("a", "p1", 42.0, List.of("A", "B")),
-            Arguments.of("a", "p1", 42.0, List.of("A", "B", "C")),
+            Arguments.of("a", "p1", 42.0, ValueType.DOUBLE, List.of()),
+            Arguments.of("a", "p1", 42.0, ValueType.DOUBLE, List.of("A")),
+            Arguments.of("a", "p1", 42.0, ValueType.DOUBLE, List.of("A", "B")),
+            Arguments.of("a", "p1", 42.0, ValueType.DOUBLE, List.of("A", "B", "C")),
 
-            Arguments.of("a", "p2", Double.longBitsToDouble(42), List.of()),
-            Arguments.of("a", "p2", Double.longBitsToDouble(42), List.of("A")),
-            Arguments.of("a", "p2", Double.longBitsToDouble(42), List.of("A", "B")),
-            Arguments.of("a", "p2", Double.longBitsToDouble(42), List.of("A", "B", "C")),
+            Arguments.of("a", "p2", Double.longBitsToDouble(42), ValueType.LONG, List.of()),
+            Arguments.of("a", "p2", Double.longBitsToDouble(42), ValueType.LONG, List.of("A")),
+            Arguments.of("a", "p2", Double.longBitsToDouble(42), ValueType.LONG, List.of("A", "B")),
+            Arguments.of("a", "p2", Double.longBitsToDouble(42), ValueType.LONG, List.of("A", "B", "C")),
 
-            Arguments.of("b", "p1", 1337.0, List.of()),
-            Arguments.of("b", "p1", 1337.0, List.of("B")),
+            Arguments.of("b", "p1", 1337.0, ValueType.DOUBLE, List.of()),
+            Arguments.of("b", "p1", 1337.0, ValueType.DOUBLE, List.of("B")),
 
-            Arguments.of("b", "p2", Double.longBitsToDouble(1337), List.of()),
-            Arguments.of("b", "p2", Double.longBitsToDouble(1337), List.of("B"))
+            Arguments.of("b", "p2", Double.longBitsToDouble(1337), ValueType.LONG, List.of()),
+            Arguments.of("b", "p2", Double.longBitsToDouble(1337), ValueType.LONG, List.of("B"))
         );
     }
 
@@ -73,11 +74,12 @@ public class EvaluationContextTest {
         String variable,
         String propertyKey,
         Object expectedValue,
+        ValueType valueType,
         List<String> expectedLabels
     ) {
         var context = new EvaluationContext.NodeEvaluationContext(graphStore);
         context.init(idFunction.of(variable));
-        assertThat(context.getProperty(propertyKey)).isEqualTo(expectedValue);
+        assertThat(context.getProperty(propertyKey, valueType)).isEqualTo(expectedValue);
         assertThat(context.hasLabelsOrTypes(expectedLabels)).isTrue();
     }
 
@@ -100,7 +102,7 @@ public class EvaluationContextTest {
     void relationshipEvaluationContextPositive() {
         var context = new EvaluationContext.RelationshipEvaluationContext(Map.of("baz", 0));
         context.init("REL", new double[]{84});
-        assertThat(context.getProperty("baz")).isEqualTo(84);
+        assertThat(context.getProperty("baz", ValueType.DOUBLE)).isEqualTo(84);
         assertThat(context.hasLabelsOrTypes(List.of("REL"))).isTrue();
     }
 

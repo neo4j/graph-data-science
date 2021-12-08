@@ -47,7 +47,8 @@ public interface Expression {
         return context;
     }
 
-    default ValueType valueType(EvaluationContext context) {
+    @Value.Default
+    default ValueType valueType() {
         return ValueType.DOUBLE;
     }
 
@@ -105,7 +106,7 @@ public interface Expression {
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
-                return context.getProperty(propertyKey());
+                return context.getProperty(propertyKey(), valueType());
             }
 
             @Override
@@ -126,12 +127,6 @@ public interface Expression {
                 }
 
                 return context;
-            }
-
-            @Value.Default
-            @Override
-            default ValueType valueType(EvaluationContext context) {
-                return context.getValueType(propertyKey());
             }
         }
 
@@ -242,14 +237,14 @@ public interface Expression {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
-                if (lhs().valueType(context) == ValueType.LONG && rhs().valueType(context) == ValueType.LONG) {
+                // It is sufficient to check one of the input types
+                // as validation made sure that the types are equal.
+                if (lhs().valueType() == ValueType.LONG) {
                     return evaluateLong(Double.doubleToLongBits(lhsValue), Double.doubleToLongBits(rhsValue));
-                } else if (lhs().valueType(context) == ValueType.DOUBLE && rhs().valueType(context) == ValueType.DOUBLE) {
-                    return evaluateDouble(lhsValue, rhsValue);
-                } else {
-                    throw new IllegalArgumentException(
-                        "Comparing incompatible types long and double: " + this.debugString());
                 }
+
+                return evaluateDouble(lhsValue, rhsValue);
+
             }
 
             double evaluateLong(long lhsValue, long rhsValue);
@@ -380,7 +375,7 @@ public interface Expression {
             long value();
 
             @Override
-            default ValueType valueType(EvaluationContext context) {
+            default ValueType valueType() {
                 return ValueType.LONG;
             }
 
@@ -397,6 +392,11 @@ public interface Expression {
         @ValueClass
         interface DoubleLiteral extends Literal {
             double value();
+
+            @Override
+            default ValueType valueType() {
+                return ValueType.DOUBLE;
+            }
 
             @Value.Derived
             @Override
