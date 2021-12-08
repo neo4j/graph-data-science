@@ -40,8 +40,28 @@ class GdsASTFactory extends ASTFactoryAdapter {
         this.validationContext = validationContext;
     }
 
+    public ValidationContext validationContext() {
+        return this.validationContext;
+    }
+
     @Override
     public Expression.LeafExpression.Variable newVariable(InputPosition p, String name) {
+        if (validationContext.context() == ValidationContext.Context.NODE) {
+            if (!name.equals("n")) {
+                validationContext = validationContext.withError(SemanticErrors.SemanticError.of(formatWithLocale(
+                    "Invalid variable `%s`. Only `n` is allowed for nodes",
+                    name
+                )));
+            }
+        } else if (validationContext.context() == ValidationContext.Context.RELATIONSHIP) {
+            if (!name.equals("r")) {
+                validationContext = validationContext.withError(SemanticErrors.SemanticError.of(formatWithLocale(
+                    "Invalid variable `%s`. Only `r` is allowed for relationships",
+                    name
+                )));
+            }
+        }
+
         return ImmutableVariable.builder().name(name).build();
     }
 

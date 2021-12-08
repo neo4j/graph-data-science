@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.filter.expression;
 
+import org.neo4j.gds.annotation.ValueClass;
 import org.opencypher.v9_0.parser.javacc.Cypher;
 import org.opencypher.v9_0.parser.javacc.CypherCharStream;
 import org.opencypher.v9_0.parser.javacc.ParseException;
@@ -27,7 +28,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ExpressionParser {
 
-    public static Expression parse(String cypher, ValidationContext validationContext) throws ParseException {
+    public static ParseResult parse(String cypher, ValidationContext validationContext) throws ParseException {
         var astFactory = new GdsASTFactory(validationContext);
         var exceptionFactory = new ExceptionFactory();
         var charstream = new CypherCharStream(cypher);
@@ -45,8 +46,19 @@ public final class ExpressionParser {
             throw new ParseException(formatWithLocale("Expected a single filter expression, got '%s'", cypher));
         }
 
-        return expression;
+        return ImmutableParseResult
+            .builder()
+            .expression(expression)
+            .validationContext(astFactory.validationContext())
+            .build();
     }
 
     private ExpressionParser() {}
+
+    @ValueClass
+    public interface ParseResult {
+        Expression expression();
+
+        ValidationContext validationContext();
+    }
 }

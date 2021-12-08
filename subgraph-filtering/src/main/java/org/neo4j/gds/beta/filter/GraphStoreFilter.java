@@ -137,18 +137,25 @@ public final class GraphStoreFilter {
     ) throws IllegalArgumentException {
         Expression nodeExpression;
         try {
-            var validationContext = ValidationContext.forNodes(graphStore);
-            nodeExpression = ExpressionParser.parse(replaceStarWithTrue(nodeFilter), validationContext);
-            nodeExpression.validate(validationContext).validate();
+            var parseResult = ExpressionParser.parse(
+                replaceStarWithTrue(nodeFilter),
+                ValidationContext.forNodes(graphStore)
+            );
+            parseResult.validationContext().validate();
+            nodeExpression = parseResult.expression();
         } catch (ParseException | SemanticErrors e) {
             throw new IllegalArgumentException("Invalid `nodeFilter` expression.", e);
         }
 
         Expression relationshipExpression;
         try {
-            var validationContext = ValidationContext.forRelationships(graphStore);
-            relationshipExpression = ExpressionParser.parse(replaceStarWithTrue(relationshipFilter), validationContext);
-            relationshipExpression.validate(validationContext).validate();
+            var parseResult = ExpressionParser.parse(
+                replaceStarWithTrue(relationshipFilter),
+                ValidationContext.forRelationships(graphStore)
+            );
+            parseResult.validationContext().validate();
+            relationshipExpression = parseResult.expression();
+            ValidationContext.forRelationships(graphStore).validate();
         } catch (ParseException | SemanticErrors e) {
             throw new IllegalArgumentException("Invalid `relationshipFilter` expression.", e);
         }
