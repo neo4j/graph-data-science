@@ -69,10 +69,10 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.stream.estimate", mode = READ)
     @Description("Estimates memory for applying a linkPrediction model")
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfig, configuration);
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

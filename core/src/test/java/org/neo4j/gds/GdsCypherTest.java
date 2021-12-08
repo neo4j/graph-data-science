@@ -194,7 +194,7 @@ class GdsCypherTest {
             .yields();
 
         assertThat(query).isEqualTo(
-            "CALL gds.algoName.%s.estimate('graph')",
+            "CALL gds.algoName.%s.estimate('graph', {})",
             executionModeName(executionMode)
         );
     }
@@ -229,7 +229,7 @@ class GdsCypherTest {
         String query = nextBuilder.yields();
 
         assertThat(query).isEqualTo(
-            "CALL gds.algoName.%s.estimate('graph')",
+            "CALL gds.algoName.%s.estimate('graph', {})",
             executionModeName(executionMode)
         );
     }
