@@ -145,6 +145,21 @@ class CypherFactoryTest extends BaseTest {
     }
 
     @Test
+    void doubleListWithMissingNodeProperty() {
+        var nodeQuery = "WITH [0, 1] AS ids, [[1.3, 3.7], []] AS properties " +
+                        "UNWIND ids AS id " +
+                        "RETURN id, properties[id] AS list";
+
+        var builder = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery(nodeQuery)
+            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
+
+        var graph = applyInTransaction(db, tx -> builder.build().graph());
+        assertThat(graph.nodeProperties("list").doubleArrayValue(0)).containsExactly(1.3, 3.7);
+    }
+
+    @Test
     void longListNodeProperty() {
         var nodeQuery = "RETURN 0 AS id, [1, 2] AS list";
 
