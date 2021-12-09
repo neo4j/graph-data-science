@@ -84,6 +84,11 @@ public interface Expression {
 
                 return context;
             }
+
+            @Override
+            default String debugString() {
+                return name();
+            }
         }
 
     }
@@ -127,6 +132,11 @@ public interface Expression {
                 }
 
                 return context;
+            }
+
+            @Override
+            default String debugString() {
+                return in().debugString() + "." + propertyKey();
             }
         }
 

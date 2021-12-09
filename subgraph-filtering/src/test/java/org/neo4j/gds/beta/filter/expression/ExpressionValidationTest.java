@@ -19,17 +19,25 @@
  */
 package org.neo4j.gds.beta.filter.expression;
 
+import org.assertj.core.api.Assertions;
 import org.immutables.value.Value;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.neo4j.gds.TestSupport.graphStoreFromGDL;
 import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.NODE;
 import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.RELATIONSHIP;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -43,7 +51,10 @@ class ExpressionValidationTest {
 
         assertThatExceptionOfType(SemanticErrors.class)
             .isThrownBy(() -> ImmutableVariable.builder().name(variableName).build().validate(context).validate())
-            .withMessageContaining(formatWithLocale("Invalid variable `%s`. Only `n` is allowed for nodes", variableName));
+            .withMessageContaining(formatWithLocale(
+                "Invalid variable `%s`. Only `n` is allowed for nodes",
+                variableName
+            ));
     }
 
     @ParameterizedTest
@@ -76,7 +87,11 @@ class ExpressionValidationTest {
     @Test
     void hasLabelsOrTypes() {
         var context = ImmutableTestValidationContext.builder().addAvailableLabelsOrTypes("foo", "bar").build();
-        var expr = ImmutableHasLabelsOrTypes.builder().in(ImmutableVariable.builder().name("n").build()).addLabelsOrTypes("foo", "baz").build();
+        var expr = ImmutableHasLabelsOrTypes
+            .builder()
+            .in(ImmutableVariable.builder().name("n").build())
+            .addLabelsOrTypes("foo", "baz")
+            .build();
 
         assertThatExceptionOfType(SemanticErrors.class)
             .isThrownBy(() -> expr.validate(context).validate())
@@ -101,6 +116,44 @@ class ExpressionValidationTest {
             .withMessageContaining("Unknown property `foo`");
     }
 
+    @ParameterizedTest(name = "{0} ({1} vs {2})")
+    @CsvSource(value = {
+        "n.foo > 42,DOUBLE,LONG",
+        "n.foo > 42.0,LONG,DOUBLE",
+
+        "n.foo >= 42,DOUBLE,LONG",
+        "n.foo >= 42.0,LONG,DOUBLE",
+
+        "n.foo < 42,DOUBLE,LONG",
+        "n.foo < 42.0,LONG,DOUBLE",
+
+        "n.foo <= 42,DOUBLE,LONG",
+        "n.foo <= 42.0,LONG,DOUBLE",
+
+        "n.foo = 42,DOUBLE,LONG",
+        "n.foo = 42.0,LONG,DOUBLE",
+
+        "n.foo <> 42,DOUBLE,LONG",
+        "n.foo <> 42.0,LONG,DOUBLE",
+    })
+    void incompatibleTypes(String exprString, ValueType lhsType, ValueType rhsType) throws ParseException {
+        var context = ImmutableValidationContext
+            .builder()
+            .context(NODE)
+            .putAvailablePropertiesWithType("foo", lhsType)
+            .build();
+
+        var expr = ExpressionParser.parse(exprString, context.availablePropertiesWithTypes());
+
+        assertThatExceptionOfType(SemanticErrors.class)
+            .isThrownBy(() -> expr.validate(context).validate())
+            .withMessageContaining("Incompatible types")
+            .withMessageContaining(lhsType.name())
+            .withMessageContaining(rhsType.name())
+            .withMessageContaining("in binary expression")
+            .withMessageContaining(exprString);
+    }
+
     @ValueClass
     @SuppressWarnings("immutables:subtype")
     interface TestValidationContext extends ValidationContext {
@@ -121,4 +174,5 @@ class ExpressionValidationTest {
         default Set<String> availableLabelsOrTypes() {
             return Set.of();
         }
-    }}
+    }
+}
