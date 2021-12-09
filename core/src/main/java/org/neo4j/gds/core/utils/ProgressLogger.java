@@ -72,6 +72,26 @@ public interface ProgressLogger {
         return this;
     }
 
+    default ProgressLogger logFinishWithFailure() {
+        return logFinishWithFailure("");
+    }
+
+    default ProgressLogger logFinishWithFailure(String message) {
+        logMessage((message + TASK_SEPARATOR + "Failed").trim());
+        return this;
+    }
+
+    default ProgressLogger logFinishSubtaskWithFailure(String subTaskName) {
+        logFinishWithFailure();
+        var endIndex = getTask().indexOf(TASK_SEPARATOR + subTaskName);
+        if (endIndex == -1) {
+            throw new IllegalArgumentException("Unknown subtask: " + subTaskName);
+        }
+        var task = getTask().substring(0, endIndex);
+        setTask(task);
+        return this;
+    }
+
     default ProgressLogger startSubTask(String subTaskName) {
         setTask(getTask() + TASK_SEPARATOR + subTaskName);
         logStart();

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.logging.Log;
@@ -53,6 +54,17 @@ class TaskProgressLogger extends BatchingProgressLogger {
             logFinish(taskName);
         } else {
             finishSubTask(taskName);
+        }
+    }
+
+    void logEndSubTaskWithFailure(Task task, @Nullable Task parentTask) {
+        var taskName = taskDescription(task, parentTask);
+
+        log100OnLeafTaskFinish(task);
+        if (parentTask == null) {
+            logFinishWithFailure(taskName);
+        } else {
+            logFinishSubtaskWithFailure(taskName);
         }
     }
 
