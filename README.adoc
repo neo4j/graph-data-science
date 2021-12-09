@@ -150,6 +150,33 @@ The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules
 
 == Building the library
 
+Installing JDKs::
+
+Install https://sdkman.io/[SKDMAN]
+
+[source]
+----
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+----
+
+Install both JDK 11 and JDK 17 Temurin:
+[source]
+----
+sdk install java 11.0.13-tem
+sdk install java 17.0.1-tem
+----
+
+NOTE: These versions were the latest at the time of writing these notes. To see a list of the available versions you can run `sdk list java`.
+
+NOTE: You do not need to set them as default JDK
+
+If you want to opt out of `Temurin`, you can override `javaLanguageVendor` and `javaLanguageVersion` in your project-local `gradle.properties`.
+https://docs.gradle.org/current/javadoc/org/gradle/jvm/toolchain/JvmVendorSpec.html[List of Gradle supported language vendors]
+
+NOTE: The `javaLanguageVendor` and `javaLanguageVersion` overrides have to be installed locally on your system.
+
+
 OpenGDS uses the build tool `Gradle`.
 Gradle is shipped with this repository using the Gradle Wrapper.
 This means you can simply run any Gradle task by running `./gradlew TASK` from the repository root.
