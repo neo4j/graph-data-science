@@ -55,7 +55,7 @@ public interface ProgressTracker {
 
     void release();
 
-    void fail();
+    void endSubTaskWithFailure();
 
     class EmptyProgressTracker implements ProgressTracker {
 
@@ -119,7 +119,7 @@ public interface ProgressTracker {
         }
 
         @Override
-        public void fail() {
+        public void endSubTaskWithFailure() {
 
         }
     }

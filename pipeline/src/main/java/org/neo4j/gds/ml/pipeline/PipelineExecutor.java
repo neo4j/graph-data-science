@@ -91,7 +91,7 @@ public abstract class PipelineExecutor<
             progressTracker.endSubTask();
             return result;
         } catch (Exception e) {
-            progressTracker.fail();
+            progressTracker.endSubTaskWithFailure();
             throw e;
         } finally {
             cleanUpGraphStore(dataSplits);
