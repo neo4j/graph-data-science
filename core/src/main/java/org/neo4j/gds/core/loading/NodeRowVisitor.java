@@ -26,6 +26,8 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.impl.util.ValueUtils;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.ArrayValue;
+import org.neo4j.values.storable.DoubleValue;
+import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
 import org.neo4j.values.storable.Values;
@@ -142,31 +144,50 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     }
 
     private ArrayValue castToNumericArrayOrFail(AnyValue value) {
-        ArrayValue array;
+        ArrayValue array = null;
         if (value instanceof ListValue) {
             var listValue = (ListValue) value;
             if (listValue.isEmpty()) {
                 // encode as long array
                 return Values.longArray(new long[0]);
             }
-            var itemValueGroup = listValue.itemValueRepresentation().valueGroup();
-            if (itemValueGroup != ValueGroup.NUMBER) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Only lists of numbers are possible as GDS node properties, but found a list with values of group `%s`.",
-                    itemValueGroup
-                ));
+            // only 2 cases are valid here: list of double and list of long
+            var firstValue = listValue.head();
+            try {
+                if (firstValue instanceof LongValue) {
+                    var longArray = new long[listValue.size()];
+                    var iterator = listValue.iterator();
+                    for (int i = 0; i < listValue.size() && iterator.hasNext(); i++) {
+                        longArray[i] = ((LongValue) iterator.next()).longValue();
+                    }
+                    array = Values.longArray(longArray);
+                } else if (firstValue instanceof DoubleValue) {
+                    var doubleArray = new double[listValue.size()];
+                    var iterator = listValue.iterator();
+                    for (int i = 0; i < listValue.size() && iterator.hasNext(); i++) {
+                        doubleArray[i] = ((DoubleValue) iterator.next()).doubleValue();
+                    }
+                    array = Values.doubleArray(doubleArray);
+                } else {
+                    failOnBadList(listValue);
+                }
+            } catch (ClassCastException c) {
+                failOnBadList(listValue);
             }
-            array = listValue.itemValueRepresentation().arrayOf(listValue);
         } else {
              array = ((ArrayValue) value);
              if (array.valueGroup() != ValueGroup.NUMBER_ARRAY) {
-                 throw new IllegalArgumentException(formatWithLocale(
-                     "Only lists of numbers are possible as GDS node properties, but found a list of group `%s`.",
-                     array.valueGroup()
-                 ));
+                 failOnBadList(array);
              }
         }
         return array;
+    }
+
+    private void failOnBadList(AnyValue badList) {
+        throw new IllegalArgumentException(formatWithLocale(
+            "Only lists of uniformly typed numbers are supported as GDS node properties, but found an unsupported list `%s`.",
+            badList
+        ));
     }
 
     long rows() {
