@@ -60,17 +60,13 @@ class ExpressionEvaluatorTest {
 
     @Property
     void longLiteral(@ForAll long input) throws ParseException {
-        var expr = ExpressionParser
-            .parse(Long.toString(input), Map.of())
-            ;
+        var expr = ExpressionParser.parse(Long.toString(input), Map.of());
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(input);
     }
 
     @Property
     void doubleLiteral(@ForAll double input) throws ParseException {
-        var expr = ExpressionParser
-            .parse(Double.toString(input), Map.of())
-            ;
+        var expr = ExpressionParser.parse(Double.toString(input), Map.of());
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(input);
     }
 

@@ -142,7 +142,7 @@ public final class GraphStoreFilter {
                 replaceStarWithTrue(nodeFilter),
                 validationContext.availablePropertiesWithTypes()
             );
-            validationContext.validate();
+            nodeExpression.validate(validationContext).validate();
         } catch (ParseException | SemanticErrors e) {
             throw new IllegalArgumentException("Invalid `nodeFilter` expression.", e);
         }
@@ -154,7 +154,7 @@ public final class GraphStoreFilter {
                 replaceStarWithTrue(relationshipFilter),
                 validationContext.availablePropertiesWithTypes()
             );
-            validationContext.validate();
+            relationshipExpression.validate(validationContext).validate();
         } catch (ParseException | SemanticErrors e) {
             throw new IllegalArgumentException("Invalid `relationshipFilter` expression.", e);
         }
