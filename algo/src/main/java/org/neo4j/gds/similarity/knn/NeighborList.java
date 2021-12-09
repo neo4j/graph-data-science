@@ -217,13 +217,11 @@ class NeighborList {
      * @param threshold we keep all results with similarity >=threshold.
      */
     public void filterHighSimilarityResults(double threshold) {
-        int nextAvailablePosition = 0;
         for (int i = 0; i < elementCount; i++) {
-            if (Double.longBitsToDouble(priorityElementPairs[2 * i]) >= threshold) {
-                priorityElementPairs[nextAvailablePosition++] = priorityElementPairs[2 * i];
-                priorityElementPairs[nextAvailablePosition++] = priorityElementPairs[2 * i + 1];
+            if (Double.longBitsToDouble(priorityElementPairs[2 * i]) < threshold) {
+                elementCount = i;
+                break;
             }
         }
-        elementCount = nextAvailablePosition / 2;
     }
 }
