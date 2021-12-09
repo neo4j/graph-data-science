@@ -24,17 +24,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.NODE;
-import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.RELATIONSHIP;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ExpressionParserTest {
@@ -63,7 +59,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("nots")
     void nots(String cypher, Expression.UnaryExpression.Not expected) throws ParseException {
-        var actual = ExpressionParser.parse(cypher, EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse(cypher, Map.of());
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -71,13 +67,13 @@ class ExpressionParserTest {
 
     @Test
     void trueLiteral() throws ParseException {
-        var actual = ExpressionParser.parse("TRUE", EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse("TRUE", Map.of());
         assertThat(actual).isEqualTo(Expression.Literal.TrueLiteral.INSTANCE);
     }
 
     @Test
     void falseLiteral() throws ParseException {
-        var actual = ExpressionParser.parse("FALSE", EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse("FALSE", Map.of());
         assertThat(actual).isEqualTo(Expression.Literal.FalseLiteral.INSTANCE);
     }
 
@@ -93,7 +89,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("longs")
     void longLiteral(String cypher, Expression.Literal.LongLiteral expected) throws ParseException {
-        var actual = ExpressionParser.parse(cypher, EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse(cypher, Map.of());
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -110,7 +106,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("doubles")
     void doubleLiteral(String cypher, Expression.Literal.DoubleLiteral expected) throws ParseException {
-        var actual = ExpressionParser.parse(cypher, EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse(cypher, Map.of());
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -145,7 +141,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("ands")
     void and(String cypher, Expression.BinaryExpression.And expected) throws ParseException {
-        var actual = ExpressionParser.parse(cypher, EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse(cypher, Map.of());
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -176,7 +172,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("ors")
     void or(String cypher, Expression.BinaryExpression.Or expected) throws ParseException {
-        var actual = ExpressionParser.parse(cypher, EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse(cypher, Map.of());
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -207,7 +203,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("xors")
     void xor(String cypher, Expression.BinaryExpression.Xor expected) throws ParseException {
-        var actual = ExpressionParser.parse(cypher, EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse(cypher, Map.of());
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -238,7 +234,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("equals")
     void equal(String cypher, Expression.BinaryExpression.Equal expected) throws ParseException {
-        var actual = ExpressionParser.parse(cypher, EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse(cypher, Map.of());
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -285,15 +281,14 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("notEquals")
     void notEqual(String cypher, Expression.BinaryExpression.NotEqual expected) throws ParseException {
-        var actual = ExpressionParser.parse(cypher, EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse(cypher, Map.of());
         assertThat(actual).isEqualTo(expected);
     }
 
     @Test
     void greaterThan() throws ParseException {
-        var actual = ExpressionParser.parse("1337 > 42", EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse("1337 > 42", Map.of());
         assertThat(actual).isEqualTo(ImmutableGreaterThan.builder()
-            .valueType(ValueType.LONG)
             .lhs(ImmutableLongLiteral.of(1337))
             .rhs(ImmutableLongLiteral.of(42))
             .build()
@@ -302,9 +297,8 @@ class ExpressionParserTest {
 
     @Test
     void greaterThanEquals() throws ParseException {
-        var actual = ExpressionParser.parse("1337 >= 42", EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse("1337 >= 42", Map.of());
         assertThat(actual).isEqualTo(ImmutableGreaterThanOrEquals.builder()
-            .valueType(ValueType.LONG)
             .lhs(ImmutableLongLiteral.of(1337))
             .rhs(ImmutableLongLiteral.of(42))
             .build()
@@ -313,10 +307,9 @@ class ExpressionParserTest {
 
     @Test
     void lessThan() throws ParseException {
-        var actual = ExpressionParser.parse("1337 < 42", EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse("1337 < 42", Map.of());
 
         assertThat(actual).isEqualTo(ImmutableLessThan.builder()
-            .valueType(ValueType.LONG)
             .lhs(ImmutableLongLiteral.of(1337))
             .rhs(ImmutableLongLiteral.of(42))
             .build()
@@ -325,9 +318,8 @@ class ExpressionParserTest {
 
     @Test
     void lessThanEquals() throws ParseException {
-        var actual = ExpressionParser.parse("1337 <= 42", EMPTY_VALIDATION_CONTEXT).expression();
+        var actual = ExpressionParser.parse("1337 <= 42", Map.of());
         assertThat(actual).isEqualTo(ImmutableLessThanOrEquals.builder()
-            .valueType(ValueType.LONG)
             .lhs(ImmutableLongLiteral.of(1337))
             .rhs(ImmutableLongLiteral.of(42))
             .build()
@@ -342,109 +334,8 @@ class ExpressionParserTest {
     })
     void shouldThrowOnMultipleExpressions(String input) {
         assertThatThrownBy(() -> ExpressionParser
-            .parse(input, ImmutableValidationContext.builder().context(NODE).build())
-            .expression())
+            .parse(input, Map.of()))
             .isInstanceOf(ParseException.class)
             .hasMessageContaining(formatWithLocale("Expected a single filter expression, got '%s'", input));
     }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"r", "foo"})
-    void nodeVariable(String variableName) {
-        assertThatThrownBy(() -> ExpressionParser.parse(
-            variableName,
-            ImmutableValidationContext.builder().context(NODE).build()
-        ).validationContext().validate())
-            .isInstanceOf(SemanticErrors.class)
-            .hasMessageContaining(formatWithLocale(
-                "Invalid variable `%s`. Only `n` is allowed for nodes",
-                variableName
-            ));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"n", "foo"})
-    void relationshipVariable(String variableName) {
-        assertThatThrownBy(() -> ExpressionParser
-            .parse(variableName, ImmutableValidationContext.builder().context(RELATIONSHIP).build())
-            .validationContext()
-            .validate())
-            .isInstanceOf(SemanticErrors.class)
-            .hasMessageContaining(formatWithLocale(
-                "Invalid variable `%s`. Only `r` is allowed for relationships",
-                variableName
-            ));
-    }
-
-    @Test
-    void property() {
-        assertThatThrownBy(() -> ExpressionParser
-            .parse(
-                "n.baz",
-                ImmutableValidationContext
-                    .builder()
-                    .context(NODE)
-                    .putAvailablePropertiesWithType("bar", ValueType.LONG)
-                    .build()
-            )
-            .validationContext()
-            .validate())
-            .isInstanceOf(SemanticErrors.class)
-            .hasMessageContaining("Unknown property `baz`. Did you mean `bar`?");
-    }
-
-    @Test
-    void hasLabelsOrTypes() {
-        assertThatThrownBy(() -> ExpressionParser
-            .parse(
-                "n:foo:baz",
-                ImmutableValidationContext.builder().context(NODE).addAvailableLabelsOrTypes("foo", "bar").build()
-            )
-            .validationContext()
-            .validate())
-            .isInstanceOf(SemanticErrors.class)
-            .hasMessageContaining("Unknown label `baz`. Did you mean `bar`?");
-    }
-
-    @Test
-    void multipleErrors() throws ParseException {
-        assertThatThrownBy(() -> ExpressionParser
-            .parse(
-                "n:Baz AND n.foo = 42",
-                ImmutableValidationContext
-                    .builder()
-                    .context(RELATIONSHIP)
-                    .addAvailableLabelsOrTypes("Foo", "Bar")
-                    .putAvailablePropertiesWithType("bar", ValueType.LONG)
-                    .putAvailablePropertiesWithType("foot", ValueType.DOUBLE)
-                    .build()
-            ).validationContext().validate())
-            .isInstanceOf(SemanticErrors.class)
-            .hasMessageContaining("Only `r` is allowed")
-            .hasMessageContaining("Unknown relationship type `Baz`")
-            .hasMessageContaining("Unknown property `foo`");
-    }
-
-    static final ValidationContext EMPTY_VALIDATION_CONTEXT = new ValidationContext() {
-        @Override
-        public Context context() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Set<String> availableProperties() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Map<String, ValueType> availablePropertiesWithTypes() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Set<String> availableLabelsOrTypes() {
-            throw new UnsupportedOperationException();
-        }
-    };
-
 }

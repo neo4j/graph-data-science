@@ -250,6 +250,30 @@ public interface Expression {
             double evaluateLong(long lhsValue, long rhsValue);
 
             double evaluateDouble(double lhsValue, double rhsValue);
+
+            @Override
+            default ValidationContext validate(ValidationContext context) {
+                context = lhs().validate(context);
+                context = rhs().validate(context);
+
+                var leftType = lhs().valueType();
+                var rightType = rhs().valueType();
+
+                // If one of the types is UNKNOWN, the corresponding property does not exist
+                // in the graph store, and we already reported this as an error when parsing
+                // the property expression. There is no need to add additional info.
+                if (leftType != rightType && leftType != ValueType.UNKNOWN && rightType != ValueType.UNKNOWN) {
+                    return context.withError(SemanticErrors.SemanticError.of(
+                        formatWithLocale(
+                            "Incompatible types `%s` and `%s` in binary expression `%s`",
+                            leftType,
+                            rightType,
+                            debugString()
+                        )));
+                }
+
+                return context;
+            }
         }
 
         @ValueClass
