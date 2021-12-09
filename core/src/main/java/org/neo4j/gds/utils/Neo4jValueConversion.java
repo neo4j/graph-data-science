@@ -64,6 +64,8 @@ public final class Neo4jValueConversion {
     public static double[] getDoubleArray(Value value) {
         if (value instanceof DoubleArray) {
             return ((DoubleArray) value).asObjectCopy();
+        } else if (value instanceof LongArray && ((LongArray) value).isEmpty()) {
+            return new double[0];
         } else {
             throw conversionError(value, "Double Array");
         }

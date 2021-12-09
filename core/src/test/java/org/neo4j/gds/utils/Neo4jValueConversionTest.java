@@ -20,6 +20,7 @@
 package org.neo4j.gds.utils;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,6 +32,7 @@ import org.neo4j.values.storable.Values;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -62,6 +64,11 @@ class Neo4jValueConversionTest {
             arguments(Values.floatValue(42.12F), null),
             arguments(Values.doubleValue(42.12), null)
         );
+    }
+
+    @Test
+    void shouldConvertEmptyLongArrayToDoubleArray() {
+        assertThat(Neo4jValueConversion.getDoubleArray(Values.longArray(new long[0]))).isEqualTo(new double[0]);
     }
 
     @ParameterizedTest
