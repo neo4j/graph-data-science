@@ -35,6 +35,7 @@ import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,29 +48,29 @@ class ExpressionEvaluatorTest {
 
     @Test
     void trueLiteral() throws ParseException {
-        var expr = ExpressionParser.parse("TRUE", ExpressionParserTest.EMPTY_VALIDATION_CONTEXT).expression();
+        var expr = ExpressionParser.parse("TRUE", Map.of());
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(TRUE);
     }
 
     @Test
     void falseLiteral() throws ParseException {
-        var expr = ExpressionParser.parse("FALSE", ExpressionParserTest.EMPTY_VALIDATION_CONTEXT).expression();
+        var expr = ExpressionParser.parse("FALSE", Map.of());
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(FALSE);
     }
 
     @Property
     void longLiteral(@ForAll long input) throws ParseException {
         var expr = ExpressionParser
-            .parse(Long.toString(input), ExpressionParserTest.EMPTY_VALIDATION_CONTEXT)
-            .expression();
+            .parse(Long.toString(input), Map.of())
+            ;
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(input);
     }
 
     @Property
     void doubleLiteral(@ForAll double input) throws ParseException {
         var expr = ExpressionParser
-            .parse(Double.toString(input), ExpressionParserTest.EMPTY_VALIDATION_CONTEXT)
-            .expression();
+            .parse(Double.toString(input), Map.of())
+            ;
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(input);
     }
 
@@ -83,8 +84,8 @@ class ExpressionEvaluatorTest {
                 : "%f = %f";
         var expr = ExpressionParser.parse(
             formatWithLocale(expression, left, right),
-            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
-        ).expression();
+            Map.of()
+        );
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
@@ -95,8 +96,8 @@ class ExpressionEvaluatorTest {
     ) throws ParseException {
         var expr = ExpressionParser.parse(
             formatWithLocale("%f < %f", left, right),
-            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
-        ).expression();
+            Map.of()
+        );
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
@@ -107,8 +108,8 @@ class ExpressionEvaluatorTest {
     ) throws ParseException {
         var expr = ExpressionParser.parse(
             formatWithLocale("%f <= %f", left, right),
-            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
-        ).expression();
+            Map.of()
+        );
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
@@ -119,8 +120,8 @@ class ExpressionEvaluatorTest {
     ) throws ParseException {
         var expr = ExpressionParser.parse(
             formatWithLocale("%f > %f", left, right),
-            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
-        ).expression();
+            Map.of()
+        );
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
@@ -131,8 +132,8 @@ class ExpressionEvaluatorTest {
     ) throws ParseException {
         var expr = ExpressionParser.parse(
             formatWithLocale("%f >= %f", left, right),
-            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
-        ).expression();
+            Map.of()
+        );
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
@@ -140,8 +141,8 @@ class ExpressionEvaluatorTest {
     void equal(@ForAll double value) throws ParseException {
         var expr = ExpressionParser.parse(
             formatWithLocale("%f = %f", value, value),
-            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
-        ).expression();
+            Map.of()
+        );
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
@@ -152,28 +153,28 @@ class ExpressionEvaluatorTest {
     ) throws ParseException {
         var expr = ExpressionParser.parse(
             formatWithLocale("%f <> %f", left, right),
-            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
-        ).expression();
+            Map.of()
+        );
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
 
         expr = ExpressionParser.parse(
             formatWithLocale("%f != %f", left, right),
-            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
-        ).expression();
+            Map.of()
+        );
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"NOT TRUE", "NOT (1337 > 42)"})
     void notTrue(String cypher) throws ParseException {
-        var expr = ExpressionParser.parse(cypher, ExpressionParserTest.EMPTY_VALIDATION_CONTEXT).expression();
+        var expr = ExpressionParser.parse(cypher, Map.of());
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isFalse();
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"NOT FALSE", "NOT (1337 < 42)"})
     void notFalse(String cypher) throws ParseException {
-        var expr = ExpressionParser.parse(cypher, ExpressionParserTest.EMPTY_VALIDATION_CONTEXT).expression();
+        var expr = ExpressionParser.parse(cypher, Map.of());
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
@@ -187,8 +188,8 @@ class ExpressionEvaluatorTest {
     void and(boolean left, boolean right, boolean expected) throws ParseException {
         var expr = ExpressionParser.parse(
             formatWithLocale("%s AND %s", left, right),
-            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
-        ).expression();
+            Map.of()
+        );
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isEqualTo(expected);
     }
 
@@ -202,8 +203,8 @@ class ExpressionEvaluatorTest {
     void or(boolean left, boolean right, boolean expected) throws ParseException {
         var expr = ExpressionParser.parse(
             formatWithLocale("%s OR %s", left, right),
-            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
-        ).expression();
+            Map.of()
+        );
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isEqualTo(expected);
     }
 
@@ -217,8 +218,8 @@ class ExpressionEvaluatorTest {
     void xor(boolean left, boolean right, boolean expected) throws ParseException {
         var expr = ExpressionParser.parse(
             formatWithLocale("%s XOR %s", left, right),
-            ExpressionParserTest.EMPTY_VALIDATION_CONTEXT
-        ).expression();
+            Map.of()
+        );
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isEqualTo(expected);
     }
 
@@ -233,7 +234,7 @@ class ExpressionEvaluatorTest {
             .putAvailablePropertiesWithType(propertyKey, propertyType)
             .build();
 
-        var expr = ExpressionParser.parse("n." + propertyKey, validationContext).expression();
+        var expr = ExpressionParser.parse("n." + propertyKey, validationContext.availablePropertiesWithTypes());
         var context = ImmutableTestContext.builder().propertyKey(propertyKey).propertyValue(propertyValue).build();
         assertThat(expr.evaluate(context) == propertyValue).isTrue();
     }
@@ -258,7 +259,7 @@ class ExpressionEvaluatorTest {
             .addAllAvailableLabelsOrTypes(actual)
             .build();
 
-        var expr = ExpressionParser.parse("n" + labelExpression, validationContext).expression();
+        var expr = ExpressionParser.parse("n" + labelExpression, validationContext.availablePropertiesWithTypes());
 
         var evaluationContext = ImmutableTestContext.builder().addAllLabelsOrTypes(actual).build();
         assertThat(expr.evaluate(evaluationContext) == TRUE).isEqualTo(expected);
