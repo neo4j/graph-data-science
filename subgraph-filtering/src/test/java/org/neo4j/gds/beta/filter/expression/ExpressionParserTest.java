@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Map;
@@ -337,5 +338,26 @@ class ExpressionParserTest {
             .parse(input, Map.of()))
             .isInstanceOf(ParseException.class)
             .hasMessageContaining(formatWithLocale("Expected a single filter expression, got '%s'", input));
+    }
+
+    static Stream<Arguments> properties() {
+        return Stream.of(
+            Arguments.of("n.foo", Map.of("foo", ValueType.LONG), ValueType.LONG),
+            Arguments.of("n.foo", Map.of("foo", ValueType.DOUBLE), ValueType.DOUBLE),
+            Arguments.of("n.foo", Map.of(), ValueType.UNKNOWN)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("properties")
+    void property(String exprString, Map<String, ValueType> properties, ValueType expectedValueType) throws ParseException {
+        var expr = ExpressionParser.parse(exprString, properties);
+
+        assertThat(expr).isEqualTo(ImmutableProperty
+            .builder()
+            .in(ImmutableVariable.builder().name("n").build())
+            .propertyKey("foo")
+            .valueType(expectedValueType)
+            .build());
     }
 }
