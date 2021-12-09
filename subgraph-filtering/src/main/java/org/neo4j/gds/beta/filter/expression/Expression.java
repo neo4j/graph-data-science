@@ -39,7 +39,7 @@ public interface Expression {
     @Value.Derived
     double evaluate(EvaluationContext context);
 
-    default String debugString() {
+    default String prettyString() {
         return toString();
     }
 
@@ -87,7 +87,7 @@ public interface Expression {
             }
 
             @Override
-            default String debugString() {
+            default String prettyString() {
                 return name();
             }
         }
@@ -137,7 +137,7 @@ public interface Expression {
                         formatWithLocale(
                             "Unsupported property type `%s` for expression `%s`. Supported types %s",
                             propertyType.name(),
-                            debugString(),
+                            prettyString(),
                             StringJoining.join(List.of(ValueType.LONG.name(), ValueType.DOUBLE.name()))
                         )));
                 }
@@ -145,8 +145,8 @@ public interface Expression {
             }
 
             @Override
-            default String debugString() {
-                return in().debugString() + "." + propertyKey();
+            default String prettyString() {
+                return in().prettyString() + "." + propertyKey();
             }
         }
 
@@ -288,7 +288,7 @@ public interface Expression {
                             "Incompatible types `%s` and `%s` in binary expression `%s`",
                             leftType,
                             rightType,
-                            debugString()
+                            prettyString()
                         )));
                 }
 
@@ -310,8 +310,8 @@ public interface Expression {
             }
 
             @Override
-            default String debugString() {
-                return lhs().debugString() + " = " + rhs().debugString();
+            default String prettyString() {
+                return lhs().prettyString() + " = " + rhs().prettyString();
             }
         }
 
@@ -329,8 +329,8 @@ public interface Expression {
             }
 
             @Override
-            default String debugString() {
-                return lhs().debugString() + " <> " + rhs().debugString();
+            default String prettyString() {
+                return lhs().prettyString() + " <> " + rhs().prettyString();
             }
         }
 
@@ -348,8 +348,8 @@ public interface Expression {
             }
 
             @Override
-            default String debugString() {
-                return lhs().debugString() + " > " + rhs().debugString();
+            default String prettyString() {
+                return lhs().prettyString() + " > " + rhs().prettyString();
             }
         }
 
@@ -367,8 +367,8 @@ public interface Expression {
             }
 
             @Override
-            default String debugString() {
-                return lhs().debugString() + " >= " + rhs().debugString();
+            default String prettyString() {
+                return lhs().prettyString() + " >= " + rhs().prettyString();
             }
         }
 
@@ -388,8 +388,8 @@ public interface Expression {
             }
 
             @Override
-            default String debugString() {
-                return lhs().debugString() + " < " + rhs().debugString();
+            default String prettyString() {
+                return lhs().prettyString() + " < " + rhs().prettyString();
             }
         }
 
@@ -407,8 +407,8 @@ public interface Expression {
             }
 
             @Override
-            default String debugString() {
-                return lhs().debugString() + " <= " + rhs().debugString();
+            default String prettyString() {
+                return lhs().prettyString() + " <= " + rhs().prettyString();
             }
         }
     }
@@ -430,7 +430,7 @@ public interface Expression {
             }
 
             @Override
-            default String debugString() {return Long.toString(value());}
+            default String prettyString() {return Long.toString(value());}
         }
 
         @ValueClass
@@ -448,7 +448,7 @@ public interface Expression {
                 return value();
             }
 
-            default String debugString() {return Double.toString(value());}
+            default String prettyString() {return Double.toString(value());}
 
         }
 
