@@ -25,7 +25,7 @@ import org.neo4j.gds.ProcedureExecutor;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.pipeline.MemoryEstimtationExecutor;
+import org.neo4j.gds.pipeline.MemoryEstimationExecutor;
 import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -80,7 +80,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
             graphCreationFactory()
         );
 
-        return new MemoryEstimtationExecutor<>(
+        return new MemoryEstimationExecutor<>(
             pipelineSpec.configParser(mutateSpec.newConfigFunction()),
             mutateSpec.algorithmFactory(),
             this::graphLoaderContext,
