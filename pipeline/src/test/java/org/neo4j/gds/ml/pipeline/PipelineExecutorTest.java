@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.NodeLabel;
@@ -121,7 +120,6 @@ class PipelineExecutorTest {
     }
 
     @Test
-    @Disabled("ProgressTracker doesn't log when task is failed")
     void shouldHaveCorrectProgressLoggingOnFailure() {
         var log = new TestLog();
         var pipelineExecutor = new FailingPipelineExecutor(
