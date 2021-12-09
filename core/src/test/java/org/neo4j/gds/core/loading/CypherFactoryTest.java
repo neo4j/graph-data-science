@@ -145,7 +145,7 @@ class CypherFactoryTest extends BaseTest {
     }
 
     @Test
-    void doubleListWithMissingNodeProperty() {
+    void doubleListWithEmptyList() {
         var nodeQuery = "WITH [0, 1] AS ids, [[1.3, 3.7], []] AS properties " +
                         "UNWIND ids AS id " +
                         "RETURN id, properties[id] AS list";
@@ -157,6 +157,23 @@ class CypherFactoryTest extends BaseTest {
 
         var graph = applyInTransaction(db, tx -> builder.build().graph());
         assertThat(graph.nodeProperties("list").doubleArrayValue(0)).containsExactly(1.3, 3.7);
+        assertThat(graph.nodeProperties("list").doubleArrayValue(1)).isEmpty();
+    }
+
+    @Test
+    void longListWithEmptyList() {
+        var nodeQuery = "WITH [0, 1] AS ids, [[1, 3, 3, 7], []] AS properties " +
+                        "UNWIND ids AS id " +
+                        "RETURN id, properties[id] AS list";
+
+        var builder = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery(nodeQuery)
+            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
+
+        var graph = applyInTransaction(db, tx -> builder.build().graph());
+        assertThat(graph.nodeProperties("list").longArrayValue(0)).containsExactly(1, 3, 3, 7);
+        assertThat(graph.nodeProperties("list").longArrayValue(1)).isEmpty();
     }
 
     @Test
