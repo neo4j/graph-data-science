@@ -19,25 +19,21 @@
  */
 package org.neo4j.gds.beta.filter.expression;
 
-import org.assertj.core.api.Assertions;
 import org.immutables.value.Value;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.utils.StringJoining;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.neo4j.gds.TestSupport.graphStoreFromGDL;
 import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.NODE;
 import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.RELATIONSHIP;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -152,6 +148,25 @@ class ExpressionValidationTest {
             .withMessageContaining(rhsType.name())
             .withMessageContaining("in binary expression")
             .withMessageContaining(exprString);
+    }
+
+    @ParameterizedTest(name = "{0} {1}")
+    @CsvSource(value = {
+        "n.foo,DOUBLE_ARRAY",
+        "n.foo,LONG_ARRAY"})
+    void unsupportedTypes(String exprString, ValueType valueType) throws ParseException {
+        var context = ImmutableValidationContext
+            .builder()
+            .context(NODE)
+            .putAvailablePropertiesWithType("foo", valueType)
+            .build();
+        var expr = ExpressionParser.parse(exprString, context.availablePropertiesWithTypes());
+
+        assertThatExceptionOfType(SemanticErrors.class)
+            .isThrownBy(() -> expr.validate(context).validate())
+            .withMessageContaining("Unsupported property type `%s` for expression", valueType.name())
+            .withMessageContaining(exprString)
+            .withMessageContaining(StringJoining.join(List.of(ValueType.LONG.name(), ValueType.DOUBLE.name())));
     }
 
     @ValueClass

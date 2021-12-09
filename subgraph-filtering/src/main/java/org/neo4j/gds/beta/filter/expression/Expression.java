@@ -22,6 +22,7 @@ package org.neo4j.gds.beta.filter.expression;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Set;
@@ -130,7 +131,16 @@ public interface Expression {
                         availablePropertyKeys
                     )));
                 }
-
+                var propertyType = context.availablePropertiesWithTypes().get(propertyKey());
+                if (propertyType != ValueType.LONG && propertyType != ValueType.DOUBLE) {
+                    return context.withError(SemanticErrors.SemanticError.of(
+                        formatWithLocale(
+                            "Unsupported property type `%s` for expression `%s`. Supported types %s",
+                            propertyType.name(),
+                            debugString(),
+                            StringJoining.join(List.of(ValueType.LONG.name(), ValueType.DOUBLE.name()))
+                        )));
+                }
                 return context;
             }
 
