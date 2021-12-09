@@ -213,8 +213,23 @@ class CypherFactoryTest extends BaseTest {
 
         assertThatThrownBy(() -> applyInTransaction(db, tx -> builder.build().graph()))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Only lists of numbers are possible as GDS node properties")
-            .hasMessageContaining("UNKNOWN"); // there is no known type for the union of number and boolean
+            .hasMessageContaining("Only lists of uniformly typed numbers are supported as GDS node properties")
+            .hasMessageContaining("List{Long(1), Long(2), Boolean('true')}");
+    }
+
+    @Test
+    void failsOnMixedNumbersList() {
+        var nodeQuery = "RETURN 0 AS id, [1, 2, 1.23] AS list";
+
+        var builder = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery(nodeQuery)
+            .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
+
+        assertThatThrownBy(() -> applyInTransaction(db, tx -> builder.build().graph()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Only lists of uniformly typed numbers are supported as GDS node properties")
+            .hasMessageContaining("List{Long(1), Long(2), Double(1,230000e+00)}");
     }
 
     @Test
@@ -228,8 +243,8 @@ class CypherFactoryTest extends BaseTest {
 
         assertThatThrownBy(() -> applyInTransaction(db, tx -> builder.build().graph()))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Only lists of numbers are possible as GDS node properties")
-            .hasMessageContaining("TEXT");
+            .hasMessageContaining("Only lists of uniformly typed numbers are supported as GDS node properties")
+            .hasMessageContaining("List{String(\"forty\"), String(\"two\")}");
     }
 
     @Test
