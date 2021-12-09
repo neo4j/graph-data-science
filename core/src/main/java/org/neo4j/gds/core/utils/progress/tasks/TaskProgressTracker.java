@@ -136,7 +136,7 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void fail() {
+    public void endSubTaskWithFailure() {
         baseTask.fail();
     }
 

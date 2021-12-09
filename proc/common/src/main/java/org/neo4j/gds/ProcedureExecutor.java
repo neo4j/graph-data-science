@@ -146,7 +146,7 @@ public class ProcedureExecutor<
                 try (ProgressTimer ignored = ProgressTimer.start(builder::computeMillis)) {
                     return algo.compute();
                 } catch (Throwable e) {
-                    algo.progressTracker.fail();
+                    algo.progressTracker.endSubTaskWithFailure();
                     throw e;
                 } finally {
                     if (releaseAlgorithm) {
