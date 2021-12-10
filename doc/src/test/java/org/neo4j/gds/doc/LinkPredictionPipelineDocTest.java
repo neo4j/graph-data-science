@@ -21,6 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcs;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProc;
@@ -32,6 +33,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionPipelineTrainPro
 
 import java.util.List;
 
+@Neo4jModelCatalogExtension
 class LinkPredictionPipelineDocTest extends DocTestBase {
 
     @Override
