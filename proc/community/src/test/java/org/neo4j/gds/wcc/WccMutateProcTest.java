@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
@@ -88,7 +89,6 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
             // {H, I}
             ", (h)-[{w: 1.0d}]->(i)";
     }
-
 
     @Test
     void testMutateAndWriteWithSeeding() throws Exception {
@@ -203,6 +203,10 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
 
         assertCypherResult(query, List.of(Map.of("componentCount", 0L)));
     }
+
+    @Disabled("This procedure for now does no longer extend MutateProc")
+    @Override
+    public void testExceptionLogging() {}
 }
 
 

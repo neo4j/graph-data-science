@@ -25,16 +25,15 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 
-class ProcedureMemoryEstimation<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
-    ALGO_RESULT,
+public class ProcedureMemoryEstimation<
+    ALGO extends Algorithm<ALGO, ?>,
     CONFIG extends AlgoBaseConfig
 > {
 
     private final AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory;
     private final GraphDimensions graphDimensions;
 
-    ProcedureMemoryEstimation(
+    public ProcedureMemoryEstimation(
         GraphDimensions graphDimensions,
         AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory
     ) {
@@ -42,7 +41,7 @@ class ProcedureMemoryEstimation<
         this.algorithmFactory = algorithmFactory;
     }
 
-    MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
+    public MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
         MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
         estimationBuilder.add("algorithm", algorithmFactory.memoryEstimation(config));

@@ -30,14 +30,7 @@ public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConf
     private final NewConfigFunction<CONFIG> newConfigFunction;
     private final String username;
 
-    interface NewConfigFunction<CONFIG extends AlgoBaseConfig> {
-        CONFIG apply(
-            String username,
-            CypherMapWrapper config
-        );
-    }
-
-    AlgoConfigParser(String username, NewConfigFunction<CONFIG> newConfigFunction) {
+    public AlgoConfigParser(String username, NewConfigFunction<CONFIG> newConfigFunction) {
         this.username = username;
         this.newConfigFunction = newConfigFunction;
     }
