@@ -223,8 +223,8 @@ final class ApproxMaxKCutTest {
             cardinalities[solution.get(i)]++;
         }
 
-        assertThat(cardinalities[0] == 1 || cardinalities[0] == 6).isTrue();
-        assertThat(cardinalities[1] == 1 || cardinalities[1] == 6).isTrue();
+        assertThat(cardinalities[0]).isIn(1L, 6L);
+        assertThat(cardinalities[1]).isIn(1L, 6L);
     }
 
     @Test
