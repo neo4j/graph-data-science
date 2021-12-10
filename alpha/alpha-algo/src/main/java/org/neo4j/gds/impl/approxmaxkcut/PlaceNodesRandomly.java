@@ -156,6 +156,7 @@ class PlaceNodesRandomly {
         private final AtomicLongArray cardinalities;
         private final long[] minNodesPerCommunity;
         private final Partition partition;
+        private final byte k;
 
         AssignNodes(
             SplittableRandom random, HugeByteArray candidateSolution,
@@ -168,6 +169,7 @@ class PlaceNodesRandomly {
             this.cardinalities = cardinalities;
             this.minNodesPerCommunity = minNodesPerCommunity;
             this.partition = partition;
+            this.k = config.k();
         }
 
         @Override
@@ -176,21 +178,21 @@ class PlaceNodesRandomly {
 
             // Fill in the nodes that this partition is required to provide to each community.
             long offset = 0;
-            for (byte i = 0; i < config.k(); i++) {
+            for (byte i = 0; i < k; i++) {
                 for (long j = 0; j < minNodesPerCommunity[i]; j++) {
                     candidateSolution.set(nodes.get(offset++), i);
                 }
             }
 
             // Assign the rest of the nodes of the partition to random communities.
-            var localCardinalities = new long[config.k()];
+            final var localCardinalities = new long[k];
             for (long i = offset; i < nodes.size(); i++) {
-                byte randomCommunity = (byte) random.nextInt(0, config.k());
+                byte randomCommunity = (byte) random.nextInt(0, k);
                 localCardinalities[randomCommunity]++;
                 candidateSolution.set(nodes.get(i), randomCommunity);
             }
 
-            for (int i = 0; i < config.k(); i++) {
+            for (int i = 0; i < k; i++) {
                 cardinalities.addAndGet(i, localCardinalities[i]);
             }
 

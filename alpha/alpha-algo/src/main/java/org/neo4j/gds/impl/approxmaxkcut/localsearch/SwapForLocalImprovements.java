@@ -44,6 +44,7 @@ final class SwapForLocalImprovements implements Runnable {
     private final AtomicBoolean change;
     private final Partition partition;
     private final ProgressTracker progressTracker;
+    private final byte k;
 
     SwapForLocalImprovements(
         Graph graph,
@@ -65,6 +66,7 @@ final class SwapForLocalImprovements implements Runnable {
         this.nodeToCommunityWeights = nodeToCommunityWeights;
         this.swapStatus = swapStatus;
         this.change = change;
+        this.k = config.k();
         this.partition = partition;
         this.progressTracker = progressTracker;
     }
@@ -160,11 +162,11 @@ final class SwapForLocalImprovements implements Runnable {
     }
 
     private byte bestCommunity(long nodeId, byte currentCommunity) {
-        final long NODE_OFFSET = nodeId * config.k();
+        final long NODE_OFFSET = nodeId * k;
         byte bestCommunity = currentCommunity;
         double bestCommunityWeight = nodeToCommunityWeights.get(NODE_OFFSET + currentCommunity);
 
-        for (byte i = 0; i < config.k(); i++) {
+        for (byte i = 0; i < k; i++) {
             var nodeToCommunityWeight = nodeToCommunityWeights.get(NODE_OFFSET + i);
             if (comparator.compare(bestCommunityWeight, nodeToCommunityWeight)) {
                 bestCommunity = i;
