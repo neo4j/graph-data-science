@@ -96,7 +96,8 @@ final class SwapForLocalImprovements implements Runnable {
 
             if (bestCommunity == currentCommunity) return;
 
-            if (cardinalities.getAndUpdate(
+            // Check if we're allowed to move this node from its current community.
+            long updatedCardinality = cardinalities.getAndUpdate(
                 currentCommunity,
                 currentCount -> {
                     if (currentCount > config.minCommunitySizes().get(currentCommunity)) {
@@ -104,7 +105,8 @@ final class SwapForLocalImprovements implements Runnable {
                     }
                     return currentCount;
                 }
-            ) == config.minCommunitySizes().get(currentCommunity)) {
+            );
+            if (updatedCardinality == config.minCommunitySizes().get(currentCommunity)) {
                 return;
             }
 
