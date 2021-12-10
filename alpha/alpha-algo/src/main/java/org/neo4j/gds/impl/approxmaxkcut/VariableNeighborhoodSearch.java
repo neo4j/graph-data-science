@@ -158,7 +158,7 @@ class VariableNeighborhoodSearch {
         return retries != MAX_RETRIES;
     }
 
-    private void copyCardinalities(AtomicLongArray source, AtomicLongArray target) {
+    private static void copyCardinalities(AtomicLongArray source, AtomicLongArray target) {
         assert target.length() >= source.length();
 
         for (int i = 0; i < source.length(); i++) {
