@@ -69,12 +69,12 @@ class PlaceNodesRandomly {
         );
     }
 
-    void compute(HugeByteArray candidateSolution, AtomicLongArray currCardinalities) {
+    void compute(HugeByteArray candidateSolution, AtomicLongArray currentCardinalities) {
         assert graph.nodeCount() >= config.k();
 
         var minCommunitiesPerPartition = minCommunitySizesToPartitions(rangePartitionActualBatchSizes);
         for (byte i = 0; i < config.k(); i++) {
-            currCardinalities.set(i, config.minCommunitySizes().get(i));
+            currentCardinalities.set(i, config.minCommunitySizes().get(i));
         }
 
         var partitionIndex = new AtomicInteger(0);
@@ -84,7 +84,7 @@ class PlaceNodesRandomly {
             partition -> new AssignNodes(
                 random.split(),
                 candidateSolution,
-                currCardinalities,
+                currentCardinalities,
                 minCommunitiesPerPartition[partitionIndex.getAndIncrement()],
                 partition
             ),

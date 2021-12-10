@@ -59,7 +59,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private final ProgressTracker progressTracker;
     private final AllocationTracker allocationTracker;
     private VariableNeighborhoodSearch variableNeighborhoodSearch;
-    private AtomicLongArray currCardinalities;
+    private AtomicLongArray currentCardinalities;
 
     public ApproxMaxKCut(
         Graph graph,
@@ -89,7 +89,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         costs[0].set(0, config.minimize() ? Double.MAX_VALUE : Double.MIN_VALUE);
         costs[1].set(0, config.minimize() ? Double.MAX_VALUE : Double.MIN_VALUE);
 
-        this.currCardinalities = new AtomicLongArray(config.k());
+        this.currentCardinalities = new AtomicLongArray(config.k());
 
         this.placeNodesRandomly = new PlaceNodesRandomly(
             config,
@@ -161,14 +161,14 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             var currCandidateSolution = candidateSolutions[currIdx];
             var currCost = costs[currIdx];
 
-            placeNodesRandomly.compute(currCandidateSolution, currCardinalities);
+            placeNodesRandomly.compute(currCandidateSolution, currentCardinalities);
 
             if (!running()) break;
 
             if (config.vnsMaxNeighborhoodOrder() > 0) {
-                currCardinalities = variableNeighborhoodSearch.compute(currIdx, currCardinalities, this::running);
+                currentCardinalities = variableNeighborhoodSearch.compute(currIdx, currentCardinalities, this::running);
             } else {
-                localSearch.compute(currCandidateSolution, currCost, currCardinalities, this::running);
+                localSearch.compute(currCandidateSolution, currCost, currentCardinalities, this::running);
             }
 
             // Store the newly computed candidate solution if it was better than the previous. Then reuse the previous data

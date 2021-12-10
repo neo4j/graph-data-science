@@ -68,9 +68,9 @@ class VariableNeighborhoodSearch {
         this.neighborCardinalities = new AtomicLongArray(config.k());
     }
 
-    AtomicLongArray compute(int candidateIdx, AtomicLongArray currCardinalities, Supplier<Boolean> running) {
+    AtomicLongArray compute(int candidateIdx, AtomicLongArray currentCardinalities, Supplier<Boolean> running) {
         var bestCandidateSolution = candidateSolutions[candidateIdx];
-        var bestCardinalities = currCardinalities;
+        var bestCardinalities = currentCardinalities;
         var bestCost = costs[candidateIdx];
         var neighborCost = new AtomicDoubleArray(1);
         boolean perturbSuccess = true;
@@ -135,9 +135,9 @@ class VariableNeighborhoodSearch {
 
         while (retries < MAX_RETRIES) {
             long nodeToFlip = random.nextLong(0, graph.nodeCount());
-            byte currCommunity = solution.get(nodeToFlip);
+            byte currentCommunity = solution.get(nodeToFlip);
 
-            if (cardinalities.get(currCommunity) <= config.minCommunitySizes().get(currCommunity)) {
+            if (cardinalities.get(currentCommunity) <= config.minCommunitySizes().get(currentCommunity)) {
                 // Flipping this node would invalidate the solution in terms of min community sizes.
                 retries++;
                 continue;
@@ -149,7 +149,7 @@ class VariableNeighborhoodSearch {
                                            % config.k());
 
             solution.set(nodeToFlip, rndNewCommunity);
-            cardinalities.decrementAndGet(currCommunity);
+            cardinalities.decrementAndGet(currentCommunity);
             cardinalities.incrementAndGet(rndNewCommunity);
 
             break;

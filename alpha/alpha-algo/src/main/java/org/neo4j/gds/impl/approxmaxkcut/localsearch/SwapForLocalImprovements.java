@@ -89,20 +89,20 @@ final class SwapForLocalImprovements implements Runnable {
         var localChange = new MutableBoolean(false);
 
         partition.consume(nodeId -> {
-            byte currCommunity = candidateSolution.get(nodeId);
-            byte bestCommunity = bestCommunity(nodeId, currCommunity);
+            byte currentCommunity = candidateSolution.get(nodeId);
+            byte bestCommunity = bestCommunity(nodeId, currentCommunity);
 
-            if (bestCommunity == currCommunity) return;
+            if (bestCommunity == currentCommunity) return;
 
             if (cardinalities.getAndUpdate(
-                currCommunity,
-                currCount -> {
-                    if (currCount > config.minCommunitySizes().get(currCommunity)) {
-                        return currCount - 1;
+                currentCommunity,
+                currentCount -> {
+                    if (currentCount > config.minCommunitySizes().get(currentCommunity)) {
+                        return currentCount - 1;
                     }
-                    return currCount;
+                    return currentCount;
                 }
-            ) == config.minCommunitySizes().get(currCommunity)) {
+            ) == config.minCommunitySizes().get(currentCommunity)) {
                 return;
             }
 
@@ -110,7 +110,7 @@ final class SwapForLocalImprovements implements Runnable {
 
             // If no incoming neighbors has marked us as NEIGHBOR, we can attempt to swap the current node.
             if (!swapStatus.compareAndSet(nodeId, NodeSwapStatus.UNTOUCHED, NodeSwapStatus.SWAPPING)) {
-                cardinalities.getAndIncrement(currCommunity);
+                cardinalities.getAndIncrement(currentCommunity);
                 return;
             }
 
@@ -146,7 +146,7 @@ final class SwapForLocalImprovements implements Runnable {
                 // Since we didn't complete the swap for this node we can unmark it as SWAPPING and thus not
                 // stopping incoming neighbor nodes of swapping because of this node's status.
                 swapStatus.set(nodeId, NodeSwapStatus.NEIGHBOR);
-                cardinalities.getAndIncrement(currCommunity);
+                cardinalities.getAndIncrement(currentCommunity);
                 return;
             }
 
@@ -159,10 +159,10 @@ final class SwapForLocalImprovements implements Runnable {
         progressTracker.logProgress(partition.nodeCount());
     }
 
-    private byte bestCommunity(long nodeId, byte currCommunity) {
+    private byte bestCommunity(long nodeId, byte currentCommunity) {
         final long NODE_OFFSET = nodeId * config.k();
-        byte bestCommunity = currCommunity;
-        double bestCommunityWeight = nodeToCommunityWeights.get(NODE_OFFSET + currCommunity);
+        byte bestCommunity = currentCommunity;
+        double bestCommunityWeight = nodeToCommunityWeights.get(NODE_OFFSET + currentCommunity);
 
         for (byte i = 0; i < config.k(); i++) {
             var nodeToCommunityWeight = nodeToCommunityWeights.get(NODE_OFFSET + i);
