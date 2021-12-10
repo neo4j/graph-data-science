@@ -133,7 +133,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
     @FunctionalInterface
     public interface Comparator {
-        boolean accept(double lhs, double rhs);
+        boolean compare(double lhs, double rhs);
     }
 
     @Override
@@ -173,7 +173,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
             // Store the newly computed candidate solution if it was better than the previous. Then reuse the previous data
             // structures to make a new solution candidate if we are doing more iterations.
-            if (comparator.accept(currCost.get(0), costs[bestIdx].get(0))) {
+            if (comparator.compare(currCost.get(0), costs[bestIdx].get(0))) {
                 var tmp = bestIdx;
                 bestIdx = currIdx;
                 currIdx = tmp;

@@ -92,7 +92,7 @@ class VariableNeighborhoodSearch {
 
             localSearch.compute(neighborSolution, neighborCost, neighborCardinalities, running);
 
-            if (comparator.accept(neighborCost.get(0), bestCost.get(0))) {
+            if (comparator.compare(neighborCost.get(0), bestCost.get(0))) {
                 var tmpCandidateSolution = bestCandidateSolution;
                 bestCandidateSolution = neighborSolution;
                 neighborSolution = tmpCandidateSolution;

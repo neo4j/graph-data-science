@@ -166,7 +166,7 @@ final class SwapForLocalImprovements implements Runnable {
 
         for (byte i = 0; i < config.k(); i++) {
             var nodeToCommunityWeight = nodeToCommunityWeights.get(NODE_OFFSET + i);
-            if (comparator.accept(bestCommunityWeight, nodeToCommunityWeight)) {
+            if (comparator.compare(bestCommunityWeight, nodeToCommunityWeight)) {
                 bestCommunity = i;
                 bestCommunityWeight = nodeToCommunityWeight;
             }
