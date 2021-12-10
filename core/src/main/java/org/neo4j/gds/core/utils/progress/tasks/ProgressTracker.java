@@ -37,6 +37,10 @@ public interface ProgressTracker {
 
     void endSubTask(String expectedTaskDescription);
 
+    void endSubTaskWithFailure();
+
+    void endSubTaskWithFailure(String expectedTaskDescription);
+
     void logProgress(long value);
 
     default void logProgress() {
@@ -54,8 +58,6 @@ public interface ProgressTracker {
     void logMessage(String message);
 
     void release();
-
-    void fail();
 
     class EmptyProgressTracker implements ProgressTracker {
 
@@ -119,7 +121,12 @@ public interface ProgressTracker {
         }
 
         @Override
-        public void fail() {
+        public void endSubTaskWithFailure() {
+
+        }
+
+        @Override
+        public void endSubTaskWithFailure(String expectedTaskDescription) {
 
         }
     }

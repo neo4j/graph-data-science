@@ -136,8 +136,24 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void fail() {
-        baseTask.fail();
+    public void endSubTaskWithFailure() {
+        var currentTask = requireCurrentTask();
+        currentTask.fail();
+        taskProgressLogger.logEndSubTaskWithFailure(currentTask, parentTask());
+
+        if (nestedTasks.isEmpty()) {
+            this.currentTask = Optional.empty();
+            release();
+        } else {
+            this.currentTask = Optional.of(nestedTasks.pop());
+            endSubTaskWithFailure();
+        }
+    }
+
+    @Override
+    public void endSubTaskWithFailure(String expectedTaskDescription) {
+        assertSubTask(expectedTaskDescription);
+        endSubTaskWithFailure();
     }
 
     @TestOnly
