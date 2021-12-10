@@ -67,7 +67,7 @@ class ValueConversionTest {
 
     @Test
     void shouldConvertEmptyLongArrayToDoubleArray() {
-        assertThat(Neo4jValueConversion.getDoubleArray(Values.longArray(new long[0]))).isEqualTo(new double[0]);
+        assertThat(ValueConversion.getDoubleArray(Values.longArray(new long[0]))).isEqualTo(new double[0]);
     }
 
     @ParameterizedTest
