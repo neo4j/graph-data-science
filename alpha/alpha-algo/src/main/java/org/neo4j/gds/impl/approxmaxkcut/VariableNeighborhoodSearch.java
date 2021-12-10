@@ -73,21 +73,27 @@ class VariableNeighborhoodSearch {
         var bestCardinalities = currentCardinalities;
         var bestCost = costs[candidateIdx];
         var neighborCost = new AtomicDoubleArray(1);
-        boolean perturbSuccess = true;
-        var order = 0;
+        var currentOrder = 0;
 
         progressTracker.beginSubTask();
 
-        while ((order < config.vnsMaxNeighborhoodOrder()) && running.get()) {
+        while ((currentOrder < config.vnsMaxNeighborhoodOrder()) && running.get()) {
+            boolean perturbSuccess = true;
             bestCandidateSolution.copyTo(neighborSolution, graph.nodeCount());
             copyCardinalities(bestCardinalities, neighborCardinalities);
 
-            // Generate a neighboring candidate solution of the current order.
-            for (int i = 0; i < order; i++) {
+            // Generate a neighboring candidate solution of the current currentOrder.
+            int order = 0;
+            for (; order < currentOrder; order++) {
                 perturbSuccess = perturbSolution(neighborSolution, neighborCardinalities);
                 if (!perturbSuccess) {
                     break;
                 }
+            }
+
+            if (currentOrder > 0 && order == 0) {
+                // We were not able to perturb at all so no point in even trying local search again.
+                break;
             }
 
             localSearch.compute(neighborSolution, neighborCost, neighborCardinalities, running);
@@ -104,14 +110,14 @@ class VariableNeighborhoodSearch {
                 bestCost.set(0, neighborCost.get(0));
 
                 // Start from scratch with the new candidate.
-                order = 0;
+                currentOrder = 0;
             } else {
-                order += 1;
-            }
+                if (!perturbSuccess) {
+                    // We were not able to perturb this solution further, so let's stop.
+                    break;
+                }
 
-            if (!perturbSuccess) {
-                // We were not able to perturb this solution further, so let's stop.
-                break;
+                currentOrder += 1;
             }
         }
 
