@@ -125,6 +125,10 @@ class NeighborList {
      * This allows KNN to just add the return values together without having the check on each of them.
      */
     public long add(long element, double priority, SplittableRandom random) {
+        return add(element, priority, random, 0);
+    }
+
+    public long add(long element, double priority, SplittableRandom random, double perturbationRate) {
         int insertIdx = 0;
         int currNumElementsWithPriority = elementCount * 2;
 
@@ -156,7 +160,12 @@ class NeighborList {
 
             int elementsWithPriorityCapacity = elementCapacity * 2;
             if (upperBoundIdxExclusive == elementsWithPriorityCapacity && Double.compare(lowestPriority, priority) == 0) {
-                // TODO: Perturbation (maybe replace last element)
+                if (random.nextDouble() < perturbationRate) {
+                    insertIdx = random.nextInt(lowerBoundIdxInclusive / 2, upperBoundIdxExclusive / 2) * 2;
+                    priorityElementPairs[insertIdx] = Double.doubleToRawLongBits(priority);
+                    priorityElementPairs[insertIdx + 1] = element;
+                    return INSERTED;
+                }
                 return NOT_INSERTED;
             }
 
