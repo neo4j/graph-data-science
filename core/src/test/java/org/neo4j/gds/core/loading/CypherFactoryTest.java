@@ -229,7 +229,7 @@ class CypherFactoryTest extends BaseTest {
         assertThatThrownBy(() -> applyInTransaction(db, tx -> builder.build().graph()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Only lists of uniformly typed numbers are supported as GDS node properties")
-            .hasMessageContaining("List{Long(1), Long(2), Double(1,230000e+00)}");
+            .hasMessageContaining("List{Long(1), Long(2), Double(1"); // omitting the rest of the double for locale reasons
     }
 
     @Test
