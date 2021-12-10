@@ -46,7 +46,7 @@ ext {
         'auto-service'         : '1.0',
         'bouncycastle'         : '1.68',
         'commons-compress'     : '1.19',
-        'commons-io'           : '2.7',
+        'commons-io'           : '2.11.0',
         'commons-lang3'        : '3.11',
         'commons-math3'        : '3.6.1',
         'commons-text'         : '1.9',
