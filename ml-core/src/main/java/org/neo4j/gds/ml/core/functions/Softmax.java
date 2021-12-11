@@ -23,18 +23,10 @@ import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
-import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
-import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
-
 public class Softmax extends SingleParentVariable<Matrix, Matrix> {
-
-    private final int rows;
-    private final int cols;
 
     public Softmax(Variable<Matrix> parent) {
         super(parent, parent.dimensions());
-        rows = dimension(ROWS_INDEX);
-        cols = dimension(COLUMNS_INDEX);
     }
 
     public static long sizeInBytes(int rows, int cols) {
@@ -44,6 +36,9 @@ public class Softmax extends SingleParentVariable<Matrix, Matrix> {
     @Override
     public Matrix apply(ComputationContext ctx) {
         var data =  ctx.data(parent);
+        int rows = data.rows();
+        int cols = data.cols();
+
         var result = data.createWithSameDimensions();
         boolean rescale = false;
         for (int row = 0; row < rows; row++) {
@@ -76,7 +71,10 @@ public class Softmax extends SingleParentVariable<Matrix, Matrix> {
         return result;
     }
 
-    private void rescale(Matrix result) {
+    private static void rescale(Matrix result) {
+        int rows = result.rows();
+        int cols = result.cols();
+
         for (int row = 0; row < rows; row++) {
             double rowSum = 1e-15;
             for (int col = 0; col < cols; col++) {
@@ -96,6 +94,9 @@ public class Softmax extends SingleParentVariable<Matrix, Matrix> {
     public Matrix gradientForParent(ComputationContext ctx) {
         var selfData = ctx.data(this);
         var selfGradient= ctx.gradient(this);
+
+        int rows = selfData.rows();
+        int cols = selfData.cols();
 
         var computedGradient = Matrix.create(0.0, rows, cols);
 
