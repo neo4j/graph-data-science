@@ -23,7 +23,7 @@ import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
-public class NormalizeRows extends SingleParentVariable<Matrix> {
+public class NormalizeRows extends SingleParentVariable<Matrix, Matrix> {
 
     private static final double EPSILON = 1e-10;
 
@@ -39,7 +39,7 @@ public class NormalizeRows extends SingleParentVariable<Matrix> {
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        double[] parentData = ctx.data(parent()).data();
+        double[] parentData = ctx.data(parent).data();
         int rows = this.rows;
         int cols = this.cols;
         double[] result = new double[rows * cols];
@@ -59,7 +59,7 @@ public class NormalizeRows extends SingleParentVariable<Matrix> {
     }
 
     @Override
-    public Matrix gradient(Variable<?> parent, ComputationContext ctx) {
+    public Matrix gradientForParent(ComputationContext ctx) {
         double[] parentData = ctx.data(parent).data();
         double[] gradientData = ctx.gradient(this).data();
         double[] result = new double[parentData.length];

@@ -23,7 +23,7 @@ import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 // Leaky Relu
-public class Relu<T extends Tensor<T>> extends SingleParentVariable<T> {
+public class Relu<T extends Tensor<T>> extends SingleParentVariable<T, T> {
 
     private static final double ALPHA = 0.01;
 
@@ -33,11 +33,11 @@ public class Relu<T extends Tensor<T>> extends SingleParentVariable<T> {
 
     @Override
     public T apply(ComputationContext ctx) {
-        return (T) ctx.data(parent()).map(value -> value > 0 ? value : ALPHA * value);
+        return ctx.data(parent).map(value -> (value > 0) ? value : (ALPHA * value));
     }
 
     @Override
-    public T gradient(Variable<?> contextParent, ComputationContext ctx) {
-        return (T) ctx.data(contextParent).map(value -> value > 0 ? 1 : ALPHA);
+    public T gradientForParent(ComputationContext ctx) {
+        return ctx.data(parent).map(value -> value > 0 ? 1 : ALPHA);
     }
 }

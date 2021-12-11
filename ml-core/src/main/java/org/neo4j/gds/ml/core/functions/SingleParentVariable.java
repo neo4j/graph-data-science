@@ -20,21 +20,36 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.neo4j.gds.ml.core.AbstractVariable;
+import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
-public abstract class SingleParentVariable<T extends Tensor<T>> extends AbstractVariable<T> {
+public abstract class SingleParentVariable<P extends Tensor<P>, T extends Tensor<T>> extends AbstractVariable<T> {
+    protected final Variable<P> parent;
 
     public SingleParentVariable(
-        Variable<?> parent,
+        Variable<P> parent,
         int[] dimensions
     ) {
         super(List.of(parent), dimensions);
+
+        this.parent = parent;
     }
 
-    protected Variable<?> parent() {
-        return parents().get(0);
+    @Override
+    public Tensor<?> gradient(Variable<?> variable, ComputationContext ctx) {
+        validateParent(variable);
+
+        return gradientForParent(ctx);
+    }
+
+    protected abstract P gradientForParent(ComputationContext ctx);
+
+    private void validateParent(Variable<?> variable) {
+        if (variable != this.parent) {
+            throw new RuntimeException("Calling gradient with a `parent` that was not expected");
+        }
     }
 }

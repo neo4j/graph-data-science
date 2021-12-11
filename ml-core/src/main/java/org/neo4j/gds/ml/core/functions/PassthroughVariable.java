@@ -21,10 +21,9 @@ package org.neo4j.gds.ml.core.functions;
 
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
-public class PassthroughVariable<T extends Tensor<T>> extends SingleParentVariable<T> {
+public class PassthroughVariable<T extends Tensor<T>> extends SingleParentVariable<T, T> {
 
     public PassthroughVariable(Variable<T> parent) {
         super(parent, parent.dimensions());
@@ -32,11 +31,11 @@ public class PassthroughVariable<T extends Tensor<T>> extends SingleParentVariab
 
     @Override
     public T apply(ComputationContext ctx) {
-        return (T) ctx.data(parent());
+        return ctx.data(parent);
     }
 
     @Override
-    public Scalar gradient(Variable<?> parent, ComputationContext ctx) {
-        return new Scalar(1D);
+    public T gradientForParent(ComputationContext ctx) {
+        return ctx.data(parent).map(v -> 1);
     }
 }

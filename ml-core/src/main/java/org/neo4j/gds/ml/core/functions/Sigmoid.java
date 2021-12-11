@@ -24,7 +24,7 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
-public class Sigmoid<T extends Tensor<T>> extends SingleParentVariable<T> {
+public class Sigmoid<T extends Tensor<T>> extends SingleParentVariable<T, T> {
 
     public Sigmoid(Variable<T> parent) {
         super(parent, parent.dimensions());
@@ -36,11 +36,11 @@ public class Sigmoid<T extends Tensor<T>> extends SingleParentVariable<T> {
 
     @Override
     public T apply(ComputationContext ctx) {
-        return (T) ctx.data(parent()).map(Sigmoid::sigmoid);
+        return ctx.data(parent).map(Sigmoid::sigmoid);
     }
 
     @Override
-    public T gradient(Variable<?> contextParent, ComputationContext ctx) {
+    public T gradientForParent(ComputationContext ctx) {
         return ctx.gradient(this).elementwiseProduct(ctx.data(this).map(value -> value * (1 - value)));
     }
 

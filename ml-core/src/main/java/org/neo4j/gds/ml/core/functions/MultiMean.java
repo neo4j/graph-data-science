@@ -24,15 +24,13 @@ import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.subgraph.BatchNeighbors;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
 import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
 
 
-public class MultiMean extends SingleParentVariable<Matrix> {
+public class MultiMean extends SingleParentVariable<Matrix, Matrix> {
     private final BatchNeighbors subGraph;
-    private final Variable<Matrix> parentVariable;
 
     public MultiMean(
         Variable<Matrix> parentVariable,
@@ -40,19 +38,18 @@ public class MultiMean extends SingleParentVariable<Matrix> {
     ) {
         super(parentVariable, Dimensions.matrix(subGraph.batchSize(), parentVariable.dimension(COLUMNS_INDEX)));
         this.subGraph = subGraph;
-        this.parentVariable = parentVariable;
 
         assert parentVariable.dimension(ROWS_INDEX) >= subGraph.nodeCount() : "Expecting a row for each node in the subgraph";
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        var parentData = ctx.data(parentVariable);
+        var parentData = ctx.data(parent);
 
         int[] batchIds = subGraph.batchIds();
         int batchSize = batchIds.length;
 
-        int cols = parentVariable.dimension(COLUMNS_INDEX);
+        int cols = parentData.cols();
 
         var resultMeans = Matrix.create(0, batchSize, cols);
 
@@ -87,13 +84,11 @@ public class MultiMean extends SingleParentVariable<Matrix> {
     }
 
     @Override
-    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        assert parent == parentVariable : "Invalid parent for SingleParentVariable";
-
+    public Matrix gradientForParent(ComputationContext ctx) {
         var multiMeanGradient = ctx.gradient(this);
-        var resultGradient = ctx.data(parentVariable).createWithSameDimensions();
+        var resultGradient = ctx.data(parent).createWithSameDimensions();
 
-        int cols = parent.dimension(1);
+        int cols = parent.dimension(COLUMNS_INDEX);
         var batchIds = this.subGraph.batchIds();
 
         for (int batchIdx = 0; batchIdx < batchIds.length; batchIdx++) {

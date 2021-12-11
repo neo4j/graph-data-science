@@ -24,12 +24,10 @@ import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.subgraph.BatchNeighbors;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 
 
-public class ElementWiseMax extends SingleParentVariable<Matrix> {
+public class ElementWiseMax extends SingleParentVariable<Matrix, Matrix> {
     public static final int INVALID_NEIGHBOR = -1;
-    private final Variable<Matrix> parentVariable;
     private final BatchNeighbors batchNeighbors;
 
     public ElementWiseMax(Variable<Matrix> parentVariable, BatchNeighbors batchGraph) {
@@ -38,14 +36,13 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
             Dimensions.matrix(batchGraph.batchSize(), parentVariable.dimension(Dimensions.COLUMNS_INDEX))
         );
         this.batchNeighbors = batchGraph;
-        this.parentVariable = parentVariable;
 
         assert parentVariable.dimension(Dimensions.ROWS_INDEX) >= batchGraph.nodeCount() : "Expecting a row for each node in the subgraph";
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        var parentData = ctx.data(parentVariable);
+        var parentData = ctx.data(parent);
 
         var rows = batchNeighbors.batchSize();
         var cols = parentData.cols();
@@ -80,12 +77,12 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
     }
 
     @Override
-    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        var result = ctx.data(parentVariable).createWithSameDimensions();
+    public Matrix gradientForParent(ComputationContext ctx) {
+        var result = ctx.data(parent).createWithSameDimensions();
 
         var cols = result.cols();
 
-        var parentData = ctx.data(parentVariable);
+        var parentData = ctx.data(parent);
         var elementWiseMaxGradient = ctx.gradient(this);
         var elementWiseMaxData = ctx.data(this);
 

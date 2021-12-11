@@ -33,7 +33,7 @@ import java.util.stream.IntStream;
 import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class GraphSageLoss extends SingleParentVariable<Scalar> {
+public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
 
     private static final int NEGATIVE_NODES_OFFSET = 2;
     private static final int SAMPLING_BUCKETS = 3;
@@ -95,7 +95,7 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
     }
 
     @Override
-    public Matrix gradient(Variable<?> parent, ComputationContext ctx) {
+    public Matrix gradientForParent(ComputationContext ctx) {
         if (parent != combinedEmbeddings) {
             throw new IllegalStateException(formatWithLocale(
                 "This variable only has a single parent. Expected %s but got %s",
@@ -171,7 +171,7 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
         );
     }
 
-    private double logisticFunction(double affinity) {
+    private static double logisticFunction(double affinity) {
         return 1 / (1 + Math.pow(Math.E, affinity));
     }
 }

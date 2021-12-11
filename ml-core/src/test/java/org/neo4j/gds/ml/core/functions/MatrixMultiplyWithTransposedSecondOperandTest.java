@@ -79,7 +79,7 @@ class MatrixMultiplyWithTransposedSecondOperandTest extends ComputationGraphBase
         Weights<Matrix> A = new Weights<>(new Matrix(m1, 2, 3));
         Weights<Matrix> B = new Weights<>(new Matrix(m2, 2, 3));
 
-        finiteDifferenceShouldApproximateGradient(List.of(A, B), new L2Norm(new MatrixMultiplyWithTransposedSecondOperand(A, B)));
+        finiteDifferenceShouldApproximateGradient(List.of(A, B), new L2Norm<>(new MatrixMultiplyWithTransposedSecondOperand(A, B)));
     }
 
     @Test

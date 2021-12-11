@@ -24,15 +24,11 @@ import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 
-public class L2NormSquared extends SingleParentVariable<Scalar> {
-
-    private final Variable<Matrix> parent;
+public class L2NormSquared extends SingleParentVariable<Matrix, Scalar> {
 
     public L2NormSquared(Variable<Matrix> parent) {
         super(parent, Dimensions.scalar());
-        this.parent = parent;
     }
 
     public static long sizeInBytesOfApply() {
@@ -58,20 +54,16 @@ public class L2NormSquared extends SingleParentVariable<Scalar> {
     }
 
     @Override
-    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        if (parent != this.parent) {
-            throw new RuntimeException("Calling gradient with a `parent` that was not expected");
-        }
-
-        var data = ctx.data(this.parent).copy();
-        var rows = data.rows();
-        var cols = data.cols();
+    public Matrix gradientForParent(ComputationContext ctx) {
+        var result = ctx.data(parent).copy();
+        var rows = result.rows();
+        var cols = result.cols();
         var biasColumnIndex = cols - 1;
 
         for (int row = 0; row < rows; row++) {
-            data.setDataAt(row * cols + biasColumnIndex, 0);
+            result.setDataAt(row * cols + biasColumnIndex, 0);
         }
 
-        return data.scalarMultiply(2 * ctx.gradient(this).value());
+        return result.scalarMultiply(2 * ctx.gradient(this).value());
     }
 }

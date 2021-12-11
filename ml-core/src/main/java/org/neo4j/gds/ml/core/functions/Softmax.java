@@ -22,12 +22,11 @@ package org.neo4j.gds.ml.core.functions;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
 import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
 
-public class Softmax extends SingleParentVariable<Matrix> {
+public class Softmax extends SingleParentVariable<Matrix, Matrix> {
 
     private final int rows;
     private final int cols;
@@ -44,7 +43,7 @@ public class Softmax extends SingleParentVariable<Matrix> {
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        var data = (Matrix) ctx.data(parent());
+        var data =  ctx.data(parent);
         var result = data.createWithSameDimensions();
         boolean rescale = false;
         for (int row = 0; row < rows; row++) {
@@ -94,7 +93,7 @@ public class Softmax extends SingleParentVariable<Matrix> {
     }
 
     @Override
-    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
+    public Matrix gradientForParent(ComputationContext ctx) {
         var selfData = ctx.data(this);
         var selfGradient= ctx.gradient(this);
 

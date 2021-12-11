@@ -63,7 +63,7 @@ class AdamOptimizerTest {
         Variable<Matrix> difference = new MatrixSum(List.of(
             weights, new ConstantScale<>(optimum, -1)
         ));
-        var lossFunction = new L2Norm(difference);
+        var lossFunction = new L2Norm<>(difference);
 
         double oldLoss = Double.MAX_VALUE;
         while(true) {
@@ -93,7 +93,7 @@ class AdamOptimizerTest {
         var weights = new Weights<>(new Vector(0.1, 0.1, 0.1));
         var expectedOptimum = new Weights<>(new Vector(5.1, 6.1, 7.1));
         var difference = new ElementSum(List.of(weights, new ConstantScale<>(expectedOptimum, -1)));
-        var lossFunction = new L2Norm(difference);
+        var lossFunction = new L2Norm<>(difference);
 
         AdamOptimizer adam = new AdamOptimizer(List.of(weights), 0.1);
 
