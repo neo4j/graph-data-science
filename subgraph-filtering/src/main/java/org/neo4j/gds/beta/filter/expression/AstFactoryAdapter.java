@@ -25,7 +25,7 @@ import scala.util.Either;
 
 import java.util.List;
 
-abstract class ASTFactoryAdapter implements ASTFactory<NULL,
+abstract class AstFactoryAdapter implements ASTFactory<NULL,
     NULL,
     NULL,
     NULL,
