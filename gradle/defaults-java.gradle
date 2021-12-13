@@ -84,6 +84,7 @@ allprojects {
             maxHeapSize = "3G"
             useJUnitPlatform {
                 includeEngines 'junit-jupiter'
+                includeEngines 'jqwik'
             }
             // enable verbose test logging
             // testLogging {
