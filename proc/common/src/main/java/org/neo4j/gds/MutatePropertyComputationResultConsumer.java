@@ -24,26 +24,15 @@ import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodeProperties;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
-import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public final class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig, RESULT>
     extends MutateComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> {
-
-    public interface NodePropertyListFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig> {
-        List<NodeProperty> apply(
-            AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
-            String resultProperty,
-            AllocationTracker allocationTracker
-        );
-    }
 
     private final NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction;
 

@@ -21,7 +21,7 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.MutatePropertyComputationResultConsumer.NodePropertyListFunction;
+import org.neo4j.gds.NodePropertyListFunction;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.pipeline.AlgorithmSpec;
