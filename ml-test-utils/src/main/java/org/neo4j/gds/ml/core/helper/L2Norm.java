@@ -28,18 +28,18 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import static org.neo4j.gds.math.L2Norm.l2Norm;
 
-public class L2Norm extends SingleParentVariable<Scalar> {
-    public L2Norm(Variable<?> parent) {
+public class L2Norm<P extends Tensor<P>> extends SingleParentVariable<P, Scalar> {
+    public L2Norm(Variable<P> parent) {
         super(parent, Dimensions.scalar());
     }
 
     @Override
     public Scalar apply(ComputationContext ctx) {
-        return new Scalar(l2Norm(ctx.data(parent()).data()));
+        return new Scalar(l2Norm(ctx.data(parent).data()));
     }
 
     @Override
-    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
+    public P gradientForParent(ComputationContext ctx) {
         var gradientValue = ctx.gradient(this).value();
         var dataValue = ctx.data(this).value();
         return ctx.data(parent).scalarMultiply(gradientValue / dataValue);

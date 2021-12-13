@@ -109,7 +109,7 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
             PROJECTED_FEATURE_SIZE,
             labels
         );
-        var loss = new L2Norm(projection);
+        var loss = new L2Norm<>(projection);
         List<Weights<?>> arrayList = new ArrayList<>(nodeLabelWeightsMap.values());
         finiteDifferenceShouldApproximateGradient(arrayList, loss);
     }

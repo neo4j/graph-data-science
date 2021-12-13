@@ -23,25 +23,22 @@ import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
-public class NormalizeRows extends SingleParentVariable<Matrix> {
+public class NormalizeRows extends SingleParentVariable<Matrix, Matrix> {
 
     private static final double EPSILON = 1e-10;
 
-    private final int rows;
-    private final int cols;
-
     public NormalizeRows(Variable<Matrix> matrix) {
         super(matrix, matrix.dimensions());
-
-        this.rows = dimension(0);
-        this.cols = dimension(1);
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        double[] parentData = ctx.data(parent()).data();
-        int rows = this.rows;
-        int cols = this.cols;
+        Matrix parentMatrix = ctx.data(parent);
+        int rows = parentMatrix.rows();
+        int cols = parentMatrix.cols();
+
+        double[] parentData = parentMatrix.data();
+
         double[] result = new double[rows * cols];
         for (int row = 0; row < rows; row++) {
             double sum = 0;
@@ -55,16 +52,18 @@ public class NormalizeRows extends SingleParentVariable<Matrix> {
                 result[elementIndex] = parentData[elementIndex] / (l2 + EPSILON);
             }
         }
-        return new Matrix(result, this.rows, this.cols);
+        return new Matrix(result, rows, cols);
     }
 
     @Override
-    public Matrix gradient(Variable<?> parent, ComputationContext ctx) {
-        double[] parentData = ctx.data(parent).data();
+    public Matrix gradientForParent(ComputationContext ctx) {
+        Matrix parentMatrix = ctx.data(parent);
+        int rows = parentMatrix.rows();
+        int cols = parentMatrix.cols();
+
+        double[] parentData = parentMatrix.data();
         double[] gradientData = ctx.gradient(this).data();
         double[] result = new double[parentData.length];
-        int rows = this.rows;
-        int cols = this.cols;
         for (int row = 0; row < rows; row++) {
             double l2Squared = 0;
             for (int col = 0; col < cols; col++) {
@@ -88,6 +87,6 @@ public class NormalizeRows extends SingleParentVariable<Matrix> {
                 }
             }
         }
-        return new Matrix(result, this.rows, this.cols);
+        return new Matrix(result, rows, cols);
     }
 }

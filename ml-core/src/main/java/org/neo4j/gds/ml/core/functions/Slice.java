@@ -23,9 +23,8 @@ import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 
-public class Slice extends SingleParentVariable<Matrix> {
+public class Slice extends SingleParentVariable<Matrix, Matrix> {
 
     private final int[] batchIds;
     private final int rows;
@@ -41,7 +40,7 @@ public class Slice extends SingleParentVariable<Matrix> {
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        double[] parentData = ctx.data(parent()).data();
+        double[] parentData = ctx.data(parent).data();
 
         double[] result = new double[rows * cols];
 
@@ -53,8 +52,8 @@ public class Slice extends SingleParentVariable<Matrix> {
     }
 
     @Override
-    public Tensor<?> gradient(Variable<?> contextParent, ComputationContext ctx) {
-        Tensor<?> result = ctx.data(contextParent).createWithSameDimensions();
+    public Matrix gradientForParent(ComputationContext ctx) {
+        Matrix result = ctx.data(parent).createWithSameDimensions();
 
         double[] selfGradient = ctx.gradient(this).data();
         for (int row = 0; row < rows; row++) {
