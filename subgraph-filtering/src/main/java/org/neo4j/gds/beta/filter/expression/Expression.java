@@ -260,7 +260,7 @@ public interface Expression {
                 // It is sufficient to check one of the input types
                 // as validation made sure that the types are equal.
                 if (lhs().valueType() == ValueType.LONG) {
-                    return evaluateLong(Double.doubleToLongBits(lhsValue), Double.doubleToLongBits(rhsValue));
+                    return evaluateLong(Double.doubleToRawLongBits(lhsValue), Double.doubleToRawLongBits(rhsValue));
                 }
 
                 return evaluateDouble(lhsValue, rhsValue);
