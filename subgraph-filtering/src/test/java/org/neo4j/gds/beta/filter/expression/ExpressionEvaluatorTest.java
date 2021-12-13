@@ -261,6 +261,30 @@ class ExpressionEvaluatorTest {
         assertThat(expr.evaluate(evaluationContext) == TRUE).isEqualTo(expected);
     }
 
+    @Test
+    void longEqual() throws ParseException {
+        long baseValue = Double.doubleToRawLongBits(Double.NaN);
+        long value1 = baseValue + 42;
+        long value2 = baseValue + 1337;
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%d = %d", value1, value2),
+            Map.of()
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isFalse();
+    }
+
+    @Test
+    void longNotEqual() throws ParseException {
+        long baseValue = Double.doubleToRawLongBits(Double.NaN);
+        long value1 = baseValue + 42;
+        long value2 = baseValue + 1337;
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%d <> %d", value1, value2),
+            Map.of()
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
+    }
+
     private static final EvaluationContext EMPTY_EVALUATION_CONTEXT = new EvaluationContext() {
         @Override
         double getProperty(String propertyKey, ValueType valueType) {
