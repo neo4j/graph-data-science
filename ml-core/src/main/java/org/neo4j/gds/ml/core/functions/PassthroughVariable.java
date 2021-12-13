@@ -27,6 +27,10 @@ public class PassthroughVariable<T extends Tensor<T>> extends SingleParentVariab
 
     public PassthroughVariable(Variable<T> parent) {
         super(parent, parent.dimensions());
+
+        if (parent instanceof PassthroughVariable) {
+            throw new IllegalArgumentException("Redundant use of PassthroughVariables. Chaining does not make sense.");
+        }
     }
 
     @Override
