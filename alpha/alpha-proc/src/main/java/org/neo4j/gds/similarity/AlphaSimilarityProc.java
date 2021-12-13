@@ -32,6 +32,7 @@ import org.neo4j.gds.impl.similarity.Computations;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.ProcConfigParser;
 import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -44,13 +45,13 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
-abstract class AlphaSimilarityProc
-    <ALGO extends SimilarityAlgorithm<ALGO, ?>, CONFIG extends SimilarityConfig>
-    extends AlgoBaseProc<ALGO, SimilarityAlgorithmResult, CONFIG, SimilarityResult> {
+public abstract class AlphaSimilarityProc
+    <ALGO extends SimilarityAlgorithm<ALGO, ?>, CONFIG extends SimilarityConfig, PROC_RESULT>
+    extends AlgoBaseProc<ALGO, SimilarityAlgorithmResult, CONFIG, PROC_RESULT> {
 
     public static final String SIMILARITY_FAKE_GRAPH_NAME = "  SIM-NULL-GRAPH";
 
-    Stream<SimilarityResult> stream(
+    protected Stream<SimilarityResult> stream(
         Map<String, Object> configuration
     ) {
         ComputationResult<ALGO, SimilarityAlgorithmResult, CONFIG> compute = compute(
@@ -58,71 +59,88 @@ abstract class AlphaSimilarityProc
             configuration
         );
 
-        SimilarityAlgorithmResult result = compute.result();
-        assert result != null;
-
-        return result.stream();
+        return streamResultConsumer().consume(compute, executionContext());
     }
 
-    Stream<AlphaSimilaritySummaryResult> write(
-        Map<String, Object> configuration
-    ) {
-        ComputationResult<ALGO, SimilarityAlgorithmResult, CONFIG> compute = compute(
-            AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME,
-            configuration
-        );
+    protected ComputationResultConsumer<ALGO, SimilarityAlgorithmResult, CONFIG, Stream<SimilarityResult>> streamResultConsumer() {
+        return (computationResult, executionContext) -> {
+            SimilarityAlgorithmResult result = computationResult.result();
+            assert result != null;
 
-        CONFIG config = compute.config();
-        SimilarityAlgorithmResult result = compute.result();
-        assert result != null;
-
-        if (result.isEmpty()) {
-            return emptyStream(config.writeRelationshipType(), config.writeProperty());
-        }
-
-        return writeAndAggregateResults(result, config, compute.algorithm().getTerminationFlag());
+            return result.stream();
+        };
     }
 
-    Stream<AlphaSimilarityStatsResult> stats(
+    protected Stream<AlphaSimilaritySummaryResult> write(
         Map<String, Object> configuration
     ) {
-        ComputationResult<ALGO, SimilarityAlgorithmResult, CONFIG> compute = compute(
+        ComputationResult<ALGO, SimilarityAlgorithmResult, CONFIG> computationResult = compute(
             AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME,
             configuration
         );
+        return writeResultConsumer().consume(computationResult, executionContext());
+    }
 
-        SimilarityAlgorithmResult result = compute.result();
-        assert result != null;
+    protected ComputationResultConsumer<ALGO, SimilarityAlgorithmResult, CONFIG, Stream<AlphaSimilaritySummaryResult>> writeResultConsumer() {
+        return (computationResult, executionContext) -> {
+            CONFIG config = computationResult.config();
+            SimilarityAlgorithmResult result = computationResult.result();
+            assert result != null;
 
-        if (result.isEmpty()) {
+            if (result.isEmpty()) {
+                return emptyStream(config.writeRelationshipType(), config.writeProperty());
+            }
+
+            return writeAndAggregateResults(result, config, computationResult.algorithm().getTerminationFlag());
+        };
+    }
+
+    protected Stream<AlphaSimilarityStatsResult> stats(
+        Map<String, Object> configuration
+    ) {
+        ComputationResult<ALGO, SimilarityAlgorithmResult, CONFIG> computationResult = compute(
+            AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME,
+            configuration
+        );
+       return statsResultConsumer().consume(computationResult, executionContext());
+    }
+
+    protected ComputationResultConsumer<ALGO, SimilarityAlgorithmResult, CONFIG, Stream<AlphaSimilarityStatsResult>> statsResultConsumer() {
+        return (computationResult, executionContext) -> {
+            SimilarityAlgorithmResult result = computationResult.result();
+            assert result != null;
+
+            if (result.isEmpty()) {
+                return Stream.of(AlphaSimilarityStatsResult.from(
+                    0,
+                    0,
+                    0,
+                    new AtomicLong(0),
+                    -1,
+                    new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT)
+                ));
+            }
+
+            AtomicLong similarityPairs = new AtomicLong();
+            DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
+            result.stream().forEach(recorder -> {
+                recorder.record(histogram);
+                similarityPairs.getAndIncrement();
+            });
             return Stream.of(AlphaSimilarityStatsResult.from(
-                0,
-                0,
-                0,
-                new AtomicLong(0),
-                -1,
-                new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT)
+                result.nodes(),
+                result.sourceIdsLength(),
+                result.targetIdsLength(),
+                similarityPairs,
+                result.computations().map(Computations::count).orElse(-1L),
+                histogram
             ));
-        }
-
-        AtomicLong similarityPairs = new AtomicLong();
-        DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
-        result.stream().forEach(recorder -> {
-            recorder.record(histogram);
-            similarityPairs.getAndIncrement();
-        });
-        return Stream.of(AlphaSimilarityStatsResult.from(
-            result.nodes(),
-            result.sourceIdsLength(),
-            result.targetIdsLength(),
-            similarityPairs,
-            result.computations().map(Computations::count).orElse(-1L),
-            histogram
-        ));
+        };
     }
-    abstract ALGO newAlgo(CONFIG config, AllocationTracker allocationTracker);
 
-    abstract String taskName();
+    protected abstract ALGO newAlgo(CONFIG config, AllocationTracker allocationTracker);
+
+    protected abstract String taskName();
 
     @Override
     public final GraphAlgorithmFactory<ALGO, CONFIG> algorithmFactory() {

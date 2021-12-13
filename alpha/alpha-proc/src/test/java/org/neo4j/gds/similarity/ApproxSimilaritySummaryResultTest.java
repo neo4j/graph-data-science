@@ -20,6 +20,7 @@
 package org.neo4j.gds.similarity;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.similarity.ann.ApproxSimilaritySummaryResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

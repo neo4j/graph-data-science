@@ -25,6 +25,7 @@ import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.impl.similarity.PearsonAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.impl.similarity.WeightedInput;
+import org.neo4j.gds.similarity.pearson.PearsonProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;

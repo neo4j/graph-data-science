@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.impl.similarity.CategoricalInput;
 import org.neo4j.gds.impl.similarity.OverlapAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
+import org.neo4j.gds.similarity.overlap.OverlapProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.IsFiniteFunc;
+import org.neo4j.gds.similarity.pearson.PearsonProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

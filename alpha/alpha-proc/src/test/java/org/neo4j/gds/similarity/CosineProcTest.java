@@ -26,6 +26,7 @@ import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.impl.similarity.CosineAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.impl.similarity.WeightedInput;
+import org.neo4j.gds.similarity.cosine.CosineProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
