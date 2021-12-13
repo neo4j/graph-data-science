@@ -30,7 +30,7 @@ public class MemoryEstimationGraphConfigParser {
 
     private final String username;
 
-    MemoryEstimationGraphConfigParser(String username) {
+    public MemoryEstimationGraphConfigParser(String username) {
         this.username = username;
     }
 
