@@ -39,7 +39,7 @@ import static org.assertj.core.util.Arrays.asList;
 class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPathYensStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensStreamConfig, ?>> getProcedureClazz() {
         return ShortestPathYensStreamProc.class;
     }
 

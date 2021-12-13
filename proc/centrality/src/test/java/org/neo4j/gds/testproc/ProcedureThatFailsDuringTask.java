@@ -34,7 +34,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm, ProcedureThatFailsDuringTask.Output, DummyConfig> {
+public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm, ProcedureThatFailsDuringTask.Output, DummyConfig, ProcedureThatFailsDuringTask.Output> {
     @Procedure(name = "very.strange.procedure", mode = Mode.READ)
     public Stream<Output> run(
         @Name(value = "graphName") String graphName,

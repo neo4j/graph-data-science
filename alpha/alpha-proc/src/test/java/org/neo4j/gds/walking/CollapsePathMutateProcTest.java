@@ -89,7 +89,7 @@ class CollapsePathMutateProcTest extends BaseProcTest implements
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<CollapsePath, Relationships, CollapsePathConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<CollapsePath, Relationships, CollapsePathConfig, ?>> getProcedureClazz() {
         return CollapsePathMutateProc.class;
     }
 

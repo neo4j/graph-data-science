@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class K1ColoringStreamProcTest extends K1ColoringProcBaseTest<K1ColoringStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringStreamConfig, ?>> getProcedureClazz() {
         return K1ColoringStreamProc.class;
     }
 

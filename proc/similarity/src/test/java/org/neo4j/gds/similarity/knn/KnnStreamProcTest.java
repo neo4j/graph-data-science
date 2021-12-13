@@ -40,7 +40,7 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnStreamConfig, ?>> getProcedureClazz() {
         return KnnStreamProc.class;
     }
 

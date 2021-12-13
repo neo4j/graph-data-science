@@ -37,7 +37,7 @@ class DegreeCentralityMutateProcTest extends DegreeCentralityProcTest<DegreeCent
     implements MutateNodePropertyTest<DegreeCentrality, DegreeCentralityMutateConfig, DegreeCentrality.DegreeFunction> {
 
     @Override
-    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityMutateConfig, ?>> getProcedureClazz() {
         return DegreeCentralityMutateProc.class;
     }
 

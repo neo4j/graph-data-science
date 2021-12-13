@@ -121,7 +121,7 @@ class LocalClusteringCoefficientMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateConfig, ?>> getProcedureClazz() {
         return LocalClusteringCoefficientMutateProc.class;
     }
 

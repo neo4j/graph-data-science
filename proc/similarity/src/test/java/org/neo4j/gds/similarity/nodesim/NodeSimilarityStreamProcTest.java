@@ -49,7 +49,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarityStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig, ?>> getProcedureClazz() {
         return NodeSimilarityStreamProc.class;
     }
 

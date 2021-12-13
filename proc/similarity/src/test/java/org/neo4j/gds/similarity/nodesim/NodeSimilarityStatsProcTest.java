@@ -115,7 +115,7 @@ public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimi
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig, ?>> getProcedureClazz() {
         return NodeSimilarityStatsProc.class;
     }
 

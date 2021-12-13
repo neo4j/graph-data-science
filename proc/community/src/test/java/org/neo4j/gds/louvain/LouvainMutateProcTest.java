@@ -106,7 +106,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainMutateConfig, ?>> getProcedureClazz() {
         return LouvainMutateProc.class;
     }
 

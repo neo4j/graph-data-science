@@ -43,7 +43,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
     private static final long[][] EXPECTED_COMMUNITIES = {new long[]{0L, 1L, 2L, 3L, 4, 5, 6}, new long[]{7, 8}, new long[]{9}};
 
     @Override
-    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccStreamConfig, ?>> getProcedureClazz() {
         return WccStreamProc.class;
     }
 

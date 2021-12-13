@@ -108,7 +108,7 @@ class ShortestPathAStarMutateProcTest extends ShortestPathAStarProcTest<Shortest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<AStar, DijkstraResult, ShortestPathAStarMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<AStar, DijkstraResult, ShortestPathAStarMutateConfig, ?>> getProcedureClazz() {
         return ShortestPathAStarMutateProc.class;
     }
 

@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionTrainProc extends
-    TrainProc<LinkPredictionTrain, LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> {
+    TrainProc<LinkPredictionTrain, LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo, MLTrainResult> {
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.train", mode = Mode.READ)
     @Description("Trains a link prediction model")

@@ -69,7 +69,7 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringM
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringMutateConfig, ?>> getProcedureClazz() {
         return K1ColoringMutateProc.class;
     }
 

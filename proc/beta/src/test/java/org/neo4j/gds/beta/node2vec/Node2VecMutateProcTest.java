@@ -55,7 +55,7 @@ class Node2VecMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig, ?>> getProcedureClazz() {
         return Node2VecMutateProc.class;
     }
 

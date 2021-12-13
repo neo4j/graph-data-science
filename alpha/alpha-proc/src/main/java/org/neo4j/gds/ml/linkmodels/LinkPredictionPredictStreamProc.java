@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictStreamConfig> {
+public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictStreamConfig, LinkPredictionPredictStreamProc.Result> {
 
     @Context
     public ModelCatalog modelCatalog;

@@ -35,7 +35,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTrainPipelineExecutor, LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> {
+public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTrainPipelineExecutor, LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo, MLTrainResult> {
 
     @Context
     public ModelCatalog modelCatalog;

@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class DegreeCentralityStreamProcTest extends DegreeCentralityProcTest<DegreeCentralityStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStreamConfig, ?>> getProcedureClazz() {
         return DegreeCentralityStreamProc.class;
     }
 

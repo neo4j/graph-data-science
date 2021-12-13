@@ -52,7 +52,7 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecStreamConfig, ?>> getProcedureClazz() {
         return Node2VecStreamProc.class;
     }
 

@@ -47,7 +47,7 @@ class BetweennessCentralityWriteProcTest extends BetweennessCentralityProcTest<B
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig, ?>> getProcedureClazz() {
         return BetweennessCentralityWriteProc.class;
     }
 

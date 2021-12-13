@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig> {
+public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig, MSClosenessCentrality.Result> {
 
     private static final String DESCRIPTION =
         "Closeness centrality is a way of detecting nodes that are " +

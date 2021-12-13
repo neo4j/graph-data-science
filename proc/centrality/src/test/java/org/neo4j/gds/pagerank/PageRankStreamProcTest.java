@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankStreamConfig, ?>> getProcedureClazz() {
         return PageRankStreamProc.class;
     }
 

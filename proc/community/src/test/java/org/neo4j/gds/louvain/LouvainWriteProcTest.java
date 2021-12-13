@@ -59,7 +59,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainWriteConfig, ?>> getProcedureClazz() {
         return LouvainWriteProc.class;
     }
 

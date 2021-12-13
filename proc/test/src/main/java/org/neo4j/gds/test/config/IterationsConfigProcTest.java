@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public final class IterationsConfigProcTest {
 
     public static List<DynamicTest> test(
-        AlgoBaseProc<?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return List.of(
@@ -50,7 +50,7 @@ public final class IterationsConfigProcTest {
     private IterationsConfigProcTest() {}
 
     private static DynamicTest invalidMaxIterations(
-        AlgoBaseProc<?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("invalidMaxIterations", () -> {
@@ -68,7 +68,7 @@ public final class IterationsConfigProcTest {
     }
 
     private static DynamicTest validMaxIterations(
-        AlgoBaseProc<?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("validMaxIterations", () -> {

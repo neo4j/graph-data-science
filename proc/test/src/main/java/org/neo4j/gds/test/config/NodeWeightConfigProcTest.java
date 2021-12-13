@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public final class NodeWeightConfigProcTest {
 
     public static <C extends AlgoBaseConfig & NodeWeightConfig> List<DynamicTest> defaultTest(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, C, ?> proc,
         CypherMapWrapper config
     ) {
         return List.of(
@@ -49,7 +49,7 @@ public final class NodeWeightConfigProcTest {
     }
 
     public static <C extends AlgoBaseConfig & NodeWeightConfig> List<DynamicTest> mandatoryParameterTest(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, C, ?> proc,
         CypherMapWrapper config
     ) {
         return List.of(
@@ -64,7 +64,7 @@ public final class NodeWeightConfigProcTest {
     private NodeWeightConfigProcTest() {}
 
     private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest validateNodeWeightProperty(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, C, ?> proc,
         CypherMapWrapper config
     ) {
         var graphStore = GdlFactory.of("(:A {a: 1})").build().graphStore();
@@ -84,7 +84,7 @@ public final class NodeWeightConfigProcTest {
     }
 
     private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest validateNodeWeightPropertyFilteredGraph(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, C, ?> proc,
         CypherMapWrapper config
     ) {
         var graphStore = GdlFactory
@@ -110,7 +110,7 @@ public final class NodeWeightConfigProcTest {
     }
 
     private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest defaultNodeWeightProperty(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, C, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("defaultNodeWeightProperty", () -> {
@@ -120,7 +120,7 @@ public final class NodeWeightConfigProcTest {
     }
 
     private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest emptyNodeWeightProperty(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, C, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("whitespaceNodeWeightProperty", () -> {
@@ -131,7 +131,7 @@ public final class NodeWeightConfigProcTest {
     }
 
     private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest trailingWhiteSpaceNodeWeightProperty(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, C, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("whitespaceNodeWeightProperty", () -> {
@@ -142,7 +142,7 @@ public final class NodeWeightConfigProcTest {
     }
 
     private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest unspecifiedNodeWeightProperty(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, C, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("unspecifiedNodeWeightProperty", () -> {
@@ -153,7 +153,7 @@ public final class NodeWeightConfigProcTest {
     }
 
     private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest validNodeWeightProperty(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, C, ?> proc,
         CypherMapWrapper config
     ) {
         var graphStore = GdlFactory.of("(:A {nw: 1})").build().graphStore();

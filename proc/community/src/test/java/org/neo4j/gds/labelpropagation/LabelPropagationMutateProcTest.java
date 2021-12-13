@@ -78,7 +78,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig, ?>> getProcedureClazz() {
         return LabelPropagationMutateProc.class;
     }
 

@@ -102,7 +102,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     }
 
     @Override
-    public void applyOnProcedure(Consumer<? super AlgoBaseProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig>> func) {
+    public void applyOnProcedure(Consumer<? super AlgoBaseProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig, ?>> func) {
         TestProcedureRunner.applyOnProcedure(
             graphDb(),
             getProcedureClazz(),
@@ -163,7 +163,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig, ?>> getProcedureClazz() {
         return NodeClassificationPredictWriteProc.class;
     }
 

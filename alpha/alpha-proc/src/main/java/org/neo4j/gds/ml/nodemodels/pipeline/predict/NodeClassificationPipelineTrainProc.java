@@ -44,7 +44,8 @@ public class NodeClassificationPipelineTrainProc
         NodeClassificationTrainPipelineExecutor,
         NodeLogisticRegressionData,
         NodeClassificationPipelineTrainConfig,
-        NodeClassificationPipelineModelInfo
+        NodeClassificationPipelineModelInfo,
+        MLTrainResult
     > {
 
     @Context

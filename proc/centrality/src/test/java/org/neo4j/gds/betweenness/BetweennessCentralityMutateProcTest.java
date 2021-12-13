@@ -63,7 +63,7 @@ public class BetweennessCentralityMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig, ?>> getProcedureClazz() {
         return BetweennessCentralityMutateProc.class;
     }
 

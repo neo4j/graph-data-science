@@ -44,7 +44,7 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTestBase {
 
     @Override
-    Class<? extends AlgoBaseProc<?, ?, ?>> getProcedureClazz() {
+    Class<? extends AlgoBaseProc<?, ?, ?, ?>> getProcedureClazz() {
         return LinkPredictionPipelineMutateProc.class;
     }
 

@@ -41,7 +41,7 @@ import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEn
 class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccStatsConfig, ?>> getProcedureClazz() {
         return WccStatsProc.class;
     }
 

@@ -49,7 +49,7 @@ import static org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrain.MOD
 @Neo4jModelCatalogExtension
 abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
 
-    abstract Class<? extends AlgoBaseProc<?, ?, ?>> getProcedureClazz();
+    abstract Class<? extends AlgoBaseProc<?, ?, ?, ?>> getProcedureClazz();
 
     @Neo4jGraph
     static String GDL = "CREATE " +

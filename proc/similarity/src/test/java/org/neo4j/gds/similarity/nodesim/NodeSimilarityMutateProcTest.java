@@ -63,7 +63,7 @@ class NodeSimilarityMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig, ?>> getProcedureClazz() {
         return NodeSimilarityMutateProc.class;
     }
 

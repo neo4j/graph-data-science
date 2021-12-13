@@ -87,7 +87,7 @@ class LocalClusteringCoefficientWriteProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig, ?>> getProcedureClazz() {
         return LocalClusteringCoefficientWriteProc.class;
     }
 

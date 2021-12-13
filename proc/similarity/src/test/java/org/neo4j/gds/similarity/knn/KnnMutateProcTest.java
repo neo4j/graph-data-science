@@ -73,7 +73,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig, ?>> getProcedureClazz() {
         return KnnMutateProc.class;
     }
 

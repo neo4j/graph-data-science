@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig> {
+public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig, TriangleStream.Result> {
 
     private static final String DESCRIPTION = "Triangles streams the nodeIds of each triangle in the graph.";
 

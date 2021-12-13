@@ -56,7 +56,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateConfig, ?>> getProcedureClazz() {
         return WccMutateProc.class;
     }
 

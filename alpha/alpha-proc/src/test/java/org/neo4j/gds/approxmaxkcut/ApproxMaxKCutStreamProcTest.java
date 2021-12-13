@@ -39,7 +39,7 @@ import static org.neo4j.gds.ThrowableRootCauseMatcher.rootCause;
 class ApproxMaxKCutStreamProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutStreamConfig, ?>> getProcedureClazz() {
         return ApproxMaxKCutStreamProc.class;
     }
 

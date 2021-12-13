@@ -178,7 +178,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig, ?>> getProcedureClazz() {
         return ModularityOptimizationMutateProc.class;
     }
 

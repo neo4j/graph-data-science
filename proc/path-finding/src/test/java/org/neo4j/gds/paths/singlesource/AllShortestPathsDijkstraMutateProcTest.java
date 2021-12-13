@@ -95,7 +95,7 @@ class AllShortestPathsDijkstraMutateProcTest extends AllShortestPathsDijkstraPro
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, AllShortestPathsDijkstraMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, AllShortestPathsDijkstraMutateConfig, ?>> getProcedureClazz() {
         return AllShortestPathsDijkstraMutateProc.class;
     }
 

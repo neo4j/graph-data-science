@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class K1ColoringWriteProcTest extends K1ColoringProcBaseTest<K1ColoringWriteConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringWriteConfig, ?>> getProcedureClazz() {
         return K1ColoringWriteProc.class;
     }
 

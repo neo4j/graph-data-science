@@ -86,7 +86,7 @@ class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<Sh
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraMutateConfig, ?>> getProcedureClazz() {
         return ShortestPathDijkstraMutateProc.class;
     }
 

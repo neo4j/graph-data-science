@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<BetweennessCentralityStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig, ?>> getProcedureClazz() {
         return BetweennessCentralityStreamProc.class;
     }
 

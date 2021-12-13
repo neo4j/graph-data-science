@@ -136,7 +136,7 @@ class TriangleCountMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateConfig, ?>> getProcedureClazz() {
         return TriangleCountMutateProc.class;
     }
 

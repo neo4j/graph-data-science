@@ -117,7 +117,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankMutateConfig, ?>> getProcedureClazz() {
         return PageRankMutateProc.class;
     }
 

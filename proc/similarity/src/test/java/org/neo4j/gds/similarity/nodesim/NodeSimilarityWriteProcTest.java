@@ -52,7 +52,7 @@ public class NodeSimilarityWriteProcTest
     implements WriteRelationshipWithPropertyTest<NodeSimilarity, NodeSimilarityWriteConfig, NodeSimilarityResult> {
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig, ?>> getProcedureClazz() {
         return NodeSimilarityWriteProc.class;
     }
 

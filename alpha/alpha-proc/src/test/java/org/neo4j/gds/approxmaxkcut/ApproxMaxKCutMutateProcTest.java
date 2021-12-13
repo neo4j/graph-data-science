@@ -47,7 +47,7 @@ class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMut
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutMutateConfig, ?>> getProcedureClazz() {
         return ApproxMaxKCutMutateProc.class;
     }
 

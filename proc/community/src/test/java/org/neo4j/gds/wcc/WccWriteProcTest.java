@@ -47,7 +47,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
     private static final String SEED_PROPERTY = "seedId";
 
     @Override
-    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccWriteConfig, ?>> getProcedureClazz() {
         return WccWriteProc.class;
     }
 

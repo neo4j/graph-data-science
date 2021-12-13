@@ -39,7 +39,7 @@ public abstract class WriteProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
-    CONFIG extends WritePropertyConfig & AlgoBaseConfig> extends NodePropertiesWriter<ALGO, ALGO_RESULT, CONFIG> {
+    CONFIG extends WritePropertyConfig & AlgoBaseConfig> extends NodePropertiesWriter<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> {
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 

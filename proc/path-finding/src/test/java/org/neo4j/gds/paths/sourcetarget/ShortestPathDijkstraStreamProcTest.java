@@ -50,7 +50,7 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
     TestLog testLog;
 
     @Override
-    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraStreamConfig, ?>> getProcedureClazz() {
         return ShortestPathDijkstraStreamProc.class;
     }
 

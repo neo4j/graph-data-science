@@ -46,7 +46,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProcTest<AllShortestPathsDijkstraWriteConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig, ?>> getProcedureClazz() {
         return AllShortestPathsDijkstraWriteProc.class;
     }
 

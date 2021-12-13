@@ -48,7 +48,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class ShortestPathAStarWriteProcTest extends ShortestPathAStarProcTest<ShortestPathAStarWriteConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<AStar, DijkstraResult, ShortestPathAStarWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<AStar, DijkstraResult, ShortestPathAStarWriteConfig, ?>> getProcedureClazz() {
         return ShortestPathAStarWriteProc.class;
     }
 

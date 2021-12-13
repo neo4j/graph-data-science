@@ -50,7 +50,7 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelationshipWithPropertyTest<Knn, KnnWriteConfig, Knn.Result> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnWriteConfig, ?>> getProcedureClazz() {
         return KnnWriteProc.class;
     }
 

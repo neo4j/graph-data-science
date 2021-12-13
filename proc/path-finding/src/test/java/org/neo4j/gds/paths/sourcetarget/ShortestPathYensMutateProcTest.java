@@ -92,7 +92,7 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensMutateConfig, ?>> getProcedureClazz() {
         return ShortestPathYensMutateProc.class;
     }
 

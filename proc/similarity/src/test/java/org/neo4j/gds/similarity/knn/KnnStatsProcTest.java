@@ -162,7 +162,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnStatsConfig, ?>> getProcedureClazz() {
         return KnnStatsProc.class;
     }
 

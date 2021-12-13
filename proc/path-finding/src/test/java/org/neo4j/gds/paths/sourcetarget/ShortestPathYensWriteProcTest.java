@@ -46,7 +46,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPathYensWriteConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensWriteConfig, ?>> getProcedureClazz() {
         return ShortestPathYensWriteProc.class;
     }
 

@@ -41,7 +41,9 @@ import java.util.stream.Stream;
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
-    CONFIG extends AlgoBaseConfig> extends BaseProc {
+    CONFIG extends AlgoBaseConfig,
+    PROC_RESULT
+> extends BaseProc {
 
     protected static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
 
@@ -136,7 +138,7 @@ public abstract class AlgoBaseProc<
     }
 
     @ValueClass
-    public interface ComputationResult<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends AlgoBaseConfig> {
+    public interface ComputationResult<A extends Algorithm<A, ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
         long createMillis();
 
         long computeMillis();
@@ -145,7 +147,7 @@ public abstract class AlgoBaseProc<
         A algorithm();
 
         @Nullable
-        RESULT result();
+        ALGO_RESULT result();
 
         Graph graph();
 

@@ -61,7 +61,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig, ?>> getProcedureClazz() {
         return LabelPropagationWriteProc.class;
     }
 

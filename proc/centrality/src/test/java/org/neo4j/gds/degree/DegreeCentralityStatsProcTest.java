@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class DegreeCentralityStatsProcTest extends DegreeCentralityProcTest<DegreeCentralityStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStatsConfig, ?>> getProcedureClazz() {
         return DegreeCentralityStatsProc.class;
     }
 

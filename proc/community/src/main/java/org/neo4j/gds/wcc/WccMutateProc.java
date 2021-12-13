@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateConfig> {
+public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateConfig, WccMutateProc.MutateResult> {
 
     @Procedure(value = "gds.wcc.mutate", mode = READ)
     @Description(WCC_DESCRIPTION)

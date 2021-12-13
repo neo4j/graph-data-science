@@ -45,7 +45,7 @@ class DegreeCentralityWriteProcTest extends DegreeCentralityProcTest<DegreeCentr
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityWriteConfig, ?>> getProcedureClazz() {
         return DegreeCentralityWriteProc.class;
     }
 

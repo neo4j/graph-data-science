@@ -171,7 +171,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<RandomWalk, Stream<long[]>, RandomWalkStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<RandomWalk, Stream<long[]>, RandomWalkStreamConfig, ?>> getProcedureClazz() {
         return RandomWalkStreamProc.class;
     }
 

@@ -63,7 +63,7 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
         );
     }
 
-    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig, ?>> getProcedureClazz() {
         return Node2VecWriteProc.class;
     }
 

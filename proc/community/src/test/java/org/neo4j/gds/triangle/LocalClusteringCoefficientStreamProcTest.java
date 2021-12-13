@@ -73,7 +73,7 @@ class LocalClusteringCoefficientStreamProcTest extends LocalClusteringCoefficien
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamConfig, ?>> getProcedureClazz() {
         return LocalClusteringCoefficientStreamProc.class;
     }
 

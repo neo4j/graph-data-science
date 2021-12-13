@@ -32,7 +32,7 @@ import java.util.Map;
 class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTestBase {
 
     @Override
-    Class<? extends AlgoBaseProc<?, ?, ?>> getProcedureClazz() {
+    Class<? extends AlgoBaseProc<?, ?, ?, ?>> getProcedureClazz() {
         return LinkPredictionPipelineStreamProc.class;
     }
 

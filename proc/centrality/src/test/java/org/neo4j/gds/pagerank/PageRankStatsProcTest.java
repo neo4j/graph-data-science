@@ -46,7 +46,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankStatsConfig, ?>> getProcedureClazz() {
         return PageRankStatsProc.class;
     }
 
