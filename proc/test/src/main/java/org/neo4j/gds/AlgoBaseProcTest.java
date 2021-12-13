@@ -331,37 +331,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     }
 
     @Test
-    default void shouldThrowWhenTooManyCoresOnLimited() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
-        var loadedGraphName = "graph";
-        GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
-            "",
-            loadedGraphName,
-            relationshipProjections()
-        );
-        GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
-        GraphStoreCatalog.set(graphCreateConfig, graphStore);
-        applyOnProcedure((proc) -> {
-            getWriteAndStreamProcedures(proc).forEach(method -> {
-                Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
-                    "concurrency",
-                    10
-                ))).toMap();
-
-                InvocationTargetException ex = assertThrows(
-                    InvocationTargetException.class,
-                    () -> method.invoke(proc, loadedGraphName, configMap)
-                );
-                assertThat(ex)
-                    .getRootCause()
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining(
-                        "Community users cannot exceed concurrency=4 (you configured concurrency=10), see https://neo4j.com/docs/graph-data-science/");
-            });
-        });
-    }
-
-    @Test
     default void checkStatsModeExists() {
         applyOnProcedure((proc) -> {
             boolean inStatsClass = methodExists(proc, "stats");
