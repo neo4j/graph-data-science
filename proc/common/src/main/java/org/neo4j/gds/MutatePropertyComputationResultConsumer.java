@@ -34,10 +34,13 @@ import java.util.stream.Collectors;
 public final class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig, RESULT>
     extends MutateComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> {
 
-    private final NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction;
+    public interface MutateNodePropertyListFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig>
+        extends NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> {}
+
+    private final MutateNodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction;
 
     public MutatePropertyComputationResultConsumer(
-        NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction,
+        MutateNodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction,
         ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction
     ) {
         super(resultBuilderFunction);

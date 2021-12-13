@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 @FunctionalInterface
-public interface ResultBuilderFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutateConfig, RESULT> {
+public interface ResultBuilderFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig, RESULT> {
     AbstractResultBuilder<RESULT> apply(
         AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
         ExecutionContext executionContext
