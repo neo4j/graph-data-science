@@ -227,7 +227,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
             }
         );
 
-        String algoQuery = "CALL gds.testProc.test('" + graphName + "', {writeProperty: 'p', relationshipTypes: $relType})";
+        String algoQuery = "CALL gds.testProc.write('" + graphName + "', {writeProperty: 'p', relationshipTypes: $relType})";
 
         runQueryWithRowConsumer(algoQuery, singletonMap("relType", Arrays.asList("X", "Y")), resultRow ->
             assertEquals(8L, resultRow.getNumber("relationshipCount"))
