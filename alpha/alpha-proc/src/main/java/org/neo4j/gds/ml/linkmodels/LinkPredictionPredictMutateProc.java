@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -30,6 +31,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -94,39 +96,48 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
     }
 
     @Override
-    protected void updateGraphStore(
-        AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateConfig> computationResult
-    ) {
-        var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .aggregation(Aggregation.SINGLE)
-            .nodes(computationResult.graph())
-            .orientation(Orientation.UNDIRECTED)
-            .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-            .concurrency(1)
-            .executorService(Pools.DEFAULT)
-            .allocationTracker(allocationTracker())
-            .build();
+    public MutateComputationResultConsumer<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateConfig, MutateResult> computationResultConsumer() {
+        return new MutateComputationResultConsumer<>(
+            (computationResult, executionContext) -> resultBuilder(computationResult)
+        ) {
+            @Override
+            protected void updateGraphStore(
+                AbstractResultBuilder<?> resultBuilder,
+                ComputationResult<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateConfig> computationResult,
+                ExecutionContext executionContext
+            ) {
+                var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+                    .aggregation(Aggregation.SINGLE)
+                    .nodes(computationResult.graph())
+                    .orientation(Orientation.UNDIRECTED)
+                    .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
+                    .concurrency(1)
+                    .executorService(Pools.DEFAULT)
+                    .allocationTracker(allocationTracker())
+                    .build();
 
-        computationResult
-            .result()
-            .stream()
-            .forEach(predictedLink -> relationshipsBuilder.addFromInternal(predictedLink.sourceId(),
-                predictedLink.targetId(),
-                predictedLink.probability()
-            ));
-        var relationships = relationshipsBuilder.build();
+                computationResult
+                    .result()
+                    .stream()
+                    .forEach(predictedLink -> relationshipsBuilder.addFromInternal(
+                        predictedLink.sourceId(),
+                        predictedLink.targetId(),
+                        predictedLink.probability()
+                    ));
+                var relationships = relationshipsBuilder.build();
 
-        var config = computationResult.config();
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            computationResult.graphStore().addRelationshipType(
-                RelationshipType.of(config.mutateRelationshipType()),
-                Optional.of(config.mutateProperty()),
-                Optional.of(NumberType.FLOATING_POINT),
-                relationships
-            );
-        }
-        resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+                var config = computationResult.config();
+                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
+                    computationResult.graphStore().addRelationshipType(
+                        RelationshipType.of(config.mutateRelationshipType()),
+                        Optional.of(config.mutateProperty()),
+                        Optional.of(NumberType.FLOATING_POINT),
+                        relationships
+                    );
+                }
+                resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+            }
+        };
     }
 
     @SuppressWarnings("unused")

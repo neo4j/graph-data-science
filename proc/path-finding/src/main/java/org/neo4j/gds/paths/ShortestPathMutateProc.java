@@ -20,8 +20,7 @@
 package org.neo4j.gds.paths;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -32,6 +31,9 @@ import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Optional;
@@ -40,42 +42,53 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 
 public abstract class ShortestPathMutateProc<ALGO extends Algorithm<ALGO, DijkstraResult>, CONFIG extends AlgoBaseConfig & MutateRelationshipConfig>
     extends MutateProc<ALGO, DijkstraResult, MutateResult, CONFIG> {
-
     @Override
-    protected void updateGraphStore(AbstractResultBuilder<?> resultBuilder, ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
-        var config = computationResult.config();
-        var result = computationResult.result();
+    public MutateComputationResultConsumer<ALGO, DijkstraResult, CONFIG, MutateResult> computationResultConsumer() {
+        return new MutateComputationResultConsumer<ALGO, DijkstraResult, CONFIG, MutateResult>(
+            (computationResult, executionContext) -> resultBuilder(computationResult)
+        ) {
+            @Override
+            protected void updateGraphStore(
+                AbstractResultBuilder<?> resultBuilder,
+                ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult,
+                ExecutionContext executionContext
+            ) {
+                var config = computationResult.config();
+                var result = computationResult.result();
 
-        var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
+                var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
 
-        var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .nodes(computationResult.graph())
-            .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-            .orientation(Orientation.NATURAL)
-            .allocationTracker(allocationTracker())
-            .build();
+                var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+                    .nodes(computationResult.graph())
+                    .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
+                    .orientation(Orientation.NATURAL)
+                    .allocationTracker(allocationTracker())
+                    .build();
 
-        Relationships relationships;
+                Relationships relationships;
 
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            result.forEachPath(pathResult -> {
-                relationshipsBuilder.addFromInternal(
-                    pathResult.sourceNode(),
-                    pathResult.targetNode(),
-                    pathResult.totalCost()
-                );
-            });
-            relationships = relationshipsBuilder.build();
-            resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
-        }
+                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
+                    result.forEachPath(pathResult -> {
+                        relationshipsBuilder.addFromInternal(
+                            pathResult.sourceNode(),
+                            pathResult.targetNode(),
+                            pathResult.totalCost()
+                        );
+                    });
+                    relationships = relationshipsBuilder.build();
+                    resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+                }
 
-        computationResult
-            .graphStore()
-            .addRelationshipType(mutateRelationshipType,
-                Optional.of(TOTAL_COST_KEY),
-                Optional.of(NumberType.FLOATING_POINT),
-                relationships
-            );
+                computationResult
+                    .graphStore()
+                    .addRelationshipType(
+                        mutateRelationshipType,
+                        Optional.of(TOTAL_COST_KEY),
+                        Optional.of(NumberType.FLOATING_POINT),
+                        relationships
+                    );
+            }
+        };
     }
 
     @Override

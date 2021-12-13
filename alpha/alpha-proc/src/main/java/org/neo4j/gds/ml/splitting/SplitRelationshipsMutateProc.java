@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
+import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -30,6 +31,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.validation.AfterLoadValidation;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -108,29 +110,36 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     }
 
     @Override
-    protected void updateGraphStore(
-        AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computationResult
-    ) {
-
-        SplitRelationshipsMutateConfig config = computationResult.config();
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            computationResult.graphStore().addRelationshipType(
-                config.remainingRelationshipType(),
-                Optional.ofNullable(config.relationshipWeightProperty()),
-                Optional.of(NumberType.FLOATING_POINT),
-                computationResult.result().remainingRels()
-            );
-            computationResult.graphStore().addRelationshipType(
-                config.holdoutRelationshipType(),
-                Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY),
-                Optional.of(NumberType.INTEGRAL),
-                computationResult.result().selectedRels()
-            );
-        }
-        long holdoutWritten = computationResult.result().selectedRels().topology().elementCount();
-        long remainingWritten = computationResult.result().remainingRels().topology().elementCount();
-        resultBuilder.withRelationshipsWritten(holdoutWritten + remainingWritten);
+    public MutateComputationResultConsumer<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig, MutateResult> computationResultConsumer() {
+        return new MutateComputationResultConsumer<>(
+            (computationResult, executionContext) -> resultBuilder(computationResult)
+        ) {
+            @Override
+            protected void updateGraphStore(
+                AbstractResultBuilder<?> resultBuilder,
+                ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computationResult,
+                ExecutionContext executionContext
+            ) {
+                SplitRelationshipsMutateConfig config = computationResult.config();
+                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
+                    computationResult.graphStore().addRelationshipType(
+                        config.remainingRelationshipType(),
+                        Optional.ofNullable(config.relationshipWeightProperty()),
+                        Optional.of(NumberType.FLOATING_POINT),
+                        computationResult.result().remainingRels()
+                    );
+                    computationResult.graphStore().addRelationshipType(
+                        config.holdoutRelationshipType(),
+                        Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY),
+                        Optional.of(NumberType.INTEGRAL),
+                        computationResult.result().selectedRels()
+                    );
+                }
+                long holdoutWritten = computationResult.result().selectedRels().topology().elementCount();
+                long remainingWritten = computationResult.result().remainingRels().topology().elementCount();
+                resultBuilder.withRelationshipsWritten(holdoutWritten + remainingWritten);
+            }
+        };
     }
 
     @Override
