@@ -30,7 +30,6 @@ import org.neo4j.gds.ml.core.tensor.Scalar;
 
 import java.util.stream.IntStream;
 
-import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
@@ -85,8 +84,8 @@ public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
         return Math.pow(relationshipWeight, ALPHA);
     }
 
-    private double affinity(Matrix embeddingData, int nodeIdOffset, int otherNodeIdOffset) {
-        int embeddingDimension = combinedEmbeddings.dimension(COLUMNS_INDEX);
+    private static double affinity(Matrix embeddingData, int nodeIdOffset, int otherNodeIdOffset) {
+        int embeddingDimension = embeddingData.cols();
         double sum = 0;
         for (int i = 0; i < embeddingDimension; i++) {
             sum += embeddingData.dataAt(nodeIdOffset, i) * embeddingData.dataAt(otherNodeIdOffset, i);

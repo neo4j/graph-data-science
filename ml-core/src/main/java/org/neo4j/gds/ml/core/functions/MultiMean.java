@@ -88,7 +88,7 @@ public class MultiMean extends SingleParentVariable<Matrix, Matrix> {
         var multiMeanGradient = ctx.gradient(this);
         var resultGradient = ctx.data(parent).createWithSameDimensions();
 
-        int cols = parent.dimension(COLUMNS_INDEX);
+        int cols = resultGradient.cols();
         var batchIds = this.subGraph.batchIds();
 
         for (int batchIdx = 0; batchIdx < batchIds.length; batchIdx++) {
