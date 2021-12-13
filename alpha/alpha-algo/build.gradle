@@ -38,7 +38,7 @@ dependencies {
     implementation group: 'org.openjdk.jol',    name: 'jol-core',      version: ver.'jol'
     implementation group: 'org.hdrhistogram',   name: 'HdrHistogram',  version: ver.'HdrHistogram'
 
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: ver.'jackson'
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.immutables
