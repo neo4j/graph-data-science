@@ -53,7 +53,7 @@ public abstract class AlgoBaseProc<
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig,
     PROC_RESULT
-> extends BaseProc implements AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG>, AlgorithmFactory<?, ALGO, CONFIG>> {
+> extends BaseProc implements AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>, AlgorithmFactory<?, ALGO, CONFIG>> {
 
     protected static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
 
@@ -120,8 +120,8 @@ public abstract class AlgoBaseProc<
     }
 
     @Override
-    public ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> computationResultConsumer() {
-        return ComputationResultConsumer.identity();
+    public <T extends ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>>> T computationResultConsumer() {
+        return null;
     }
 
     protected Validator<CONFIG> validator() {
@@ -131,8 +131,33 @@ public abstract class AlgoBaseProc<
     private ProcedureExecutor<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> procedureExecutor() {
         var pipelineSpec = new AlgoBasePipelineSpec();
 
+        var name = name();
+        var factory = algorithmFactory();
+        var configFunction = newConfigFunction();
+        var algoSpec = new AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>, AlgorithmFactory<?, ALGO, CONFIG>>() {
+            @Override
+            public String name() {
+                return name;
+            }
+
+            @Override
+            public AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory() {
+                return factory;
+            }
+
+            @Override
+            public NewConfigFunction<CONFIG> newConfigFunction() {
+                return configFunction;
+            }
+
+            @Override
+            public ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> computationResultConsumer() {
+                return ComputationResultConsumer.identity();
+            }
+        };
+
         return new ProcedureExecutor<>(
-            this,
+            algoSpec,
             pipelineSpec,
             executionContext()
         );
