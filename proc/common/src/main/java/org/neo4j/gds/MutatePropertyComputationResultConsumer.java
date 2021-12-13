@@ -27,8 +27,8 @@ import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.logging.Log;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,30 +46,27 @@ public final class MutatePropertyComputationResultConsumer<ALGO extends Algorith
     }
 
     private final NodePropertiesFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertiesFunction;
-    private final AllocationTracker allocationTracker;
 
     public MutatePropertyComputationResultConsumer(
         NodePropertiesFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertiesFunction,
-        ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction,
-        Log log,
-        AllocationTracker allocationTracker
+        ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction
     ) {
-        super(resultBuilderFunction, log);
+        super(resultBuilderFunction);
         this.nodePropertiesFunction = nodePropertiesFunction;
-        this.allocationTracker = allocationTracker;
     }
 
     @Override
     protected void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
-        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
+        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
+        ExecutionContext executionContext
     ) {
         var graph = computationResult.graph();
         MutatePropertyConfig mutatePropertyConfig = computationResult.config();
 
         var nodeProperties = List.of(ImmutableNodeProperty.of(
             computationResult.config().mutateProperty(),
-            this.nodePropertiesFunction.apply(computationResult, mutatePropertyConfig.mutateProperty(), allocationTracker)
+            this.nodePropertiesFunction.apply(computationResult, mutatePropertyConfig.mutateProperty(), executionContext.allocationTracker())
         ));
 
         if (graph instanceof NodeFilteredGraph) {
@@ -86,7 +83,7 @@ public final class MutatePropertyComputationResultConsumer<ALGO extends Algorith
         }
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            log.debug("Updating in-memory graph store");
+            executionContext.log().debug("Updating in-memory graph store");
             GraphStore graphStore = computationResult.graphStore();
             Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
 
