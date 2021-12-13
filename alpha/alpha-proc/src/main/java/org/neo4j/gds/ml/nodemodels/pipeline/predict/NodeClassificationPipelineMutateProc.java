@@ -64,7 +64,7 @@ public class NodeClassificationPipelineMutateProc
     }
 
     @Override
-    public ValidationConfiguration<NodeClassificationPredictPipelineMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<NodeClassificationPredictPipelineMutateConfig> validationConfig() {
         return NodeClassificationPipelineCompanion.getValidationConfig(modelCatalog);
     }
 
@@ -111,7 +111,7 @@ public class NodeClassificationPipelineMutateProc
     }
 
     @Override
-    protected GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig> algorithmFactory() {
         return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this);
     }
 

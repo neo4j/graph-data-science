@@ -66,7 +66,7 @@ public class NodeClassificationPipelineWriteProc
     }
 
     @Override
-    public ValidationConfiguration<NodeClassificationPredictPipelineWriteConfig> getValidationConfig() {
+    public ValidationConfiguration<NodeClassificationPredictPipelineWriteConfig> validationConfig() {
         return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<NodeClassificationPredictPipelineWriteConfig>> afterLoadValidations() {
@@ -132,7 +132,7 @@ public class NodeClassificationPipelineWriteProc
     }
 
     @Override
-    protected GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig> algorithmFactory() {
         return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this);
     }
 

@@ -60,7 +60,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     }
 
     @Override
-    public ValidationConfiguration<LocalClusteringCoefficientStatsConfig> getValidationConfig() {
+    public ValidationConfiguration<LocalClusteringCoefficientStatsConfig> validationConfig() {
         return LocalClusteringCoefficientCompanion.getValidationConfig(log);
     }
 
@@ -78,7 +78,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     }
 
     @Override
-    protected GraphAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStatsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStatsConfig> algorithmFactory() {
         return new LocalClusteringCoefficientFactory<>();
     }
 

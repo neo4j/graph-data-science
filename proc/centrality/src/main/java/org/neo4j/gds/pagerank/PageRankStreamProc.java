@@ -68,7 +68,7 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
     }
 
     @Override
-    public ValidationConfiguration<PageRankStreamConfig> getValidationConfig() {
+    public ValidationConfiguration<PageRankStreamConfig> validationConfig() {
         return PageRankProc.getValidationConfig(log);
     }
 
@@ -78,7 +78,7 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
     }
 
     @Override
-    protected GraphAlgorithmFactory<PageRankAlgorithm, PageRankStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankStreamConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>();
     }
 

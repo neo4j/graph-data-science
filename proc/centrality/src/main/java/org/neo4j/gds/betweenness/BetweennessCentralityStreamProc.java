@@ -79,12 +79,12 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     }
 
     @Override
-    public ValidationConfiguration<BetweennessCentralityStreamConfig> getValidationConfig() {
+    public ValidationConfiguration<BetweennessCentralityStreamConfig> validationConfig() {
         return BetweennessCentralityProc.getValidationConfig();
     }
 
     @Override
-    protected GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityStreamConfig> algorithmFactory() {
         return BetweennessCentralityProc.algorithmFactory();
     }
 }

@@ -70,7 +70,7 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     }
 
     @Override
-    public ValidationConfiguration<NodeClassificationTrainConfig> getValidationConfig() {
+    public ValidationConfiguration<NodeClassificationTrainConfig> validationConfig() {
         return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<NodeClassificationTrainConfig>> afterLoadValidations() {
@@ -97,7 +97,7 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     }
 
     @Override
-    protected GraphAlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> algorithmFactory() {
         return new NodeClassificationTrainAlgorithmFactory();
     }
 

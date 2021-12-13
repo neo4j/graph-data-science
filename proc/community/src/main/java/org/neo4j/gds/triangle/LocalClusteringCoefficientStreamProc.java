@@ -64,7 +64,7 @@ public class LocalClusteringCoefficientStreamProc
     }
 
     @Override
-    protected GraphAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStreamConfig> algorithmFactory() {
         return new LocalClusteringCoefficientFactory<>();
     }
 
@@ -76,7 +76,7 @@ public class LocalClusteringCoefficientStreamProc
     }
 
     @Override
-    public ValidationConfiguration<LocalClusteringCoefficientStreamConfig> getValidationConfig() {
+    public ValidationConfiguration<LocalClusteringCoefficientStreamConfig> validationConfig() {
         return LocalClusteringCoefficientCompanion.getValidationConfig(log);
     }
 

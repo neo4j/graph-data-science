@@ -71,7 +71,7 @@ public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, Degre
     }
 
     @Override
-    protected GraphAlgorithmFactory<DegreeCentrality, DegreeCentralityWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<DegreeCentrality, DegreeCentralityWriteConfig> algorithmFactory() {
         return new DegreeCentralityFactory<>();
     }
 

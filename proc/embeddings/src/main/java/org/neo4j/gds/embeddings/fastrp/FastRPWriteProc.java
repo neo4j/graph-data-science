@@ -66,7 +66,7 @@ public class FastRPWriteProc extends WriteProc<FastRP, FastRP.FastRPResult, Fast
     }
 
     @Override
-    protected GraphAlgorithmFactory<FastRP, FastRPWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<FastRP, FastRPWriteConfig> algorithmFactory() {
         return new FastRPFactory<>();
     }
 

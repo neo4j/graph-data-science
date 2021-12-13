@@ -68,7 +68,7 @@ public class NodeClassificationPipelineTrainProc
     }
 
     @Override
-    protected GraphStoreAlgorithmFactory<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainConfig> algorithmFactory() {
         return new NodeClassificationTrainPipelineAlgorithmFactory(this, modelCatalog);
     }
 

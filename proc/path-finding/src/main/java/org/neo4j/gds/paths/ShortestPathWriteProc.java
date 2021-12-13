@@ -73,7 +73,7 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
                 ));
 
             var progressTracker = new TaskProgressTracker(
-                RelationshipStreamExporter.baseTask(procName()),
+                RelationshipStreamExporter.baseTask(name()),
                 log,
                 1,
                 taskRegistryFactory

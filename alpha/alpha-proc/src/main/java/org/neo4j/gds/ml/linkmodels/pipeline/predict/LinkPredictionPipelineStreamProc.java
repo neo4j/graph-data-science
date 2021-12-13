@@ -69,7 +69,7 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     }
 
     @Override
-    public ValidationConfiguration<LinkPredictionPredictPipelineStreamConfig> getValidationConfig() {
+    public ValidationConfiguration<LinkPredictionPredictPipelineStreamConfig> validationConfig() {
         return LinkPredictionPipelineCompanion.getValidationConfig();
     }
 
@@ -79,7 +79,7 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     }
 
     @Override
-    protected GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineStreamConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineStreamConfig> algorithmFactory() {
         return new LinkPredictionPredictPipelineAlgorithmFactory<>(this, modelCatalog);
     }
 

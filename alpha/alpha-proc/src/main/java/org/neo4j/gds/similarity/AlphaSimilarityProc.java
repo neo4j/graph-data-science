@@ -125,7 +125,7 @@ abstract class AlphaSimilarityProc
     abstract String taskName();
 
     @Override
-    protected final GraphAlgorithmFactory<ALGO, CONFIG> algorithmFactory() {
+    public final GraphAlgorithmFactory<ALGO, CONFIG> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
             public String taskName() {

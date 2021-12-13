@@ -63,7 +63,7 @@ public class AllShortestPathsDijkstraStreamProc extends ShortestPathStreamProc<D
     }
 
     @Override
-    protected GraphAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraStreamConfig> algorithmFactory() {
         return DijkstraFactory.singleSource();
     }
 }

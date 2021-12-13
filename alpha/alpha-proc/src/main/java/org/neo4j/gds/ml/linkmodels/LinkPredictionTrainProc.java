@@ -83,7 +83,7 @@ public class LinkPredictionTrainProc extends
     }
 
     @Override
-    public ValidationConfiguration<LinkPredictionTrainConfig> getValidationConfig() {
+    public ValidationConfiguration<LinkPredictionTrainConfig> validationConfig() {
         return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<LinkPredictionTrainConfig>> beforeLoadValidations() {
@@ -101,7 +101,7 @@ public class LinkPredictionTrainProc extends
     }
 
     @Override
-    protected GraphAlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
         return new LinkPredictionTrainFactory();
     }
 }

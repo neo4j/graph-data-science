@@ -63,7 +63,7 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
     }
 
     @Override
-    protected GraphAlgorithmFactory<LabelPropagation, LabelPropagationMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<LabelPropagation, LabelPropagationMutateConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
     }
 

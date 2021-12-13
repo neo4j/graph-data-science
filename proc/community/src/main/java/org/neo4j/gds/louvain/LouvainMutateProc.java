@@ -65,7 +65,7 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
     }
 
     @Override
-    protected GraphAlgorithmFactory<Louvain, LouvainMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Louvain, LouvainMutateConfig> algorithmFactory() {
         return new LouvainFactory<>();
     }
 

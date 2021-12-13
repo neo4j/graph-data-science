@@ -62,7 +62,7 @@ public class ApproxMaxKCutStreamProc extends StreamProc<ApproxMaxKCut, ApproxMax
     }
 
     @Override
-    protected GraphAlgorithmFactory<ApproxMaxKCut, ApproxMaxKCutStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ApproxMaxKCut, ApproxMaxKCutStreamConfig> algorithmFactory() {
         return ApproxMaxKCutProc.algorithmFactory();
     }
 

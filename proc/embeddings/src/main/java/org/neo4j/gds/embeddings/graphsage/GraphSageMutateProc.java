@@ -87,7 +87,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     }
 
     @Override
-    public ValidationConfiguration<GraphSageMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<GraphSageMutateConfig> validationConfig() {
         return GraphSageCompanion.getValidationConfig(modelCatalog, username());
     }
 
@@ -97,7 +97,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     }
 
     @Override
-    protected GraphAlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>(modelCatalog);
     }
 

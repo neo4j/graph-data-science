@@ -66,7 +66,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     }
 
     @Override
-    public ValidationConfiguration<TRAIN_CONFIG> getValidationConfig() {
+    public ValidationConfiguration<TRAIN_CONFIG> validationConfig() {
         return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<TRAIN_CONFIG>> beforeLoadValidations() {

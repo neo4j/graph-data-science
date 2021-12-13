@@ -69,7 +69,7 @@ class WriteProcTest {
             }
 
             @Override
-            protected GraphAlgorithmFactory algorithmFactory() {
+            public GraphAlgorithmFactory algorithmFactory() {
                 throw new UnsupportedOperationException("TODO");
             }
 

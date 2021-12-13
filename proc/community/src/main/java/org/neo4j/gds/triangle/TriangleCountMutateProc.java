@@ -58,7 +58,7 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
     }
 
     @Override
-    public ValidationConfiguration<TriangleCountMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<TriangleCountMutateConfig> validationConfig() {
         return TriangleCountCompanion.getValidationConfig();
     }
 
@@ -68,7 +68,7 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
     }
 
     @Override
-    protected GraphAlgorithmFactory<IntersectingTriangleCount, TriangleCountMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<IntersectingTriangleCount, TriangleCountMutateConfig> algorithmFactory() {
         return new IntersectingTriangleCountFactory<>();
     }
 

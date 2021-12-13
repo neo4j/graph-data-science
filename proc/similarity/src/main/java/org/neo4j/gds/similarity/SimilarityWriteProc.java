@@ -81,7 +81,7 @@ public abstract class SimilarityWriteProc<
                     () -> {
                         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
                             var progressTracker = new TaskProgressTracker(
-                                RelationshipExporter.baseTask(procName(), similarityGraph.relationshipCount()),
+                                RelationshipExporter.baseTask(name(), similarityGraph.relationshipCount()),
                                 log,
                                 RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
                                 taskRegistryFactory

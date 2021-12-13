@@ -64,7 +64,7 @@ public class ShortestPathYensWriteProc extends ShortestPathWriteProc<Yens, Short
     }
 
     @Override
-    protected GraphAlgorithmFactory<Yens, ShortestPathYensWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Yens, ShortestPathYensWriteConfig> algorithmFactory() {
         return new YensFactory<>();
     }
 }

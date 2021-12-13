@@ -60,7 +60,7 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    public ValidationConfiguration<TriangleCountStreamConfig> getValidationConfig() {
+    public ValidationConfiguration<TriangleCountStreamConfig> validationConfig() {
         return TriangleCountCompanion.getValidationConfig();
     }
 
@@ -91,7 +91,7 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected GraphAlgorithmFactory<IntersectingTriangleCount, TriangleCountStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<IntersectingTriangleCount, TriangleCountStreamConfig> algorithmFactory() {
         return new IntersectingTriangleCountFactory<>();
     }
 

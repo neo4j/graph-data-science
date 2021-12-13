@@ -63,7 +63,7 @@ public class ShortestPathAStarStreamProc extends ShortestPathStreamProc<AStar, S
     }
 
     @Override
-    protected GraphAlgorithmFactory<AStar, ShortestPathAStarStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<AStar, ShortestPathAStarStreamConfig> algorithmFactory() {
         return new AStarFactory<>();
     }
 }

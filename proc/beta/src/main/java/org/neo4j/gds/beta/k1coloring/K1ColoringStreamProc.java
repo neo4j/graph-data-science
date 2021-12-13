@@ -60,7 +60,7 @@ public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, 
     }
 
     @Override
-    protected GraphAlgorithmFactory<K1Coloring, K1ColoringStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<K1Coloring, K1ColoringStreamConfig> algorithmFactory() {
         return new K1ColoringFactory<>();
     }
 

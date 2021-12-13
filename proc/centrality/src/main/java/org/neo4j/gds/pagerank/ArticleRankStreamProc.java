@@ -55,7 +55,7 @@ public class ArticleRankStreamProc extends PageRankStreamProc {
     }
 
     @Override
-    protected GraphAlgorithmFactory<PageRankAlgorithm, PageRankStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankStreamConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
     }
 }

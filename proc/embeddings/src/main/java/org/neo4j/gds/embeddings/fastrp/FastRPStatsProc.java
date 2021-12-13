@@ -69,7 +69,7 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FastRPResult, Fast
     }
 
     @Override
-    protected GraphAlgorithmFactory<FastRP, FastRPStatsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<FastRP, FastRPStatsConfig> algorithmFactory() {
         return new FastRPFactory<>();
     }
 

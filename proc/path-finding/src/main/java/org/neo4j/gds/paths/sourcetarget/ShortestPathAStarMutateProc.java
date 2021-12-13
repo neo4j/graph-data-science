@@ -63,7 +63,7 @@ public class ShortestPathAStarMutateProc extends ShortestPathMutateProc<AStar, S
     }
 
     @Override
-    protected GraphAlgorithmFactory<AStar, ShortestPathAStarMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<AStar, ShortestPathAStarMutateConfig> algorithmFactory() {
         return new AStarFactory<>();
     }
 }

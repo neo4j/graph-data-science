@@ -71,7 +71,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
     }
 
     @Override
-    protected GraphAlgorithmFactory<Node2Vec, Node2VecWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Node2Vec, Node2VecWriteConfig> algorithmFactory() {
         return new Node2VecAlgorithmFactory<>();
     }
 

@@ -78,7 +78,7 @@ public class FastRPStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, Fa
     }
 
     @Override
-    protected GraphAlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
         return new FastRPFactory<>();
     }
 

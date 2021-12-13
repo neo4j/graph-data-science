@@ -74,7 +74,7 @@ public class NodeClassificationPredictMutateProc
     }
 
     @Override
-    public ValidationConfiguration<NodeClassificationMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<NodeClassificationMutateConfig> validationConfig() {
         return NodeClassificationCompanion.getValidationConfig(modelCatalog);
     }
 
@@ -84,7 +84,7 @@ public class NodeClassificationPredictMutateProc
     }
 
     @Override
-    protected GraphAlgorithmFactory<NodeClassificationPredict, NodeClassificationMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<NodeClassificationPredict, NodeClassificationMutateConfig> algorithmFactory() {
         return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
     }
 

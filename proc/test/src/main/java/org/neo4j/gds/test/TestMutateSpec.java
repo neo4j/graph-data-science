@@ -26,7 +26,7 @@ import org.neo4j.gds.pipeline.NewConfigFunction;
 public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorithm, TestMutateConfig, TestResult, TestAlgorithmFactory<TestMutateConfig>> {
 
     @Override
-    public String getName() {
+    public String name() {
         return "TestMutate";
     }
 

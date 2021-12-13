@@ -64,7 +64,7 @@ public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dij
     }
 
     @Override
-    protected GraphAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraWriteConfig> algorithmFactory() {
         return DijkstraFactory.singleSource();
     }
 }

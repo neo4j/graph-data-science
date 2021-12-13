@@ -69,7 +69,7 @@ public final class NodeWeightConfigProcTest {
     ) {
         var graphStore = GdlFactory.of("(:A {a: 1})").build().graphStore();
         return DynamicTest.dynamicTest("validateNodeWeightProperty", () -> {
-            var validator = new Validator<>(proc.getValidationConfig());
+            var validator = new Validator<>(proc.validationConfig());
             assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
                     graphStore,
                     null,
@@ -92,7 +92,7 @@ public final class NodeWeightConfigProcTest {
             .build()
             .graphStore();
         return DynamicTest.dynamicTest("validateNodeWeightPropertyFilteredGraph", () -> {
-            var validator = new Validator<>(proc.getValidationConfig());
+            var validator = new Validator<>(proc.validationConfig());
             assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
                     graphStore,
                     null,
@@ -162,7 +162,7 @@ public final class NodeWeightConfigProcTest {
             var algoConfig = proc.configParser().processInput(nodeWeightConfig.toMap());
             assertThat(algoConfig.nodeWeightProperty()).isEqualTo("nw");
 
-            var validator = new Validator<>(proc.getValidationConfig());
+            var validator = new Validator<>(proc.validationConfig());
             assertThatCode(() -> validator.validateConfigWithGraphStore(
                 graphStore,
                 null,

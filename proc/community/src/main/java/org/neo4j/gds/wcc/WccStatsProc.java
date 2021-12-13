@@ -76,7 +76,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
     }
 
     @Override
-    protected GraphAlgorithmFactory<Wcc, WccStatsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Wcc, WccStatsConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
     }
 

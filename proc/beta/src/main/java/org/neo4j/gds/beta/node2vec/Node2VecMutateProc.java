@@ -72,7 +72,7 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
     }
 
     @Override
-    protected GraphAlgorithmFactory<Node2Vec, Node2VecMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Node2Vec, Node2VecMutateConfig> algorithmFactory() {
         return new Node2VecAlgorithmFactory<>();
     }
 

@@ -75,7 +75,7 @@ public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP.FastRPRe
     }
 
     @Override
-    protected GraphAlgorithmFactory<FastRP, FastRPMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<FastRP, FastRPMutateConfig> algorithmFactory() {
         return new FastRPFactory<>();
     }
 

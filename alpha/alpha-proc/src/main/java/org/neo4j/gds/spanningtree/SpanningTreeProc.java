@@ -135,7 +135,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
     }
 
     @Override
-    protected GraphAlgorithmFactory<Prim, SpanningTreeConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Prim, SpanningTreeConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
             public String taskName() {

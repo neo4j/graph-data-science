@@ -90,7 +90,7 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
     }
 
     @Override
-    protected GraphAlgorithmFactory<CELF, InfluenceMaximizationConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<CELF, InfluenceMaximizationConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
             public String taskName() {

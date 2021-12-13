@@ -57,7 +57,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
     }
 
     @Override
-    protected GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory() {
         return new LinkPredictionTrainPipelineAlgorithmFactory(this, modelCatalog);
     }
 

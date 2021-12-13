@@ -144,7 +144,7 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
     }
 
     @Override
-    protected GraphAlgorithmFactory<ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
             public String taskName() {

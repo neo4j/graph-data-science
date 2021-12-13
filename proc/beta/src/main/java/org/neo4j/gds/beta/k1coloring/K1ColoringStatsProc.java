@@ -70,7 +70,7 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
     }
 
     @Override
-    protected GraphAlgorithmFactory<K1Coloring, K1ColoringStatsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<K1Coloring, K1ColoringStatsConfig> algorithmFactory() {
         return new K1ColoringFactory<>();
     }
 

@@ -188,7 +188,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         var exception = assertThrows(
             IllegalArgumentException.class,
             () -> {
-                var validationConfig = proc.getValidationConfig();
+                var validationConfig = proc.validationConfig();
                 validationConfig
                     .afterLoadValidations()
                     .forEach(validation ->
@@ -220,7 +220,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         var exception = assertThrows(
             IllegalArgumentException.class,
             () -> {
-                var validationConfig = proc.getValidationConfig();
+                var validationConfig = proc.validationConfig();
                 validationConfig
                     .afterLoadValidations()
                     .forEach(validation ->

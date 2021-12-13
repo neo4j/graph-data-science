@@ -70,7 +70,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
     }
 
     @Override
-    protected GraphAlgorithmFactory<Wcc, WccWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Wcc, WccWriteConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
     }
 

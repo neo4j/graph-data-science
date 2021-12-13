@@ -65,12 +65,12 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
     }
 
     @Override
-    public ValidationConfiguration<BetweennessCentralityMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<BetweennessCentralityMutateConfig> validationConfig() {
         return BetweennessCentralityProc.getValidationConfig();
     }
 
     @Override
-    protected GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityMutateConfig> algorithmFactory() {
         return BetweennessCentralityProc.algorithmFactory();
     }
 

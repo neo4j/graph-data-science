@@ -113,7 +113,7 @@ public class NodeClassificationPipelineStreamProc
     }
 
     @Override
-    protected GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig> algorithmFactory()
+    public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig> algorithmFactory()
     {
         return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this);
     }

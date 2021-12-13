@@ -64,7 +64,7 @@ public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.R
     }
 
     @Override
-    protected GraphAlgorithmFactory<Conductance, ConductanceStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Conductance, ConductanceStreamConfig> algorithmFactory() {
         return ConductanceProc.algorithmFactory();
     }
 

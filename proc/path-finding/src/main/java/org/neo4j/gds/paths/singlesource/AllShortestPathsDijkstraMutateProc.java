@@ -63,7 +63,7 @@ public class AllShortestPathsDijkstraMutateProc extends ShortestPathMutateProc<D
     }
 
     @Override
-    protected GraphAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraMutateConfig> algorithmFactory() {
         return DijkstraFactory.singleSource();
     }
 }

@@ -63,7 +63,7 @@ public class ShortestPathYensStreamProc extends ShortestPathStreamProc<Yens, Sho
     }
 
     @Override
-    protected GraphAlgorithmFactory<Yens, ShortestPathYensStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Yens, ShortestPathYensStreamConfig> algorithmFactory() {
         return new YensFactory<>();
     }
 }

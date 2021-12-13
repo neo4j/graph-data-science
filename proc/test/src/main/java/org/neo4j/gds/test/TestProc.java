@@ -67,7 +67,7 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestResult
     }
 
     @Override
-    protected GraphAlgorithmFactory<TestAlgorithm, TestWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<TestAlgorithm, TestWriteConfig> algorithmFactory() {
         return new TestAlgorithmFactory<>();
     }
 }

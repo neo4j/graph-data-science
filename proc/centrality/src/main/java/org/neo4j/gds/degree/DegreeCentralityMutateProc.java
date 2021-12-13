@@ -64,7 +64,7 @@ public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentral
     }
 
     @Override
-    protected GraphAlgorithmFactory<DegreeCentrality, DegreeCentralityMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<DegreeCentrality, DegreeCentralityMutateConfig> algorithmFactory() {
         return new DegreeCentralityFactory<>();
     }
 

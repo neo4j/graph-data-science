@@ -158,7 +158,7 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
     }
 
     @Override
-    protected GraphAlgorithmFactory<SccAlgorithm, SccConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<SccAlgorithm, SccConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
             public String taskName() {

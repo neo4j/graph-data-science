@@ -64,7 +64,7 @@ public class ShortestPathAStarWriteProc extends ShortestPathWriteProc<AStar, Sho
     }
 
     @Override
-    protected GraphAlgorithmFactory<AStar, ShortestPathAStarWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<AStar, ShortestPathAStarWriteConfig> algorithmFactory() {
         return new AStarFactory<>();
     }
 }

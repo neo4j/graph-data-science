@@ -66,12 +66,12 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
     }
 
     @Override
-    public ValidationConfiguration<BetweennessCentralityWriteConfig> getValidationConfig() {
+    public ValidationConfiguration<BetweennessCentralityWriteConfig> validationConfig() {
         return BetweennessCentralityProc.getValidationConfig();
     }
 
     @Override
-    protected GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityWriteConfig> algorithmFactory() {
         return BetweennessCentralityProc.algorithmFactory();
     }
 

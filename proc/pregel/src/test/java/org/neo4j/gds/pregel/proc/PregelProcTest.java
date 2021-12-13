@@ -287,7 +287,7 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected GraphAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+        public GraphAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
 
             return new GraphAlgorithmFactory<>() {
 
@@ -355,7 +355,7 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected GraphAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+        public GraphAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
             return new GraphAlgorithmFactory<>() {
 
                 @Override
@@ -421,7 +421,7 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected GraphAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+        public GraphAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
             return new GraphAlgorithmFactory<>() {
 
                 @Override

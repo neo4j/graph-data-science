@@ -78,7 +78,7 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
     }
 
     @Override
-    protected GraphAlgorithmFactory<NodeSimilarity, NodeSimilarityStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<NodeSimilarity, NodeSimilarityStreamConfig> algorithmFactory() {
         return new NodeSimilarityFactory<>();
     }
 

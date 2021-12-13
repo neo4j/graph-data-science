@@ -53,13 +53,9 @@ public abstract class AlgoBaseProc<
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig,
     PROC_RESULT
-> extends BaseProc {
+> extends BaseProc implements AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG>, AlgorithmFactory<?, ALGO, CONFIG>> {
 
     protected static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
-
-    protected String procName() {
-        return this.getClass().getSimpleName();
-    }
 
     public ProcConfigParser<CONFIG> configParser() {
         return new AlgoConfigParser<>(username(), AlgoBaseProc.this::newConfig);
@@ -69,8 +65,6 @@ public abstract class AlgoBaseProc<
         String username,
         CypherMapWrapper config
     );
-
-    protected abstract AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory();
 
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         String graphName,
@@ -101,26 +95,44 @@ public abstract class AlgoBaseProc<
         Map<String, Object> algoConfiguration
     ) {
         return new MemoryEstimationExecutor<>(
-            new AlgoBaseProcSpec<>(algorithmFactory()),
+            this,
             new ProcedurePipelineSpec<>(),
             executionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    public ValidationConfiguration<CONFIG> getValidationConfig() {
+    @Override
+    public String name() {
+        return this.getClass().getSimpleName();
+    }
+
+    @Override
+    public NewConfigFunction<CONFIG> newConfigFunction() {
+        return this::newConfig;
+    }
+
+    @Override
+    public abstract AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory();
+
+    @Override
+    public ValidationConfiguration<CONFIG> validationConfig() {
         return ValidationConfiguration.empty();
     }
 
+    @Override
+    public ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> computationResultConsumer() {
+        return ComputationResultConsumer.identity();
+    }
+
     protected Validator<CONFIG> validator() {
-        return new Validator<>(getValidationConfig());
+        return new Validator<>(validationConfig());
     }
 
     private ProcedureExecutor<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> procedureExecutor() {
-        var algoSpec = new AlgoBaseProcSpec<>(algorithmFactory());
         var pipelineSpec = new AlgoBasePipelineSpec();
 
         return new ProcedureExecutor<>(
-            algoSpec,
+            this,
             pipelineSpec,
             executionContext()
         );
@@ -147,39 +159,6 @@ public abstract class AlgoBaseProc<
         @Value.Default
         default boolean isGraphEmpty() {
             return false;
-        }
-    }
-
-    private final class AlgoBaseProcSpec<G> implements AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>, AlgorithmFactory<G, ALGO, CONFIG>> {
-        private final AlgorithmFactory<G, ALGO, CONFIG> algorithmFactory;
-
-        private AlgoBaseProcSpec(AlgorithmFactory<G, ALGO, CONFIG> algorithmFactory) {
-            this.algorithmFactory = algorithmFactory;
-        }
-
-        @Override
-        public String getName() {
-            return procName();
-        }
-
-        @Override
-        public ValidationConfiguration<CONFIG> validationConfig() {
-            return getValidationConfig();
-        }
-
-        @Override
-        public AlgorithmFactory<G, ALGO, CONFIG> algorithmFactory() {
-            return algorithmFactory;
-        }
-
-        @Override
-        public NewConfigFunction<CONFIG> newConfigFunction() {
-            return AlgoBaseProc.this::newConfig;
-        }
-
-        @Override
-        public ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> computationResultConsumer() {
-            return ComputationResultConsumer.identity();
         }
     }
 

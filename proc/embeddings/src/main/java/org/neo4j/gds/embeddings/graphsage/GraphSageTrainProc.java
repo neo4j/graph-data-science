@@ -76,7 +76,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
     }
 
     @Override
-    protected GraphAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
         return new GraphSageTrainAlgorithmFactory();
     }
 
@@ -86,7 +86,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
     }
 
     @Override
-    public ValidationConfiguration<GraphSageTrainConfig> getValidationConfig() {
+    public ValidationConfiguration<GraphSageTrainConfig> validationConfig() {
         return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<GraphSageTrainConfig>> afterLoadValidations() {
