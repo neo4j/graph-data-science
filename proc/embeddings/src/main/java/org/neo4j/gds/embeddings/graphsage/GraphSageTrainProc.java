@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
@@ -48,17 +49,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return trainAndStoreModelWithResult(
-            graphName,
-            configuration,
-            (model, result) -> new TrainResult(
-                graphName,
-                model,
-                result.computeMillis(),
-                result.graph().nodeCount(),
-                result.graph().relationshipCount()
-            )
-        );
+        return trainAndStoreModelWithResult(compute(graphName, configuration));
     }
 
     @Description(ESTIMATE_DESCRIPTION)
@@ -102,5 +93,18 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
         };
     }
 
+    @Override
+    protected TrainResult constructResult(
+        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model,
+        ComputationResult<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig> computationResult
+    ) {
+        return new TrainResult(
+            "",
+            model,
+            computationResult.computeMillis(),
+            computationResult.graph().nodeCount(),
+            computationResult.graph().relationshipCount()
+        );
+    }
 }
 

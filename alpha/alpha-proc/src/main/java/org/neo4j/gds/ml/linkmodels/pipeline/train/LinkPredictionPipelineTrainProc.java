@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
@@ -48,7 +49,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
     ) {
         // TODO: this will go away once node property steps do not rely on this method
         config.put("graphName", graphName);
-        return trainAndStoreModelWithResult(graphName, config, (model, result) -> new MLTrainResult(model, result.computeMillis()));
+        return trainAndStoreModelWithResult(compute(graphName, config));
     }
 
     @Override
@@ -64,5 +65,13 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
     @Override
     protected String modelType() {
         return LinkPredictionTrain.MODEL_TYPE;
+    }
+
+    @Override
+    protected MLTrainResult constructResult(
+        Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
+        ComputationResult<LinkPredictionTrainPipelineExecutor, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>, LinkPredictionTrainConfig> computationResult
+    ) {
+        return new MLTrainResult(model, computationResult.computeMillis());
     }
 }

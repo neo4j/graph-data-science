@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
@@ -50,8 +51,7 @@ public class LinkPredictionTrainProc extends
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return trainAndStoreModelWithResult(
-            graphName, configuration,
-            (model, result) -> new MLTrainResult(model, result.computeMillis())
+            compute(graphName, configuration)
         );
     }
 
@@ -103,5 +103,13 @@ public class LinkPredictionTrainProc extends
     @Override
     public GraphAlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
         return new LinkPredictionTrainFactory();
+    }
+
+    @Override
+    protected MLTrainResult constructResult(
+        Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
+        ComputationResult<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>, LinkPredictionTrainConfig> computationResult
+    ) {
+        return new MLTrainResult(model, computationResult.computeMillis());
     }
 }
