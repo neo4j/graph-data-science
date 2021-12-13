@@ -26,13 +26,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class GdsASTFactory extends ASTFactoryAdapter {
+class GdsAstFactory extends AstFactoryAdapter {
 
     private static final String LONG_MIN_VALUE_DECIMAL_STRING = Long.toString(Long.MIN_VALUE).substring(1);
 
     private final Map<String, ValueType> properties;
 
-    GdsASTFactory(Map<String, ValueType> properties) {
+    GdsAstFactory(Map<String, ValueType> properties) {
         this.properties = properties;
     }
 

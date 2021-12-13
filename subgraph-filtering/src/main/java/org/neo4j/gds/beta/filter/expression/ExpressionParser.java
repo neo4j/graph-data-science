@@ -31,7 +31,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class ExpressionParser {
 
     public static Expression parse(String cypher, Map<String, ValueType> properties) throws ParseException {
-        var astFactory = new GdsASTFactory(properties);
+        var astFactory = new GdsAstFactory(properties);
         var exceptionFactory = new ExceptionFactory();
         var charstream = new CypherCharStream(cypher);
 
