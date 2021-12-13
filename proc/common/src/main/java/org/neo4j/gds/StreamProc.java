@@ -23,6 +23,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -35,18 +37,25 @@ public abstract class StreamProc<
 
     protected abstract PROC_RESULT streamResult(long originalNodeId, long internalNodeId, NodeProperties nodeProperties);
 
+    @Override
+    public ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
+        return (AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext) ->
+            runWithExceptionLogging("Result streaming failed", () -> {
+                if (computationResult.isGraphEmpty()) {
+                    return Stream.empty();
+                }
+
+                Graph graph = computationResult.graph();
+                NodeProperties nodeProperties = nodeProperties(computationResult);
+
+                return LongStream
+                    .range(IdMapping.START_NODE_ID, graph.nodeCount())
+                    .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, nodeProperties));
+                }
+            );
+    }
+
     protected Stream<PROC_RESULT> stream(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        return runWithExceptionLogging("Result streaming failed", () -> {
-            if (computationResult.isGraphEmpty()) {
-                return Stream.empty();
-            }
-
-            Graph graph = computationResult.graph();
-            NodeProperties nodeProperties = nodeProperties(computationResult);
-
-            return LongStream
-                .range(IdMapping.START_NODE_ID, graph.nodeCount())
-                .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, nodeProperties));
-        });
+        return computationResultConsumer().consume(computationResult, executionContext());
     }
 }
