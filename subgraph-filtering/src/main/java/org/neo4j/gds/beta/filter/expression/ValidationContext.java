@@ -34,15 +34,9 @@ import java.util.stream.Collectors;
 public interface ValidationContext {
     Context context();
 
-    // TODO get rid of this and only use the Map
-    @Value.Derived
-    default Set<String> availableProperties() {
-        return availablePropertiesWithTypes().keySet();
-    }
-
-    Map<String, ValueType> availablePropertiesWithTypes();
-
     Set<String> availableLabelsOrTypes();
+
+    Map<String, ValueType> availableProperties();
 
     @Value.Default
     default List<SemanticErrors.SemanticError> errors() {
@@ -85,7 +79,7 @@ public interface ValidationContext {
                 .stream()
                 .map(ElementIdentifier::name)
                 .collect(Collectors.toSet()))
-            .putAllAvailablePropertiesWithTypes(propertiesAndTypes)
+            .putAllAvailableProperties(propertiesAndTypes)
             .build();
     }
 
@@ -109,7 +103,7 @@ public interface ValidationContext {
                 .stream()
                 .map(ElementIdentifier::name)
                 .collect(Collectors.toSet()))
-            .putAllAvailablePropertiesWithTypes(propertiesAndTypes)
+            .putAllAvailableProperties(propertiesAndTypes)
             .build();
     }
 
