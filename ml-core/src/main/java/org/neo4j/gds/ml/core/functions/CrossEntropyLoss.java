@@ -55,8 +55,7 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
         double result = 0;
         for (int row = 0; row < targetsVector.totalSize(); row++) {
             var trueClass = (int) targetsVector.dataAt(row);
-            var predictedProbabilityForTrueClass =
-                predictionsMatrix.dataAt(row * predictionsMatrix.cols() + trueClass);
+            var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row, trueClass);
             if (predictedProbabilityForTrueClass > 0) {
                 result += Math.log(predictedProbabilityForTrueClass);
             }
