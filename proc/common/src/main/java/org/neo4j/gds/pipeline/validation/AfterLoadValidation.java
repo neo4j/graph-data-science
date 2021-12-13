@@ -17,14 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.pipeline.validation;
 
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.config.GraphCreateConfig;
 
-public interface NewConfigFunction<CONFIG extends AlgoBaseConfig> {
-    CONFIG apply(
-        String username,
-        CypherMapWrapper config
+@FunctionalInterface
+public interface AfterLoadValidation<CONFIG extends AlgoBaseConfig> {
+    void validateConfigsAfterLoad(
+        GraphStore graphStore,
+        GraphCreateConfig graphCreateConfig,
+        CONFIG config
     );
 }

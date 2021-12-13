@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
@@ -30,9 +29,10 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.pipeline.GraphStoreValidation;
+import org.neo4j.gds.pipeline.validation.AfterLoadValidation;
+import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.utils.StringFormatting;
-import org.neo4j.gds.validation.AfterLoadValidation;
-import org.neo4j.gds.validation.ValidationConfiguration;
 
 import java.util.List;
 import java.util.Map;

@@ -25,11 +25,10 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.NodeWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.validation.Validator;
+import org.neo4j.gds.pipeline.validation.Validator;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

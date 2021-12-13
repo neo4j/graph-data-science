@@ -21,11 +21,6 @@ package org.neo4j.gds.pipeline;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.FictitiousGraphStoreLoader;
-import org.neo4j.gds.GraphStoreFromCatalogLoader;
-import org.neo4j.gds.GraphStoreFromDatabaseLoader;
-import org.neo4j.gds.MemoryEstimationGraphConfigParser;
-import org.neo4j.gds.ProcConfigParser;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;

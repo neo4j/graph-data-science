@@ -17,12 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.validation;
+package org.neo4j.gds.pipeline;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
-@FunctionalInterface
-public interface BeforeLoadValidation<CONFIG extends AlgoBaseConfig> {
-    void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG config);
+public interface GraphStoreCreator extends GraphStoreLoader {
+    MemoryEstimation memoryEstimation();
 }

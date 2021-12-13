@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.validation;
+package org.neo4j.gds.pipeline.validation;
 
-import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.pipeline.GraphStoreValidation;
 
 public class Validator<CONFIG extends AlgoBaseConfig> {
 

@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.neo4j.gds.validation.BeforeLoadValidation;
-import org.neo4j.gds.validation.GraphCreateConfigValidations;
-import org.neo4j.gds.validation.ValidationConfiguration;
+import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
+import org.neo4j.gds.pipeline.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 
 import java.util.List;
 

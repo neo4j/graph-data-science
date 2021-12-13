@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class TestAlgorithmFactory extends GraphAlgorithmFactory<TestAlgorithm, TestConfig> {
+public class TestAlgorithmFactory<CONFIG extends TestConfig> extends GraphAlgorithmFactory<TestAlgorithm, CONFIG> {
 
     @Override
     public String taskName() {

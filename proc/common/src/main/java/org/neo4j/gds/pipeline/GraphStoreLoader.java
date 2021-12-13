@@ -17,17 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.validation;
+package org.neo4j.gds.pipeline;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.GraphDimensions;
 
-@FunctionalInterface
-public interface AfterLoadValidation<CONFIG extends AlgoBaseConfig> {
-    void validateConfigsAfterLoad(
-        GraphStore graphStore,
-        GraphCreateConfig graphCreateConfig,
-        CONFIG config
-    );
+public interface GraphStoreLoader {
+    GraphCreateConfig graphCreateConfig();
+    GraphStore graphStore();
+    GraphDimensions graphDimensions();
 }

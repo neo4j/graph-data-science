@@ -23,10 +23,10 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
+import org.neo4j.gds.pipeline.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.validation.BeforeLoadValidation;
-import org.neo4j.gds.validation.GraphCreateConfigValidations;
-import org.neo4j.gds.validation.ValidationConfiguration;
 
 import java.util.List;
 import java.util.Optional;

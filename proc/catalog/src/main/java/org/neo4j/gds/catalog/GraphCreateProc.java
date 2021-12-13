@@ -20,9 +20,6 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.FictitiousGraphStoreLoader;
-import org.neo4j.gds.GraphStoreCreator;
-import org.neo4j.gds.GraphStoreFromDatabaseLoader;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.RelationshipProjections;
@@ -41,6 +38,9 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.pipeline.FictitiousGraphStoreLoader;
+import org.neo4j.gds.pipeline.GraphStoreCreator;
+import org.neo4j.gds.pipeline.GraphStoreFromDatabaseLoader;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.procedure.Description;

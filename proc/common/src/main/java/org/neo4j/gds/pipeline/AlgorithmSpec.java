@@ -21,9 +21,8 @@ package org.neo4j.gds.pipeline;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.NewConfigFunction;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.validation.ValidationConfiguration;
+import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 
 public interface AlgorithmSpec<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,

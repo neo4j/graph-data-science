@@ -17,36 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.pipeline;
 
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.Collection;
 import java.util.Map;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConfigParser<CONFIG> {
 
-public class MemoryEstimationGraphConfigParser {
-
+    private final NewConfigFunction<CONFIG> newConfigFunction;
     private final String username;
 
-    public MemoryEstimationGraphConfigParser(String username) {
+    public AlgoConfigParser(String username, NewConfigFunction<CONFIG> newConfigFunction) {
         this.username = username;
+        this.newConfigFunction = newConfigFunction;
     }
 
-    public String username() {
-        return username;
+    @Override
+    public CONFIG processInput(Map<String, Object> configuration) {
+        CypherMapWrapper cypherMapWrapper = CypherMapWrapper.create(configuration);
+        CONFIG algoConfig = newConfigFunction.apply(username, cypherMapWrapper);
+        validateConfig(cypherMapWrapper, algoConfig.configKeys());
+        return algoConfig;
     }
 
-    public GraphCreateConfig processInput(Object graphNameOrConfig) {
-        if (graphNameOrConfig instanceof Map) {
-            var createConfigMap = (Map<String, Object>) graphNameOrConfig;
-            var createConfigMapWrapper = CypherMapWrapper.create(createConfigMap);
-            return GraphCreateConfig.createImplicit(username(), createConfigMapWrapper);
-        }
-        throw new IllegalArgumentException(formatWithLocale(
-            "Could not parse input. Expected a configuration map, but got %s.",
-            graphNameOrConfig.getClass().getSimpleName()
-        ));
+    private void validateConfig(CypherMapWrapper cypherConfig, Collection<String> allowedKeys) {
+        cypherConfig.requireOnlyKeysFrom(allowedKeys);
     }
 }
