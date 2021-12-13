@@ -58,8 +58,8 @@ dependencies {
     implementation(group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: ver.'jjwt') {
         exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
     }
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
-    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: ver['jackson']
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: ver.'jackson'
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: ver.'jackson'
 
     // TEST DEPENDENCIES
 
