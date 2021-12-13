@@ -22,6 +22,7 @@ package org.neo4j.gds.beta.filter.expression;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.constraints.DoubleRange;
+import net.jqwik.api.constraints.LongRange;
 import org.immutables.value.Value;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -60,8 +61,11 @@ class ExpressionEvaluatorTest {
 
     @Property
     void longLiteral(@ForAll long input) throws ParseException {
-        var expr = ExpressionParser.parse(Long.toString(input), Map.of());
-        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(input);
+        var doubleInput = Double.longBitsToDouble(input);
+        if (!Double.isNaN(doubleInput)) {
+            var expr = ExpressionParser.parse(Long.toString(input), Map.of());
+            assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(doubleInput);
+        }
     }
 
     @Property
@@ -71,7 +75,7 @@ class ExpressionEvaluatorTest {
     }
 
     @Property
-    void comparison(@ForAll double left, @ForAll double right) throws ParseException {
+    void doubleComparison(@ForAll double left, @ForAll double right) throws ParseException {
         var compare = Double.compare(left, right);
         var expression = compare < 0
             ? "%f < %f"
@@ -86,7 +90,22 @@ class ExpressionEvaluatorTest {
     }
 
     @Property
-    void lessThan(
+    void longComparison(@ForAll long left, @ForAll long right) throws ParseException {
+        var compare = Long.compare(left, right);
+        var expression = compare < 0
+            ? "%d < %d"
+            : compare > 0
+                ? "%d > %d"
+                : "%d = %d";
+        var expr = ExpressionParser.parse(
+            formatWithLocale(expression, left, right),
+            Map.of()
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
+    }
+
+    @Property
+    void doubleLessThan(
         @ForAll @DoubleRange(max = 1E10, maxIncluded = false) double left,
         @ForAll @DoubleRange(min = 1E10, minIncluded = false) double right
     ) throws ParseException {
@@ -98,7 +117,19 @@ class ExpressionEvaluatorTest {
     }
 
     @Property
-    void lessThanOrEqual(
+    void longLessThan(
+        @ForAll @LongRange(max = 10_000_000_000L) long left,
+        @ForAll @LongRange(min = 10_000_000_001L) long right
+    ) throws ParseException {
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%d < %d", left, right),
+            Map.of()
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
+    }
+
+    @Property
+    void doubleLessThanOrEqual(
         @ForAll @DoubleRange(max = 1E10) double left,
         @ForAll @DoubleRange(min = 1E10) double right
     ) throws ParseException {
@@ -110,7 +141,19 @@ class ExpressionEvaluatorTest {
     }
 
     @Property
-    void greaterThan(
+    void longLessThanOrEqual(
+        @ForAll @LongRange(max = 10_000_000_000L) long left,
+        @ForAll @LongRange(min = 10_000_000_000L) long right
+    ) throws ParseException {
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%d <= %d", left, right),
+            Map.of()
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
+    }
+
+    @Property
+    void doubleGreaterThan(
         @ForAll @DoubleRange(min = 1E10, minIncluded = false) double left,
         @ForAll @DoubleRange(max = 1E10, maxIncluded = false) double right
     ) throws ParseException {
@@ -122,7 +165,19 @@ class ExpressionEvaluatorTest {
     }
 
     @Property
-    void greaterThanOrEqual(
+    void longGreaterThan(
+        @ForAll @LongRange(min = 10_000_000_001L) long left,
+        @ForAll @LongRange(max = 10_000_000_000L) long right
+    ) throws ParseException {
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%d > %d", left, right),
+            Map.of()
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
+    }
+
+    @Property
+    void doubleGreaterThanOrEqual(
         @ForAll @DoubleRange(min = 1E10) double left,
         @ForAll @DoubleRange(max = 1E10) double right
     ) throws ParseException {
@@ -134,7 +189,20 @@ class ExpressionEvaluatorTest {
     }
 
     @Property
-    void equal(@ForAll double value) throws ParseException {
+    void longGreaterThanOrEqual(
+        @ForAll @LongRange(min = 10_000_000_000L) long left,
+        @ForAll @LongRange(max = 10_000_000_000L) long right
+    ) throws ParseException {
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%d >= %d", left, right),
+            Map.of()
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
+    }
+
+
+    @Property
+    void doubleEqual(@ForAll double value) throws ParseException {
         var expr = ExpressionParser.parse(
             formatWithLocale("%f = %f", value, value),
             Map.of()
@@ -143,7 +211,7 @@ class ExpressionEvaluatorTest {
     }
 
     @Property
-    void notEqual(
+    void doubleNotEqual(
         @ForAll @DoubleRange(min = 1E10, minIncluded = false) double left,
         @ForAll @DoubleRange(max = 1E10, maxIncluded = false) double right
     ) throws ParseException {
@@ -155,6 +223,57 @@ class ExpressionEvaluatorTest {
 
         expr = ExpressionParser.parse(
             formatWithLocale("%f != %f", left, right),
+            Map.of()
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
+    }
+
+    @Property
+    void longEqual(@ForAll long value) throws ParseException {
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%d = %d", value, value),
+            Map.of()
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
+    }
+
+    @Property
+    void longNotEqual(
+        @ForAll @LongRange(min = 10_000_000_001L) long left,
+        @ForAll @LongRange(max = 10_000_000_000L) long right
+    ) throws ParseException {
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%d <> %d", left, right),
+            Map.of()
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
+
+        expr = ExpressionParser.parse(
+            formatWithLocale("%d != %d", left, right),
+            Map.of()
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
+    }
+
+    @Test
+    void longEqualHandleNaN() throws ParseException {
+        long baseValue = Double.doubleToRawLongBits(Double.NaN);
+        long value1 = baseValue + 42;
+        long value2 = baseValue + 1337;
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%d = %d", value1, value2),
+            Map.of()
+        );
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isFalse();
+    }
+
+    @Test
+    void longNotEqualHandleNaN() throws ParseException {
+        long baseValue = Double.doubleToRawLongBits(Double.NaN);
+        long value1 = baseValue + 42;
+        long value2 = baseValue + 1337;
+        var expr = ExpressionParser.parse(
+            formatWithLocale("%d <> %d", value1, value2),
             Map.of()
         );
         assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
@@ -259,30 +378,6 @@ class ExpressionEvaluatorTest {
 
         var evaluationContext = ImmutableTestContext.builder().addAllLabelsOrTypes(actual).build();
         assertThat(expr.evaluate(evaluationContext) == TRUE).isEqualTo(expected);
-    }
-
-    @Test
-    void longEqual() throws ParseException {
-        long baseValue = Double.doubleToRawLongBits(Double.NaN);
-        long value1 = baseValue + 42;
-        long value2 = baseValue + 1337;
-        var expr = ExpressionParser.parse(
-            formatWithLocale("%d = %d", value1, value2),
-            Map.of()
-        );
-        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isFalse();
-    }
-
-    @Test
-    void longNotEqual() throws ParseException {
-        long baseValue = Double.doubleToRawLongBits(Double.NaN);
-        long value1 = baseValue + 42;
-        long value2 = baseValue + 1337;
-        var expr = ExpressionParser.parse(
-            formatWithLocale("%d <> %d", value1, value2),
-            Map.of()
-        );
-        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT) == TRUE).isTrue();
     }
 
     private static final EvaluationContext EMPTY_EVALUATION_CONTEXT = new EvaluationContext() {
