@@ -57,7 +57,7 @@ class SimilarityComputerTest {
     void doublePropertySimilarityReturnsValuesBetween0And1(@ForAll @From("differentValues") LongLongPair ids) {
         NodeProperties props = new DoubleTestProperties(nodeId -> Math.exp(Math.log1p(nodeId / 42.0)));
         var sim = SimilarityComputer.ofDoubleProperty(props);
-        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
+        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
 
     @Property
@@ -203,9 +203,8 @@ class SimilarityComputerTest {
 
     @Provide("differentValues")
     final Arbitrary<LongLongPair> differentValues() {
-        return Arbitraries.longs().between(0L, Long.MAX_VALUE).flatMap(n1 ->
-            Arbitraries.longs().between(0L, Long.MAX_VALUE)
-                .filter(n2 -> n1.longValue() != n2.longValue())
-                .map(n2 -> PrimitiveTuples.pair((long) n1, (long) n2)));
+        return Arbitraries.longs().between(0L, Long.MAX_VALUE).flatMap(n1 -> Arbitraries.longs().between(0L, Long.MAX_VALUE)
+            .filter(n2 -> n1.longValue() != n2.longValue())
+            .map(n2 -> PrimitiveTuples.pair((long) n1, (long) n2)));
     }
 }
