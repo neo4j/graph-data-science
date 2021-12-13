@@ -48,11 +48,8 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var mutateSpec = new WccMutateSpec(callContext, allocationTracker(), log);
-        var pipelineSpec = new ProcedurePipelineSpec<>(
-            username(),
-            graphCreationFactory()
-        );
+        var mutateSpec = new WccMutateSpec();
+        var pipelineSpec = new ProcedurePipelineSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new ProcedureExecutor<>(
             pipelineSpec.configParser(mutateSpec.newConfigFunction()),
@@ -74,19 +71,12 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var mutateSpec = new WccMutateSpec(callContext, allocationTracker(), log);
-        var pipelineSpec = new ProcedurePipelineSpec<>(
-            username(),
-            graphCreationFactory()
-        );
+        var mutateSpec = new WccMutateSpec();
+        var pipelineSpec = new ProcedurePipelineSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new MemoryEstimationExecutor<>(
-            pipelineSpec.configParser(mutateSpec.newConfigFunction()),
-            mutateSpec.algorithmFactory(),
-            this::graphLoaderContext,
-            this::databaseId,
-            username(),
-            isGdsAdmin()
+            mutateSpec,
+            pipelineSpec
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

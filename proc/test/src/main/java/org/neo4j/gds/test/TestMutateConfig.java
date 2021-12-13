@@ -19,27 +19,15 @@
  */
 package org.neo4j.gds.test;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface TestMutateConfig extends AlgoBaseConfig, MutatePropertyConfig {
-
-    @Value.Default
-    default int maxIterations() {
-        return 20;
-    }
-
-    @Value.Default
-    default boolean throwInCompute() {
-        return false;
-    }
+public interface TestMutateConfig extends TestConfig, MutatePropertyConfig {
 
     static TestMutateConfig of(CypherMapWrapper config) {
         return new TestMutateConfigImpl(config);

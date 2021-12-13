@@ -17,22 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pipeline;
+package org.neo4j.gds.test;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.WriteConfig;
+import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-public class IdentityComputationResultConsumer<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
-    ALGO_RESULT,
-    CONFIG extends AlgoBaseConfig
-> implements ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG>> {
-
-    @Override
-    public AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> consume(
-        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
-    ) {
-        return computationResult;
+@ValueClass
+@Configuration
+@SuppressWarnings("immutables:subtype")
+public interface TestWriteConfig extends TestConfig, WriteConfig, WritePropertyConfig {
+    static TestWriteConfig of(CypherMapWrapper config) {
+        return new TestWriteConfigImpl(config);
     }
 }

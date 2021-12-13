@@ -21,7 +21,6 @@ package org.neo4j.gds.pipeline;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoConfigParser;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
@@ -31,8 +30,8 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.test.TestAlgorithm;
-import org.neo4j.gds.test.TestAlgorithmFactory;
-import org.neo4j.gds.test.TestConfig;
+import org.neo4j.gds.test.TestMutateConfig;
+import org.neo4j.gds.test.TestMutateSpec;
 
 import java.util.List;
 import java.util.Map;
@@ -45,19 +44,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MemoryEstimationExecutorTest extends BaseTest {
 
-    private MemoryEstimationExecutor<TestAlgorithm, TestAlgorithm, TestConfig> memoryEstimationExecutor;
+
+    private MemoryEstimationExecutor<TestAlgorithm, TestAlgorithm, TestMutateConfig> memoryEstimationExecutor;
 
     @BeforeEach
     void setup() throws Exception {
         GraphDatabaseApiProxy.registerProcedures(db, GraphCreateProc.class);
 
         memoryEstimationExecutor = new MemoryEstimationExecutor<>(
-            new AlgoConfigParser<>("", (username, config) -> TestConfig.of(config)),
-            new TestAlgorithmFactory(),
-            () -> null,
-            () -> db.databaseId(),
-            "",
-            false
+            new TestMutateSpec(),
+            new ProcedurePipelineSpec<>()
         );
     }
 
@@ -71,7 +67,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
 
         var estimationResult = memoryEstimationExecutor.computeEstimate(
             graphName,
-            Map.of("writeProperty", "foo")
+            Map.of("mutateProperty", "foo")
         );
 
         estimationResult.forEach(row -> {
@@ -95,7 +91,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
 
         var estimationResult = memoryEstimationExecutor.computeEstimate(
             graphCreateConfig,
-            Map.of("writeProperty", "foo")
+            Map.of("mutateProperty", "foo")
         );
 
         estimationResult.forEach(row -> {

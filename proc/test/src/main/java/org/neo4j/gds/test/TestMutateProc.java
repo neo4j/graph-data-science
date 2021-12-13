@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, TestMutateProc.TestResult, TestMutateConfig> {
+public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, TestResult, TestMutateConfig> {
 
     @Procedure(value = "gds.testProc.mutate", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -54,7 +54,7 @@ public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, Tes
 
     @Override
     protected AbstractResultBuilder<TestResult> resultBuilder(ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computeResult) {
-        return new TestAlgoResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());
+        return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());
     }
 
     @Override
@@ -100,40 +100,5 @@ public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, Tes
                 );
             }
         };
-    }
-
-    static class TestAlgoResultBuilder extends AbstractResultBuilder<TestResult> {
-
-        long relationshipCount = 0;
-
-        @Override
-        public TestResult build() {
-            return new TestResult(
-                createMillis,
-                computeMillis,
-                relationshipCount,
-                config.toMap()
-            );
-        }
-
-        TestAlgoResultBuilder withRelationshipCount(long relationshipCount) {
-            this.relationshipCount = relationshipCount;
-            return this;
-        }
-    }
-
-    public static final class TestResult {
-
-        public long createMillis;
-        public long computeMillis;
-        public long relationshipCount;
-        public Map<String, Object> configuration;
-
-        TestResult(long createMillis, long computeMillis, long relationshipCount, Map<String, Object> configuration) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.relationshipCount = relationshipCount;
-            this.configuration = configuration;
-        }
     }
 }
