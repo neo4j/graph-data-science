@@ -21,13 +21,16 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.MutatePropertyComputationResultConsumer.NodePropertyListFunction;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.pipeline.AlgorithmSpec;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.NewConfigFunction;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>, WccAlgorithmFactory<WccMutateConfig>> {
@@ -51,7 +54,17 @@ class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateCo
 
     @Override
     public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(WccProc::nodeProperties, this::resultBuilder);
+        NodePropertyListFunction<Wcc, DisjointSetStruct, WccMutateConfig> mutateConfigNodePropertyListFunction = (computationResult, resultProperty, allocationTracker) -> List.of(
+            ImmutableNodeProperty.of(
+                computationResult.config().mutateProperty(),
+                WccProc.nodeProperties(
+                    computationResult,
+                    computationResult.config().mutateProperty(),
+                    allocationTracker
+                )
+            )
+        );
+        return new MutatePropertyComputationResultConsumer<>(mutateConfigNodePropertyListFunction, this::resultBuilder);
     }
 
     private AbstractCommunityResultBuilder<WccMutateProc.MutateResult> resultBuilder(

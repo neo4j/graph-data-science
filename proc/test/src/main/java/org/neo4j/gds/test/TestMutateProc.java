@@ -25,7 +25,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.nodeproperties.LongTestProperties;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -51,23 +50,9 @@ public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, Tes
         return mutate(computationResult);
     }
 
-
     @Override
     protected AbstractResultBuilder<TestResult> resultBuilder(ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computeResult) {
         return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());
-    }
-
-    @Override
-    protected void updateGraphStore(
-        AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computationResult
-    ) {
-        var graphStore = computationResult.graphStore();
-        var config = computationResult.config();
-
-        config.nodeLabelIdentifiers(graphStore).forEach(nodeLabel -> {
-            graphStore.addNodeProperty(nodeLabel, config.mutateProperty(), new LongTestProperties(__ -> 42L));
-        });
     }
 
     @Override

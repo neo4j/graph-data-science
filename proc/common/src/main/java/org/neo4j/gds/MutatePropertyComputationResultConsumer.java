@@ -20,13 +20,13 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodeProperties;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -37,22 +37,22 @@ import java.util.stream.Collectors;
 public final class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig, RESULT>
     extends MutateComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> {
 
-    public interface NodePropertiesFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig> {
-        NodeProperties apply(
+    public interface NodePropertyListFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig> {
+        List<NodeProperty> apply(
             AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
             String resultProperty,
             AllocationTracker allocationTracker
         );
     }
 
-    private final NodePropertiesFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertiesFunction;
+    private final NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction;
 
     public MutatePropertyComputationResultConsumer(
-        NodePropertiesFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertiesFunction,
+        NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction,
         ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction
     ) {
         super(resultBuilderFunction);
-        this.nodePropertiesFunction = nodePropertiesFunction;
+        this.nodePropertyListFunction = nodePropertyListFunction;
     }
 
     @Override
@@ -64,10 +64,7 @@ public final class MutatePropertyComputationResultConsumer<ALGO extends Algorith
         var graph = computationResult.graph();
         MutatePropertyConfig mutatePropertyConfig = computationResult.config();
 
-        var nodeProperties = List.of(ImmutableNodeProperty.of(
-            computationResult.config().mutateProperty(),
-            this.nodePropertiesFunction.apply(computationResult, mutatePropertyConfig.mutateProperty(), executionContext.allocationTracker())
-        ));
+        var nodeProperties = this.nodePropertyListFunction.apply(computationResult, mutatePropertyConfig.mutateProperty(), executionContext.allocationTracker());
 
         if (graph instanceof NodeFilteredGraph) {
             nodeProperties = nodeProperties.stream().map(nodeProperty ->
