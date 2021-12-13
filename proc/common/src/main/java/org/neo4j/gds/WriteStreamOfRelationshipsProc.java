@@ -29,6 +29,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreaming;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
@@ -46,30 +48,37 @@ public abstract class WriteStreamOfRelationshipsProc<
         throw new UnsupportedOperationException("Write relationship procedures do not produce node properties.");
     }
 
-    protected Stream<PROC_RESULT> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
-        return runWithExceptionLogging("Graph write failed", () -> {
-            CONFIG config = computeResult.config();
+    @Override
+    public ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
+        return (computationResult, executionContext) -> runWithExceptionLogging("Graph write failed", () -> {
+            CONFIG config = computationResult.config();
 
-            AbstractResultBuilder<PROC_RESULT> builder = resultBuilder(computeResult)
-                .withCreateMillis(computeResult.createMillis())
-                .withComputeMillis(computeResult.computeMillis())
-                .withNodeCount(computeResult.graph().nodeCount())
+            AbstractResultBuilder<PROC_RESULT> builder = resultBuilder(computationResult)
+                .withCreateMillis(computationResult.createMillis())
+                .withComputeMillis(computationResult.computeMillis())
+                .withNodeCount(computationResult.graph().nodeCount())
                 .withConfig(config);
 
-            if (!computeResult.isGraphEmpty()) {
-                writeToNeo(builder, computeResult);
-                computeResult.graph().releaseProperties();
+            if (!computationResult.isGraphEmpty()) {
+                writeToNeo(builder, computationResult, executionContext);
+                computationResult.graph().releaseProperties();
             }
             return Stream.of(builder.build());
         });
     }
 
+    protected Stream<PROC_RESULT> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
+        return computationResultConsumer().consume(computeResult, executionContext());
+    }
+
     private void writeToNeo(
         AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
+        ExecutionContext executionContext
     ) {
         var config = computationResult.config();
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
+            var log = executionContext.log();
             log.debug("Writing results");
 
             Graph graph = computationResult.graph();
@@ -78,7 +87,7 @@ public abstract class WriteStreamOfRelationshipsProc<
                 RelationshipStreamExporter.baseTask(name()),
                 log,
                 computationResult.config().writeConcurrency(),
-                taskRegistryFactory
+                executionContext.taskRegistryFactory()
             );
 
             var relationshipsWritten = 0L;

@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.ImmutableRelationship;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -43,7 +44,12 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
     extends StreamOfRelationshipsWriter<ALGO, DijkstraResult, CONFIG, StandardWriteRelationshipsResult> {
 
     protected Stream<StandardWriteRelationshipsResult> write(ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
-        return runWithExceptionLogging("Write relationships failed", () -> {
+        return computationResultConsumer().consume(computationResult, executionContext());
+    }
+
+    @Override
+    public ComputationResultConsumer<ALGO, DijkstraResult, CONFIG, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
+        return (computationResult, executionContext) -> runWithExceptionLogging("Write relationships failed", () -> {
             var config = computationResult.config();
 
             var resultBuilder = new StandardWriteRelationshipsResult.Builder()
@@ -52,7 +58,14 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
                 .withConfig(config);
 
             if (computationResult.isGraphEmpty()) {
-                return Stream.of(new StandardWriteRelationshipsResult(computationResult.createMillis(), 0L, 0L, 0L, 0L, config.toMap()));
+                return Stream.of(new StandardWriteRelationshipsResult(
+                    computationResult.createMillis(),
+                    0L,
+                    0L,
+                    0L,
+                    0L,
+                    config.toMap()
+                ));
             }
 
             var algorithm = computationResult.algorithm();
