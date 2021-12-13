@@ -68,7 +68,10 @@ class ExpressionValidationTest {
 
     @Test
     void property() {
-        var context = ImmutableTestValidationContext.builder().addAvailableProperties("bar").build();
+        var context = ImmutableTestValidationContext
+            .builder()
+            .putAvailableProperty("bar", ValueType.DOUBLE)
+            .build();
         var expr = ImmutableProperty
             .builder()
             .in(ImmutableVariable.builder().name("n").build())
@@ -102,7 +105,8 @@ class ExpressionValidationTest {
         var context = ImmutableTestValidationContext.builder()
             .context(RELATIONSHIP)
             .addAvailableLabelsOrTypes("Foo", "Bar")
-            .addAvailableProperties("bar", "foot")
+            .putAvailableProperty("bar", ValueType.DOUBLE)
+            .putAvailableProperty("foot", ValueType.DOUBLE)
             .build();
 
         assertThatExceptionOfType(SemanticErrors.class)
@@ -136,10 +140,10 @@ class ExpressionValidationTest {
         var context = ImmutableValidationContext
             .builder()
             .context(NODE)
-            .putAvailablePropertiesWithType("foo", lhsType)
+            .putAvailableProperty("foo", lhsType)
             .build();
 
-        var expr = ExpressionParser.parse(exprString, context.availablePropertiesWithTypes());
+        var expr = ExpressionParser.parse(exprString, context.availableProperties());
 
         assertThatExceptionOfType(SemanticErrors.class)
             .isThrownBy(() -> expr.validate(context).validate())
@@ -158,9 +162,9 @@ class ExpressionValidationTest {
         var context = ImmutableValidationContext
             .builder()
             .context(NODE)
-            .putAvailablePropertiesWithType("foo", valueType)
+            .putAvailableProperty("foo", valueType)
             .build();
-        var expr = ExpressionParser.parse(exprString, context.availablePropertiesWithTypes());
+        var expr = ExpressionParser.parse(exprString, context.availableProperties());
 
         assertThatExceptionOfType(SemanticErrors.class)
             .isThrownBy(() -> expr.validate(context).validate())
@@ -176,12 +180,6 @@ class ExpressionValidationTest {
         @Value.Default
         default Context context() {
             return NODE;
-        }
-
-        @Override
-        @Value.Default
-        default Set<String> availableProperties() {
-            return Set.of();
         }
 
         @Override

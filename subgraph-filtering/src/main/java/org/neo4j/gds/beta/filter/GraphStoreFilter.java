@@ -140,7 +140,7 @@ public final class GraphStoreFilter {
             var validationContext = ValidationContext.forNodes(graphStore);
             nodeExpression = ExpressionParser.parse(
                 replaceStarWithTrue(nodeFilter),
-                validationContext.availablePropertiesWithTypes()
+                validationContext.availableProperties()
             );
             nodeExpression.validate(validationContext).validate();
         } catch (ParseException | SemanticErrors e) {
@@ -152,7 +152,7 @@ public final class GraphStoreFilter {
             var validationContext = ValidationContext.forRelationships(graphStore);
             relationshipExpression = ExpressionParser.parse(
                 replaceStarWithTrue(relationshipFilter),
-                validationContext.availablePropertiesWithTypes()
+                validationContext.availableProperties()
             );
             relationshipExpression.validate(validationContext).validate();
         } catch (ParseException | SemanticErrors e) {

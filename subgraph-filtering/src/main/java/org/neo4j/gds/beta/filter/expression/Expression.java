@@ -119,7 +119,7 @@ public interface Expression {
             default ValidationContext validate(ValidationContext context) {
                 context = in().validate(context);
 
-                Set<String> availablePropertyKeys = context.availableProperties();
+                Set<String> availablePropertyKeys = context.availableProperties().keySet();
 
                 if (!availablePropertyKeys.contains(propertyKey())) {
                     return context.withError(SemanticErrors.SemanticError.of(prettySuggestions(
@@ -131,7 +131,7 @@ public interface Expression {
                         availablePropertyKeys
                     )));
                 }
-                var propertyType = context.availablePropertiesWithTypes().get(propertyKey());
+                var propertyType = context.availableProperties().get(propertyKey());
                 if (propertyType != ValueType.LONG && propertyType != ValueType.DOUBLE) {
                     return context.withError(SemanticErrors.SemanticError.of(
                         formatWithLocale(

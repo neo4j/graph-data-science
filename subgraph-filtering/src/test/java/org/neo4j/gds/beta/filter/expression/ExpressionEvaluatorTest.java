@@ -227,10 +227,10 @@ class ExpressionEvaluatorTest {
     void property(String propertyKey, double propertyValue, ValueType propertyType) throws ParseException {
         var validationContext = ImmutableValidationContext.builder()
             .context(ValidationContext.Context.NODE)
-            .putAvailablePropertiesWithType(propertyKey, propertyType)
+            .putAvailableProperty(propertyKey, propertyType)
             .build();
 
-        var expr = ExpressionParser.parse("n." + propertyKey, validationContext.availablePropertiesWithTypes());
+        var expr = ExpressionParser.parse("n." + propertyKey, validationContext.availableProperties());
         var context = ImmutableTestContext.builder().propertyKey(propertyKey).propertyValue(propertyValue).build();
         assertThat(expr.evaluate(context) == propertyValue).isTrue();
     }
@@ -255,7 +255,7 @@ class ExpressionEvaluatorTest {
             .addAllAvailableLabelsOrTypes(actual)
             .build();
 
-        var expr = ExpressionParser.parse("n" + labelExpression, validationContext.availablePropertiesWithTypes());
+        var expr = ExpressionParser.parse("n" + labelExpression, validationContext.availableProperties());
 
         var evaluationContext = ImmutableTestContext.builder().addAllLabelsOrTypes(actual).build();
         assertThat(expr.evaluate(evaluationContext) == TRUE).isEqualTo(expected);
