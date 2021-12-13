@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.test.config.DummyConfig;
 import org.neo4j.gds.test.config.DummyConfigImpl;
 import org.neo4j.procedure.Mode;
@@ -71,6 +72,11 @@ public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm,
                 return new FailingAlgorithm(progressTracker);
             }
        };
+    }
+
+    @Override
+    public <T extends ComputationResultConsumer<FailingAlgorithm, Output, DummyConfig, Stream<Output>>> T computationResultConsumer() {
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     public class Output {

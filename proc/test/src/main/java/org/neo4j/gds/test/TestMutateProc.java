@@ -21,7 +21,7 @@ package org.neo4j.gds.test;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
-import org.neo4j.gds.MutateProc;
+import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, TestResult, TestMutateConfig> {
+public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgorithm, TestResult, TestMutateConfig> {
 
     @Procedure(value = "gds.testProc.mutate", mode = READ)
     @Description(STATS_DESCRIPTION)
