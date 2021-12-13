@@ -19,16 +19,18 @@
  */
 package org.neo4j.gds.pipeline;
 
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AlgorithmMetaData;
+import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
+import org.neo4j.gds.ImmutableComputationResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.validation.Validator;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.logging.Log;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -40,39 +42,19 @@ public class ProcedureExecutor<
     RESULT
 > {
 
-    private final ProcConfigParser<CONFIG> configParser;
-    private final Validator<CONFIG> validator;
-    private final AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory;
-    private final KernelTransaction ktx;
-    private final Log log;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final String procName;
-    private final AllocationTracker allocationTracker;
-    private final ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> computationResultConsumer;
-    private final GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory;
+    private final AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ?> algoSpec;
+    private final PipelineSpec<ALGO, ALGO_RESULT, CONFIG> pipelineSpec;
+    private final ExecutionContext executionContext;
 
     public ProcedureExecutor(
-        ProcConfigParser<CONFIG> configParser,
-        Validator<CONFIG> validator,
-        AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory,
-        KernelTransaction ktx,
-        Log log,
-        TaskRegistryFactory taskRegistryFactory,
-        String procName,
-        AllocationTracker allocationTracker,
-        ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> computationResultConsumer,
-        GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory
+        AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ?> algoSpec,
+        PipelineSpec<ALGO, ALGO_RESULT, CONFIG> pipelineSpec,
+        ExecutionContext executionContext
     ) {
-        this.configParser = configParser;
-        this.validator = validator;
-        this.algorithmFactory = algorithmFactory;
-        this.ktx = ktx;
-        this.log = log;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.procName = procName;
-        this.allocationTracker = allocationTracker;
-        this.computationResultConsumer = computationResultConsumer;
-        this.graphCreationFactory = graphCreationFactory;
+        this.algoSpec = algoSpec;
+        this.pipelineSpec = pipelineSpec;
+
+        this.executionContext = executionContext;
     }
 
     public RESULT compute(
@@ -83,19 +65,20 @@ public class ProcedureExecutor<
     ) {
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
 
-        CONFIG config = configParser.processInput(configuration);
+        CONFIG config = pipelineSpec.configParser(algoSpec.newConfigFunction(), executionContext).processInput(configuration);
 
         setAlgorithmMetaDataToTransaction(config);
 
-        var graphCreation = graphCreationFactory.create(config, graphName);
+        var graphCreation = pipelineSpec.graphCreationFactory(executionContext).create(config, graphName);
 
-        var memoryEstimationInBytes = graphCreation.validateMemoryEstimation(algorithmFactory);
+        var memoryEstimationInBytes = graphCreation.validateMemoryEstimation(algoSpec.algorithmFactory());
 
         GraphStore graphStore;
         Graph graph;
 
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
             var graphCreateConfig = graphCreation.graphCreateConfig();
+            var validator = pipelineSpec.validator(algoSpec.validationConfig());
             validator.validateConfigsBeforeLoad(graphCreateConfig, config);
             graphStore = graphCreation.graphStore();
             validator.validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
@@ -103,7 +86,7 @@ public class ProcedureExecutor<
         }
 
         if (graph.isEmpty()) {
-            return computationResultConsumer.consume(builder
+            var emptyComputationResult = builder
                 .isGraphEmpty(true)
                 .graph(graph)
                 .graphStore(graphStore)
@@ -111,24 +94,27 @@ public class ProcedureExecutor<
                 .computeMillis(0)
                 .result(null)
                 .algorithm(null)
-                .build());
+                .build();
+            return algoSpec.computationResultConsumer().consume(emptyComputationResult, executionContext);
         }
 
-        ALGO algo = newAlgorithm(graph, graphStore, config, allocationTracker);
+        ALGO algo = newAlgorithm(graph, graphStore, config, executionContext.allocationTracker());
 
-        algo.progressTracker.setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
+        algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
 
         ALGO_RESULT result = executeAlgorithm(releaseAlgorithm, releaseTopology, builder, graph, algo);
 
-        log.info(procName + ": overall memory usage %s", allocationTracker.getUsageString());
+        executionContext.log().info(algoSpec.getName() + ": overall memory usage %s", executionContext.allocationTracker().getUsageString());
 
-        return computationResultConsumer.consume(builder
+        var computationResult = builder
             .graph(graph)
             .graphStore(graphStore)
             .algorithm(algo)
             .result(result)
             .config(config)
-            .build());
+            .build();
+
+        return algoSpec.computationResultConsumer().consume(computationResult, executionContext);
     }
 
     private ALGO_RESULT executeAlgorithm(
@@ -144,11 +130,11 @@ public class ProcedureExecutor<
                 try (ProgressTimer ignored = ProgressTimer.start(builder::computeMillis)) {
                     return algo.compute();
                 } catch (Throwable e) {
-                    algo.progressTracker.endSubTaskWithFailure();
+                    algo.getProgressTracker().endSubTaskWithFailure();
                     throw e;
                 } finally {
                     if (releaseAlgorithm) {
-                        algo.progressTracker.release();
+                        algo.getProgressTracker().release();
                         algo.release();
                     }
                     if (releaseTopology) {
@@ -165,27 +151,27 @@ public class ProcedureExecutor<
         CONFIG config,
         AllocationTracker allocationTracker
     ) {
-        TerminationFlag terminationFlag = TerminationFlag.wrap(ktx);
-        return algorithmFactory
+        TerminationFlag terminationFlag = TerminationFlag.wrap(executionContext.transaction());
+        return algoSpec.algorithmFactory()
             .accept(new AlgorithmFactory.Visitor<>() {
                 @Override
                 public ALGO graph(GraphAlgorithmFactory<ALGO, CONFIG> graphAlgorithmFactory) {
-                    return graphAlgorithmFactory.build(graph, config, allocationTracker, log, taskRegistryFactory);
+                    return graphAlgorithmFactory.build(graph, config, allocationTracker, executionContext.log(), executionContext.taskRegistryFactory());
                 }
 
                 @Override
                 public ALGO graphStore(GraphStoreAlgorithmFactory<ALGO, CONFIG> graphStoreAlgorithmFactory) {
-                    return graphStoreAlgorithmFactory.build(graphStore, config, allocationTracker, log, taskRegistryFactory);
+                    return graphStoreAlgorithmFactory.build(graphStore, config, allocationTracker, executionContext.log(), executionContext.taskRegistryFactory());
                 }
             })
             .withTerminationFlag(terminationFlag);
     }
 
     private void setAlgorithmMetaDataToTransaction(CONFIG algoConfig) {
-        if (ktx == null) {
+        if (executionContext.transaction() == null) {
             return;
         }
-        var metaData = ktx.getMetaData();
+        var metaData = executionContext.transaction().getMetaData();
         if (metaData instanceof AlgorithmMetaData) {
             ((AlgorithmMetaData) metaData).set(algoConfig);
         }
@@ -195,7 +181,7 @@ public class ProcedureExecutor<
         try {
             return supplier.get();
         } catch (Exception e) {
-            log.warn(message, e);
+            executionContext.log().warn(message, e);
             throw e;
         }
     }

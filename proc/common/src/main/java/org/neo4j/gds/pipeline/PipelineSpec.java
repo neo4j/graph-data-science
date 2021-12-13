@@ -29,7 +29,7 @@ public interface PipelineSpec<
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig
 > {
-    ProcConfigParser<CONFIG> configParser(NewConfigFunction<CONFIG> newConfigFunction);
+    ProcConfigParser<CONFIG> configParser(NewConfigFunction<CONFIG> newConfigFunction, ExecutionContext executionContext);
     Validator<CONFIG> validator(ValidationConfiguration<CONFIG> validationConfiguration);
-    GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory();
+    GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory(ExecutionContext executionContext);
 }

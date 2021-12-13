@@ -30,6 +30,10 @@ import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.pipeline.GraphStoreFromCatalogLoader;
+import org.neo4j.gds.pipeline.ImmutableExecutionContext;
+import org.neo4j.gds.pipeline.MemoryUsageValidator;
 import org.neo4j.gds.transaction.SecurityContextWrapper;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.Transaction;
@@ -154,6 +158,20 @@ public abstract class BaseProc {
 
     public MemoryUsageValidator memoryUsageValidator() {
         return new MemoryUsageValidator(log, api);
+    }
+
+    public ExecutionContext executionContext() {
+        return ImmutableExecutionContext
+            .builder()
+            .api(api)
+            .log(log)
+            .procedureTransaction(procedureTransaction)
+            .transaction(transaction)
+            .callContext(callContext)
+            .allocationTracker(allocationTracker)
+            .taskRegistryFactory(taskRegistryFactory)
+            .username(username())
+            .build();
     }
 
     @FunctionalInterface

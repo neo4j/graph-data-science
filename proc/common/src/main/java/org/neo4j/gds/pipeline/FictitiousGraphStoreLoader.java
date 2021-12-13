@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pipeline;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;

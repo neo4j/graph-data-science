@@ -20,10 +20,13 @@
 package org.neo4j.gds.gdl;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 
 public final class GdlGraphs {
 
-    public static final Graph EMPTY = GdlFactory.of("").build().graphStore().getUnion();
+    public static final GraphStore EMPTY_GRAPH_STORE = GdlFactory.of("").build().graphStore();
+
+    public static final Graph EMPTY = EMPTY_GRAPH_STORE.getUnion();
 
     private GdlGraphs() {}
 }

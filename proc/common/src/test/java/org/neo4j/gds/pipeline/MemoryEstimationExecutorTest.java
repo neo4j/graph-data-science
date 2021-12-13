@@ -19,19 +19,24 @@
  */
 package org.neo4j.gds.pipeline;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestMutateConfig;
 import org.neo4j.gds.test.TestMutateSpec;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
 import java.util.Map;
@@ -44,17 +49,38 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MemoryEstimationExecutorTest extends BaseTest {
 
-
+    private ExecutionContext executionContext;
     private MemoryEstimationExecutor<TestAlgorithm, TestAlgorithm, TestMutateConfig> memoryEstimationExecutor;
 
     @BeforeEach
     void setup() throws Exception {
         GraphDatabaseApiProxy.registerProcedures(db, GraphCreateProc.class);
 
+        var procedureTransaction = db.beginTx();
+        var transaction = GraphDatabaseApiProxy.kernelTransaction(procedureTransaction);
+
+        executionContext = ImmutableExecutionContext
+            .builder()
+            .api(db)
+            .allocationTracker(AllocationTracker.empty())
+            .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
+            .log(new TestLog())
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .username("")
+            .procedureTransaction(procedureTransaction)
+            .transaction(transaction)
+            .build();
+
         memoryEstimationExecutor = new MemoryEstimationExecutor<>(
             new TestMutateSpec(),
-            new ProcedurePipelineSpec<>()
+            new ProcedurePipelineSpec<>(),
+            executionContext
         );
+    }
+
+    @AfterEach
+    void tearDown() {
+        executionContext.procedureTransaction().close();
     }
 
     @Test

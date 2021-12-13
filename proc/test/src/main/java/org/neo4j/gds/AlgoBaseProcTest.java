@@ -26,7 +26,6 @@ import org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;

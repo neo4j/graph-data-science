@@ -52,16 +52,9 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         var pipelineSpec = new ProcedurePipelineSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new ProcedureExecutor<>(
-            pipelineSpec.configParser(mutateSpec.newConfigFunction()),
-            pipelineSpec.validator(mutateSpec.validationConfig()),
-            algorithmFactory(),
-            transaction,
-            log,
-            taskRegistryFactory,
-            procName(),
-            allocationTracker(),
-            mutateSpec.computationResultConsumer(),
-            pipelineSpec.graphCreationFactory()
+            mutateSpec,
+            pipelineSpec,
+            executionContext()
         ).compute(graphName, configuration, true, true);
     }
 
@@ -76,7 +69,8 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
 
         return new MemoryEstimationExecutor<>(
             mutateSpec,
-            pipelineSpec
+            pipelineSpec,
+            executionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

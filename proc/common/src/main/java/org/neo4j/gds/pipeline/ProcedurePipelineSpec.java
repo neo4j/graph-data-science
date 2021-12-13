@@ -30,20 +30,11 @@ public class ProcedurePipelineSpec<
     CONFIG extends AlgoBaseConfig
 > implements PipelineSpec<ALGO, ALGO_RESULT, CONFIG> {
 
-    private final String username;
-    private final GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory;
-
-    public ProcedurePipelineSpec(
-        String username,
-        GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory
-    ) {
-        this.username = username;
-        this.graphCreationFactory = graphCreationFactory;
-    }
+    public ProcedurePipelineSpec() { }
 
     @Override
-    public ProcConfigParser<CONFIG> configParser(NewConfigFunction<CONFIG> newConfigFunction) {
-        return new AlgoConfigParser<>(username, newConfigFunction);
+    public ProcConfigParser<CONFIG> configParser(NewConfigFunction<CONFIG> newConfigFunction, ExecutionContext executionContext) {
+        return new AlgoConfigParser<>(executionContext.username(), newConfigFunction);
     }
 
     @Override
@@ -52,7 +43,16 @@ public class ProcedurePipelineSpec<
     }
 
     @Override
-    public GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory() {
-        return graphCreationFactory;
+    public GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory(ExecutionContext executionContext) {
+        return new ProcedureGraphCreationFactory<>(
+            (config, graphName) -> new GraphStoreFromCatalogLoader(
+                graphName,
+                config,
+                executionContext.username(),
+                executionContext.databaseId(),
+                executionContext.isGdsAdmin()
+            ),
+            new MemoryUsageValidator(executionContext.log(), executionContext.api())
+        );
     }
 }
