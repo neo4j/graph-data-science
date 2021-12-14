@@ -22,7 +22,6 @@ package org.neo4j.gds.test;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -33,22 +32,22 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.TestResult, TestConfig> {
+public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestResult, TestWriteConfig> {
 
-    @Procedure(value = "gds.testProc.test", mode = READ)
+    @Procedure(value = "gds.testProc.write", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<TestResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<TestAlgorithm, TestAlgorithm, TestConfig> computationResult = compute(
+        ComputationResult<TestAlgorithm, TestAlgorithm, TestWriteConfig> computationResult = compute(
             graphName,
             configuration
         );
         return stats(computationResult);
     }
 
-    @Procedure(value = "gds.testProc.test.estimate", mode = READ)
+    @Procedure(value = "gds.testProc.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -58,32 +57,17 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
     }
 
     @Override
-    protected AbstractResultBuilder<TestResult> resultBuilder(ComputationResult<TestAlgorithm, TestAlgorithm, TestConfig> computeResult) {
-        return new TestAlgoResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());
+    protected TestResult.TestResultBuilder resultBuilder(ComputationResult<TestAlgorithm, TestAlgorithm, TestWriteConfig> computeResult) {
+        return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());
     }
 
     @Override
-    protected TestConfig newConfig(String username, CypherMapWrapper config) {
-        return TestConfig.of(config);
+    protected TestWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return TestWriteConfig.of(config);
     }
 
     @Override
-    protected GraphAlgorithmFactory<TestAlgorithm, TestConfig> algorithmFactory() {
-        return new TestAlgorithmFactory();
-    }
-
-    public static final class TestResult {
-
-        public long createMillis;
-        public long computeMillis;
-        public long relationshipCount;
-        public Map<String, Object> configuration;
-
-        TestResult(long createMillis, long computeMillis, long relationshipCount, Map<String, Object> configuration) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.relationshipCount = relationshipCount;
-            this.configuration = configuration;
-        }
+    protected GraphAlgorithmFactory<TestAlgorithm, TestWriteConfig> algorithmFactory() {
+        return new TestAlgorithmFactory<>();
     }
 }

@@ -23,14 +23,11 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.WriteConfig;
-import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface TestConfig extends AlgoBaseConfig, WriteConfig, WritePropertyConfig {
+public interface TestConfig extends AlgoBaseConfig {
 
     @Value.Default
     default int maxIterations() {
@@ -40,9 +37,5 @@ public interface TestConfig extends AlgoBaseConfig, WriteConfig, WritePropertyCo
     @Value.Default
     default boolean throwInCompute() {
         return false;
-    }
-
-    static TestConfig of(CypherMapWrapper config) {
-        return new TestConfigImpl(config);
     }
 }

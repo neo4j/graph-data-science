@@ -21,31 +21,22 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.NewConfigFunction;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.pipeline.AlgorithmSpec;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.pipeline.NewConfigFunction;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.logging.Log;
 
 import java.util.stream.Stream;
 
 class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>, WccAlgorithmFactory<WccMutateConfig>> {
 
-    private final ProcedureCallContext callContext;
-    private final AllocationTracker allocationTracker;
-    private final Log log;
+    WccMutateSpec() {}
 
-    WccMutateSpec(
-        ProcedureCallContext callContext,
-        AllocationTracker allocationTracker,
-        Log log
-    ) {
-        this.callContext = callContext;
-        this.allocationTracker = allocationTracker;
-        this.log = log;
+    @Override
+    public String getName() {
+        return "WccMutate";
     }
 
     @Override
@@ -60,15 +51,18 @@ class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateCo
 
     @Override
     public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(WccProc::nodeProperties, this::resultBuilder, log, allocationTracker);
+        return new MutatePropertyComputationResultConsumer<>(WccProc::nodeProperties, this::resultBuilder);
     }
 
-    private AbstractCommunityResultBuilder<WccMutateProc.MutateResult> resultBuilder(AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult) {
+    private AbstractCommunityResultBuilder<WccMutateProc.MutateResult> resultBuilder(
+        AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult,
+        ExecutionContext executionContext
+    ) {
         return WccProc.resultBuilder(
             new WccMutateProc.MutateResult.Builder(
-                callContext,
+                executionContext.callContext(),
                 computationResult.config().concurrency(),
-                allocationTracker
+                executionContext.allocationTracker()
             ),
             computationResult
         );

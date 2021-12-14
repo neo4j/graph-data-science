@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.validation.AfterLoadValidation;
-import org.neo4j.gds.validation.ValidationConfiguration;
+import org.neo4j.gds.pipeline.GraphStoreValidation;
+import org.neo4j.gds.pipeline.validation.AfterLoadValidation;
+import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 
 import java.util.List;
 import java.util.Optional;

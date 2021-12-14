@@ -21,24 +21,20 @@ package org.neo4j.gds.pipeline;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.FictitiousGraphStoreLoader;
-import org.neo4j.gds.GraphStoreFromCatalogLoader;
-import org.neo4j.gds.GraphStoreFromDatabaseLoader;
-import org.neo4j.gds.MemoryEstimationGraphConfigParser;
-import org.neo4j.gds.ProcConfigParser;
 import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.kernel.database.NamedDatabaseId;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -47,45 +43,53 @@ public class MemoryEstimationExecutor<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig
-> {
+    > {
 
-    private final ProcConfigParser<CONFIG> configParser;
-    private final AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory;
-    private final Supplier<GraphLoaderContext> graphLoaderContextSupplier;
-    private final String username;
-    private final Supplier<NamedDatabaseId> databaseIdSupplier;
-    private final boolean isGdsAdmin;
+    private final AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec;
+    private final PipelineSpec<ALGO, ALGO_RESULT, CONFIG> pipelineSpec;
+    private final ExecutionContext executionContext;
 
     public MemoryEstimationExecutor(
-        ProcConfigParser<CONFIG> configParser,
-        AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory,
-        Supplier<GraphLoaderContext> graphLoaderContextSupplier,
-        Supplier<NamedDatabaseId> databaseIdSupplier,
-        String username,
-        boolean isGdsAdmin
+        AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec,
+        PipelineSpec<ALGO, ALGO_RESULT, CONFIG> pipelineSpec,
+        ExecutionContext executionContext
     ) {
-        this.configParser = configParser;
-        this.algorithmFactory = algorithmFactory;
-        this.graphLoaderContextSupplier = graphLoaderContextSupplier;
-        this.username = username;
-        this.databaseIdSupplier = databaseIdSupplier;
-        this.isGdsAdmin = isGdsAdmin;
+        this.algoSpec = algoSpec;
+        this.pipelineSpec = pipelineSpec;
+        this.executionContext = executionContext;
     }
 
     public Stream<MemoryEstimateResult> computeEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
+        var configParser = pipelineSpec.configParser(algoSpec.newConfigFunction(), executionContext);
         CONFIG algoConfig = configParser.processInput(algoConfiguration);
         GraphDimensions graphDimensions;
         Optional<MemoryEstimation> memoryEstimation;
 
         if (graphNameOrConfiguration instanceof Map) {
-            var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(username);
+
+            // if the api is null, we are probably using EstimationCli
+            var graphLoaderContext = (executionContext.api() == null)
+                ? GraphLoaderContext.NULL_CONTEXT
+                : ImmutableGraphLoaderContext
+                    .builder()
+                    .api(executionContext.api())
+                    .allocationTracker(executionContext.allocationTracker())
+                    .log(executionContext.log())
+                    .taskRegistryFactory(executionContext.taskRegistryFactory())
+                    .terminationFlag(TerminationFlag.wrap(executionContext.transaction()))
+                    .transactionContext(TransactionContext.of(
+                        executionContext.api(),
+                        executionContext.procedureTransaction()
+                    )).build();
+
+            var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
             var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfiguration);
             var graphStoreCreator = graphCreateConfig.isFictitiousLoading()
                 ? new FictitiousGraphStoreLoader(graphCreateConfig)
-                : new GraphStoreFromDatabaseLoader(graphCreateConfig, username, graphLoaderContextSupplier.get());
+                : new GraphStoreFromDatabaseLoader(graphCreateConfig, executionContext.username(), graphLoaderContext);
 
             graphDimensions = graphStoreCreator.graphDimensions();
             memoryEstimation = Optional.of(graphStoreCreator.memoryEstimation());
@@ -93,9 +97,9 @@ public class MemoryEstimationExecutor<
             graphDimensions = new GraphStoreFromCatalogLoader(
                 (String) graphNameOrConfiguration,
                 algoConfig,
-                username,
-                databaseIdSupplier.get(),
-                isGdsAdmin
+                executionContext.username(),
+                executionContext.databaseId(),
+                executionContext.isGdsAdmin()
             ).graphDimensions();
 
             memoryEstimation = Optional.empty();
@@ -109,7 +113,7 @@ public class MemoryEstimationExecutor<
         MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(
             graphDimensions,
             memoryEstimation,
-            algorithmFactory,
+            algoSpec.algorithmFactory(),
             algoConfig
         );
 

@@ -26,7 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
-import org.neo4j.gds.validation.ValidationConfiguration;
+import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;

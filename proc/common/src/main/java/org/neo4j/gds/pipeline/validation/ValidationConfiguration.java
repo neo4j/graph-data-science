@@ -17,11 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.pipeline.validation;
 
-import java.util.Map;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
-@FunctionalInterface
-public interface ProcConfigParser<CONFIG> {
-    CONFIG processInput(Map<String, Object> configuration);
+import java.util.List;
+
+public interface ValidationConfiguration<CONFIG extends AlgoBaseConfig> {
+    default List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
+        return List.of();
+    }
+
+    default List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
+        return List.of();
+    }
+
+    static <CONFIG extends AlgoBaseConfig> ValidationConfiguration<CONFIG> empty() {
+        return new ValidationConfiguration<>(){};
+    }
 }

@@ -25,8 +25,8 @@ import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.model.ModelConfig;
-import org.neo4j.gds.validation.BeforeLoadValidation;
-import org.neo4j.gds.validation.ValidationConfiguration;
+import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
+import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 
 import java.util.HashMap;

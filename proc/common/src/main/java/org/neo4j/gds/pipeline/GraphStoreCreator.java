@@ -17,14 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.pipeline;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
-public interface NewConfigFunction<CONFIG extends AlgoBaseConfig> {
-    CONFIG apply(
-        String username,
-        CypherMapWrapper config
-    );
+public interface GraphStoreCreator extends GraphStoreLoader {
+    MemoryEstimation memoryEstimation();
 }

@@ -17,22 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.validation;
+package org.neo4j.gds.pipeline.validation;
 
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
 
-import java.util.List;
-
-public interface ValidationConfiguration<CONFIG extends AlgoBaseConfig> {
-    default List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
-        return List.of();
-    }
-
-    default List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
-        return List.of();
-    }
-
-    static <CONFIG extends AlgoBaseConfig> ValidationConfiguration<CONFIG> empty() {
-        return new ValidationConfiguration<>(){};
-    }
+@FunctionalInterface
+public interface AfterLoadValidation<CONFIG extends AlgoBaseConfig> {
+    void validateConfigsAfterLoad(
+        GraphStore graphStore,
+        GraphCreateConfig graphCreateConfig,
+        CONFIG config
+    );
 }

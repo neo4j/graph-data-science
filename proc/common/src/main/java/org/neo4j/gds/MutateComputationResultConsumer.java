@@ -21,8 +21,8 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.logging.Log;
 
 import java.util.stream.Stream;
 
@@ -32,30 +32,31 @@ public abstract class MutateComputationResultConsumer<ALGO extends Algorithm<ALG
     implements ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<RESULT>> {
 
     public interface ResultBuilderFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutateConfig, RESULT> {
-        AbstractResultBuilder<RESULT> apply(AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
+        AbstractResultBuilder<RESULT> apply(
+            AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
+            ExecutionContext executionContext
+        );
     }
 
     private final ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction;
-    protected final Log log;
 
-    protected MutateComputationResultConsumer(ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction, Log log) {
+    protected MutateComputationResultConsumer(ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction) {
         this.resultBuilderFunction = resultBuilderFunction;
-        this.log = log;
     }
 
     @Override
-    public Stream<RESULT> consume(AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        return runWithExceptionLogging("Graph mutation failed", log, () -> {
+    public Stream<RESULT> consume(AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext) {
+        return runWithExceptionLogging("Graph mutation failed", executionContext.log(), () -> {
             CONFIG config = computationResult.config();
 
-            AbstractResultBuilder<RESULT> builder = resultBuilderFunction.apply(computationResult)
+            AbstractResultBuilder<RESULT> builder = resultBuilderFunction.apply(computationResult, executionContext)
                 .withCreateMillis(computationResult.createMillis())
                 .withComputeMillis(computationResult.computeMillis())
                 .withNodeCount(computationResult.graph().nodeCount())
                 .withConfig(config);
 
             if (!computationResult.isGraphEmpty()) {
-                updateGraphStore(builder, computationResult);
+                updateGraphStore(builder, computationResult, executionContext);
                 computationResult.graph().releaseProperties();
             }
             return Stream.of(builder.build());
@@ -64,6 +65,7 @@ public abstract class MutateComputationResultConsumer<ALGO extends Algorithm<ALG
 
     protected abstract void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
-        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
+        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
+        ExecutionContext executionContext
     );
 }

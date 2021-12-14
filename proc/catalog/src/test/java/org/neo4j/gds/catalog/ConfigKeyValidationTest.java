@@ -54,7 +54,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void additionalKeyForExplicitLoading() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.testProc.test('foo', {nodeProjection: '*', writeProperty: 'p'})")
+            () -> runQuery("CALL gds.testProc.write('foo', {nodeProjection: '*', writeProperty: 'p'})")
         );
 
         assertThat(
@@ -67,7 +67,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void misspelledRequiredKeyWithSuggestion() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.testProc.test('g', {wirteProperty: 'foo'})")
+            () -> runQuery("CALL gds.testProc.write('g', {wirteProperty: 'foo'})")
         );
 
         assertThat(
@@ -80,7 +80,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void misspelledOptionalKeyWithSuggestion() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.testProc.test('graph', {maxiiterations: 1337, writeProperty: 'p'})")
+            () -> runQuery("CALL gds.testProc.write('graph', {maxiiterations: 1337, writeProperty: 'p'})")
         );
 
         assertThat(
@@ -93,7 +93,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void dontSuggestExistingKeys() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.testProc.test('g', {writeProperty: 'p', writeConccurrency: 12})")
+            () -> runQuery("CALL gds.testProc.write('g', {writeProperty: 'p', writeConccurrency: 12})")
         );
 
         assertThat(
@@ -142,7 +142,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery(formatWithLocale("CALL gds.testProc.test('%s', {maxIterations: [1]})", DEFAULT_GRAPH_NAME))
+            () -> runQuery(formatWithLocale("CALL gds.testProc.write('%s', {maxIterations: [1]})", DEFAULT_GRAPH_NAME))
         );
 
         String expectedMsg = "Multiple errors in configuration arguments:\n" +

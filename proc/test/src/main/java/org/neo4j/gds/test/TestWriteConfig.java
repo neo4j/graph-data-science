@@ -17,14 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.test;
 
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.WriteConfig;
+import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-public interface GraphStoreLoader {
-    GraphCreateConfig graphCreateConfig();
-    GraphStore graphStore();
-    GraphDimensions graphDimensions();
+@ValueClass
+@Configuration
+@SuppressWarnings("immutables:subtype")
+public interface TestWriteConfig extends TestConfig, WriteConfig, WritePropertyConfig {
+    static TestWriteConfig of(CypherMapWrapper config) {
+        return new TestWriteConfigImpl(config);
+    }
 }

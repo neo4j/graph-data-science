@@ -21,13 +21,13 @@ package org.neo4j.gds.test;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
-public class TestAlgoResultBuilder extends AbstractResultBuilder<TestProc.TestResult> {
+public class TestAlgoResultBuilder extends AbstractResultBuilder<TestResult> {
 
     long relationshipCount = 0;
 
     @Override
-    public TestProc.TestResult build() {
-        return new TestProc.TestResult(
+    public TestResult build() {
+        return new TestResult(
             createMillis,
             computeMillis,
             relationshipCount,

@@ -117,8 +117,8 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void failWhenNotFindingGraph() {
-        String query1 = "CALL gds.testProc.test('nope', {writeProperty: 'p'})";
-        String query2 = "CALL gds.testProc.test.estimate('nope', {writeProperty: 'p'})";
+        String query1 = "CALL gds.testProc.write('nope', {writeProperty: 'p'})";
+        String query2 = "CALL gds.testProc.write.estimate('nope', {writeProperty: 'p'})";
 
         assertError(query1, "Graph with name `nope` does not exist on database `neo4j`.");
         assertError(query2, "Graph with name `nope` does not exist on database `neo4j`.");

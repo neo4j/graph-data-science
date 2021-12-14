@@ -25,9 +25,9 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPredictPipelineBaseConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
-import org.neo4j.gds.validation.BeforeLoadValidation;
-import org.neo4j.gds.validation.GraphCreateConfigValidations;
-import org.neo4j.gds.validation.ValidationConfiguration;
+import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
+import org.neo4j.gds.pipeline.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 
 import java.util.List;
 import java.util.Map;

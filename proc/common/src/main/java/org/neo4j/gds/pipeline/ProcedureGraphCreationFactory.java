@@ -20,8 +20,6 @@
 package org.neo4j.gds.pipeline;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.GraphStoreLoader;
-import org.neo4j.gds.MemoryUsageValidator;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.util.function.BiFunction;

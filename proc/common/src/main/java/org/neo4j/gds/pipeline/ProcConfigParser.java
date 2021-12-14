@@ -19,20 +19,9 @@
  */
 package org.neo4j.gds.pipeline;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import java.util.Map;
 
-public class IdentityComputationResultConsumer<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
-    ALGO_RESULT,
-    CONFIG extends AlgoBaseConfig
-> implements ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG>> {
-
-    @Override
-    public AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> consume(
-        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
-    ) {
-        return computationResult;
-    }
+@FunctionalInterface
+public interface ProcConfigParser<CONFIG> {
+    CONFIG processInput(Map<String, Object> configuration);
 }

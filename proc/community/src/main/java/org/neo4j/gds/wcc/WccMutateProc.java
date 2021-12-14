@@ -21,11 +21,11 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.ProcedureExecutor;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.pipeline.MemoryEstimationExecutor;
+import org.neo4j.gds.pipeline.ProcedureExecutor;
 import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -48,23 +48,13 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var mutateSpec = new WccMutateSpec(callContext, allocationTracker(), log);
-        var pipelineSpec = new ProcedurePipelineSpec<>(
-            username(),
-            graphCreationFactory()
-        );
+        var mutateSpec = new WccMutateSpec();
+        var pipelineSpec = new ProcedurePipelineSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new ProcedureExecutor<>(
-            pipelineSpec.configParser(mutateSpec.newConfigFunction()),
-            pipelineSpec.validator(mutateSpec.validationConfig()),
-            algorithmFactory(),
-            transaction,
-            log,
-            taskRegistryFactory,
-            procName(),
-            allocationTracker(),
-            mutateSpec.computationResultConsumer(),
-            pipelineSpec.graphCreationFactory()
+            mutateSpec,
+            pipelineSpec,
+            executionContext()
         ).compute(graphName, configuration, true, true);
     }
 
@@ -74,19 +64,13 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var mutateSpec = new WccMutateSpec(callContext, allocationTracker(), log);
-        var pipelineSpec = new ProcedurePipelineSpec<>(
-            username(),
-            graphCreationFactory()
-        );
+        var mutateSpec = new WccMutateSpec();
+        var pipelineSpec = new ProcedurePipelineSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new MemoryEstimationExecutor<>(
-            pipelineSpec.configParser(mutateSpec.newConfigFunction()),
-            mutateSpec.algorithmFactory(),
-            this::graphLoaderContext,
-            this::databaseId,
-            username(),
-            isGdsAdmin()
+            mutateSpec,
+            pipelineSpec,
+            executionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

@@ -27,13 +27,23 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.AlgoConfigParser;
+import org.neo4j.gds.pipeline.AlgorithmSpec;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GraphCreationFactory;
+import org.neo4j.gds.pipeline.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.pipeline.MemoryEstimationExecutor;
+import org.neo4j.gds.pipeline.MemoryUsageValidator;
+import org.neo4j.gds.pipeline.NewConfigFunction;
+import org.neo4j.gds.pipeline.PipelineSpec;
+import org.neo4j.gds.pipeline.ProcConfigParser;
+import org.neo4j.gds.pipeline.ProcedureExecutor;
 import org.neo4j.gds.pipeline.ProcedureGraphCreationFactory;
+import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
+import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
+import org.neo4j.gds.pipeline.validation.Validator;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.validation.ValidationConfiguration;
-import org.neo4j.gds.validation.Validator;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -91,14 +101,10 @@ public abstract class AlgoBaseProc<
         Map<String, Object> algoConfiguration
     ) {
         return new MemoryEstimationExecutor<>(
-            configParser(),
-            algorithmFactory(),
-            this::graphLoaderContext,
-            this::databaseId,
-            username(),
-            isGdsAdmin()
+            new AlgoBaseProcSpec<>(algorithmFactory()),
+            new ProcedurePipelineSpec<>(),
+            executionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-
     }
 
     public ValidationConfiguration<CONFIG> getValidationConfig() {
@@ -110,30 +116,13 @@ public abstract class AlgoBaseProc<
     }
 
     private ProcedureExecutor<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> procedureExecutor() {
-        return new ProcedureExecutor<>(
-            configParser(),
-            validator(),
-            algorithmFactory(),
-            transaction,
-            log,
-            taskRegistryFactory,
-            procName(),
-            allocationTracker(),
-            ComputationResultConsumer.identity(),
-            graphCreationFactory()
-        );
-    }
+        var algoSpec = new AlgoBaseProcSpec<>(algorithmFactory());
+        var pipelineSpec = new AlgoBasePipelineSpec();
 
-    protected GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory() {
-        return new ProcedureGraphCreationFactory<>(
-            (config, graphName) -> new GraphStoreFromCatalogLoader(
-                graphName,
-                config,
-                username(),
-                databaseId(),
-                isGdsAdmin()
-            ),
-            memoryUsageValidator()
+        return new ProcedureExecutor<>(
+            algoSpec,
+            pipelineSpec,
+            executionContext()
         );
     }
 
@@ -158,6 +147,67 @@ public abstract class AlgoBaseProc<
         @Value.Default
         default boolean isGraphEmpty() {
             return false;
+        }
+    }
+
+    private final class AlgoBaseProcSpec<G> implements AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>, AlgorithmFactory<G, ALGO, CONFIG>> {
+        private final AlgorithmFactory<G, ALGO, CONFIG> algorithmFactory;
+
+        private AlgoBaseProcSpec(AlgorithmFactory<G, ALGO, CONFIG> algorithmFactory) {
+            this.algorithmFactory = algorithmFactory;
+        }
+
+        @Override
+        public String getName() {
+            return procName();
+        }
+
+        @Override
+        public ValidationConfiguration<CONFIG> validationConfig() {
+            return getValidationConfig();
+        }
+
+        @Override
+        public AlgorithmFactory<G, ALGO, CONFIG> algorithmFactory() {
+            return algorithmFactory;
+        }
+
+        @Override
+        public NewConfigFunction<CONFIG> newConfigFunction() {
+            return AlgoBaseProc.this::newConfig;
+        }
+
+        @Override
+        public ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> computationResultConsumer() {
+            return ComputationResultConsumer.identity();
+        }
+    }
+
+    private final class AlgoBasePipelineSpec implements PipelineSpec<ALGO, ALGO_RESULT, CONFIG> {
+        @Override
+        public ProcConfigParser<CONFIG> configParser(
+            NewConfigFunction<CONFIG> newConfigFunction, ExecutionContext executionContext
+        ) {
+            return AlgoBaseProc.this.configParser();
+        }
+
+        @Override
+        public Validator<CONFIG> validator(ValidationConfiguration<CONFIG> validationConfiguration) {
+            return new Validator<>(validationConfiguration);
+        }
+
+        @Override
+        public GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory(ExecutionContext executionContext) {
+            return new ProcedureGraphCreationFactory<>(
+                (config, graphName) -> new GraphStoreFromCatalogLoader(
+                    graphName,
+                    config,
+                    executionContext.username(),
+                    executionContext.databaseId(),
+                    executionContext.isGdsAdmin()
+                ),
+                new MemoryUsageValidator(executionContext.log(), executionContext.api())
+            );
         }
     }
 }

@@ -31,16 +31,20 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.pipeline.ImmutableExecutionContext;
 import org.neo4j.gds.test.ImmutableTestMutateConfig;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestMutateConfig;
-import org.neo4j.gds.test.TestProc;
+import org.neo4j.gds.test.TestResult;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Optional;
 
@@ -55,15 +59,22 @@ class MutatePropertyComputationResultConsumerTest {
     @Inject
     private GraphStore graphStore;
 
-    MutatePropertyComputationResultConsumer<TestAlgorithm, TestAlgorithm, TestMutateConfig, TestProc.TestResult> mutateResultConsumer;
+    private MutatePropertyComputationResultConsumer<TestAlgorithm, TestAlgorithm, TestMutateConfig, TestResult> mutateResultConsumer;
+
+    private final ExecutionContext executionContext = ImmutableExecutionContext
+        .builder()
+        .allocationTracker(AllocationTracker.empty())
+        .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
+        .log(new TestLog())
+        .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+        .username("")
+        .build();
 
     @BeforeEach
     void setup() {
         mutateResultConsumer = new MutatePropertyComputationResultConsumer<>(
             (computationResult, resultProperty, allocationTracker) -> new TestNodeProperties(),
-            computationResult -> new TestAlgoResultBuilder(),
-            new TestLog(),
-            AllocationTracker.empty()
+            (computationResult, executionContext) -> new TestAlgoResultBuilder()
         );
     }
 
@@ -75,7 +86,7 @@ class MutatePropertyComputationResultConsumerTest {
             ImmutableTestMutateConfig.builder().mutateProperty("mutated").build()
         );
 
-        mutateResultConsumer.consume(computationResult);
+        mutateResultConsumer.consume(computationResult, executionContext);
 
         assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "mutated")).isTrue();
         var mutatedNodeProperty = graphStore.nodeProperty("mutated");
@@ -112,7 +123,7 @@ class MutatePropertyComputationResultConsumerTest {
             ImmutableTestMutateConfig.builder().addNodeLabel("A").mutateProperty(mutateProperty).build()
         );
 
-        mutateResultConsumer.consume(computationResult);
+        mutateResultConsumer.consume(computationResult, executionContext);
 
         assertThat(graphStore.hasNodeProperty(NodeLabel.of("A"), mutateProperty)).isTrue();
         assertThat(graphStore.hasNodeProperty(NodeLabel.of("B"), mutateProperty)).isFalse();

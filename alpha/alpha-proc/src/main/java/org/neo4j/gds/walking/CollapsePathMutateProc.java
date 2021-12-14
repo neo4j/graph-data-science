@@ -20,7 +20,6 @@
 package org.neo4j.gds.walking;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.ImmutableComputationResult;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.RelationshipType;
@@ -32,6 +31,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.impl.walking.CollapsePath;
 import org.neo4j.gds.impl.walking.CollapsePathConfig;
+import org.neo4j.gds.pipeline.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
