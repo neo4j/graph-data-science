@@ -175,9 +175,4 @@ public class BatchingProgressLogger implements ProgressLogger {
         globalPercentage = -1;
         return remainingVolume;
     }
-
-    @Override
-    public void logProgress(double percentDone, Supplier<String> msg) {
-        throw new UnsupportedOperationException("BatchProgressLogger does not support logging percentages");
-    }
 }
