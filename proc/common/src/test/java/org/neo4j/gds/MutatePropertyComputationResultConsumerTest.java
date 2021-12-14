@@ -33,6 +33,7 @@ import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -46,6 +47,7 @@ import org.neo4j.gds.test.TestMutateConfig;
 import org.neo4j.gds.test.TestResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,8 +74,9 @@ class MutatePropertyComputationResultConsumerTest {
 
     @BeforeEach
     void setup() {
+        var nodePropertyList = List.of(ImmutableNodeProperty.of("mutateProperty", new TestNodeProperties()));
         mutateResultConsumer = new MutatePropertyComputationResultConsumer<>(
-            (computationResult, resultProperty, allocationTracker) -> new TestNodeProperties(),
+            (computationResult, resultProperty, allocationTracker) -> nodePropertyList,
             (computationResult, executionContext) -> new TestAlgoResultBuilder()
         );
     }
@@ -83,13 +86,13 @@ class MutatePropertyComputationResultConsumerTest {
         var computationResult = getComputationResult(
             graphStore,
             graphStore.getUnion(),
-            ImmutableTestMutateConfig.builder().mutateProperty("mutated").build()
+            ImmutableTestMutateConfig.builder().mutateProperty("mutateProperty").build()
         );
 
         mutateResultConsumer.consume(computationResult, executionContext);
 
-        assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "mutated")).isTrue();
-        var mutatedNodeProperty = graphStore.nodeProperty("mutated");
+        assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "mutateProperty")).isTrue();
+        var mutatedNodeProperty = graphStore.nodeProperty("mutateProperty");
 
         assertThat(mutatedNodeProperty.propertyState()).isEqualTo(PropertyState.TRANSIENT);
 
@@ -97,7 +100,6 @@ class MutatePropertyComputationResultConsumerTest {
         assertThat(mutatedNodePropertyValues.longValue(0)).isEqualTo(0);
         assertThat(mutatedNodePropertyValues.longValue(1)).isEqualTo(1);
     }
-
 
     @Test
     void testGraphMutationOnFilteredGraph() {
@@ -115,7 +117,7 @@ class MutatePropertyComputationResultConsumerTest {
             Optional.empty()
         );
 
-        String mutateProperty = "mutated";
+        String mutateProperty = "mutateProperty";
 
         var computationResult = getComputationResult(
             graphStore,

@@ -20,12 +20,14 @@
 package org.neo4j.gds.test;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.LongTestProperties;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -51,23 +53,28 @@ public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, Tes
         return mutate(computationResult);
     }
 
+    @Override
+    public MutateComputationResultConsumer<TestAlgorithm, TestAlgorithm, TestMutateConfig, TestResult> computationResultConsumer() {
+        return new MutateComputationResultConsumer<>((computationResult, executionContext) -> resultBuilder(computationResult)) {
+            @Override
+            protected void updateGraphStore(
+                AbstractResultBuilder<?> resultBuilder,
+                ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computationResult,
+                ExecutionContext executionContext
+            ) {
+                var graphStore = computationResult.graphStore();
+                var config = computationResult.config();
+
+                config.nodeLabelIdentifiers(graphStore).forEach(nodeLabel -> {
+                    graphStore.addNodeProperty(nodeLabel, config.mutateProperty(), new LongTestProperties(__ -> 42L));
+                });
+            }
+        };
+    }
 
     @Override
     protected AbstractResultBuilder<TestResult> resultBuilder(ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computeResult) {
         return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());
-    }
-
-    @Override
-    protected void updateGraphStore(
-        AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computationResult
-    ) {
-        var graphStore = computationResult.graphStore();
-        var config = computationResult.config();
-
-        config.nodeLabelIdentifiers(graphStore).forEach(nodeLabel -> {
-            graphStore.addNodeProperty(nodeLabel, config.mutateProperty(), new LongTestProperties(__ -> 42L));
-        });
     }
 
     @Override

@@ -19,20 +19,12 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.MutatePropertyConfig;
-import org.neo4j.gds.core.huge.FilteredNodeProperties;
-import org.neo4j.gds.core.huge.NodeFilteredGraph;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class MutatePropertyProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -54,45 +46,10 @@ public abstract class MutatePropertyProc<
     }
 
     @Override
-    protected void updateGraphStore(
-        AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
-    ) {
-        Graph graph = computationResult.graph();
-
-        var nodeProperties = nodePropertyList(computationResult);
-
-        if (graph instanceof NodeFilteredGraph) {
-            nodeProperties = nodeProperties.stream().map(nodeProperty ->
-                ImmutableNodeProperty.of(
-                    nodeProperty.propertyKey(),
-                    new FilteredNodeProperties.OriginalToFilteredNodeProperties(
-                        nodeProperty.properties(),
-                        (NodeFilteredGraph) graph
-                    )
-                )
-            )
-                .collect(Collectors.toList());
-        }
-
-        MutatePropertyConfig mutatePropertyConfig = computationResult.config();
-
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            log.debug("Updating in-memory graph store");
-            GraphStore graphStore = computationResult.graphStore();
-            Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
-
-            nodeProperties.forEach(nodeProperty -> {
-                for (NodeLabel label : labelsToUpdate) {
-                    graphStore.addNodeProperty(
-                        label,
-                        nodeProperty.propertyKey(),
-                        nodeProperty.properties()
-                    );
-                }
-            });
-
-            resultBuilder.withNodePropertiesWritten(nodeProperties.size() * computationResult.graph().nodeCount());
-        }
+    public MutatePropertyComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> computationResultConsumer() {
+        return new MutatePropertyComputationResultConsumer<>(
+            (computationResult, resultProperty, allocationTracker) -> nodePropertyList(computationResult),
+            (computationResult, executionContext) -> resultBuilder(computationResult)
+        );
     }
 }

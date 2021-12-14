@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.HdrHistogram.ConcurrentDoubleHistogram;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
+import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -36,6 +37,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
@@ -85,47 +87,55 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     }
 
     @Override
-    protected void updateGraphStore(
-        AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig> computationResult
-    ) {
-        var concurrency = computationResult.config().concurrency();
-        var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .aggregation(Aggregation.SINGLE)
-            .nodes(computationResult.graph())
-            .orientation(Orientation.UNDIRECTED)
-            .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-            .concurrency(concurrency)
-            .executorService(Pools.DEFAULT)
-            .allocationTracker(allocationTracker())
-            .build();
+    public MutateComputationResultConsumer<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig, MutateResult> computationResultConsumer() {
+        return new MutateComputationResultConsumer<>(
+            (computationResult, executionContext) -> resultBuilder(computationResult)
+        ) {
+            @Override
+            protected void updateGraphStore(
+                AbstractResultBuilder<?> resultBuilder,
+                ComputationResult<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig> computationResult,
+                ExecutionContext executionContext
+            ) {
+                var concurrency = computationResult.config().concurrency();
+                var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+                    .aggregation(Aggregation.SINGLE)
+                    .nodes(computationResult.graph())
+                    .orientation(Orientation.UNDIRECTED)
+                    .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
+                    .concurrency(concurrency)
+                    .executorService(Pools.DEFAULT)
+                    .allocationTracker(allocationTracker())
+                    .build();
 
-        var resultWithHistogramBuilder = (MutateResult.Builder) resultBuilder;
-        ParallelUtil.parallelStreamConsume(
-            computationResult.result().stream(),
-            concurrency,
-            stream -> stream.forEach(predictedLink -> {
-                relationshipsBuilder.addFromInternal(
-                    predictedLink.sourceId(),
-                    predictedLink.targetId(),
-                    predictedLink.probability()
+                var resultWithHistogramBuilder = (MutateResult.Builder) resultBuilder;
+                ParallelUtil.parallelStreamConsume(
+                    computationResult.result().stream(),
+                    concurrency,
+                    stream -> stream.forEach(predictedLink -> {
+                        relationshipsBuilder.addFromInternal(
+                            predictedLink.sourceId(),
+                            predictedLink.targetId(),
+                            predictedLink.probability()
+                        );
+                        resultWithHistogramBuilder.recordHistogramValue(predictedLink.probability());
+                    })
                 );
-                resultWithHistogramBuilder.recordHistogramValue(predictedLink.probability());
-            })
-        );
 
-        var relationships = relationshipsBuilder.build();
+                var relationships = relationshipsBuilder.build();
 
-        var config = computationResult.config();
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            computationResult.graphStore().addRelationshipType(
-                RelationshipType.of(config.mutateRelationshipType()),
-                Optional.of(config.mutateProperty()),
-                Optional.of(NumberType.FLOATING_POINT),
-                relationships
-            );
-        }
-        resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+                var config = computationResult.config();
+                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
+                    computationResult.graphStore().addRelationshipType(
+                        RelationshipType.of(config.mutateRelationshipType()),
+                        Optional.of(config.mutateProperty()),
+                        Optional.of(NumberType.FLOATING_POINT),
+                        relationships
+                    );
+                }
+                resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+            }
+        };
     }
 
     @Override

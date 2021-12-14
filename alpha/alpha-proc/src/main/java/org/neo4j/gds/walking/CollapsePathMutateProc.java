@@ -21,6 +21,7 @@ package org.neo4j.gds.walking;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.ImmutableComputationResult;
+import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
@@ -31,6 +32,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.impl.walking.CollapsePath;
 import org.neo4j.gds.impl.walking.CollapsePathConfig;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
@@ -109,20 +111,26 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     }
 
     @Override
-    protected void updateGraphStore(
-        AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<CollapsePath, Relationships, CollapsePathConfig> computationResult
-    ) {
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            computationResult.graphStore().addRelationshipType(
-                RelationshipType.of(computationResult.config().mutateRelationshipType()),
-                Optional.empty(),
-                Optional.empty(),
-                computationResult.result()
-            );
-        }
+    public MutateComputationResultConsumer<CollapsePath, Relationships, CollapsePathConfig, MutateResult> computationResultConsumer() {
+        return new MutateComputationResultConsumer<>((computationResult, executionContext) -> resultBuilder(computationResult)) {
+            @Override
+            protected void updateGraphStore(
+                AbstractResultBuilder<?> resultBuilder,
+                ComputationResult<CollapsePath, Relationships, CollapsePathConfig> computationResult,
+                ExecutionContext executionContext
+            ) {
+                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
+                    computationResult.graphStore().addRelationshipType(
+                        RelationshipType.of(computationResult.config().mutateRelationshipType()),
+                        Optional.empty(),
+                        Optional.empty(),
+                        computationResult.result()
+                    );
+                }
 
-        resultBuilder.withRelationshipsWritten(computationResult.result().topology().elementCount());
+                resultBuilder.withRelationshipsWritten(computationResult.result().topology().elementCount());
+            }
+        };
     }
 
     @SuppressWarnings("unused")

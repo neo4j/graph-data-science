@@ -33,27 +33,6 @@ public abstract class MutateProc<
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
     protected Stream<PROC_RESULT> mutate(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
-        return runWithExceptionLogging("Graph mutation failed", () -> {
-            CONFIG config = computeResult.config();
-
-            AbstractResultBuilder<PROC_RESULT> builder = resultBuilder(computeResult)
-                .withCreateMillis(computeResult.createMillis())
-                .withComputeMillis(computeResult.computeMillis())
-                .withNodeCount(computeResult.graph().nodeCount())
-                .withConfig(config);
-
-            if (computeResult.isGraphEmpty()) {
-                return Stream.of(builder.build());
-            } else {
-                updateGraphStore(builder, computeResult);
-                computeResult.graph().releaseProperties();
-                return Stream.of(builder.build());
-            }
-        });
+        return computationResultConsumer().consume(computeResult, executionContext());
     }
-
-    protected abstract void updateGraphStore(
-        AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
-    );
 }
