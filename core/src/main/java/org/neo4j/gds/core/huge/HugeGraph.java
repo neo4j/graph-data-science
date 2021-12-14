@@ -88,7 +88,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  */
 public class HugeGraph implements CSRGraph {
 
-    public static final double NO_PROPERTY_VALUE = Double.NaN;
+    static final double NO_PROPERTY_VALUE = Double.NaN;
 
     protected final NodeMapping idMapping;
     protected final AllocationTracker allocationTracker;
@@ -102,7 +102,7 @@ public class HugeGraph implements CSRGraph {
 
     protected AdjacencyList adjacency;
 
-    protected final double defaultPropertyValue;
+    private final double defaultPropertyValue;
     protected @Nullable AdjacencyProperties properties;
 
     private AdjacencyCursor adjacencyCursorCache;
@@ -520,26 +520,6 @@ public class HugeGraph implements CSRGraph {
     @Override
     public boolean hasLabel(long nodeId, NodeLabel label) {
         return idMapping.hasLabel(nodeId, label);
-    }
-
-    public static class GetTargetConsumer implements RelationshipConsumer {
-        static final long TARGET_NOT_FOUND = -1L;
-
-        private long count;
-        public long target = TARGET_NOT_FOUND;
-
-        public GetTargetConsumer(long count) {
-            this.count = count;
-        }
-
-        @Override
-        public boolean accept(long s, long t) {
-            if (count-- == 0) {
-                target = t;
-                return false;
-            }
-            return true;
-        }
     }
 
     private static class ParallelRelationshipsDegreeCounter implements RelationshipConsumer {
