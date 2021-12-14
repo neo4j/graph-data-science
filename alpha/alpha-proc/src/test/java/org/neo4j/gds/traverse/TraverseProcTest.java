@@ -67,7 +67,7 @@ class TraverseProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(TraverseProc.class, GraphCreateProc.class);
+        registerProcedures(TraverseProcBFS.class, TraverseProcDFS.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
     }
 

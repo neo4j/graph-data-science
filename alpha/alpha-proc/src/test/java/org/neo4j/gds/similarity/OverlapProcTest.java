@@ -26,7 +26,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.impl.similarity.CategoricalInput;
 import org.neo4j.gds.impl.similarity.OverlapAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
-import org.neo4j.gds.similarity.overlap.OverlapProc;
+import org.neo4j.gds.similarity.overlap.OverlapStatsProc;
+import org.neo4j.gds.similarity.overlap.OverlapStreamProc;
+import org.neo4j.gds.similarity.overlap.OverlapWriteProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -104,7 +106,9 @@ class OverlapProcTest extends AlphaSimilarityProcTest<OverlapAlgorithm, Categori
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(OverlapProc.class);
+        registerProcedures(OverlapStatsProc.class);
+        registerProcedures(OverlapStreamProc.class);
+        registerProcedures(OverlapWriteProc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -387,7 +391,7 @@ class OverlapProcTest extends AlphaSimilarityProcTest<OverlapAlgorithm, Categori
     }
 
     @Override
-    Class<? extends AlphaSimilarityProc<OverlapAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
-        return OverlapProc.class;
+    Class<? extends AlphaSimilarityProc<OverlapAlgorithm, ? extends SimilarityConfig, ?>> getProcedureClazz() {
+        return OverlapStreamProc.class;
     }
 }

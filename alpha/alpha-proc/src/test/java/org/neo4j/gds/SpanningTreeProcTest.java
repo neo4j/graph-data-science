@@ -30,7 +30,8 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeRelationshipExporter;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.spanningtree.SpanningTreeProc;
+import org.neo4j.gds.spanningtree.SpanningTreeProcMax;
+import org.neo4j.gds.spanningtree.SpanningTreeProcMin;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -73,7 +74,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(SpanningTreeProc.class, GraphCreateProc.class);
+        registerProcedures(SpanningTreeProcMin.class, SpanningTreeProcMax.class, GraphCreateProc.class);
     }
 
     @Override
@@ -211,7 +212,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
     @Test
     void shouldTrackProgress() {
         loadGraph();
-        TestProcedureRunner.applyOnProcedure(db, SpanningTreeProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, SpanningTreeProcMin.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));

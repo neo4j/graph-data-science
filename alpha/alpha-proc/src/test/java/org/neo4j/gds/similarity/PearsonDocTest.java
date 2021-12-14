@@ -25,7 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.IsFiniteFunc;
-import org.neo4j.gds.similarity.pearson.PearsonProc;
+import org.neo4j.gds.similarity.pearson.PearsonStatsProc;
+import org.neo4j.gds.similarity.pearson.PearsonStreamProc;
+import org.neo4j.gds.similarity.pearson.PearsonWriteProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -74,7 +76,9 @@ class PearsonDocTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(PearsonProc.class);
+        registerProcedures(PearsonStatsProc.class);
+        registerProcedures(PearsonStreamProc.class);
+        registerProcedures(PearsonWriteProc.class);
         registerFunctions(AsNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
         registerAggregationFunctions(SimilaritiesFunc.class);
         runQuery(DB_CYPHER);

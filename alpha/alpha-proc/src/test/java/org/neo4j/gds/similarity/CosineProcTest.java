@@ -26,7 +26,9 @@ import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.impl.similarity.CosineAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.impl.similarity.WeightedInput;
-import org.neo4j.gds.similarity.cosine.CosineProc;
+import org.neo4j.gds.similarity.cosine.CosineStatsProc;
+import org.neo4j.gds.similarity.cosine.CosineStreamProc;
+import org.neo4j.gds.similarity.cosine.CosineWriteProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -120,7 +122,9 @@ class CosineProcTest extends AlphaSimilarityProcTest<CosineAlgorithm, WeightedIn
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(CosineProc.class);
+        registerProcedures(CosineStatsProc.class);
+        registerProcedures(CosineStreamProc.class);
+        registerProcedures(CosineWriteProc.class);
         registerFunctions(IsFiniteFunc.class);
         runQuery(DB_CYPHER);
     }
@@ -640,7 +644,7 @@ class CosineProcTest extends AlphaSimilarityProcTest<CosineAlgorithm, WeightedIn
     }
 
     @Override
-    Class<? extends AlphaSimilarityProc<CosineAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
-        return CosineProc.class;
+    Class<? extends AlphaSimilarityProc<CosineAlgorithm, ? extends SimilarityConfig, ?>> getProcedureClazz() {
+        return CosineStreamProc.class;
     }
 }

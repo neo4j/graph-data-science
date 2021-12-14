@@ -25,7 +25,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.spanningtree.KSpanningTreeProc;
-import org.neo4j.gds.spanningtree.SpanningTreeProc;
+import org.neo4j.gds.spanningtree.SpanningTreeProcMax;
+import org.neo4j.gds.spanningtree.SpanningTreeProcMin;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,7 +55,8 @@ class SpanningTreeDocTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
-            SpanningTreeProc.class,
+            SpanningTreeProcMin.class,
+            SpanningTreeProcMax.class,
             KSpanningTreeProc.class,
             GraphCreateProc.class
         );

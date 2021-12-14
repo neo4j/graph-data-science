@@ -25,7 +25,9 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.IsFiniteFunc;
-import org.neo4j.gds.similarity.cosine.CosineProc;
+import org.neo4j.gds.similarity.cosine.CosineStatsProc;
+import org.neo4j.gds.similarity.cosine.CosineStreamProc;
+import org.neo4j.gds.similarity.cosine.CosineWriteProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -42,7 +44,9 @@ class EmbeddingsAsInputTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(CosineProc.class);
+        registerProcedures(CosineStatsProc.class);
+        registerProcedures(CosineStreamProc.class);
+        registerProcedures(CosineWriteProc.class);
         registerFunctions(IsFiniteFunc.class);
         registerFunctions(AsNodeFunc.class);
 

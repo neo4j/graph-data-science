@@ -30,7 +30,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.spanningtree.KSpanningTreeMaxProc;
-import org.neo4j.gds.spanningtree.KSpanningTreeProc;
+import org.neo4j.gds.spanningtree.KSpanningTreeMinProc;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.HashMap;
@@ -64,7 +64,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(KSpanningTreeProc.class, GraphCreateProc.class);
+        registerProcedures(KSpanningTreeMinProc.class, KSpanningTreeMaxProc.class, GraphCreateProc.class);
         var createQuery = GdsCypher.call(GRAPH_NAME)
             .graphCreate()
             .withRelationshipProperty("w")

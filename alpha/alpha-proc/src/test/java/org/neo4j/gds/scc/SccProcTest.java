@@ -71,7 +71,7 @@ class SccProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(SccProc.class, GraphCreateProc.class);
+        registerProcedures(SccWriteProc.class, SccStreamProc.class, GraphCreateProc.class);
     }
 
     @Test

@@ -72,7 +72,6 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             Map<String, Object> resultRow = result.next();
             assertNotNull(resultRow);
             assertNotNull(resultRow.get("configuration"));
-            assertEquals(graphName, resultRow.get("graphName"));
             var modelInfo = (Map<String, Object>) resultRow.get("modelInfo");
             assertNotNull(modelInfo);
             assertEquals(modelName, modelInfo.get(MODEL_NAME_KEY));
@@ -134,7 +133,6 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             Map<String, Object> resultRow = result.next();
             assertNotNull(resultRow);
             assertNotNull(resultRow.get("configuration"));
-            assertEquals(graphName, resultRow.get("graphName"));
             Map<String, Object> modelInfo = (Map<String, Object>) resultRow.get("modelInfo");
             assertNotNull(modelInfo);
             assertEquals(modelName, modelInfo.get(MODEL_NAME_KEY));

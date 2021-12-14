@@ -25,7 +25,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc;
+import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingStreamProc;
+import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingWriteProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,7 +56,7 @@ class ShortestPathDeltaSteppingDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(ShortestPathDeltaSteppingProc.class, GraphCreateProc.class);
+        registerProcedures(ShortestPathDeltaSteppingWriteProc.class, ShortestPathDeltaSteppingStreamProc.class, GraphCreateProc.class);
         registerFunctions(AsNodeFunc.class);
 
         runQuery("CALL gds.graph.create(" +

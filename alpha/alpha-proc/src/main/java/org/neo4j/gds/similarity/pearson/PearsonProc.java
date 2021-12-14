@@ -26,7 +26,7 @@ import org.neo4j.gds.impl.similarity.PearsonConfig;
 import org.neo4j.gds.impl.similarity.PearsonConfigImpl;
 import org.neo4j.gds.similarity.AlphaSimilarityProc;
 
-abstract class PearsonProc<PROC_RESULT> extends AlphaSimilarityProc<PearsonAlgorithm, PearsonConfig, PROC_RESULT> {
+public abstract class PearsonProc<PROC_RESULT> extends AlphaSimilarityProc<PearsonAlgorithm, PearsonConfig, PROC_RESULT> {
 
     protected static final String DESCRIPTION =
         "Pearson-similarity is an algorithm for finding similar nodes " +

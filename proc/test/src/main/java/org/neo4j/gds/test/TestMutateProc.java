@@ -22,6 +22,8 @@ package org.neo4j.gds.test;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -48,6 +50,21 @@ public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgori
             configuration
         );
         return mutate(computationResult);
+    }
+
+    @Override
+    protected NodeProperties nodeProperties(ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computationResult) {
+        return new LongNodeProperties() {
+            @Override
+            public long longValue(long nodeId) {
+                return nodeId;
+            }
+
+            @Override
+            public long size() {
+                return 0;
+            }
+        };
     }
 
     @Override

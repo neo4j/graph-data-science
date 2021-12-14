@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public final class PearsonStreamProc<PROC_RESULT> extends PearsonProc<SimilarityResult> {
+public final class PearsonStreamProc extends PearsonProc<SimilarityResult> {
 
     @Procedure(name = "gds.alpha.similarity.pearson.stream", mode = READ)
     @Description(DESCRIPTION)

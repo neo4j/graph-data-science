@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.impl.walking.VirtualNode;
-import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc;
+import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingStreamProc;
 import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingWriteProc;
 import org.neo4j.gds.transaction.TransactionContext;
 
@@ -87,7 +87,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(ShortestPathDeltaSteppingProc.class, GraphCreateProc.class);
+        registerProcedures(ShortestPathDeltaSteppingStreamProc.class, ShortestPathDeltaSteppingWriteProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
     }
 

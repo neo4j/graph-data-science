@@ -27,6 +27,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.similarity.ann.ApproxNearestNeighborsStreamProc;
+import org.neo4j.gds.similarity.ann.ApproxNearestNeighborsWriteProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -69,6 +70,7 @@ public class ApproxNearestNeighborsDocTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(ApproxNearestNeighborsStreamProc.class);
+        registerProcedures(ApproxNearestNeighborsWriteProc.class);
         registerFunctions(AsNodeFunc.class);
         runQuery(DB_CYPHER);
     }

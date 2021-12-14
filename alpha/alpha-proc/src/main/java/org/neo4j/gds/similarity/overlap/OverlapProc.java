@@ -26,7 +26,7 @@ import org.neo4j.gds.impl.similarity.OverlapConfig;
 import org.neo4j.gds.impl.similarity.OverlapConfigImpl;
 import org.neo4j.gds.similarity.AlphaSimilarityProc;
 
-abstract class OverlapProc<PROC_RESULT> extends AlphaSimilarityProc<OverlapAlgorithm, OverlapConfig, PROC_RESULT> {
+public abstract class OverlapProc<PROC_RESULT> extends AlphaSimilarityProc<OverlapAlgorithm, OverlapConfig, PROC_RESULT> {
 
     protected static final String DESCRIPTION = "Overlap-similarity is an algorithm for finding similar nodes based on the overlap coefficient.";
 

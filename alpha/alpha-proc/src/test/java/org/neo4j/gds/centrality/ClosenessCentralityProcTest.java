@@ -94,7 +94,7 @@ class ClosenessCentralityProcTest extends BaseProcTest {
             .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
             .close();
 
-        registerProcedures(ClosenessCentralityProc.class, GraphCreateProc.class);
+        registerProcedures(ClosenessCentralityWriteProc.class, ClosenessCentralityStreamProc.class, GraphCreateProc.class);
     }
 
     @Test

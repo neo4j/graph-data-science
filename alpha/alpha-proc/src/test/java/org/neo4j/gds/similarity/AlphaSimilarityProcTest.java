@@ -65,9 +65,9 @@ public abstract class AlphaSimilarityProcTest<
     INPUT extends SimilarityInput
     > extends BaseProcTest implements GraphCreateConfigSupport {
 
-    abstract Class<? extends AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig>> getProcedureClazz();
+    abstract Class<? extends AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig, ?>> getProcedureClazz();
 
-    void applyOnProcedure(Consumer<AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig>> func) {
+    void applyOnProcedure(Consumer<AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig, ?>> func) {
         try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(db)) {
             var proc = TestProcedureRunner.instantiateProcedure(
                 db,
@@ -88,7 +88,7 @@ public abstract class AlphaSimilarityProcTest<
         return name;
     }
 
-    private Stream<Method> getProcMethods(AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig> proc) {
+    private Stream<Method> getProcMethods(AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig, ?> proc) {
         return Arrays.stream(proc.getClass().getDeclaredMethods())
             .filter(method ->
                 method.getDeclaredAnnotation(Procedure.class) != null &&

@@ -53,7 +53,7 @@ public class ClosenessCentralityDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(ClosenessCentralityProc.class, GraphCreateProc.class);
+        registerProcedures(ClosenessCentralityWriteProc.class, ClosenessCentralityStreamProc.class, GraphCreateProc.class);
         registerFunctions(AsNodeFunc.class);
 
         var createQuery = "CALL gds.graph.create('graph', 'Node', 'LINK')";

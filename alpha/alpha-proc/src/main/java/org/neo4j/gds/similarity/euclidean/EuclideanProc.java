@@ -26,7 +26,7 @@ import org.neo4j.gds.impl.similarity.EuclideanConfig;
 import org.neo4j.gds.impl.similarity.EuclideanConfigImpl;
 import org.neo4j.gds.similarity.AlphaSimilarityProc;
 
-abstract class EuclideanProc<PROC_RESULT> extends AlphaSimilarityProc<EuclideanAlgorithm, EuclideanConfig, PROC_RESULT> {
+public abstract class EuclideanProc<PROC_RESULT> extends AlphaSimilarityProc<EuclideanAlgorithm, EuclideanConfig, PROC_RESULT> {
 
     protected static final String DESCRIPTION = "Euclidean-similarity is an algorithm for finding similar nodes based on the euclidean distance.";
 

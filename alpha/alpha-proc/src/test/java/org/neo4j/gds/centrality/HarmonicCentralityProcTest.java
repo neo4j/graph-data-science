@@ -56,7 +56,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(HarmonicCentralityProc.class, GraphCreateProc.class);
+        registerProcedures(HarmonicCentralityWriteProc.class, HarmonicCentralityStreamProc.class, GraphCreateProc.class);
     }
 
     @Test

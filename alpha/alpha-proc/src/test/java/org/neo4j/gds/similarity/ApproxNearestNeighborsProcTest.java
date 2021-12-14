@@ -29,6 +29,7 @@ import org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.impl.similarity.SimilarityInput;
 import org.neo4j.gds.similarity.ann.ApproxNearestNeighborsStreamProc;
+import org.neo4j.gds.similarity.ann.ApproxNearestNeighborsWriteProc;
 
 import java.util.Map;
 
@@ -76,6 +77,7 @@ class ApproxNearestNeighborsProcTest extends AlphaSimilarityProcTest<ApproxNeare
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(ApproxNearestNeighborsStreamProc.class);
+        registerProcedures(ApproxNearestNeighborsWriteProc.class);
         registerFunctions(AsNodeFunc.class);
         runQuery(DB_CYPHER);
     }
@@ -100,7 +102,7 @@ class ApproxNearestNeighborsProcTest extends AlphaSimilarityProcTest<ApproxNeare
 
         Map<String, Object> config = map(
             "config", map(
-            "algorithm", "jaccard", "similarityCutoff", 0.1, "randomSeed", 42L)
+                "algorithm", "jaccard", "similarityCutoff", 0.1, "randomSeed", 42L)
         );
 
         String query =
@@ -194,7 +196,7 @@ class ApproxNearestNeighborsProcTest extends AlphaSimilarityProcTest<ApproxNeare
     }
 
     @Override
-    Class<? extends AlphaSimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ? extends SimilarityConfig>> getProcedureClazz() {
+    Class<? extends AlphaSimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ? extends SimilarityConfig, ?>> getProcedureClazz() {
         return ApproxNearestNeighborsStreamProc.class;
     }
 }

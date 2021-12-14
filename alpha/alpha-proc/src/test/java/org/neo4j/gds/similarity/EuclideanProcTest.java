@@ -24,7 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.impl.similarity.EuclideanAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.impl.similarity.WeightedInput;
-import org.neo4j.gds.similarity.euclidean.EuclideanProc;
+import org.neo4j.gds.similarity.euclidean.EuclideanStatsProc;
+import org.neo4j.gds.similarity.euclidean.EuclideanStreamProc;
+import org.neo4j.gds.similarity.euclidean.EuclideanWriteProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -105,7 +107,9 @@ class EuclideanProcTest extends AlphaSimilarityProcTest<EuclideanAlgorithm, Weig
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(EuclideanProc.class);
+        registerProcedures(EuclideanStatsProc.class);
+        registerProcedures(EuclideanStreamProc.class);
+        registerProcedures(EuclideanWriteProc.class);
         runQuery(buildDatabaseQuery());
     }
 
@@ -608,7 +612,7 @@ class EuclideanProcTest extends AlphaSimilarityProcTest<EuclideanAlgorithm, Weig
     }
 
     @Override
-    Class<? extends AlphaSimilarityProc<EuclideanAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
-        return EuclideanProc.class;
+    Class<? extends AlphaSimilarityProc<EuclideanAlgorithm, ? extends SimilarityConfig, ?>> getProcedureClazz() {
+        return EuclideanStreamProc.class;
     }
 }

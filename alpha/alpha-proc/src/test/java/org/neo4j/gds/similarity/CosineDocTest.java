@@ -26,7 +26,9 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.IsFiniteFunc;
-import org.neo4j.gds.similarity.cosine.CosineProc;
+import org.neo4j.gds.similarity.cosine.CosineStatsProc;
+import org.neo4j.gds.similarity.cosine.CosineStreamProc;
+import org.neo4j.gds.similarity.cosine.CosineWriteProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,7 +73,7 @@ class CosineDocTest extends BaseProcTest {
                              "CREATE (karin)-[:LIKES {score: 10}]->(portuguese)";
 
         runQuery(createGraph);
-        registerProcedures(CosineProc.class, GraphCreateProc.class);
+        registerProcedures(CosineStatsProc.class, CosineStreamProc.class, CosineWriteProc.class, GraphCreateProc.class);
         registerFunctions(AsNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
     }
 

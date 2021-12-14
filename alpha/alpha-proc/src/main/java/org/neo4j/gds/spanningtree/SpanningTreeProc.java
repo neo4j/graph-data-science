@@ -38,7 +38,7 @@ import org.neo4j.procedure.Context;
 import java.util.stream.Stream;
 
 // TODO: Always undirected
-abstract class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningTreeConfig, Prim.Result> {
+public abstract class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningTreeConfig, Prim.Result> {
 
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;

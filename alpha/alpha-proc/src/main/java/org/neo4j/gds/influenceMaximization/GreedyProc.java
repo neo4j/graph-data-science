@@ -28,8 +28,6 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.influenceMaximization.Greedy;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.pipeline.ExecutionContext;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.InfluenceMaximizationResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

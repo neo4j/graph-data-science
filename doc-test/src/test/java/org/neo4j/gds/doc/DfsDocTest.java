@@ -21,7 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.traverse.TraverseProc;
+import org.neo4j.gds.traverse.TraverseProcDFS;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ class DfsDocTest extends DocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(TraverseProc.class, GraphCreateProc.class);
+        return List.of(TraverseProcDFS.class, GraphCreateProc.class);
     }
 
     @Override

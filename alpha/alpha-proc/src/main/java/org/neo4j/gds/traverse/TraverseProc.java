@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.InputNodeValidator.validateEndNode;
 import static org.neo4j.gds.utils.InputNodeValidator.validateStartNode;
 
-abstract class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig, WalkResult> {
+public abstract class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig, WalkResult> {
 
     @Override
     public GraphAlgorithmFactory<Traverse, TraverseConfig> algorithmFactory() {

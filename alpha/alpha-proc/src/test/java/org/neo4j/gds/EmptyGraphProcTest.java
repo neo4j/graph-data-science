@@ -23,15 +23,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.centrality.ClosenessCentralityProc;
-import org.neo4j.gds.centrality.HarmonicCentralityProc;
+import org.neo4j.gds.centrality.ClosenessCentralityStreamProc;
+import org.neo4j.gds.centrality.ClosenessCentralityWriteProc;
+import org.neo4j.gds.centrality.HarmonicCentralityStreamProc;
+import org.neo4j.gds.centrality.HarmonicCentralityWriteProc;
 import org.neo4j.gds.influenceMaximization.CELFProc;
 import org.neo4j.gds.influenceMaximization.GreedyProc;
-import org.neo4j.gds.scc.SccProc;
+import org.neo4j.gds.scc.SccStreamProc;
+import org.neo4j.gds.scc.SccWriteProc;
 import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc;
 import org.neo4j.gds.shortestpaths.AllShortestPathsProc;
-import org.neo4j.gds.spanningtree.KSpanningTreeProc;
-import org.neo4j.gds.spanningtree.SpanningTreeProc;
+import org.neo4j.gds.spanningtree.KSpanningTreeMaxProc;
+import org.neo4j.gds.spanningtree.KSpanningTreeMinProc;
+import org.neo4j.gds.spanningtree.SpanningTreeProcMax;
+import org.neo4j.gds.spanningtree.SpanningTreeProcMin;
 import org.neo4j.gds.triangle.TriangleProc;
 import org.neo4j.graphdb.Result;
 
@@ -46,12 +51,17 @@ class EmptyGraphProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             AllShortestPathsProc.class,
-            ClosenessCentralityProc.class,
-            HarmonicCentralityProc.class,
-            KSpanningTreeProc.class,
-            SpanningTreeProc.class,
+            ClosenessCentralityStreamProc.class,
+            ClosenessCentralityWriteProc.class,
+            HarmonicCentralityStreamProc.class,
+            HarmonicCentralityWriteProc.class,
+            KSpanningTreeMaxProc.class,
+            KSpanningTreeMinProc.class,
+            SpanningTreeProcMax.class,
+            SpanningTreeProcMin.class,
             ShortestPathDeltaSteppingProc.class,
-            SccProc.class,
+            SccStreamProc.class,
+            SccWriteProc.class,
             TriangleProc.class,
             GreedyProc.class,
             CELFProc.class,
