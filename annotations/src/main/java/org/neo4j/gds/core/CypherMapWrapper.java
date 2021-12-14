@@ -193,28 +193,6 @@ public final class CypherMapWrapper {
         ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, config.keySet());
     }
 
-    @SuppressWarnings("unchecked")
-    @Contract("_, !null -> !null")
-    @Deprecated
-    public <V> @Nullable V get(String key, @Nullable V defaultValue) {
-        Object value = config.get(key);
-        if (null == value) {
-            return defaultValue;
-        }
-        return (V) value;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Contract("_, _, !null -> !null")
-    @Deprecated
-    public <V> @Nullable V get(String newKey, String oldKey, @Nullable V defaultValue) {
-        Object value = config.get(newKey);
-        if (null == value) {
-            value = config.get(oldKey);
-        }
-        return null == value ? defaultValue : (V) value;
-    }
-
     public static <T> T failOnNull(String key, T value) {
         if (value == null) {
             throw MissingParameterExceptions.missingValueFor(key, Collections.emptySet());
