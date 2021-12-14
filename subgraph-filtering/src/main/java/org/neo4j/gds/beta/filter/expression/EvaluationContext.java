@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.ObjectIntScatterMap;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class EvaluationContext {
 
-    abstract double getProperty(String propertyKey);
+    abstract double getProperty(String propertyKey, ValueType propertyType);
 
     abstract boolean hasLabelsOrTypes(List<String> labelsOrTypes);
 
@@ -39,7 +40,6 @@ public abstract class EvaluationContext {
 
         private final GraphStore graphStore;
         private final AtomicReference<NodeLabel> labelForPropertyReference;
-
         private long nodeId;
 
         public NodeEvaluationContext(GraphStore graphStore) {
@@ -48,9 +48,8 @@ public abstract class EvaluationContext {
         }
 
         @Override
-        double getProperty(String propertyKey) {
+        double getProperty(String propertyKey, ValueType propertyType) {
             labelForPropertyReference.set(null);
-
             graphStore.nodes().forEachNodeLabel(nodeId, (nodeLabel -> {
                 if (graphStore.hasNodeProperty(nodeLabel, propertyKey)) {
                     labelForPropertyReference.set(nodeLabel);
@@ -63,6 +62,11 @@ public abstract class EvaluationContext {
             if (labelForProperty == null) {
                 return DefaultValue.DOUBLE_DEFAULT_FALLBACK;
             } else {
+                if (propertyType == ValueType.LONG) {
+                    return Double.longBitsToDouble(graphStore
+                        .nodePropertyValues(labelForProperty, propertyKey)
+                        .longValue(nodeId));
+                }
                 return graphStore.nodePropertyValues(labelForProperty, propertyKey).doubleValue(nodeId);
             }
         }
@@ -95,7 +99,7 @@ public abstract class EvaluationContext {
         }
 
         @Override
-        double getProperty(String propertyKey) {
+        double getProperty(String propertyKey, ValueType propertyType) {
             return properties[propertyIndices.get(propertyKey)];
         }
 

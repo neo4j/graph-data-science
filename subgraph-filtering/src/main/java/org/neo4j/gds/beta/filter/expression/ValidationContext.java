@@ -23,16 +23,20 @@ import org.immutables.value.Value;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @ValueClass
 public interface ValidationContext {
     Context context();
-    Set<String> availableProperties();
+
     Set<String> availableLabelsOrTypes();
+
+    Map<String, ValueType> availableProperties();
 
     @Value.Default
     default List<SemanticErrors.SemanticError> errors() {
@@ -56,20 +60,50 @@ public interface ValidationContext {
     }
 
     static ValidationContext forNodes(GraphStore graphStore) {
+        var propertiesAndTypes = graphStore
+            .schema()
+            .nodeSchema()
+            .unionProperties()
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> e.getValue().valueType()
+            ));
+
         return ImmutableValidationContext
             .builder()
             .context(Context.NODE)
-            .addAllAvailableLabelsOrTypes(graphStore.nodeLabels().stream().map(ElementIdentifier::name).collect(Collectors.toSet()))
-            .addAllAvailableProperties(graphStore.schema().nodeSchema().unionProperties().keySet())
+            .addAllAvailableLabelsOrTypes(graphStore
+                .nodeLabels()
+                .stream()
+                .map(ElementIdentifier::name)
+                .collect(Collectors.toSet()))
+            .putAllAvailableProperties(propertiesAndTypes)
             .build();
     }
 
     static ValidationContext forRelationships(GraphStore graphStore) {
+        var propertiesAndTypes = graphStore
+            .schema()
+            .relationshipSchema()
+            .unionProperties()
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> e.getValue().valueType()
+            ));
+
         return ImmutableValidationContext
             .builder()
             .context(Context.RELATIONSHIP)
-            .addAllAvailableLabelsOrTypes(graphStore.relationshipTypes().stream().map(ElementIdentifier::name).collect(Collectors.toSet()))
-            .addAllAvailableProperties(graphStore.schema().relationshipSchema().unionProperties().keySet())
+            .addAllAvailableLabelsOrTypes(graphStore
+                .relationshipTypes()
+                .stream()
+                .map(ElementIdentifier::name)
+                .collect(Collectors.toSet()))
+            .putAllAvailableProperties(propertiesAndTypes)
             .build();
     }
 

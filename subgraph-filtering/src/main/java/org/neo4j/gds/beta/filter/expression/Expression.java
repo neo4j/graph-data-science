@@ -21,6 +21,8 @@ package org.neo4j.gds.beta.filter.expression;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Set;
@@ -37,9 +39,18 @@ public interface Expression {
     @Value.Derived
     double evaluate(EvaluationContext context);
 
+    default String prettyString() {
+        return toString();
+    }
+
     @Value.Derived
     default ValidationContext validate(ValidationContext context) {
         return context;
+    }
+
+    @Value.Default
+    default ValueType valueType() {
+        return ValueType.DOUBLE;
     }
 
     interface LeafExpression extends Expression {
@@ -74,6 +85,11 @@ public interface Expression {
 
                 return context;
             }
+
+            @Override
+            default String prettyString() {
+                return name();
+            }
         }
 
     }
@@ -96,14 +112,14 @@ public interface Expression {
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
-                return context.getProperty(propertyKey());
+                return context.getProperty(propertyKey(), valueType());
             }
 
             @Override
             default ValidationContext validate(ValidationContext context) {
                 context = in().validate(context);
 
-                Set<String> availablePropertyKeys = context.availableProperties();
+                Set<String> availablePropertyKeys = context.availableProperties().keySet();
 
                 if (!availablePropertyKeys.contains(propertyKey())) {
                     return context.withError(SemanticErrors.SemanticError.of(prettySuggestions(
@@ -115,8 +131,22 @@ public interface Expression {
                         availablePropertyKeys
                     )));
                 }
-
+                var propertyType = context.availableProperties().get(propertyKey());
+                if (propertyType != ValueType.LONG && propertyType != ValueType.DOUBLE) {
+                    return context.withError(SemanticErrors.SemanticError.of(
+                        formatWithLocale(
+                            "Unsupported property type `%s` for expression `%s`. Supported types %s",
+                            propertyType.name(),
+                            prettyString(),
+                            StringJoining.join(List.of(ValueType.LONG.name(), ValueType.DOUBLE.name()))
+                        )));
+                }
                 return context;
+            }
+
+            @Override
+            default String prettyString() {
+                return in().prettyString() + "." + propertyKey();
             }
         }
 
@@ -184,7 +214,6 @@ public interface Expression {
 
         @ValueClass
         interface And extends BinaryExpression {
-
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
@@ -192,6 +221,7 @@ public interface Expression {
                     ? TRUE
                     : FALSE;
             }
+
         }
 
         @ValueClass
@@ -204,6 +234,7 @@ public interface Expression {
                     ? TRUE
                     : FALSE;
             }
+
         }
 
         @ValueClass
@@ -216,107 +247,209 @@ public interface Expression {
                     ? TRUE
                     : FALSE;
             }
+
         }
 
-        @ValueClass
-        interface Equal extends BinaryExpression {
+        interface BinaryArithmeticExpression extends BinaryExpression {
 
-            @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
+                // It is sufficient to check one of the input types
+                // as validation made sure that the types are equal.
+                if (lhs().valueType() == ValueType.LONG) {
+                    return evaluateLong(Double.doubleToRawLongBits(lhsValue), Double.doubleToRawLongBits(rhsValue));
+                }
+
+                return evaluateDouble(lhsValue, rhsValue);
+
+            }
+
+            double evaluateLong(long lhsValue, long rhsValue);
+
+            double evaluateDouble(double lhsValue, double rhsValue);
+
+            @Override
+            default ValidationContext validate(ValidationContext context) {
+                context = lhs().validate(context);
+                context = rhs().validate(context);
+
+                var leftType = lhs().valueType();
+                var rightType = rhs().valueType();
+
+                // If one of the types is UNKNOWN, the corresponding property does not exist
+                // in the graph store, and we already reported this as an error when parsing
+                // the property expression. There is no need to add additional info.
+                if (leftType != rightType && leftType != ValueType.UNKNOWN && rightType != ValueType.UNKNOWN) {
+                    return context.withError(SemanticErrors.SemanticError.of(
+                        formatWithLocale(
+                            "Incompatible types `%s` and `%s` in binary expression `%s`",
+                            leftType,
+                            rightType,
+                            prettyString()
+                        )));
+                }
+
+                return context;
+            }
+        }
+
+        @ValueClass
+        interface Equal extends BinaryArithmeticExpression {
+
+            @Override
+            default double evaluateLong(long lhsValue, long rhsValue) {
+                return lhsValue == rhsValue ? TRUE : FALSE;
+            }
+
+            @Override
+            default double evaluateDouble(double lhsValue, double rhsValue) {
                 return Math.abs(lhsValue - rhsValue) < EPSILON ? TRUE : FALSE;
             }
+
+            @Override
+            default String prettyString() {
+                return lhs().prettyString() + " = " + rhs().prettyString();
+            }
         }
 
         @ValueClass
-        interface NotEqual extends BinaryExpression {
+        interface NotEqual extends BinaryArithmeticExpression {
 
-            @Value.Derived
             @Override
-            default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context);
-                var rhsValue = rhs().evaluate(context);
+            default double evaluateLong(long lhsValue, long rhsValue) {
+                return lhsValue != rhsValue ? TRUE : FALSE;
+            }
 
+            @Override
+            default double evaluateDouble(double lhsValue, double rhsValue) {
                 return Math.abs(lhsValue - rhsValue) > EPSILON ? TRUE : FALSE;
             }
+
+            @Override
+            default String prettyString() {
+                return lhs().prettyString() + " <> " + rhs().prettyString();
+            }
         }
 
         @ValueClass
-        interface GreaterThan extends BinaryExpression {
-            @Value.Derived
-            @Override
-            default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context);
-                var rhsValue = rhs().evaluate(context);
+        interface GreaterThan extends BinaryArithmeticExpression {
 
+            @Override
+            default double evaluateLong(long lhsValue, long rhsValue) {
+                return lhsValue > rhsValue ? TRUE : FALSE;
+            }
+
+            @Override
+            default double evaluateDouble(double lhsValue, double rhsValue) {
                 return (lhsValue - rhsValue) > EPSILON ? TRUE : FALSE;
             }
+
+            @Override
+            default String prettyString() {
+                return lhs().prettyString() + " > " + rhs().prettyString();
+            }
         }
 
         @ValueClass
-        interface GreaterThanOrEquals extends BinaryExpression {
-            @Value.Derived
-            @Override
-            default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context);
-                var rhsValue = rhs().evaluate(context);
+        interface GreaterThanOrEquals extends BinaryArithmeticExpression {
 
+            @Override
+            default double evaluateLong(long lhsValue, long rhsValue) {
+                return lhsValue >= rhsValue ? TRUE : FALSE;
+            }
+
+            @Override
+            default double evaluateDouble(double lhsValue, double rhsValue) {
                 return lhsValue > rhsValue || Math.abs(lhsValue - rhsValue) < EPSILON ? TRUE : FALSE;
             }
-        }
 
-        @ValueClass
-        interface LessThan extends BinaryExpression {
-
-            @Value.Derived
             @Override
-            default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context);
-                var rhsValue = rhs().evaluate(context);
-
-                return (rhsValue - lhsValue) > EPSILON ? TRUE : FALSE;
+            default String prettyString() {
+                return lhs().prettyString() + " >= " + rhs().prettyString();
             }
         }
 
         @ValueClass
-        interface LessThanOrEquals extends BinaryExpression {
+        interface LessThan extends BinaryArithmeticExpression {
 
             @Value.Derived
             @Override
-            default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context);
-                var rhsValue = rhs().evaluate(context);
+            default double evaluateLong(long lhsValue, long rhsValue) {
+                return lhsValue < rhsValue ? TRUE : FALSE;
+            }
 
+            @Value.Derived
+            @Override
+            default double evaluateDouble(double lhsValue, double rhsValue) {
+                return (rhsValue - lhsValue) > EPSILON ? TRUE : FALSE;
+            }
+
+            @Override
+            default String prettyString() {
+                return lhs().prettyString() + " < " + rhs().prettyString();
+            }
+        }
+
+        @ValueClass
+        interface LessThanOrEquals extends BinaryArithmeticExpression {
+
+            @Override
+            default double evaluateLong(long lhsValue, long rhsValue) {
+                return lhsValue <= rhsValue ? TRUE : FALSE;
+            }
+
+            @Override
+            default double evaluateDouble(double lhsValue, double rhsValue) {
                 return lhsValue < rhsValue || (rhsValue - lhsValue) > -EPSILON ? TRUE : FALSE;
+            }
+
+            @Override
+            default String prettyString() {
+                return lhs().prettyString() + " <= " + rhs().prettyString();
             }
         }
     }
 
     interface Literal extends Expression {
-
         @ValueClass
         interface LongLiteral extends Literal {
             long value();
 
+            @Override
+            default ValueType valueType() {
+                return ValueType.LONG;
+            }
+
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
-                return ((Long) value()).doubleValue();
+                return Double.longBitsToDouble(value());
             }
+
+            @Override
+            default String prettyString() {return Long.toString(value());}
         }
 
         @ValueClass
         interface DoubleLiteral extends Literal {
             double value();
 
+            @Override
+            default ValueType valueType() {
+                return ValueType.DOUBLE;
+            }
+
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
                 return value();
             }
+
+            default String prettyString() {return Double.toString(value());}
+
         }
 
         @ValueClass

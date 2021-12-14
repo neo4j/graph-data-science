@@ -19,15 +19,22 @@
  */
 package org.neo4j.gds.beta.filter.expression;
 
-
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.opencypher.v9_0.ast.factory.ASTFactory;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-class GdsASTFactory extends ASTFactoryAdapter {
+class GdsAstFactory extends AstFactoryAdapter {
 
     private static final String LONG_MIN_VALUE_DECIMAL_STRING = Long.toString(Long.MIN_VALUE).substring(1);
+
+    private final Map<String, ValueType> properties;
+
+    GdsAstFactory(Map<String, ValueType> properties) {
+        this.properties = properties;
+    }
 
     @Override
     public Expression.LeafExpression.Variable newVariable(InputPosition p, String name) {
@@ -36,18 +43,17 @@ class GdsASTFactory extends ASTFactoryAdapter {
 
     @Override
     public Expression.Literal.DoubleLiteral newDouble(InputPosition p, String image) {
-        return ImmutableDoubleLiteral.of(Double.parseDouble(image));
+        return ImmutableDoubleLiteral.builder().value(Double.parseDouble(image)).build();
     }
 
     @Override
     public Expression.Literal.LongLiteral newDecimalInteger(InputPosition p, String image, boolean negated) {
         try {
             long value = Long.parseLong(image);
-
-            return ImmutableLongLiteral.of(negated ? -value : value);
+            return ImmutableLongLiteral.builder().value(negated ? -value : value).build();
         } catch (NumberFormatException e) {
             if (negated && LONG_MIN_VALUE_DECIMAL_STRING.equals(image)) {
-                return ImmutableLongLiteral.of(Long.MIN_VALUE);
+                return ImmutableLongLiteral.builder().value(Long.MIN_VALUE).build();
             } else {
                 throw e;
             }
@@ -67,7 +73,12 @@ class GdsASTFactory extends ASTFactoryAdapter {
     @Override
     public Expression hasLabelsOrTypes(Expression subject, List<ASTFactory.StringPos<InputPosition>> labels) {
         var labelStrings = labels.stream().map(l -> l.string).collect(Collectors.toList());
-        return ImmutableHasLabelsOrTypes.of(subject, labelStrings);
+
+        return ImmutableHasLabelsOrTypes
+            .builder()
+            .in(subject)
+            .addAllLabelsOrTypes(labelStrings)
+            .build();
     }
 
     @Override
@@ -75,62 +86,65 @@ class GdsASTFactory extends ASTFactoryAdapter {
         Expression subject,
         ASTFactory.StringPos<InputPosition> propertyKeyName
     ) {
-        return ImmutableProperty.of(subject, propertyKeyName.string);
+        var propertyKey = propertyKeyName.string;
+        var propertyType = properties.getOrDefault(propertyKey, ValueType.UNKNOWN);
+
+        return ImmutableProperty.builder().in(subject).propertyKey(propertyKey).valueType(propertyType).build();
     }
 
     @Override
     public Expression or(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableOr.of(lhs, rhs);
+        return ImmutableOr.builder().lhs(lhs).rhs(rhs).build();
     }
 
     @Override
     public Expression xor(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableXor.of(lhs, rhs);
+        return ImmutableXor.builder().lhs(lhs).rhs(rhs).build();
     }
 
     @Override
     public Expression and(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableAnd.of(lhs, rhs);
+        return ImmutableAnd.builder().lhs(lhs).rhs(rhs).build();
     }
 
     @Override
     public Expression not(Expression e) {
-        return ImmutableNot.of(e);
+        return ImmutableNot.builder().in(e).build();
     }
 
     @Override
     public Expression eq(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableEqual.of(lhs, rhs);
+        return ImmutableEqual.builder().lhs(lhs).rhs(rhs).build();
     }
 
     @Override
     public Expression neq(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableNotEqual.of(lhs, rhs);
+        return ImmutableNotEqual.builder().lhs(lhs).rhs(rhs).build();
     }
 
     @Override
     public Expression neq2(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableNotEqual.of(lhs, rhs);
+        return ImmutableNotEqual.builder().lhs(lhs).rhs(rhs).build();
     }
 
     @Override
     public Expression lte(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableLessThanOrEquals.of(lhs, rhs);
+        return ImmutableLessThanOrEquals.builder().lhs(lhs).rhs(rhs).build();
     }
 
     @Override
     public Expression gte(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableGreaterThanOrEquals.of(lhs, rhs);
+        return ImmutableGreaterThanOrEquals.builder().lhs(lhs).rhs(rhs).build();
     }
 
     @Override
     public Expression lt(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableLessThan.of(lhs, rhs);
+        return ImmutableLessThan.builder().lhs(lhs).rhs(rhs).build();
     }
 
     @Override
     public Expression gt(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableGreaterThan.of(lhs, rhs);
+        return ImmutableGreaterThan.builder().lhs(lhs).rhs(rhs).build();
     }
 
     @Override
