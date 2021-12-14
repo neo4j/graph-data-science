@@ -163,11 +163,6 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public long getTarget(long nodeId, long index) {
-        return graph.getTarget(nodeId, index);
-    }
-
-    @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
         graph.forEachRelationship(nodeId, consumer);
     }

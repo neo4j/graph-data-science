@@ -243,24 +243,6 @@ public final class UnionGraph implements CSRGraph {
         return graphs.stream().anyMatch(g -> g.exists(sourceNodeId, targetNodeId));
     }
 
-    /*
-     * O(n) !
-     */
-    @Override
-    public long getTarget(long sourceNodeId, long index) {
-        var currentIndex = 0;
-
-        for (Graph graph : graphs) {
-            var degree = graph.degree(sourceNodeId);
-            if (currentIndex + degree > index) {
-                return graph.getTarget(sourceNodeId, index - currentIndex);
-            }
-            currentIndex += degree;
-        }
-
-        return HugeGraph.GetTargetConsumer.TARGET_NOT_FOUND;
-    }
-
     @Override
     public void canRelease(boolean canRelease) {
         for (Graph graph : graphs) {

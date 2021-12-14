@@ -183,11 +183,6 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public long getTarget(long nodeId, long index) {
-        throw new NullGraphStore.NullGraphException();
-    }
-
-    @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {}
 
     @Override
