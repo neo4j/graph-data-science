@@ -86,13 +86,13 @@ class MutatePropertyComputationResultConsumerTest {
         var computationResult = getComputationResult(
             graphStore,
             graphStore.getUnion(),
-            ImmutableTestMutateConfig.builder().mutateProperty("mutated").build()
+            ImmutableTestMutateConfig.builder().mutateProperty("mutateProperty").build()
         );
 
         mutateResultConsumer.consume(computationResult, executionContext);
 
-        assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "mutated")).isTrue();
-        var mutatedNodeProperty = graphStore.nodeProperty("mutated");
+        assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "mutateProperty")).isTrue();
+        var mutatedNodeProperty = graphStore.nodeProperty("mutateProperty");
 
         assertThat(mutatedNodeProperty.propertyState()).isEqualTo(PropertyState.TRANSIENT);
 
@@ -100,7 +100,6 @@ class MutatePropertyComputationResultConsumerTest {
         assertThat(mutatedNodePropertyValues.longValue(0)).isEqualTo(0);
         assertThat(mutatedNodePropertyValues.longValue(1)).isEqualTo(1);
     }
-
 
     @Test
     void testGraphMutationOnFilteredGraph() {
@@ -118,7 +117,7 @@ class MutatePropertyComputationResultConsumerTest {
             Optional.empty()
         );
 
-        String mutateProperty = "mutated";
+        String mutateProperty = "mutateProperty";
 
         var computationResult = getComputationResult(
             graphStore,
