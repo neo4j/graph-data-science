@@ -66,12 +66,12 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     }
 
     @Override
-    public ValidationConfiguration<BetweennessCentralityStatsConfig> getValidationConfig() {
+    public ValidationConfiguration<BetweennessCentralityStatsConfig> validationConfig() {
         return BetweennessCentralityProc.getValidationConfig();
     }
 
     @Override
-    protected GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityStatsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<BetweennessCentrality, BetweennessCentralityStatsConfig> algorithmFactory() {
         return BetweennessCentralityProc.algorithmFactory();
     }
 

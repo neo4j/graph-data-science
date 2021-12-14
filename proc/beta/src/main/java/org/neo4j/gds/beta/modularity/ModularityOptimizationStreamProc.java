@@ -55,7 +55,7 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
     }
 
     @Override
-    protected GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationStreamConfig> algorithmFactory() {
         return new ModularityOptimizationFactory<>();
     }
 

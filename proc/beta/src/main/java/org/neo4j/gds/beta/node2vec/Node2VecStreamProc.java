@@ -72,7 +72,7 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Flo
     }
 
     @Override
-    protected GraphAlgorithmFactory<Node2Vec, Node2VecStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Node2Vec, Node2VecStreamConfig> algorithmFactory() {
         return new Node2VecAlgorithmFactory<>();
     }
 

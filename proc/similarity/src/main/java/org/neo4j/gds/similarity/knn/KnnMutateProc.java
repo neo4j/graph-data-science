@@ -80,7 +80,7 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, KnnMutate
     }
 
     @Override
-    protected GraphAlgorithmFactory<Knn, KnnMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Knn, KnnMutateConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 

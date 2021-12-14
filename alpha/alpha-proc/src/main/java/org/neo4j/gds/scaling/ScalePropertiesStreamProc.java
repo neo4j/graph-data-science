@@ -55,7 +55,7 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
     }
 
     @Override
-    protected GraphAlgorithmFactory<ScaleProperties, ScalePropertiesStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ScaleProperties, ScalePropertiesStreamConfig> algorithmFactory() {
         return new ScalePropertiesFactory<>();
     }
 

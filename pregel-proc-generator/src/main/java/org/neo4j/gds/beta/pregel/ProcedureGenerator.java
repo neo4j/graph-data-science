@@ -250,7 +250,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
         return MethodSpec.methodBuilder("algorithmFactory")
             .addAnnotation(Override.class)
-            .addModifiers(Modifier.PROTECTED)
+            .addModifiers(Modifier.PUBLIC)
             .returns(ParameterizedTypeName.get(
                 ClassName.get(GraphAlgorithmFactory.class),
                 algorithmClassName,

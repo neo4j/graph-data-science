@@ -58,7 +58,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     }
 
     @Override
-    public ValidationConfiguration<TriangleCountWriteConfig> getValidationConfig() {
+    public ValidationConfiguration<TriangleCountWriteConfig> validationConfig() {
         return TriangleCountCompanion.getValidationConfig();
     }
 
@@ -68,7 +68,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected GraphAlgorithmFactory<IntersectingTriangleCount, TriangleCountWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<IntersectingTriangleCount, TriangleCountWriteConfig> algorithmFactory() {
         return new IntersectingTriangleCountFactory<>();
     }
 

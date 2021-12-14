@@ -70,7 +70,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
     }
 
     @Override
-    protected GraphAlgorithmFactory<Knn, KnnStatsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Knn, KnnStatsConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 

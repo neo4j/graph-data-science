@@ -72,7 +72,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     }
 
     @Override
-    public ValidationConfiguration<GraphSageWriteConfig> getValidationConfig() {
+    public ValidationConfiguration<GraphSageWriteConfig> validationConfig() {
         return GraphSageCompanion.getValidationConfig(modelCatalog, username());
     }
 
@@ -82,7 +82,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     }
 
     @Override
-    protected GraphAlgorithmFactory<GraphSage, GraphSageWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<GraphSage, GraphSageWriteConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>(modelCatalog);
     }
 

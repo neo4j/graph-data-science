@@ -63,7 +63,7 @@ public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsPr
     }
 
     @Override
-    public ValidationConfiguration<LinkPredictionPredictWriteConfig> getValidationConfig() {
+    public ValidationConfiguration<LinkPredictionPredictWriteConfig> validationConfig() {
         return LinkPredictionPredictCompanion.getValidationConfig();
     }
 
@@ -73,7 +73,7 @@ public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsPr
     }
 
     @Override
-    protected GraphAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictWriteConfig> algorithmFactory() {
         return new LinkPredictionPredictFactory<>(modelCatalog);
     }
 

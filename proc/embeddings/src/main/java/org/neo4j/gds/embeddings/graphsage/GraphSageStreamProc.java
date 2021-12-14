@@ -92,7 +92,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     }
 
     @Override
-    public ValidationConfiguration<GraphSageStreamConfig> getValidationConfig() {
+    public ValidationConfiguration<GraphSageStreamConfig> validationConfig() {
         return GraphSageCompanion.getValidationConfig(modelCatalog, username());
     }
 
@@ -102,7 +102,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     }
 
     @Override
-    protected GraphAlgorithmFactory<GraphSage, GraphSageStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<GraphSage, GraphSageStreamConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>(modelCatalog);
     }
 

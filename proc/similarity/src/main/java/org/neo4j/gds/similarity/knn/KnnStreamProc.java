@@ -83,7 +83,7 @@ public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult,
     }
 
     @Override
-    protected GraphAlgorithmFactory<Knn, KnnStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Knn, KnnStreamConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 }

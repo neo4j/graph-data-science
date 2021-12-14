@@ -137,7 +137,7 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
     }
 
     @Override
-    protected GraphAlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> algorithmFactory() {
         return new HarmonicCentralityAlgorithmFactory();
     }
 

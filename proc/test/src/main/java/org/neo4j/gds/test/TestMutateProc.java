@@ -76,7 +76,7 @@ public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, Tes
     }
 
     @Override
-    protected GraphAlgorithmFactory<TestAlgorithm, TestMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<TestAlgorithm, TestMutateConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
 
             @Override

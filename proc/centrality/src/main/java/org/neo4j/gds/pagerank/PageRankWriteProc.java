@@ -77,12 +77,12 @@ public class PageRankWriteProc extends WriteProc<PageRankAlgorithm, PageRankResu
     }
 
     @Override
-    protected GraphAlgorithmFactory<PageRankAlgorithm, PageRankWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankWriteConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>();
     }
 
     @Override
-    public ValidationConfiguration<PageRankWriteConfig> getValidationConfig() {
+    public ValidationConfiguration<PageRankWriteConfig> validationConfig() {
         return PageRankProc.getValidationConfig(log);
     }
 

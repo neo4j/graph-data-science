@@ -90,7 +90,7 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
     }
 
     @Override
-    protected GraphAlgorithmFactory<Greedy, InfluenceMaximizationConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Greedy, InfluenceMaximizationConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
             public String taskName() {

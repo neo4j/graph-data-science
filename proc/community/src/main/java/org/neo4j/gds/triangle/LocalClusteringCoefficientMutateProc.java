@@ -64,12 +64,12 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
     }
 
     @Override
-    protected GraphAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientMutateConfig> algorithmFactory() {
         return new LocalClusteringCoefficientFactory<>();
     }
 
     @Override
-    public ValidationConfiguration<LocalClusteringCoefficientMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<LocalClusteringCoefficientMutateConfig> validationConfig() {
         return LocalClusteringCoefficientCompanion.getValidationConfig(log);
     }
 

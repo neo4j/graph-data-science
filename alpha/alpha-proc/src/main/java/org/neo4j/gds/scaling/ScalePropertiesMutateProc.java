@@ -54,7 +54,7 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
     }
 
     @Override
-    protected GraphAlgorithmFactory<ScaleProperties, ScalePropertiesMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ScaleProperties, ScalePropertiesMutateConfig> algorithmFactory() {
         return new ScalePropertiesFactory<>();
     }
 

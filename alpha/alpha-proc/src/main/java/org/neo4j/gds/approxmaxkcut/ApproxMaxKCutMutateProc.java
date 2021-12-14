@@ -64,7 +64,7 @@ public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, A
     }
 
     @Override
-    protected GraphAlgorithmFactory<ApproxMaxKCut, ApproxMaxKCutMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ApproxMaxKCut, ApproxMaxKCutMutateConfig> algorithmFactory() {
         return ApproxMaxKCutProc.algorithmFactory();
     }
 

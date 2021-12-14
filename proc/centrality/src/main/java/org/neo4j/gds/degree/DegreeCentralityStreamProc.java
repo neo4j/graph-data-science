@@ -61,7 +61,7 @@ public class DegreeCentralityStreamProc extends StreamProc<DegreeCentrality, Deg
     }
 
     @Override
-    protected GraphAlgorithmFactory<DegreeCentrality, DegreeCentralityStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<DegreeCentrality, DegreeCentralityStreamConfig> algorithmFactory() {
         return DegreeCentralityProc.algorithmFactory();
     }
 

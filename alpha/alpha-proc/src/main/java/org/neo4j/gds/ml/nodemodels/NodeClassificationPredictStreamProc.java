@@ -101,7 +101,7 @@ public class NodeClassificationPredictStreamProc
     }
 
     @Override
-    public ValidationConfiguration<NodeClassificationStreamConfig> getValidationConfig() {
+    public ValidationConfiguration<NodeClassificationStreamConfig> validationConfig() {
         return NodeClassificationCompanion.getValidationConfig(modelCatalog);
     }
 
@@ -112,7 +112,7 @@ public class NodeClassificationPredictStreamProc
     }
 
     @Override
-    protected GraphAlgorithmFactory<NodeClassificationPredict, NodeClassificationStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<NodeClassificationPredict, NodeClassificationStreamConfig> algorithmFactory() {
         return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
     }
 

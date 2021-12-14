@@ -80,7 +80,7 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
     }
 
     @Override
-    protected GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationMutateConfig> algorithmFactory() {
         return new ModularityOptimizationFactory<>();
     }
 

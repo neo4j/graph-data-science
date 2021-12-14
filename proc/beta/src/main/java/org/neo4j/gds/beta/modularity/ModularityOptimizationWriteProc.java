@@ -64,7 +64,7 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
     }
 
     @Override
-    protected GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationWriteConfig> algorithmFactory() {
         return new ModularityOptimizationFactory<>();
     }
 

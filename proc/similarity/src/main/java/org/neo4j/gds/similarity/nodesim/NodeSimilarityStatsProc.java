@@ -65,7 +65,7 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
     }
 
     @Override
-    protected GraphAlgorithmFactory<NodeSimilarity, NodeSimilarityStatsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<NodeSimilarity, NodeSimilarityStatsConfig> algorithmFactory() {
         return new NodeSimilarityFactory<>();
     }
 

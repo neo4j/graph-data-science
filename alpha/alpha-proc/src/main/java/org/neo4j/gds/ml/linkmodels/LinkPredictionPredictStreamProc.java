@@ -76,7 +76,7 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     }
 
     @Override
-    public ValidationConfiguration<LinkPredictionPredictStreamConfig> getValidationConfig() {
+    public ValidationConfiguration<LinkPredictionPredictStreamConfig> validationConfig() {
         return LinkPredictionPredictCompanion.getValidationConfig();
     }
 
@@ -86,7 +86,7 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     }
 
     @Override
-    protected GraphAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictStreamConfig> algorithmFactory() {
         return new LinkPredictionPredictFactory<>(modelCatalog);
     }
 

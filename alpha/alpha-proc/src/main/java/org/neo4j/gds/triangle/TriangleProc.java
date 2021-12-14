@@ -74,7 +74,7 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     }
 
     @Override
-    public ValidationConfiguration<TriangleCountBaseConfig> getValidationConfig() {
+    public ValidationConfiguration<TriangleCountBaseConfig> validationConfig() {
         return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<TriangleCountBaseConfig>> beforeLoadValidations() {
@@ -84,7 +84,7 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     }
 
     @Override
-    protected GraphAlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
             public String taskName() {

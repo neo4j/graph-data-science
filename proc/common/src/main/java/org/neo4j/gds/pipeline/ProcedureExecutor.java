@@ -104,7 +104,7 @@ public class ProcedureExecutor<
 
         ALGO_RESULT result = executeAlgorithm(releaseAlgorithm, releaseTopology, builder, graph, algo);
 
-        executionContext.log().info(algoSpec.getName() + ": overall memory usage %s", executionContext.allocationTracker().getUsageString());
+        executionContext.log().info(algoSpec.name() + ": overall memory usage %s", executionContext.allocationTracker().getUsageString());
 
         var computationResult = builder
             .graph(graph)

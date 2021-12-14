@@ -63,7 +63,7 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
     }
 
     @Override
-    protected GraphAlgorithmFactory<K1Coloring, K1ColoringMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<K1Coloring, K1ColoringMutateConfig> algorithmFactory() {
         return new K1ColoringFactory<>();
     }
 

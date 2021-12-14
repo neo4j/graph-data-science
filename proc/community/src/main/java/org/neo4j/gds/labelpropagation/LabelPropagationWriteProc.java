@@ -76,7 +76,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     }
 
     @Override
-    protected GraphAlgorithmFactory<LabelPropagation, LabelPropagationWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<LabelPropagation, LabelPropagationWriteConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
     }
 

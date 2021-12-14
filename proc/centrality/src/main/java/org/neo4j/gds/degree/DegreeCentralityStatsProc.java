@@ -65,7 +65,7 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
     }
 
     @Override
-    protected GraphAlgorithmFactory<DegreeCentrality, DegreeCentralityStatsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<DegreeCentrality, DegreeCentralityStatsConfig> algorithmFactory() {
         return new DegreeCentralityFactory<>();
     }
 

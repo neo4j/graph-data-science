@@ -80,7 +80,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
     }
 
     @Override
-    protected GraphAlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory() {
         return new WccAlgorithmFactory<>();
     }
 

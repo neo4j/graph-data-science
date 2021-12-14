@@ -73,7 +73,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
     }
 
     @Override
-    protected GraphAlgorithmFactory<K1Coloring, K1ColoringWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<K1Coloring, K1ColoringWriteConfig> algorithmFactory() {
         return new K1ColoringFactory<>();
     }
 

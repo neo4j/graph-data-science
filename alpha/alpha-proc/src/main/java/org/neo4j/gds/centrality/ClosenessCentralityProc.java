@@ -127,7 +127,7 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
     }
 
     @Override
-    protected GraphAlgorithmFactory<MSClosenessCentrality, ClosenessCentralityConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<MSClosenessCentrality, ClosenessCentralityConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
             public String taskName() {

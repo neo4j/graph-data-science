@@ -57,7 +57,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
     }
 
     @Override
-    public ValidationConfiguration<TriangleCountStatsConfig> getValidationConfig() {
+    public ValidationConfiguration<TriangleCountStatsConfig> validationConfig() {
         return TriangleCountCompanion.getValidationConfig();
     }
 
@@ -72,7 +72,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected GraphAlgorithmFactory<IntersectingTriangleCount, TriangleCountStatsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<IntersectingTriangleCount, TriangleCountStatsConfig> algorithmFactory() {
         return new IntersectingTriangleCountFactory<>();
     }
 

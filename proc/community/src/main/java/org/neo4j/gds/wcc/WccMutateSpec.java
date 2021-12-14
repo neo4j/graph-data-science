@@ -35,7 +35,7 @@ class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateCo
     WccMutateSpec() {}
 
     @Override
-    public String getName() {
+    public String name() {
         return "WccMutate";
     }
 

@@ -85,7 +85,7 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
     }
 
     @Override
-    protected GraphAlgorithmFactory<NodeSimilarity, NodeSimilarityMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<NodeSimilarity, NodeSimilarityMutateConfig> algorithmFactory() {
         return new NodeSimilarityFactory<>();
     }
 

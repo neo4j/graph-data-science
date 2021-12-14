@@ -69,7 +69,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     }
 
     @Override
-    public ValidationConfiguration<LinkPredictionPredictPipelineMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<LinkPredictionPredictPipelineMutateConfig> validationConfig() {
         return LinkPredictionPipelineCompanion.getValidationConfig();
     }
 
@@ -134,7 +134,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     }
 
     @Override
-    protected GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineMutateConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineMutateConfig> algorithmFactory() {
         return new LinkPredictionPredictPipelineAlgorithmFactory<>(this, modelCatalog);
     }
 

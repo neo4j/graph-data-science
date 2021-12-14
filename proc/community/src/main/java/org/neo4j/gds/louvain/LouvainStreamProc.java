@@ -67,7 +67,7 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
     }
 
     @Override
-    protected GraphAlgorithmFactory<Louvain, LouvainStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Louvain, LouvainStreamConfig> algorithmFactory() {
         return new LouvainFactory<>();
     }
 

@@ -67,7 +67,7 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, Pa
     }
 
     @Override
-    protected GraphAlgorithmFactory<PageRankAlgorithm, PageRankMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankMutateConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>();
     }
 
@@ -85,7 +85,7 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, Pa
     }
 
     @Override
-    public ValidationConfiguration<PageRankMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<PageRankMutateConfig> validationConfig() {
         return PageRankProc.getValidationConfig(log);
     }
 

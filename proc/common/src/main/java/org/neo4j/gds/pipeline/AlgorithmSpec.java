@@ -31,7 +31,7 @@ public interface AlgorithmSpec<
     RESULT,
     ALGO_FACTORY extends AlgorithmFactory<?, ALGO, CONFIG>
 > {
-    String getName();
+    String name();
 
     ALGO_FACTORY algorithmFactory();
 

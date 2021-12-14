@@ -98,7 +98,7 @@ public class NodeClassificationPredictWriteProc
     }
 
     @Override
-    public ValidationConfiguration<NodeClassificationPredictWriteConfig> getValidationConfig() {
+    public ValidationConfiguration<NodeClassificationPredictWriteConfig> validationConfig() {
         return NodeClassificationCompanion.getValidationConfig(modelCatalog);
     }
 
@@ -108,7 +108,7 @@ public class NodeClassificationPredictWriteProc
     }
 
     @Override
-    protected GraphAlgorithmFactory<NodeClassificationPredict, NodeClassificationPredictWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<NodeClassificationPredict, NodeClassificationPredictWriteConfig> algorithmFactory() {
         return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
     }
 

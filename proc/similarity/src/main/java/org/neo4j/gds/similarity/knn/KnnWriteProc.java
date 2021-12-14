@@ -83,7 +83,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
     }
 
     @Override
-    protected GraphAlgorithmFactory<Knn, KnnWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Knn, KnnWriteConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 

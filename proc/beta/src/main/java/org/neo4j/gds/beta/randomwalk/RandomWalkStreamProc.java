@@ -95,7 +95,7 @@ public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]
     }
 
     @Override
-    protected GraphAlgorithmFactory<RandomWalk, RandomWalkStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<RandomWalk, RandomWalkStreamConfig> algorithmFactory() {
         return new RandomWalkAlgorithmFactory<>();
     }
 

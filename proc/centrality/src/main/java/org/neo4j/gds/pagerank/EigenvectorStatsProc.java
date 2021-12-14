@@ -54,7 +54,7 @@ public class EigenvectorStatsProc extends PageRankStatsProc {
     }
 
     @Override
-    protected GraphAlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
     }
 

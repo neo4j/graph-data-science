@@ -53,7 +53,7 @@ public class ArticleRankStatsProc extends PageRankStatsProc {
     }
 
     @Override
-    protected GraphAlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
     }
 }

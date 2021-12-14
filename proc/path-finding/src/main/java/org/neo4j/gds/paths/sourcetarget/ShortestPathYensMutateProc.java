@@ -63,7 +63,7 @@ public class ShortestPathYensMutateProc extends ShortestPathMutateProc<Yens, Sho
     }
 
     @Override
-    protected GraphAlgorithmFactory<Yens, ShortestPathYensMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Yens, ShortestPathYensMutateConfig> algorithmFactory() {
         return new YensFactory<>();
     }
 }

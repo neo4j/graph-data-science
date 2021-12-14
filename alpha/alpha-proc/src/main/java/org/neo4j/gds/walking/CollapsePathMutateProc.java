@@ -87,7 +87,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
             builder.result(algo.compute());
         }
 
-        log.info(procName() + ": overall memory usage %s", allocationTracker.getUsageString());
+        log.info(name() + ": overall memory usage %s", allocationTracker.getUsageString());
 
         algo.release();
 
@@ -164,7 +164,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     }
 
     @Override
-    protected GraphAlgorithmFactory<CollapsePath, CollapsePathConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<CollapsePath, CollapsePathConfig> algorithmFactory() {
         throw new UnsupportedOperationException("CollapsePath does not support the AlgorithmFactory");
     }
 

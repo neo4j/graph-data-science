@@ -70,7 +70,7 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
     }
 
     @Override
-    public ValidationConfiguration<PageRankStatsConfig> getValidationConfig() {
+    public ValidationConfiguration<PageRankStatsConfig> validationConfig() {
         return PageRankProc.getValidationConfig(log);
     }
 
@@ -80,7 +80,7 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
     }
 
     @Override
-    protected GraphAlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>();
     }
 

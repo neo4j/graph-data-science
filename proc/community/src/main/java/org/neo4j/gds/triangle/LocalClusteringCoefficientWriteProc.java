@@ -65,12 +65,12 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
     }
 
     @Override
-    protected GraphAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientWriteConfig> algorithmFactory() {
         return new LocalClusteringCoefficientFactory<>();
     }
 
     @Override
-    public ValidationConfiguration<LocalClusteringCoefficientWriteConfig> getValidationConfig() {
+    public ValidationConfiguration<LocalClusteringCoefficientWriteConfig> validationConfig() {
         return LocalClusteringCoefficientCompanion.getValidationConfig(log);
     }
 

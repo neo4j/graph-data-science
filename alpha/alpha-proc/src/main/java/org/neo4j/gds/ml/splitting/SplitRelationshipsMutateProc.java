@@ -65,7 +65,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     }
 
     @Override
-    protected GraphStoreAlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> algorithmFactory() {
         return new GraphStoreAlgorithmFactory<>() {
 
             @Override
@@ -134,7 +134,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     }
 
     @Override
-    public ValidationConfiguration<SplitRelationshipsMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<SplitRelationshipsMutateConfig> validationConfig() {
         return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<SplitRelationshipsMutateConfig>> afterLoadValidations() {
