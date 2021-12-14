@@ -23,6 +23,8 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.function.DoubleUnaryOperator;
+
 @Configuration
 public interface SpanningTreeConfig extends SpanningTreeBaseConfig
 {
@@ -36,8 +38,7 @@ public interface SpanningTreeConfig extends SpanningTreeBaseConfig
         return WRITE_RELATIONSHIP_TYPE;
     }
 
-    static SpanningTreeConfig of(CypherMapWrapper userInput) {
-        return new SpanningTreeConfigImpl(userInput);
+    static SpanningTreeConfig of(DoubleUnaryOperator minMax, CypherMapWrapper userInput) {
+        return new SpanningTreeConfigImpl(minMax, userInput);
     }
-
 }

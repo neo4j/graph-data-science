@@ -136,7 +136,7 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
 
     @Override
     protected KSpanningTreeConfig newConfig(String username, CypherMapWrapper config) {
-        return KSpanningTreeConfig.of(config);
+        return KSpanningTreeConfig.of(minMax, config);
     }
 
     @Override
