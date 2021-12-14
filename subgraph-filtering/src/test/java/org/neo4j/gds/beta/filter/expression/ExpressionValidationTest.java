@@ -22,14 +22,18 @@ package org.neo4j.gds.beta.filter.expression;
 import org.immutables.value.Value;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.utils.StringJoining;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.NODE;
 import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.RELATIONSHIP;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -42,8 +46,11 @@ class ExpressionValidationTest {
         var context = ImmutableTestValidationContext.builder().context(NODE).build();
 
         assertThatExceptionOfType(SemanticErrors.class)
-            .isThrownBy(() -> ImmutableVariable.of(variableName).validate(context).validate())
-            .withMessageContaining(formatWithLocale("Invalid variable `%s`. Only `n` is allowed for nodes", variableName));
+            .isThrownBy(() -> ImmutableVariable.builder().name(variableName).build().validate(context).validate())
+            .withMessageContaining(formatWithLocale(
+                "Invalid variable `%s`. Only `n` is allowed for nodes",
+                variableName
+            ));
     }
 
     @ParameterizedTest
@@ -52,37 +59,54 @@ class ExpressionValidationTest {
         var context = ImmutableTestValidationContext.builder().context(RELATIONSHIP).build();
 
         assertThatExceptionOfType(SemanticErrors.class)
-            .isThrownBy(() -> ImmutableVariable.of(variableName).validate(context).validate())
-            .withMessageContaining(formatWithLocale("Invalid variable `%s`. Only `r` is allowed for relationships", variableName));
+            .isThrownBy(() -> ImmutableVariable.builder().name(variableName).build().validate(context).validate())
+            .withMessageContaining(formatWithLocale(
+                "Invalid variable `%s`. Only `r` is allowed for relationships",
+                variableName
+            ));
     }
 
     @Test
     void property() {
-        var context = ImmutableTestValidationContext.builder().addAvailableProperties("bar").build();
+        var context = ImmutableTestValidationContext
+            .builder()
+            .putAvailableProperty("bar", ValueType.DOUBLE)
+            .build();
+        var expr = ImmutableProperty
+            .builder()
+            .in(ImmutableVariable.builder().name("n").build())
+            .propertyKey("baz")
+            .build();
 
         assertThatExceptionOfType(SemanticErrors.class)
-            .isThrownBy(() -> ImmutableProperty.of(ImmutableVariable.of("n"), "baz").validate(context).validate())
+            .isThrownBy(() -> expr.validate(context).validate())
             .withMessageContaining("Unknown property `baz`. Did you mean `bar`?");
     }
 
     @Test
     void hasLabelsOrTypes() {
         var context = ImmutableTestValidationContext.builder().addAvailableLabelsOrTypes("foo", "bar").build();
+        var expr = ImmutableHasLabelsOrTypes
+            .builder()
+            .in(ImmutableVariable.builder().name("n").build())
+            .addLabelsOrTypes("foo", "baz")
+            .build();
 
         assertThatExceptionOfType(SemanticErrors.class)
-            .isThrownBy(() -> ImmutableHasLabelsOrTypes.of(ImmutableVariable.of("n"), List.of("foo", "baz")).validate(context).validate())
+            .isThrownBy(() -> expr.validate(context).validate())
             .withMessageContaining("Unknown label `baz`. Did you mean `bar`?");
     }
 
     @Test
     void multipleErrors() throws ParseException {
         var expressionString = "n:Baz AND n.foo = 42";
-        var expr = ExpressionParser.parse(expressionString);
+        var expr = ExpressionParser.parse(expressionString, Map.of());
 
         var context = ImmutableTestValidationContext.builder()
             .context(RELATIONSHIP)
             .addAvailableLabelsOrTypes("Foo", "Bar")
-            .addAvailableProperties("bar", "foot")
+            .putAvailableProperty("bar", ValueType.DOUBLE)
+            .putAvailableProperty("foot", ValueType.DOUBLE)
             .build();
 
         assertThatExceptionOfType(SemanticErrors.class)
@@ -90,6 +114,63 @@ class ExpressionValidationTest {
             .withMessageContaining("Only `r` is allowed")
             .withMessageContaining("Unknown relationship type `Baz`")
             .withMessageContaining("Unknown property `foo`");
+    }
+
+    @ParameterizedTest(name = "{0} ({1} vs {2})")
+    @CsvSource(value = {
+        "n.foo > 42,DOUBLE,LONG",
+        "n.foo > 42.0,LONG,DOUBLE",
+
+        "n.foo >= 42,DOUBLE,LONG",
+        "n.foo >= 42.0,LONG,DOUBLE",
+
+        "n.foo < 42,DOUBLE,LONG",
+        "n.foo < 42.0,LONG,DOUBLE",
+
+        "n.foo <= 42,DOUBLE,LONG",
+        "n.foo <= 42.0,LONG,DOUBLE",
+
+        "n.foo = 42,DOUBLE,LONG",
+        "n.foo = 42.0,LONG,DOUBLE",
+
+        "n.foo <> 42,DOUBLE,LONG",
+        "n.foo <> 42.0,LONG,DOUBLE",
+    })
+    void incompatibleTypes(String exprString, ValueType lhsType, ValueType rhsType) throws ParseException {
+        var context = ImmutableValidationContext
+            .builder()
+            .context(NODE)
+            .putAvailableProperty("foo", lhsType)
+            .build();
+
+        var expr = ExpressionParser.parse(exprString, context.availableProperties());
+
+        assertThatExceptionOfType(SemanticErrors.class)
+            .isThrownBy(() -> expr.validate(context).validate())
+            .withMessageContaining("Incompatible types")
+            .withMessageContaining(lhsType.name())
+            .withMessageContaining(rhsType.name())
+            .withMessageContaining("in binary expression")
+            .withMessageContaining(exprString);
+    }
+
+    @ParameterizedTest(name = "{0} {1}")
+    @CsvSource(value = {
+        "n.foo,DOUBLE_ARRAY",
+        "n.foo,LONG_ARRAY"})
+    void unsupportedTypes(String exprString, ValueType valueType) throws ParseException {
+        var context = ImmutableValidationContext
+            .builder()
+            .context(NODE)
+            .putAvailableProperty("foo", valueType)
+            .build();
+        var expr = ExpressionParser.parse(exprString, context.availableProperties());
+
+        assertThatExceptionOfType(SemanticErrors.class)
+            .isThrownBy(() -> expr.validate(context).validate())
+            .withMessageContaining("Unsupported property type `%s` for expression", valueType.name())
+            .withMessageContaining(exprString)
+            .withMessageContaining(StringJoining.join(List.of(ValueType.LONG.name(), ValueType.DOUBLE.name())));
     }
 
     @ValueClass
@@ -103,15 +184,8 @@ class ExpressionValidationTest {
 
         @Override
         @Value.Default
-        default Set<String> availableProperties() {
-            return Set.of();
-        }
-
-        @Override
-        @Value.Default
         default Set<String> availableLabelsOrTypes() {
             return Set.of();
         }
     }
-
 }

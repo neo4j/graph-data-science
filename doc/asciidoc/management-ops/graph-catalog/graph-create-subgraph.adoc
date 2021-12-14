@@ -190,7 +190,7 @@ CALL gds.beta.graph.create.subgraph(
   'teenagers',
   'social-graph',
   'n.age > 13 AND n.age <= 18',
-  'r.since >= 2012'
+  'r.since >= 2012.0'
 )
 YIELD graphName, fromGraphName, nodeCount, relationshipCount
 ----

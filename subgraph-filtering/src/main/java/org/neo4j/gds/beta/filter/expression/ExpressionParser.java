@@ -19,17 +19,19 @@
  */
 package org.neo4j.gds.beta.filter.expression;
 
-
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.opencypher.v9_0.parser.javacc.Cypher;
 import org.opencypher.v9_0.parser.javacc.CypherCharStream;
 import org.opencypher.v9_0.parser.javacc.ParseException;
+
+import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ExpressionParser {
 
-    public static Expression parse(String cypher) throws ParseException {
-        var astFactory = new GdsASTFactory();
+    public static Expression parse(String cypher, Map<String, ValueType> properties) throws ParseException {
+        var astFactory = new GdsAstFactory(properties);
         var exceptionFactory = new ExceptionFactory();
         var charstream = new CypherCharStream(cypher);
 
@@ -50,4 +52,5 @@ public final class ExpressionParser {
     }
 
     private ExpressionParser() {}
+
 }
