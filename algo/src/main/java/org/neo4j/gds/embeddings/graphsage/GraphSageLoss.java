@@ -34,8 +34,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
 
-    private static final int NEGATIVE_NODES_OFFSET = 2;
+    // batch nodes (0), neighbor nodes(1), negative nodes(2)
     private static final int SAMPLING_BUCKETS = 3;
+    private static final int NEGATIVE_NODES_OFFSET = 2;
 
     private final RelationshipWeights relationshipWeights;
     private final Variable<Matrix> combinedEmbeddings;
@@ -87,8 +88,8 @@ public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
     private static double affinity(Matrix embeddingData, int nodeIdOffset, int otherNodeIdOffset) {
         int embeddingDimension = embeddingData.cols();
         double sum = 0;
-        for (int i = 0; i < embeddingDimension; i++) {
-            sum += embeddingData.dataAt(nodeIdOffset, i) * embeddingData.dataAt(otherNodeIdOffset, i);
+        for (int col = 0; col < embeddingDimension; col++) {
+            sum += embeddingData.dataAt(nodeIdOffset, col) * embeddingData.dataAt(otherNodeIdOffset, col);
         }
         return sum;
     }

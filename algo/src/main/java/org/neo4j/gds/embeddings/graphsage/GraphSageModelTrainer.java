@@ -255,6 +255,7 @@ public class GraphSageModelTrainer {
         var neighborBatchBuilder = LongStream.builder();
         var localRandom = new Random(batchLocalSeed);
 
+        // sample a neighbor for each batchNode
         batch.consume(nodeId -> {
             // randomWalk with at most maxSearchDepth steps and only save last node
             int searchDepth = localRandom.nextInt(maxSearchDepth) + 1;
