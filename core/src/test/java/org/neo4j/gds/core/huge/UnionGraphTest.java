@@ -19,23 +19,22 @@
  */
 package org.neo4j.gds.core.huge;
 
-import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.RelationshipCursor;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.Collection;
 import java.util.List;
@@ -44,7 +43,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @GdlExtension
@@ -88,28 +86,6 @@ class UnionGraphTest {
 
     @Inject
     IdFunction multiRelTypeIdFunction;
-
-    @Test
-    void testGetTargetOnMultiRelationshipTypeGraph() {
-        var combinations = List.of(
-            Triple.of(multiRelTypeIdFunction.of("a"), 0, multiRelTypeIdFunction.of("b")),
-            Triple.of(multiRelTypeIdFunction.of("a"), 1, multiRelTypeIdFunction.of("c")),
-            Triple.of(multiRelTypeIdFunction.of("b"), 0, multiRelTypeIdFunction.of("a")),
-            Triple.of(multiRelTypeIdFunction.of("b"), 1, multiRelTypeIdFunction.of("c")),
-            Triple.of(multiRelTypeIdFunction.of("c"), 0, multiRelTypeIdFunction.of("a")),
-            Triple.of(multiRelTypeIdFunction.of("c"), 1, multiRelTypeIdFunction.of("b"))
-        );
-
-        var graph = multiRelTypeGraphStore.getUnion();
-
-        combinations.forEach(combination -> {
-            var source = combination.getLeft();
-            var index = combination.getMiddle();
-            var expected = combination.getRight();
-
-            assertEquals(expected, graph.getTarget(source, index));
-        });
-    }
 
     @ParameterizedTest
     @MethodSource("nodeRelCombinations")

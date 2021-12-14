@@ -185,14 +185,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
         super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue, (s, t, p) -> filterAndConsume(s, t, p, consumer));
     }
 
-    @Override
-    public long getTarget(long sourceNodeId, long index) {
-        HugeGraph.GetTargetConsumer consumer = new HugeGraph.GetTargetConsumer(index);
-        forEachRelationship(sourceNodeId, consumer);
-        return consumer.target;
-    }
-
-    public long getFilteredMappedNodeId(long nodeId) {
+    long getFilteredMappedNodeId(long nodeId) {
         return filteredIdMap.toMappedNodeId(nodeId);
     }
 
