@@ -173,6 +173,8 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                     ")",
             "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"
         );
+        assertThat(ModelCatalog.exists("", "pipeline")).isTrue();
+        assertThat(ModelCatalog.exists("", "doesntmatter")).isFalse();
     }
 
     @Test
