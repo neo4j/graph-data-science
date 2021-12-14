@@ -32,7 +32,7 @@ import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
@@ -79,8 +79,10 @@ public class Node2VecModel {
         this.negativeSamples = new NegativeSampleProducer(randomWalkProbabilities.negativeSamplingDistribution());
         this.allocationTracker = allocationTracker;
 
-        centerEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension());
-        contextEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension());
+        var random = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
+
+        centerEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension(), random);
+        contextEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension(), random);
     }
 
     void train() {
@@ -100,7 +102,7 @@ public class Node2VecModel {
                 PrimitiveLongCollections.range(0, walks.size() - 1),
                 walks::walkLength,
                 BitUtil.ceilDiv(randomWalkProbabilities.sampleCount(), config.concurrency()),
-                (partition -> {
+                partition -> {
                     var positiveSampleProducer = new PositiveSampleProducer(
                         walks.iterator(partition.startNode(), partition.nodeCount()),
                         randomWalkProbabilities.positiveSamplingProbabilities(),
@@ -117,7 +119,7 @@ public class Node2VecModel {
                         config.negativeSamplingRate(),
                         config.embeddingDimension()
                     );
-                })
+                }
             );
 
             ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
@@ -130,14 +132,12 @@ public class Node2VecModel {
         return centerEmbeddings;
     }
 
-    private HugeObjectArray<FloatVector> initializeEmbeddings(long nodeCount, int embeddingDimensions) {
+    private HugeObjectArray<FloatVector> initializeEmbeddings(long nodeCount, int embeddingDimensions, SplittableRandom random) {
         HugeObjectArray<FloatVector> embeddings = HugeObjectArray.newArray(
             FloatVector.class,
             nodeCount,
             allocationTracker
         );
-
-        var random = new Random();
 
         for (var i = 0L; i < nodeCount; i++) {
             var data = random
