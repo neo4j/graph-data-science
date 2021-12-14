@@ -80,7 +80,7 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
     }
 
     @Override
-    protected GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
             @Override
             public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,
