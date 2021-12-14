@@ -41,7 +41,10 @@ public class Sigmoid<T extends Tensor<T>> extends SingleParentVariable<T, T> {
 
     @Override
     public T gradientForParent(ComputationContext ctx) {
-        return ctx.gradient(this).elementwiseProduct(ctx.data(this).map(value -> value * (1 - value)));
+        T result = ctx.data(this).map(value -> value * (1 - value));
+        result.elementwiseProductMutate(ctx.gradient(this));
+
+        return result;
     }
 
     public static double sigmoid(double x) {
