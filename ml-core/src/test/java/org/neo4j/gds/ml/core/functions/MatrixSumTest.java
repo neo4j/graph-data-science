@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.List;
@@ -29,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class MatrixSumTest {
+class MatrixSumTest implements FiniteDifferenceTest {
 
     @Test
     void adds() {
@@ -53,4 +54,13 @@ class MatrixSumTest {
         assertThrows(AssertionError.class, () -> new MatrixSum(List.of(op1, op2, op1)));
     }
 
+    @Test
+    void gradient() {
+        var operand = Constant.matrix(new double[]{1.0, 2.0, 3.0, 4.0}, 2, 2);
+        var weights = new Weights<>(new Matrix(new double[]{2.0, 3.0, 4.0, 5.0}, 2, 2));
+
+        var loss = new ElementSum(List.of(new MatrixSum(List.of(operand, weights))));
+
+        finiteDifferenceShouldApproximateGradient(weights, loss);
+    }
 }
