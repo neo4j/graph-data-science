@@ -177,6 +177,38 @@ class Node2VecTest extends AlgoTestBase {
 
     }
 
+    @Test
+    void randomSeed() {
+        Graph graph = new StoreLoaderBuilder().api(db).build().graph();
+
+        int embeddingDimension = 2;
+
+        var config = ImmutableNode2VecStreamConfig
+            .builder()
+            .embeddingDimension(embeddingDimension)
+            .iterations(2)
+            .randomSeed(1337L)
+            .build();
+
+        var embeddings = new Node2Vec(
+            graph,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        ).compute();
+
+        var otherEmbeddings = new Node2Vec(
+            graph,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        ).compute();
+
+        for (long node = 0; node < graph.nodeCount(); node++) {
+            assertThat(otherEmbeddings.get(node)).isEqualTo(embeddings.get(node));
+        }
+    }
+
     static Stream<Arguments> graphs() {
         return Stream.of(
             Arguments.of("All Labels", List.of()),
