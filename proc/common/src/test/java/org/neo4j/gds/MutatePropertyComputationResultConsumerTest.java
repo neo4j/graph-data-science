@@ -76,7 +76,7 @@ class MutatePropertyComputationResultConsumerTest {
     void setup() {
         var nodePropertyList = List.of(ImmutableNodeProperty.of("mutateProperty", new TestNodeProperties()));
         mutateResultConsumer = new MutatePropertyComputationResultConsumer<>(
-            (computationResult, resultProperty, allocationTracker) -> nodePropertyList,
+            (computationResult, allocationTracker) -> nodePropertyList,
             (computationResult, executionContext) -> new TestAlgoResultBuilder()
         );
     }

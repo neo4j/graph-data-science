@@ -29,7 +29,6 @@ import java.util.List;
 public interface NodePropertyListFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
     List<NodeProperty> apply(
         AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
-        String resultProperty,
         AllocationTracker allocationTracker
     );
 }

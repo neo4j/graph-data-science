@@ -67,7 +67,7 @@ class WriteProcCancellationTest extends BaseTest {
 
             var resultConsumer = new WriteNodePropertiesComputationResultConsumer<TestAlgorithm, TestAlgorithm, TestWriteConfig, TestResult>(
                 (computationResult, executionContext) -> new TestAlgoResultBuilder(),
-                (computationResult, resultProperty, allocationTracker) -> List.of(nodeProperty),
+                (computationResult, allocationTracker) -> List.of(nodeProperty),
                 new NativeNodePropertyExporter.Builder(TransactionContext.of(db, tx)),
                 "foo"
             );

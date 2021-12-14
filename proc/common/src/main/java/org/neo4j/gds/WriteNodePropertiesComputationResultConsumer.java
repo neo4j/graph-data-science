@@ -95,7 +95,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
             var exporter = createNodePropertyExporter(graph, progressTracker, computationResult);
 
             try {
-                exporter.write(nodePropertyListFunction.apply(computationResult, computationResult.config().writeProperty(), executionContext.allocationTracker()));
+                exporter.write(nodePropertyListFunction.apply(computationResult, executionContext.allocationTracker()));
             } finally {
                 progressTracker.release();
             }
