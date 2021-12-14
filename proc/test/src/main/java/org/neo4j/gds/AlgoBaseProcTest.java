@@ -164,6 +164,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     class InvocationCountingTaskStore extends GlobalTaskStore {
         int registerTaskInvocations;
+        int removeTaskInvocations;
 
         @Override
         public void store(
@@ -171,6 +172,12 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         ) {
             super.store(username, jobId, task);
             registerTaskInvocations++;
+        }
+
+        @Override
+        public void remove(String username, JobId jobId) {
+            super.remove(username, jobId);
+            removeTaskInvocations++;
         }
     }
 

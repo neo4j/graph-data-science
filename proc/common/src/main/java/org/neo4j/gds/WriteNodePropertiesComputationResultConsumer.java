@@ -1,0 +1,133 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.gds;
+
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.result.AbstractResultBuilder;
+
+import java.util.stream.Stream;
+
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
+
+public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends WritePropertyConfig & AlgoBaseConfig, RESULT>
+    implements ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<RESULT>> {
+
+    interface WriteNodePropertyListFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends WritePropertyConfig & AlgoBaseConfig>
+        extends NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> {}
+
+    private final ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction;
+    private final WriteNodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction;
+    private final NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
+    private final String procedureName;
+
+    WriteNodePropertiesComputationResultConsumer(
+        ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction,
+        WriteNodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction,
+        NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder,
+        String procedureName
+    ) {
+        this.resultBuilderFunction = resultBuilderFunction;
+        this.nodePropertyListFunction = nodePropertyListFunction;
+        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
+        this.procedureName = procedureName;
+    }
+
+    @Override
+    public Stream<RESULT> consume(
+        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext
+    ) {
+        return runWithExceptionLogging("Graph write failed", executionContext.log(), () -> {
+            CONFIG config = computationResult.config();
+
+            AbstractResultBuilder<RESULT> builder = resultBuilderFunction.apply(computationResult, executionContext)
+                .withCreateMillis(computationResult.createMillis())
+                .withComputeMillis(computationResult.computeMillis())
+                .withNodeCount(computationResult.graph().nodeCount())
+                .withConfig(config);
+
+            if (!computationResult.isGraphEmpty()) {
+                writeToNeo(builder, computationResult, executionContext);
+                computationResult.graph().releaseProperties();
+            }
+            return Stream.of(builder.build());
+        });
+    }
+
+    void writeToNeo(
+        AbstractResultBuilder<?> resultBuilder,
+        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
+        ExecutionContext executionContext
+    ) {
+        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
+            Graph graph = computationResult.graph();
+            var progressTracker = createProgressTracker(
+                graph.nodeCount(),
+                computationResult.config().writeConcurrency(),
+                executionContext
+            );
+            var exporter = createNodePropertyExporter(graph, progressTracker, computationResult);
+
+            try {
+                exporter.write(nodePropertyListFunction.apply(computationResult, executionContext.allocationTracker()));
+            } finally {
+                progressTracker.release();
+            }
+
+            resultBuilder.withNodeCount(computationResult.graph().nodeCount());
+            resultBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
+        }
+    }
+
+    ProgressTracker createProgressTracker(
+        long taskVolume,
+        int writeConcurrency,
+        ExecutionContext executionContext
+    ) {
+        return new TaskProgressTracker(
+            NodePropertyExporter.baseTask(this.procedureName, taskVolume),
+            executionContext.log(),
+            writeConcurrency,
+            executionContext.taskRegistryFactory()
+        );
+    }
+
+    NodePropertyExporter createNodePropertyExporter(
+        Graph graph,
+        ProgressTracker progressTracker,
+        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
+    ) {
+        return nodePropertyExporterBuilder
+            .withIdMapping(graph)
+            .withTerminationFlag(computationResult.algorithm().terminationFlag)
+            .withProgressTracker(progressTracker)
+            .parallel(Pools.DEFAULT, computationResult.config().writeConcurrency())
+            .build();
+    }
+}

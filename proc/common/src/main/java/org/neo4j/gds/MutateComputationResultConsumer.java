@@ -31,13 +31,6 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 public abstract class MutateComputationResultConsumer<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutateConfig, RESULT>
     implements ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<RESULT>> {
 
-    public interface ResultBuilderFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutateConfig, RESULT> {
-        AbstractResultBuilder<RESULT> apply(
-            AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
-            ExecutionContext executionContext
-        );
-    }
-
     private final ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction;
 
     protected MutateComputationResultConsumer(ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction) {

@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 
 import java.util.stream.Stream;
 
@@ -45,9 +46,13 @@ public abstract class SimilarityWriteProc<
 
     protected abstract SimilarityProc.SimilarityResultBuilder<PROC_RESULT> resultBuilder(AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
 
-    @Override
     protected Stream<PROC_RESULT> write(AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        return runWithExceptionLogging("Graph write failed", () -> {
+        return computationResultConsumer().consume(computationResult, executionContext());
+    }
+
+    @Override
+    public ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
+        return (computationResult, executionContext) -> runWithExceptionLogging("Graph write failed", () -> {
             CONFIG config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
@@ -82,9 +87,9 @@ public abstract class SimilarityWriteProc<
                         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
                             var progressTracker = new TaskProgressTracker(
                                 RelationshipExporter.baseTask(name(), similarityGraph.relationshipCount()),
-                                log,
+                                executionContext().log(),
                                 RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
-                                taskRegistryFactory
+                                executionContext().taskRegistryFactory()
                             );
                             var exporter = relationshipExporterBuilder
                                 .withIdMapping(rootNodeMapping)
@@ -93,7 +98,7 @@ public abstract class SimilarityWriteProc<
                                 .withProgressTracker(progressTracker)
                                 .build();
 
-                            if (SimilarityProc.shouldComputeHistogram(callContext)) {
+                            if (SimilarityProc.shouldComputeHistogram(executionContext().callContext())) {
                                 DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
                                 exporter.write(
                                     writeRelationshipType,
