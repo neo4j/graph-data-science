@@ -112,7 +112,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
     @Test
     void testProgressTracking() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        TestProcedureRunner.applyOnProcedure(db, HarmonicCentralityProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, HarmonicCentralityWriteProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));

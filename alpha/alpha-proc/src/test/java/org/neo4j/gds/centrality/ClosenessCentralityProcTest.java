@@ -141,7 +141,7 @@ class ClosenessCentralityProcTest extends BaseProcTest {
     @Test
     void testProgressTracking() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        TestProcedureRunner.applyOnProcedure(db, ClosenessCentralityProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, ClosenessCentralityWriteProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));

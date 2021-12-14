@@ -23,7 +23,6 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -36,108 +35,14 @@ import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.spanningTrees.KSpanningTree;
 import org.neo4j.gds.impl.spanningTrees.Prim;
 import org.neo4j.gds.impl.spanningTrees.SpanningTree;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.utils.InputNodeValidator;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.Procedure;
 
-import java.util.Map;
-import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
-
-public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, SpanningTree, KSpanningTreeConfig, Prim.Result> {
-
-    private static final String MAX_DESCRIPTION =
-        "The maximum weight spanning tree (MST) starts from a given node, and finds all its reachable nodes " +
-        "and the set of relationships that connect the nodes together with the maximum possible weight.";
-
-    private static final String MIN_DESCRIPTION =
-        "The minimum weight spanning tree (MST) starts from a given node, and finds all its reachable nodes " +
-        "and the set of relationships that connect the nodes together with the minimum possible weight.";
-
-    static DoubleUnaryOperator minMax;
+public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, SpanningTree, KSpanningTreeConfig, Prim.Result> {
 
     public static final String DEFAULT_CLUSTER_PROPERTY = "partition";
-
-    @Procedure(value = "gds.alpha.spanningTree.kmax.write", mode = WRITE)
-    @Description(MAX_DESCRIPTION)
-    public Stream<Prim.Result> kmax(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        minMax = Prim.MAX_OPERATOR;
-        return computeAndWrite(graphName, configuration);
-    }
-
-    @Procedure(value = "gds.alpha.spanningTree.kmin.write", mode = WRITE)
-    @Description(MIN_DESCRIPTION)
-    public Stream<Prim.Result> kmin(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        minMax = Prim.MIN_OPERATOR;
-        return computeAndWrite(graphName, configuration);
-    }
-
-    public Stream<Prim.Result> computeAndWrite(String graphName, Map<String, Object> configuration) {
-        ComputationResult<KSpanningTree, SpanningTree, KSpanningTreeConfig> computationResult = compute(graphName, configuration);
-
-        Graph graph = computationResult.graph();
-        SpanningTree spanningTree = computationResult.result();
-        KSpanningTreeConfig config = computationResult.config();
-
-        Prim.Builder builder = new Prim.Builder();
-
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.of(builder.build());
-        }
-
-        builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
-        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-            var progressTracker = new TaskProgressTracker(
-                NodePropertyExporter.baseTask("KSpanningTree", graph.nodeCount()),
-                log,
-                config.writeConcurrency(),
-                taskRegistryFactory
-            );
-            final NodePropertyExporter exporter = nodePropertyExporterBuilder
-                .withIdMapping(graph)
-                .withTerminationFlag(TerminationFlag.wrap(transaction)).withProgressTracker(progressTracker)
-                .parallel(Pools.DEFAULT, config.writeConcurrency())
-                .build();
-
-            var properties = new DoubleNodeProperties() {
-                @Override
-                public long size() {
-                    return computationResult.graph().nodeCount();
-                }
-
-                @Override
-                public double doubleValue(long nodeId) {
-                    return spanningTree.head((int) nodeId);
-                }
-            };
-
-            exporter.write(
-                config.writeProperty(),
-                properties
-            );
-
-            builder.withNodePropertiesWritten(exporter.propertiesWritten());
-        }
-
-        builder.withComputeMillis(computationResult.computeMillis());
-        builder.withCreateMillis(computationResult.createMillis());
-        return Stream.of(builder.build());
-    }
-
-    @Override
-    protected KSpanningTreeConfig newConfig(String username, CypherMapWrapper config) {
-        return KSpanningTreeConfig.of(minMax, config);
-    }
 
     @Override
     public GraphAlgorithmFactory<KSpanningTree, KSpanningTreeConfig> algorithmFactory() {
@@ -167,8 +72,70 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
                 ProgressTracker progressTracker
             ) {
                 InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);
-                return new KSpanningTree(graph, graph, graph, minMax, configuration.startNodeId(), configuration.k(), progressTracker);
+                return new KSpanningTree(
+                    graph,
+                    graph,
+                    graph,
+                    configuration.minMax(),
+                    configuration.startNodeId(),
+                    configuration.k(),
+                    progressTracker
+                );
             }
+        };
+    }
+
+    @Override
+    public ComputationResultConsumer<KSpanningTree, SpanningTree, KSpanningTreeConfig, Stream<Prim.Result>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            Graph graph = computationResult.graph();
+            SpanningTree spanningTree = computationResult.result();
+            KSpanningTreeConfig config = computationResult.config();
+
+            Prim.Builder builder = new Prim.Builder();
+
+            if (graph.isEmpty()) {
+                graph.release();
+                return Stream.of(builder.build());
+            }
+
+            builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
+            try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
+                var progressTracker = new TaskProgressTracker(
+                    NodePropertyExporter.baseTask("KSpanningTree", graph.nodeCount()),
+                    log,
+                    config.writeConcurrency(),
+                    taskRegistryFactory
+                );
+                final NodePropertyExporter exporter = nodePropertyExporterBuilder
+                    .withIdMapping(graph)
+                    .withTerminationFlag(TerminationFlag.wrap(transaction)).withProgressTracker(progressTracker)
+                    .parallel(Pools.DEFAULT, config.writeConcurrency())
+                    .build();
+
+                var properties = new DoubleNodeProperties() {
+                    @Override
+                    public long size() {
+                        return computationResult.graph().nodeCount();
+                    }
+
+                    @Override
+                    public double doubleValue(long nodeId) {
+                        return spanningTree.head((int) nodeId);
+                    }
+                };
+
+                exporter.write(
+                    config.writeProperty(),
+                    properties
+                );
+
+                builder.withNodePropertiesWritten(exporter.propertiesWritten());
+            }
+
+            builder.withComputeMillis(computationResult.computeMillis());
+            builder.withCreateMillis(computationResult.createMillis());
+            return Stream.of(builder.build());
         };
     }
 }

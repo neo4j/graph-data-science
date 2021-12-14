@@ -29,6 +29,7 @@ import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.spanningtree.KSpanningTreeMaxProc;
 import org.neo4j.gds.spanningtree.KSpanningTreeProc;
 import org.neo4j.gds.transaction.TransactionContext;
 
@@ -144,7 +145,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
     @Test
     void shouldTrackProgress() {
-        TestProcedureRunner.applyOnProcedure(db, KSpanningTreeProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, KSpanningTreeMaxProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));

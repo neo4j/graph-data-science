@@ -19,14 +19,16 @@
  */
 package org.neo4j.gds.shortestpath;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.NodePropertiesWriter;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.ShortestPathDeltaStepping;
-import org.neo4j.gds.utils.InputNodeValidator;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
+
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.neo4j.procedure.Mode.READ;
 
 /**
  * Delta-Stepping is a non-negative single source shortest paths (NSSSP) algorithm
@@ -41,38 +43,26 @@ import org.neo4j.gds.utils.InputNodeValidator;
  * <a href="http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf">http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf</a><br>
  * <a href="http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf">http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf</a>
  */
-public abstract class ShortestPathDeltaSteppingProc<PROC_RESULT> extends NodePropertiesWriter<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig, PROC_RESULT> {
+public class ShortestPathDeltaSteppingStreamProc extends ShortestPathDeltaSteppingProc<ShortestPathDeltaStepping.DeltaSteppingResult> {
 
-    protected static final String DESCRIPTION = "Delta-Stepping is a non-negative single source shortest paths (NSSSP) algorithm.";
-
-    @Override
-    protected ShortestPathDeltaSteppingConfig newConfig(String username, CypherMapWrapper config) {
-        return ShortestPathDeltaSteppingConfig.of(config);
+    @Procedure(name = "gds.alpha.shortestPath.deltaStepping.stream", mode = READ)
+    @Description(DESCRIPTION)
+    public Stream<ShortestPathDeltaStepping.DeltaSteppingResult> stream(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        var computationResult = compute(graphName, configuration);
+        return computationResultConsumer().consume(computationResult, executionContext());
     }
 
     @Override
-    public GraphAlgorithmFactory<ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> algorithmFactory() {
-        return new GraphAlgorithmFactory<>() {
-            @Override
-            public String taskName() {
-                return "ShortestPathDeltaStepping";
+    public ComputationResultConsumer<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig, Stream<ShortestPathDeltaStepping.DeltaSteppingResult>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            if (computationResult.graph().isEmpty()) {
+                return Stream.empty();
             }
 
-            @Override
-            public ShortestPathDeltaStepping build(
-                Graph graph,
-                ShortestPathDeltaSteppingConfig configuration,
-                AllocationTracker allocationTracker,
-                ProgressTracker progressTracker
-            ) {
-                InputNodeValidator.validateStartNode(configuration.startNode(), graph);
-                return new ShortestPathDeltaStepping(
-                    graph,
-                    configuration.startNode(),
-                    configuration.delta(),
-                    progressTracker
-                );
-            }
+            return computationResult.result().resultStream();
         };
     }
 }

@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.impl.walking.VirtualNode;
 import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc;
+import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingWriteProc;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Map;
@@ -223,7 +224,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
             .withAnyRelationshipType()
             .yields();
         runQuery(createQuery);
-        TestProcedureRunner.applyOnProcedure(db, ShortestPathDeltaSteppingProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, ShortestPathDeltaSteppingWriteProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
