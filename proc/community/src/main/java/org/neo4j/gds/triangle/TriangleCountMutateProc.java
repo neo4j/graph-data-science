@@ -23,6 +23,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -33,10 +34,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.triangle.TriangleCountCompanion.DESCRIPTION;
 import static org.neo4j.gds.triangle.TriangleCountCompanion.nodePropertyTranslator;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.triangleCount.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateProc.MutateResult, TriangleCountMutateConfig> {
 
     @Procedure(value = "gds.triangleCount.mutate", mode = READ)

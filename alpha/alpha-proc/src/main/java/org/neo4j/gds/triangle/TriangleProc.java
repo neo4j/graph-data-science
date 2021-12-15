@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.triangle.TriangleStream;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
 import org.neo4j.gds.pipeline.validation.GraphCreateConfigValidations;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
@@ -40,11 +41,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
+import static org.neo4j.gds.triangle.TriangleProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.alpha.triangles", description = DESCRIPTION, executionMode = STREAM)
 public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig, TriangleStream.Result> {
 
-    private static final String DESCRIPTION = "Triangles streams the nodeIds of each triangle in the graph.";
+    static final String DESCRIPTION = "Triangles streams the nodeIds of each triangle in the graph.";
 
     @Procedure(name = "gds.alpha.triangles", mode = READ)
     @Description(DESCRIPTION)

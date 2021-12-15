@@ -24,6 +24,7 @@ import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -37,9 +38,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
+@GdsCallable(name = "gds.louvain.write", description = LouvainProc.LOUVAIN_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWriteProc.WriteResult, LouvainWriteConfig> {
 
     @Procedure(value = "gds.louvain.write", mode = WRITE)
@@ -62,7 +65,11 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult) {
-        return LouvainProc.nodeProperties(computationResult, computationResult.config().writeProperty(), allocationTracker());
+        return LouvainProc.nodeProperties(
+            computationResult,
+            computationResult.config().writeProperty(),
+            allocationTracker()
+        );
     }
 
     @Override

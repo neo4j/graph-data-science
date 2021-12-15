@@ -25,6 +25,7 @@ import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -38,8 +39,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.STATS;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.betweenness.stats", description = BETWEENNESS_DESCRIPTION, executionMode = STATS)
 public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsProc.StatsResult, BetweennessCentralityStatsConfig> {
 
     @Procedure(value = "gds.betweenness.stats", mode = READ)
@@ -82,7 +85,10 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
 
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig> computeResult) {
-        return BetweennessCentralityProc.resultBuilder(new StatsResult.Builder(callContext, computeResult.config().concurrency()), computeResult);
+        return BetweennessCentralityProc.resultBuilder(new StatsResult.Builder(
+            callContext,
+            computeResult.config().concurrency()
+        ), computeResult);
     }
 
     @SuppressWarnings("unused")

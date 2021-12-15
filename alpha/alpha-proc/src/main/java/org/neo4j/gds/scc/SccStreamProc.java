@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.impl.scc.SccAlgorithm;
 import org.neo4j.gds.impl.scc.SccConfig;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -33,8 +34,11 @@ import java.util.Map;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
+import static org.neo4j.gds.scc.SccProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.alpha.scc.stream", description = DESCRIPTION, executionMode = STREAM)
 public class SccStreamProc extends SccProc<SccAlgorithm.StreamResult> {
 
     @Procedure(value = "gds.alpha.scc.stream", mode = READ)

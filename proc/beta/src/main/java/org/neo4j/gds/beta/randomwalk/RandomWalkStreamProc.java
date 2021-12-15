@@ -26,6 +26,8 @@ import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.ExecutionMode;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkAlgorithmFactory;
@@ -42,12 +44,14 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.beta.randomwalk.RandomWalkStreamProc.DESCRIPTION;
 import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.beta.randomWalk.stream", description = DESCRIPTION, executionMode = ExecutionMode.STREAM)
 public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, RandomWalkStreamConfig, RandomWalkStreamProc.RandomWalkResult> {
 
-    private static final String DESCRIPTION =
+    static final String DESCRIPTION =
         "Random Walk is an algorithm that provides random paths in a graph. " +
         "It’s similar to how a drunk person traverses a city.";
 

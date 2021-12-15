@@ -24,6 +24,7 @@ import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -35,8 +36,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.labelpropagation.LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.labelPropagation.mutate", description = LABEL_PROPAGATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagation, LabelPropagation, LabelPropagationMutateProc.MutateResult, LabelPropagationMutateConfig> {
 
     @Procedure(value = "gds.labelPropagation.mutate", mode = READ)
@@ -69,7 +72,11 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig> computationResult) {
-        return LabelPropagationProc.nodeProperties(computationResult, computationResult.config().mutateProperty(), allocationTracker());
+        return LabelPropagationProc.nodeProperties(
+            computationResult,
+            computationResult.config().mutateProperty(),
+            allocationTracker()
+        );
     }
 
     @Override

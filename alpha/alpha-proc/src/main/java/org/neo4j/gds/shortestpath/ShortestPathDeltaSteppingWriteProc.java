@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.ShortestPathDeltaStepping;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.DeltaSteppingProcResult;
 import org.neo4j.procedure.Description;
@@ -36,6 +37,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_RELATIONSHIP;
+import static org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
 /**
@@ -51,6 +54,7 @@ import static org.neo4j.procedure.Mode.WRITE;
  * <a href="http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf">http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf</a><br>
  * <a href="http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf">http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf</a>
  */
+@GdsCallable(name = "gds.alpha.shortestPath.deltaStepping.write", description = DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class ShortestPathDeltaSteppingWriteProc extends ShortestPathDeltaSteppingProc<DeltaSteppingProcResult> {
 
     @Procedure(value = "gds.alpha.shortestPath.deltaStepping.write", mode = WRITE)

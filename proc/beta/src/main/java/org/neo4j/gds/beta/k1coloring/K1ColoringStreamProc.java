@@ -24,6 +24,7 @@ import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -32,8 +33,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.beta.k1coloring.stream", description = K1ColoringProc.K1_COLORING_DESCRIPTION, executionMode = STREAM)
 public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, K1ColoringStreamProc.StreamResult, K1ColoringStreamConfig> {
 
     @Procedure(name = "gds.beta.k1coloring.stream", mode = READ)

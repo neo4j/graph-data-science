@@ -24,6 +24,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -36,13 +37,15 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.degree.mutate", description = DegreeCentralityProc.DEGREE_CENTRALITY_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityMutateProc.MutateResult, DegreeCentralityMutateConfig> {
 
     @Procedure(value = "gds.degree.mutate", mode = READ)
     @Description(DegreeCentralityProc.DEGREE_CENTRALITY_DESCRIPTION)
-    public Stream<DegreeCentralityMutateProc.MutateResult> mutate(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -71,7 +74,7 @@ public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentral
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityMutateConfig> computeResult) {
         return DegreeCentralityProc.resultBuilder(
-            new DegreeCentralityMutateProc.MutateResult.Builder(callContext, computeResult.config().concurrency()),
+            new MutateResult.Builder(callContext, computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -106,15 +109,15 @@ public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentral
             this.centralityDistribution = centralityDistribution;
         }
 
-        static final class Builder extends AbstractCentralityResultBuilder<DegreeCentralityMutateProc.MutateResult> {
+        static final class Builder extends AbstractCentralityResultBuilder<MutateResult> {
 
             Builder(ProcedureCallContext context, int concurrency) {
                 super(context, concurrency);
             }
 
             @Override
-            public DegreeCentralityMutateProc.MutateResult buildResult() {
-                return new DegreeCentralityMutateProc.MutateResult(
+            public MutateResult buildResult() {
+                return new MutateResult(
                     nodePropertiesWritten,
                     preProcessingMillis,
                     computeMillis,

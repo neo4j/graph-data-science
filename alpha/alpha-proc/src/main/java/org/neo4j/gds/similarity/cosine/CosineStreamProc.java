@@ -23,6 +23,7 @@ import org.neo4j.gds.impl.similarity.CosineAlgorithm;
 import org.neo4j.gds.impl.similarity.CosineConfig;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -31,11 +32,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
+import static org.neo4j.gds.similarity.cosine.CosineStreamProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.alpha.similarity.cosine.stream", description = DESCRIPTION, executionMode = STREAM)
 public class CosineStreamProc extends CosineProc<SimilarityResult> {
-
-    private static final String DESCRIPTION = "Cosine-similarity is an algorithm for finding similar nodes based on the cosine similarity metric.";
 
     @Procedure(name = "gds.alpha.similarity.cosine.stream", mode = READ)
     @Description(DESCRIPTION)

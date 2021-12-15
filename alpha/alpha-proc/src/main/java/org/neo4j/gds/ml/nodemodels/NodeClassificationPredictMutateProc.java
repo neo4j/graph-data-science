@@ -26,6 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -41,8 +42,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class NodeClassificationPredictMutateProc
-    extends MutatePropertyProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationMutateConfig> {
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
+
+@GdsCallable(name = "gds.alpha.ml.nodeClassification.predict.mutate", description = "Predicts classes for all nodes based on a previously trained model", executionMode = MUTATE_NODE_PROPERTY)
+public class NodeClassificationPredictMutateProc extends MutatePropertyProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationMutateConfig> {
 
     @Context
     public ModelCatalog modelCatalog;

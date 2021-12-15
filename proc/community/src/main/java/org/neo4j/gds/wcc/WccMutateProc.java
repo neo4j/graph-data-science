@@ -25,6 +25,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.MemoryEstimationExecutor;
 import org.neo4j.gds.pipeline.ProcedureExecutor;
 import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
@@ -38,14 +39,16 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.wcc.mutate", description = WCC_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateConfig, WccMutateProc.MutateResult> {
 
     @Procedure(value = "gds.wcc.mutate", mode = READ)
     @Description(WCC_DESCRIPTION)
-    public Stream<WccMutateProc.MutateResult> mutate(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -118,7 +121,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
             this.nodePropertiesWritten = nodePropertiesWritten;
         }
 
-        static class Builder extends AbstractCommunityResultBuilder<WccMutateProc.MutateResult> {
+        static class Builder extends AbstractCommunityResultBuilder<MutateResult> {
 
             Builder(
                 ProcedureCallContext context,
@@ -129,8 +132,8 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
             }
 
             @Override
-            protected WccMutateProc.MutateResult buildResult() {
-                return new WccMutateProc.MutateResult(
+            protected MutateResult buildResult() {
+                return new MutateResult(
                     maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
                     preProcessingMillis,

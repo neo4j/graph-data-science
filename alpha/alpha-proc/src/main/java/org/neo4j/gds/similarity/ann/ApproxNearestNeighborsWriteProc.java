@@ -27,6 +27,7 @@ import org.neo4j.gds.impl.similarity.Computations;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.gds.impl.similarity.SimilarityInput;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.gds.similarity.SimilarityExporter;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -40,8 +41,11 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_RELATIONSHIP;
+import static org.neo4j.gds.similarity.ann.ApproxNearestNeighborsProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
+@GdsCallable(name = "gds.alpha.ml.ann.write", description = DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class ApproxNearestNeighborsWriteProc extends ApproxNearestNeighborsProc<ApproxSimilaritySummaryResult> {
 
     @Procedure(name = "gds.alpha.ml.ann.write", mode = WRITE)

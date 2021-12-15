@@ -24,6 +24,7 @@ import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -34,9 +35,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
+@GdsCallable(name = "gds.labelPropagation.write", description = LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, LabelPropagation, LabelPropagationWriteProc.WriteResult, LabelPropagationWriteConfig> {
 
     @Procedure(value = "gds.labelPropagation.write", mode = WRITE)
@@ -59,7 +62,11 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult) {
-        return LabelPropagationProc.nodeProperties(computationResult, computationResult.config().writeProperty(), allocationTracker());
+        return LabelPropagationProc.nodeProperties(
+            computationResult,
+            computationResult.config().writeProperty(),
+            allocationTracker()
+        );
     }
 
     @Override

@@ -24,6 +24,7 @@ import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -37,8 +38,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.louvain.mutate", description = LouvainProc.LOUVAIN_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, LouvainMutateProc.MutateResult, LouvainMutateConfig> {
 
     @Procedure(value = "gds.louvain.mutate", mode = READ)
@@ -71,7 +74,11 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<Louvain, Louvain, LouvainMutateConfig> computationResult) {
-        return LouvainProc.nodeProperties(computationResult, computationResult.config().mutateProperty(), allocationTracker());
+        return LouvainProc.nodeProperties(
+            computationResult,
+            computationResult.config().mutateProperty(),
+            allocationTracker()
+        );
     }
 
     @Override

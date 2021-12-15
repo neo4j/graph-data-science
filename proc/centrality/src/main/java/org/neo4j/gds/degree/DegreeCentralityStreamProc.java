@@ -24,6 +24,7 @@ import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -33,8 +34,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.degree.DegreeCentralityProc.DEGREE_CENTRALITY_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.degree.stream", description = DEGREE_CENTRALITY_DESCRIPTION, executionMode = STREAM)
 public class DegreeCentralityStreamProc extends StreamProc<DegreeCentrality, DegreeCentrality.DegreeFunction, CentralityStreamResult, DegreeCentralityStreamConfig> {
 
     @Procedure(value = "gds.degree.stream", mode = READ)

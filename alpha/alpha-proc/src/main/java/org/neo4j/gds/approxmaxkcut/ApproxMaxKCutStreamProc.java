@@ -25,6 +25,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -34,16 +35,15 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.approxmaxkcut.ApproxMaxKCutProc.APPROX_MAX_K_CUT_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.alpha.maxkcut.stream", description = APPROX_MAX_K_CUT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class ApproxMaxKCutStreamProc extends StreamProc<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutStreamProc.StreamResult, ApproxMaxKCutStreamConfig> {
 
     @Procedure(value = "gds.alpha.maxkcut.stream", mode = READ)
     @Description(APPROX_MAX_K_CUT_DESCRIPTION)
-    public Stream<StreamResult> stream(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
+    public Stream<StreamResult> stream(@Name(value = "graphName") String graphName, @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
         return stream(compute(graphName, configuration));
     }
 

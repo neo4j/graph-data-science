@@ -25,6 +25,7 @@ import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -37,9 +38,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
+@GdsCallable(name = "gds.betweenness.write", description = BETWEENNESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteProc.WriteResult, BetweennessCentralityWriteConfig> {
 
     @Procedure(value = "gds.betweenness.write", mode = WRITE)
@@ -106,7 +109,16 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
             double maxCentrality,
             Map<String, Object> config
         ) {
-            super(centralityDistribution, sumCentrality, minCentrality, maxCentrality, preProcessingMillis, computeMillis, postProcessingMillis, config);
+            super(
+                centralityDistribution,
+                sumCentrality,
+                minCentrality,
+                maxCentrality,
+                preProcessingMillis,
+                computeMillis,
+                postProcessingMillis,
+                config
+            );
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.writeMillis = writeMillis;
         }

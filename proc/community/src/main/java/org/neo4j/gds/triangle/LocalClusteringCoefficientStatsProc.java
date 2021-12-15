@@ -24,6 +24,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -36,10 +37,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.STATS;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.localClusteringCoefficient.stats", description = STATS_DESCRIPTION, executionMode = STATS)
 public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsProc.StatsResult, LocalClusteringCoefficientStatsConfig> {
-
 
     @Procedure(value = "gds.localClusteringCoefficient.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -67,7 +70,11 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsConfig> computeResult) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
-            new LocalClusteringCoefficientStatsBuilder(callContext, computeResult.config().concurrency(), allocationTracker()),
+            new LocalClusteringCoefficientStatsBuilder(
+                callContext,
+                computeResult.config().concurrency(),
+                allocationTracker()
+            ),
             computeResult
         );
     }
@@ -104,7 +111,11 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
 
     static class LocalClusteringCoefficientStatsBuilder extends LocalClusteringCoefficientCompanion.ResultBuilder<StatsResult> {
 
-        LocalClusteringCoefficientStatsBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker allocationTracker) {
+        LocalClusteringCoefficientStatsBuilder(
+            ProcedureCallContext callContext,
+            int concurrency,
+            AllocationTracker allocationTracker
+        ) {
             super(callContext, concurrency, allocationTracker);
         }
 

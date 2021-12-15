@@ -24,6 +24,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -36,9 +37,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
+@GdsCallable(name = "gds.pageRank.write", description = PAGE_RANK_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class PageRankWriteProc extends WriteProc<PageRankAlgorithm, PageRankResult, PageRankWriteProc.WriteResult, PageRankWriteConfig> {
 
     @Procedure(value = "gds.pageRank.write", mode = WRITE)

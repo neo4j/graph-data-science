@@ -21,6 +21,7 @@ package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.spanningTrees.Prim;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -28,12 +29,15 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_NODE_PROPERTY;
+import static org.neo4j.gds.spanningtree.SpanningTreeProcMax.MAX_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
 // TODO: Always undirected
+@GdsCallable(name = "gds.alpha.spanningTree.maximum.write", description = MAX_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class SpanningTreeProcMax extends SpanningTreeProc {
 
-    private static final String MAX_DESCRIPTION =
+    static final String MAX_DESCRIPTION =
         "Maximum weight spanning tree visits all nodes that are in the same connected component as the starting node, " +
         "and returns a spanning tree of all nodes in the component where the total weight of the relationships is maximized.";
 

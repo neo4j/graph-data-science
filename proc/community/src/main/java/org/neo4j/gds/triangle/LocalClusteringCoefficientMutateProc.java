@@ -24,6 +24,7 @@ import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -35,9 +36,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.localClusteringCoefficient.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateProc.MutateResult, LocalClusteringCoefficientMutateConfig> {
 
     @Procedure(value = "gds.localClusteringCoefficient.mutate", mode = READ)
@@ -121,7 +124,11 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
 
     static class LocalClusteringCoefficientMutateBuilder extends LocalClusteringCoefficientCompanion.ResultBuilder<MutateResult> {
 
-        LocalClusteringCoefficientMutateBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker allocationTracker) {
+        LocalClusteringCoefficientMutateBuilder(
+            ProcedureCallContext callContext,
+            int concurrency,
+            AllocationTracker allocationTracker
+        ) {
             super(callContext, concurrency, allocationTracker);
         }
 

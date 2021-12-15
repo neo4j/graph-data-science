@@ -24,6 +24,7 @@ import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -35,10 +36,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
+@GdsCallable(name = "gds.localClusteringCoefficient.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteProc.WriteResult, LocalClusteringCoefficientWriteConfig> {
 
     @Procedure(value = "gds.localClusteringCoefficient.write", mode = WRITE)
@@ -84,7 +87,11 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig> computeResult) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
-            new LocalClusteringCoefficientWriteResultBuilder(callContext, computeResult.config().concurrency(), allocationTracker()),
+            new LocalClusteringCoefficientWriteResultBuilder(
+                callContext,
+                computeResult.config().concurrency(),
+                allocationTracker()
+            ),
             computeResult
         );
     }

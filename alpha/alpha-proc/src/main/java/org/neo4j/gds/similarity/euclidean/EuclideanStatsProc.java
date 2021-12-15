@@ -23,6 +23,7 @@ import org.neo4j.gds.impl.similarity.EuclideanAlgorithm;
 import org.neo4j.gds.impl.similarity.EuclideanConfig;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.similarity.AlphaSimilarityStatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -31,8 +32,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.STATS;
+import static org.neo4j.gds.similarity.euclidean.EuclideanProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.alpha.similarity.euclidean.stats", description = DESCRIPTION, executionMode = STATS)
 public class EuclideanStatsProc extends EuclideanProc<AlphaSimilarityStatsResult> {
 
     @Procedure(name = "gds.alpha.similarity.euclidean.stats", mode = READ)

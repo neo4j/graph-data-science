@@ -24,6 +24,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -37,16 +38,15 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.degree.DegreeCentralityProc.DEGREE_CENTRALITY_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.STATS;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.degree.stats", description = DEGREE_CENTRALITY_DESCRIPTION, executionMode = STATS)
 public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStatsProc.StatsResult, DegreeCentralityStatsConfig> {
 
     @Procedure(value = "gds.degree.stats", mode = READ)
     @Description(DEGREE_CENTRALITY_DESCRIPTION)
-    public Stream<DegreeCentralityStatsProc.StatsResult> stats(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
+    public Stream<StatsResult> stats(@Name(value = "graphName")String graphName, @Name(value = "configuration", defaultValue = "{}")Map<String, Object> configuration) {
         return stats(compute(graphName, configuration));
     }
 
@@ -77,7 +77,7 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStatsConfig> computeResult) {
         return DegreeCentralityProc.resultBuilder(
-            new DegreeCentralityStatsProc.StatsResult.Builder(callContext, computeResult.config().concurrency()),
+            new StatsResult.Builder(callContext, computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -97,14 +97,14 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
             this.centralityDistribution = centralityDistribution;
         }
 
-        static final class Builder extends AbstractCentralityResultBuilder<DegreeCentralityStatsProc.StatsResult> {
+        static final class Builder extends AbstractCentralityResultBuilder<StatsResult> {
             protected Builder(ProcedureCallContext callContext, int concurrency) {
                 super(callContext, concurrency);
             }
 
             @Override
-            public DegreeCentralityStatsProc.StatsResult buildResult() {
-                return new DegreeCentralityStatsProc.StatsResult(
+            public StatsResult buildResult() {
+                return new StatsResult(
                     centralityHistogram,
                     preProcessingMillis,
                     computeMillis,

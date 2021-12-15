@@ -26,6 +26,8 @@ import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
+import org.neo4j.gds.pipeline.ExecutionMode;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -37,6 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.wcc.stream", description = WCC_DESCRIPTION, executionMode = ExecutionMode.STREAM)
 public class WccStreamProc extends StreamProc<
     Wcc,
     DisjointSetStruct,
@@ -79,7 +82,7 @@ public class WccStreamProc extends StreamProc<
     protected StreamResult streamResult(
         long originalNodeId, long internalNodeId, NodeProperties nodeProperties
     ) {
-        return new WccStreamProc.StreamResult(originalNodeId, nodeProperties.longValue(internalNodeId));
+        return new StreamResult(originalNodeId, nodeProperties.longValue(internalNodeId));
     }
 
     @Override

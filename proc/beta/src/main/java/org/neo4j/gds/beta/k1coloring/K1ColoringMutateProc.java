@@ -25,6 +25,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -35,13 +36,15 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.beta.k1coloring.mutate", description = K1ColoringProc.K1_COLORING_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLongArray, K1ColoringMutateProc.MutateResult, K1ColoringMutateConfig> {
 
     @Procedure(value = "gds.beta.k1coloring.mutate", mode = READ)
     @Description(K1ColoringProc.K1_COLORING_DESCRIPTION)
-    public Stream<K1ColoringMutateProc.MutateResult> mutate(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -69,7 +72,11 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computeResult) {
-        return K1ColoringProc.resultBuilder(new MutateResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()), computeResult, callContext);
+        return K1ColoringProc.resultBuilder(new MutateResult.Builder(
+            callContext,
+            computeResult.config().concurrency(),
+            allocationTracker()
+        ), computeResult, callContext);
     }
 
     @Override

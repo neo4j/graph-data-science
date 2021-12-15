@@ -22,6 +22,7 @@ package org.neo4j.gds.pagerank;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,8 +31,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.eigenvector.stream", description = PageRankProc.EIGENVECTOR_DESCRIPTION, executionMode = STREAM)
 public class EigenvectorStreamProc extends PageRankStreamProc {
 
     @Override

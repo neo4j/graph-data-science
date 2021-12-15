@@ -25,6 +25,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -36,10 +37,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.beta.k1coloring.K1ColoringProc.K1_COLORING_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
+@GdsCallable(name = "gds.beta.k1coloring.write", description = K1ColoringProc.K1_COLORING_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1ColoringWriteProc.WriteResult, K1ColoringWriteConfig> {
+
     @Procedure(name = "gds.beta.k1coloring.write", mode = WRITE)
     @Description(K1_COLORING_DESCRIPTION)
     public Stream<WriteResult> write(

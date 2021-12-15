@@ -20,12 +20,12 @@
 package org.neo4j.gds.louvain;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -39,8 +39,10 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.louvain.stream", description = LouvainProc.LOUVAIN_DESCRIPTION, executionMode = STREAM)
 public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStreamProc.StreamResult, LouvainStreamConfig> {
 
     @Procedure(value = "gds.louvain.stream", mode = READ)
@@ -72,7 +74,7 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
     }
 
     @Override
-    protected Stream<StreamResult> stream(AlgoBaseProc.ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {
+    protected Stream<StreamResult> stream(ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();
 

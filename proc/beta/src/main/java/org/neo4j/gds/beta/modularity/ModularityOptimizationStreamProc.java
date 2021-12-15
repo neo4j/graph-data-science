@@ -23,6 +23,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -32,8 +33,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.beta.modularity.ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.beta.modularityOptimization.stream", description = MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = STREAM)
 public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationStreamProc.StreamResult, ModularityOptimizationStreamConfig> {
 
     @Procedure(name = "gds.beta.modularityOptimization.stream", mode = READ)

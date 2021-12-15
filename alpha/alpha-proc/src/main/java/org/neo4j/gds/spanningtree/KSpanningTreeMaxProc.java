@@ -21,6 +21,7 @@ package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.spanningTrees.Prim;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -28,11 +29,14 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_NODE_PROPERTY;
+import static org.neo4j.gds.spanningtree.KSpanningTreeMaxProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
+@GdsCallable(name = "gds.alpha.spanningTree.kmax.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class KSpanningTreeMaxProc extends KSpanningTreeProc {
 
-    private static final String DESCRIPTION =
+    public static final String DESCRIPTION =
         "The maximum weight spanning tree (MST) starts from a given node, and finds all its reachable nodes " +
         "and the set of relationships that connect the nodes together with the maximum possible weight.";
 

@@ -22,6 +22,7 @@ package org.neo4j.gds.traverse;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.traverse.TraverseConfig;
 import org.neo4j.gds.impl.walking.WalkResult;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -29,11 +30,14 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
+import static org.neo4j.gds.traverse.TraverseProcBFS.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.alpha.bfs.stream", description = DESCRIPTION, executionMode = STREAM)
 public class TraverseProcBFS extends TraverseProc {
 
-    private static final String DESCRIPTION =
+    static final String DESCRIPTION =
         "BFS is a traversal algorithm, which explores all of the neighbor nodes at " +
         "the present depth prior to moving on to the nodes at the next depth level.";
 

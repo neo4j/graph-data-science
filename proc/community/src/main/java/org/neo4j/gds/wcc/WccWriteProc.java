@@ -25,6 +25,8 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.pipeline.ExecutionMode;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -40,6 +42,7 @@ import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
+@GdsCallable(name = "gds.wcc.write", description = WCC_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc.WriteResult, WccWriteConfig> {
 
     @Procedure(value = "gds.wcc.write", mode = WRITE)
@@ -82,7 +85,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
     }
 
     @Override
-    protected AbstractResultBuilder<WccWriteProc.WriteResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computeResult) {
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computeResult) {
         return WccProc.resultBuilder(
             new WriteResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
             computeResult
@@ -117,15 +120,15 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
             this.nodePropertiesWritten = nodePropertiesWritten;
         }
 
-        static class Builder extends AbstractCommunityResultBuilder<WccWriteProc.WriteResult> {
+        static class Builder extends AbstractCommunityResultBuilder<WriteResult> {
 
             Builder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
                 super(context, concurrency, allocationTracker);
             }
 
             @Override
-            protected WccWriteProc.WriteResult buildResult() {
-                return new WccWriteProc.WriteResult(
+            protected WriteResult buildResult() {
+                return new WriteResult(
                     maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
                     preProcessingMillis,

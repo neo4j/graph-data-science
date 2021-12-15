@@ -21,6 +21,7 @@ package org.neo4j.gds.shortestpath;
 
 import org.neo4j.gds.impl.ShortestPathDeltaStepping;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -28,6 +29,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
+import static org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 /**
@@ -43,6 +46,7 @@ import static org.neo4j.procedure.Mode.READ;
  * <a href="http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf">http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf</a><br>
  * <a href="http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf">http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf</a>
  */
+@GdsCallable(name = "gds.alpha.shortestPath.deltaStepping.stream", description = DESCRIPTION, executionMode = STREAM)
 public class ShortestPathDeltaSteppingStreamProc extends ShortestPathDeltaSteppingProc<ShortestPathDeltaStepping.DeltaSteppingResult> {
 
     @Procedure(name = "gds.alpha.shortestPath.deltaStepping.stream", mode = READ)

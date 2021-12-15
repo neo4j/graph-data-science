@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.influenceMaximization.CELF;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.InfluenceMaximizationResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,10 +37,14 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.influenceMaximization.CELFProc.DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.alpha.influenceMaximization.celf.stream", description = DESCRIPTION, executionMode = STREAM)
 public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConfig, InfluenceMaximizationResult> {
-    private static final String DESCRIPTION = "The Cost Effective Lazy Forward (CELF) algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
+
+    public static final String DESCRIPTION = "The Cost Effective Lazy Forward (CELF) algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
 
     @Procedure(name = "gds.alpha.influenceMaximization.celf.stream", mode = READ)
     @Description(DESCRIPTION)
