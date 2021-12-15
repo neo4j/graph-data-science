@@ -99,7 +99,6 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
         ComputationResult<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig> computationResult
     ) {
         return new TrainResult(
-            "",
             model,
             computationResult.computeMillis(),
             computationResult.graph().nodeCount(),
