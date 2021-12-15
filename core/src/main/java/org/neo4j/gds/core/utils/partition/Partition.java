@@ -69,6 +69,11 @@ public class Partition {
     }
 
     @Override
+    public String toString() {
+        return "Partition{start:" + startNode + ", length:" + nodeCount + '}';
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(startNode, nodeCount);
     }

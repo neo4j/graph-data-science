@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -186,7 +187,12 @@ class Node2VecTest extends AlgoTestBase {
         var config = ImmutableNode2VecStreamConfig
             .builder()
             .embeddingDimension(embeddingDimension)
-            .iterations(2)
+            .iterations(1)
+            .negativeSamplingRate(1)
+            .windowSize(1)
+            .walksPerNode(1)
+            .walkLength(20)
+            .walkBufferSize(50)
             .randomSeed(1337L)
             .build();
 
@@ -204,9 +210,13 @@ class Node2VecTest extends AlgoTestBase {
             AllocationTracker.empty()
         ).compute();
 
+        SoftAssertions softly = new SoftAssertions();
+
         for (long node = 0; node < graph.nodeCount(); node++) {
-            assertThat(otherEmbeddings.get(node)).isEqualTo(embeddings.get(node));
+            softly.assertThat(otherEmbeddings.get(node)).isEqualTo(embeddings.get(node));
         }
+
+        softly.assertAll();
     }
 
     static Stream<Arguments> graphs() {
