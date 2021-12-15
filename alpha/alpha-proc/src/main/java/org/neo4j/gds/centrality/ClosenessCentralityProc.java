@@ -24,102 +24,17 @@ import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.closeness.ClosenessCentralityConfig;
 import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.Procedure;
 
-import java.util.Map;
-import java.util.stream.Stream;
+public abstract class ClosenessCentralityProc<PROC_RESULT> extends NodePropertiesWriter<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig, PROC_RESULT> {
 
-import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
-
-public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig, MSClosenessCentrality.Result> {
-
-    private static final String DESCRIPTION =
+    protected static final String DESCRIPTION =
         "Closeness centrality is a way of detecting nodes that are " +
         "able to spread information very efficiently through a graph.";
 
-    @Procedure(name = "gds.alpha.closeness.stream", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<MSClosenessCentrality.Result> stream(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-
-        MSClosenessCentrality algorithm = computationResult.algorithm();
-        Graph graph = computationResult.graph();
-
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.empty();
-        }
-
-        graph.release();
-        return algorithm.resultStream();
-    }
-
-    @Procedure(value = "gds.alpha.closeness.write", mode = WRITE)
-    @Description(DESCRIPTION)
-    public Stream<CentralityScore.Stats> write(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-
-        MSClosenessCentrality algorithm = computationResult.algorithm();
-        ClosenessCentralityConfig config = computationResult.config();
-        Graph graph = computationResult.graph();
-
-        AbstractCentralityResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder(callContext, config.concurrency());
-
-        builder.withNodeCount(graph.nodeCount())
-            .withConfig(config)
-            .withComputeMillis(computationResult.computeMillis())
-            .withCreateMillis(computationResult.createMillis());
-
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.of(builder.build());
-        }
-
-        builder.withCentralityFunction(algorithm.getCentrality()::get);
-
-        try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
-            var writeConcurrency = computationResult.config().writeConcurrency();
-            var progressTracker = new TaskProgressTracker(
-                NodePropertyExporter.baseTask("ClosenessCentrality", graph.nodeCount()),
-                log,
-                writeConcurrency,
-                taskRegistryFactory
-            );
-            var exporter = nodePropertyExporterBuilder
-                .withIdMapping(graph)
-                .withTerminationFlag(algorithm.getTerminationFlag())
-                .withProgressTracker(progressTracker)
-                .parallel(Pools.DEFAULT, writeConcurrency)
-                .build();
-            algorithm.export(config.writeProperty(), exporter, progressTracker);
-        }
-
-        graph.release();
-        return Stream.of(builder.build());
-    }
 
     @Override
     protected ClosenessCentralityConfig newConfig(String username, CypherMapWrapper config) {

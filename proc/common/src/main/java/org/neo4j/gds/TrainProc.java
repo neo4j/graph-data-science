@@ -25,6 +25,7 @@ import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
@@ -32,8 +33,6 @@ import org.neo4j.procedure.Context;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
@@ -51,18 +50,22 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
 
     protected abstract String modelType();
 
-    protected <T> Stream<T> trainAndStoreModelWithResult(
-        String graphName,
-        Map<String, Object> configuration,
-        BiFunction<
-            Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>,
-            ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG>,
-            T> resultConstructor
-    ) {
-        var result = compute(graphName, configuration);
-        var model = Objects.requireNonNull(result.result());
-        modelCatalog.set(model);
-        return Stream.of(resultConstructor.apply(model, result));
+    protected abstract PROC_RESULT constructResult(
+        Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO> model,
+        ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG> computationResult
+    );
+
+    @Override
+    public ComputationResultConsumer<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            var model = computationResult.result();
+            modelCatalog.set(model);
+            return Stream.of(constructResult(model, computationResult));
+        };
+    }
+
+    protected Stream<PROC_RESULT> trainAndStoreModelWithResult(ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG> computationResult) {
+        return computationResultConsumer().consume(computationResult, executionContext());
     }
 
     @Override
@@ -104,26 +107,23 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     @SuppressWarnings("unused")
     public static class TrainResult {
 
-        public final String graphName;
         public final Map<String, Object> modelInfo;
         public final Map<String, Object> configuration;
         public final long trainMillis;
 
         public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends ToMapConvertible> TrainResult(
-            String graphName,
             Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO> trainedModel,
             long trainMillis,
             long nodeCount,
             long relationshipCount
         ) {
-
             TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
 
-            this.graphName = graphName;
             this.modelInfo = new HashMap<>();
             modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
             modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
             modelInfo.putAll(trainedModel.customInfo().toMap());
+
             this.configuration = trainConfig.toMap();
             this.trainMillis = trainMillis;
         }

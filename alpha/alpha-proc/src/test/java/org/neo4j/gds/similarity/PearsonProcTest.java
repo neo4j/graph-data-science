@@ -25,11 +25,15 @@ import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.impl.similarity.PearsonAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.impl.similarity.WeightedInput;
+import org.neo4j.gds.similarity.pearson.PearsonStatsProc;
+import org.neo4j.gds.similarity.pearson.PearsonStreamProc;
+import org.neo4j.gds.similarity.pearson.PearsonWriteProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
@@ -105,7 +109,9 @@ class PearsonProcTest extends AlphaSimilarityProcTest<PearsonAlgorithm, Weighted
 
     @BeforeEach
     void beforeClass() throws Exception {
-        registerProcedures(PearsonProc.class);
+        registerProcedures(PearsonStatsProc.class);
+        registerProcedures(PearsonStreamProc.class);
+        registerProcedures(PearsonWriteProc.class);
         registerFunctions(IsFiniteFunc.class);
         runQuery(buildDatabaseQuery());
     }
@@ -628,7 +634,7 @@ class PearsonProcTest extends AlphaSimilarityProcTest<PearsonAlgorithm, Weighted
     }
 
     @Override
-    Class<? extends AlphaSimilarityProc<PearsonAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
-        return PearsonProc.class;
+    List<Class<? extends AlphaSimilarityProc<PearsonAlgorithm, ? extends SimilarityConfig, ?>>> getProcedureClazzes() {
+        return List.of(PearsonStreamProc.class, PearsonWriteProc.class);
     }
 }

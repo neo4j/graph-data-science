@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.triangle.TriangleStream;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
 import org.neo4j.gds.pipeline.validation.GraphCreateConfigValidations;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
@@ -51,21 +52,8 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig> computationResult =
-            compute(graphName, configuration, false, false);
-
-        Graph graph = computationResult.graph();
-
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.empty();
-        }
-
-        var resultStream = computationResult.result();
-        try(var statement = transaction.acquireStatement()) {
-            statement.registerCloseableResource(resultStream);
-        }
-        return resultStream;
+        var computationResult = compute(graphName, configuration, false, false);
+        return computationResultConsumer().consume(computationResult, executionContext());
     }
 
     @Override
@@ -101,6 +89,24 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
                 return TriangleStream.create(graph, Pools.DEFAULT, configuration.concurrency())
                     .withTerminationFlag(TerminationFlag.wrap(transaction));
             }
+        };
+    }
+
+    @Override
+    public ComputationResultConsumer<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig, Stream<TriangleStream.Result>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            Graph graph = computationResult.graph();
+
+            if (graph.isEmpty()) {
+                graph.release();
+                return Stream.empty();
+            }
+
+            var resultStream = computationResult.result();
+            try(var statement = transaction.acquireStatement()) {
+                statement.registerCloseableResource(resultStream);
+            }
+            return resultStream;
         };
     }
 }

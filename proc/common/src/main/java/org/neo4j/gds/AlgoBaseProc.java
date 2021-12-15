@@ -119,11 +119,6 @@ public abstract class AlgoBaseProc<
         return ValidationConfiguration.empty();
     }
 
-    @Override
-    public <T extends ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>>> T computationResultConsumer() {
-        return null;
-    }
-
     protected Validator<CONFIG> validator() {
         return new Validator<>(validationConfig());
     }

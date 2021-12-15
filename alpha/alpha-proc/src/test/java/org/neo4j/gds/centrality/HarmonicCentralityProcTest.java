@@ -56,7 +56,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(HarmonicCentralityProc.class, GraphCreateProc.class);
+        registerProcedures(HarmonicCentralityWriteProc.class, HarmonicCentralityStreamProc.class, GraphCreateProc.class);
     }
 
     @Test
@@ -112,7 +112,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
     @Test
     void testProgressTracking() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        TestProcedureRunner.applyOnProcedure(db, HarmonicCentralityProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, HarmonicCentralityWriteProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));

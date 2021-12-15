@@ -24,6 +24,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -50,20 +51,7 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var result = compute(graphName, configuration);
-
-        Graph graph = result.graph();
-
-        if (result.isGraphEmpty()) {
-            graph.release();
-            return Stream.empty();
-        }
-
-        return result.result().stream()
-            .map(predictedLink -> new Result(
-                graph.toOriginalNodeId(predictedLink.sourceId()),
-                graph.toOriginalNodeId(predictedLink.targetId()),
-                predictedLink.probability()
-            ));
+        return computationResultConsumer().consume(result, executionContext());
     }
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.stream.estimate", mode = READ)
@@ -88,6 +76,25 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     @Override
     public GraphAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictStreamConfig> algorithmFactory() {
         return new LinkPredictionPredictFactory<>(modelCatalog);
+    }
+
+    @Override
+    public ComputationResultConsumer<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictStreamConfig, Stream<Result>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            Graph graph = computationResult.graph();
+
+            if (computationResult.isGraphEmpty()) {
+                graph.release();
+                return Stream.empty();
+            }
+
+            return computationResult.result().stream()
+                .map(predictedLink -> new Result(
+                    graph.toOriginalNodeId(predictedLink.sourceId()),
+                    graph.toOriginalNodeId(predictedLink.targetId()),
+                    predictedLink.probability()
+                ));
+        };
     }
 
     @SuppressWarnings("unused")

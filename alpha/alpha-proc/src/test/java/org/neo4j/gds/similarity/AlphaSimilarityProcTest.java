@@ -39,6 +39,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -65,17 +66,20 @@ public abstract class AlphaSimilarityProcTest<
     INPUT extends SimilarityInput
     > extends BaseProcTest implements GraphCreateConfigSupport {
 
-    abstract Class<? extends AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig>> getProcedureClazz();
+    abstract List<Class<? extends AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig, ?>>> getProcedureClazzes();
 
-    void applyOnProcedure(Consumer<AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig>> func) {
-        try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(db)) {
-            var proc = TestProcedureRunner.instantiateProcedure(
-                db,
-                getProcedureClazz(),
-                transactions.tx()
-            );
-            func.accept(proc);
-        }
+    void applyOnProcedure(Consumer<AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig, ?>> func) {
+        getProcedureClazzes().forEach(clazz -> {
+            try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(db)) {
+                var proc = TestProcedureRunner.instantiateProcedure(
+                    db,
+                    clazz,
+                    transactions.tx()
+                );
+                func.accept(proc);
+            }
+        });
+
     }
 
     private String getProcedureMethodName(Method method) {
@@ -88,7 +92,7 @@ public abstract class AlphaSimilarityProcTest<
         return name;
     }
 
-    private Stream<Method> getProcMethods(AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig> proc) {
+    private Stream<Method> getProcMethods(AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig, ?> proc) {
         return Arrays.stream(proc.getClass().getDeclaredMethods())
             .filter(method ->
                 method.getDeclaredAnnotation(Procedure.class) != null &&
@@ -198,6 +202,7 @@ public abstract class AlphaSimilarityProcTest<
             assertTrue(graphStore.nodeLabels().isEmpty());
             assertTrue(graphStore.relationshipTypes().isEmpty());
             assertTrue(graphStore.getGraph(Set.of(), Set.of(), Optional.empty()) instanceof NullGraph);
+            GraphStoreCatalog.removeAllLoadedGraphs();
         });
     }
 

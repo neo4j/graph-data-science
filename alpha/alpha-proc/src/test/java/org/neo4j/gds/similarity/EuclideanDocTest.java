@@ -26,6 +26,9 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.IsFiniteFunc;
+import org.neo4j.gds.similarity.euclidean.EuclideanStatsProc;
+import org.neo4j.gds.similarity.euclidean.EuclideanStreamProc;
+import org.neo4j.gds.similarity.euclidean.EuclideanWriteProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -70,7 +73,9 @@ public class EuclideanDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(EuclideanProc.class);
+        registerProcedures(EuclideanStatsProc.class);
+        registerProcedures(EuclideanStreamProc.class);
+        registerProcedures(EuclideanWriteProc.class);
         registerFunctions(AsNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
         runQuery(DB_CYPHER);
     }

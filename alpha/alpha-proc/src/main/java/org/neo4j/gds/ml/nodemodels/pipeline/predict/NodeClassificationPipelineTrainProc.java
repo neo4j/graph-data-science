@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
@@ -59,7 +60,7 @@ public class NodeClassificationPipelineTrainProc
     ) {
         // TODO: this will go away once node property steps do not rely on this method
         configuration.put("graphName", graphName);
-        return trainAndStoreModelWithResult(graphName, configuration, (model, result) -> new MLTrainResult(model, result.computeMillis()));
+        return trainAndStoreModelWithResult(compute(graphName, configuration));
     }
 
     @Override
@@ -75,5 +76,13 @@ public class NodeClassificationPipelineTrainProc
     @Override
     protected String modelType() {
         return NodeClassificationTrain.MODEL_TYPE;
+    }
+
+    @Override
+    protected MLTrainResult constructResult(
+        Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
+        ComputationResult<NodeClassificationTrainPipelineExecutor, Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo>, NodeClassificationPipelineTrainConfig> computationResult
+    ) {
+        return new MLTrainResult(model, computationResult.computeMillis());
     }
 }

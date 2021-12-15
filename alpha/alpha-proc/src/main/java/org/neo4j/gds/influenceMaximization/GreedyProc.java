@@ -27,7 +27,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.influenceMaximization.Greedy;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.results.InfluenceMaximizationResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -48,40 +48,8 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
 
-        ComputationResult<Greedy, Greedy, InfluenceMaximizationConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-
-        if (computationResult.graph().isEmpty()) {
-            computationResult.graph().release();
-            return Stream.empty();
-        }
-
-        computationResult.graph().release();
-        return computationResult.algorithm().resultStream();
-    }
-
-//    @Procedure(name = "gds.alpha.influenceMaximization.greedy.stats", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<InfluenceMaximizationResult.Stats> stats(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<Greedy, Greedy, InfluenceMaximizationConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-
-        InfluenceMaximizationConfig config = computationResult.config();
-        Graph graph = computationResult.graph();
-
-        AbstractResultBuilder<InfluenceMaximizationResult.Stats> builder = new InfluenceMaximizationResult.Stats.Builder()
-            .withNodeCount(graph.nodeCount())
-            .withConfig(config)
-            .withComputeMillis(computationResult.computeMillis());
-
-        return Stream.of(builder.build());
+        var computationResult = compute(graphName, configuration);
+        return computationResultConsumer().consume(computationResult, executionContext());
     }
 
     @Override
@@ -114,6 +82,19 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
                     allocationTracker
                 );
             }
+        };
+    }
+
+    @Override
+    public ComputationResultConsumer<Greedy, Greedy, InfluenceMaximizationConfig, Stream<InfluenceMaximizationResult>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            if (computationResult.graph().isEmpty()) {
+                computationResult.graph().release();
+                return Stream.empty();
+            }
+
+            computationResult.graph().release();
+            return computationResult.algorithm().resultStream();
         };
     }
 }

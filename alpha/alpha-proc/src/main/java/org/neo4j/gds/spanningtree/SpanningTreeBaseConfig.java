@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.spanningtree;
 
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
+
+import java.util.function.DoubleUnaryOperator;
 
 public interface SpanningTreeBaseConfig extends
     AlgoBaseConfig,
@@ -29,4 +32,7 @@ public interface SpanningTreeBaseConfig extends
     RelationshipWeightConfig
 {
     long startNodeId();
+
+    @Configuration.Parameter
+    DoubleUnaryOperator minMax();
 }

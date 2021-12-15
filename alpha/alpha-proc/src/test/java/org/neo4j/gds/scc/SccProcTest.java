@@ -71,7 +71,7 @@ class SccProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(SccProc.class, GraphCreateProc.class);
+        registerProcedures(SccWriteProc.class, SccStreamProc.class, GraphCreateProc.class);
     }
 
     @Test
@@ -144,7 +144,7 @@ class SccProcTest extends BaseProcTest {
     @Test
     void testProgressTracking() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        TestProcedureRunner.applyOnProcedure(db, SccProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, SccWriteProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));

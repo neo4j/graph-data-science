@@ -25,6 +25,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.PathFactory;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkAlgorithmFactory;
@@ -57,27 +58,7 @@ public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var computationResult = compute(graphName, configuration, false, false);
-
-        if (computationResult.graph().isEmpty()) {
-            computationResult.graph().release();
-            return Stream.empty();
-        }
-
-        var returnPath = callContext
-            .outputFields()
-            .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
-
-        Function<List<Long>, Path> pathCreator = returnPath
-            ? (List<Long> nodes) -> PathFactory.create(procedureTransaction, nodes, RelationshipType.withName("NEXT"))
-            : (List<Long> nodes) -> null;
-
-        return computationResult.result()
-            .map(nodes -> {
-                var translatedNodes = translateInternalToNeoIds(nodes, computationResult.graph());
-                var path = pathCreator.apply(translatedNodes);
-
-                return new RandomWalkResult(translatedNodes, path);
-            });
+        return computationResultConsumer().consume(computationResult, executionContext());
     }
 
     @Procedure(value = "gds.beta.randomWalk.stream.estimate", mode = READ)
@@ -97,6 +78,32 @@ public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]
     @Override
     public GraphAlgorithmFactory<RandomWalk, RandomWalkStreamConfig> algorithmFactory() {
         return new RandomWalkAlgorithmFactory<>();
+    }
+
+    @Override
+    public ComputationResultConsumer<RandomWalk, Stream<long[]>, RandomWalkStreamConfig, Stream<RandomWalkResult>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            if (computationResult.graph().isEmpty()) {
+                computationResult.graph().release();
+                return Stream.empty();
+            }
+
+            var returnPath = callContext
+                .outputFields()
+                .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
+
+            Function<List<Long>, Path> pathCreator = returnPath
+                ? (List<Long> nodes) -> PathFactory.create(procedureTransaction, nodes, RelationshipType.withName("NEXT"))
+                : (List<Long> nodes) -> null;
+
+            return computationResult.result()
+                .map(nodes -> {
+                    var translatedNodes = translateInternalToNeoIds(nodes, computationResult.graph());
+                    var path = pathCreator.apply(translatedNodes);
+
+                    return new RandomWalkResult(translatedNodes, path);
+                });
+        };
     }
 
     private List<Long> translateInternalToNeoIds(long[] nodes, IdMapping nodeMapping) {

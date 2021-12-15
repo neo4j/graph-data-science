@@ -22,6 +22,8 @@ package org.neo4j.gds.spanningtree;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.function.DoubleUnaryOperator;
+
 @Configuration
 public interface KSpanningTreeConfig extends SpanningTreeBaseConfig {
 
@@ -32,8 +34,7 @@ public interface KSpanningTreeConfig extends SpanningTreeBaseConfig {
         return KSpanningTreeProc.DEFAULT_CLUSTER_PROPERTY;
     }
 
-    static KSpanningTreeConfig of(CypherMapWrapper userInput) {
-        return new KSpanningTreeConfigImpl(userInput);
+    static KSpanningTreeConfig of(DoubleUnaryOperator minMax, CypherMapWrapper userInput) {
+        return new KSpanningTreeConfigImpl(minMax, userInput);
     }
-
 }

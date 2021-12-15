@@ -23,6 +23,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.pipeline.validation.AfterLoadValidation;
@@ -50,8 +51,7 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return trainAndStoreModelWithResult(
-            graphName, configuration,
-            (model, result) -> new MLTrainResult(model, result.computeMillis())
+            compute(graphName, configuration)
         );
     }
 
@@ -101,4 +101,11 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
         return new NodeClassificationTrainAlgorithmFactory();
     }
 
+    @Override
+    protected MLTrainResult constructResult(
+        Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> model,
+        ComputationResult<NodeClassificationTrain, Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>, NodeClassificationTrainConfig> computationResult
+    ) {
+        return  new MLTrainResult(model, computationResult.computeMillis());
+    }
 }

@@ -31,6 +31,7 @@ import org.neo4j.gds.impl.msbfs.AllShortestPathsStream;
 import org.neo4j.gds.impl.msbfs.MSBFSASPAlgorithm;
 import org.neo4j.gds.impl.msbfs.MSBFSAllShortestPaths;
 import org.neo4j.gds.impl.msbfs.WeightedAllShortestPaths;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -52,13 +53,7 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
     ) {
         ComputationResult<MSBFSASPAlgorithm, Stream<AllShortestPathsStream.Result>, AllShortestPathsConfig> computationResult =
             compute(graphName, configuration, false, false);
-
-        if (computationResult.isGraphEmpty()) {
-            computationResult.graph().release();
-            return Stream.empty();
-        }
-
-        return computationResult.result();
+        return computationResultConsumer().consume(computationResult, executionContext());
     }
 
     @Override
@@ -98,6 +93,18 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
                         .withTerminationFlag(TerminationFlag.wrap(transaction));
                 }
             }
+        };
+    }
+
+    @Override
+    public ComputationResultConsumer<MSBFSASPAlgorithm, Stream<AllShortestPathsStream.Result>, AllShortestPathsConfig, Stream<AllShortestPathsStream.Result>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            if (computationResult.isGraphEmpty()) {
+                computationResult.graph().release();
+                return Stream.empty();
+            }
+
+            return computationResult.result();
         };
     }
 }

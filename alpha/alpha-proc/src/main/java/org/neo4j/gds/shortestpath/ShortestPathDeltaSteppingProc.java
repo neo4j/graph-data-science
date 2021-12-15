@@ -22,27 +22,11 @@ package org.neo4j.gds.shortestpath;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.ShortestPathDeltaStepping;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.DeltaSteppingProcResult;
 import org.neo4j.gds.utils.InputNodeValidator;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.Procedure;
-
-import java.util.Map;
-import java.util.stream.Stream;
-
-import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
 /**
  * Delta-Stepping is a non-negative single source shortest paths (NSSSP) algorithm
@@ -57,86 +41,9 @@ import static org.neo4j.procedure.Mode.WRITE;
  * <a href="http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf">http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf</a><br>
  * <a href="http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf">http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf</a>
  */
-public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig, ShortestPathDeltaStepping.DeltaSteppingResult> {
+public abstract class ShortestPathDeltaSteppingProc<PROC_RESULT> extends NodePropertiesWriter<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig, PROC_RESULT> {
 
-    private static final String DESCRIPTION = "Delta-Stepping is a non-negative single source shortest paths (NSSSP) algorithm.";
-
-    @Procedure(name = "gds.alpha.shortestPath.deltaStepping.stream", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<ShortestPathDeltaStepping.DeltaSteppingResult> stream(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-
-        ComputationResult<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-
-        if (computationResult.graph().isEmpty()) {
-            return Stream.empty();
-        }
-
-        return computationResult.result().resultStream();
-    }
-
-    @Procedure(value = "gds.alpha.shortestPath.deltaStepping.write", mode = WRITE)
-    @Description(DESCRIPTION)
-    public Stream<DeltaSteppingProcResult> deltaStepping(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-
-        Graph graph = computationResult.graph();
-        ShortestPathDeltaStepping algorithm = computationResult.algorithm();
-        ShortestPathDeltaSteppingConfig config = computationResult.config();
-
-        AbstractResultBuilder<DeltaSteppingProcResult> builder = DeltaSteppingProcResult.builder()
-            .withNodeCount(graph.nodeCount());
-
-        if (graph.isEmpty()) {
-            return Stream.empty();
-        }
-
-        try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
-            var shortestPaths = algorithm.getShortestPaths();
-
-            var properties = new DoubleNodeProperties() {
-                @Override
-                public long size() {
-                    return computationResult.graph().nodeCount();
-                }
-
-                @Override
-                public double doubleValue(long nodeId) {
-                    return shortestPaths[(int) nodeId];
-                }
-            };
-
-            var progressTracker = new TaskProgressTracker(
-                NodePropertyExporter.baseTask("ShortestPathDeltaStepping", graph.nodeCount()),
-                log,
-                config.writeConcurrency(),
-                taskRegistryFactory
-            );
-            nodePropertyExporterBuilder
-                .withIdMapping(graph)
-                .withTerminationFlag(algorithm.getTerminationFlag())
-                .withProgressTracker(progressTracker)
-                .parallel(Pools.DEFAULT, config.writeConcurrency())
-                .build()
-                .write(
-                    config.writeProperty(),
-                    properties
-                );
-        }
-
-        return Stream.of(builder.build());
-    }
+    protected static final String DESCRIPTION = "Delta-Stepping is a non-negative single source shortest paths (NSSSP) algorithm.";
 
     @Override
     protected ShortestPathDeltaSteppingConfig newConfig(String username, CypherMapWrapper config) {

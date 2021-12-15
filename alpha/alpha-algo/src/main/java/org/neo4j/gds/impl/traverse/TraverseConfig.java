@@ -46,7 +46,10 @@ public interface TraverseConfig extends AlgoBaseConfig, RelationshipWeightConfig
         return -1L;
     }
 
-    static TraverseConfig of(CypherMapWrapper userInput) {
-        return new TraverseConfigImpl(userInput);
+    @Configuration.Parameter
+    boolean isBfs();
+
+    static TraverseConfig of(boolean isBfs, CypherMapWrapper userInput) {
+        return new TraverseConfigImpl(isBfs, userInput);
     }
 }

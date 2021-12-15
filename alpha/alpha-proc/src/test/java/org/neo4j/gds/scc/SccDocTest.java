@@ -51,7 +51,7 @@ class SccDocTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(SccProc.class, GraphCreateProc.class);
+        registerProcedures(SccWriteProc.class, SccStreamProc.class, GraphCreateProc.class);
         registerFunctions(AsNodeFunc.class);
 
         runQuery("CALL gds.graph.create('graph', 'User', 'FOLLOW')");

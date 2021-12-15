@@ -22,7 +22,6 @@ package org.neo4j.gds.spanningtree;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -32,107 +31,17 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.impl.spanningTrees.Prim;
 import org.neo4j.gds.impl.spanningTrees.SpanningGraph;
 import org.neo4j.gds.impl.spanningTrees.SpanningTree;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.utils.InputNodeValidator;
 import org.neo4j.procedure.Context;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.Procedure;
 
-import java.util.Map;
-import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
-
 // TODO: Always undirected
-public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningTreeConfig, Prim.Result> {
-
-    private static final String MIN_DESCRIPTION =
-        "Minimum weight spanning tree visits all nodes that are in the same connected component as the starting node, " +
-        "and returns a spanning tree of all nodes in the component where the total weight of the relationships is minimized.";
-
-    private static final String MAX_DESCRIPTION =
-        "Maximum weight spanning tree visits all nodes that are in the same connected component as the starting node, " +
-        "and returns a spanning tree of all nodes in the component where the total weight of the relationships is maximized.";
-
-    static DoubleUnaryOperator minMax;
+public abstract class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningTreeConfig, Prim.Result> {
 
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
-
-    @Procedure(value = "gds.alpha.spanningTree.write", mode = WRITE)
-    @Description(MIN_DESCRIPTION)
-    public Stream<Prim.Result> spanningTree(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        minMax = Prim.MIN_OPERATOR;
-        return computeAndWrite(graphName, configuration);
-    }
-
-    @Procedure(value = "gds.alpha.spanningTree.minimum.write", mode = WRITE)
-    @Description(MIN_DESCRIPTION)
-    public Stream<Prim.Result> minimumSpanningTree(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        minMax = Prim.MIN_OPERATOR;
-        return computeAndWrite(graphName, configuration);
-    }
-
-    @Procedure(value = "gds.alpha.spanningTree.maximum.write", mode = WRITE)
-    @Description(MAX_DESCRIPTION)
-    public Stream<Prim.Result> maximumSpanningTree(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        minMax = Prim.MAX_OPERATOR;
-        return computeAndWrite(graphName, configuration);
-    }
-
-    private Stream<Prim.Result> computeAndWrite(String graphName, Map<String, Object> configuration) {
-        ComputationResult<Prim, SpanningTree, SpanningTreeConfig> computationResult = compute(graphName, configuration);
-
-        Graph graph = computationResult.graph();
-        Prim prim = computationResult.algorithm();
-        SpanningTree spanningTree = computationResult.result();
-        SpanningTreeConfig config = computationResult.config();
-
-        Prim.Builder builder = new Prim.Builder();
-
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.of(builder.build());
-        }
-
-        builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
-        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-
-            var spanningGraph = new SpanningGraph(graph, spanningTree);
-            var progressTracker = new TaskProgressTracker(
-                RelationshipExporter.baseTask("SpanningTree", graph.relationshipCount()),
-                log,
-                RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
-                taskRegistryFactory
-            );
-
-            relationshipExporterBuilder
-                .withGraph(spanningGraph)
-                .withIdMapping(spanningGraph)
-                .withTerminationFlag(prim.getTerminationFlag())
-                .withProgressTracker(progressTracker)
-                .build()
-                .write(config.writeProperty(), config.weightWriteProperty());
-        }
-        builder.withComputeMillis(computationResult.computeMillis());
-        builder.withCreateMillis(computationResult.createMillis());
-        return Stream.of(builder.build());
-    }
-
-    @Override
-    protected SpanningTreeConfig newConfig(String username, CypherMapWrapper config) {
-        return SpanningTreeConfig.of(config);
-    }
 
     @Override
     public GraphAlgorithmFactory<Prim, SpanningTreeConfig> algorithmFactory() {
@@ -150,8 +59,48 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
                 ProgressTracker progressTracker
             ) {
                 InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);
-                return new Prim(graph, graph, minMax, configuration.startNodeId(), progressTracker);
+                return new Prim(graph, graph, configuration.minMax(), configuration.startNodeId(), progressTracker);
             }
+        };
+    }
+
+    @Override
+    public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeConfig, Stream<Prim.Result>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            Graph graph = computationResult.graph();
+            Prim prim = computationResult.algorithm();
+            SpanningTree spanningTree = computationResult.result();
+            SpanningTreeConfig config = computationResult.config();
+
+            Prim.Builder builder = new Prim.Builder();
+
+            if (graph.isEmpty()) {
+                graph.release();
+                return Stream.of(builder.build());
+            }
+
+            builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
+            try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
+
+                var spanningGraph = new SpanningGraph(graph, spanningTree);
+                var progressTracker = new TaskProgressTracker(
+                    RelationshipExporter.baseTask("SpanningTree", graph.relationshipCount()),
+                    log,
+                    RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
+                    taskRegistryFactory
+                );
+
+                relationshipExporterBuilder
+                    .withGraph(spanningGraph)
+                    .withIdMapping(spanningGraph)
+                    .withTerminationFlag(prim.getTerminationFlag())
+                    .withProgressTracker(progressTracker)
+                    .build()
+                    .write(config.writeProperty(), config.weightWriteProperty());
+            }
+            builder.withComputeMillis(computationResult.computeMillis());
+            builder.withCreateMillis(computationResult.createMillis());
+            return Stream.of(builder.build());
         };
     }
 }

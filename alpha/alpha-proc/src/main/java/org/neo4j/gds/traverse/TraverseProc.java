@@ -22,57 +22,22 @@ package org.neo4j.gds.traverse;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.traverse.Traverse;
 import org.neo4j.gds.impl.traverse.TraverseConfig;
 import org.neo4j.gds.impl.walking.WalkPath;
 import org.neo4j.gds.impl.walking.WalkResult;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.Procedure;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.InputNodeValidator.validateEndNode;
 import static org.neo4j.gds.utils.InputNodeValidator.validateStartNode;
-import static org.neo4j.procedure.Mode.READ;
 
-public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig, WalkResult> {
-
-    private static final String DESCRIPTION =
-        "BFS is a traversal algorithm, which explores all of the neighbor nodes at " +
-        "the present depth prior to moving on to the nodes at the next depth level.";
-    private static boolean isBfs;
-
-    @Procedure(name = "gds.alpha.bfs.stream", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<WalkResult> bfs(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        isBfs = true;
-        return stream(graphName, configuration);
-    }
-
-    @Procedure(name = "gds.alpha.dfs.stream", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<WalkResult> dfs(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        isBfs = false;
-        return stream(graphName, configuration);
-    }
-
-    @Override
-    protected TraverseConfig newConfig(String username, CypherMapWrapper userInput) {
-        return TraverseConfig.of(userInput);
-    }
+public abstract class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig, WalkResult> {
 
     @Override
     public GraphAlgorithmFactory<Traverse, TraverseConfig> algorithmFactory() {
@@ -113,25 +78,23 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
 
                 var mappedStartNodeId = graph.toMappedNodeId(configuration.startNode());
 
-                return isBfs
+                return configuration.isBfs()
                     ? Traverse.bfs(graph, mappedStartNodeId, exitFunction, aggregatorFunction)
                     : Traverse.dfs(graph, mappedStartNodeId, exitFunction, aggregatorFunction);
             }
         };
     }
 
-    private Stream<WalkResult> stream(String graphName, Map<String, Object> configuration) {
-        ComputationResult<Traverse, Traverse, TraverseConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
+    @Override
+    public ComputationResultConsumer<Traverse, Traverse, TraverseConfig, Stream<WalkResult>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            if (computationResult.graph().isEmpty()) {
+                return Stream.empty();
+            }
 
-        if (computationResult.graph().isEmpty()) {
-            return Stream.empty();
-        }
-
-        Traverse traverse = computationResult.algorithm();
-        long[] nodes = traverse.resultNodes();
-        return Stream.of(new WalkResult(nodes, WalkPath.toPath(transaction, nodes)));
+            Traverse traverse = computationResult.algorithm();
+            long[] nodes = traverse.resultNodes();
+            return Stream.of(new WalkResult(nodes, WalkPath.toPath(transaction, nodes)));
+        };
     }
 }

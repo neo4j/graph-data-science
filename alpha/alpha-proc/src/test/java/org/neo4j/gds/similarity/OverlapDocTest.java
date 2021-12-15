@@ -26,6 +26,9 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.IsFiniteFunc;
+import org.neo4j.gds.similarity.overlap.OverlapStatsProc;
+import org.neo4j.gds.similarity.overlap.OverlapStreamProc;
+import org.neo4j.gds.similarity.overlap.OverlapWriteProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -63,7 +66,9 @@ public class OverlapDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(OverlapProc.class);
+        registerProcedures(OverlapStatsProc.class);
+        registerProcedures(OverlapStreamProc.class);
+        registerProcedures(OverlapWriteProc.class);
         registerFunctions(AsNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
         runQuery(DB_CYPHER);
     }
