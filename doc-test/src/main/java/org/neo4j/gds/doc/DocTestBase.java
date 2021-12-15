@@ -68,27 +68,30 @@ public abstract class DocTestBase extends BaseProcTest {
         Class<?>[] clazzArray = new Class<?>[0];
         registerProcedures(procedures().toArray(clazzArray));
         registerFunctions(functions().toArray(clazzArray));
-        Asciidoctor asciidoctor = create();
-        var treeProcessor = new QueryCollectingTreeProcessor();
-        asciidoctor.javaExtensionRegistry().treeprocessor(treeProcessor);
 
-        var docFile = adocPath().resolve(adocFile()).toFile();
-        assertThat(docFile).exists().canRead();
+        QueryCollectingTreeProcessor treeProcessor;
+        try (Asciidoctor asciidoctor = create()) {
+            treeProcessor = new QueryCollectingTreeProcessor();
+            asciidoctor.javaExtensionRegistry().treeprocessor(treeProcessor);
 
-        var options = OptionsBuilder.options()
-            .toDir(workDir) // Make sure we don't write anything in the project.
-            .safe(SafeMode.UNSAFE); // By default we are forced to use relative path which we don't want.
+            var docFile = adocPath().resolve(adocFile()).toFile();
+            assertThat(docFile).exists().canRead();
 
-        asciidoctor.convertFile(docFile, options);
+            var options = OptionsBuilder.options()
+                .toDir(workDir) // Make sure we don't write anything in the project.
+                .safe(SafeMode.UNSAFE); // By default we are forced to use relative path which we don't want.
 
-        beforeEachQueries = treeProcessor.beforeEachQueries();
-        queryExampleGroups = treeProcessor.queryExamples();
-
-        beforeAllQueries = treeProcessor.beforeAllQueries();
-
-        if (!setupNeo4jGraphPerTest()) {
-            beforeAllQueries.forEach(this::runQuery);
+            asciidoctor.convertFile(docFile, options);
         }
+
+            beforeEachQueries = treeProcessor.beforeEachQueries();
+            queryExampleGroups = treeProcessor.queryExamples();
+
+            beforeAllQueries = treeProcessor.beforeAllQueries();
+
+            if (!setupNeo4jGraphPerTest()) {
+                beforeAllQueries.forEach(this::runQuery);
+            }
     }
 
     @TestFactory
