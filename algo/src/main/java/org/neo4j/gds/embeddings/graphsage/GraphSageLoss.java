@@ -62,6 +62,7 @@ public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
     @Override
     public Scalar apply(ComputationContext ctx) {
         Matrix embeddingData = ctx.data(combinedEmbeddings);
+        // also, the offset for the neighbor nodes
         int batchSize = embeddingData.rows() / SAMPLING_BUCKETS;
         int negativeNodesOffset = NEGATIVE_NODES_OFFSET * batchSize;
 
@@ -79,9 +80,12 @@ public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
 
     private double relationshipWeightFactor(long nodeId, long positiveNodeId) {
         double relationshipWeight = relationshipWeights.weight(nodeId, positiveNodeId);
+
+        // the positiveNode does not have to be a direct neighbor of that node
         if(Double.isNaN(relationshipWeight)) {
             relationshipWeight = RelationshipWeights.DEFAULT_VALUE;
         }
+
         return Math.pow(relationshipWeight, ALPHA);
     }
 
