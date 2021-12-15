@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.WRITE;
 
-public final class PearsonWriteProc<PROC_RESULT> extends PearsonProc<AlphaSimilaritySummaryResult> {
+public final class PearsonWriteProc extends PearsonProc<AlphaSimilaritySummaryResult> {
 
     @Procedure(name = "gds.alpha.similarity.pearson.write", mode = WRITE)
     @Description(DESCRIPTION)

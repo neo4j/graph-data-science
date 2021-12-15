@@ -31,6 +31,7 @@ import org.neo4j.gds.impl.similarity.SimilarityInput;
 import org.neo4j.gds.similarity.ann.ApproxNearestNeighborsStreamProc;
 import org.neo4j.gds.similarity.ann.ApproxNearestNeighborsWriteProc;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -196,7 +197,7 @@ class ApproxNearestNeighborsProcTest extends AlphaSimilarityProcTest<ApproxNeare
     }
 
     @Override
-    Class<? extends AlphaSimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ? extends SimilarityConfig, ?>> getProcedureClazz() {
-        return ApproxNearestNeighborsStreamProc.class;
+    List<Class<? extends AlphaSimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ? extends SimilarityConfig, ?>>> getProcedureClazzes() {
+        return List.of(ApproxNearestNeighborsStreamProc.class, ApproxNearestNeighborsWriteProc.class);
     }
 }

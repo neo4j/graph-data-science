@@ -33,6 +33,7 @@ import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
@@ -633,7 +634,7 @@ class PearsonProcTest extends AlphaSimilarityProcTest<PearsonAlgorithm, Weighted
     }
 
     @Override
-    Class<? extends AlphaSimilarityProc<PearsonAlgorithm, ? extends SimilarityConfig, ?>> getProcedureClazz() {
-        return PearsonStreamProc.class;
+    List<Class<? extends AlphaSimilarityProc<PearsonAlgorithm, ? extends SimilarityConfig, ?>>> getProcedureClazzes() {
+        return List.of(PearsonStreamProc.class, PearsonWriteProc.class);
     }
 }

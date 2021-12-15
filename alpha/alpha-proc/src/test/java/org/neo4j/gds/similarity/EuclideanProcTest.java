@@ -32,6 +32,7 @@ import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static java.lang.Math.sqrt;
@@ -612,7 +613,7 @@ class EuclideanProcTest extends AlphaSimilarityProcTest<EuclideanAlgorithm, Weig
     }
 
     @Override
-    Class<? extends AlphaSimilarityProc<EuclideanAlgorithm, ? extends SimilarityConfig, ?>> getProcedureClazz() {
-        return EuclideanStreamProc.class;
+    List<Class<? extends AlphaSimilarityProc<EuclideanAlgorithm, ? extends SimilarityConfig, ?>>> getProcedureClazzes() {
+        return List.of(EuclideanStreamProc.class, EuclideanWriteProc.class);
     }
 }

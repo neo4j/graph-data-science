@@ -391,7 +391,7 @@ class OverlapProcTest extends AlphaSimilarityProcTest<OverlapAlgorithm, Categori
     }
 
     @Override
-    Class<? extends AlphaSimilarityProc<OverlapAlgorithm, ? extends SimilarityConfig, ?>> getProcedureClazz() {
-        return OverlapStreamProc.class;
+    List<Class<? extends AlphaSimilarityProc<OverlapAlgorithm, ? extends SimilarityConfig, ?>>> getProcedureClazzes() {
+        return List.of(OverlapStreamProc.class, OverlapWriteProc.class);
     }
 }

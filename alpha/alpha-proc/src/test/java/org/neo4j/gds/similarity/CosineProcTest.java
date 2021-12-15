@@ -644,7 +644,7 @@ class CosineProcTest extends AlphaSimilarityProcTest<CosineAlgorithm, WeightedIn
     }
 
     @Override
-    Class<? extends AlphaSimilarityProc<CosineAlgorithm, ? extends SimilarityConfig, ?>> getProcedureClazz() {
-        return CosineStreamProc.class;
+    List<Class<? extends AlphaSimilarityProc<CosineAlgorithm, ? extends SimilarityConfig, ?>>> getProcedureClazzes() {
+        return List.of(CosineStreamProc.class, CosineWriteProc.class);
     }
 }
