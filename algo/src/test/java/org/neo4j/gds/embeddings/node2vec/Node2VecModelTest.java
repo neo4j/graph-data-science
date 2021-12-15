@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -133,6 +134,7 @@ class Node2VecModelTest {
         );
     }
 
+    @Disabled("The order of the randomWalks + its usage in the training is not deterministic yet.")
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 4})
     void randomSeed(int iterations) {

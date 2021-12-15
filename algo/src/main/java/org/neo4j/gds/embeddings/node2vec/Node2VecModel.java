@@ -186,6 +186,8 @@ public class Node2VecModel {
         @Override
         public void run() {
             var buffer = new long[2];
+
+            // this corresponds to a stochastic optimizer as the embeddings are updated after each sample
             while (positiveSampleProducer.next(buffer)) {
                 trainSample(buffer[0], buffer[1], true);
 

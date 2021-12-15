@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -178,6 +179,7 @@ class Node2VecTest extends AlgoTestBase {
 
     }
 
+    @Disabled("The order of the randomWalks + its usage in the training is not deterministic yet.")
     @Test
     void randomSeed() {
         Graph graph = new StoreLoaderBuilder().api(db).build().graph();
