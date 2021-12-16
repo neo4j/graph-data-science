@@ -196,7 +196,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
             "   relationshipWeightProperty: 'cost'," +
             "   writeProperty: 'sp'" +
             "}) " +
-            "YIELD nodeCount, loadDuration, evalDuration, writeDuration RETURN nodeCount, loadDuration, evalDuration, writeDuration";
+            "YIELD nodeCount, preProcessDuration, evalDuration, writeDuration RETURN nodeCount, evalDuration, writeDuration";
 
         runQueryWithRowConsumer(cypher, row -> {
             long writeDuration = row.getNumber("writeDuration").longValue();
