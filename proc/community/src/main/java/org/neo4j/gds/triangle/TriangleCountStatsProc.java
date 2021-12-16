@@ -85,12 +85,12 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
         StatsResult(
             long globalTriangleCount,
             long nodeCount,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             Map<String, Object> configuration
         ) {
             // post-processing is instant for TC
-            super(createMillis, computeMillis, 0L, configuration);
+            super(preProcessingMillis, computeMillis, 0L, configuration);
             this.globalTriangleCount = globalTriangleCount;
             this.nodeCount = nodeCount;
         }
@@ -103,7 +103,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
             return new StatsResult(
                 globalTriangleCount,
                 nodeCount,
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 config.toMap()
             );

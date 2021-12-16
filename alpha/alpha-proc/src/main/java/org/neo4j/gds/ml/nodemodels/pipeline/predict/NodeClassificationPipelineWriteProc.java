@@ -142,14 +142,14 @@ public class NodeClassificationPipelineWriteProc
         public final long nodePropertiesWritten;
 
         WriteResult(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long writeMillis,
             long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
             super(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 0L,
                 writeMillis,
@@ -163,7 +163,7 @@ public class NodeClassificationPipelineWriteProc
             @Override
             public WriteResult build() {
                 return new WriteResult(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     writeMillis,
                     nodePropertiesWritten,

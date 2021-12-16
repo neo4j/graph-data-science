@@ -121,18 +121,18 @@ public class NodeClassificationPredictWriteProc
 
         public final long writeMillis;
         public final long nodePropertiesWritten;
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
         public final Map<String, Object> configuration;
 
         public Result(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long writeMillis,
             long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.nodePropertiesWritten = nodePropertiesWritten;
@@ -143,7 +143,7 @@ public class NodeClassificationPredictWriteProc
             @Override
             public NodeClassificationPredictWriteProc.Result build() {
                 return new NodeClassificationPredictWriteProc.Result(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     writeMillis,
                     nodePropertiesWritten,

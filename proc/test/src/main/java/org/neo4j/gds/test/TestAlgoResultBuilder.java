@@ -28,7 +28,7 @@ public class TestAlgoResultBuilder extends AbstractResultBuilder<TestResult> {
     @Override
     public TestResult build() {
         return new TestResult(
-            createMillis,
+            preProcessingMillis,
             computeMillis,
             relationshipCount,
             config.toMap()

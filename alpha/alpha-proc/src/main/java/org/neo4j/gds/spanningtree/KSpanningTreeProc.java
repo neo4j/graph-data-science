@@ -134,7 +134,7 @@ public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTr
             }
 
             builder.withComputeMillis(computationResult.computeMillis());
-            builder.withCreateMillis(computationResult.createMillis());
+            builder.withPreProcessingMillis(computationResult.preProcessingMillis());
             return Stream.of(builder.build());
         };
     }

@@ -45,7 +45,7 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
         return (computationResult, executionContext) -> new TestResult.TestResultBuilder()
             .withRelationshipCount(computationResult.result().relationshipCount())
             .withNodeCount(computationResult.graph().nodeCount())
-            .withCreateMillis(42)
+            .withPreProcessingMillis(42)
             .withComputeMillis(42)
             .withMutateMillis(42)
             .withWriteMillis(42)

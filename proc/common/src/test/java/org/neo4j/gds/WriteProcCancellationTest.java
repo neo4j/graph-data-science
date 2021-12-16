@@ -95,7 +95,7 @@ class WriteProcCancellationTest extends BaseTest {
                 .algorithm(algorithm)
                 .result(algorithm)
                 .computeMillis(0)
-                .createMillis(0)
+                .preProcessingMillis(0)
                 .build();
 
             var executionContext = ImmutableExecutionContext

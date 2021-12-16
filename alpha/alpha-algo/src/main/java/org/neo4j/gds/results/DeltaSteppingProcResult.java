@@ -19,18 +19,18 @@
  */
 package org.neo4j.gds.results;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
 public class DeltaSteppingProcResult {
 
-    public final long loadDuration;
+    public final long preProcessDuration;
     public final long evalDuration;
     public final long writeDuration;
     public final long nodeCount;
 
-    public DeltaSteppingProcResult(long loadDuration, long evalDuration, long writeDuration, long nodeCount) {
-        this.loadDuration = loadDuration;
+    public DeltaSteppingProcResult(long preProcessDuration, long evalDuration, long writeDuration, long nodeCount) {
+        this.preProcessDuration = preProcessDuration;
         this.evalDuration = evalDuration;
         this.writeDuration = writeDuration;
         this.nodeCount = nodeCount;
@@ -42,8 +42,8 @@ public class DeltaSteppingProcResult {
 
     public static class Builder extends AbstractResultBuilder<DeltaSteppingProcResult> {
 
-        public ProgressTimer load() {
-            return ProgressTimer.start(res -> createMillis = res);
+        public ProgressTimer preProcess() {
+            return ProgressTimer.start(res -> preProcessingMillis = res);
         }
 
         public ProgressTimer eval() {
@@ -55,7 +55,7 @@ public class DeltaSteppingProcResult {
         }
 
         public DeltaSteppingProcResult build() {
-            return new DeltaSteppingProcResult(createMillis, computeMillis, writeMillis, nodeCount);
+            return new DeltaSteppingProcResult(preProcessingMillis, computeMillis, writeMillis, nodeCount);
         }
     }
 }

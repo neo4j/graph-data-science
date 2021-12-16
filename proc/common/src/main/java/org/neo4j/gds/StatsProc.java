@@ -37,7 +37,7 @@ public abstract class StatsProc<
     public ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging("Stats call failed", () -> Stream.of(
             resultBuilder(computationResult)
-                .withCreateMillis(computationResult.createMillis())
+                .withPreProcessingMillis(computationResult.preProcessingMillis())
                 .withComputeMillis(computationResult.computeMillis())
                 .withNodeCount(computationResult.graph().nodeCount())
                 .withConfig(computationResult.config())

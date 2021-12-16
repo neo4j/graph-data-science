@@ -63,7 +63,7 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest<K1ColoringWriteConf
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertNotEquals(-1L, row.getNumber("createMillis").longValue());
+            assertNotEquals(-1L, row.getNumber("preProcessingMillis").longValue());
             assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
             assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
             assertEquals(4, row.getNumber("nodeCount").longValue());

@@ -72,7 +72,7 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
                 "p99", 7L,
                 "p999", 7L
             )),
-            "createMillis", greaterThanOrEqualTo(0L),
+            "preProcessingMillis", greaterThanOrEqualTo(0L),
             "computeMillis", greaterThanOrEqualTo(0L),
             "postProcessingMillis", greaterThanOrEqualTo(0L),
             "configuration", containsAllEntriesOf(MapUtil.map(

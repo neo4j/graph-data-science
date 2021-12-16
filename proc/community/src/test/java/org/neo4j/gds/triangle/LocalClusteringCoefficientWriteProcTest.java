@@ -54,7 +54,7 @@ class LocalClusteringCoefficientWriteProcTest
         assertCypherResult(query, List.of(Map.of(
             "averageClusteringCoefficient", closeTo(expectedAverageClusteringCoefficient() / 5, 1e-10),
             "nodeCount", 5L,
-            "createMillis", greaterThan(-1L),
+            "preProcessingMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class),
@@ -75,7 +75,7 @@ class LocalClusteringCoefficientWriteProcTest
         assertCypherResult(query, List.of(Map.of(
             "averageClusteringCoefficient", closeTo(expectedAverageClusteringCoefficientSeeded() / 5, 1e-10),
             "nodeCount", 5L,
-            "createMillis", greaterThan(-1L),
+            "preProcessingMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class),

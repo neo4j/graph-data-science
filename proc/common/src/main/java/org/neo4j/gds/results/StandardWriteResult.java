@@ -27,13 +27,13 @@ public class StandardWriteResult extends StandardStatsResult {
     public final long writeMillis;
 
     public StandardWriteResult(
-        long createMillis,
+        long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         long writeMillis,
         Map<String, Object> configuration
     ) {
-        super(createMillis, computeMillis, postProcessingMillis, configuration);
+        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
         this.writeMillis = writeMillis;
     }
 }

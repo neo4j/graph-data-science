@@ -65,7 +65,7 @@ public final class SimilarityProc {
         AlgoBaseProc.ComputationResult<? extends Algorithm<?, ?>, ?, CONFIG> computationResult
     ) {
         procResultBuilder
-            .withCreateMillis(computationResult.createMillis())
+            .withPreProcessingMillis(computationResult.preProcessingMillis())
             .withComputeMillis(computationResult.computeMillis())
             .withConfig(computationResult.config());
 

@@ -86,7 +86,7 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringM
             assertTrue(row.getBoolean("didConverge"), "did not converge");
             assertTrue(row.getNumber("ranIterations").longValue() < 3, "wrong ranIterations");
             assertEquals(2, row.getNumber("colorCount").longValue(), "wrong color count");
-            assertTrue(row.getNumber("createMillis").longValue() >= 0, "invalid createMillis");
+            assertTrue(row.getNumber("preProcessingMillis").longValue() >= 0, "invalid preProcessingMillis");
             assertTrue(row.getNumber("mutateMillis").longValue() >= 0, "invalid mutateMillis");
             assertTrue(row.getNumber("computeMillis").longValue() >= 0, "invalid computeMillis");
         });

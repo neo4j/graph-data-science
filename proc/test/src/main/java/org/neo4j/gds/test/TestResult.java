@@ -25,13 +25,13 @@ import java.util.Map;
 
 public final class TestResult {
 
-    public long createMillis;
+    public long preProcessingMillis;
     public long computeMillis;
     public long relationshipCount;
     public Map<String, Object> configuration;
 
-    TestResult(long createMillis, long computeMillis, long relationshipCount, Map<String, Object> configuration) {
-        this.createMillis = createMillis;
+    TestResult(long preProcessingMillis, long computeMillis, long relationshipCount, Map<String, Object> configuration) {
+        this.preProcessingMillis = preProcessingMillis;
         this.computeMillis = computeMillis;
         this.relationshipCount = relationshipCount;
         this.configuration = configuration;
@@ -44,7 +44,7 @@ public final class TestResult {
         @Override
         public TestResult build() {
             return new TestResult(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 relationshipCount,
                 config.toMap()

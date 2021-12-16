@@ -158,7 +158,7 @@ class MutatePropertyComputationResultConsumerTest {
             .result(algorithm)
             .graph(graph)
             .graphStore(graphStore)
-            .createMillis(0)
+            .preProcessingMillis(0)
             .computeMillis(0)
             .build();
     }

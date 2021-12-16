@@ -29,14 +29,14 @@ public final class StandardWriteRelationshipsResult extends StandardWriteResult 
     public final long relationshipsWritten;
 
     public StandardWriteRelationshipsResult(
-        long createMillis,
+        long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         long writeMillis,
         long relationshipsWritten,
         Map<String, Object> configuration
     ) {
-        super(createMillis, computeMillis, postProcessingMillis, writeMillis, configuration);
+        super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, configuration);
         this.relationshipsWritten = relationshipsWritten;
     }
 
@@ -45,7 +45,7 @@ public final class StandardWriteRelationshipsResult extends StandardWriteResult 
         @Override
         public StandardWriteRelationshipsResult build() {
             return new StandardWriteRelationshipsResult(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 0L,
                 writeMillis,

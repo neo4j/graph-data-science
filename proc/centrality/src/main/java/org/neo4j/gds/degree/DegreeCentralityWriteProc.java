@@ -90,14 +90,14 @@ public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, Degre
 
         WriteResult(
             long nodePropertiesWritten,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             long writeMillis,
             @Nullable Map<String, Object> centralityDistribution,
             Map<String, Object> config
         ) {
-            super(createMillis, computeMillis, postProcessingMillis, writeMillis, config);
+            super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, config);
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.centralityDistribution = centralityDistribution;
         }
@@ -112,7 +112,7 @@ public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, Degre
             protected WriteResult buildResult() {
                 return new WriteResult(
                     nodePropertiesWritten,
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingMillis,
                     writeMillis,

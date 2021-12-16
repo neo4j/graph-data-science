@@ -106,7 +106,7 @@ class LinkPredictionPredictWriteProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
-            "createMillis", greaterThan(-1L),
+            "preProcessingMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "writeMillis", greaterThan(-1L),
             "postProcessingMillis", 0L,

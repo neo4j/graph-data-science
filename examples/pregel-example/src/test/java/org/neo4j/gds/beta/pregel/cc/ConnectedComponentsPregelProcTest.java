@@ -178,7 +178,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertNotEquals(-1L, row.getNumber("createMillis"));
+            assertNotEquals(-1L, row.getNumber("preProcessingMillis"));
             assertNotEquals(-1L, row.getNumber("computeMillis"));
             assertNotEquals(-1L, row.getNumber("writeMillis"));
 
@@ -212,7 +212,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .yields();
 
         runQueryWithRowConsumer(mutateQuery, row -> {
-            assertNotEquals(-1L, row.getNumber("createMillis"));
+            assertNotEquals(-1L, row.getNumber("preProcessingMillis"));
             assertNotEquals(-1L, row.getNumber("computeMillis"));
             assertNotEquals(-1L, row.getNumber("mutateMillis"));
 
@@ -240,7 +240,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .statsMode()
             .addParameter("maxIterations", 10)
             .yields(
-                "createMillis",
+                "preProcessingMillis",
                 "computeMillis",
                 "ranIterations",
                 "didConverge"
@@ -249,7 +249,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertNotEquals(-1L, row.getNumber("createMillis"));
+                assertNotEquals(-1L, row.getNumber("preProcessingMillis"));
                 assertNotEquals(-1L, row.getNumber("computeMillis"));
 
                 assertEquals(1, row.getNumber("ranIterations").longValue());

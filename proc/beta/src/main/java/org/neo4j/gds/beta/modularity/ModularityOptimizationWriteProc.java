@@ -84,7 +84,7 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
     @SuppressWarnings("unused")
     public static class WriteResult {
 
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
         public final long writeMillis;
         public final long postProcessingMillis;
@@ -97,7 +97,7 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
         public final Map<String, Object> configuration;
 
         WriteResult(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             long writeMillis,
@@ -109,7 +109,7 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
             Map<String, Object> communityDistribution,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.postProcessingMillis = postProcessingMillis;
@@ -135,7 +135,7 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
             @Override
             protected WriteResult buildResult() {
                 return new WriteResult(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingDuration,
                     writeMillis,

@@ -95,7 +95,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             assertUserInput(row, "writeRelationshipType", "SIMILAR");
             assertUserInput(row, "writeProperty", "score");
             assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
-            assertThat("Missing createMillis", -1L, lessThan(row.getNumber("createMillis").longValue()));
+            assertThat("Missing preProcessingMillis", -1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
             assertThat("Missing writeMillis", -1L, lessThan(row.getNumber("writeMillis").longValue()));
 
             Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");

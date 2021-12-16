@@ -94,7 +94,7 @@ class NodeClassificationPredictMutateProcTest extends BaseProcTest {
             "mutateMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "postProcessingMillis", greaterThan(-1L),
-            "createMillis", greaterThan(-1L),
+            "preProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
     }
@@ -117,7 +117,7 @@ class NodeClassificationPredictMutateProcTest extends BaseProcTest {
             "mutateMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "postProcessingMillis", greaterThan(-1L),
-            "createMillis", greaterThan(-1L),
+            "preProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
     }

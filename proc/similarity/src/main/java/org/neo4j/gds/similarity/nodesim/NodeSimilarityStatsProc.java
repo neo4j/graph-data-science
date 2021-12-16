@@ -82,7 +82,7 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
                     new SimilarityStatsResult(
-                        computationResult.createMillis(),
+                        computationResult.preProcessingMillis(),
                         0,
                         0,
                         0,

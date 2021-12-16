@@ -48,7 +48,7 @@ class K1ColoringStatsProcTest extends K1ColoringProcBaseTest<K1ColoringStatsConf
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertNotEquals(-1L, row.getNumber("createMillis").longValue());
+            assertNotEquals(-1L, row.getNumber("preProcessingMillis").longValue());
             assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
             assertEquals(4, row.getNumber("nodeCount").longValue());
             assertEquals(2, row.getNumber("colorCount").longValue());

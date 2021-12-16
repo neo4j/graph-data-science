@@ -53,13 +53,13 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
             var config = computationResult.config();
 
             var resultBuilder = new StandardWriteRelationshipsResult.Builder()
-                .withCreateMillis(computationResult.createMillis())
+                .withPreProcessingMillis(computationResult.preProcessingMillis())
                 .withComputeMillis(computationResult.computeMillis())
                 .withConfig(config);
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(new StandardWriteRelationshipsResult(
-                    computationResult.createMillis(),
+                    computationResult.preProcessingMillis(),
                     0L,
                     0L,
                     0L,

@@ -156,7 +156,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
         public final Map<String, Object> samplingStats;
 
         MutateResult(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
             long relationshipsWritten,
@@ -165,7 +165,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
             Map<String, Object> samplingStats
         ) {
             super(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 0L,
                 mutateMillis,
@@ -187,7 +187,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
             @Override
             public MutateResult build() {
                 return new MutateResult(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     mutateMillis,
                     relationshipsWritten,

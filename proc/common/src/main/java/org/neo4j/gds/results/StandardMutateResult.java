@@ -27,13 +27,13 @@ public class StandardMutateResult extends StandardStatsResult {
     public final long mutateMillis;
 
     public StandardMutateResult(
-        long createMillis,
+        long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         long mutateMillis,
         Map<String, Object> configuration
     ) {
-        super(createMillis, computeMillis, postProcessingMillis, configuration);
+        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
         this.mutateMillis = mutateMillis;
     }
 }

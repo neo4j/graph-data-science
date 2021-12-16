@@ -85,21 +85,21 @@ public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP.FastRPRe
         public final long nodePropertiesWritten;
         public final long mutateMillis;
         public final long nodeCount;
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
         public final Map<String, Object> configuration;
 
         MutateResult(
             long nodeCount,
             long nodePropertiesWritten,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
             Map<String, Object> config
         ) {
             this.nodeCount = nodeCount;
             this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.mutateMillis = mutateMillis;
             this.configuration = config;
@@ -112,7 +112,7 @@ public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP.FastRPRe
                 return new MutateResult(
                     nodeCount,
                     nodePropertiesWritten,
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     mutateMillis,
                     config.toMap()

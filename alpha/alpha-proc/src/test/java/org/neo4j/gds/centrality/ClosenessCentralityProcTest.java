@@ -120,7 +120,7 @@ class ClosenessCentralityProcTest extends BaseProcTest {
 
         runQueryWithRowConsumer(query, row -> {
             assertNotEquals(-1L, row.getNumber("writeMillis"));
-            assertNotEquals(-1L, row.getNumber("createMillis"));
+            assertNotEquals(-1L, row.getNumber("preProcessingMillis"));
             assertNotEquals(-1L, row.getNumber("computeMillis"));
             assertNotEquals(-1L, row.getNumber("nodes"));
             Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");

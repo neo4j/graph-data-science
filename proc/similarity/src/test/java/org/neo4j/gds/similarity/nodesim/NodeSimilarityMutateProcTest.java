@@ -125,7 +125,7 @@ class NodeSimilarityMutateProcTest
             .addParameter("mutateProperty", mutateProperty())
             .yields(
                 "computeMillis",
-                "createMillis",
+                "preProcessingMillis",
                 "nodesCompared ",
                 "relationshipsWritten",
                 "mutateMillis",
@@ -138,7 +138,7 @@ class NodeSimilarityMutateProcTest
             assertEquals(3, row.getNumber("nodesCompared").longValue());
             assertEquals(6, row.getNumber("relationshipsWritten").longValue());
             assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
-            assertThat("Missing createMillis", -1L, lessThan(row.getNumber("createMillis").longValue()));
+            assertThat("Missing preProcessingMillis", -1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
             assertThat("Missing mutateMillis", -1L, lessThan(row.getNumber("mutateMillis").longValue()));
 
             Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");

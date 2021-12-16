@@ -86,14 +86,14 @@ public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, A
         MutateResult(
             long nodePropertiesWritten,
             double cutCost,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             long mutateMillis,
             Map<String, Object> config
         ) {
             super(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
                 mutateMillis,
@@ -116,7 +116,7 @@ public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, A
                 return new MutateResult(
                     nodePropertiesWritten,
                     cutCost,
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     0L,
                     mutateMillis,

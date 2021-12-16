@@ -23,7 +23,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 
 public abstract class AbstractResultBuilder<RESULT> {
 
-    protected long createMillis = -1;
+    protected long preProcessingMillis = -1;
     protected long computeMillis = -1;
     protected long writeMillis = -1;
     protected long mutateMillis = -1;
@@ -32,8 +32,8 @@ public abstract class AbstractResultBuilder<RESULT> {
     protected long relationshipsWritten;
     protected AlgoBaseConfig config;
 
-    public AbstractResultBuilder<RESULT> withCreateMillis(long createMillis) {
-        this.createMillis = createMillis;
+    public AbstractResultBuilder<RESULT> withPreProcessingMillis(long preProcessingMillis) {
+        this.preProcessingMillis = preProcessingMillis;
         return this;
     }
 

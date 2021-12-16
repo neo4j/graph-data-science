@@ -88,7 +88,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
             .addParameter("writeProperty", writeProperty)
             .yields(
                 "communityCount",
-                "createMillis",
+                "preProcessingMillis",
                 "computeMillis",
                 "writeMillis",
                 "postProcessingMillis",
@@ -98,13 +98,13 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
         runQueryWithRowConsumer(query, row -> {
             long communityCount = row.getNumber("communityCount").longValue();
-            long createMillis = row.getNumber("createMillis").longValue();
+            long preProcessingMillis = row.getNumber("preProcessingMillis").longValue();
             long computeMillis = row.getNumber("computeMillis").longValue();
             long writeMillis = row.getNumber("writeMillis").longValue();
             boolean didConverge = row.getBoolean("didConverge");
             Map<String, Object> communityDistribution = (Map<String, Object>) row.get("communityDistribution");
             assertEquals(10, communityCount, "wrong community count");
-            assertTrue(createMillis >= 0, "invalid loadTime");
+            assertTrue(preProcessingMillis >= 0, "invalid preProcessingTime");
             assertTrue(writeMillis >= 0, "invalid writeTime");
             assertTrue(computeMillis >= 0, "invalid computeTime");
             assertTrue(didConverge, "did not converge");
@@ -500,7 +500,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     }
 
     private void checkMillisSet(Result.ResultRow row) {
-        assertTrue(row.getNumber("createMillis").intValue() >= 0, "load time not set");
+        assertTrue(row.getNumber("preProcessingMillis").intValue() >= 0, "load time not set");
         assertTrue(row.getNumber("computeMillis").intValue() >= 0, "compute time not set");
         assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
     }

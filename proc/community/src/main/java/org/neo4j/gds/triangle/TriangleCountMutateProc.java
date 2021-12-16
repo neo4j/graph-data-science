@@ -93,7 +93,7 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
         MutateResult(
             long globalTriangleCount,
             long nodeCount,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
             long nodePropertiesWritten,
@@ -102,7 +102,7 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
             super(
                 globalTriangleCount,
                 nodeCount,
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 configuration
             );
@@ -118,7 +118,7 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
             return new MutateResult(
                 globalTriangleCount,
                 nodeCount,
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 mutateMillis,
                 nodePropertiesWritten,

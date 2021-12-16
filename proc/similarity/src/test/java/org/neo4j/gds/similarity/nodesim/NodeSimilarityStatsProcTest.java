@@ -47,7 +47,7 @@ public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimi
             .statsMode()
             .addParameter("similarityCutoff", 0.0)
             .yields(
-                "createMillis",
+                "preProcessingMillis",
                 "computeMillis",
                 "postProcessingMillis",
                 "nodesCompared ",
@@ -60,7 +60,7 @@ public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimi
             assertEquals(3, row.getNumber("nodesCompared").longValue());
             assertEquals(6, row.getNumber("similarityPairs").longValue());
             assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
-            assertThat("Missing createMillis", -1L, lessThan(row.getNumber("createMillis").longValue()));
+            assertThat("Missing preProcessingMillis", -1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
             assertThat("Missing postProcessingMillis", -1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
 
             Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");

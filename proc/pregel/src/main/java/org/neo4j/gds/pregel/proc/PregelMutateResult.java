@@ -32,14 +32,14 @@ public final class PregelMutateResult extends StandardMutateResult {
 
     private PregelMutateResult(
         long nodePropertiesWritten,
-        long createMillis,
+        long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
         long ranIterations,
         boolean didConverge,
         Map<String, Object> configuration
     ) {
-        super(createMillis, computeMillis, 0L, mutateMillis, configuration);
+        super(preProcessingMillis, computeMillis, 0L, mutateMillis, configuration);
         this.nodePropertiesWritten = nodePropertiesWritten;
         this.ranIterations = ranIterations;
         this.didConverge = didConverge;
@@ -51,7 +51,7 @@ public final class PregelMutateResult extends StandardMutateResult {
         public PregelMutateResult build() {
             return new PregelMutateResult(
                 nodePropertiesWritten,
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 mutateMillis,
                 ranIterations,

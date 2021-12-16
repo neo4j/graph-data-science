@@ -53,7 +53,7 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
         runQueryWithRowConsumer(query, row -> {
             assertNotNull(row.get("nodeCount"));
             assertNotNull(row.get("nodePropertiesWritten"));
-            assertNotNull(row.get("createMillis"));
+            assertNotNull(row.get("preProcessingMillis"));
             assertNotNull(row.get("computeMillis"));
             assertNotNull(row.get("writeMillis"));
             assertNotNull(row.get("configuration"));

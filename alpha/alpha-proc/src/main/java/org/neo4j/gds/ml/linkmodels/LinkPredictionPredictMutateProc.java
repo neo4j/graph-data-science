@@ -146,14 +146,14 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
         public final long relationshipsWritten;
 
         MutateResult(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
             long relationshipsWritten,
             Map<String, Object> configuration
         ) {
             super(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 0L,
                 mutateMillis,
@@ -167,7 +167,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
             @Override
             public LinkPredictionPredictMutateProc.MutateResult build() {
                 return new LinkPredictionPredictMutateProc.MutateResult(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     mutateMillis,
                     relationshipsWritten,

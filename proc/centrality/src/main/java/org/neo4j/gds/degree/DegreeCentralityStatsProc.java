@@ -88,12 +88,12 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
 
         StatsResult(
             @Nullable Map<String, Object> centralityDistribution,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             Map<String, Object> configuration
         ) {
-            super(createMillis, computeMillis, postProcessingMillis, configuration);
+            super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
             this.centralityDistribution = centralityDistribution;
         }
 
@@ -106,7 +106,7 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
             public DegreeCentralityStatsProc.StatsResult buildResult() {
                 return new DegreeCentralityStatsProc.StatsResult(
                     centralityHistogram,
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingMillis,
                     config.toMap()

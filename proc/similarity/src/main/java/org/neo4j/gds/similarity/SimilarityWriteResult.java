@@ -23,7 +23,7 @@ import java.util.Map;
 
 @SuppressWarnings("unused")
 public class SimilarityWriteResult {
-    public final long createMillis;
+    public final long preProcessingMillis;
     public final long computeMillis;
     public final long writeMillis;
     public final long postProcessingMillis;
@@ -35,7 +35,7 @@ public class SimilarityWriteResult {
     public final Map<String, Object> configuration;
 
     public SimilarityWriteResult(
-        long createMillis,
+        long preProcessingMillis,
         long computeMillis,
         long writeMillis,
         long postProcessingMillis,
@@ -44,7 +44,7 @@ public class SimilarityWriteResult {
         Map<String, Object> similarityDistribution,
         Map<String, Object> configuration
     ) {
-        this.createMillis = createMillis;
+        this.preProcessingMillis = preProcessingMillis;
         this.computeMillis = computeMillis;
         this.writeMillis = writeMillis;
         this.postProcessingMillis = postProcessingMillis;
@@ -59,7 +59,7 @@ public class SimilarityWriteResult {
         @Override
         public SimilarityWriteResult build() {
             return new SimilarityWriteResult(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 writeMillis,
                 postProcessingMillis,

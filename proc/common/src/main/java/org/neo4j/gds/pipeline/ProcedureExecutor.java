@@ -76,7 +76,7 @@ public class ProcedureExecutor<
         GraphStore graphStore;
         Graph graph;
 
-        try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
+        try (ProgressTimer timer = ProgressTimer.start(builder::preProcessingMillis)) {
             var graphCreateConfig = graphCreation.graphCreateConfig();
             var validator = pipelineSpec.validator(algoSpec.validationConfig());
             validator.validateConfigsBeforeLoad(graphCreateConfig, config);

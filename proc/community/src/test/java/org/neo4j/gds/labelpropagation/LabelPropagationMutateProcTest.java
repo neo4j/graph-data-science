@@ -136,7 +136,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));

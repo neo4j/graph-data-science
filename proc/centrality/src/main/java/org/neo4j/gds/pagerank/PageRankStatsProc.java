@@ -95,12 +95,12 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
             long ranIterations,
             boolean didConverge,
             @Nullable Map<String, Object> centralityDistribution,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             Map<String, Object> configuration
         ) {
-            super(createMillis, computeMillis, postProcessingMillis, configuration);
+            super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
             this.centralityDistribution = centralityDistribution;
@@ -118,7 +118,7 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
                     ranIterations,
                     didConverge,
                     centralityHistogram,
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingMillis,
                     config.toMap()

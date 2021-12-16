@@ -30,13 +30,13 @@ public final class PregelStatsResult extends StandardStatsResult {
     public final boolean didConverge;
 
     private PregelStatsResult(
-        long createMillis,
+        long preProcessingMillis,
         long computeMillis,
         long ranIterations,
         boolean didConverge,
         Map<String, Object> configuration
     ) {
-        super(createMillis, computeMillis, 0L, configuration);
+        super(preProcessingMillis, computeMillis, 0L, configuration);
         this.ranIterations = ranIterations;
         this.didConverge = didConverge;
     }
@@ -45,7 +45,7 @@ public final class PregelStatsResult extends StandardStatsResult {
 
         @Override
         public PregelStatsResult build() {
-            return new PregelStatsResult(createMillis, computeMillis, ranIterations, didConverge, config.toMap());
+            return new PregelStatsResult(preProcessingMillis, computeMillis, ranIterations, didConverge, config.toMap());
         }
     }
 }

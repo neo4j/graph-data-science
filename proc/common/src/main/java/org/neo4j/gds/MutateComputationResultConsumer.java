@@ -43,7 +43,7 @@ public abstract class MutateComputationResultConsumer<ALGO extends Algorithm<ALG
             CONFIG config = computationResult.config();
 
             AbstractResultBuilder<RESULT> builder = resultBuilderFunction.apply(computationResult, executionContext)
-                .withCreateMillis(computationResult.createMillis())
+                .withPreProcessingMillis(computationResult.preProcessingMillis())
                 .withComputeMillis(computationResult.computeMillis())
                 .withNodeCount(computationResult.graph().nodeCount())
                 .withConfig(config);

@@ -87,7 +87,7 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
     @SuppressWarnings("unused")
     public static class MutateResult {
 
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
         public final long mutateMillis;
         public final long postProcessingMillis;
@@ -100,7 +100,7 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
         public final Map<String, Object> configuration;
 
         MutateResult(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             long mutateMillis,
@@ -112,7 +112,7 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
             Map<String, Object> communityDistribution,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.mutateMillis = mutateMillis;
             this.postProcessingMillis = postProcessingMillis;
@@ -134,7 +134,7 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
             @Override
             protected MutateResult buildResult() {
                 return new MutateResult(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingDuration,
                     mutateMillis,

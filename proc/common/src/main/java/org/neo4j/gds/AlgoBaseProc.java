@@ -166,7 +166,7 @@ public abstract class AlgoBaseProc<
 
     @ValueClass
     public interface ComputationResult<A extends Algorithm<A, ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
-        long createMillis();
+        long preProcessingMillis();
 
         long computeMillis();
 

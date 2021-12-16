@@ -96,7 +96,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
             null
         );
 
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
         public final long writeMillis;
 
@@ -108,7 +108,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
         public Map<String, Object> configuration;
 
         WriteResult(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long writeMillis,
             long nodeCount,
@@ -117,7 +117,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
             boolean didConverge,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.nodeCount = nodeCount;
@@ -140,7 +140,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
             @Override
             protected WriteResult buildResult() {
                 return new WriteResult(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     writeMillis,
                     nodeCount,

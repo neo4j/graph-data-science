@@ -98,7 +98,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
         WriteResult(
             long componentCount,
             Map<String, Object> componentDistribution,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             long writeMillis,
@@ -108,7 +108,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
             super(
                 componentCount,
                 componentDistribution,
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
                 configuration
@@ -128,7 +128,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
                 return new WccWriteProc.WriteResult(
                     maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingDuration,
                     writeMillis,

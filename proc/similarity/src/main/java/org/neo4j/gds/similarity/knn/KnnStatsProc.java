@@ -87,7 +87,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
                     new Result(
-                        computationResult.createMillis(),
+                        computationResult.preProcessingMillis(),
                         0,
                         0,
                         0,
@@ -144,7 +144,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
         public final long nodePairsConsidered;
 
         public Result(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             long nodesCompared,
@@ -156,7 +156,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
             Map<String, Object> configuration
         ) {
             super(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
                 nodesCompared,
@@ -178,7 +178,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
             @Override
             public Result build() {
                 return new Result(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingMillis,
                     nodesCompared,

@@ -81,10 +81,10 @@ class KSpanningTreeProcTest extends BaseProcTest {
             .addParameter("startNodeId", idFunction.of("a"))
             .addParameter("relationshipWeightProperty", "w")
             .addParameter("k", 2)
-            .yields("createMillis", "computeMillis", "writeMillis");
+            .yields("preProcessingMillis", "computeMillis", "writeMillis");
 
         runQueryWithRowConsumer(query, row -> {
-            assertTrue(row.getNumber("createMillis").longValue() >= 0);
+            assertTrue(row.getNumber("preProcessingMillis").longValue() >= 0);
             assertTrue(row.getNumber("writeMillis").longValue() >= 0);
             assertTrue(row.getNumber("computeMillis").longValue() >= 0);
         });
@@ -110,10 +110,10 @@ class KSpanningTreeProcTest extends BaseProcTest {
             .addParameter("startNodeId", idFunction.of("a"))
             .addParameter("relationshipWeightProperty", "w")
             .addParameter("k", 2)
-            .yields("createMillis", "computeMillis", "writeMillis");
+            .yields("preProcessingMillis", "computeMillis", "writeMillis");
 
         runQueryWithRowConsumer(query, row -> {
-            assertTrue(row.getNumber("createMillis").longValue() >= 0);
+            assertTrue(row.getNumber("preProcessingMillis").longValue() >= 0);
             assertTrue(row.getNumber("writeMillis").longValue() >= 0);
             assertTrue(row.getNumber("computeMillis").longValue() >= 0);
         });

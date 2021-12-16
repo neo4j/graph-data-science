@@ -153,7 +153,7 @@ class AllShortestPathsDijkstraMutateProcTest extends AllShortestPathsDijkstraPro
 
         assertCypherResult(query, List.of(Map.of(
             "relationshipsWritten", 6L,
-            "createMillis", greaterThan(-1L),
+            "preProcessingMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "postProcessingMillis", greaterThan(-1L),
             "mutateMillis", greaterThan(-1L),

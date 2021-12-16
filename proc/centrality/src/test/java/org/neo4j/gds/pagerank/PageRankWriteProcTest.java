@@ -106,7 +106,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
 
         assertCypherResult(query, List.of(Map.of(
             "nodePropertiesWritten", 10L,
-            "createMillis", greaterThan(-1L),
+            "preProcessingMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "postProcessingMillis", greaterThan(-1L),
             "writeMillis", greaterThan(-1L),

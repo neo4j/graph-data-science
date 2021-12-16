@@ -101,12 +101,12 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
             double scoreSum,
             double minimumScore,
             double maximumScore,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             Map<String, Object> configuration
         ) {
-            super(createMillis, computeMillis, postProcessingMillis, configuration);
+            super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
             this.centralityDistribution = centralityDistribution;
             this.maximumScore = maximumScore;
             this.minimumScore = minimumScore;
@@ -125,7 +125,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
                     sumCentrality,
                     minCentrality,
                     maxCentrality,
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingMillis,
                     config.toMap()

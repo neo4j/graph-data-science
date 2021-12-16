@@ -74,7 +74,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
             .addParameter("writeProperty", WRITE_PROPERTY)
             .yields(
                 "nodePropertiesWritten",
-                "createMillis",
+                "preProcessingMillis",
                 "computeMillis",
                 "writeMillis",
                 "postProcessingMillis",
@@ -92,7 +92,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
                 assertEquals(10L, row.getNumber("nodePropertiesWritten"));
 
-                assertNotEquals(-1L, row.getNumber("createMillis"));
+                assertNotEquals(-1L, row.getNumber("preProcessingMillis"));
                 assertNotEquals(-1L, row.getNumber("computeMillis"));
                 assertNotEquals(-1L, row.getNumber("writeMillis"));
                 assertNotEquals(-1L, row.getNumber("postProcessingMillis"));

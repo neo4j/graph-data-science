@@ -101,7 +101,7 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
         MutateResult(
             double averageClusteringCoefficient,
             long nodeCount,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
             long nodePropertiesWritten,
@@ -110,7 +110,7 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
             super(
                 averageClusteringCoefficient,
                 nodeCount,
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 configuration
             );
@@ -130,7 +130,7 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
             return new MutateResult(
                 averageClusteringCoefficient,
                 nodeCount,
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 mutateMillis,
                 nodePropertiesWritten,

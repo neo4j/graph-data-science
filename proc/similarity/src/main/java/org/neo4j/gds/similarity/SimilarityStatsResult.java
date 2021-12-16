@@ -24,7 +24,7 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class SimilarityStatsResult {
 
-    public long createMillis;
+    public long preProcessingMillis;
     public long computeMillis;
     public long postProcessingMillis;
 
@@ -34,7 +34,7 @@ public class SimilarityStatsResult {
     public Map<String, Object> configuration;
 
     public SimilarityStatsResult(
-        long createMillis,
+        long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         long nodesCompared,
@@ -43,7 +43,7 @@ public class SimilarityStatsResult {
         Map<String, Object> configuration
 
     ) {
-        this.createMillis = createMillis;
+        this.preProcessingMillis = preProcessingMillis;
         this.computeMillis = computeMillis;
         this.postProcessingMillis = postProcessingMillis;
         this.nodesCompared = nodesCompared;
@@ -57,7 +57,7 @@ public class SimilarityStatsResult {
         @Override
         public SimilarityStatsResult build() {
             return new SimilarityStatsResult(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
                 nodesCompared,
