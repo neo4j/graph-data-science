@@ -91,8 +91,6 @@ With this it is possible to measure the memory consumption of creating a graph a
 | relationshipProperties                                      | String, List of String or Map | null                   | yes      | The relationship properties to project during anonymous graph creation.
 | <<common-configuration-concurrency,concurrency>>            | Integer                       | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency                                             | Integer                       | value of 'concurrency' | yes      | The number of concurrent threads used for creating the graph.
-| <<common-configuration-write-concurrency,writeConcurrency>> | Integer                       | value of 'concurrency' | yes      | WRITE mode only: The number of concurrent threads used for writing the result.
-| <<common-configuration-write-property,writeProperty>>       | String                        | n/a                    | no       | WRITE mode only: The {entity} property to which the {result} is written to.
 |===
 
 [[estimate-procedure-graph]]
