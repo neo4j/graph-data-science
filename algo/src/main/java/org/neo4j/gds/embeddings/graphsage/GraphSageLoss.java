@@ -123,8 +123,10 @@ public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
             double positiveAffinity = affinity(embeddings, bucketIdx, positiveNodeIdx);
             double negativeAffinity = affinity(embeddings, bucketIdx, negativeNodeIdx);
 
-            double positiveLogistic = logisticFunction(positiveAffinity);
-            double negativeLogistic = logisticFunction(-negativeAffinity);
+            double relationshipWeightFactor = relationshipWeightFactor(batch[bucketIdx], batch[positiveNodeIdx]);
+            double weightedPositiveLogistic = relationshipWeightFactor * logisticFunction(positiveAffinity);
+
+            double weightedNegativeLogistic = negativeSamplingFactor * logisticFunction(-negativeAffinity);
 
             for (int embeddingIdx = 0; embeddingIdx < embeddingDimension; embeddingIdx++) {
                 computeGradientForEmbeddingIdx(
@@ -133,8 +135,8 @@ public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
                     bucketIdx,
                     positiveNodeIdx,
                     negativeNodeIdx,
-                    positiveLogistic,
-                    negativeLogistic,
+                    weightedPositiveLogistic,
+                    weightedNegativeLogistic,
                     embeddingIdx
                 );
             }
@@ -143,21 +145,18 @@ public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
         return gradientResult;
     }
 
-    private void computeGradientForEmbeddingIdx(
+    private static void computeGradientForEmbeddingIdx(
         Matrix embeddings,
         Matrix gradientResult,
         int batchIdx,
         int positiveNodeIdx,
         int negativeNodeIdx,
-        double positiveLogistic,
-        double negativeLogistic,
+        double weightedPositiveLogistic,
+        double weightedNegativeLogistic,
         int embeddingIdx
     ) {
-        double relationshipWeightFactor = relationshipWeightFactor(batch[batchIdx], batch[positiveNodeIdx]);
-        double weightedPositiveLogistic = relationshipWeightFactor * positiveLogistic;
-
         double scaledPositiveExampleGradient = -embeddings.dataAt(positiveNodeIdx, embeddingIdx) * weightedPositiveLogistic;
-        double scaledNegativeExampleGradient = negativeSamplingFactor * negativeLogistic * embeddings.dataAt(negativeNodeIdx, embeddingIdx);
+        double scaledNegativeExampleGradient = weightedNegativeLogistic * embeddings.dataAt(negativeNodeIdx, embeddingIdx);
 
         gradientResult.setDataAt(batchIdx, embeddingIdx, scaledPositiveExampleGradient + scaledNegativeExampleGradient);
 
@@ -172,7 +171,7 @@ public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
         gradientResult.setDataAt(
             negativeNodeIdx,
             embeddingIdx,
-            negativeSamplingFactor * negativeLogistic * currentEmbeddingValue
+            weightedNegativeLogistic * currentEmbeddingValue
         );
     }
 
