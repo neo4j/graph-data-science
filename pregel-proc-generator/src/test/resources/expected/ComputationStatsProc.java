@@ -34,6 +34,8 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.pipeline.ExecutionMode;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pregel.proc.PregelStatsProc;
 import org.neo4j.gds.pregel.proc.PregelStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -43,6 +45,11 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+@GdsCallable(
+    name = "gds.pregel.test.stats",
+    executionMode = ExecutionMode.STATS,
+    description = "Test computation description"
+)
 @Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
 public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgorithm, PregelProcedureConfig> {
     @Procedure(

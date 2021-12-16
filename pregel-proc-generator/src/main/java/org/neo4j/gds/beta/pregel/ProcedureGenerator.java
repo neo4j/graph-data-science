@@ -35,6 +35,8 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.pipeline.ExecutionMode;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -106,6 +108,24 @@ abstract class ProcedureGenerator extends PregelGenerator {
         ClassName procedureClassName,
         ClassName algorithmClassName
     ) {
+
+        ExecutionMode executionMode;
+        switch (procGdsMode()) {
+            case STATS: executionMode = ExecutionMode.STATS; break;
+            case WRITE: executionMode = ExecutionMode.WRITE_NODE_PROPERTY; break;
+            case MUTATE: executionMode = ExecutionMode.MUTATE_NODE_PROPERTY; break;
+            case STREAM: executionMode = ExecutionMode.STREAM; break;
+            default: throw new IllegalArgumentException("Unsupported procedure mode: " + procGdsMode());
+        }
+
+        var gdsCallableAnnotationBuilder = AnnotationSpec
+            .builder(GdsCallable.class)
+            .addMember("name", "$S", formatWithLocale("%s.%s", pregelSpec.procedureName(), procGdsMode().lowerCase()))
+            .addMember("executionMode", "$T.$L", ExecutionMode.class, executionMode);
+        pregelSpec.description().ifPresent(description ->
+            gdsCallableAnnotationBuilder.addMember("description", "$S", description)
+        );
+
         return TypeSpec
             .classBuilder(procedureClassName)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -114,6 +134,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 algorithmClassName,
                 configTypeName
             ))
+            .addAnnotation(gdsCallableAnnotationBuilder.build())
             .addOriginatingElement(pregelSpec.element());
     }
 
