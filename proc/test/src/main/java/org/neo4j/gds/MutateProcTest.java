@@ -65,7 +65,7 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
             () -> applyOnProcedure(procedure -> {
                 var computationResult = mock(AlgoBaseProc.ComputationResult.class);
                 log.add(0, ((TestLog) procedure.log));
-                ((MutateProc) procedure).mutate(computationResult);
+                procedure.computationResultConsumer().consume(computationResult, procedure.executionContext());
             })
         );
 
