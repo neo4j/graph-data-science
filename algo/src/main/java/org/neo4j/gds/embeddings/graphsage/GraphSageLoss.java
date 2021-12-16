@@ -157,7 +157,7 @@ public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
         double weightedPositiveLogistic = relationshipWeightFactor * positiveLogistic;
 
         double scaledPositiveExampleGradient = -embeddings.dataAt(positiveNodeIdx, embeddingIdx) * weightedPositiveLogistic;
-        double scaledNegativeExampleGradient = negativeSamplingFactor * embeddings.dataAt(negativeNodeIdx, embeddingIdx) * negativeLogistic;
+        double scaledNegativeExampleGradient = negativeSamplingFactor * negativeLogistic * embeddings.dataAt(negativeNodeIdx, embeddingIdx);
 
         gradientResult.setDataAt(batchIdx, embeddingIdx, scaledPositiveExampleGradient + scaledNegativeExampleGradient);
 
@@ -172,7 +172,7 @@ public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
         gradientResult.setDataAt(
             negativeNodeIdx,
             embeddingIdx,
-            negativeSamplingFactor * currentEmbeddingValue * negativeLogistic
+            negativeSamplingFactor * negativeLogistic * currentEmbeddingValue
         );
     }
 
