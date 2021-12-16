@@ -20,7 +20,6 @@
 package org.neo4j.gds.beta.pregel;
 
 import com.google.auto.common.GeneratedAnnotationSpecs;
-import com.google.common.collect.Streams;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
@@ -55,7 +54,7 @@ class PregelGenerator {
     }
 
     List<JavaFile> generate(PregelValidation.Spec pregelSpec) {
-        return Streams.concat(
+        return Stream.concat(
             Stream.of(new AlgorithmGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec()),
             Arrays
                 .stream(pregelSpec.procedureModes())

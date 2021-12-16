@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.proc;
 
-import com.google.common.io.Resources;
 import com.google.testing.compile.CompilationRule;
 import com.google.testing.compile.CompileTester;
 import org.junit.Rule;
@@ -32,7 +31,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.Objects;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.JavaFileObjects.forResource;
@@ -249,7 +251,11 @@ class ConfigurationProcessorTest {
 
     private JavaFileObject loadExpectedFile(String resourceName) {
         try {
-            Iterable<String> sourceLines = Resources.readLines(Resources.getResource(resourceName), UTF_8);
+            var sourceLines = Files.readAllLines(
+                Paths.get(Objects.requireNonNull(getClass().getResource(resourceName)).toURI()),
+                UTF_8
+            );
+
             String binaryName = resourceName
                 .replace('/', '.')
                 .replace(".java", "");
