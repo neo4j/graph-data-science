@@ -84,7 +84,7 @@ CALL gds.localClusteringCoefficient.stats(
 YIELD
   averageClusteringCoefficient: Double,
   nodeCount: Integer,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   configuration: Map
@@ -102,7 +102,7 @@ include::specific-configuration.adoc[]
 | Name                         | Type    | Description
 | averageClusteringCoefficient | Double  | The average clustering coefficient.
 | nodeCount                    | Integer | Number of nodes in the graph.
-| createMillis                 | Integer | Milliseconds for creating the graph.
+| preProcessingMillis          | Integer | Milliseconds for preprocessing the graph.
 | computeMillis                | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis         | Integer | Milliseconds for computing the global metrics.
 | configuration                | Map     | The configuration used for running the algorithm.
@@ -122,7 +122,7 @@ YIELD
   averageClusteringCoefficient: Double,
   nodeCount: Integer,
   nodePropertiesWritten: Integer,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   mutateMillis: Integer,
@@ -142,7 +142,7 @@ include::specific-configuration.adoc[]
 | averageClusteringCoefficient  | Double  | The average clustering coefficient.
 | nodeCount                     | Integer | Number of nodes in the graph.
 | nodePropertiesWritten         | Integer | Number of properties added to the in-memory graph.
-| createMillis                  | Integer | Milliseconds for creating the graph.
+| preProcessingMillis           | Integer | Milliseconds for preprocessing the graph.
 | computeMillis                 | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis          | Integer | Milliseconds for computing the global metrics.
 | mutateMillis                  | Integer | Milliseconds for adding properties to the in-memory graph.
@@ -163,7 +163,7 @@ YIELD
   averageClusteringCoefficient: Double,
   nodeCount: Integer,
   nodePropertiesWritten: Integer,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   writeMillis: Integer,
@@ -183,7 +183,7 @@ include::specific-configuration.adoc[]
 | averageClusteringCoefficient  | Double  | The average clustering coefficient.
 | nodeCount                     | Integer | Number of nodes in the graph.
 | nodePropertiesWritten         | Integer | Number of properties written to Neo4j.
-| createMillis                  | Integer | Milliseconds for creating the graph.
+| preProcessingMillis           | Integer | Milliseconds for preprocessing the graph.
 | computeMillis                 | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis          | Integer | Milliseconds for computing the global metrics.
 | writeMillis                   | Integer | Milliseconds for writing results back to Neo4j.

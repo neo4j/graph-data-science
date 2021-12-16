@@ -60,7 +60,7 @@ If we're trying to spread a message on social media we could use the algorithm t
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.closeness.harmonic.write(configuration: Map)
-YIELD nodes, createMillis, computeMillis, writeMillis, centralityDistribution
+YIELD nodes, preProcessingMillis, computeMillis, writeMillis, centralityDistribution
 ----
 
 .Parameters
@@ -78,7 +78,7 @@ YIELD nodes, createMillis, computeMillis, writeMillis, centralityDistribution
 |===
 | Name                   | Type      | Description
 | nodes                  | int       | The number of nodes considered.
-| createMillis           | int       | Milliseconds for loading data.
+| preProcessingMillis    | int       | Milliseconds for preprocessing the data.
 | computeMillis          | int       | Milliseconds for running the algorithm.
 | writeMillis            | int       | Milliseconds for writing result data back.
 | writeProperty          | string    | The property name written back to.

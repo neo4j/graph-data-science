@@ -114,7 +114,7 @@ CALL gds.nodeSimilarity.stats(
   configuration: Map
 )
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   nodesCompared: Integer,
@@ -133,7 +133,7 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                          | Type      | Description
-| createMillis                  | Integer   | Milliseconds for loading data.
+| preProcessingMillis           | Integer   | Milliseconds for preprocessing the data.
 | computeMillis                 | Integer   | Milliseconds for running the algorithm.
 | nodesCompared                 | Integer   | The number of nodes compared.
 | postProcessingMillis          | Integer   | Milliseconds for computing component count and distribution statistics.
@@ -153,7 +153,7 @@ CALL gds.nodeSimilarity.mutate(
   configuration: Map
 )
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
   postProcessingMillis: Integer,
@@ -175,7 +175,7 @@ include::specific-configuration.adoc[]
 | Name                   | Type    | Description
 | nodesCompared          | Integer | The number of nodes compared.
 | relationshipsWritten   | Integer | The number of relationships created.
-| createMillis           | Integer | Milliseconds for loading data.
+| preProcessingMillis    | Integer | Milliseconds for preprocessing the data.
 | computeMillis          | Integer | Milliseconds for running the algorithm.
 | mutateMillis           | Integer | Milliseconds for adding properties to the in-memory graph.
 | postProcessingMillis   | Integer | Milliseconds for computing percentiles.
@@ -194,7 +194,7 @@ CALL gds.nodeSimilarity.write(
   configuration: Map
 )
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
   postProcessingMillis: Integer,
@@ -216,7 +216,7 @@ include::specific-configuration.adoc[]
 | Name                   | Type    | Description
 | nodesCompared          | Integer | The number of nodes compared.
 | relationshipsWritten   | Integer | The number of relationships created.
-| createMillis           | Integer | Milliseconds for loading data.
+| preProcessingMillis    | Integer | Milliseconds for preprocessing data.
 | computeMillis          | Integer | Milliseconds for running the algorithm.
 | writeMillis            | Integer | Milliseconds for writing result data back to Neo4j.
 | postProcessingMillis   | Integer | Milliseconds for computing percentiles.

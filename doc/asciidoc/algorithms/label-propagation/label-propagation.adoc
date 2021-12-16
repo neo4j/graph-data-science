@@ -110,7 +110,7 @@ CALL gds.labelPropagation.stats(
   configuration: Map
 )
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   communityCount: Integer,
@@ -130,7 +130,7 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type    | Description
-| createMillis          | Integer | Milliseconds for loading data.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.
 | communityCount        | Integer | The number of communities found.
@@ -154,7 +154,7 @@ CALL gds.labelPropagation.mutate(
   configuration: Map
 )
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
   postProcessingMillis: Integer,
@@ -176,7 +176,7 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type    | Description
-| createMillis          | Integer | Milliseconds for loading data.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
 | postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.
@@ -201,7 +201,7 @@ CALL gds.labelPropagation.write(
   configuration: Map
 )
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
   postProcessingMillis: Integer,
@@ -223,7 +223,7 @@ include::specific-configuration-write.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type    | Description
-| createMillis          | Integer | Milliseconds for loading data.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | writeMillis           | Integer | Milliseconds for writing result data back.
 | postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.

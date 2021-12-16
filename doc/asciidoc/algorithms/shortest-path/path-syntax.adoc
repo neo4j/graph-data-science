@@ -77,7 +77,7 @@ CALL {procedure-name}.mutate(
 )
 YIELD
   relationshipsWritten: Integer,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   mutateMillis: Integer,
@@ -109,7 +109,7 @@ endif::[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                   | Type      | Description
-| createMillis           | Integer   | Milliseconds for creating the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer   | Unused.
 | mutateMillis           | Integer   | Milliseconds for adding relationships to the in-memory graph.
@@ -137,7 +137,7 @@ CALL {procedure-name}.write(
 )
 YIELD
   relationshipsWritten: Integer,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   writeMillis: Integer,
@@ -171,7 +171,7 @@ endif::[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                   | Type      | Description
-| createMillis           | Integer   | Milliseconds for creating the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer   | Unused.
 | writeMillis            | Integer   | Milliseconds for writing relationships to Neo4j.

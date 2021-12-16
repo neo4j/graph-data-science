@@ -43,7 +43,7 @@ CALL gds.alpha.ml.splitRelationships.mutate(
   configuration: Map
 )
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
   relationshipsWritten: Integer,
@@ -72,7 +72,7 @@ include::../../common-configuration/common-mutate-configuration-named-graph.adoc
 [opts="header",cols="1m,1,6"]
 |===
 | Name                  | Type      | Description
-| createMillis          | Integer   | Milliseconds for loading data.
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
 | mutateMillis          | Integer   | Milliseconds for adding properties to the in-memory graph.
 | relationshipsWritten  | Integer   | The number of relationships created by the algorithm.

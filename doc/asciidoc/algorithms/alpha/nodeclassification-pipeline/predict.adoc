@@ -62,7 +62,7 @@ CALL gds.alpha.ml.pipeline.nodeClassification.predict.mutate(
   configuration: Map
 )
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   mutateMillis: Integer,
@@ -80,7 +80,7 @@ include::specific-write-mutate-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                    | Type    | Description
-| createMillis            | Integer | Milliseconds for creating the graph.
+| preProcessingMillis     | Integer | Milliseconds for preprocessing the graph.
 | computeMillis           | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis    | Integer | Milliseconds for computing the global metrics.
 | mutateMillis            | Integer | Milliseconds for adding properties to the in-memory graph.
@@ -99,7 +99,7 @@ CALL gds.alpha.ml.pipeline.nodeClassification.predict.write(
   configuration: Map
 )
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   writeMillis: Integer,
@@ -117,7 +117,7 @@ include::specific-write-mutate-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                    | Type    | Description
-| createMillis            | Integer | Milliseconds for creating the graph.
+| preProcessingMillis     | Integer | Milliseconds for preprocessing the graph.
 | computeMillis           | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis    | Integer | Milliseconds for computing the global metrics.
 | writeMillis             | Integer | Milliseconds for writing result back to Neo4j.

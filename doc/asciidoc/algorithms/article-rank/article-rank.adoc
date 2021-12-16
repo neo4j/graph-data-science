@@ -104,7 +104,7 @@ CALL gds.articleRank.stats(
 YIELD
   ranIterations: Integer,
   didConverge: Boolean,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   centralityDistribution: Map,
@@ -123,7 +123,7 @@ include::specific-configuration.adoc[]
 | Name                   | Type      | Description
 | ranIterations          | Integer   | The number of iterations run.
 | didConverge            | Boolean   | Indicates if the algorithm converged.
-| createMillis           | Integer   | Milliseconds for creating the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
 | centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
@@ -146,7 +146,7 @@ YIELD
   nodePropertiesWritten: Integer,
   ranIterations: Integer,
   didConverge: Boolean,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   mutateMillis: Integer,
@@ -166,7 +166,7 @@ include::specific-configuration.adoc[]
 | Name                   | Type      | Description
 | ranIterations          | Integer   | The number of iterations run.
 | didConverge            | Boolean   | Indicates if the algorithm converged.
-| createMillis           | Integer   | Milliseconds for creating the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
 | mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
@@ -191,7 +191,7 @@ YIELD
   nodePropertiesWritten: Integer,
   ranIterations: Integer,
   didConverge: Boolean,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   writeMillis: Integer,
@@ -211,7 +211,7 @@ include::specific-configuration.adoc[]
 | Name                   | Type      | Description
 | ranIterations          | Integer   | The number of iterations run.
 | didConverge            | Boolean   | Indicates if the algorithm converged.
-| createMillis           | Integer   | Milliseconds for creating the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
 | writeMillis            | Integer   | Milliseconds for writing result data back.
