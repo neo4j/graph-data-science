@@ -24,6 +24,9 @@ import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.ExecutionMode;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.procedure.Description;
@@ -36,6 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.nodeSimilarity.stream", description = NODE_SIMILARITY_DESCRIPTION, executionMode = ExecutionMode.STREAM)
 public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSimilarityResult, SimilarityResult, NodeSimilarityStreamConfig> {
 
     @Procedure(value = "gds.nodeSimilarity.stream", mode = READ)
@@ -44,23 +48,8 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig> result = compute(
-            graphName,
-            configuration
-        );
-        Graph graph = result.graph();
-
-        if (result.isGraphEmpty()) {
-            graph.release();
-            return Stream.empty();
-        }
-
-        return result.result().streamResult()
-            .map(similarityResult -> {
-                similarityResult.node1 = graph.toOriginalNodeId(similarityResult.node1);
-                similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);
-                return similarityResult;
-            });
+        var computationResult = compute(graphName, configuration);
+        return computationResultConsumer().consume(computationResult, executionContext());
     }
 
     @Procedure(value = "gds.nodeSimilarity.stream.estimate", mode = READ)
@@ -87,5 +76,24 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
         long originalNodeId, long internalNodeId, NodeProperties nodeProperties
     ) {
         throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
+    }
+
+    @Override
+    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            Graph graph = computationResult.graph();
+
+            if (computationResult.isGraphEmpty()) {
+                graph.release();
+                return Stream.empty();
+            }
+
+            return computationResult.result().streamResult()
+                .map(similarityResult -> {
+                    similarityResult.node1 = graph.toOriginalNodeId(similarityResult.node1);
+                    similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);
+                    return similarityResult;
+                });
+        };
     }
 }

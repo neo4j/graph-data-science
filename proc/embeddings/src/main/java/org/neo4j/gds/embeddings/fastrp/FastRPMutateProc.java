@@ -23,6 +23,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -33,13 +34,15 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.fastRP.mutate", description = FastRPCompanion.DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP.FastRPResult, FastRPMutateProc.MutateResult, FastRPMutateConfig> {
 
     @Procedure(value = "gds.fastRP.mutate", mode = READ)
     @Description(FastRPCompanion.DESCRIPTION)
-    public Stream<FastRPMutateProc.MutateResult> mutate(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

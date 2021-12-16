@@ -25,6 +25,7 @@ import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
@@ -39,11 +40,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.STATS;
 import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
 import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.gds.similarity.knn.KnnWriteProc.computeToGraph;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.beta.knn.stats", description = STATS_DESCRIPTION, executionMode = STATS)
 public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.Result, KnnStatsConfig> {
 
     @Procedure(name = "gds.beta.knn.stats", mode = READ)

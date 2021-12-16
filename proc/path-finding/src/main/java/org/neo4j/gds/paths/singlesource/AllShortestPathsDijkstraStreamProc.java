@@ -26,6 +26,7 @@ import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -35,8 +36,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraProc.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.allShortestPaths.dijkstra.stream", description = DIJKSTRA_DESCRIPTION, executionMode = STREAM)
 public class AllShortestPathsDijkstraStreamProc extends ShortestPathStreamProc<Dijkstra, AllShortestPathsDijkstraStreamConfig> {
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.stream", mode = READ)

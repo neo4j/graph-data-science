@@ -24,6 +24,9 @@ import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.ExecutionMode;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.procedure.Description;
@@ -36,6 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.beta.knn.stream", description = KNN_DESCRIPTION, executionMode = ExecutionMode.STREAM)
 public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult, KnnStreamConfig> {
 
     @Procedure(value = "gds.beta.knn.stream", mode = READ)
@@ -44,21 +48,8 @@ public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult,
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Knn, Knn.Result, KnnStreamConfig> result = compute(graphName, configuration);
-        Graph graph = result.graph();
-
-        if (result.isGraphEmpty()) {
-            graph.release();
-            return Stream.empty();
-        }
-
-        return result.result()
-            .streamSimilarityResult()
-            .map(similarityResult -> {
-                similarityResult.node1 = graph.toOriginalNodeId(similarityResult.node1);
-                similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);
-                return similarityResult;
-            });
+        var computationResult = compute(graphName, configuration);
+        return computationResultConsumer().consume(computationResult, executionContext());
     }
 
     @Procedure(value = "gds.beta.knn.stream.estimate", mode = READ)
@@ -85,5 +76,25 @@ public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult,
     @Override
     public GraphAlgorithmFactory<Knn, KnnStreamConfig> algorithmFactory() {
         return new KnnFactory<>();
+    }
+
+    @Override
+    public ComputationResultConsumer<Knn, Knn.Result, KnnStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            Graph graph = computationResult.graph();
+
+            if (computationResult.isGraphEmpty()) {
+                graph.release();
+                return Stream.empty();
+            }
+
+            return computationResult.result()
+                .streamSimilarityResult()
+                .map(similarityResult -> {
+                    similarityResult.node1 = graph.toOriginalNodeId(similarityResult.node1);
+                    similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);
+                    return similarityResult;
+                });
+        };
     }
 }

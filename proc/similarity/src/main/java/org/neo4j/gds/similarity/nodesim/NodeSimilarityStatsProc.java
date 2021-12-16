@@ -23,6 +23,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityProc;
@@ -35,10 +36,13 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.STATS;
 import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
 import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.nodeSimilarity.stats", description = STATS_DESCRIPTION, executionMode = STATS)
 public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimilarityResult, SimilarityStatsResult, NodeSimilarityStatsConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.stats", mode = READ)

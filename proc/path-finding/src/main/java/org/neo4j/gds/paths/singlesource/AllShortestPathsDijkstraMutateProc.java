@@ -26,6 +26,7 @@ import org.neo4j.gds.paths.ShortestPathMutateProc;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -35,8 +36,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraProc.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.allShortestPaths.dijkstra.mutate", description = DIJKSTRA_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class AllShortestPathsDijkstraMutateProc extends ShortestPathMutateProc<Dijkstra, AllShortestPathsDijkstraMutateConfig> {
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.mutate", mode = READ)

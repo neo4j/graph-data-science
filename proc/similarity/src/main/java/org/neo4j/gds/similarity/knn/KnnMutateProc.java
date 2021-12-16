@@ -19,14 +19,15 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityMutateResult;
@@ -43,13 +44,15 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
 import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.gds.similarity.knn.KnnWriteProc.computeToGraph;
 import static org.neo4j.procedure.Mode.READ;
 
-public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, KnnMutateProc.Result, KnnMutateConfig> {
+@GdsCallable(name = "gds.beta.knn.mutate", description = KNN_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+public class KnnMutateProc extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig, KnnMutateProc.Result> {
 
     @Procedure(name = "gds.beta.knn.mutate", mode = READ)
     @Description(KNN_DESCRIPTION)
@@ -57,7 +60,8 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, KnnMutate
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphName, configuration));
+        var computationResult =  compute(graphName, configuration);
+        return computationResultConsumer().consume(computationResult, executionContext());
     }
 
     @Procedure(value = "gds.beta.knn.mutate.estimate", mode = READ)
@@ -75,18 +79,13 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, KnnMutate
     }
 
     @Override
-    protected AbstractResultBuilder<Result> resultBuilder(ComputationResult<Knn, Knn.Result, KnnMutateConfig> computeResult) {
-        throw new UnsupportedOperationException("Knn handles result building individually.");
-    }
-
-    @Override
     public GraphAlgorithmFactory<Knn, KnnMutateConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 
     @Override
-    protected Stream<Result> mutate(ComputationResult<Knn, Knn.Result, KnnMutateConfig> computationResult) {
-        return runWithExceptionLogging("Graph mutation failed", () -> {
+    public ComputationResultConsumer<Knn, Knn.Result, KnnMutateConfig, Stream<Result>> computationResultConsumer() {
+        return (computationResult, executionContext) -> runWithExceptionLogging("Graph mutation failed", () -> {
             KnnMutateConfig config = computationResult.config();
             Knn.Result result = computationResult.result();
 

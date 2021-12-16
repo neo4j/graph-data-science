@@ -20,8 +20,8 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.HdrHistogram.DoubleHistogram;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
@@ -35,7 +35,8 @@ import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityMutateResult;
@@ -51,12 +52,14 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
 import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity, NodeSimilarityResult, SimilarityMutateResult, NodeSimilarityMutateConfig> {
+@GdsCallable(name = "gds.nodeSimilarity.mutate", description = NODE_SIMILARITY_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig, SimilarityMutateResult> {
 
     @Procedure(name = "gds.nodeSimilarity.mutate", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
@@ -64,7 +67,8 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphName, configuration));
+        var computationResult = compute(graphName, configuration);
+        return computationResultConsumer().consume(computationResult, executionContext());
     }
 
     @Procedure(value = "gds.nodeSimilarity.mutate.estimate", mode = READ)
@@ -97,17 +101,8 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
     }
 
     @Override
-    protected AbstractResultBuilder<SimilarityMutateResult> resultBuilder(
-        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computeResult
-    ) {
-        throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
-    }
-
-    @Override
-    public Stream<SimilarityMutateResult> mutate(
-        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult
-    ) {
-        return runWithExceptionLogging("Graph mutation failed", () -> {
+    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig, Stream<SimilarityMutateResult>> computationResultConsumer() {
+        return (computationResult, executionContext) -> runWithExceptionLogging("Graph mutation failed", () -> {
             NodeSimilarityMutateConfig config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {

@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.fastrp;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -32,8 +33,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
+import static org.neo4j.gds.pipeline.ExecutionMode.STATS;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.fastRP.stats", description = "Random Projection produces node embeddings via the fastrp algorithm", executionMode = STATS)
 public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FastRPResult, FastRPStatsProc.StatsResult, FastRPStatsConfig> {
 
     @Procedure(value = "gds.fastRP.stats", mode = READ)
@@ -48,6 +51,7 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FastRPResult, Fast
         );
         return stats(computationResult);
     }
+
     @Procedure(value = "gds.fastRP.stats.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
