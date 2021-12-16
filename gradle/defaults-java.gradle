@@ -100,7 +100,12 @@ allprojects {
         }
 
         tasks.withType(JavaCompile) {
-            options.compilerArgs += "--release=11"
+            if (ver.'neo4j' == neos.'dev') {
+                options.compilerArgs += "--release=17"
+            } else {
+                options.compilerArgs += "--release=11"
+            }
+
             options.warnings = true
             options.encoding = 'UTF-8'
 
