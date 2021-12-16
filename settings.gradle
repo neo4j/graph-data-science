@@ -24,7 +24,6 @@ def registerSubModules(File file) {
             .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop04.3" }
             .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop04.4" }
             .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop05.0" }
-            .filter { moduleDir -> moduleDir.getParentFile().name != "4.4" }
             .filter { moduleDir -> moduleDir.getParentFile().name != "dev" }
             .forEach { moduleDir ->
                 def parent = moduleDir.getParentFile();
@@ -41,6 +40,8 @@ def registerSubModules(File file) {
                     projectName = ":${moduleDir.name}-4.2";
                 } else if (parent.name == "4.3") {
                     projectName = ":${moduleDir.name}-4.3";
+                } else if (parent.name == "4.4") {
+                    projectName = ":${moduleDir.name}-4.4";
                 } else if (parent.name == "unsupported") {
                     projectName = ":${moduleDir.name}-unsupported";
                 } else if (parent.name == "4.3.3") {
