@@ -26,21 +26,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.ResourceUtil;
 
 import javax.tools.JavaFileObject;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Locale;
-import java.util.Objects;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.JavaFileObjects.forResource;
 import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @EnableRuleMigrationSupport
@@ -157,21 +151,12 @@ class PregelProcessorTest {
     }
 
     private JavaFileObject loadExpectedFile(String resourceName) {
-        try {
-            var sourceLines = Files.readAllLines(
-                Paths.get(Objects.requireNonNull(getClass().getResource(resourceName)).toURI()),
-                UTF_8
-            );
+        var sourceLines = ResourceUtil.lines(resourceName);
 
-            String binaryName = resourceName
-                .replace('/', '.')
-                .replace(".java", "");
-            return forSourceLines(binaryName, sourceLines);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        String binaryName = resourceName
+            .replace('/', '.')
+            .replace(".java", "");
+        return forSourceLines(binaryName, sourceLines);
     }
 
     private static ErrorCheck e(String error, int line, int column) {
