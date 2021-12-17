@@ -1,5 +1,8 @@
 = Neo4j Graph Data Science
 
+image:https://github.com/neo4j/graph-data-science/actions/workflows/gradle_cipr.yml/badge.svg?branch=master[https://github.com/neo4j/graph-data-science/actions/workflows/gradle_cipr.yml]
+image:https://img.shields.io/maven-central/v/org.neo4j.gds/proc.svg?label=Maven%20Central[https://search.maven.org/search?q=g:%22org.neo4j.gds%22%20AND%20a:%22proc%22]
+
 *Documentation* (https://neo4j.com/docs/graph-data-science/current/installation/[Stable] | https://neo4j.com/docs/graph-data-science/2.0-preview/introduction/[Preview])| https://community.neo4j.com/c/neo4j-graph-platform/graph-algorithms[
 *Community Forum*] | https://discord.com/invite/neo4j[*Discord*]
 
