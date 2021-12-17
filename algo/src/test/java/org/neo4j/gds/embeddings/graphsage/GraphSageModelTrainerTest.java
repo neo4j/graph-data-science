@@ -224,6 +224,7 @@ class GraphSageModelTrainerTest {
                 "GraphSageTrain :: train epoch 2 of 2 :: iteration 1 of 2 100%",
                 "GraphSageTrain :: train epoch 2 of 2 :: iteration 1 of 2 :: Finished",
                 "GraphSageTrain :: train epoch 2 of 2 :: iteration 2 of 2 :: Start",
+                "GraphSageTrain :: train epoch 2 of 2 :: iteration 2 of 2 :: LOSS: 531.5699087433",
                 "GraphSageTrain :: train epoch 2 of 2 :: iteration 2 of 2 100%",
                 "GraphSageTrain :: train epoch 2 of 2 :: iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: train epoch 2 of 2 :: Finished",
@@ -288,16 +289,16 @@ class GraphSageModelTrainerTest {
             .isInstanceOf(List.class)
             .asList()
             .containsExactly(
-                91.33327272493308,
-                88.179405005798,
-                87.68340477199386,
-                85.60797746024531,
-                85.59108701774029,
+                91.33327272493334,
+                88.17940500579795,
+                87.68340477199389,
+                85.60797746024537,
+                85.59108701774032,
                 85.5900723408756,
-                81.44403525117448,
+                81.44403525117445,
                 81.44260858480706,
-                81.44349342539152,
-                81.45612978300521
+                81.44349342539118,
+                81.45612978301318
             );
     }
 
@@ -336,15 +337,15 @@ class GraphSageModelTrainerTest {
             .asList()
             .containsExactly(
                 90.53361989137981,
-                83.29795301874591,
-                74.75620220930375,
-                74.6103157894963,
-                74.68090829811632,
-                74.5497784349849,
-                74.37264430707182,
-                74.36673549939077,
-                74.36632354657218,
-                74.3662033796945
+                83.29795301874604,
+                74.75620220928317,
+                74.61031578945892,
+                74.68090735517063,
+                74.55875643599765,
+                74.4087249239107,
+                74.57257264047709,
+                74.4061551497545,
+                74.4057348185484
             );
     }
 

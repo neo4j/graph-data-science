@@ -34,7 +34,6 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
-import org.neo4j.gds.ml.core.functions.PassthroughVariable;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
 import org.neo4j.gds.ml.core.samplers.WeightedUniformSampler;
@@ -244,20 +243,19 @@ public class GraphSageModelTrainer {
 
         Variable<Matrix> embeddingVariable = embeddings(graph, useWeights, totalBatch, features, layers, featureFunction);
 
-        Variable<Scalar> lossFunction = new GraphSageLoss(
+        return new GraphSageLoss(
             useWeights ? graph::relationshipProperty : UNWEIGHTED,
             embeddingVariable,
             totalBatch,
             negativeSampleWeight
         );
-
-        return new PassthroughVariable<>(lossFunction);
     }
 
     LongStream neighborBatch(Graph graph, Partition batch, long batchLocalSeed) {
         var neighborBatchBuilder = LongStream.builder();
         var localRandom = new Random(batchLocalSeed);
 
+        // sample a neighbor for each batchNode
         batch.consume(nodeId -> {
             // randomWalk with at most maxSearchDepth steps and only save last node
             int searchDepth = localRandom.nextInt(maxSearchDepth) + 1;
@@ -297,7 +295,7 @@ public class GraphSageModelTrainer {
         return Math.toIntExact(Math.floorDiv(partition.startNode(), nodeCount));
     }
 
-    private int firstLayerColumns(GraphSageTrainConfig config, Graph graph) {
+    private static int firstLayerColumns(GraphSageTrainConfig config, Graph graph) {
         return config.projectedFeatureDimension().orElseGet(() -> {
             var featureExtractors = GraphSageHelper.featureExtractors(graph, config);
             return FeatureExtraction.featureCount(featureExtractors);

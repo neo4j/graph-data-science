@@ -19,33 +19,30 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
-import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
-import java.util.List;
-
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class ConstantScale<T extends Tensor<T>> extends AbstractVariable<T> {
+public class ConstantScale<T extends Tensor<T>> extends SingleParentVariable<T, T> {
     private final Variable<T> parent;
     private final double constant;
 
     public ConstantScale(Variable<T> parent, double constant) {
-        super(List.of(parent), parent.dimensions());
+        super(parent, parent.dimensions());
         this.parent = parent;
         this.constant = constant;
     }
 
     @Override
     public T apply(ComputationContext ctx) {
-        return (T) ctx.data(parent).scalarMultiply(constant);
+        return ctx.data(parent).scalarMultiply(constant);
     }
 
     @Override
-    public T gradient(Variable<?> parent, ComputationContext ctx) {
-        return (T) ctx.gradient(this).scalarMultiply(constant);
+    protected T gradientForParent(ComputationContext ctx) {
+        return ctx.gradient(this).scalarMultiply(constant);
     }
 
     @Override
