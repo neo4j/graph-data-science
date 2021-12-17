@@ -39,7 +39,7 @@ ext {
             'asciidoctorGroovyDsl': '1.0.0.Alpha2',
             'dom4j'               : '2.1.1',
             'jaxen'               : '1.1.6',
-            'reflections'         : '0.9.11'
+            'reflections'         : '0.10.2'
         ],
         'assertj'              : '3.20.2',
         'auto-common'          : '1.1.2',

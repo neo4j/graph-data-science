@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,9 +69,9 @@ public final class CsvTestSupport {
 
         try {
             var fileLines = Files.readAllLines(path.resolve(fileName), StandardCharsets.UTF_8);
-            assertThat(fileLines).containsExactlyInAnyOrder(expectedContent.toArray(String[]::new));
+            assertThat(fileLines).containsExactlyInAnyOrderElementsOf(expectedContent);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 }

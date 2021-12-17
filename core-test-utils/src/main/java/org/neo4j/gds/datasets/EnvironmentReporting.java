@@ -19,25 +19,30 @@
  */
 package org.neo4j.gds.datasets;
 
-import org.apache.commons.io.IOUtils;
-
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.util.stream.Collectors;
 
 public final class EnvironmentReporting {
     private EnvironmentReporting() {}
 
     public static String diskUsage() throws IOException {
         Process p = new ProcessBuilder("df", "-h").start();
-        String stdout = IOUtils.toString(p.getInputStream(), Charset.defaultCharset());
+        String stdout = new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.defaultCharset()))
+            .lines()
+            .collect(Collectors.joining(System.lineSeparator()));
         String diskUsage = "$ df -h\n" + stdout;
         return asMultilineCloudWatchLogMessageIfAppropriate(diskUsage);
     }
 
     public static String directoryContents(Path directory) throws IOException {
         Process p = new ProcessBuilder("ls", "-l", directory.toAbsolutePath().toString()).start();
-        String stdout = IOUtils.toString(p.getInputStream(), Charset.defaultCharset());
+        String stdout = new BufferedReader(new InputStreamReader(p.getInputStream(), Charset.defaultCharset()))
+            .lines()
+            .collect(Collectors.joining(System.lineSeparator()));
         String directoryContents = "$ ls -l " + directory + "\n" + stdout;
         return asMultilineCloudWatchLogMessageIfAppropriate(directoryContents);
     }

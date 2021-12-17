@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.proc;
 
-import com.google.common.collect.Streams;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 import org.immutables.value.Value;
@@ -83,9 +82,9 @@ final class ConfigParser {
         var members = methodsIn(configElement.getEnclosedElements())
             .stream()
             .map(m -> validateMember(seen, root, m))
-            .flatMap(Streams::stream)
+            .flatMap(Optional::stream)
             .map(this::validateParameters)
-            .flatMap(Streams::stream)
+            .flatMap(Optional::stream)
             .collect(Collectors.toList());
 
         if (members.stream().filter(Member::graphStoreValidation).count() > 1) {

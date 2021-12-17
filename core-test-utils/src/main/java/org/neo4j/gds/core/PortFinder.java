@@ -39,12 +39,11 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class PortFinder implements ParameterResolver, TestInstancePostProcessor {
 
@@ -97,7 +96,8 @@ public class PortFinder implements ParameterResolver, TestInstancePostProcessor 
                 trySetValueToField(testInstance, context, field);
             } catch (SecurityException | InaccessibleObjectException | IllegalAccessException illegalAccessException) {
                 throw new ExtensionConfigurationException(
-                    formatWithLocale(
+                    String.format(
+                        Locale.ENGLISH,
                         "Field %s cannot be set, please make it either public or accessible to reflection.",
                         field.getName()
                     ));
@@ -112,7 +112,7 @@ public class PortFinder implements ParameterResolver, TestInstancePostProcessor 
 
         if (existingValue != null && !Objects.equals(existingValue, 0)) {
             throw new ExtensionConfigurationException(
-                formatWithLocale("Field %s should not have any manually assigned value.", field.getName()));
+                String.format(Locale.ENGLISH,"Field %s should not have any manually assigned value.", field.getName()));
         }
 
         var annotation = field.getAnnotation(FreePort.class);
