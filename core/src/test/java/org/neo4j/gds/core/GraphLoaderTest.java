@@ -119,7 +119,7 @@ class GraphLoaderTest extends BaseTest {
             .log(log)
             .build()
             .graph();
-        
+
         log.assertContainsMessage(TestLog.DEBUG, "Loading :: Nodes :: Store Scan :: Imported 3 records and 1 properties");
         log.assertContainsMessage(TestLog.DEBUG, "Loading :: Relationships :: Store Scan :: Imported 4 records and 0 properties");
     }

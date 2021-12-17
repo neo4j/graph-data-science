@@ -95,7 +95,7 @@ final class CypherExporterTest extends BaseTest {
             .addRelationshipProperty(PropertyMapping.of("property", DefaultValue.of(42)))
             .build()
             .graph();
-        
+
         StringWriter output = new StringWriter();
         CypherExporter.export(new PrintWriter(output), graph);
         return output.toString().trim();

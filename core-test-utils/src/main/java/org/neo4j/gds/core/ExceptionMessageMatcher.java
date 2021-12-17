@@ -59,4 +59,3 @@ public final class ExceptionMessageMatcher<EX extends Throwable>
     }
 
 }
-
