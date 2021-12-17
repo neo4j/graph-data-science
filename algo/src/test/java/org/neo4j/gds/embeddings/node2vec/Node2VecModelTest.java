@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -27,6 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.Random;
 import java.util.stream.LongStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class Node2VecModelTest {
@@ -39,7 +43,6 @@ class Node2VecModelTest {
         int numberOfWalks = 10;
         int walkLength = 80;
 
-        var walks = new CompressedRandomWalks(numberOfClusters * clusterSize * numberOfWalks, AllocationTracker.empty());
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             numberOfClusters * clusterSize,
             0.001,
@@ -48,23 +51,14 @@ class Node2VecModelTest {
             AllocationTracker.empty()
         );
 
-        LongStream.range(0, numberOfClusters)
-            .boxed()
-            .flatMap(clusterId ->
-                LongStream.range(clusterSize * clusterId, clusterSize * (clusterId + 1))
-                    .boxed()
-                    .flatMap(nodeId ->
-                        LongStream.range(0, numberOfWalks)
-                            .mapToObj(ignore ->
-                                LongStream.range(0, walkLength)
-                                    .map(foo -> random.nextInt(clusterSize) + (clusterId * clusterSize))
-                                    .toArray()
-                            )
-                    )
-            ).forEach(walk -> {
-                probabilitiesBuilder.registerWalk(walk);
-                walks.add(walk);
-            });
+        CompressedRandomWalks walks = generateRandomWalks(
+            probabilitiesBuilder,
+            numberOfClusters,
+            clusterSize,
+            numberOfWalks,
+            walkLength,
+            random
+        );
 
         Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder()
             .embeddingDimension(10)
@@ -75,7 +69,7 @@ class Node2VecModelTest {
 
         int nodeCount = numberOfClusters * clusterSize;
 
-        Node2VecModel word2Vec = new Node2VecModel(
+        var node2VecModel = new Node2VecModel(
             nodeCount,
             config,
             walks,
@@ -84,7 +78,7 @@ class Node2VecModelTest {
             AllocationTracker.empty()
         );
 
-        word2Vec.train();
+        node2VecModel.train();
 
         double innerClusterSum = LongStream.range(0, numberOfClusters)
             .boxed()
@@ -94,8 +88,8 @@ class Node2VecModelTest {
                     .flatMap(nodeId ->
                         LongStream.range(0, clusterSize)
                             .mapToObj(ignore -> {
-                                var e1 = word2Vec.getEmbeddings().get(nodeId).data();
-                                var e2 = word2Vec
+                                var e1 = node2VecModel.getEmbeddings().get(nodeId).data();
+                                var e2 = node2VecModel
                                     .getEmbeddings()
                                     .get(random.nextInt(clusterSize) + (clusterId * clusterSize))
                                     .data();
@@ -121,8 +115,8 @@ class Node2VecModelTest {
                         LongStream.range(0, clusterSize)
                             .mapToObj(ignore -> {
                                 long otherClusterId = (clusterId + random.nextInt(numberOfClusters - 1) + 1) % numberOfClusters;
-                                var e1 = word2Vec.getEmbeddings().get(nodeId).data();
-                                var e2 = word2Vec
+                                var e1 = node2VecModel.getEmbeddings().get(nodeId).data();
+                                var e2 = node2VecModel
                                     .getEmbeddings()
                                     .get(random.nextInt(clusterSize) + (otherClusterId * clusterSize))
                                     .data();
@@ -138,5 +132,97 @@ class Node2VecModelTest {
             0.05,
             "Average extra-cluster similarity should be about 0.35"
         );
+    }
+
+    @Disabled("The order of the randomWalks + its usage in the training is not deterministic yet.")
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 4})
+    void randomSeed(int iterations) {
+        var random = new Random(42);
+        int numberOfClusters = 10;
+        int clusterSize = 100;
+        int numberOfWalks = 10;
+        int walkLength = 80;
+
+        var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
+            numberOfClusters * clusterSize,
+            0.001,
+            0.75,
+            4,
+            AllocationTracker.empty()
+        );
+
+        CompressedRandomWalks walks = generateRandomWalks(probabilitiesBuilder, numberOfClusters, clusterSize, numberOfWalks, walkLength, random);
+
+        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder()
+            .embeddingDimension(2)
+            .initialLearningRate(0.05)
+            .negativeSamplingRate(1)
+            .randomSeed(1337L)
+            .concurrency(4)
+            .iterations(iterations)
+            .build();
+
+        int nodeCount = numberOfClusters * clusterSize;
+
+        var node2VecModel = new Node2VecModel(
+            nodeCount,
+            config,
+            walks,
+            probabilitiesBuilder.build(),
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        );
+
+        node2VecModel.train();
+
+        var otherNode2VecModel = new Node2VecModel(
+            nodeCount,
+            config,
+            walks,
+            probabilitiesBuilder.build(),
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        );
+        
+        otherNode2VecModel.train();
+
+        var embeddings = node2VecModel.getEmbeddings();
+        var otherEmbeddings = otherNode2VecModel.getEmbeddings();
+
+        for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
+            assertThat(embeddings.get(nodeId)).isEqualTo(otherEmbeddings.get(nodeId));
+        }
+    }
+
+    private static CompressedRandomWalks generateRandomWalks(
+        RandomWalkProbabilities.Builder probabilitiesBuilder,
+        long numberOfClusters,
+        int clusterSize,
+        long numberOfWalks,
+        long walkLength,
+        Random random
+    ) {
+        var walks = new CompressedRandomWalks(
+            numberOfClusters * clusterSize * numberOfWalks,
+            AllocationTracker.empty()
+        );
+
+        for (long clusterId = 0; clusterId < numberOfClusters; clusterId++) {
+            long finalClusterId = clusterId;
+            long bound = clusterSize * (clusterId + 1);
+            for (long nodeId = clusterSize * clusterId; nodeId < bound; nodeId++) {
+                for (long ignore = 0; ignore < numberOfWalks; ignore++) {
+                    long[] walk = LongStream.range(0, walkLength)
+                        .map(foo -> random.nextInt(clusterSize) + (finalClusterId * clusterSize))
+                        .toArray();
+
+                    probabilitiesBuilder.registerWalk(walk);
+                    walks.add(walk);
+                }
+            }
+        }
+
+        return walks;
     }
 }

@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -175,6 +177,48 @@ class Node2VecTest extends AlgoTestBase {
             .hasMessage("Found an invalid relationship weight between nodes `0` and `1` with the property value of `-1.000000`." +
                         " Node2Vec only supports non-negative weights.");
 
+    }
+
+    @Disabled("The order of the randomWalks + its usage in the training is not deterministic yet.")
+    @Test
+    void randomSeed() {
+        Graph graph = new StoreLoaderBuilder().api(db).build().graph();
+
+        int embeddingDimension = 2;
+
+        var config = ImmutableNode2VecStreamConfig
+            .builder()
+            .embeddingDimension(embeddingDimension)
+            .iterations(1)
+            .negativeSamplingRate(1)
+            .windowSize(1)
+            .walksPerNode(1)
+            .walkLength(20)
+            .walkBufferSize(50)
+            .randomSeed(1337L)
+            .build();
+
+        var embeddings = new Node2Vec(
+            graph,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        ).compute();
+
+        var otherEmbeddings = new Node2Vec(
+            graph,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        ).compute();
+
+        SoftAssertions softly = new SoftAssertions();
+
+        for (long node = 0; node < graph.nodeCount(); node++) {
+            softly.assertThat(otherEmbeddings.get(node)).isEqualTo(embeddings.get(node));
+        }
+
+        softly.assertAll();
     }
 
     static Stream<Arguments> graphs() {

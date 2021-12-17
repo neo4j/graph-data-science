@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.core.tensor;
 
+import java.util.Arrays;
+
 public class FloatVector {
     private final float[] data;
 
@@ -40,5 +42,26 @@ public class FloatVector {
             result += data[i] * other.data[i];
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(data);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        return Arrays.equals(data, ((FloatVector) other).data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(data);
     }
 }
