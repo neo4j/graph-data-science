@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.SafeMode;
 import org.assertj.core.util.Arrays;
@@ -70,7 +69,7 @@ public abstract class DocTestBase extends BaseProcTest {
         registerFunctions(functions().toArray(clazzArray));
 
         QueryCollectingTreeProcessor treeProcessor;
-        try (Asciidoctor asciidoctor = create()) {
+        try (var asciidoctor = create()) {
             treeProcessor = new QueryCollectingTreeProcessor();
             asciidoctor.javaExtensionRegistry().treeprocessor(treeProcessor);
 
@@ -84,14 +83,14 @@ public abstract class DocTestBase extends BaseProcTest {
             asciidoctor.convertFile(docFile, options);
         }
 
-            beforeEachQueries = treeProcessor.beforeEachQueries();
-            queryExampleGroups = treeProcessor.queryExamples();
+        beforeEachQueries = treeProcessor.beforeEachQueries();
+        queryExampleGroups = treeProcessor.queryExamples();
 
-            beforeAllQueries = treeProcessor.beforeAllQueries();
+        beforeAllQueries = treeProcessor.beforeAllQueries();
 
-            if (!setupNeo4jGraphPerTest()) {
-                beforeAllQueries.forEach(this::runQuery);
-            }
+        if (!setupNeo4jGraphPerTest()) {
+            beforeAllQueries.forEach(this::runQuery);
+        }
     }
 
     @TestFactory
