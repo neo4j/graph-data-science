@@ -89,16 +89,20 @@ OpenGDS is also available on https://search.maven.org/search?q=g:org.neo4j.gds[M
 If you want to include the OpenGDS in your own project you can simply add it as a dependency.
 
 For the most basic set of features, like graph loading and the graph representation, you need to include the `core` module:
-```
+
+[source]
+----
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>core</artifactId>
   <version>1.8.0</version>
 </dependency>
-```
+----
 
 The algorithms are located in the `algo-common`, `algo` and `alpha-algo` modules:
-```
+
+[source]
+----
 <!-- Contains the basic algorithm infrastructure -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
@@ -119,10 +123,12 @@ The algorithms are located in the `algo-common`, `algo` and `alpha-algo` modules
     <artifactId>alpha-algo</artifactId>
     <version>1.8.0</version>
 </dependency>
-```
+----
 
 The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules:
-```
+
+[source]
+----
 <!-- Contains the basic procedure infrastructure -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
@@ -150,7 +156,7 @@ The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules
   <artifactId>write-services</artifactId>
   <version>1.8.0</version>
 </dependency>
-```
+----
 
 
 == Building the library
