@@ -113,7 +113,7 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
                     new SimilarityMutateResult(
-                        computationResult.createMillis(),
+                        computationResult.preProcessingMillis(),
                         0,
                         0,
                         0,

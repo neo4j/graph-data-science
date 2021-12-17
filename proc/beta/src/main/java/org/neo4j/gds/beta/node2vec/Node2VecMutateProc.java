@@ -94,12 +94,12 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
         MutateResult(
             long nodeCount,
             long nodePropertiesWritten,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
             Map<String, Object> configuration
         ) {
-            super(createMillis, computeMillis, 0, mutateMillis, configuration);
+            super(preProcessingMillis, computeMillis, 0, mutateMillis, configuration);
             this.nodeCount = nodeCount;
             this.nodePropertiesWritten = nodePropertiesWritten;
         }
@@ -111,7 +111,7 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
                 return new MutateResult(
                     nodeCount,
                     nodePropertiesWritten,
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     writeMillis,
                     config.toMap()

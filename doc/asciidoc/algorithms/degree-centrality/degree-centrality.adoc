@@ -93,7 +93,7 @@ CALL gds.degree.stats(
   configuration: Map
 ) YIELD
   centralityDistribution: Map,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   configuration: Map
@@ -110,7 +110,7 @@ include::specific-configuration.adoc[]
 |===
 | Name                   | Type      | Description
 | centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
-| createMillis           | Integer   | Milliseconds for creating the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
 | configuration          | Map       | Configuration used for running the algorithm.
@@ -128,7 +128,7 @@ CALL gds.degree.mutate(
   configuration: Map
 ) YIELD
   centralityDistribution: Map,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   mutateMillis: Integer,
@@ -147,7 +147,7 @@ include::specific-configuration.adoc[]
 |===
 | Name                   | Type      | Description
 | centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
-| createMillis           | Integer   | Milliseconds for creating the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
 | mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
@@ -167,7 +167,7 @@ CALL gds.degree.write(
   configuration: Map
 ) YIELD
   centralityDistribution: Map,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   writeMillis: Integer,
@@ -186,7 +186,7 @@ include::specific-configuration.adoc[]
 |===
 | Name                   | Type      | Description
 | centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
-| createMillis           | Integer   | Milliseconds for creating the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
 | writeMillis            | Integer   | Milliseconds for writing result data back.

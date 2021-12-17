@@ -32,14 +32,14 @@ public final class PregelWriteResult extends StandardWriteResult {
 
     private PregelWriteResult(
         long nodePropertiesWritten,
-        long createMillis,
+        long preProcessingMillis,
         long computeMillis,
         long writeMillis,
         long ranIterations,
         boolean didConverge,
         Map<String, Object> configuration
     ) {
-        super(createMillis, computeMillis, 0L, writeMillis, configuration);
+        super(preProcessingMillis, computeMillis, 0L, writeMillis, configuration);
         this.nodePropertiesWritten = nodePropertiesWritten;
         this.ranIterations = ranIterations;
         this.didConverge = didConverge;
@@ -51,7 +51,7 @@ public final class PregelWriteResult extends StandardWriteResult {
         public PregelWriteResult build() {
             return new PregelWriteResult(
                 nodePropertiesWritten,
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 writeMillis,
                 ranIterations,

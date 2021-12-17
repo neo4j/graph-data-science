@@ -77,18 +77,18 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FastRPResult, Fast
     public static final class StatsResult {
 
         public final long nodeCount;
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
         public final Map<String, Object> configuration;
 
         StatsResult(
             long nodeCount,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             Map<String, Object> config
         ) {
             this.nodeCount = nodeCount;
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.configuration = config;
         }
@@ -99,7 +99,7 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FastRPResult, Fast
             public StatsResult build() {
                 return new StatsResult(
                     nodeCount,
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     config.toMap()
                 );

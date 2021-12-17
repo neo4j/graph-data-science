@@ -215,7 +215,7 @@ CALL gds.alpha.ml.nodeClassification.predict.mutate(
   graphName: String,
   configuration: Map
 ) YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   mutateMillis: Integer,
@@ -233,7 +233,7 @@ include::specific-write-mutate-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type    | Description
-| createMillis          | Integer | Milliseconds for creating the graph.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the graph.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis  | Integer | Milliseconds for computing the global metrics.
 | mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
@@ -251,7 +251,7 @@ CALL gds.alpha.ml.nodeClassification.predict.write(
   graphName: String,
   configuration: Map
 ) YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
   nodePropertiesWritten: Integer,
@@ -268,7 +268,7 @@ include::specific-write-mutate-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type    | Description
-| createMillis          | Integer | Milliseconds for creating the graph.
+| preProcessingMillis   | Integer | Milliseconds for preprocssing the graph.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | writeMillis           | Integer | Milliseconds for writing result back to Neo4j.
 | nodePropertiesWritten | Integer | Number of relationships created.

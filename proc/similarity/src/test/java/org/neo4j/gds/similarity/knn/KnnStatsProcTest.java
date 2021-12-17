@@ -80,7 +80,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
                 .isGreaterThanOrEqualTo(0L);
 
             assertThat(row)
-                .extracting(r -> r.getNumber("createMillis"), InstanceOfAssertFactories.LONG)
+                .extracting(r -> r.getNumber("preProcessingMillis"), InstanceOfAssertFactories.LONG)
                 .isGreaterThanOrEqualTo(0L);
 
             assertThat(row)

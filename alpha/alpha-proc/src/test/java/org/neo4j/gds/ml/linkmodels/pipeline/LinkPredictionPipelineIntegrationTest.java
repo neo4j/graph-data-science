@@ -150,7 +150,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
             "})",
             Map.of("graphName", GRAPH_NAME, "modelName", modelName,"topN", topN, "concurrency", 4),
             List.of(Map.of(
-                "createMillis", greaterThan(-1L),
+                "preProcessingMillis", greaterThan(-1L),
                 "computeMillis", greaterThan(-1L),
                 "mutateMillis", greaterThan(-1L),
                 "postProcessingMillis", 0L,

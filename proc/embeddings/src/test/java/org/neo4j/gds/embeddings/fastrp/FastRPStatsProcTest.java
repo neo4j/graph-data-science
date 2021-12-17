@@ -59,7 +59,7 @@ class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
 
         assertCypherResult(query, List.of(Map.of(
             "nodeCount", 5L,
-            "createMillis", greaterThan(-1L),
+            "preProcessingMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));

@@ -62,7 +62,7 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
                 .withNodeCount(graph.nodeCount())
                 .withConfig(config)
                 .withComputeMillis(computationResult.computeMillis())
-                .withCreateMillis(computationResult.createMillis());
+                .withPreProcessingMillis(computationResult.preProcessingMillis());
 
             if (graph.isEmpty()) {
                 graph.release();

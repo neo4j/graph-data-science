@@ -87,12 +87,12 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
             boolean didConverge,
             long communityCount,
             Map<String, Object> communityDistribution,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             Map<String, Object> configuration
         ) {
-            super(createMillis, computeMillis, postProcessingMillis, configuration);
+            super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
             this.communityCount = communityCount;
@@ -112,7 +112,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
                     didConverge,
                     maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingDuration,
                     config.toMap()

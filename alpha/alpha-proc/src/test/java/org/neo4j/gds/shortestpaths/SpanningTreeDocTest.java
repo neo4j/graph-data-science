@@ -83,8 +83,8 @@ class SpanningTreeDocTest extends BaseProcTest {
                        "   weightWriteProperty: 'writeCost'," +
                        "   writeProperty: 'MINST'" +
                        " })" +
-                       " YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount" +
-                       " RETURN createMillis, computeMillis, writeMillis, effectiveNodeCount;";
+                       " YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount" +
+                       " RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount;";
 
         runQuery(spanningTreeQuery);
 
@@ -117,8 +117,8 @@ class SpanningTreeDocTest extends BaseProcTest {
                        "   weightWriteProperty: 'writeCost'," + // -> the weight of the `writeProperty` relationship
                        "   writeProperty: 'MAXST'" + // -> type of the new relationship
                        " })" +
-                       " YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount" +
-                       " RETURN createMillis, computeMillis, writeMillis, effectiveNodeCount;";
+                       " YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount" +
+                       " RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount;";
 
         runQuery(spanningTreeQuery);
 

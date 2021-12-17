@@ -132,16 +132,16 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
 
     public static class Result {
 
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
         public final long writeMillis;
         public final long effectiveNodeCount;
 
-        public Result(long createMillis,
+        public Result(long preProcessingMillis,
                       long computeMillis,
                       long writeMillis,
                       int effectiveNodeCount) {
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.effectiveNodeCount = effectiveNodeCount;
@@ -159,7 +159,7 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
 
         public Result build() {
             return new Result(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 writeMillis,
                 effectiveNodeCount);

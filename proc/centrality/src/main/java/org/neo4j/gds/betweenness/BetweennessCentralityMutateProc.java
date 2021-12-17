@@ -92,7 +92,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
 
         MutateResult(
             long nodePropertiesWritten,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             long mutateMillis,
@@ -107,7 +107,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
                 scoreSum,
                 minimumScore,
                 maximumScore,
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
                 config
@@ -126,7 +126,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
             public MutateResult buildResult() {
                 return new MutateResult(
                     nodePropertiesWritten,
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingMillis,
                     mutateMillis,

@@ -118,7 +118,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             assertUserInput(row, "mutateRelationshipType", "SIMILAR");
             assertUserInput(row, "mutateProperty", "score");
             assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
-            assertThat("Missing createMillis", -1L, lessThan(row.getNumber("createMillis").longValue()));
+            assertThat("Missing preProcessingMillis", -1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
             assertThat("Missing mutateMillis", -1L, lessThan(row.getNumber("mutateMillis").longValue()));
 
             Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");

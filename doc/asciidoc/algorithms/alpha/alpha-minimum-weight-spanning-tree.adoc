@@ -59,7 +59,7 @@ CALL gds.alpha.spanningTree.write(
   graphName: string,
   configuration: map
 )
-YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
+YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
 .The following will compute the minimum weight spanning tree and write the results:
@@ -69,7 +69,7 @@ CALL gds.alpha.spanningTree.minimum.write(
   graphName: string,
   configuration: map
 )
-YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
+YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
 .The following will compute the maximum weight spanning tree and write the results:
@@ -79,7 +79,7 @@ CALL gds.alpha.spanningTree.maximum.write(
   graphName: string,
   configuration: map
 )
-YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
+YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
 .Configuration
@@ -95,11 +95,11 @@ YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name               | Type    | Description
-| effectiveNodeCount | Integer | The number of visited nodes
-| createMillis       | Integer | Milliseconds for loading data
-| computeMillis      | Integer | Milliseconds for running the algorithm
-| writeMillis        | Integer | Milliseconds for writing result data back
+| Name                | Type    | Description
+| effectiveNodeCount  | Integer | The number of visited nodes
+| preProcessingMillis | Integer | Milliseconds for preprocessing the data
+| computeMillis       | Integer | Milliseconds for running the algorithm
+| writeMillis         | Integer | Milliseconds for writing result data back
 |===
 
 .The following will run the k-spanning tree algorithms and write back results:
@@ -109,7 +109,7 @@ CALL gds.alpha.spanningTree.kmin.write(
   graphName: string,
   configuration: map
 )
-YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
+YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
 [source, cypher, role=noplay]
@@ -118,7 +118,7 @@ CALL gds.alpha.spanningTree.kmax.write(
   graphName: string,
   configuration: map
 )
-YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
+YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
 .Configuration
@@ -135,11 +135,11 @@ YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name               | Type    | Description
-| effectiveNodeCount | Integer | The number of visited nodes
-| createMillis       | Integer | Milliseconds for loading data
-| computeMillis      | Integer | Milliseconds for running the algorithm
-| writeMillis        | Integer | Milliseconds for writing result data back
+| Name                | Type    | Description
+| effectiveNodeCount  | Integer | The number of visited nodes
+| preProcessingMillis | Integer | Milliseconds for preprocessing the data
+| computeMillis       | Integer | Milliseconds for running the algorithm
+| writeMillis         | Integer | Milliseconds for writing result data back
 |===
 
 
@@ -195,8 +195,8 @@ CALL gds.alpha.spanningTree.minimum.write('graph', {
   writeProperty: 'MINST',
   weightWriteProperty: 'writeCost'
 })
-YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
-RETURN createMillis, computeMillis, writeMillis, effectiveNodeCount;
+YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
+RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount;
 ----
 
 .To find all pairs of nodes included in our minimum spanning tree, run the following query:
@@ -237,8 +237,8 @@ CALL gds.alpha.spanningTree.maximum.write('graph', {
   writeProperty: 'MAXST',
   weightWriteProperty: 'writeCost'
 })
-YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
-RETURN createMillis,computeMillis, writeMillis, effectiveNodeCount;
+YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
+RETURN preProcessingMillis,computeMillis, writeMillis, effectiveNodeCount;
 ----
 
 .Results
@@ -264,8 +264,8 @@ CALL gds.alpha.spanningTree.kmin.write('graph', {
   relationshipWeightProperty: 'cost',
   writeProperty:'kminst'
 })
-YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
-RETURN createMillis,computeMillis,writeMillis, effectiveNodeCount;
+YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
+RETURN preProcessingMillis,computeMillis,writeMillis, effectiveNodeCount;
 ----
 
 .Find nodes that belong to our k-spanning tree result:
@@ -300,8 +300,8 @@ CALL gds.alpha.spanningTree.kmax.write('graph', {
   relationshipWeightProperty: 'cost',
   writeProperty:'kmaxst'
 })
-YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
-RETURN createMillis,computeMillis,writeMillis, effectiveNodeCount;
+YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
+RETURN preProcessingMillis,computeMillis,writeMillis, effectiveNodeCount;
 ----
 
 .Find nodes that belong to our k-spanning tree result:

@@ -68,7 +68,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
         GraphStore graphStore;
         var validator = validator();
         var graphStoreLoader = new GraphStoreFromCatalogLoader(graphName, config, username(), databaseId(), isGdsAdmin());
-        try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
+        try (ProgressTimer timer = ProgressTimer.start(builder::preProcessingMillis)) {
             var graphCreateConfig = graphStoreLoader.graphCreateConfig();
             validator.validateConfigsBeforeLoad(graphCreateConfig, config);
             graphStore = graphStoreLoader.graphStore();
@@ -135,7 +135,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
 
     @SuppressWarnings("unused")
     public static class MutateResult {
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
         public final long mutateMillis;
         public final long relationshipsWritten;
@@ -143,13 +143,13 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
         public final Map<String, Object> configuration;
 
         MutateResult(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
             long relationshipsWritten,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.mutateMillis = mutateMillis;
             this.relationshipsWritten = relationshipsWritten;
@@ -161,7 +161,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
             @Override
             public MutateResult build() {
                 return new MutateResult(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     mutateMillis,
                     relationshipsWritten,

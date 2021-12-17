@@ -93,7 +93,7 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, KnnMutate
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
                     new Result(
-                        computationResult.createMillis(),
+                        computationResult.preProcessingMillis(),
                         0,
                         0,
                         0,
@@ -171,7 +171,7 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, KnnMutate
         public final boolean didConverge;
 
         public Result(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
             long postProcessingMillis,
@@ -184,7 +184,7 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, KnnMutate
             Map<String, Object> configuration
         ) {
             super(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 mutateMillis,
                 postProcessingMillis,
@@ -207,7 +207,7 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, KnnMutate
             @Override
             public Result build() {
                 return new Result(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     mutateMillis,
                     postProcessingMillis,

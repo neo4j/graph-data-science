@@ -73,7 +73,7 @@ class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropag
                 "p99", 2L,
                 "p999", 2L
             )),
-            "createMillis", greaterThanOrEqualTo(0L),
+            "preProcessingMillis", greaterThanOrEqualTo(0L),
             "computeMillis", greaterThanOrEqualTo(0L),
             "postProcessingMillis", greaterThanOrEqualTo(0L),
             "configuration", containsAllEntriesOf(MapUtil.map(

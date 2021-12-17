@@ -54,7 +54,7 @@ public abstract class WriteStreamOfRelationshipsProc<
             CONFIG config = computationResult.config();
 
             AbstractResultBuilder<PROC_RESULT> builder = resultBuilder(computationResult)
-                .withCreateMillis(computationResult.createMillis())
+                .withPreProcessingMillis(computationResult.preProcessingMillis())
                 .withComputeMillis(computationResult.computeMillis())
                 .withNodeCount(computationResult.graph().nodeCount())
                 .withConfig(config);

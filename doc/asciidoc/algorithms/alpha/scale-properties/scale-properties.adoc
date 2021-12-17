@@ -134,7 +134,7 @@ CALL gds.alpha.scaleProperties.mutate(
   graphName: String,
   configuration: Map
 ) YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
   postProcessingMillis: Integer,
@@ -152,7 +152,7 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type      | Description
-| createMillis          | Integer   | Milliseconds for loading data.
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
 | mutateMillis          | Integer   | Milliseconds for adding properties to the in-memory graph.
 | postProcessingMillis  | Integer   | Unused.

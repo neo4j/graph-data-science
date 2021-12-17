@@ -90,7 +90,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
 
         public final long nodeCount;
         public final long nodePropertiesWritten;
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
         public final long writeMillis;
         public final Map<String, Object> configuration;
@@ -98,14 +98,14 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
         WriteResult(
             long nodeCount,
             long nodePropertiesWritten,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long writeMillis,
             Map<String, Object> configuration
         ) {
             this.nodeCount = nodeCount;
             this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.configuration = configuration;
@@ -118,7 +118,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
                 return new WriteResult(
                     nodeCount,
                     nodePropertiesWritten,
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     writeMillis,
                     config.toMap()

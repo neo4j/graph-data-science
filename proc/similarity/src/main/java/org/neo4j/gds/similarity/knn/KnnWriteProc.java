@@ -122,7 +122,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
         public final long nodePairsConsidered;
 
         Result(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long writeMillis,
             long postProcessingMillis,
@@ -135,7 +135,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
             Map<String, Object> configuration
         ) {
             super(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 writeMillis,
                 postProcessingMillis,
@@ -159,7 +159,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
             @Override
             public Result build() {
                 return new Result(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     writeMillis,
                     postProcessingMillis,

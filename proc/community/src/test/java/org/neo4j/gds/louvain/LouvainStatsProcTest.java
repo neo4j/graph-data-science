@@ -76,7 +76,7 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
                 "p99", 8L,
                 "p999", 8L
             )),
-            "createMillis", greaterThanOrEqualTo(0L),
+            "preProcessingMillis", greaterThanOrEqualTo(0L),
             "computeMillis", greaterThanOrEqualTo(0L),
             "postProcessingMillis", greaterThanOrEqualTo(0L),
             "configuration", containsAllEntriesOf(MapUtil.map(

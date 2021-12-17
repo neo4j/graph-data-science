@@ -87,7 +87,7 @@ CALL gds.wcc.stats(
 )
 YIELD
   componentCount: Integer,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   componentDistribution: Map,
@@ -105,7 +105,7 @@ include::specific-configuration.adoc[]
 |===
 | Name                  | Type    | Description
 | componentCount        | Integer | The number of computed components.
-| createMillis          | Integer | Milliseconds for loading data.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis  | Integer | Milliseconds for computing component count and distribution statistics.
 | componentDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
@@ -126,7 +126,7 @@ CALL gds.wcc.mutate(
 YIELD
   componentCount: Integer,
   nodePropertiesWritten: Integer,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
   postProcessingMillis: Integer,
@@ -146,7 +146,7 @@ include::specific-configuration.adoc[]
 | Name                          | Type    | Description
 | componentCount                | Integer | The number of computed components.
 | nodePropertiesWritten         | Integer | The number of node properties written.
-| createMillis                  | Integer | Milliseconds for loading data.
+| preProcessingMillis           | Integer | Milliseconds for preprocessing the data.
 | computeMillis                 | Integer | Milliseconds for running the algorithm.
 | mutateMillis                  | Integer | Milliseconds for adding properties to the in-memory graph.
 | postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.
@@ -168,7 +168,7 @@ CALL gds.wcc.write(
 YIELD
   componentCount: Integer,
   nodePropertiesWritten: Integer,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
   postProcessingMillis: Integer,
@@ -188,7 +188,7 @@ include::specific-configuration-write.adoc[]
 | Name                          | Type    | Description
 | componentCount                | Integer | The number of computed components.
 | nodePropertiesWritten         | Integer | The number of node properties written.
-| createMillis                  | Integer | Milliseconds for loading data.
+| preProcessingMillis           | Integer | Milliseconds for preprocessing the data.
 | computeMillis                 | Integer | Milliseconds for running the algorithm.
 | writeMillis                   | Integer | Milliseconds for writing result back to Neo4j.
 | postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.

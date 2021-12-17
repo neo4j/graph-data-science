@@ -122,7 +122,7 @@ class ArticleRankProcTest extends BaseProcTest {
 
         assertCypherResult(query, List.of(
             Map.of(
-                "createMillis", greaterThan(-1L),
+                "preProcessingMillis", greaterThan(-1L),
                 "computeMillis", greaterThan(-1L),
                 "postProcessingMillis", greaterThan(-1L),
                 "configuration", isA(Map.class),
@@ -193,7 +193,7 @@ class ArticleRankProcTest extends BaseProcTest {
 
         assertCypherResult(query, List.of(
             Map.of(
-                "createMillis", greaterThan(-1L),
+                "preProcessingMillis", greaterThan(-1L),
                 "computeMillis", greaterThan(-1L),
                 "writeMillis", greaterThan(-1L),
                 "postProcessingMillis", greaterThan(-1L),
@@ -216,7 +216,7 @@ class ArticleRankProcTest extends BaseProcTest {
 
         assertCypherResult(query, List.of(
             Map.of(
-                "createMillis", greaterThan(-1L),
+                "preProcessingMillis", greaterThan(-1L),
                 "computeMillis", greaterThan(-1L),
                 "mutateMillis", greaterThan(-1L),
                 "postProcessingMillis", greaterThan(-1L),

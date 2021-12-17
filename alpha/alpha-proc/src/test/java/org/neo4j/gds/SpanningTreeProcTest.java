@@ -120,8 +120,8 @@ public class SpanningTreeProcTest extends BaseProcTest {
                            "    writeProperty:'MNIST'," +
                            "    relationshipWeightProperty:'distance'" +
                            "})\n" +
-                           "YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount\n" +
-                           "RETURN createMillis, computeMillis, writeMillis, effectiveNodeCount";
+                           "YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount\n" +
+                           "RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount";
         runQuery(insert1024NodesQuery);
         runQuery(importQuery);
         runQuery(importRelsQuery);
@@ -144,7 +144,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
             .addParameter("startNodeId", getStartNodeId())
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("weightWriteProperty", "cost")
-            .yields("createMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
+            .yields("preProcessingMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
 
         runQueryWithRowConsumer(
             query,
@@ -178,7 +178,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
             .addParameter("writeProperty", "MAX")
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("weightWriteProperty", "cost")
-            .yields("createMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
+            .yields("preProcessingMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
 
         runQueryWithRowConsumer(
             query,

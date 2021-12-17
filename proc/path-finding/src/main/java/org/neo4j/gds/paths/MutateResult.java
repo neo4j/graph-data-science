@@ -29,14 +29,14 @@ public final class MutateResult extends StandardMutateResult {
     public final long relationshipsWritten;
 
     private MutateResult(
-        long createMillis,
+        long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
         long postProcessingMillis,
         long relationshipsWritten,
         Map<String, Object> configuration
     ) {
-        super(createMillis, computeMillis, postProcessingMillis, mutateMillis, configuration);
+        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, configuration);
         this.relationshipsWritten = relationshipsWritten;
     }
 
@@ -45,7 +45,7 @@ public final class MutateResult extends StandardMutateResult {
         @Override
         public MutateResult build() {
             return new MutateResult(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 0L,
                 mutateMillis,

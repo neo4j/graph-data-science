@@ -23,7 +23,7 @@ import java.util.Map;
 
 @SuppressWarnings("unused")
 public class SimilarityMutateResult {
-    public final long createMillis;
+    public final long preProcessingMillis;
     public final long computeMillis;
     public final long mutateMillis;
     public final long postProcessingMillis;
@@ -35,7 +35,7 @@ public class SimilarityMutateResult {
     public final Map<String, Object> configuration;
 
     public SimilarityMutateResult(
-        long createMillis,
+        long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
         long postProcessingMillis,
@@ -44,7 +44,7 @@ public class SimilarityMutateResult {
         Map<String, Object> similarityDistribution,
         Map<String, Object> configuration
     ) {
-        this.createMillis = createMillis;
+        this.preProcessingMillis = preProcessingMillis;
         this.computeMillis = computeMillis;
         this.mutateMillis = mutateMillis;
         this.postProcessingMillis = postProcessingMillis;
@@ -59,7 +59,7 @@ public class SimilarityMutateResult {
         @Override
         public SimilarityMutateResult build() {
             return new SimilarityMutateResult(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 mutateMillis,
                 postProcessingMillis,

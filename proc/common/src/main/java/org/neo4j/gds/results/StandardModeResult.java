@@ -24,16 +24,16 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class StandardModeResult {
 
-    public final long createMillis;
+    public final long preProcessingMillis;
     public final long computeMillis;
     public final Map<String, Object> configuration;
 
     public StandardModeResult(
-        long createMillis,
+        long preProcessingMillis,
         long computeMillis,
         Map<String, Object> configuration
     ) {
-        this.createMillis = createMillis;
+        this.preProcessingMillis = preProcessingMillis;
         this.computeMillis = computeMillis;
         this.configuration = configuration;
     }

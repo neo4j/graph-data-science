@@ -159,7 +159,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
             .addParameter("mutateProperty", mutateProperty())
             .yields(
                 "nodePropertiesWritten",
-                "createMillis",
+                "preProcessingMillis",
                 "computeMillis",
                 "mutateMillis",
                 "postProcessingMillis",
@@ -175,7 +175,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
             row -> {
                 assertEquals(15L, row.getNumber("nodePropertiesWritten"));
 
-                assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
 

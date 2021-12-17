@@ -82,7 +82,7 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
     @SuppressWarnings("unused")
     public static class StatsResult {
 
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
 
         public final long nodeCount;
@@ -93,7 +93,7 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
         public Map<String, Object> configuration;
 
         StatsResult(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long nodeCount,
             long colorCount,
@@ -101,7 +101,7 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
             boolean didConverge,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.nodeCount = nodeCount;
             this.colorCount = colorCount;
@@ -123,7 +123,7 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
             @Override
             protected StatsResult buildResult() {
                 return new StatsResult(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     nodeCount,
                     colorCount,

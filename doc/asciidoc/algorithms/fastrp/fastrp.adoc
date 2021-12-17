@@ -218,7 +218,7 @@ CALL gds.fastRP.stats(
   configuration: Map
 ) YIELD
   nodeCount: Integer,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   configuration: Map
 ----
@@ -232,11 +232,11 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type    | Description
-| nodeCount     | Integer | Number of nodes processed.
-| createMillis  | Integer | Milliseconds for creating the graph.
-| computeMillis | Integer | Milliseconds for running the algorithm.
-| configuration | Map     | Configuration used for running the algorithm.
+| Name                | Type    | Description
+| nodeCount           | Integer | Number of nodes processed.
+| preProcessingMillis | Integer | Milliseconds for preprocessing the graph.
+| computeMillis       | Integer | Milliseconds for running the algorithm.
+| configuration       | Map     | Configuration used for running the algorithm.
 |===
 
 ======
@@ -253,7 +253,7 @@ CALL gds.fastRP.mutate(
 ) YIELD
   nodeCount: Integer,
   nodePropertiesWritten: Integer,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
   configuration: Map
@@ -271,7 +271,7 @@ include::specific-configuration.adoc[]
 | Name                  | Type    | Description
 | nodeCount             | Integer | Number of nodes processed.
 | nodePropertiesWritten | Integer | Number of node properties written.
-| createMillis          | Integer | Milliseconds for creating the graph.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the graph.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
 | configuration         | Map     | Configuration used for running the algorithm.
@@ -290,7 +290,7 @@ CALL gds.fastRP.write(
 ) YIELD
   nodeCount: Integer,
   nodePropertiesWritten: Integer,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
   configuration: Map
@@ -308,7 +308,7 @@ include::specific-configuration.adoc[]
 | Name                  | Type    | Description
 | nodeCount             | Integer | Number of nodes processed.
 | nodePropertiesWritten | Integer | Number of node properties written.
-| createMillis          | Integer | Milliseconds for creating the graph.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the graph.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | writeMillis           | Integer | Milliseconds for writing result data back to Neo4j.
 | configuration         | Map     | Configuration used for running the algorithm.

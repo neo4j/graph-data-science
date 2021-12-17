@@ -69,7 +69,7 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
         assertCypherResult(query, List.of(Map.of(
             "globalTriangleCount", 5L,
             "nodeCount", 5L,
-            "createMillis", greaterThan(-1L),
+            "preProcessingMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class),

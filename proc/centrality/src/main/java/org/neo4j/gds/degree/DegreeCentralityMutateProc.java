@@ -88,7 +88,7 @@ public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentral
 
         MutateResult(
             long nodePropertiesWritten,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             long mutateMillis,
@@ -96,7 +96,7 @@ public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentral
             Map<String, Object> config
         ) {
             super(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
                 mutateMillis,
@@ -116,7 +116,7 @@ public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentral
             public DegreeCentralityMutateProc.MutateResult buildResult() {
                 return new DegreeCentralityMutateProc.MutateResult(
                     nodePropertiesWritten,
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingMillis,
                     mutateMillis,

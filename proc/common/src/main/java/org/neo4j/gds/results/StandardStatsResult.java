@@ -27,12 +27,12 @@ public class StandardStatsResult extends StandardModeResult {
     public final long postProcessingMillis;
 
     public StandardStatsResult(
-        long createMillis,
+        long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         Map<String, Object> configuration
     ) {
-        super(createMillis, computeMillis, configuration);
+        super(preProcessingMillis, computeMillis, configuration);
         this.postProcessingMillis = postProcessingMillis;
     }
 }

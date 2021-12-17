@@ -80,7 +80,7 @@ class BetweennessCentralityWriteProcTest extends BetweennessCentralityProcTest<B
             assertEquals(0.0, centralityDistribution.get("min"));
             assertEquals(4.0, (double) centralityDistribution.get("max"), 1e-4);
 
-            assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+            assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("writeMillis").longValue()));

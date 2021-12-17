@@ -94,7 +94,7 @@ public abstract class ShortestPathMutateProc<ALGO extends Algorithm<ALGO, Dijkst
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<ALGO, DijkstraResult, CONFIG> computeResult) {
         return new MutateResult.Builder()
-            .withCreateMillis(computeResult.createMillis())
+            .withPreProcessingMillis(computeResult.preProcessingMillis())
             .withComputeMillis(computeResult.computeMillis())
             .withConfig(computeResult.config());
     }

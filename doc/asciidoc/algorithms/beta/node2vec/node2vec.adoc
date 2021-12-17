@@ -87,7 +87,7 @@ CALL gds.beta.node2vec.mutate(
   configuration: Map
 )
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   mutateMillis: Integer,
@@ -109,7 +109,7 @@ include::specific-configuration.adoc[]
 | Name                  | Type    | Description
 | nodeCount             | Integer | The number of nodes processed.
 | nodePropertiesWritten | Integer | The number of node properties written.
-| createMillis          | Integer | Milliseconds for loading data.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
 | postProcessingMillis  | Integer | Milliseconds for post-processing of the results.
@@ -127,7 +127,7 @@ CALL gds.beta.node2vec.write(
   configuration: Map
 )
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
   nodeCount: Integer,
@@ -148,7 +148,7 @@ include::specific-configuration.adoc[]
 | Name                  | Type    | Description
 | nodeCount             | Integer | The number of nodes processed.
 | nodePropertiesWritten | Integer | The number of node properties written.
-| createMillis          | Integer | Milliseconds for loading data.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | writeMillis           | Integer | Milliseconds for writing result data back to Neo4j.
 | configuration         | Map     | The configuration used for running the algorithm.

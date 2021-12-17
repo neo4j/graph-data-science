@@ -84,14 +84,14 @@ class SccProcTest extends BaseProcTest {
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            long createMillis = row.getNumber("createMillis").longValue();
+            long preProcessingMillis = row.getNumber("preProcessingMillis").longValue();
             long computeMillis = row.getNumber("computeMillis").longValue();
             long writeMillis = row.getNumber("writeMillis").longValue();
             assertEquals(3, row.getNumber("setCount").longValue());
             assertEquals(3, row.getNumber("minSetSize").longValue());
             assertEquals(3, row.getNumber("maxSetSize").longValue());
             assertEquals("componentId", row.getString("writeProperty"));
-            assertNotEquals(-1, createMillis);
+            assertNotEquals(-1, preProcessingMillis);
             assertNotEquals(-1, computeMillis);
             assertNotEquals(-1, writeMillis);
         });
@@ -118,7 +118,7 @@ class SccProcTest extends BaseProcTest {
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            long createMillis = row.getNumber("createMillis").longValue();
+            long createMillis = row.getNumber("preProcessingMillis").longValue();
             long computeMillis = row.getNumber("computeMillis").longValue();
             long writeMillis = row.getNumber("writeMillis").longValue();
             assertEquals(3, row.getNumber("setCount").longValue());

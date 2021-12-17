@@ -74,7 +74,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
                 .withCommunityFunction(components != null ? components::get : null)
                 .withNodeCount(graph.nodeCount())
                 .withConfig(config)
-                .withCreateMillis(computationResult.createMillis())
+                .withPreProcessingMillis(computationResult.preProcessingMillis())
                 .withComputeMillis(computationResult.computeMillis());
 
             if (graph.isEmpty()) {
@@ -126,7 +126,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
     @SuppressWarnings("unused")
     public static class SccResult {
 
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
         public final long writeMillis;
         public final long postProcessingMillis;
@@ -148,7 +148,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
         public final String writeProperty;
 
         public SccResult(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             long writeMillis,
@@ -168,7 +168,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
             long maxSetSize,
             String writeProperty
         ) {
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.writeMillis = writeMillis;
@@ -199,7 +199,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
         @Override
         public SccResult buildResult() {
             return new SccResult(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 writeMillis,
                 postProcessingDuration,

@@ -91,12 +91,12 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
         StatsResult(
             double averageClusteringCoefficient,
             long nodeCount,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             Map<String, Object> configuration
         ) {
             // post-processing is instant for LCC
-            super(createMillis, computeMillis, 0L, configuration);
+            super(preProcessingMillis, computeMillis, 0L, configuration);
             this.averageClusteringCoefficient = averageClusteringCoefficient;
             this.nodeCount = nodeCount;
         }
@@ -113,7 +113,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
             return new StatsResult(
                 averageClusteringCoefficient,
                 nodeCount,
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 config.toMap()
             );

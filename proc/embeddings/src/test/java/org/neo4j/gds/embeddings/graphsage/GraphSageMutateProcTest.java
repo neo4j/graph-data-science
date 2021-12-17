@@ -59,7 +59,7 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
         runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("nodeCount")).isEqualTo(graphStore.nodeCount());
             assertThat(row.get("nodePropertiesWritten")).isEqualTo(graphStore.nodeCount());
-            assertThat(row.get("createMillis")).isNotEqualTo(-1L);
+            assertThat(row.get("preProcessingMillis")).isNotEqualTo(-1L);
             assertThat(row.get("computeMillis")).isNotEqualTo(-1L);
             assertThat(row.get("mutateMillis")).isNotEqualTo(-1L);
             assertThat(row.get("configuration")).isInstanceOf(Map.class);

@@ -99,7 +99,7 @@ public abstract class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, 
                     .write(config.writeProperty(), config.weightWriteProperty());
             }
             builder.withComputeMillis(computationResult.computeMillis());
-            builder.withCreateMillis(computationResult.createMillis());
+            builder.withPreProcessingMillis(computationResult.preProcessingMillis());
             return Stream.of(builder.build());
         };
     }

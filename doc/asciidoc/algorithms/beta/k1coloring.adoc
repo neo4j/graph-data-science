@@ -92,7 +92,7 @@ YIELD
     ranIterations,
     didConverge,
     configuration,
-    createMillis,
+    preProcessingMillis,
     computeMillis
 ----
 
@@ -109,14 +109,14 @@ include::../common-configuration/common-parameters.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type    | Description
-| nodeCount     | Integer | The number of nodes considered.
-| ranIterations | Integer | The actual number of iterations the algorithm ran.
-| didConverge   | Boolean | An indicator of whether the algorithm found a correct coloring.
-| colorCount    | Integer | The number of colors used.
-| createMillis  | Integer | Milliseconds for loading data.
-| computeMillis | Integer | Milliseconds for running the algorithm.
-| configuration | Map     | The configuration used for running the algorithm.
+| Name                 | Type    | Description
+| nodeCount            | Integer | The number of nodes considered.
+| ranIterations        | Integer | The actual number of iterations the algorithm ran.
+| didConverge          | Boolean | An indicator of whether the algorithm found a correct coloring.
+| colorCount           | Integer | The number of colors used.
+| preProcessingMillis  | Integer | Milliseconds for preprocessing the data.
+| computeMillis        | Integer | Milliseconds for running the algorithm.
+| configuration        | Map     | The configuration used for running the algorithm.
 |===
 ======
 
@@ -127,7 +127,7 @@ include::../common-configuration/common-parameters.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.mutate(graphName: String, configuration: Map)
-YIELD nodeCount, colorCount, ranIterations, didConverge, configuration, createMillis, computeMillis, mutateMillis
+YIELD nodeCount, colorCount, ranIterations, didConverge, configuration, preProcessingMillis, computeMillis, mutateMillis
 ----
 
 include::../common-configuration/common-parameters.adoc[]
@@ -139,15 +139,15 @@ Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type    | Description
-| nodeCount     | Integer | The number of nodes considered.
-| ranIterations | Integer | The actual number of iterations the algorithm ran.
-| didConverge   | Boolean | An indicator of whether the algorithm found a correct coloring.
-| colorCount    | Integer | The number of colors used.
-| createMillis  | Integer | Milliseconds for loading data.
-| computeMillis | Integer | Milliseconds for running the algorithm.
-| mutateMillis  | Integer | Milliseconds for adding properties to the in-memory graph.
-| configuration | Map     | The configuration used for running the algorithm.
+| Name                 | Type    | Description
+| nodeCount            | Integer | The number of nodes considered.
+| ranIterations        | Integer | The actual number of iterations the algorithm ran.
+| didConverge          | Boolean | An indicator of whether the algorithm found a correct coloring.
+| colorCount           | Integer | The number of colors used.
+| preProcessingMillis  | Integer | Milliseconds for preprocessing the data.
+| computeMillis        | Integer | Milliseconds for running the algorithm.
+| mutateMillis         | Integer | Milliseconds for adding properties to the in-memory graph.
+| configuration        | Map     | The configuration used for running the algorithm.
 |===
 ======
 
@@ -158,7 +158,7 @@ Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.write(graphName: String, configuration: Map)
-YIELD nodeCount, colorCount, ranIterations, didConverge, configuration, createMillis, computeMillis, writeMillis
+YIELD nodeCount, colorCount, ranIterations, didConverge, configuration, preProcessingMillis, computeMillis, writeMillis
 ----
 
 include::../common-configuration/common-parameters.adoc[]
@@ -176,15 +176,15 @@ include::../common-configuration/common-parameters.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type    | Description
-| nodeCount     | Integer | The number of nodes considered.
-| ranIterations | Integer | The actual number of iterations the algorithm ran.
-| didConverge   | Boolean | An indicator of whether the algorithm found a correct coloring.
-| colorCount    | Integer | The number of colors used.
-| createMillis  | Integer | Milliseconds for loading data.
-| computeMillis | Integer | Milliseconds for running the algorithm.
-| writeMillis   | Integer | Milliseconds for writing result data back to Neo4j.
-| configuration | Map     | The configuration used for running the algorithm.
+| Name                 | Type    | Description
+| nodeCount            | Integer | The number of nodes considered.
+| ranIterations        | Integer | The actual number of iterations the algorithm ran.
+| didConverge          | Boolean | An indicator of whether the algorithm found a correct coloring.
+| colorCount           | Integer | The number of colors used.
+| preProcessingMillis  | Integer | Milliseconds for preprocessing the data.
+| computeMillis        | Integer | Milliseconds for running the algorithm.
+| writeMillis          | Integer | Milliseconds for writing result data back to Neo4j.
+| configuration        | Map     | The configuration used for running the algorithm.
 |===
 ======
 

@@ -80,7 +80,7 @@ include::../common-configuration/common-configuration.adoc[]
 ----
 CALL gds.beta.modularityOptimization.mutate(graphName: String, configuration: Map})
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   mutateMillis: Integer,
@@ -103,7 +103,7 @@ Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type      | Description
-| createMillis          | Integer   | Milliseconds for loading data.
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
 | mutateMillis          | Integer   | Milliseconds for adding properties to the in-memory graph.
 | postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
@@ -125,7 +125,7 @@ Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 ----
 CALL gds.beta.modularityOptimization.write(graphName: String, configuration: Map})
 YIELD
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
   writeMillis: Integer,
@@ -158,7 +158,7 @@ include::../common-configuration/common-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type      | Description
-| createMillis          | Integer   | Milliseconds for loading data.
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
 | writeMillis           | Integer   | Milliseconds for writing result data back.
 | postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.

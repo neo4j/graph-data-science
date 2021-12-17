@@ -91,7 +91,7 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
             null
         );
 
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
         public final long mutateMillis;
 
@@ -103,7 +103,7 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
         public Map<String, Object> configuration;
 
         MutateResult(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
             long nodeCount,
@@ -112,7 +112,7 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
             boolean didConverge,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.mutateMillis = mutateMillis;
             this.nodeCount = nodeCount;
@@ -134,7 +134,7 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
             @Override
             protected MutateResult buildResult() {
                 return new MutateResult(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     mutateMillis,
                     nodeCount,

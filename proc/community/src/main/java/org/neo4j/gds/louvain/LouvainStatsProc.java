@@ -92,12 +92,12 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
             long ranLevels,
             long communityCount,
             Map<String, Object> communityDistribution,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             Map<String, Object> configuration
         ) {
-            super(createMillis, computeMillis, postProcessingMillis, configuration);
+            super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
             this.modularity = modularity;
             this.modularities = modularities;
             this.ranLevels = ranLevels;
@@ -119,7 +119,7 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
                     levels,
                     maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingDuration,
                     config.toMap()

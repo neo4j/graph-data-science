@@ -99,7 +99,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         MutateResult(
             long componentCount,
             Map<String, Object> componentDistribution,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             long mutateMillis,
@@ -109,7 +109,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
             super(
                 componentCount,
                 componentDistribution,
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
                 configuration
@@ -133,7 +133,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
                 return new WccMutateProc.MutateResult(
                     maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingDuration,
                     mutateMillis,

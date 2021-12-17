@@ -154,7 +154,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
 
     @SuppressWarnings("unused")
     public static class MutateResult {
-        public final long createMillis;
+        public final long preProcessingMillis;
         public final long computeMillis;
         public final long mutateMillis;
         public final long relationshipsWritten;
@@ -162,13 +162,13 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
         public final Map<String, Object> configuration;
 
         MutateResult(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
             long relationshipsWritten,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
+            this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.mutateMillis = mutateMillis;
             this.relationshipsWritten = relationshipsWritten;
@@ -180,7 +180,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
             @Override
             public SplitRelationshipsMutateProc.MutateResult build() {
                 return new SplitRelationshipsMutateProc.MutateResult(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     mutateMillis,
                     relationshipsWritten,

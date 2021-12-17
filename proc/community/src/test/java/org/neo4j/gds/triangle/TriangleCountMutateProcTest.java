@@ -78,7 +78,7 @@ class TriangleCountMutateProcTest
         assertCypherResult(query, List.of(Map.of(
             "globalTriangleCount", 1L,
             "nodeCount", 3L,
-            "createMillis", greaterThan(-1L),
+            "preProcessingMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class),

@@ -89,12 +89,12 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
         StatsResult(
             long componentCount,
             Map<String, Object> componentDistribution,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
             Map<String, Object> configuration
         ) {
-            super(createMillis, computeMillis, postProcessingMillis, configuration);
+            super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
             this.componentCount = componentCount;
             this.componentDistribution = componentDistribution;
         }
@@ -114,7 +114,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
                 return new StatsResult(
                     maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     postProcessingDuration,
                     config.toMap()

@@ -50,7 +50,7 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             .call(DEFAULT_GRAPH_NAME)
             .algo("betweenness")
             .statsMode()
-            .yields("centralityDistribution", "createMillis", "computeMillis", "postProcessingMillis", "minimumScore", "maximumScore", "scoreSum");
+            .yields("centralityDistribution", "preProcessingMillis", "computeMillis", "postProcessingMillis", "minimumScore", "maximumScore", "scoreSum");
 
         runQueryWithRowConsumer(query, row -> {
             Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
@@ -60,7 +60,7 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             assertEquals(10.0, row.getNumber("scoreSum"));
 
 
-            assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+            assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
         });
@@ -73,7 +73,7 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             .call(DEFAULT_GRAPH_NAME)
             .algo("betweenness")
             .statsMode()
-            .yields("createMillis", "computeMillis", "postProcessingMillis", "minimumScore", "maximumScore", "scoreSum");
+            .yields("preProcessingMillis", "computeMillis", "postProcessingMillis", "minimumScore", "maximumScore", "scoreSum");
 
         runQueryWithRowConsumer(query, row -> {
             assertEquals(0.0, row.getNumber("minimumScore"));
@@ -81,7 +81,7 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             assertEquals(10.0, row.getNumber("scoreSum"));
 
 
-            assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+            assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
         });

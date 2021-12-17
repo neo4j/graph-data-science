@@ -143,7 +143,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
             .addParameter("mutateProperty", mutateProperty())
             .yields(
                 "nodePropertiesWritten",
-                "createMillis",
+                "preProcessingMillis",
                 "computeMillis",
                 "mutateMillis",
                 "postProcessingMillis",
@@ -157,7 +157,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
             row -> {
                 assertEquals(10L, row.getNumber("nodePropertiesWritten"));
 
-                assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));

@@ -75,7 +75,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
                 "modularity",
                 "modularities",
                 "ranLevels",
-                "createMillis",
+                "preProcessingMillis",
                 "computeMillis",
                 "writeMillis",
                 "postProcessingMillis",
@@ -88,7 +88,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
             double modularity = row.getNumber("modularity").doubleValue();
             List<Double> modularities = (List<Double>) row.get("modularities");
             long levels = row.getNumber("ranLevels").longValue();
-            long createMillis = row.getNumber("createMillis").longValue();
+            long preProcessingMillis = row.getNumber("preProcessingMillis").longValue();
             long computeMillis = row.getNumber("computeMillis").longValue();
             long writeMillis = row.getNumber("writeMillis").longValue();
 
@@ -97,7 +97,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
             assertEquals(2, levels, "invalid level count");
             assertUserInput(row, "includeIntermediateCommunities", false);
             assertTrue(modularity > 0, "wrong modularity value");
-            assertTrue(createMillis >= 0, "invalid loadTime");
+            assertTrue(preProcessingMillis >= 0, "invalid preProcessingTime");
             assertTrue(writeMillis >= 0, "invalid writeTime");
             assertTrue(computeMillis >= 0, "invalid computeTime");
         });

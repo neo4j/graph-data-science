@@ -76,7 +76,7 @@ CALL gds.alpha.sllpa.stats(
 YIELD
   ranIterations: Integer,
   didConverge: Boolean,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   configuration: Map
 ----
@@ -93,7 +93,7 @@ include::specific-configuration.adoc[]
 | Name                   | Type      | Description
 | ranIterations          | Integer   | Number of iterations run.
 | didConverge            | Boolean   | Indicates if the algorithm converged.
-| createMillis           | Integer   | Milliseconds for creating the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | configuration          | Map       | Configuration used for running the algorithm.
 |===
@@ -113,7 +113,7 @@ CALL gds.alpha.sllpa.mutate(
 YIELD
   ranIterations: Integer,
   didConverge: Boolean,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
   nodePropertiesWritten: Integer,
@@ -132,7 +132,7 @@ include::specific-configuration.adoc[]
 | Name                   | Type      | Description
 | ranIterations          | Integer   | The number of iterations run.
 | didConverge            | Boolean   | Indicates if the algorithm converged.
-| createMillis           | Integer   | Milliseconds for creating the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
 | nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
@@ -154,7 +154,7 @@ CALL gds.alpha.sllpa.write(
 YIELD
   ranIterations: Integer,
   didConverge: Boolean,
-  createMillis: Integer,
+  preProcessingMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
   nodePropertiesWritten: Integer,
@@ -173,7 +173,7 @@ include::specific-configuration.adoc[]
 | Name                   | Type      | Description
 | ranIterations          | Integer   | The number of iterations run.
 | didConverge            | Boolean   | Indicates if the algorithm converged.
-| createMillis           | Integer   | Milliseconds for creating the graph.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | writeMillis            | Integer   | Milliseconds for writing result data back.
 | nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.

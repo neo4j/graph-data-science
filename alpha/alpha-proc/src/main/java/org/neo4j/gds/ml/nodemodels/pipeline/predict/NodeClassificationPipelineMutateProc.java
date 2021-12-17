@@ -121,14 +121,14 @@ public class NodeClassificationPipelineMutateProc
         public final long nodePropertiesWritten;
 
         MutateResult(
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
             long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
             super(
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 0L,
                 mutateMillis,
@@ -142,7 +142,7 @@ public class NodeClassificationPipelineMutateProc
             @Override
             public MutateResult build() {
                 return new MutateResult(
-                    createMillis,
+                    preProcessingMillis,
                     computeMillis,
                     mutateMillis,
                     nodePropertiesWritten,

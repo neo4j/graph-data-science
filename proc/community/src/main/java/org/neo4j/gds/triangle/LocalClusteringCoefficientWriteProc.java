@@ -98,13 +98,13 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
         WriteResult(
             double averageClusteringCoefficient,
             long nodeCount,
-            long createMillis,
+            long preProcessingMillis,
             long computeMillis,
             long writeMillis,
             long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
-            super(averageClusteringCoefficient, nodeCount, createMillis, computeMillis, configuration);
+            super(averageClusteringCoefficient, nodeCount, preProcessingMillis, computeMillis, configuration);
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.writeMillis = writeMillis;
         }
@@ -126,7 +126,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
             return new WriteResult(
                 averageClusteringCoefficient,
                 nodeCount,
-                createMillis,
+                preProcessingMillis,
                 computeMillis,
                 writeMillis,
                 nodePropertiesWritten,
