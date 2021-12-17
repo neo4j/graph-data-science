@@ -69,7 +69,7 @@ class Node2VecModelTest {
 
         int nodeCount = numberOfClusters * clusterSize;
 
-        Node2VecModel word2Vec = new Node2VecModel(
+        var node2VecModel = new Node2VecModel(
             nodeCount,
             config,
             walks,
@@ -78,7 +78,7 @@ class Node2VecModelTest {
             AllocationTracker.empty()
         );
 
-        word2Vec.train();
+        node2VecModel.train();
 
         double innerClusterSum = LongStream.range(0, numberOfClusters)
             .boxed()
@@ -88,8 +88,8 @@ class Node2VecModelTest {
                     .flatMap(nodeId ->
                         LongStream.range(0, clusterSize)
                             .mapToObj(ignore -> {
-                                var e1 = word2Vec.getEmbeddings().get(nodeId).data();
-                                var e2 = word2Vec
+                                var e1 = node2VecModel.getEmbeddings().get(nodeId).data();
+                                var e2 = node2VecModel
                                     .getEmbeddings()
                                     .get(random.nextInt(clusterSize) + (clusterId * clusterSize))
                                     .data();
@@ -115,8 +115,8 @@ class Node2VecModelTest {
                         LongStream.range(0, clusterSize)
                             .mapToObj(ignore -> {
                                 long otherClusterId = (clusterId + random.nextInt(numberOfClusters - 1) + 1) % numberOfClusters;
-                                var e1 = word2Vec.getEmbeddings().get(nodeId).data();
-                                var e2 = word2Vec
+                                var e1 = node2VecModel.getEmbeddings().get(nodeId).data();
+                                var e2 = node2VecModel
                                     .getEmbeddings()
                                     .get(random.nextInt(clusterSize) + (otherClusterId * clusterSize))
                                     .data();
@@ -138,7 +138,7 @@ class Node2VecModelTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 4})
     void randomSeed(int iterations) {
-        Random random = new Random(42);
+        var random = new Random(42);
         int numberOfClusters = 10;
         int clusterSize = 100;
         int numberOfWalks = 10;
@@ -165,7 +165,7 @@ class Node2VecModelTest {
 
         int nodeCount = numberOfClusters * clusterSize;
 
-        Node2VecModel word2Vec = new Node2VecModel(
+        var node2VecModel = new Node2VecModel(
             nodeCount,
             config,
             walks,
@@ -174,9 +174,9 @@ class Node2VecModelTest {
             AllocationTracker.empty()
         );
 
-        word2Vec.train();
+        node2VecModel.train();
 
-        Node2VecModel otherWord2Vec = new Node2VecModel(
+        var otherNode2VecModel = new Node2VecModel(
             nodeCount,
             config,
             walks,
@@ -185,10 +185,10 @@ class Node2VecModelTest {
             AllocationTracker.empty()
         );
         
-        otherWord2Vec.train();
+        otherNode2VecModel.train();
 
-        var embeddings = word2Vec.getEmbeddings();
-        var otherEmbeddings = otherWord2Vec.getEmbeddings();
+        var embeddings = node2VecModel.getEmbeddings();
+        var otherEmbeddings = otherNode2VecModel.getEmbeddings();
 
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
             assertThat(embeddings.get(nodeId)).isEqualTo(otherEmbeddings.get(nodeId));
