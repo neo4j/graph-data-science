@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -262,6 +263,8 @@ class ConfigurationProcessorTest {
             return forSourceLines(binaryName, sourceLines);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 
