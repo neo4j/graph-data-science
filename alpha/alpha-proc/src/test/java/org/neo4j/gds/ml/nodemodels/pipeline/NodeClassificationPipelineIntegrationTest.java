@@ -111,7 +111,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
     @Test
     void trainWithNodePropertyStepsAndFeatures() {
         runQuery(
-            "CALL gds.graph.create('g', ['N', 'Hidden'], {T: {properties: 'w'}}, {nodeProperties: ['a', 'b', 'class']})");
+            "CALL gds.graph.project('g', ['N', 'Hidden'], {T: {properties: 'w'}}, {nodeProperties: ['a', 'b', 'class']})");
 
         runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.create('p')");
 

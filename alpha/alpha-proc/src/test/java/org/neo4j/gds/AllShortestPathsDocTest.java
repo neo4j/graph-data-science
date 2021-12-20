@@ -56,7 +56,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
 
     @Test
     void shouldStream() {
-        var createQuery = "CALL gds.graph.create(" +
+        var createQuery = "CALL gds.graph.project(" +
                           "  'nativeGraph', " +
                           "  'Loc', " +
                           "  {" +
@@ -105,7 +105,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
 
     @Test
     void shouldStreamWithCypherProjection() {
-        var createQuery = " CALL gds.graph.create.cypher(" +
+        var createQuery = " CALL gds.graph.project.cypher(" +
                           "   'cypherGraph'," +
                           "   'MATCH (n:Loc) RETURN id(n) AS id', " +
                           "   'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) AS source, id(p) AS target, r.cost AS cost'" +

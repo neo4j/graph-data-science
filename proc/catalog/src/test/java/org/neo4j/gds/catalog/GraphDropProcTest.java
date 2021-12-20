@@ -67,7 +67,7 @@ class GraphDropProcTest extends BaseProcTest {
 
     @Test
     void dropGraphFromCatalog() {
-        runQuery("CALL gds.graph.create($name, 'A', 'REL')", Map.of("name", GRAPH_NAME));
+        runQuery("CALL gds.graph.project($name, 'A', 'REL')", Map.of("name", GRAPH_NAME));
 
         assertCypherResult(
             "CALL gds.graph.exists($graphName)",
@@ -128,7 +128,7 @@ class GraphDropProcTest extends BaseProcTest {
 
     @Test
     void shouldNotReturnDegreeDistribution() {
-        runQuery("CALL gds.graph.create($name, 'A', 'REL')", Map.of("name", GRAPH_NAME));
+        runQuery("CALL gds.graph.project($name, 'A', 'REL')", Map.of("name", GRAPH_NAME));
 
         runQueryWithResultConsumer(
             "CALL gds.graph.drop($graphName)",
@@ -209,7 +209,7 @@ class GraphDropProcTest extends BaseProcTest {
     void doNotAcceptUsernameOverrideForNonGdsAdmins() {
         var graphNameParams = Map.<String, Object>of("name", GRAPH_NAME);
 
-        QueryRunner.runQuery(db, "alice", "CALL gds.graph.create($name, 'A', 'REL')", graphNameParams);
+        QueryRunner.runQuery(db, "alice", "CALL gds.graph.project($name, 'A', 'REL')", graphNameParams);
 
         assertThatThrownBy(() -> QueryRunner.runQuery(db, "bob", "CALL gds.graph.drop($name, true, '', 'alice')", graphNameParams))
             .hasMessageContaining("Cannot override the username as a non-admin");
@@ -263,7 +263,7 @@ class GraphDropProcTest extends BaseProcTest {
 
     @Test
     void dropsMultipleGraphsGraphFromCatalogWithListAsArgument() {
-        var createQuery = "CALL gds.graph.create($name, '*', '*')";
+        var createQuery = "CALL gds.graph.project($name, '*', '*')";
         runQuery(createQuery, Map.of("name", "g1"));
         runQuery(createQuery, Map.of("name", "g2"));
 
@@ -289,7 +289,7 @@ class GraphDropProcTest extends BaseProcTest {
 
     @Test
     void requiresAllGraphsToExistBeforeAnyOneIsDropped() {
-        var createQuery = "CALL gds.graph.create($name, '*', '*')";
+        var createQuery = "CALL gds.graph.project($name, '*', '*')";
         var existsQuery = "RETURN gds.graph.exists($graphName) AS exists";
 
         runQuery(createQuery, Map.of("name", "g1"));
@@ -332,7 +332,7 @@ class GraphDropProcTest extends BaseProcTest {
 
     @Test
     void droppingMultipleGraphsAcceptsTheFailIfMissingFlag() {
-        var createQuery = "CALL gds.graph.create($name, '*', '*')";
+        var createQuery = "CALL gds.graph.project($name, '*', '*')";
         runQuery(createQuery, Map.of("name", "g1"));
 
         assertCypherResult(

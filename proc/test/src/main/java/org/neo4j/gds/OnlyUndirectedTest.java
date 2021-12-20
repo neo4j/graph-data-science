@@ -40,7 +40,7 @@ public interface OnlyUndirectedTest<ALGORITHM extends Algorithm<RESULT>, CONFIG 
 
     @Test
     default void validateUndirected() {
-        runQuery(graphDb(), "CALL gds.graph.create('directed', '*', '*')");
+        runQuery(graphDb(), "CALL gds.graph.project('directed', '*', '*')");
 
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.empty());
 
@@ -66,7 +66,7 @@ public interface OnlyUndirectedTest<ALGORITHM extends Algorithm<RESULT>, CONFIG 
     @MethodSource("filtered")
     @ParameterizedTest(name = "Orientation(s): {1}")
     default void validateUndirectedFiltering(List<String> filter, String ignoredModeName) {
-        runQuery(graphDb(), "CALL gds.graph.create('directedMultiRels', '*', {" +
+        runQuery(graphDb(), "CALL gds.graph.project('directedMultiRels', '*', {" +
                             "  R: { type: '*', orientation: 'REVERSE' }, " +
                             "  U: { type: '*', orientation: 'UNDIRECTED' }, " +
                             "  N: { type: '*', orientation: 'NATURAL' } " +

@@ -246,7 +246,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
         @MethodSource("org.neo4j.gds.similarity.nodesim.NodeSimilarityProcTest#allGraphVariations")
         void shouldDealWithAnyIdSpace(GdsCypher.QueryBuilder queryBuilder, String testName) throws Exception {
             String graphCreate =
-                "CALL gds.graph.create(" +
+                "CALL gds.graph.project(" +
                 "    'myGraphNATURAL'," +
                 "    ['Person', 'Item']," +
                 "    'LIKES'" +

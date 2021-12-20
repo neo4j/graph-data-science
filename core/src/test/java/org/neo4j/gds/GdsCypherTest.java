@@ -100,7 +100,7 @@ class GdsCypherTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"gds.graph.create", "algo.louvain", "geedeeess.algo.louvain", "  foo .  bar  ", "🙈.🙉.🙊"})
+    @ValueSource(strings = {"gds.graph.project", "algo.louvain", "geedeeess.algo.louvain", "  foo .  bar  ", "🙈.🙉.🙊"})
     void algoNameWithPeriodsOverridesDefaultNamespace(String algoName) {
         String query = GdsCypher
             .call("graph")
@@ -113,7 +113,7 @@ class GdsCypherTest {
 
     static Stream<Arguments> separateNamePartsArguments() {
         return Stream.of(
-            "gds.graph.create",
+            "gds.graph.project",
             "algo.louvain",
             "geedeeess.algo.louvain",
             "  foo .  bar  ",
@@ -586,7 +586,7 @@ class GdsCypherTest {
             .yields();
 
         assertThat(query).isEqualTo(
-            "CALL gds.graph.create('graph', %s, %s, {nodeProjection: 'SOMETHING | ELSE'})",
+            "CALL gds.graph.project('graph', %s, %s, {nodeProjection: 'SOMETHING | ELSE'})",
             expectedNodeProjection(),
             expectedRelationshipProjection()
         );
@@ -599,7 +599,7 @@ class GdsCypherTest {
             .graphCreate()
             .yields();
 
-        assertThat(query).isEqualTo("CALL gds.graph.create('graph', '*', '*')");
+        assertThat(query).isEqualTo("CALL gds.graph.project('graph', '*', '*')");
     }
 
     @Test
@@ -613,7 +613,7 @@ class GdsCypherTest {
 
         assertThat(query).isEqualTo(
             //@formatter:off
-            "CALL gds.graph.create(" +
+            "CALL gds.graph.project(" +
               "'graph', " +
               "'*', " +
               "{" +
@@ -637,7 +637,7 @@ class GdsCypherTest {
             .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))
             .yields();
         assertThat(query).isEqualTo(
-            "CALL gds.graph.create('graph', {" +
+            "CALL gds.graph.project('graph', {" +
             "N: {label: 'N', properties: {" +
             "a: {property: 'a', defaultValue: (0.0 / 0.0)}, " +
             "b: {property: 'b', defaultValue: (0.0 / 0.0)}" +

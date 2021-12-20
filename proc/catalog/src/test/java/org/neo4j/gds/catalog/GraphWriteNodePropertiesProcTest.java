@@ -308,7 +308,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     void writePropertyTwice() {
         clearDb();
         runQuery("CREATE (:A:B)");
-        runQuery("CALL gds.graph.create('myGraph', ['A','B'], '*')");
+        runQuery("CALL gds.graph.project('myGraph', ['A','B'], '*')");
 
         runQuery("CALL gds.pageRank.mutate('myGraph', {nodeLabels: ['A'], mutateProperty: 'score'})");
         runQuery("CALL gds.degree.mutate('myGraph', {nodeLabels: ['B'], mutateProperty: 'score'})");

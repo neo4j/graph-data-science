@@ -52,7 +52,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
         registerProcedures(NodeClassificationTrainProc.class, GraphCreateProc.class);
         runQuery(createQuery());
 
-        runQuery("CALL gds.graph.create('g', 'N', '*', {nodeProperties: ['a', 'b', 't']})");
+        runQuery("CALL gds.graph.project('g', 'N', '*', {nodeProperties: ['a', 'b', 't']})");
     }
 
     @Test

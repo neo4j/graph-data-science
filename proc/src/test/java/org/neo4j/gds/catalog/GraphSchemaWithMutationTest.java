@@ -52,7 +52,7 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
     void listWithMutatedNodeProperty() {
         String name = "name";
         runQuery(
-            "CALL gds.graph.create($name, 'A', 'REL', {nodeProperties: 'foo', relationshipProperties: 'bar'})",
+            "CALL gds.graph.project($name, 'A', 'REL', {nodeProperties: 'foo', relationshipProperties: 'bar'})",
             map("name", name)
         );
         runQuery(
@@ -75,7 +75,7 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
 
     @Test
     void listWithMutatedRelationshipProperty() {
-        runQuery("CALL gds.graph.create('graph', 'A', 'REL', {nodeProperties: 'foo', relationshipProperties: 'bar'})");
+        runQuery("CALL gds.graph.project('graph', 'A', 'REL', {nodeProperties: 'foo', relationshipProperties: 'bar'})");
         runQuery("CALL gds.nodeSimilarity.mutate('graph', {mutateProperty: 'faz', mutateRelationshipType: 'BOO'})");
 
         assertCypherResult("CALL gds.graph.list() YIELD schema",

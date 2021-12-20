@@ -75,7 +75,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
             "B",
             map("type", "REL")
         );
-        String query = "CALL gds.graph.create.estimate('*', $relProjection)";
+        String query = "CALL gds.graph.project.estimate('*', $relProjection)";
         double expectedPercentage = BigDecimal.valueOf(303504)
             .divide(BigDecimal.valueOf(Runtime.getRuntime().maxMemory()), 1, RoundingMode.UP)
             .doubleValue();
@@ -96,7 +96,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
             "B",
             map("type", "REL")
         );
-        String query = "CALL gds.graph.create.estimate('*', $relProjection, {nodeCount: 1000000})";
+        String query = "CALL gds.graph.project.estimate('*', $relProjection, {nodeCount: 1000000})";
 
         double expectedPercentage = BigDecimal.valueOf(30190200L)
             .divide(BigDecimal.valueOf(Runtime.getRuntime().maxMemory()), 1, RoundingMode.UP)
@@ -118,7 +118,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
             "B",
             map("type", "REL", "properties", "weight")
         );
-        String query = "CALL gds.graph.create.estimate('*', $relProjection)";
+        String query = "CALL gds.graph.project.estimate('*', $relProjection)";
 
         runQueryWithRowConsumer(query, map("relProjection", relProjection),
             row -> {
@@ -132,7 +132,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
     void computeMemoryEstimationForCypherProjection() {
         String nodeQuery = "MATCH (n) RETURN id(n) AS id";
         String relationshipQuery = "MATCH (n)-[:REL]->(m) RETURN id(n) AS source, id(m) AS target";
-        String query = "CALL gds.graph.create.cypher.estimate($nodeQuery, $relationshipQuery)";
+        String query = "CALL gds.graph.project.cypher.estimate($nodeQuery, $relationshipQuery)";
         runQueryWithRowConsumer(
             query,
             map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
@@ -148,7 +148,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
     void computeMemoryEstimationForCypherProjectionWithProperties() {
         String nodeQuery = "MATCH (n) RETURN id(n) AS id";
         String relationshipQuery = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
-        String query = "CALL gds.graph.create.cypher.estimate($nodeQuery, $relationshipQuery)";
+        String query = "CALL gds.graph.project.cypher.estimate($nodeQuery, $relationshipQuery)";
         runQueryWithRowConsumer(
             query,
             map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
@@ -161,7 +161,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
     @Test
     void computeMemoryEstimationForVirtualGraph() {
-        String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
+        String query = "CALL gds.graph.project.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
         runQueryWithRowConsumer(query,
             row -> {
                 assertEquals(296128, row.getNumber("bytesMin").longValue());
@@ -174,7 +174,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
     @Test
     void computeMemoryEstimationForVirtualGraphNonEmptyGraph() {
-        String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
+        String query = "CALL gds.graph.project.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
         runQueryWithRowConsumer(query,
             row -> {
                 assertEquals(296128, row.getNumber("bytesMin").longValue());
@@ -187,7 +187,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
     @Test
     void computeMemoryEstimationForVirtualGraphWithProperties() throws Exception {
-        String query = "CALL gds.graph.create.estimate('*', {`FOO`: {type: '*', properties: 'weight'}}, {nodeCount: 42, relationshipCount: 1337})";
+        String query = "CALL gds.graph.project.estimate('*', {`FOO`: {type: '*', properties: 'weight'}}, {nodeCount: 42, relationshipCount: 1337})";
         runQueryWithRowConsumer(query,
             row -> {
                 assertEquals(558712, row.getNumber("bytesMin").longValue());
@@ -198,7 +198,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
     @Test
     void computeMemoryEstimationForVirtualGraphWithLargeValues() {
-        String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 5000000000, relationshipCount: 20000000000})";
+        String query = "CALL gds.graph.project.estimate('*', '*', {nodeCount: 5000000000, relationshipCount: 20000000000})";
         runQueryWithRowConsumer(query,
             row -> {
                 assertEquals(170_045_063_992L, row.getNumber("bytesMin").longValue());
@@ -244,7 +244,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
     @Test
     void silentlyDropRelsWithUnloadedNodesForCypherCreation() {
-        String query = "CALL gds.graph.create.cypher(" +
+        String query = "CALL gds.graph.project.cypher(" +
                        "'g', " +
                        "'MATCH (n:A) Return id(n) as id', " +
                        "'MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target'," +
@@ -275,7 +275,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
     @Test
     void failCypherCreationWitIncompleteNodeQuery() {
-        String query = "CALL gds.graph.create.cypher(" +
+        String query = "CALL gds.graph.project.cypher(" +
                        "'g', " +
                        "'MATCH (n:A) Return id(n) as id', " +
                        "'MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target')" +

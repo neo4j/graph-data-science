@@ -40,7 +40,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(GraphCreateProc.class);
         runQuery("CREATE (n)-[:REL]->(m)");
-        runQuery("CALL gds.graph.create('g', '*', '*')");
+        runQuery("CALL gds.graph.project('g', '*', '*')");
     }
 
     @AfterEach

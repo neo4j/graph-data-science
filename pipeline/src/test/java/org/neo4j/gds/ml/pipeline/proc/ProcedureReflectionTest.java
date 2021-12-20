@@ -35,7 +35,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class ProcedureReflectionTest extends BaseProcTest {
 
     @ParameterizedTest
-    @ValueSource(strings = {"boogieewoogie", "gds.graph.create", "ageRank", ".pageRank"})
+    @ValueSource(strings = {"boogieewoogie", "gds.graph.project", "ageRank", ".pageRank"})
     void shouldFailOnInvalidProc(String proc) {
         assertThatThrownBy(() -> ProcedureReflection.INSTANCE.findProcedureMethod(proc))
             .isExactlyInstanceOf(IllegalArgumentException.class)

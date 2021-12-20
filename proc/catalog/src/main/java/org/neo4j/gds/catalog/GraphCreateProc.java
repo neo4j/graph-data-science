@@ -67,7 +67,7 @@ public class GraphCreateProc extends CatalogProc {
         GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY
     );
 
-    @Procedure(name = "gds.graph.create", mode = READ)
+    @Procedure(name = "gds.graph.project", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphCreateNativeResult> create(
         @Name(value = "graphName") String graphName,
@@ -98,7 +98,7 @@ public class GraphCreateProc extends CatalogProc {
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.graph.create.estimate", mode = READ)
+    @Procedure(name = "gds.graph.project.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> createEstimate(
         @Name(value = "nodeProjection") @Nullable Object nodeProjection,
@@ -119,7 +119,7 @@ public class GraphCreateProc extends CatalogProc {
         return estimateGraph(config);
     }
 
-    @Procedure(name = "gds.graph.create.cypher", mode = READ)
+    @Procedure(name = "gds.graph.project.cypher", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphCreateCypherResult> createCypher(
         @Name(value = "graphName") String graphName,
@@ -150,7 +150,7 @@ public class GraphCreateProc extends CatalogProc {
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.graph.create.cypher.estimate", mode = READ)
+    @Procedure(name = "gds.graph.project.cypher.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> createCypherEstimate(
         @Name(value = "nodeQuery") String nodeQuery,
@@ -172,7 +172,7 @@ public class GraphCreateProc extends CatalogProc {
         return estimateGraph(config);
     }
 
-    @Procedure(name = "gds.beta.graph.create.subgraph", mode = READ)
+    @Procedure(name = "gds.beta.graph.project.subgraph", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphCreateSubgraphResult> create(
         @Name(value = "graphName") String graphName,

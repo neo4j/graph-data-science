@@ -41,7 +41,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void additionalKeyForGraphCreate() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.graph.create('foo', '*', '*', {readConcurrency: 4, maxIterations: 1337})")
+            () -> runQuery("CALL gds.graph.project('foo', '*', '*', {readConcurrency: 4, maxIterations: 1337})")
         );
 
         assertThat(
@@ -106,7 +106,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void misspelledRelationshipProjectionKeyWithSuggestion() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.graph.create('g', '*', {" +
+            () -> runQuery("CALL gds.graph.project('g', '*', {" +
                            "    FOO: {" +
                            "        tpe: 'FOO'" +
                            "    }" +
@@ -123,7 +123,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void additionalRelationshipProjectionKey() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.graph.create('g', '*', {" +
+            () -> runQuery("CALL gds.graph.project('g', '*', {" +
                            "    FOO: {" +
                            "        type: 'FOO'," +
                            "        some: 'some'" +
@@ -158,7 +158,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void misspelledNodeProjectionKeyWithSuggestion() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.graph.create('g', {" +
+            () -> runQuery("CALL gds.graph.project('g', {" +
                            "    FOO: {" +
                            "        labl: 'Foo'" +
                            "    }" +
@@ -175,7 +175,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void additionalNodeProjectionKey() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.graph.create('g', {" +
+            () -> runQuery("CALL gds.graph.project('g', {" +
                            "    FOO: {" +
                            "        label: 'Foo'," +
                            "        some: 'some'" +

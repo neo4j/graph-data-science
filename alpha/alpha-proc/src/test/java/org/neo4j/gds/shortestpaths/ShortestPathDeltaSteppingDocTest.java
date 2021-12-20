@@ -59,7 +59,7 @@ class ShortestPathDeltaSteppingDocTest extends BaseProcTest {
         registerProcedures(ShortestPathDeltaSteppingWriteProc.class, ShortestPathDeltaSteppingStreamProc.class, GraphCreateProc.class);
         registerFunctions(AsNodeFunc.class);
 
-        runQuery("CALL gds.graph.create(" +
+        runQuery("CALL gds.graph.project(" +
                  "  'graph'," +
                  "  'Loc'," +
                  "  {" +

@@ -67,8 +67,17 @@ class FilterOnCypherGraphIntegrationTest extends BaseProcTest {
         registerProcedures(GraphCreateProc.class, LabelPropagationStatsProc.class);
         runQuery(DB_CYPHER);
 
-        runQuery("CALL gds.graph.create.cypher($graphName, $nodeQuery, $relQuery)",
-            map("graphName", TEST_GRAPH, "nodeQuery", "MATCH (n) RETURN id(n) AS id, labels(n) AS labels", "relQuery", ALL_RELATIONSHIPS_QUERY));
+        runQuery(
+            "CALL gds.graph.project.cypher($graphName, $nodeQuery, $relQuery)",
+            map(
+                "graphName",
+                TEST_GRAPH,
+                "nodeQuery",
+                "MATCH (n) RETURN id(n) AS id, labels(n) AS labels",
+                "relQuery",
+                ALL_RELATIONSHIPS_QUERY
+            )
+        );
     }
 
     @AfterEach

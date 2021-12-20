@@ -54,13 +54,13 @@ class KnnFilteredGraphTest extends BaseProcTest {
 
     @Test
     void shouldComputeAndMutateOnFilteredGraph() {
-        var create = "CALL gds.graph.create(" +
-                         "'g'," +
-                         "['Person', 'Horse']," +
-                         "['LIKES', 'KNOWS']" +
-                         ", {" +
-                             "nodeProperties: ['knn']" +
-                         "}" +
+        var create = "CALL gds.graph.project(" +
+                     "'g'," +
+                     "['Person', 'Horse']," +
+                     "['LIKES', 'KNOWS']" +
+                     ", {" +
+                     "nodeProperties: ['knn']" +
+                     "}" +
                      ")";
         runQuery(create);
         var knnQuery1 = "CALL gds.beta.knn.mutate('g', {" +

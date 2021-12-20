@@ -54,7 +54,7 @@ class SccDocTest extends BaseProcTest {
         registerProcedures(SccWriteProc.class, SccStreamProc.class, GraphCreateProc.class);
         registerFunctions(AsNodeFunc.class);
 
-        runQuery("CALL gds.graph.create('graph', 'User', 'FOLLOW')");
+        runQuery("CALL gds.graph.project('graph', 'User', 'FOLLOW')");
     }
 
     @Test

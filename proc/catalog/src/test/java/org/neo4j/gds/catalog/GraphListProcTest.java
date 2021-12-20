@@ -82,7 +82,7 @@ class GraphListProcTest extends BaseProcTest {
     @Test
     void listASingleLabelRelationshipTypeProjection() {
         String name = "name";
-        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
+        runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
 
         assertCypherResult("CALL gds.graph.list()", singletonList(
             map(
@@ -220,7 +220,7 @@ class GraphListProcTest extends BaseProcTest {
     void listASingleLabelRelationshipTypeProjectionWithProperties() {
         String name = "name";
         runQuery(
-            "CALL gds.graph.create($name, 'A', 'REL', {nodeProperties: 'foo', relationshipProperties: 'bar'})",
+            "CALL gds.graph.project($name, 'A', 'REL', {nodeProperties: 'foo', relationshipProperties: 'bar'})",
             map("name", name)
         );
 
@@ -238,7 +238,7 @@ class GraphListProcTest extends BaseProcTest {
     void listCypherProjection() {
         String name = "name";
         runQuery(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY)
         );
 
@@ -282,11 +282,14 @@ class GraphListProcTest extends BaseProcTest {
     void listCypherProjectionWithProperties() {
         String name = "name";
         runQuery(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
             map(
-                "name", name,
-                "nodeQuery", "MATCH (n) RETURN id(n) AS id, n.foo as foo, labels(n) as labels",
-                "relationshipQuery", "MATCH (a)-[r]->(b) RETURN id(a) AS source, id(b) AS target, r.bar as bar, type(r) as type"
+                "name",
+                name,
+                "nodeQuery",
+                "MATCH (n) RETURN id(n) AS id, n.foo as foo, labels(n) as labels",
+                "relationshipQuery",
+                "MATCH (a)-[r]->(b) RETURN id(a) AS source, id(b) AS target, r.bar as bar, type(r) as type"
             )
         );
 
@@ -304,7 +307,7 @@ class GraphListProcTest extends BaseProcTest {
     void listCypherProjectionProjectAllWithProperties() {
         String name = "name";
         runQuery(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
             map(
                 "name", name,
                 "nodeQuery", "MATCH (n) RETURN id(n) AS id, n.foo as foo",
@@ -325,7 +328,7 @@ class GraphListProcTest extends BaseProcTest {
     @Test
     void degreeDistributionComputationIsOptOut() {
         String name = "name";
-        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
+        runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
 
         assertCypherResult(
             "CALL gds.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodeCount, relationshipCount",
@@ -355,7 +358,7 @@ class GraphListProcTest extends BaseProcTest {
     @Test
     void calculateDegreeDistributionForUndirectedNodesWhenAskedTo() {
         String name = "name";
-        runQuery("CALL gds.graph.create($name, 'A', {REL: {orientation: 'undirected'}})", map("name", name));
+        runQuery("CALL gds.graph.project($name, 'A', {REL: {orientation: 'undirected'}})", map("name", name));
 
         assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
             map(
@@ -377,7 +380,7 @@ class GraphListProcTest extends BaseProcTest {
     @Test
     void calculateDegreeDistributionForOutgoingRelationshipsWhenAskedTo() {
         String name = "name";
-        runQuery("CALL gds.graph.create($name, 'A', {REL: {orientation: 'natural'}})", map("name", name));
+        runQuery("CALL gds.graph.project($name, 'A', {REL: {orientation: 'natural'}})", map("name", name));
 
         assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
             map(
@@ -399,7 +402,7 @@ class GraphListProcTest extends BaseProcTest {
     @Test
     void calculateDegreeDistributionForIncomingRelationshipsWhenAskedTo() {
         String name = "name";
-        runQuery("CALL gds.graph.create($name, 'A', {REL: {orientation: 'reverse'}})", map("name", name));
+        runQuery("CALL gds.graph.project($name, 'A', {REL: {orientation: 'reverse'}})", map("name", name));
 
         assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
             map(
@@ -420,7 +423,7 @@ class GraphListProcTest extends BaseProcTest {
 
     @Test
     void calculateActualMemoryUsage() {
-        runQuery("CALL gds.graph.create('name', 'A', 'REL')");
+        runQuery("CALL gds.graph.project('name', 'A', 'REL')");
         assertCypherResult(
             "CALL gds.graph.list() YIELD memoryUsage, sizeInBytes",
             List.of(Map.of(
@@ -435,7 +438,7 @@ class GraphListProcTest extends BaseProcTest {
     void listAllGraphsWhenCalledWithoutArgumentOrAnEmptyArgument(String argument) {
         String[] names = {"a", "b", "c"};
         for (String name : names) {
-            runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
+            runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
         }
 
         List<String> actualNames = runQuery(
@@ -454,7 +457,7 @@ class GraphListProcTest extends BaseProcTest {
     void filterOnExactMatchUsingTheFirstArgument() {
         String[] names = {"b", "bb", "ab", "ba", "B", "ʙ"};
         for (String name : names) {
-            runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
+            runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
         }
 
         String name = names[0];
@@ -482,7 +485,7 @@ class GraphListProcTest extends BaseProcTest {
     void returnEmptyStreamWhenNoGraphMatchesTheFilterArgument(String argument) {
         String[] names = {"a", "b", "c"};
         for (String name : names) {
-            runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
+            runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
         }
 
         long numberOfRows = runQuery(
@@ -499,7 +502,7 @@ class GraphListProcTest extends BaseProcTest {
     void reverseProjectionForListing() {
         runQuery("CREATE (a:Person), (b:Person), (a)-[:INTERACTS]->(b)");
         runQuery(
-            "CALL gds.graph.create('incoming', 'Person', {" +
+            "CALL gds.graph.project('incoming', 'Person', {" +
             "  INTERACTS: {" +
             "    orientation: 'REVERSE'" +
             "  }" +
@@ -512,7 +515,7 @@ class GraphListProcTest extends BaseProcTest {
 
     @Test
     void listAllAvailableGraphsForUser() {
-        String loadQuery = "CALL gds.graph.create($name, '*', '*')";
+        String loadQuery = "CALL gds.graph.project($name, '*', '*')";
 
         runQuery("alice", loadQuery, map("name", "aliceGraph"));
         runQuery("bob", loadQuery, map("name", "bobGraph"));
@@ -525,7 +528,7 @@ class GraphListProcTest extends BaseProcTest {
 
     @Test
     void shouldShowSchemaForNativeProjectedGraph() {
-        String loadQuery = "CALL gds.graph.create('graph', '*', '*')";
+        String loadQuery = "CALL gds.graph.project('graph', '*', '*')";
 
         runQuery(loadQuery);
 
@@ -542,7 +545,7 @@ class GraphListProcTest extends BaseProcTest {
     void shouldShowSchemaForMultipleProjectionsWithStar() {
         runQuery("CREATE (:B {age: 12})-[:LIKES {since: 42}]->(:B {age: 66})");
 
-        String loadQuery = "CALL gds.graph.create(" +
+        String loadQuery = "CALL gds.graph.project(" +
                            "    'graph', " +
                            "    {all: {label: '*', properties: 'foo'}, B: {properties: 'age'}}, " +
                            "    {all: {type:  '*', properties: 'since'}, REL: {properties: 'bar'}})";
@@ -566,7 +569,7 @@ class GraphListProcTest extends BaseProcTest {
     void shouldShowSchemaForMultipleProjectionsWithTwoRenamedStars() {
         runQuery("CREATE (:B {age: 12})-[:LIKES {since: 42}]->(:B {age: 66})");
 
-        String loadQuery = "CALL gds.graph.create(" +
+        String loadQuery = "CALL gds.graph.project(" +
                            "    'graph', " +
                            "    {all: {label: '*', properties: 'foo'}, B: {label: '*', properties: 'age'}}, " +
                            "    {all: {type:  '*', properties: 'since'}, REL: {type: '*', properties: 'bar'}})";
@@ -588,7 +591,7 @@ class GraphListProcTest extends BaseProcTest {
     void shouldShowSchemaForMultipleProjections() {
         runQuery("CREATE (:B {age: 12})-[:LIKES {since: 42}]->(:B {age: 66})");
 
-        String loadQuery = "CALL gds.graph.create(" +
+        String loadQuery = "CALL gds.graph.project(" +
                            "    'graph', " +
                            "    {A: {properties: 'foo'}, B: {properties: 'age'}}, " +
                            "    {LIKES: {properties: 'since'}, REL: {properties: 'bar'}})";
@@ -606,7 +609,7 @@ class GraphListProcTest extends BaseProcTest {
 
     @Test
     void shouldHaveCreationTimeField() {
-        String loadQuery = "CALL gds.graph.create($name, '*', '*')";
+        String loadQuery = "CALL gds.graph.project($name, '*', '*')";
 
         runQuery("alice", loadQuery, map("name", "aliceGraph"));
         runQuery("bob", loadQuery, map("name", "bobGraph"));

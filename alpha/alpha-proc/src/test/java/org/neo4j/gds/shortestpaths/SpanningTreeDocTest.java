@@ -61,7 +61,7 @@ class SpanningTreeDocTest extends BaseProcTest {
             GraphCreateProc.class
         );
 
-        runQuery("CALL gds.graph.create(" +
+        runQuery("CALL gds.graph.project(" +
                  "  'graph'," +
                  "  'Place'," +
                  "  {" +

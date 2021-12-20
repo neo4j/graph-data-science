@@ -175,7 +175,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.beta.graphSage.write.estimate",
 
         "gds.beta.graph.generate",
-        "gds.beta.graph.create.subgraph",
+        "gds.beta.graph.project.subgraph",
 
         "gds.beta.k1coloring.mutate",
         "gds.beta.k1coloring.mutate.estimate",
@@ -258,10 +258,10 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.fastRP.write",
         "gds.fastRP.write.estimate",
 
-        "gds.graph.create",
-        "gds.graph.create.cypher",
-        "gds.graph.create.cypher.estimate",
-        "gds.graph.create.estimate",
+        "gds.graph.project",
+        "gds.graph.project.cypher",
+        "gds.graph.project.cypher.estimate",
+        "gds.graph.project.estimate",
         "gds.graph.deleteRelationships",
         "gds.graph.drop",
         "gds.graph.exists",

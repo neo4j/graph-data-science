@@ -71,7 +71,7 @@ class ArticleRankProcTest extends BaseProcTest {
             ArticleRankWriteProc.class,
             ArticleRankMutateProc.class
         );
-        runQuery("CALL gds.graph.create($graphName, '*', '*')", Map.of("graphName", GRAPH_NAME));
+        runQuery("CALL gds.graph.project($graphName, '*', '*')", Map.of("graphName", GRAPH_NAME));
     }
 
     static Stream<Arguments> scalers() {

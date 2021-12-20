@@ -53,7 +53,7 @@ class GraphExistsProcTest extends BaseProcTest {
     @ParameterizedTest(name = "Existing Graphs: {0}, Lookup: {1}, Exists: {2}")
     @MethodSource("graphNameExistsCombinations")
     void shouldReportOnGraphExistenceProc(String graphNameToCreate, String graphNameToCheck, boolean exists) {
-        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", graphNameToCreate));
+        runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", graphNameToCreate));
 
         assertCypherResult(
             "CALL gds.graph.exists($graphName)",
@@ -67,7 +67,7 @@ class GraphExistsProcTest extends BaseProcTest {
     @ParameterizedTest(name = "Existing Graphs: {0}, Lookup: {1}, Exists: {2}")
     @MethodSource("graphNameExistsCombinations")
     void shouldReportOnGraphExistenceFunc(String graphNameToCreate, String graphNameToCheck, boolean exists) {
-        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", graphNameToCreate));
+        runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", graphNameToCreate));
 
         assertCypherResult(
             "RETURN gds.graph.exists($graphName) AS exists",

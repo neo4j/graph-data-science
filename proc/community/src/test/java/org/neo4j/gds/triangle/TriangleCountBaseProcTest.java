@@ -60,7 +60,10 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
             getProcedureClazz()
         );
 
-        runQuery(formatWithLocale("CALL gds.graph.create('%s', 'A', {T: { orientation: 'UNDIRECTED'}})", DEFAULT_GRAPH_NAME));
+        runQuery(formatWithLocale(
+            "CALL gds.graph.project('%s', 'A', {T: { orientation: 'UNDIRECTED'}})",
+            DEFAULT_GRAPH_NAME
+        ));
     }
 
     @Override

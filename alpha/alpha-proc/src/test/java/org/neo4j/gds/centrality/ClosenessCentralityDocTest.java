@@ -56,7 +56,7 @@ public class ClosenessCentralityDocTest extends BaseProcTest {
         registerProcedures(ClosenessCentralityWriteProc.class, ClosenessCentralityStreamProc.class, GraphCreateProc.class);
         registerFunctions(AsNodeFunc.class);
 
-        var createQuery = "CALL gds.graph.create('graph', 'Node', 'LINK')";
+        var createQuery = "CALL gds.graph.project('graph', 'Node', 'LINK')";
         runQuery(createQuery);
     }
 

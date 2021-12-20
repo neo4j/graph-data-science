@@ -556,7 +556,7 @@ public abstract class GdsCypher {
 
         @Language("Cypher")
         public String yields(Collection<String> elements) {
-            var procedureName = "gds.graph.create";
+            var procedureName = "gds.graph.project";
 
             var queryArguments = queryArguments(graphName, graphCreateConfigBuilder.build(), parameters);
             var yieldsFields = yieldsFields(elements);

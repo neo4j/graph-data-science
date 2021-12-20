@@ -75,7 +75,7 @@ class TransactionsWhileProjectingIntegrationTest extends BaseProcTest {
             }
         });
 
-        thread2.setUncaughtExceptionHandler((t, e) -> softly.fail("graph.create failed", e));
+        thread2.setUncaughtExceptionHandler((t, e) -> softly.fail("graph.project failed", e));
 
         thread1.start();
         thread2.start();

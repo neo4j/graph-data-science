@@ -51,7 +51,7 @@ final class K1ColoringDocTest extends BaseProcTest {
             ", (alice)-[:LINK]->(doug)" +
             ", (bridget)-[:LINK]->(charles)";
 
-        String graphCreateQuery = "CALL gds.graph.create('myGraph', 'User', 'LINK')";
+        String graphCreateQuery = "CALL gds.graph.project('myGraph', 'User', 'LINK')";
 
         runQuery(dbQuery);
         runQuery(graphCreateQuery);

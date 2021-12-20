@@ -42,7 +42,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(GraphCreateProc.class, PageRankStatsProc.class);
-        runQuery("CALL gds.graph.create('graphLabel1', '*', '*')");
+        runQuery("CALL gds.graph.project('graphLabel1', '*', '*')");
     }
 
     @Override

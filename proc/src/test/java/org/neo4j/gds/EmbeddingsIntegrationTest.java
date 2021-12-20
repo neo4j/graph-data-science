@@ -126,7 +126,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
         runQuery(rpQuery);
 
         String newCreateQuery = formatWithLocale(
-            "CALL gds.graph.create.cypher('newGraph', '%s', '%s')",
+            "CALL gds.graph.project.cypher('newGraph', '%s', '%s')",
             "MATCH (n) " +
             "RETURN " +
             "  id(n) AS id, " +

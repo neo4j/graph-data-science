@@ -140,7 +140,7 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
 
     private void createGraph() {
         var graphCreateQuery =
-            "CALL gds.graph.create(" +
+            "CALL gds.graph.project(" +
             "  $graphName," +
             "  {N: {properties: 'z'}}," +
             "  {REL: {orientation: 'UNDIRECTED', properties: 'label'}}" +

@@ -147,7 +147,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
         clearDb();
 
         runQuery(graphCreateQuery);
-        runQuery("CALL gds.graph.create('graph', '*', '*', {nodeProperties: 'weight'})");
+        runQuery("CALL gds.graph.project('graph', '*', '*', {nodeProperties: 'weight'})");
 
         String algoQuery = GdsCypher
             .call("graph")

@@ -100,7 +100,7 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
 
         runQuery(
             formatWithLocale(
-                "CALL gds.graph.create('%s', {A: {label: 'A', properties: 'seed'}}, {T: {orientation: 'UNDIRECTED'}})",
+                "CALL gds.graph.project('%s', {A: {label: 'A', properties: 'seed'}}, {T: {orientation: 'UNDIRECTED'}})",
                 TEST_GRAPH_NAME
             )
         );
@@ -142,7 +142,7 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     @Test
     void warnOnNoneAggregatedGraph() {
         var graphName = "nonagg";
-        runQuery("CALL gds.graph.create(" +
+        runQuery("CALL gds.graph.project(" +
                  " $graphName," +
                  " '*', {" +
                  "    ALL: {" +

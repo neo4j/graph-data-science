@@ -127,7 +127,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void listProperties() {
         var cypherProjection =
-            "CALL gds.graph.create.cypher('g', " +
+            "CALL gds.graph.project.cypher('g', " +
             "  'RETURN 0 AS id, [1.0, 2.0] AS list', " +
             "  'RETURN 0 AS source, 1 AS target LIMIT 0'" +
             ") YIELD nodeCount";
@@ -142,7 +142,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String graphName = "name";
 
         assertCypherResult(
-            "CALL gds.graph.create($name, 'A', 'REL')",
+            "CALL gds.graph.project($name, 'A', 'REL')",
             map("name", graphName),
             singletonList(map(
                 "graphName", graphName,
@@ -174,7 +174,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String graphName = "name";
 
         assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
             map("name", graphName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
             singletonList(map(
                 "graphName", graphName,
@@ -220,7 +220,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String relationshipQuery = "MATCH (a)-[r:REL]->(b) RETURN id(a) AS source, id(b) AS target, type(r) AS type";
 
         assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, {validateRelationships: false})",
+            "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery, {validateRelationships: false})",
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
             singletonList(map(
                 "graphName", name,
@@ -242,8 +242,17 @@ class GraphCreateProcTest extends BaseProcTest {
         String nodeQuery = "MATCH (n) WHERE n.age = $age RETURN id(n) AS id";
 
         assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { parameters: { age: 2 }, validateRelationships: false})",
-            map("name", graphName, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "validateRelationships", false),
+            "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery, { parameters: { age: 2 }, validateRelationships: false})",
+            map(
+                "name",
+                graphName,
+                "nodeQuery",
+                nodeQuery,
+                "relationshipQuery",
+                ALL_RELATIONSHIPS_QUERY,
+                "validateRelationships",
+                false
+            ),
             singletonList(map(
                 "graphName", graphName,
                 NODE_QUERY_KEY, nodeQuery,
@@ -259,7 +268,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void nodeProjectionWithAsterisk() {
-        String query = "CALL gds.graph.create('g', '*', 'REL') YIELD nodeCount";
+        String query = "CALL gds.graph.project('g', '*', 'REL') YIELD nodeCount";
 
         runQuery("CREATE (), (:B), (:C:D:E)");
         assertCypherResult(query, singletonList(
@@ -271,7 +280,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void relationshipProjectionWithAsterisk() {
-        String query = "CALL gds.graph.create('g', 'A', '*') YIELD relationshipCount";
+        String query = "CALL gds.graph.project('g', 'A', '*') YIELD relationshipCount";
 
         runQuery("CREATE (:A)-[:R]->(:A), (:B:A)-[:T]->(:A:B), (cde:C:D:E)-[:SELF]->(cde)");
         assertCypherResult(query, singletonList(
@@ -287,7 +296,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String name = "g";
 
         assertCypherResult(
-            "CALL gds.graph.create($name, $nodeProjection, '*')",
+            "CALL gds.graph.project($name, $nodeProjection, '*')",
             map("name", name, "nodeProjection", nodeProjection),
             singletonList(map(
                 "graphName", name,
@@ -310,7 +319,7 @@ class GraphCreateProcTest extends BaseProcTest {
         Map<String, Object> expectedNodeProjection = map("B", map(LABEL_KEY, "A", PROPERTIES_KEY, expectedProperties));
 
         assertCypherResult(
-            "CALL gds.graph.create($name, $nodeProjection, '*')",
+            "CALL gds.graph.project($name, $nodeProjection, '*')",
             map("name", name, "nodeProjection", nodeProjection),
             singletonList(map(
                 "graphName", name,
@@ -335,7 +344,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String relationshipQuery = "RETURN 0 AS source, 0 AS target";
 
         assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
             map("name", name,
                 "nodeQuery", nodeQuery,
                 "relationshipQuery", relationshipQuery
@@ -362,7 +371,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String nodeQuery = "MATCH (n) RETURN id(n) AS id, n.age AS age";
 
         assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
             map("name", name, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
             singletonList(map(
                 "graphName", name,
@@ -383,7 +392,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String name = "g";
 
         assertCypherResult(
-            "CALL gds.graph.create($name, '*', $relProjection)",
+            "CALL gds.graph.project($name, '*', $relProjection)",
             map("name", name, "relProjection", relProjection),
             singletonList(map(
                 "graphName", name,
@@ -480,7 +489,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String relationshipQuery = "MATCH (s)-[r]->(t) RETURN id(s) AS source, id(t) AS target, r.weight AS weight";
 
         assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
             singletonList(map(
                 "graphName", name,
@@ -517,8 +526,15 @@ class GraphCreateProcTest extends BaseProcTest {
         ));
 
         assertCypherResult(
-            "CALL gds.graph.create($name, '*', $relationshipProjection, { relationshipProperties: $relationshipProperties })",
-            map("name", name, "relationshipProjection", relationshipProjection, "relationshipProperties", relationshipProperties),
+            "CALL gds.graph.project($name, '*', $relationshipProjection, { relationshipProperties: $relationshipProperties })",
+            map(
+                "name",
+                name,
+                "relationshipProjection",
+                relationshipProjection,
+                "relationshipProperties",
+                relationshipProperties
+            ),
             singletonList(map(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
@@ -569,7 +585,7 @@ class GraphCreateProcTest extends BaseProcTest {
         ));
 
         assertCypherResult(
-            "CALL gds.graph.create($name, '*', $relationshipProjection)",
+            "CALL gds.graph.project($name, '*', $relationshipProjection)",
             map("name", name, "relationshipProjection", relationshipProjection),
             singletonList(map(
                 "graphName", name,
@@ -639,10 +655,11 @@ class GraphCreateProcTest extends BaseProcTest {
         AtomicInteger cypherRelCount = new AtomicInteger();
 
         runQueryWithRowConsumer(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            "CALL gds.graph.project.cypher($name, $nodeQuery, $relationshipQuery)",
             map("name", cypher,
                 "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", formatWithLocale("MATCH (s)-[r:KNOWS]->(t) RETURN id(s) AS source, id(t) AS target, %s AS weight",
+                "relationshipQuery", formatWithLocale(
+                    "MATCH (s)-[r:KNOWS]->(t) RETURN id(s) AS source, id(t) AS target, %s AS weight",
                     getCypherAggregation(aggregation, "r.weight")
                 )
             ),
@@ -663,7 +680,7 @@ class GraphCreateProcTest extends BaseProcTest {
             relationshipsStandard,
             relationshipCountCypher,
             formatWithLocale(
-                "Expected %d relationships using `gds.graph.create` to be equal to %d relationships when using `gds.graph.create.cypher`",
+                "Expected %d relationships using `gds.graph.project` to be equal to %d relationships when using `gds.graph.project.cypher`",
                 relationshipsStandard,
                 relationshipCountCypher
             )
@@ -672,17 +689,18 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void defaultRelationshipProjectionProperty() {
-        assertCypherResult("CALL gds.graph.create('testGraph', '*', $relationshipProjection)",
+        assertCypherResult(
+            "CALL gds.graph.project('testGraph', '*', $relationshipProjection)",
             singletonMap("relationshipProjection", map(
                 "REL", map("properties", map("weight", map("aggregation", "SINGLE"))
-            ))),
+                ))),
             singletonList(map(
-            "graphName", "testGraph",
-            NODE_PROJECTION_KEY, isA(Map.class),
-            RELATIONSHIP_PROJECTION_KEY, map(
-                "REL", map(
-                    "type", "REL",
-                    ORIENTATION_KEY, "NATURAL",
+                "graphName", "testGraph",
+                NODE_PROJECTION_KEY, isA(Map.class),
+                RELATIONSHIP_PROJECTION_KEY, map(
+                    "REL", map(
+                        "type", "REL",
+                        ORIENTATION_KEY, "NATURAL",
                     AGGREGATION_KEY, "DEFAULT",
                     PROPERTIES_KEY,  map(
                     "weight", map(
@@ -699,17 +717,18 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void defaultNodeProjectionProperty() {
-        assertCypherResult("CALL gds.graph.create('testGraph', $nodeProjection, '*')",
+        assertCypherResult(
+            "CALL gds.graph.project('testGraph', $nodeProjection, '*')",
             singletonMap("nodeProjection", map(
                 "A", map("properties", map("age", map("defaultValue", 1)))
             )),
             singletonList(map(
-            "graphName", "testGraph",
-            NODE_PROJECTION_KEY, map(
-                "A", map(
-                    "label", "A",
-                    "properties", map(
-                        "age", map(
+                "graphName", "testGraph",
+                NODE_PROJECTION_KEY, map(
+                    "A", map(
+                        "label", "A",
+                        "properties", map(
+                            "age", map(
                             "defaultValue", 1,
                             "property", "age"
                         )
@@ -730,8 +749,9 @@ class GraphCreateProcTest extends BaseProcTest {
         var name = "g";
         runQuery("CREATE ({ratings: [1.0, 2.0]}), ()");
         runQuery(
-            "CALL gds.graph.create($name, '*', '*', {nodeProperties: {ratings: {defaultValue: [5.0]}}}) YIELD nodeProjection",
-            Map.of("name", name));
+            "CALL gds.graph.project($name, '*', '*', {nodeProperties: {ratings: {defaultValue: [5.0]}}}) YIELD nodeProjection",
+            Map.of("name", name)
+        );
 
         assertGraphExists(name);
         var graph = GraphStoreCatalog.get("", db.databaseId(), name).graphStore().getUnion();
@@ -743,7 +763,7 @@ class GraphCreateProcTest extends BaseProcTest {
         clearDb();
         runQuery("CREATE ({ratings: [1.0, 2.0]}), ()");
         assertError(
-            "CALL gds.graph.create('g', '*', '*', {nodeProperties: {ratings: {defaultValue: 5.0}}}) YIELD nodeProjection",
+            "CALL gds.graph.project('g', '*', '*', {nodeProperties: {ratings: {defaultValue: 5.0}}}) YIELD nodeProjection",
             "Expected type of default value to be `double[]`. But got `Double`."
         );
     }
@@ -753,7 +773,7 @@ class GraphCreateProcTest extends BaseProcTest {
         clearDb();
         runQuery("CREATE ({ratings: 1.0}), ()");
         assertError(
-            "CALL gds.graph.create('g', '*', '*', {nodeProperties: {ratings: {defaultValue: [5.0]}}}) YIELD nodeProjection",
+            "CALL gds.graph.project('g', '*', '*', {nodeProperties: {ratings: {defaultValue: [5.0]}}}) YIELD nodeProjection",
             "Expected type of default value to be `Double`. But got `double[]`."
         );
     }
@@ -833,7 +853,7 @@ class GraphCreateProcTest extends BaseProcTest {
         // ensure that we don't drop task that can't be scheduled while importing a graph.
 
         // TODO: ensure parallel running via batch-size
-        String query = "CALL gds.graph.create('g', '*', '*')";
+        String query = "CALL gds.graph.project('g', '*', '*')";
 
         List<Future<?>> futures = new ArrayList<>();
         // block all available threads
@@ -1149,7 +1169,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @ParameterizedTest(name = "projections: {0}")
     @ValueSource(strings = {"'*', {}", "{}, '*'", "'', '*'", "'*', ''"})
     void failsOnEmptyProjection(String projection) {
-        String query = "CALL gds.graph.create('g', " + projection + ")";
+        String query = "CALL gds.graph.project('g', " + projection + ")";
 
         assertErrorRegex(
             query,
@@ -1161,7 +1181,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void failsOnBothEmptyProjection() {
-        String query = "CALL gds.graph.create('g','','')";
+        String query = "CALL gds.graph.project('g','','')";
 
         String expectedMsg = "Multiple errors in configuration arguments:\n" +
                              "\t\t\t\tAn empty node projection was given; at least one node label must be projected.\n" +
@@ -1180,7 +1200,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String name = "g";
 
         String graphCreate =
-            "CALL gds.graph.create(" +
+            "CALL gds.graph.project(" +
             "$name, " +
             "{" +
             "  A: {" +
@@ -1204,27 +1224,27 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failsOnNulls() {
         assertError(
-            "CALL gds.graph.create(null, null, null)",
+            "CALL gds.graph.project(null, null, null)",
             "`graphName` can not be null or blank, but it was `null`"
         );
         assertError(
-            "CALL gds.graph.create('name', null, null)",
+            "CALL gds.graph.project('name', null, null)",
             "No value specified for the mandatory configuration parameter `nodeProjection`"
         );
         assertError(
-            "CALL gds.graph.create('name', 'A', null)",
+            "CALL gds.graph.project('name', 'A', null)",
             "No value specified for the mandatory configuration parameter `relationshipProjection`"
         );
         assertError(
-            "CALL gds.graph.create.cypher(null, null, null)",
+            "CALL gds.graph.project.cypher(null, null, null)",
             "`graphName` can not be null or blank, but it was `null`"
         );
         assertError(
-            "CALL gds.graph.create.cypher('name', null, null)",
+            "CALL gds.graph.project.cypher('name', null, null)",
             "No value specified for the mandatory configuration parameter `nodeQuery`"
         );
         assertError(
-            "CALL gds.graph.create.cypher('name', 'MATCH (n) RETURN id(n) AS id', null)",
+            "CALL gds.graph.project.cypher('name', 'MATCH (n) RETURN id(n) AS id', null)",
             "No value specified for the mandatory configuration parameter `relationshipQuery`"
         );
     }
@@ -1232,7 +1252,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failsOnInvalidAggregationCombinations() {
         String query =
-            "CALL gds.graph.create('g', '*', " +
+            "CALL gds.graph.project('g', '*', " +
             "{" +
             "    B: {" +
             "        type: 'REL'," +
@@ -1262,7 +1282,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failsOnMissingStarPropertyForCountAggregation() {
         String query =
-            "CALL gds.graph.create('g', '*', " +
+            "CALL gds.graph.project('g', '*', " +
             "{" +
             "    B: {" +
             "        type: 'REL'," +
@@ -1282,7 +1302,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failsOnMissingPropertyForCountAggregation() {
         String query =
-            "CALL gds.graph.create('g', '*', " +
+            "CALL gds.graph.project('g', '*', " +
             "{" +
             "    B: {" +
             "        type: 'REL'," +
@@ -1304,12 +1324,12 @@ class GraphCreateProcTest extends BaseProcTest {
     @MethodSource("org.neo4j.gds.catalog.GraphCreateProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
-            "CALL gds.graph.create($graphName, {}, {})",
+            "CALL gds.graph.project($graphName, {}, {})",
             map("graphName", invalidName),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
         assertError(
-            "CALL gds.graph.create.cypher($graphName, $nodeQuery, $relationshipQuery)",
+            "CALL gds.graph.project.cypher($graphName, $nodeQuery, $relationshipQuery)",
             map("graphName", invalidName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
@@ -1320,11 +1340,11 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failsOnMissingMandatory() {
         assertError(
-            "CALL gds.graph.create()",
+            "CALL gds.graph.project()",
             "Procedure call does not provide the required number of arguments"
         );
         assertError(
-            "CALL gds.graph.create.cypher()",
+            "CALL gds.graph.project.cypher()",
             "Procedure call does not provide the required number of arguments"
         );
     }
@@ -1335,7 +1355,7 @@ class GraphCreateProcTest extends BaseProcTest {
         Map<String, Object> nodeProjection = map("A", map(LABEL_KEY, "INVALID"));
 
         assertError(
-            "CALL gds.graph.create($name, $nodeProjection, '*')",
+            "CALL gds.graph.project($name, $nodeProjection, '*')",
             map("name", name, "nodeProjection", nodeProjection),
             "Invalid node projection, one or more labels not found: 'INVALID'"
         );
@@ -1346,7 +1366,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failsOnNodeQueryWithNoResult() {
         assertError(
-            "CALL gds.graph.create.cypher(" +
+            "CALL gds.graph.project.cypher(" +
             "  'not_exist'," +
             "  'MATCH (n:NotExist) RETURN id(n) AS id'," +
             "  'MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target'" +
@@ -1360,7 +1380,7 @@ class GraphCreateProcTest extends BaseProcTest {
         Map<String, Object> relProjection = map("A", map(TYPE_KEY, "REL", AGGREGATION_KEY, "INVALID"));
 
         assertError(
-            "CALL gds.graph.create('g', '*', $relProjection)",
+            "CALL gds.graph.project('g', '*', $relProjection)",
             map("relProjection", relProjection),
             "Aggregation `INVALID` is not supported."
         );
@@ -1371,7 +1391,7 @@ class GraphCreateProcTest extends BaseProcTest {
         Map<String, Object> relProjection = map("A", map(TYPE_KEY, "REL", ORIENTATION_KEY, "INVALID"));
 
         assertError(
-            "CALL gds.graph.create('g', '*', $relProjection)",
+            "CALL gds.graph.project('g', '*', $relProjection)",
             map("relProjection", relProjection),
             "Orientation `INVALID` is not supported."
         );
@@ -1382,7 +1402,7 @@ class GraphCreateProcTest extends BaseProcTest {
         Map<String, Object> relProjection = map("A", map(TYPE_KEY, "REL", ORIENTATION_KEY, "INVALID"));
 
         assertError(
-            "CALL gds.graph.create('g', '*', $relProjection)",
+            "CALL gds.graph.project('g', '*', $relProjection)",
             map("relProjection", relProjection),
             "Orientation `INVALID` is not supported."
         );
@@ -1391,16 +1411,18 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failsOnExistingGraphName() {
         String name = "g";
-        runQuery("CALL gds.graph.create($name, '*', '*')", map("name", name));
+        runQuery("CALL gds.graph.project($name, '*', '*')", map("name", name));
         assertError(
-            "CALL gds.graph.create($name, '*', '*')",
+            "CALL gds.graph.project($name, '*', '*')",
             map("name", name),
-            formatWithLocale("A graph with name '%s' already exists.", name));
+            formatWithLocale("A graph with name '%s' already exists.", name)
+        );
 
         assertError(
-            "CALL gds.graph.create.cypher($name, '*', '*')",
+            "CALL gds.graph.project.cypher($name, '*', '*')",
             map("name", name),
-            formatWithLocale("A graph with name '%s' already exists.", name));
+            formatWithLocale("A graph with name '%s' already exists.", name)
+        );
     }
 
     @Test
@@ -1411,15 +1433,15 @@ class GraphCreateProcTest extends BaseProcTest {
             invalidName
         );
 
-        assertError("CALL gds.graph.create($name, '*', '*')", map("name", invalidName), expectedMessage);
-        assertError("CALL gds.graph.create.cypher($name, '*', '*')", map("name", invalidName), expectedMessage);
+        assertError("CALL gds.graph.project($name, '*', '*')", map("name", invalidName), expectedMessage);
+        assertError("CALL gds.graph.project.cypher($name, '*', '*')", map("name", invalidName), expectedMessage);
     }
 
 
     @Test
     void failsOnWriteQuery() {
         String writeQuery = "CREATE (n) RETURN id(n) AS id";
-        String query = "CALL gds.graph.create.cypher('dragons', $nodeQuery, $relQuery)";
+        String query = "CALL gds.graph.project.cypher('dragons', $nodeQuery, $relQuery)";
 
         assertError(
             query,
@@ -1437,7 +1459,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failsOnMissingIdColumn() {
         String query =
-            "CALL gds.graph.create.cypher(" +
+            "CALL gds.graph.project.cypher(" +
             "   'cypherGraph', " +
             "   'RETURN 1 AS foo', " +
             "   'RETURN 0 AS source, 1 AS target'" +
@@ -1456,7 +1478,7 @@ class GraphCreateProcTest extends BaseProcTest {
         })
     void failsOnMissingSourceAndTargetColumns(String returnClause, String missingColumns) {
         String query = formatWithLocale(
-            "CALL gds.graph.create.cypher(" +
+            "CALL gds.graph.project.cypher(" +
             "   'cypherGraph', " +
             "   'RETURN 1 AS id', " +
             "   '%s'" +
@@ -1477,7 +1499,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String name = "g";
 
         String graphCreateQuery =
-            "CALL gds.graph.create(" +
+            "CALL gds.graph.project(" +
             "   $name, " +
             "   '*'," +
             "   {" +
@@ -1498,7 +1520,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void cypherCreationShouldNotReturnProjections() {
-        runQueryWithResultConsumer("CALL gds.graph.create.cypher('test', '*', '*')", result -> {
+        runQueryWithResultConsumer("CALL gds.graph.project.cypher('test', '*', '*')", result -> {
             assertFalse(result.columns().contains(NODE_PROJECTION_KEY));
             assertFalse(result.columns().contains(RELATIONSHIP_PROJECTION_KEY));
         });
@@ -1508,7 +1530,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @ValueSource(strings = {NODE_PROJECTION_KEY, RELATIONSHIP_PROJECTION_KEY, NODE_QUERY_KEY, RELATIONSHIP_QUERY_KEY})
     void failOnUsingGraphProjectionConfigurationParamsNative(String configKey) {
         assertError(
-            formatWithLocale("CALL gds.graph.create('g', '*', '*', {%s: 'does not matter'})", configKey),
+            formatWithLocale("CALL gds.graph.project('g', '*', '*', {%s: 'does not matter'})", configKey),
             formatWithLocale("Unexpected configuration key: %s", configKey)
         );
     }
@@ -1517,7 +1539,10 @@ class GraphCreateProcTest extends BaseProcTest {
     @ValueSource(strings = {NODE_QUERY_KEY, RELATIONSHIP_QUERY_KEY})
     void failOnUsingGraphProjectionConfigurationParamsCypher(String configKey) {
         assertError(
-            formatWithLocale("CALL gds.graph.create.cypher('g', 'MATCH ...', 'MATCH ...', {%s: 'does not matter'})", configKey),
+            formatWithLocale(
+                "CALL gds.graph.project.cypher('g', 'MATCH ...', 'MATCH ...', {%s: 'does not matter'})",
+                configKey
+            ),
             formatWithLocale("Unexpected configuration key: %s", configKey)
         );
     }

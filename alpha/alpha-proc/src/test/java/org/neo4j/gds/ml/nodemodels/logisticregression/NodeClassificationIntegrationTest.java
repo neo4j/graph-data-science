@@ -82,7 +82,7 @@ class NodeClassificationIntegrationTest extends BaseProcTest {
         registerFunctions(AsNodeFunc.class);
         runQuery(GRAPH);
 
-        runQuery("CALL gds.graph.create('g', ['N', 'Hidden'], '*', {nodeProperties: ['a', 'b', 'class']})");
+        runQuery("CALL gds.graph.project('g', ['N', 'Hidden'], '*', {nodeProperties: ['a', 'b', 'class']})");
     }
 
     @Test

@@ -106,7 +106,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
         for (int i = 0; i < 1024; i++) {
             insert1024NodesQuery = insert1024NodesQuery + "CREATE(x" + i + ":Node) ";
         }
-        String createQuery = "CALL gds.graph.create('spanningtree_example', 'Place', {" +
+        String createQuery = "CALL gds.graph.project('spanningtree_example', 'Place', {" +
                              "  EROAD: {" +
                              "      type: 'EROAD'," +
                              "      orientation: 'Undirected'," +

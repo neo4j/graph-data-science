@@ -39,7 +39,7 @@ import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 public interface OrientationCombinationTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
     private void setupDb() {
-        runQuery(graphDb(), "CALL gds.graph.create('directedMultiRels', '*', {" +
+        runQuery(graphDb(), "CALL gds.graph.project('directedMultiRels', '*', {" +
                             "  R: { type: '*', orientation: 'REVERSE' }, " +
                             "  U: { type: '*', orientation: 'UNDIRECTED' }, " +
                             "  N: { type: '*', orientation: 'NATURAL' } " +

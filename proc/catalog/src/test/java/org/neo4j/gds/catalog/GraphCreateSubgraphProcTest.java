@@ -63,7 +63,7 @@ class GraphCreateSubgraphProcTest extends BaseProcTest {
 
     @Test
     void executeProc() {
-        var subGraphQuery = "CALL gds.beta.graph.create.subgraph('subgraph', 'graph', 'n:A', 'true')";
+        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'n:A', 'true')";
 
         assertCypherResult(subGraphQuery, List.of(Map.of(
             "graphName", "subgraph",
@@ -119,7 +119,7 @@ class GraphCreateSubgraphProcTest extends BaseProcTest {
             .withAnyRelationshipType()
             .yields());
 
-        var subGraphQuery = "CALL gds.beta.graph.create.subgraph('subgraph', 'graph', 'n:A', 'true')";
+        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'n:A', 'true')";
 
         assertThatThrownBy(() -> runQuery(subGraphQuery))
             .getRootCause()
@@ -129,7 +129,7 @@ class GraphCreateSubgraphProcTest extends BaseProcTest {
 
     @Test
     void throwsOnParserError() {
-        var subGraphQuery = "CALL gds.beta.graph.create.subgraph('subgraph', 'graph', 'GIMME NODES, JOANNA, GIMME NODES', 'true')";
+        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'GIMME NODES, JOANNA, GIMME NODES', 'true')";
 
         assertThatThrownBy(() -> runQuery(subGraphQuery))
             .getRootCause()
@@ -139,7 +139,7 @@ class GraphCreateSubgraphProcTest extends BaseProcTest {
 
     @Test
     void throwsOnSemanticNodeError() {
-        var subGraphQuery = "CALL gds.beta.graph.create.subgraph('subgraph', 'graph', 'r:Foo', 'true')";
+        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'r:Foo', 'true')";
 
         assertThatThrownBy(() -> runQuery(subGraphQuery))
             .getRootCause()
@@ -150,7 +150,7 @@ class GraphCreateSubgraphProcTest extends BaseProcTest {
 
     @Test
     void throwsOnSemanticRelationshipError() {
-        var subGraphQuery = "CALL gds.beta.graph.create.subgraph('subgraph', 'graph', 'true', 'r:BAR AND r.weight > 42')";
+        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:BAR AND r.weight > 42')";
 
         assertThatThrownBy(() -> runQuery(subGraphQuery))
             .getRootCause()
