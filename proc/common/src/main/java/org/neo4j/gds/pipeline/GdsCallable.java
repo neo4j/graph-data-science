@@ -24,6 +24,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * This annotation is used to identify callables within the GDS library.
+ * All callable is a unit that is surfaced via a Cypher procedure and encapsulates an end-to-end process.
+ * For example an algorithm alone is not a callable, however, an algorithm in combination with a mode,
+ * like mutate or stream, is a callable.
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GdsCallable {
