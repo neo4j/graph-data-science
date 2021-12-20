@@ -116,11 +116,6 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
         ).compute();
     }
 
-    @Override
-    public LinkPredictionTrainPipelineExecutor me() {
-        return this;
-    }
-
     private void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets) {
         datasets.values()
             .stream()

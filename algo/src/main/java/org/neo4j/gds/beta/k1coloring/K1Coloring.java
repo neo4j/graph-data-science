@@ -106,11 +106,6 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
     }
 
     @Override
-    public K1Coloring me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         graph.release();
         nodesToColor = null;

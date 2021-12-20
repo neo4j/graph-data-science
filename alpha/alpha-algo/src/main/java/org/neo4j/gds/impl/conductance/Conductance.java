@@ -350,11 +350,6 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
     }
 
     @Override
-    public Conductance me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         graph = null;
     }

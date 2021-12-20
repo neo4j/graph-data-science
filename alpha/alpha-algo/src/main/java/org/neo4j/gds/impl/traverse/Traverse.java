@@ -151,16 +151,11 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
         }
 
         this.resultNodes = result.toArray();
-        return me();
+        return this;
     }
 
     public long[] resultNodes() {
         return resultNodes;
-    }
-
-    @Override
-    public Traverse me() {
-        return this;
     }
 
     @Override

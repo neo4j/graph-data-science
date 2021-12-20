@@ -96,11 +96,6 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
     }
 
     @Override
-    public Node2Vec me() {
-        return this;
-    }
-
-    @Override
     public void release() {
 
     }

@@ -95,11 +95,6 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
         return connectedComponents;
     }
 
-    @Override
-    public SccAlgorithm me() {
-        return this;
-    }
-
     /**
      * release inner data structures
      */

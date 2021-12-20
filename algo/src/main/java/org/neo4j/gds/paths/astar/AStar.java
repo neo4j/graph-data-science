@@ -91,11 +91,6 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
     }
 
     @Override
-    public AStar me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         dijkstra.release();
     }

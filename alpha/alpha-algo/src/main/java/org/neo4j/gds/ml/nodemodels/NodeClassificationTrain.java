@@ -260,11 +260,6 @@ public final class NodeClassificationTrain extends Algorithm<NodeClassificationT
     }
 
     @Override
-    public NodeClassificationTrain me() {
-        return this;
-    }
-
-    @Override
     public void release() {}
 
     @Override

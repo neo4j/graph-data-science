@@ -88,11 +88,6 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Exha
     }
 
     @Override
-    public LinkPredictionPredict me() {
-        return this;
-    }
-
-    @Override
     public void release() {
 
     }

@@ -99,11 +99,6 @@ public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResu
     }
 
     @Override
-    public PageRankAlgorithm me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         this.pregelJob.release();
     }

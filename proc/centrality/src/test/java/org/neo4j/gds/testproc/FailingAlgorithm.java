@@ -34,11 +34,6 @@ class FailingAlgorithm extends Algorithm<FailingAlgorithm, ProcedureThatFailsDur
     }
 
     @Override
-    public FailingAlgorithm me() {
-        return this;
-    }
-
-    @Override
     public void release() {
 
     }

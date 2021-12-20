@@ -376,11 +376,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     @Override
-    public ModularityOptimization me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         this.nextCommunities.release();
         this.communityWeights.release();

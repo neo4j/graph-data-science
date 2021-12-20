@@ -203,11 +203,6 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
     }
 
     @Override
-    public Yens me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         dijkstra.release();
         nodeBlackList.release();

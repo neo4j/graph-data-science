@@ -121,11 +121,6 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
     }
 
     @Override
-    public Prim me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         spanningTree = null;
     }

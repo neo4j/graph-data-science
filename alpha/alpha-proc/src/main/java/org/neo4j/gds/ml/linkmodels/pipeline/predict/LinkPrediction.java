@@ -83,11 +83,6 @@ public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredi
     );
 
     @Override
-    public LinkPrediction me() {
-        return this;
-    }
-
-    @Override
     public void release() {
 
     }

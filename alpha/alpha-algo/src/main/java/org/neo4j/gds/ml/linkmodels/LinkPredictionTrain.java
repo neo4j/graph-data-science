@@ -329,11 +329,6 @@ public class LinkPredictionTrain
     }
 
     @Override
-    public LinkPredictionTrain me() {
-        return this;
-    }
-
-    @Override
     public void release() {
 
     }

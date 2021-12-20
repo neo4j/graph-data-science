@@ -31,9 +31,4 @@ public abstract class GraphSageTrain extends Algorithm<GraphSageTrain, Model<Mod
         super(progressTracker);
     }
 
-    @Override
-    public GraphSageTrain me() {
-        return this;
-    }
-
 }

@@ -291,11 +291,6 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     }
 
     @Override
-    public Dijkstra me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         // We do not release, since the result
         // is lazily computed when the consumer

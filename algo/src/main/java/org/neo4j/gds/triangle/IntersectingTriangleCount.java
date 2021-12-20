@@ -114,11 +114,6 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
     }
 
     @Override
-    public final IntersectingTriangleCount me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         executorService = null;
         graph = null;

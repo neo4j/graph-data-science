@@ -116,11 +116,6 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
     }
 
     @Override
-    public MSClosenessCentrality me() {
-        return this;
-    }
-
-    @Override
     public void release() {}
 
     @Override

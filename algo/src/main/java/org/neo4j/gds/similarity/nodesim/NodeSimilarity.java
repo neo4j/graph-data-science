@@ -77,11 +77,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     @Override
-    public NodeSimilarity me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         graph.release();
     }

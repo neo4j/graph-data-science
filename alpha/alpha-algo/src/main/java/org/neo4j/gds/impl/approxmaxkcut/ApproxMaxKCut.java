@@ -189,11 +189,6 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     }
 
     @Override
-    public ApproxMaxKCut me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         graph = null;
     }

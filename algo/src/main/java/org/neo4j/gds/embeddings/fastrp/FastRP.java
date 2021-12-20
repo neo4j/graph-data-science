@@ -151,11 +151,6 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     }
 
     @Override
-    public FastRP me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         this.embeddingA.release();
         this.embeddingB.release();

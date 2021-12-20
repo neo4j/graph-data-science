@@ -508,11 +508,6 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        public CompositeTestAlgorithm me() {
-            return this;
-        }
-
-        @Override
         public void release() {
 
         }

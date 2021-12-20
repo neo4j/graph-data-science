@@ -152,11 +152,6 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
     }
 
     @Override
-    public Wcc me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         graph = null;
     }

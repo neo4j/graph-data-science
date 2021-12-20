@@ -91,11 +91,6 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
         this.queue = new AtomicInteger();
     }
 
-    @Override
-    public TriangleStream me() {
-        return this;
-    }
-
     /**
      * This algorithm computes a stream, therefore we must not release before consumption.
      */

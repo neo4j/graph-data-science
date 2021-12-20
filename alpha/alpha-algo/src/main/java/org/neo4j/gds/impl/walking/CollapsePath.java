@@ -116,11 +116,6 @@ public class CollapsePath extends Algorithm<CollapsePath, Relationships> {
     }
 
     @Override
-    public CollapsePath me() {
-        return this;
-    }
-
-    @Override
     public void release() {
 
     }

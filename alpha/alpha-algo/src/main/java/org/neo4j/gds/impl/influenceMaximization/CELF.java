@@ -150,11 +150,6 @@ public class CELF extends Algorithm<CELF, CELF> {
     }
 
     @Override
-    public CELF me() {
-        return this;
-    }
-
-    @Override
     public void release() {
     }
 

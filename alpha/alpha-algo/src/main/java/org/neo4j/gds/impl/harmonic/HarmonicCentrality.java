@@ -77,11 +77,6 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality, HarmonicCe
     }
 
     @Override
-    public HarmonicCentrality me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         graph = null;
     }

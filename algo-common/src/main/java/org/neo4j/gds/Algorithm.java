@@ -33,8 +33,6 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
 
     public abstract RESULT compute();
 
-    public abstract ME me();
-
     /**
      * Release internal data structures used by the algorithm.
      *
@@ -43,7 +41,7 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
 
     public ME withTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
-        return me();
+        return null;
     }
 
     public TerminationFlag getTerminationFlag() {

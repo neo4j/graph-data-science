@@ -94,11 +94,6 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
     }
 
     @Override
-    public GraphSage me() {
-        return this;
-    }
-
-    @Override
     public void release() {
 
     }

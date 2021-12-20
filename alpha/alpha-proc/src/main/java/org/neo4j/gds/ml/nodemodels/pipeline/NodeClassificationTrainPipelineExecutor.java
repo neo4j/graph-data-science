@@ -99,11 +99,6 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         );
     }
 
-    @Override
-    public NodeClassificationTrainPipelineExecutor me() {
-        return this;
-    }
-
     NodeClassificationTrainConfig innerConfig() {
         var params = pipeline.trainingParameterSpace().stream()
             .map(NodeLogisticRegressionTrainCoreConfig::toMap).collect(Collectors.toList());

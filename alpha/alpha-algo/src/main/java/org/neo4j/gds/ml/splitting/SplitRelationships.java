@@ -46,11 +46,6 @@ public class SplitRelationships extends Algorithm<SplitRelationships, SplitResul
     }
 
     @Override
-    public SplitRelationships me() {
-        return this;
-    }
-
-    @Override
     public void release() {
 
     }

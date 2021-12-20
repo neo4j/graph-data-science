@@ -94,11 +94,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
     }
 
     @Override
-    public LabelPropagation me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         graph = null;
     }
@@ -148,7 +143,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         stepRunners.forEach(StepRunner::release);
         progressTracker.endSubTask();
 
-        return me();
+        return this;
     }
 
     private List<StepRunner> stepRunners() {

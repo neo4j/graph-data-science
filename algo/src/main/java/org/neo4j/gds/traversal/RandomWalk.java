@@ -140,11 +140,6 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     }
 
     @Override
-    public RandomWalk me() {
-        return this;
-    }
-
-    @Override
     public void release() { }
 
     private static final class RandomWalkTask implements Runnable {

@@ -133,11 +133,6 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
     }
 
     @Override
-    public Knn me() {
-        return this;
-    }
-
-    @Override
     public void release() {
 
     }

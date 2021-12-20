@@ -110,11 +110,6 @@ public abstract class SimilarityAlgorithm<ME extends SimilarityAlgorithm<ME, INP
     }
 
     @Override
-    public ME me() {
-        return (ME) this;
-    }
-
-    @Override
     public void release() {}
 
     SimilarityResult modifyResult(SimilarityResult result) {

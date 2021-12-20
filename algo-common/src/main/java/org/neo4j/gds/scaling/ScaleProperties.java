@@ -133,11 +133,6 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     }
 
     @Override
-    public ScaleProperties me() {
-        return this;
-    }
-
-    @Override
     public void release() {}
 
     @ValueClass

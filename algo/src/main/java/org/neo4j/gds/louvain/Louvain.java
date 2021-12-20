@@ -276,11 +276,6 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         this.rootGraph.releaseTopology();
     }
 
-    @Override
-    public Louvain me() {
-        return this;
-    }
-
     static class OriginalIdNodeProperties implements LongNodeProperties {
         private final Graph graph;
 

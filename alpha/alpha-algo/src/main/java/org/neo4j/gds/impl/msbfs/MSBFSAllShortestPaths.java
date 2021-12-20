@@ -72,11 +72,6 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
     }
 
     @Override
-    public MSBFSAllShortestPaths me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         graph = null;
         resultQueue = null;

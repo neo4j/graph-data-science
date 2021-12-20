@@ -134,11 +134,6 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     }
 
     @Override
-    public LocalClusteringCoefficient me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         localClusteringCoefficients = null;
         graph = null;

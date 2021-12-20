@@ -99,11 +99,6 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
     }
 
     @Override
-    public NodeClassificationPredict me() {
-        return this;
-    }
-
-    @Override
     public void release() {
 
     }

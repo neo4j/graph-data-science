@@ -109,11 +109,6 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
     }
 
     @Override
-    public Greedy me() {
-        return this;
-    }
-
-    @Override
     public void release() {
     }
 
