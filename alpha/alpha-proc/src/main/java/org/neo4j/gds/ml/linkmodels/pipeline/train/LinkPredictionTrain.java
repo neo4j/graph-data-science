@@ -61,7 +61,7 @@ import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionTrain
-    extends Algorithm<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>> {
+    extends Algorithm<Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>> {
 
     public static final String MODEL_TYPE = "Link prediction pipeline";
 

@@ -25,7 +25,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import java.util.function.BiFunction;
 
 public class ProcedureGraphCreationFactory<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig
 > implements GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> {

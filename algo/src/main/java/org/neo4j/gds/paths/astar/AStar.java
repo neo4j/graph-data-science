@@ -35,7 +35,7 @@ import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class AStar extends Algorithm<AStar, DijkstraResult> {
+public final class AStar extends Algorithm<DijkstraResult> {
 
     private final Dijkstra dijkstra;
 

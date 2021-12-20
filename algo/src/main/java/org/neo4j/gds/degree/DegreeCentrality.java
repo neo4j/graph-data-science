@@ -38,7 +38,7 @@ import java.util.function.Function;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrality.DegreeFunction> {
+public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction> {
 
     private static final double DEFAULT_WEIGHT = 0D;
 

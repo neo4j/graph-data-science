@@ -41,7 +41,7 @@ import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 
-public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagation> {
+public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     private final long nodeCount;
     private final AllocationTracker allocationTracker;

@@ -31,10 +31,10 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-public final class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig, RESULT>
+public final class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig, RESULT>
     extends MutateComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> {
 
-    public interface MutateNodePropertyListFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig>
+    public interface MutateNodePropertyListFunction<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig>
         extends NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> {}
 
     private final MutateNodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction;

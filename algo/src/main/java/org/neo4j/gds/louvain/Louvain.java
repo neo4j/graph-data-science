@@ -50,7 +50,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
-public final class Louvain extends Algorithm<Louvain, Louvain> {
+public final class Louvain extends Algorithm<Louvain> {
 
     private final Graph rootGraph;
     private final LouvainBaseConfig config;

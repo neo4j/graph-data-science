@@ -44,7 +44,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class Yens extends Algorithm<Yens, DijkstraResult> {
+public final class Yens extends Algorithm<DijkstraResult> {
 
     private static final LongHashSet EMPTY_SET = new LongHashSet(0);
 

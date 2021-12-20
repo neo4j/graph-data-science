@@ -73,7 +73,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * the database returned by {@link AlgoBaseProcTest#graphDb} and
  * clears the data after each test.
  */
-public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT>
+public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends AlgoBaseConfig, RESULT>
     extends GraphCreateConfigSupport {
 
     String TEST_USERNAME = Username.EMPTY_USERNAME.username();

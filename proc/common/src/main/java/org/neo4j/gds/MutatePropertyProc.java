@@ -27,7 +27,7 @@ import org.neo4j.gds.core.write.NodeProperty;
 import java.util.List;
 
 public abstract class MutatePropertyProc<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
     CONFIG extends MutatePropertyConfig> extends MutateProc<ALGO, ALGO_RESULT, PROC_RESULT, CONFIG> {

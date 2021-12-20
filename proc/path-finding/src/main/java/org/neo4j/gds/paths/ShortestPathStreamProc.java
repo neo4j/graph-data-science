@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 public abstract class ShortestPathStreamProc<
-    ALGO extends Algorithm<ALGO, DijkstraResult>,
+    ALGO extends Algorithm<DijkstraResult>,
     CONFIG extends AlgoBaseConfig> extends StreamProc<ALGO, DijkstraResult, StreamResult, CONFIG> {
 
     @Override

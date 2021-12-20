@@ -37,7 +37,7 @@ import java.util.concurrent.ExecutorService;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeMultiLabelFeatures;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeSingleLabelFeatures;
 
-public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
+public class GraphSage extends Algorithm<GraphSage.GraphSageResult> {
 
     public static final String MODEL_TYPE = "graphSage";
 

@@ -31,7 +31,7 @@ import org.neo4j.internal.recordstorage.RecordStorageEngine;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.QueryRunner.runQuery;
 
-public interface NodeConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends NodeConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
+public interface NodeConfigTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends NodeConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
     default void testNodeValidation(String configKey, String... expectedMessageSubstrings) {
         runQuery(graphDb(), "CREATE (:A)");

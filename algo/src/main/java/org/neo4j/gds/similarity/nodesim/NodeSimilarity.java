@@ -42,7 +42,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResult> {
+public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private final Graph graph;
     private final boolean sortVectors;

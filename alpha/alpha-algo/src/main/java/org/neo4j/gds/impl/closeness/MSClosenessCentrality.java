@@ -40,7 +40,7 @@ import java.util.stream.Stream;
  * Utilizes the MSBFS for counting the farness between nodes.
  * See MSBFS documentation.
  */
-public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSClosenessCentrality> {
+public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
 
     private final Graph graph;
     private final PagedAtomicIntegerArray farness;

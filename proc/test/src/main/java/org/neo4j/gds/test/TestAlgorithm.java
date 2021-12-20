@@ -24,7 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
+public class TestAlgorithm extends Algorithm<TestAlgorithm> {
 
     private final Graph graph;
     private final AllocationTracker allocationTracker;

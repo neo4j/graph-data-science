@@ -52,7 +52,7 @@ import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2No
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
+public class FastRP extends Algorithm<FastRP.FastRPResult> {
 
     private static final int SPARSITY = 3;
     private static final double ENTRY_PROBABILITY = 1.0 / (2 * SPARSITY);

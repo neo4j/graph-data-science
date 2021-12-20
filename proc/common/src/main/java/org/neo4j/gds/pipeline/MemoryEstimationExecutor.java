@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MemoryEstimationExecutor<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig
     > {

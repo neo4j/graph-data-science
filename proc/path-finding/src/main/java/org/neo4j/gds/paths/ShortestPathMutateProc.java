@@ -40,7 +40,7 @@ import java.util.Optional;
 
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-public abstract class ShortestPathMutateProc<ALGO extends Algorithm<ALGO, DijkstraResult>, CONFIG extends AlgoBaseConfig & MutateRelationshipConfig>
+public abstract class ShortestPathMutateProc<ALGO extends Algorithm<DijkstraResult>, CONFIG extends AlgoBaseConfig & MutateRelationshipConfig>
     extends MutateProc<ALGO, DijkstraResult, MutateResult, CONFIG> {
     @Override
     public MutateComputationResultConsumer<ALGO, DijkstraResult, CONFIG, MutateResult> computationResultConsumer() {

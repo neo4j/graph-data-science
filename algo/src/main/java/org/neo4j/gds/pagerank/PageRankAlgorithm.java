@@ -35,7 +35,7 @@ import java.util.concurrent.ExecutorService;
 import static org.neo4j.gds.scaling.ScalarScaler.Variant.L2NORM;
 import static org.neo4j.gds.scaling.ScalarScaler.Variant.NONE;
 
-public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResult> {
+public class PageRankAlgorithm extends Algorithm<PageRankResult> {
 
     private final Pregel<PageRankConfig> pregelJob;
     private final Graph graph;

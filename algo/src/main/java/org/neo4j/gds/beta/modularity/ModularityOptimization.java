@@ -57,7 +57,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * Parallel Computing 47 (2015): 19-37.
  * https://arxiv.org/pdf/1410.1237.pdf
  */
-public final class ModularityOptimization extends Algorithm<ModularityOptimization, ModularityOptimization> {
+public final class ModularityOptimization extends Algorithm<ModularityOptimization> {
 
     public static final int K1COLORING_MAX_ITERATIONS = 5;
     private final int concurrency;

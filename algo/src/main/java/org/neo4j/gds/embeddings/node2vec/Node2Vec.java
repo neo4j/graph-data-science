@@ -30,7 +30,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.traversal.RandomWalk;
 
-public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> {
+public class Node2Vec extends Algorithm<HugeObjectArray<FloatVector>> {
 
     private final Graph graph;
     private final Node2VecBaseConfig config;

@@ -28,7 +28,7 @@ import org.neo4j.gds.core.write.NodeProperty;
 import java.util.List;
 
 public abstract class PregelWriteProc<
-    ALGO extends Algorithm<ALGO, PregelResult>,
+    ALGO extends Algorithm<PregelResult>,
     CONFIG extends PregelProcedureConfig>
     extends WriteProc<ALGO, PregelResult, PregelWriteResult, CONFIG> {
 

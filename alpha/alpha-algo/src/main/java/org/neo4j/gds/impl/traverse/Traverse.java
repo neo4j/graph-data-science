@@ -32,7 +32,7 @@ import java.util.function.ObjLongConsumer;
 
 import static org.neo4j.gds.impl.Converters.longToIntConsumer;
 
-public final class Traverse extends Algorithm<Traverse, Traverse> {
+public final class Traverse extends Algorithm<Traverse> {
 
     public static final Aggregator DEFAULT_AGGREGATOR = (s, t, w) -> .0;
 

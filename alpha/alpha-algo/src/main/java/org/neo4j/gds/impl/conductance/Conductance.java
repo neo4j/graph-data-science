@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class Conductance extends Algorithm<Conductance, Conductance.Result> {
+public class Conductance extends Algorithm<Conductance.Result> {
 
     private static final double DEFAULT_WEIGHT = 0.0D;
 

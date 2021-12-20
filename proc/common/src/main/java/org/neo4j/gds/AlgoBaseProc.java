@@ -49,7 +49,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public abstract class AlgoBaseProc<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig,
     PROC_RESULT
@@ -165,7 +165,7 @@ public abstract class AlgoBaseProc<
     }
 
     @ValueClass
-    public interface ComputationResult<A extends Algorithm<A, ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
+    public interface ComputationResult<A extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
         long preProcessingMillis();
 
         long computeMillis();

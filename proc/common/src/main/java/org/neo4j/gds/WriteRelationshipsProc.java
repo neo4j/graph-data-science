@@ -29,7 +29,7 @@ import org.neo4j.procedure.Context;
 import java.util.stream.Stream;
 
 public abstract class WriteRelationshipsProc<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
     CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> {

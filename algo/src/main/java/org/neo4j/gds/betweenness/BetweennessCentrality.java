@@ -40,7 +40,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-public class BetweennessCentrality extends Algorithm<BetweennessCentrality, HugeAtomicDoubleArray> {
+public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
     private final Graph graph;
     private final AtomicLong nodeQueue = new AtomicLong();

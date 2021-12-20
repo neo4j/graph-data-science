@@ -64,7 +64,7 @@ import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 
-public final class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
+public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
 
     public static final String MODEL_TYPE = "nodeLogisticRegression";
 

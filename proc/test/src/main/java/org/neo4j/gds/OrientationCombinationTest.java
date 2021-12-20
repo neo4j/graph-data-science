@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
-public interface OrientationCombinationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
+public interface OrientationCombinationTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
     private void setupDb() {
         runQuery(graphDb(), "CALL gds.graph.create('directedMultiRels', '*', {" +

@@ -34,7 +34,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 public class ProcedureGraphCreation<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig
 > implements GraphCreation<ALGO, ALGO_RESULT, CONFIG> {

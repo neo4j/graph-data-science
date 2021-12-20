@@ -37,7 +37,7 @@ import java.util.function.DoubleUnaryOperator;
  * After calculating the MST the algorithm cuts the tree at its k weakest
  * relationships to form k spanning trees
  */
-public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
+public class KSpanningTree extends Algorithm<SpanningTree> {
 
     private IdMapping idMapping;
     private Graph graph;

@@ -26,7 +26,7 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import java.util.stream.Stream;
 
 public abstract class StatsProc<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
     CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> {

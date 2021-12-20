@@ -28,7 +28,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 public interface GraphCreation<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig
 > {

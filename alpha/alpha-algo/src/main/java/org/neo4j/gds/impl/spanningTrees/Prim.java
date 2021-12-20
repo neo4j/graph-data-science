@@ -45,7 +45,7 @@ import static org.neo4j.gds.impl.Converters.longToIntConsumer;
  * The algorithm also computes the minimum, maximum and sum of all
  * weights in the MST.
  */
-public class Prim extends Algorithm<Prim, SpanningTree> {
+public class Prim extends Algorithm<SpanningTree> {
 
     public static final DoubleUnaryOperator MAX_OPERATOR = (w) -> -w;
     public static final DoubleUnaryOperator MIN_OPERATOR = (w) -> w;

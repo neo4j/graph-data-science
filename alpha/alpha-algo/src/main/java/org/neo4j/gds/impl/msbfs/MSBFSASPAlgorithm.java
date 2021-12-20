@@ -24,7 +24,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.stream.Stream;
 
-public abstract class MSBFSASPAlgorithm extends Algorithm<MSBFSASPAlgorithm, Stream<AllShortestPathsStream.Result>> {
+public abstract class MSBFSASPAlgorithm extends Algorithm<Stream<AllShortestPathsStream.Result>> {
     MSBFSASPAlgorithm(ProgressTracker progressTracker) {
         super(progressTracker);
     }

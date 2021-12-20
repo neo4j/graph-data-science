@@ -29,7 +29,7 @@ import org.neo4j.gds.impl.msbfs.MultiSourceBFS;
 
 import java.util.concurrent.ExecutorService;
 
-public class HarmonicCentrality extends Algorithm<HarmonicCentrality, HarmonicCentrality> {
+public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
 
     private final int concurrency;
     private final long nodeCount;

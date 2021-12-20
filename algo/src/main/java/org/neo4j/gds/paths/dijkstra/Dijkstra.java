@@ -45,7 +45,7 @@ import static org.neo4j.gds.paths.dijkstra.Dijkstra.TraversalState.CONTINUE;
 import static org.neo4j.gds.paths.dijkstra.Dijkstra.TraversalState.EMIT_AND_CONTINUE;
 import static org.neo4j.gds.paths.dijkstra.Dijkstra.TraversalState.EMIT_AND_STOP;
 
-public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
+public final class Dijkstra extends Algorithm<DijkstraResult> {
     private static final long NO_RELATIONSHIP = -1;
 
     private final Graph graph;

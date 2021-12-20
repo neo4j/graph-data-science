@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class Greedy extends Algorithm<Greedy, Greedy> {
+public class Greedy extends Algorithm<Greedy> {
     private final Graph graph;
     private final int seedSetCount;
     private final double propagationProbability;

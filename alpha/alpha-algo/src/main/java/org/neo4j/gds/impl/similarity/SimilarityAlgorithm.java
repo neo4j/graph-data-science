@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public abstract class SimilarityAlgorithm<ME extends SimilarityAlgorithm<ME, INPUT>, INPUT extends SimilarityInput> extends Algorithm<ME, SimilarityAlgorithmResult> {
+public abstract class SimilarityAlgorithm<ME extends SimilarityAlgorithm<ME, INPUT>, INPUT extends SimilarityInput> extends Algorithm<SimilarityAlgorithmResult> {
 
     private static int[] indexesFor(long[] inputIds, List<Long> sourceIds, String key) {
         try {

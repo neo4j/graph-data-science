@@ -50,7 +50,7 @@ import static org.neo4j.gds.impl.Converters.longToIntConsumer;
  * <a href="http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf">http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf</a><br>
  * <a href="http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf">http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf</a>
  */
-public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaStepping, ShortestPathDeltaStepping> {
+public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaStepping> {
 
     // distance array
     private final AtomicLongArray distance;

@@ -39,7 +39,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.QueryRunner.runQueryWithRowConsumer;
 
-public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
+public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
     extends MutatePropertyProcTest<ALGORITHM, CONFIG, RESULT> {
 
     String mutateRelationshipType();

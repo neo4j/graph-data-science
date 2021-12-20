@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class CELF extends Algorithm<CELF, CELF> {
+public class CELF extends Algorithm<CELF> {
 
     private final long seedSetCount;
     private final double propagationProbability;

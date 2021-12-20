@@ -41,7 +41,7 @@ import org.neo4j.gds.impl.msbfs.MultiSourceBFS;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class CollapsePath extends Algorithm<CollapsePath, Relationships> {
+public class CollapsePath extends Algorithm<Relationships> {
 
     private final Graph[] graphs;
     private final long nodeCount;

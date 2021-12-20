@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 
 public class ProcedureMemoryEstimation<
-    ALGO extends Algorithm<ALGO, ?>,
+    ALGO extends Algorithm<?>,
     CONFIG extends AlgoBaseConfig
 > {
 

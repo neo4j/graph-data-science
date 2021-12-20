@@ -52,7 +52,6 @@ class AlgorithmGenerator extends PregelGenerator {
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .superclass(ParameterizedTypeName.get(
                 ClassName.get(Algorithm.class),
-                algorithmClassName,
                 ClassName.get(PregelResult.class)
             ))
             .addOriginatingElement(pregelSpec.element());

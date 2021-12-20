@@ -45,7 +45,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * The output node property values are lists of the same size as the input lists, and contain the scaled values
  * of the input node properties.
  */
-public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.Result> {
+public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
 
     private final Graph graph;
     private final ScalePropertiesBaseConfig config;

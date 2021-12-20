@@ -458,7 +458,7 @@ public class PregelProcTest extends BaseProcTest {
         }
     }
 
-    public static class CompositeTestAlgorithm extends Algorithm<CompositeTestAlgorithm, PregelResult> {
+    public static class CompositeTestAlgorithm extends Algorithm<PregelResult> {
 
         static final String LONG_KEY = "long";
         static final String DOUBLE_KEY = "double";

@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class Knn extends Algorithm<Knn, Knn.Result> {
+public class Knn extends Algorithm<Knn.Result> {
 
     private final Graph graph;
     private final KnnBaseConfig config;

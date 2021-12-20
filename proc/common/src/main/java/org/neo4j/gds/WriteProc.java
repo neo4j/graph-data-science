@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public abstract class WriteProc<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
     CONFIG extends WritePropertyConfig & AlgoBaseConfig> extends NodePropertiesWriter<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> {

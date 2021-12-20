@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class ProcedureExecutor<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig,
     RESULT
