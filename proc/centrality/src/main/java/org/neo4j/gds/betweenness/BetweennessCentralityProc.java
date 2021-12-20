@@ -52,7 +52,6 @@ final class BetweennessCentralityProc {
     ) {
         if (computeResult.result() != null) {
             HugeAtomicDoubleArray centrality = computeResult.result();
-
             procResultBuilder.withCentralityFunction(computeResult.result()::get);
         }
         return procResultBuilder;

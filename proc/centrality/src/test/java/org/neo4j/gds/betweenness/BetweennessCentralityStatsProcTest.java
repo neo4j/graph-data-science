@@ -58,8 +58,7 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             assertEquals(0.0, centralityDistribution.get("min"));
             assertEquals(4.0, (double) centralityDistribution.get("max"), 1e-4);
             assertEquals(2.0, (double) centralityDistribution.get("mean"), 1e-4);
-
-
+            
             assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
@@ -76,7 +75,7 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             .yields("preProcessingMillis", "computeMillis", "postProcessingMillis");
 
         runQueryWithRowConsumer(query, row -> {
-            
+
             assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
