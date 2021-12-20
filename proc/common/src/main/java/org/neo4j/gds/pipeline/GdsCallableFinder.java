@@ -21,9 +21,7 @@ package org.neo4j.gds.pipeline;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
