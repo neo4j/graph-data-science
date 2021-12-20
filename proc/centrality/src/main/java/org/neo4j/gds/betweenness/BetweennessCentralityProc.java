@@ -53,27 +53,6 @@ final class BetweennessCentralityProc {
         if (computeResult.result() != null) {
             HugeAtomicDoubleArray centrality = computeResult.result();
 
-            if (procResultBuilder.computeDeprecatedStats) {
-                double min = Double.MAX_VALUE;
-                double max = -Double.MAX_VALUE;
-                double sum = 0.0;
-                for (long i = centrality.size() - 1; i >= 0; i--) {
-                    double c = centrality.get(i);
-                    if (c < min) {
-                        min = c;
-                    }
-                    if (c > max) {
-                        max = c;
-                    }
-                    sum += c;
-                }
-
-                procResultBuilder
-                    .minCentrality(min)
-                    .maxCentrality(max)
-                    .sumCentrality(sum);
-            }
-
             procResultBuilder.withCentralityFunction(computeResult.result()::get);
         }
         return procResultBuilder;
@@ -91,9 +70,7 @@ final class BetweennessCentralityProc {
     }
 
     abstract static class BetweennessCentralityResultBuilder<PROC_RESULT> extends AbstractCentralityResultBuilder<PROC_RESULT> {
-        double minCentrality = -1;
-        double maxCentrality = -1;
-        double sumCentrality = -1;
+
         boolean computeDeprecatedStats;
 
         BetweennessCentralityResultBuilder(ProcedureCallContext callContext, int concurrency) {
@@ -103,19 +80,5 @@ final class BetweennessCentralityProc {
                 .anyMatch(s -> s.toLowerCase(Locale.ENGLISH).contains("score"));
         }
 
-        BetweennessCentralityResultBuilder<PROC_RESULT> minCentrality(double minCentrality) {
-            this.minCentrality = minCentrality;
-            return this;
-        }
-
-        BetweennessCentralityResultBuilder<PROC_RESULT> maxCentrality(double maxCentrality) {
-            this.maxCentrality = maxCentrality;
-            return this;
-        }
-
-        BetweennessCentralityResultBuilder<PROC_RESULT> sumCentrality(double sumCentrality) {
-            this.sumCentrality = sumCentrality;
-            return this;
-        }
     }
 }
