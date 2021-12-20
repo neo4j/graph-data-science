@@ -86,8 +86,7 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
-                return TriangleStream.create(graph, Pools.DEFAULT, configuration.concurrency())
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+                return TriangleStream.create(graph, Pools.DEFAULT, configuration.concurrency());
             }
         };
     }

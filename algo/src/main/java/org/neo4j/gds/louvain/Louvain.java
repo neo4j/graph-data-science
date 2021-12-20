@@ -175,7 +175,8 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
                 seed,
                 allocationTracker,
                 progressTracker
-            ).withTerminationFlag(terminationFlag);
+            );
+        modularityOptimization.setTerminationFlag(terminationFlag);
 
         modularityOptimization.compute();
 

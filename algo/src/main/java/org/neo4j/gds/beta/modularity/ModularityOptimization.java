@@ -165,9 +165,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             .batchSize((int) minBatchSize)
             .build();
 
-        K1Coloring coloring = new K1ColoringFactory<>()
-            .build(graph, k1Config, allocationTracker, progressTracker)
-            .withTerminationFlag(terminationFlag);
+        K1Coloring coloring = new K1ColoringFactory<>().build(graph, k1Config, allocationTracker, progressTracker);
+        coloring.setTerminationFlag(terminationFlag);
 
         this.colors = coloring.compute();
         this.colorsUsed = coloring.usedColors();

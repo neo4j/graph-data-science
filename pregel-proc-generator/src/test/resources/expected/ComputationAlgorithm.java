@@ -45,11 +45,6 @@ public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, 
     }
 
     @Override
-    public ComputationAlgorithm me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         pregelJob.release();
     }

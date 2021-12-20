@@ -152,19 +152,33 @@ public class ProcedureExecutor<
         AllocationTracker allocationTracker
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(executionContext.transaction());
-        return algoSpec.algorithmFactory()
+        ALGO algorithm = algoSpec.algorithmFactory()
             .accept(new AlgorithmFactory.Visitor<>() {
                 @Override
                 public ALGO graph(GraphAlgorithmFactory<ALGO, CONFIG> graphAlgorithmFactory) {
-                    return graphAlgorithmFactory.build(graph, config, allocationTracker, executionContext.log(), executionContext.taskRegistryFactory());
+                    return graphAlgorithmFactory.build(
+                        graph,
+                        config,
+                        allocationTracker,
+                        executionContext.log(),
+                        executionContext.taskRegistryFactory()
+                    );
                 }
 
                 @Override
                 public ALGO graphStore(GraphStoreAlgorithmFactory<ALGO, CONFIG> graphStoreAlgorithmFactory) {
-                    return graphStoreAlgorithmFactory.build(graphStore, config, allocationTracker, executionContext.log(), executionContext.taskRegistryFactory());
+                    return graphStoreAlgorithmFactory.build(
+                        graphStore,
+                        config,
+                        allocationTracker,
+                        executionContext.log(),
+                        executionContext.taskRegistryFactory()
+                    );
                 }
-            })
-            .withTerminationFlag(terminationFlag);
+            });
+        algorithm.setTerminationFlag(terminationFlag);
+
+        return algorithm;
     }
 
     private void setAlgorithmMetaDataToTransaction(CONFIG algoConfig) {

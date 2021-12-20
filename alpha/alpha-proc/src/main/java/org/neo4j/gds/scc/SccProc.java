@@ -60,7 +60,7 @@ public abstract class SccProc<PROC_RESULT> extends NodePropertiesWriter<SccAlgor
                     graph,
                     allocationTracker,
                     progressTracker
-                ).withTerminationFlag(TerminationFlag.wrap(transaction));
+                );
             }
         };
     }

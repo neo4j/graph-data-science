@@ -81,16 +81,14 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
                         graph,
                         Pools.DEFAULT,
                         configuration.concurrency()
-                    )
-                        .withTerminationFlag(TerminationFlag.wrap(transaction));
+                    );
                 } else {
                     return new MSBFSAllShortestPaths(
                         graph,
                         allocationTracker,
                         configuration.concurrency(),
                         Pools.DEFAULT
-                    )
-                        .withTerminationFlag(TerminationFlag.wrap(transaction));
+                    );
                 }
             }
         };

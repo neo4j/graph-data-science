@@ -87,7 +87,7 @@ class NodeSimilarityTerminationTest extends AlgoTestBase {
 
         var timeoutTx = db.beginTx(10, TimeUnit.SECONDS);
         KernelTransaction kernelTx = ((InternalTransaction) timeoutTx).kernelTransaction();
-        algorithm.withTerminationFlag(new TestTerminationFlag(kernelTx, sleepMillis));
+        algorithm.setTerminationFlag(new TestTerminationFlag(kernelTx, sleepMillis));
 
         Runnable algorithmThread = () -> {
             try {

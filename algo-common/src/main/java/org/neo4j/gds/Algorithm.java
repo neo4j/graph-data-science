@@ -39,9 +39,8 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
      */
     public abstract void release();
 
-    public ME withTerminationFlag(TerminationFlag terminationFlag) {
+    public void setTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
-        return null;
     }
 
     public TerminationFlag getTerminationFlag() {
