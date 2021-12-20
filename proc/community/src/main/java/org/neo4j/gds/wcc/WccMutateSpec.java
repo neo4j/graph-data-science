@@ -27,15 +27,20 @@ import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.pipeline.AlgorithmSpec;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.NewConfigFunction;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>, WccAlgorithmFactory<WccMutateConfig>> {
+import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
 
-    WccMutateSpec() {}
+@GdsCallable(name = "gds.wcc.mutate", description = WCC_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>, WccAlgorithmFactory<WccMutateConfig>> {
+
+    public WccMutateSpec() {}
 
     @Override
     public String name() {
@@ -80,5 +85,4 @@ class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateCo
             computationResult
         );
     }
-
 }

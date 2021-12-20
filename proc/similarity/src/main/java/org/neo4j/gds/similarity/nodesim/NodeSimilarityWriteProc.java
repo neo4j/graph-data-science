@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.nodesim;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityProc;
@@ -34,10 +35,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_RELATIONSHIP;
 import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
+@GdsCallable(name = "gds.nodeSimilarity.write", description = NODE_SIMILARITY_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity, NodeSimilarityResult, SimilarityWriteResult, NodeSimilarityWriteConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.write", mode = WRITE)
