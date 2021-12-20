@@ -19,22 +19,18 @@
  */
 package org.neo4j.gds.walking;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.ImmutableComputationResult;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.impl.walking.CollapsePath;
+import org.neo4j.gds.impl.walking.CollapsePathAlgorithmFactory;
 import org.neo4j.gds.impl.walking.CollapsePathConfig;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
-import org.neo4j.gds.pipeline.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -60,55 +56,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var computationResult = compute(graphName, configuration, true, false);
-        return mutate(computationResult);
-    }
-
-    @Override
-    protected ComputationResult<CollapsePath, Relationships, CollapsePathConfig> compute(
-        String graphName, Map<String, Object> configuration, boolean releaseAlgorithm, boolean releaseTopology
-    ) {
-        ImmutableComputationResult.Builder<CollapsePath, Relationships, CollapsePathConfig> builder = ImmutableComputationResult.builder();
-
-        CollapsePathConfig config = configParser().processInput(configuration);
-
-        GraphStore graphStore;
-        var validator = validator();
-        var graphStoreLoader = new GraphStoreFromCatalogLoader(graphName, config, username(), databaseId(), isGdsAdmin());
-        try (ProgressTimer timer = ProgressTimer.start(builder::preProcessingMillis)) {
-            var graphCreateConfig = graphStoreLoader.graphCreateConfig();
-            validator.validateConfigsBeforeLoad(graphCreateConfig, config);
-            graphStore = graphStoreLoader.graphStore();
-            validator.validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
-        }
-
-        Graph[] graphs = config.relationshipTypes()
-            .stream()
-            .map(relType -> graphStore.getGraph(RelationshipType.of(relType)))
-            .toArray(Graph[]::new);
-
-        var allocationTracker = allocationTracker();
-
-        CollapsePath algo = new CollapsePath(graphs, config, Pools.DEFAULT, allocationTracker);
-        builder.algorithm(algo);
-
-        try (ProgressTimer timer = ProgressTimer.start(builder::computeMillis)) {
-            builder.result(algo.compute());
-        }
-
-        log.info(name() + ": overall memory usage %s", allocationTracker.getUsageString());
-
-        algo.release();
-
-        for (Graph graph : graphs) {
-            graph.releaseTopology();
-        }
-
-       return builder
-            .graphStore(graphStore)
-            .graph(graphs[0])
-            .algorithm(algo)
-            .config(config)
-            .build();
+        return computationResultConsumer().consume(computationResult, executionContext());
     }
 
     @Override
@@ -178,8 +126,8 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     }
 
     @Override
-    public GraphAlgorithmFactory<CollapsePath, CollapsePathConfig> algorithmFactory() {
-        throw new UnsupportedOperationException("CollapsePath does not support the AlgorithmFactory");
+    public GraphStoreAlgorithmFactory<CollapsePath, CollapsePathConfig> algorithmFactory() {
+        return new CollapsePathAlgorithmFactory();
     }
 
     @Override
