@@ -24,7 +24,7 @@ import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.procedure.Context;
 
-public abstract class StreamOfRelationshipsWriter<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig, PROC_RESULT>
+public abstract class StreamOfRelationshipsWriter<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig, PROC_RESULT>
     extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> {
 
     @Context

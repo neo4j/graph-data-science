@@ -24,7 +24,6 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.triangle.TriangleStream;
@@ -90,8 +89,7 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
-                return TriangleStream.create(graph, Pools.DEFAULT, configuration.concurrency())
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+                return TriangleStream.create(graph, Pools.DEFAULT, configuration.concurrency());
             }
         };
     }

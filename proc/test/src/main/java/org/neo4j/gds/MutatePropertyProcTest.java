@@ -44,7 +44,7 @@ import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.NATIVE;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
+public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
     extends MutateProcTest<ALGORITHM, CONFIG, RESULT> {
 
     String mutateProperty();

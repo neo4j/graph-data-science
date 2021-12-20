@@ -458,7 +458,7 @@ public class PregelProcTest extends BaseProcTest {
         }
     }
 
-    public static class CompositeTestAlgorithm extends Algorithm<CompositeTestAlgorithm, PregelResult> {
+    public static class CompositeTestAlgorithm extends Algorithm<PregelResult> {
 
         static final String LONG_KEY = "long";
         static final String DOUBLE_KEY = "double";
@@ -505,11 +505,6 @@ public class PregelProcTest extends BaseProcTest {
         @Override
         public PregelResult compute() {
             return pregelJob.run();
-        }
-
-        @Override
-        public CompositeTestAlgorithm me() {
-            return this;
         }
 
         @Override

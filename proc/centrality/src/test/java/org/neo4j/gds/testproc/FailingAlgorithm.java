@@ -22,7 +22,7 @@ package org.neo4j.gds.testproc;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-class FailingAlgorithm extends Algorithm<FailingAlgorithm, ProcedureThatFailsDuringTask.Output> {
+class FailingAlgorithm extends Algorithm<ProcedureThatFailsDuringTask.Output> {
     FailingAlgorithm(ProgressTracker progressTracker) {
         super(progressTracker);
     }
@@ -31,11 +31,6 @@ class FailingAlgorithm extends Algorithm<FailingAlgorithm, ProcedureThatFailsDur
     public ProcedureThatFailsDuringTask.Output compute() {
         progressTracker.beginSubTask();
         throw new IllegalStateException("Oops");
-    }
-
-    @Override
-    public FailingAlgorithm me() {
-        return this;
     }
 
     @Override

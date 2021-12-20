@@ -40,7 +40,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-public class BetweennessCentrality extends Algorithm<BetweennessCentrality, HugeAtomicDoubleArray> {
+public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
     private final Graph graph;
     private final AtomicLong nodeQueue = new AtomicLong();
@@ -81,11 +81,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         ParallelUtil.run(ParallelUtil.tasks(concurrency, () -> new BCTask(allocationTracker)), executorService);
         progressTracker.endSubTask();
         return centrality;
-    }
-
-    @Override
-    public BetweennessCentrality me() {
-        return this;
     }
 
     @Override

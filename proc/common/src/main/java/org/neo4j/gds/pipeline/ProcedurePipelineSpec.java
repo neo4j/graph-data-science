@@ -25,7 +25,7 @@ import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.pipeline.validation.Validator;
 
 public class ProcedurePipelineSpec<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig
 > implements PipelineSpec<ALGO, ALGO_RESULT, CONFIG> {

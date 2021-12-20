@@ -106,11 +106,6 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
     }
 
     @Override
-    public WeightedAllShortestPaths me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         graph = null;
         counter = null;

@@ -22,7 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
-public abstract class GraphStoreAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig>
+public abstract class GraphStoreAlgorithmFactory<ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig>
     implements AlgorithmFactory<GraphStore, ALGO, CONFIG> {
 
     @Override

@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.LongToDoubleFunction;
 
-public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficient, LocalClusteringCoefficient.Result> {
+public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficient.Result> {
 
     private final int concurrency;
     private final AllocationTracker allocationTracker;
@@ -131,11 +131,6 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
 
         // local clustering coefficient C(v) = 2 * triangles(v) / (degree(v) * (degree(v) - 1))
         return triangles * 2 / (degree * (degree - 1));
-    }
-
-    @Override
-    public LocalClusteringCoefficient me() {
-        return this;
     }
 
     @Override

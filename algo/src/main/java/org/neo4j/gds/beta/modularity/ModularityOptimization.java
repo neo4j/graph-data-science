@@ -57,7 +57,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * Parallel Computing 47 (2015): 19-37.
  * https://arxiv.org/pdf/1410.1237.pdf
  */
-public final class ModularityOptimization extends Algorithm<ModularityOptimization, ModularityOptimization> {
+public final class ModularityOptimization extends Algorithm<ModularityOptimization> {
 
     public static final int K1COLORING_MAX_ITERATIONS = 5;
     private final int concurrency;
@@ -165,9 +165,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             .batchSize((int) minBatchSize)
             .build();
 
-        K1Coloring coloring = new K1ColoringFactory<>()
-            .build(graph, k1Config, allocationTracker, progressTracker)
-            .withTerminationFlag(terminationFlag);
+        K1Coloring coloring = new K1ColoringFactory<>().build(graph, k1Config, allocationTracker, progressTracker);
+        coloring.setTerminationFlag(terminationFlag);
 
         this.colors = coloring.compute();
         this.colorsUsed = coloring.usedColors();
@@ -373,11 +372,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         );
 
         return (ex / (2 * totalNodeWeight)) - (ax / (Math.pow(2 * totalNodeWeight, 2)));
-    }
-
-    @Override
-    public ModularityOptimization me() {
-        return this;
     }
 
     @Override

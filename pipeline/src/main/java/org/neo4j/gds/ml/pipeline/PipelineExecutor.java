@@ -38,7 +38,7 @@ public abstract class PipelineExecutor<
     PIPELINE extends Pipeline<?, ?>,
     RESULT,
     SELF extends PipelineExecutor<PIPELINE_CONFIG, PIPELINE, RESULT, SELF>
-> extends Algorithm<SELF, RESULT> {
+> extends Algorithm<RESULT> {
 
     public enum DatasetSplits {
         TRAIN,

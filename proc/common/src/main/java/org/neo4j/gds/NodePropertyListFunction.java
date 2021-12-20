@@ -26,7 +26,7 @@ import org.neo4j.gds.core.write.NodeProperty;
 import java.util.List;
 
 @FunctionalInterface
-public interface NodePropertyListFunction<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
+public interface NodePropertyListFunction<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
     List<NodeProperty> apply(
         AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
         AllocationTracker allocationTracker

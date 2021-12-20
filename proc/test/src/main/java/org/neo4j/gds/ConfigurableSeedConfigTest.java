@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends ConfigurableSeedConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
+public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends ConfigurableSeedConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
     @Test
     default void testDefaultSeedPropertyIsNull() {

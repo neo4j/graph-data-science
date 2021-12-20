@@ -42,7 +42,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResult> {
+public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private final Graph graph;
     private final boolean sortVectors;
@@ -74,11 +74,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         this.allocationTracker = allocationTracker;
         this.nodeFilter = new BitSet(graph.nodeCount());
         this.weighted = config.hasRelationshipWeightProperty();
-    }
-
-    @Override
-    public NodeSimilarity me() {
-        return this;
     }
 
     @Override

@@ -25,7 +25,7 @@ import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 
 public abstract class PregelStatsProc<
-    ALGO extends Algorithm<ALGO, PregelResult>,
+    ALGO extends Algorithm<PregelResult>,
     CONFIG extends PregelProcedureConfig>
     extends StatsProc<ALGO, PregelResult, PregelStatsResult, CONFIG> {
 

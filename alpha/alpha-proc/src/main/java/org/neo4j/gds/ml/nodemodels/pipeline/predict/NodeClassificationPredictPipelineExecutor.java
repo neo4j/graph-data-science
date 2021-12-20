@@ -56,11 +56,6 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor
     }
 
     @Override
-    public NodeClassificationPredictPipelineExecutor me() {
-        return this;
-    }
-
-    @Override
     public Map<DatasetSplits, GraphFilter> splitDataset() {
         return Map.of(
             DatasetSplits.FEATURE_INPUT,

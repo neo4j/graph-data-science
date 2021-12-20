@@ -66,7 +66,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * Graph Connectivity Computation via Subgraph Sampling" Symposium on
  * Parallel and Distributed Processing, IPDPS 2018.
  */
-public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
+public class Wcc extends Algorithm<DisjointSetStruct> {
 
     /**
      * The number of relationships of each node to sample during subgraph sampling.
@@ -149,11 +149,6 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
 
         progressTracker.endSubTask();
         return dss;
-    }
-
-    @Override
-    public Wcc me() {
-        return this;
     }
 
     @Override

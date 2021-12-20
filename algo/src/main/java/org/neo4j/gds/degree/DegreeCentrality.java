@@ -38,7 +38,7 @@ import java.util.function.Function;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrality.DegreeFunction> {
+public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction> {
 
     private static final double DEFAULT_WEIGHT = 0D;
 
@@ -178,11 +178,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
         return degrees::get;
-    }
-
-    @Override
-    public DegreeCentrality me() {
-        return this;
     }
 
     @Override

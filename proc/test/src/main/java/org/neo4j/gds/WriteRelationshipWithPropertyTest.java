@@ -37,7 +37,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.QueryRunner.runQueryWithRowConsumer;
 
-public interface WriteRelationshipWithPropertyTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends WriteConfig & AlgoBaseConfig, RESULT>
+public interface WriteRelationshipWithPropertyTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends WriteConfig & AlgoBaseConfig, RESULT>
     extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
     String writeRelationshipType();

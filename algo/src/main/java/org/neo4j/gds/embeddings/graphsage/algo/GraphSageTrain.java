@@ -25,15 +25,10 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 
-public abstract class GraphSageTrain extends Algorithm<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> {
+public abstract class GraphSageTrain extends Algorithm<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> {
 
     protected GraphSageTrain(ProgressTracker progressTracker) {
         super(progressTracker);
-    }
-
-    @Override
-    public GraphSageTrain me() {
-        return this;
     }
 
 }

@@ -22,7 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implements TerminationFlag {
+public abstract class Algorithm<RESULT> implements TerminationFlag {
     protected final ProgressTracker progressTracker;
 
     protected TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
@@ -33,17 +33,14 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
 
     public abstract RESULT compute();
 
-    public abstract ME me();
-
     /**
      * Release internal data structures used by the algorithm.
      *
      */
     public abstract void release();
 
-    public ME withTerminationFlag(TerminationFlag terminationFlag) {
+    public void setTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
-        return me();
     }
 
     public TerminationFlag getTerminationFlag() {

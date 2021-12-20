@@ -50,7 +50,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
-public final class Louvain extends Algorithm<Louvain, Louvain> {
+public final class Louvain extends Algorithm<Louvain> {
 
     private final Graph rootGraph;
     private final LouvainBaseConfig config;
@@ -175,7 +175,8 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
                 seed,
                 allocationTracker,
                 progressTracker
-            ).withTerminationFlag(terminationFlag);
+            );
+        modularityOptimization.setTerminationFlag(terminationFlag);
 
         modularityOptimization.compute();
 
@@ -274,11 +275,6 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
     @Override
     public void release() {
         this.rootGraph.releaseTopology();
-    }
-
-    @Override
-    public Louvain me() {
-        return this;
     }
 
     static class OriginalIdNodeProperties implements LongNodeProperties {

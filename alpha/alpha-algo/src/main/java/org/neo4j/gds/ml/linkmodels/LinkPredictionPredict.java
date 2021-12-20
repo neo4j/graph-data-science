@@ -34,7 +34,7 @@ import java.util.HashSet;
 import java.util.function.Consumer;
 import java.util.stream.LongStream;
 
-public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, ExhaustiveLinkPredictionResult> {
+public class LinkPredictionPredict extends Algorithm<ExhaustiveLinkPredictionResult> {
 
     private final LinkLogisticRegressionPredictor predictor;
     private final Graph graph;
@@ -85,11 +85,6 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Exha
         );
         progressTracker.endSubTask();
         return new ExhaustiveLinkPredictionResult(predictQueue, -1);
-    }
-
-    @Override
-    public LinkPredictionPredict me() {
-        return this;
     }
 
     @Override

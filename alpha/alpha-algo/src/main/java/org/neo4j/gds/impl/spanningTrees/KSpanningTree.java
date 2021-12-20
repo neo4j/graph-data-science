@@ -37,7 +37,7 @@ import java.util.function.DoubleUnaryOperator;
  * After calculating the MST the algorithm cuts the tree at its k weakest
  * relationships to form k spanning trees
  */
-public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
+public class KSpanningTree extends Algorithm<SpanningTree> {
 
     private IdMapping idMapping;
     private Graph graph;
@@ -76,7 +76,8 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
             minMax,
             graph.toOriginalNodeId(startNodeId),
             progressTracker
-        ).withTerminationFlag(getTerminationFlag());
+        );
+        prim.setTerminationFlag(getTerminationFlag());
 
         IntPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR ? IntPriorityQueue.min() : IntPriorityQueue.max();
         SpanningTree spanningTree = prim.compute();
@@ -102,11 +103,6 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
         this.spanningTree = prim.getSpanningTree();
         progressTracker.endSubTask();
         return this.spanningTree;
-    }
-
-    @Override
-    public KSpanningTree me() {
-        return this;
     }
 
     @Override

@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
-public interface AlgorithmFactory<G, ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
+public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig> {
     default ALGO build(
         G graphOrGraphStore,
         CONFIG configuration,
@@ -81,7 +81,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<ALGO, ?>, CONFIG ext
 
     ALGO accept(Visitor<ALGO, CONFIG> visitor);
 
-    interface Visitor<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
+    interface Visitor<ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig> {
         ALGO graph(GraphAlgorithmFactory<ALGO, CONFIG> graphAlgorithmFactory);
         ALGO graphStore(GraphStoreAlgorithmFactory<ALGO, CONFIG> graphStoreAlgorithmFactory);
     }

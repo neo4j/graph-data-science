@@ -166,7 +166,8 @@ class LouvainTest {
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
-        ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
+        );
+        algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
@@ -206,7 +207,8 @@ class LouvainTest {
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
-        ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
+        );
+        algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
@@ -246,7 +248,8 @@ class LouvainTest {
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
-        ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
+        );
+        algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
@@ -288,7 +291,8 @@ class LouvainTest {
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
-        ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
+        );
+        algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
@@ -315,7 +319,8 @@ class LouvainTest {
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
-        ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
+        );
+        algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
@@ -406,15 +411,17 @@ class LouvainTest {
             .generate();
 
         assertTerminates((terminationFlag) ->
-            new Louvain(
-                graph,
-                defaultConfigBuilder().concurrency(2).build(),
-                Pools.DEFAULT,
-                ProgressTracker.NULL_TRACKER,
-                AllocationTracker.empty()
-            )
-                .withTerminationFlag(terminationFlag)
-                .compute(), 500, 1000
+            {
+                Louvain louvain = new Louvain(
+                    graph,
+                    defaultConfigBuilder().concurrency(2).build(),
+                    Pools.DEFAULT,
+                    ProgressTracker.NULL_TRACKER,
+                    AllocationTracker.empty()
+                );
+                louvain.setTerminationFlag(terminationFlag);
+                louvain.compute();
+            }, 500, 1000
         );
     }
 

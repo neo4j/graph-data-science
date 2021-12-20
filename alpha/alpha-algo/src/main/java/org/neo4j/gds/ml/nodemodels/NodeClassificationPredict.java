@@ -38,7 +38,7 @@ import java.util.List;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.batch.BatchTransformer.IDENTITY;
 
-public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, NodeClassificationResult> {
+public class NodeClassificationPredict extends Algorithm<NodeClassificationResult> {
 
     static MemoryEstimation memoryEstimation(boolean produceProbabilities, int batchSize, int featureCount, int classCount) {
         var builder = MemoryEstimations.builder(NodeClassificationPredict.class);
@@ -96,11 +96,6 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         batchQueue.parallelConsume(consumer, concurrency, terminationFlag);
         progressTracker.endSubTask();
         return NodeClassificationResult.of(predictedClasses, predictedProbabilities);
-    }
-
-    @Override
-    public NodeClassificationPredict me() {
-        return this;
     }
 
     @Override

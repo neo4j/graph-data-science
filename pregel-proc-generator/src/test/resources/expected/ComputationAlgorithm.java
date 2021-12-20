@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 @Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
-public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, PregelResult> {
+public final class ComputationAlgorithm extends Algorithm<PregelResult> {
     private final Pregel<PregelProcedureConfig> pregelJob;
 
     ComputationAlgorithm(Graph graph, PregelProcedureConfig configuration,
@@ -42,11 +42,6 @@ public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, 
     @Override
     public PregelResult compute() {
         return pregelJob.run();
-    }
-
-    @Override
-    public ComputationAlgorithm me() {
-        return this;
     }
 
     @Override

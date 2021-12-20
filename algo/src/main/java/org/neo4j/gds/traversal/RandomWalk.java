@@ -43,7 +43,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
+public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
     private final Graph graph;
     private final RandomWalkBaseConfig config;
@@ -137,11 +137,6 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             progressTracker,
             allocationTracker
         ).compute();
-    }
-
-    @Override
-    public RandomWalk me() {
-        return this;
     }
 
     @Override

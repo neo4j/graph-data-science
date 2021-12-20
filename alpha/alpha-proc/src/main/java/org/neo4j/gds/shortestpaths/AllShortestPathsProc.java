@@ -24,7 +24,6 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.msbfs.AllShortestPathsStream;
@@ -85,16 +84,14 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
                         graph,
                         Pools.DEFAULT,
                         configuration.concurrency()
-                    )
-                        .withTerminationFlag(TerminationFlag.wrap(transaction));
+                    );
                 } else {
                     return new MSBFSAllShortestPaths(
                         graph,
                         allocationTracker,
                         configuration.concurrency(),
                         Pools.DEFAULT
-                    )
-                        .withTerminationFlag(TerminationFlag.wrap(transaction));
+                    );
                 }
             }
         };

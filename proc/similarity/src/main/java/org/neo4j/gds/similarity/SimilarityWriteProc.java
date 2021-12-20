@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
 public abstract class SimilarityWriteProc<
-    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT extends SimilarityWriteResult,
     CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig> extends WriteRelationshipsProc<ALGO, ALGO_RESULT, PROC_RESULT, CONFIG> {

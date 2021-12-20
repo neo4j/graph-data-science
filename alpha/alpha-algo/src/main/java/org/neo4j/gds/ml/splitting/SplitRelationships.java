@@ -24,7 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
 
-public class SplitRelationships extends Algorithm<SplitRelationships, SplitResult> {
+public class SplitRelationships extends Algorithm<SplitResult> {
 
     private final Graph graph;
     private final Graph masterGraph;
@@ -43,11 +43,6 @@ public class SplitRelationships extends Algorithm<SplitRelationships, SplitResul
             ? new UndirectedEdgeSplitter(config.randomSeed(), config.negativeSamplingRatio())
             : new DirectedEdgeSplitter(config.randomSeed(), config.negativeSamplingRatio());
         return splitter.split(graph, masterGraph, config.holdoutFraction());
-    }
-
-    @Override
-    public SplitRelationships me() {
-        return this;
     }
 
     @Override

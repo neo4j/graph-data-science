@@ -52,7 +52,6 @@ class AlgorithmGenerator extends PregelGenerator {
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .superclass(ParameterizedTypeName.get(
                 ClassName.get(Algorithm.class),
-                algorithmClassName,
                 ClassName.get(PregelResult.class)
             ))
             .addOriginatingElement(pregelSpec.element());
@@ -62,7 +61,6 @@ class AlgorithmGenerator extends PregelGenerator {
         typeSpecBuilder.addField(pregelJobField());
         typeSpecBuilder.addMethod(constructor());
         typeSpecBuilder.addMethod(computeMethod());
-        typeSpecBuilder.addMethod(meMethod(algorithmClassName));
         typeSpecBuilder.addMethod(releaseMethod());
 
         return typeSpecBuilder.build();
@@ -126,15 +124,6 @@ class AlgorithmGenerator extends PregelGenerator {
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .addStatement("pregelJob.release()")
-            .build();
-    }
-
-    private MethodSpec meMethod(ClassName algorithmClassName) {
-        return MethodSpec.methodBuilder("me")
-            .addAnnotation(Override.class)
-            .addModifiers(Modifier.PUBLIC)
-            .returns(algorithmClassName)
-            .addStatement("return this")
             .build();
     }
 }

@@ -79,15 +79,15 @@ class NodeSimilarityTerminationTest extends AlgoTestBase {
      */
     static void assertAlgorithmTermination(
         GraphDatabaseAPI db,
-        Algorithm<?, ?> algorithm,
-        Consumer<Algorithm<?, ?>> algoConsumer,
+        Algorithm<?> algorithm,
+        Consumer<Algorithm<?>> algoConsumer,
         long sleepMillis
     ) {
         assert sleepMillis >= 100 && sleepMillis <= 10_000;
 
         var timeoutTx = db.beginTx(10, TimeUnit.SECONDS);
         KernelTransaction kernelTx = ((InternalTransaction) timeoutTx).kernelTransaction();
-        algorithm.withTerminationFlag(new TestTerminationFlag(kernelTx, sleepMillis));
+        algorithm.setTerminationFlag(new TestTerminationFlag(kernelTx, sleepMillis));
 
         Runnable algorithmThread = () -> {
             try {

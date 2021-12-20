@@ -61,7 +61,7 @@ import static org.neo4j.gds.mem.BitUtil.ceilDiv;
  * and contain more colors as needed.
  * </p>
  */
-public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
+public class K1Coloring extends Algorithm<HugeLongArray> {
 
     private final Graph graph;
     private final long nodeCount;
@@ -103,11 +103,6 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
         if (maxIterations <= 0L) {
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
-    }
-
-    @Override
-    public K1Coloring me() {
-        return this;
     }
 
     @Override

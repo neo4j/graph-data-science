@@ -190,10 +190,6 @@ class PipelineExecutorTest {
             return "I am not failing";
         }
 
-        @Override
-        public SucceedingPipelineExecutor me() {
-            return this;
-        }
     }
 
     private class FailingPipelineExecutor extends SucceedingPipelineExecutor {

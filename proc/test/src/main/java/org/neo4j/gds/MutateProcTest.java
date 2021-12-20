@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
+public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
     extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
     default Optional<String> mutateGraphName() {

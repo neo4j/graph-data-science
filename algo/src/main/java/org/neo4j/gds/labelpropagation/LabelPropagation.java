@@ -41,7 +41,7 @@ import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 
-public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagation> {
+public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     private final long nodeCount;
     private final AllocationTracker allocationTracker;
@@ -94,11 +94,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
     }
 
     @Override
-    public LabelPropagation me() {
-        return this;
-    }
-
-    @Override
     public void release() {
         graph = null;
     }
@@ -148,7 +143,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         stepRunners.forEach(StepRunner::release);
         progressTracker.endSubTask();
 
-        return me();
+        return this;
     }
 
     private List<StepRunner> stepRunners() {

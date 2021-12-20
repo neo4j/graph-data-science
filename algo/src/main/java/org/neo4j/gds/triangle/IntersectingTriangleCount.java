@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.LongAdder;
  * http://www.math.cmu.edu/~ctsourak/tsourICDM08.pdf
  */
 @SuppressWarnings("FieldCanBeLocal")
-public final class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult> {
+public final class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount.TriangleCountResult> {
 
     static final int EXCLUDED_NODE_TRIANGLE_COUNT = -1;
 
@@ -111,11 +111,6 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         this.triangleCounts = HugeAtomicLongArray.newArray(graph.nodeCount(), allocationTracker);
         this.globalTriangleCounter = new LongAdder();
         this.queue = new AtomicLong();
-    }
-
-    @Override
-    public final IntersectingTriangleCount me() {
-        return this;
     }
 
     @Override

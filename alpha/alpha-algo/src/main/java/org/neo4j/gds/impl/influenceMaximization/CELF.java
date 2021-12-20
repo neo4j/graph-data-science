@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class CELF extends Algorithm<CELF, CELF> {
+public class CELF extends Algorithm<CELF> {
 
     private final long seedSetCount;
     private final double propagationProbability;
@@ -147,11 +147,6 @@ public class CELF extends Algorithm<CELF, CELF> {
             seedSetNodes.put(highestNode, highestScore + gain);
             gain += highestScore;
         }
-    }
-
-    @Override
-    public CELF me() {
-        return this;
     }
 
     @Override

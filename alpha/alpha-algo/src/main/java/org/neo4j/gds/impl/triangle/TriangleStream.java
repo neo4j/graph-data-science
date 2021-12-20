@@ -48,7 +48,7 @@ import java.util.stream.StreamSupport;
  * emitting the nodeId and the number of triangles the node is part of,
  * this impl. streams the actual nodeIds of each triangle once.
  */
-public final class TriangleStream extends Algorithm<TriangleStream, Stream<TriangleStream.Result>> {
+public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result>> {
 
     private final Graph graph;
     private final RelationshipIntersectFactory intersectFactory;
@@ -89,11 +89,6 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
         this.resultQueue = new ArrayBlockingQueue<>(concurrency << 10);
         this.runningThreads = new AtomicInteger();
         this.queue = new AtomicInteger();
-    }
-
-    @Override
-    public TriangleStream me() {
-        return this;
     }
 
     /**

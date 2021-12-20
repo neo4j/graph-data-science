@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class Knn extends Algorithm<Knn, Knn.Result> {
+public class Knn extends Algorithm<Knn.Result> {
 
     private final Graph graph;
     private final KnnBaseConfig config;
@@ -130,11 +130,6 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             this.progressTracker.endSubTask();
             return ImmutableResult.of(neighbors, iteration, didConverge, this.nodePairsConsidered);
         }
-    }
-
-    @Override
-    public Knn me() {
-        return this;
     }
 
     @Override

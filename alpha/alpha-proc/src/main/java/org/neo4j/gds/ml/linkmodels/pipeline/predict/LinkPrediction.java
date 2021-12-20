@@ -27,7 +27,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 
-public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResult> {
+public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
 
     private final LinkLogisticRegressionData modelData;
     private final LinkFeatureExtractor linkFeatureExtractor;
@@ -81,11 +81,6 @@ public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredi
         Graph graph,
         LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     );
-
-    @Override
-    public LinkPrediction me() {
-        return this;
-    }
 
     @Override
     public void release() {
