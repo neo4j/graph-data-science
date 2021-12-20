@@ -21,7 +21,10 @@ package org.neo4j.gds.pipeline;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
@@ -32,7 +35,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class GdsCallableFinder {
+@SuppressWarnings("unchecked")
+public final class GdsCallableFinder {
     private static final List<String> PACKAGES_TO_SCAN = List.of(
         "org.neo4j.gds"
     );
@@ -43,7 +47,10 @@ public class GdsCallableFinder {
     );
 
     public static Stream<GdsCallableDefinition> findAll() {
-        return allGdsCallables().sorted(Comparator.comparing(GdsCallableDefinition::name, String.CASE_INSENSITIVE_ORDER));
+        return allGdsCallables().sorted(Comparator.comparing(
+            GdsCallableDefinition::name,
+            String.CASE_INSENSITIVE_ORDER
+        ));
     }
 
     public static Optional<GdsCallableDefinition> findAByName(String name) {
@@ -58,26 +65,28 @@ public class GdsCallableFinder {
         return PACKAGES_TO_SCAN.stream()
             .map(pkg -> new Reflections(pkg, Scanners.TypesAnnotated))
             .flatMap(reflections -> reflections.getTypesAnnotatedWith(GdsCallable.class).stream())
-            .filter(clazz -> PACKAGES_BLACKLIST.stream().noneMatch(blacklist -> clazz.getPackageName().startsWith(blacklist)))
-            .peek(clazz -> { assert AlgorithmSpec.class.isAssignableFrom(clazz); })
+            .filter(clazz -> PACKAGES_BLACKLIST
+                .stream()
+                .noneMatch(blacklist -> clazz.getPackageName().startsWith(blacklist)))
+            .peek(clazz -> {assert AlgorithmSpec.class.isAssignableFrom(clazz);})
             .map(clazz -> {
                 GdsCallable gdsCallable = clazz.getAnnotation(GdsCallable.class);
-                    return ImmutableGdsCallableDefinition
-                        .builder()
-                        .name(gdsCallable.name())
-                        .description(gdsCallable.description())
-                        .executionMode(gdsCallable.executionMode())
-                        .algorithmSpecClass((Class<AlgorithmSpec<?, ?, ?, ?, ?>>) clazz)
-                        .build();
+                return ImmutableGdsCallableDefinition
+                    .builder()
+                    .name(gdsCallable.name())
+                    .description(gdsCallable.description())
+                    .executionMode(gdsCallable.executionMode())
+                    .algorithmSpecClass((Class<AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>>>) clazz)
+                    .build();
             });
     }
 
     @ValueClass
     public interface GdsCallableDefinition {
-        Class<AlgorithmSpec<?, ?, ?, ?, ?>> algorithmSpecClass();
+        Class<AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>>> algorithmSpecClass();
 
         @Value.Lazy
-        default AlgorithmSpec<?, ?, ?, ?, ?> algorithmSpec() {
+        default AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>> algorithmSpec() {
             try {
                 return algorithmSpecClass().getConstructor().newInstance();
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -91,4 +100,6 @@ public class GdsCallableFinder {
 
         ExecutionMode executionMode();
     }
+
+    private GdsCallableFinder() {}
 }
