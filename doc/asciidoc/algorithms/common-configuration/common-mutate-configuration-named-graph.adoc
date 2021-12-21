@@ -16,12 +16,12 @@ ifeval::["{entity}" == "node"]
 endif::[]
 
 ifeval::["{entity}" == "relationship"]
-| mutateRelationshipType                                        | String      | n/a                    | no       | The relationship type used for the new relationships written to the in-memory graph.
+| mutateRelationshipType                                        | String      | n/a                    | no       | The relationship type used for the new relationships written to the projected graph.
 | mutateProperty                                                | String      | n/a                    | no       | The {entity} property in the GDS graph to which the {result} is written.
 endif::[]
 
 ifeval::["{entity}" == "source-target-pair"]
-| mutateRelationshipType                                        | String      | n/a                    | no       | The relationship type used for the new relationships written to the in-memory graph.
+| mutateRelationshipType                                        | String      | n/a                    | no       | The relationship type used for the new relationships written to the projected graph.
 endif::[]
 
 ifeval::["{entity}" == "pregel"]

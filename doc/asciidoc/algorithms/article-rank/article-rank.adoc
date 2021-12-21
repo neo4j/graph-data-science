@@ -169,8 +169,8 @@ include::specific-configuration.adoc[]
 | preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
-| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
-| nodePropertiesWritten  | Integer   | The number of properties that were written to the in-memory graph.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
+| nodePropertiesWritten  | Integer   | The number of properties that were written to the projected graph.
 | centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
 | configuration          | Map       | The configuration used for running the algorithm.
 |===

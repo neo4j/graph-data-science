@@ -229,7 +229,7 @@ include::knn-specific-algo-config.adoc[]
 | Name                   | Type    | Description
 | preProcessingMillis    | Integer | Milliseconds for preprocessing the data.
 | computeMillis          | Integer | Milliseconds for running the algorithm.
-| mutateMillis           | Integer | Milliseconds for adding properties to the in-memory graph.
+| mutateMillis           | Integer | Milliseconds for adding properties to the projected graph.
 | postProcessingMillis   | Integer | Milliseconds for computing similarity value distribution statistics.
 | nodesCompared          | Integer | The number of nodes compared.
 | relationshipsWritten   | Integer | The number of relationships created.

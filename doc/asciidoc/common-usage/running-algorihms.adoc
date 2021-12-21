@@ -40,9 +40,9 @@ This mode forms the basis of the `mutate` and `write` execution modes but does n
 [[running-algos-mutate]]
 == Mutate
 
-The `mutate` mode will write the results of the algorithm computation back to the in-memory graph.
-Note that the specified `mutateProperty` value must not exist in the in-memory graph beforehand.
-This enables running multiple algorithms on the same in-memory graph without writing results to Neo4j in-between algorithm executions.
+The `mutate` mode will write the results of the algorithm computation back to the projected graph.
+Note that the specified `mutateProperty` value must not exist in the projected graph beforehand.
+This enables running multiple algorithms on the same projected graph without writing results to Neo4j in-between algorithm executions.
 
 This execution mode is especially useful in three scenarios:
 

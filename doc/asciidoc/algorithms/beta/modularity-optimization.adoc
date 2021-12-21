@@ -105,7 +105,7 @@ Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 | Name                  | Type      | Description
 | preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
-| mutateMillis          | Integer   | Milliseconds for adding properties to the in-memory graph.
+| mutateMillis          | Integer   | Milliseconds for adding properties to the projected graph.
 | postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
 | nodes                 | Integer   | The number of nodes considered.
 | didConverge           | Boolean   | True if the algorithm did converge to a stable modularity score within the provided number of maximum iterations.

@@ -191,7 +191,7 @@ RETURN relationshipsWritten
 |===
 --
 
-After executing the above query, the in-memory graph will be updated with a new relationship of type `PATH`.
+After executing the above query, the projected graph will be updated with a new relationship of type `PATH`.
 The new relationship will store a single property `totalCost`.
 
 [NOTE]

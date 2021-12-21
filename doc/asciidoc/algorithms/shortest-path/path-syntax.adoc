@@ -64,7 +64,7 @@ endif::[]
 [.include-with-mutate]
 ======
 
-The mutate mode creates new relationships in the in-memory graph.
+The mutate mode creates new relationships in the projected graph.
 Each relationship represents a path from the source node to the target node.
 The total cost of a path is stored via the `totalCost` relationship property.
 
@@ -112,7 +112,7 @@ endif::[]
 | preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer   | Unused.
-| mutateMillis           | Integer   | Milliseconds for adding relationships to the in-memory graph.
+| mutateMillis           | Integer   | Milliseconds for adding relationships to the projected graph.
 | relationshipsWritten   | Integer   | The number of relationships that were added.
 | configuration          | Map       | The configuration used for running the algorithm.
 |===

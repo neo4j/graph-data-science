@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class GraphRemoveNodePropertiesProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.removeNodeProperties", mode = READ)
-    @Description("Removes node properties from an in-memory graph.")
+    @Description("Removes node properties from a projected graph.")
     public Stream<Result> run(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,

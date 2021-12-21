@@ -63,7 +63,7 @@ include::specific-configuration.adoc[]
 | Name                  | Type      | Description
 | preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
-| mutateMillis          | Integer   | Milliseconds for adding properties to the in-memory graph.
+| mutateMillis          | Integer   | Milliseconds for adding properties to the projected graph.
 | relationshipsWritten  | Integer   | The number of relationships created by the algorithm.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===

@@ -141,11 +141,11 @@ include::specific-configuration.adoc[]
 | Name                          | Type    | Description
 | averageClusteringCoefficient  | Double  | The average clustering coefficient.
 | nodeCount                     | Integer | Number of nodes in the graph.
-| nodePropertiesWritten         | Integer | Number of properties added to the in-memory graph.
+| nodePropertiesWritten         | Integer | Number of properties added to the projected graph.
 | preProcessingMillis           | Integer | Milliseconds for preprocessing the graph.
 | computeMillis                 | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis          | Integer | Milliseconds for computing the global metrics.
-| mutateMillis                  | Integer | Milliseconds for adding properties to the in-memory graph.
+| mutateMillis                  | Integer | Milliseconds for adding properties to the projected graph.
 | configuration                 | Map     | The configuration used for running the algorithm.
 |===
 ======

@@ -51,11 +51,11 @@ import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.ml.splitRelationships.mutate", description = "Splits a graph into holdout and remaining relationship types and adds them to the in-memory graph.", executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.alpha.ml.splitRelationships.mutate", description = "Splits a graph into holdout and remaining relationship types and adds them to the graph.", executionMode = MUTATE_RELATIONSHIP)
 public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships, SplitResult, SplitRelationshipsMutateProc.MutateResult, SplitRelationshipsMutateConfig> {
 
     @Procedure(name = "gds.alpha.ml.splitRelationships.mutate", mode = READ)
-    @Description("Splits a graph into holdout and remaining relationship types and adds them to the in-memory graph.")
+    @Description("Splits a graph into holdout and remaining relationship types and adds them to the graph.")
     public Stream<SplitRelationshipsMutateProc.MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

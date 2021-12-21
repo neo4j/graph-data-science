@@ -3,7 +3,7 @@
 |===
 | Name                                                                             | Type            | Default         | Optional  | Description
 | propertyRatio                                                                    | Float           | 0.0             | yes       | The desired ratio of the property embedding dimension to the total `embeddingDimension`. A positive value requires `featureProperties` to be non-empty.
-| featureProperties                                                                | List of String  | []              | yes       | The names of the node properties that should be used as input features. All property names must exist in the in-memory graph and be of type Float or List of Float.
+| featureProperties                                                                | List of String  | []              | yes       | The names of the node properties that should be used as input features. All property names must exist in the projected graph and be of type Float or List of Float.
 | embeddingDimension                                                               | Integer         | n/a             | no        | The dimension of the computed node embeddings. Minimum value is 1.
 | iterationWeights                                                                 | List of Float   | [0.0, 1.0, 1.0] | yes       | Contains a weight for each iteration. The weight controls how much the intermediate embedding from the iteration contributes to the final embedding.
 | nodeSelfInfluence                                                                | Float           | 0.0             | yes       | Controls for each node how much its initial random vector contributes to its final embedding.

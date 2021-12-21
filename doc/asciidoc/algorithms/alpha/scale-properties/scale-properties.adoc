@@ -154,7 +154,7 @@ include::specific-configuration.adoc[]
 | Name                  | Type      | Description
 | preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
-| mutateMillis          | Integer   | Milliseconds for adding properties to the in-memory graph.
+| mutateMillis          | Integer   | Milliseconds for adding properties to the projected graph.
 | postProcessingMillis  | Integer   | Unused.
 | nodePropertiesWritten | Integer   | Number of node properties written.
 | configuration         | Map       | Configuration used for running the algorithm.

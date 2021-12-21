@@ -18,7 +18,7 @@ It splits the relationships into a holdout set and a remaining set.
 The holdout set is divided into two classes: positive, i.e., existing relationships, and negative, i.e., non-existing relationships.
 The class is indicated by a `label` property on the relationships.
 This enables the holdout set to be used for training or testing a machine learning model.
-Both, the holdout and the remaining relationships are added to the in-memory graph.
+Both, the holdout and the remaining relationships are added to the projected graph.
 
 If the configuration option `relationshipWeightProperty` is specified, then the corresponding relationship property is preserved on the remaining set of relationships.
 Note however that the holdout set only has the `label` property; it is not possible to induce relationship weights on the holdout set as it also contains negative samples.
@@ -74,7 +74,7 @@ include::../../common-configuration/common-mutate-configuration-named-graph.adoc
 | Name                  | Type      | Description
 | preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
-| mutateMillis          | Integer   | Milliseconds for adding properties to the in-memory graph.
+| mutateMillis          | Integer   | Milliseconds for adding properties to the projected graph.
 | relationshipsWritten  | Integer   | The number of relationships created by the algorithm.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===

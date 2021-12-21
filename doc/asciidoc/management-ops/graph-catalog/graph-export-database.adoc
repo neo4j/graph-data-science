@@ -18,7 +18,7 @@ The feature is useful in the following, exemplary scenarios:
 
 [.graph-export-syntax]
 --
-.Export an in-memory graph to a new database in the Neo4j databases directory:
+.Export a projected graph to a new database in the Neo4j databases directory:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.export(graphName: String, configuration: Map)

@@ -148,7 +148,7 @@ include::specific-configuration.adoc[]
 | nodePropertiesWritten | Integer              | The number of node properties written.
 | preProcessingMillis   | Integer              | Milliseconds for preprocessing data.
 | computeMillis         | Integer              | Milliseconds for running the algorithm.
-| mutateMillis          | Integer              | Milliseconds for writing result data back to the in-memory graph.
+| mutateMillis          | Integer              | Milliseconds for writing result data back to the projected graph.
 | configuration         | Map                  | The configuration used for running the algorithm.
 |===
 ======
@@ -250,7 +250,7 @@ NOTE: The algorithm is defined for UNDIRECTED graphs.
 Before we are able to generate node embeddings we need to train a model and store it in the model catalog.
 Below is an example of how to do that.
 
-NOTE: The names specified in the `featureProperties` configuration parameter must exist in the in-memory graph.
+NOTE: The names specified in the `featureProperties` configuration parameter must exist in the projected graph.
 
 [source, cypher, role=noplay query-example, no-result=true]
 ----

@@ -73,7 +73,7 @@ The element is uniquely identified by a key, which is used to access the value d
 The `init` method is called in the beginning of the first superstep of the Pregel computation and allows initializing node values.
 The interface defines an abstract `compute` method, which is called for each node in every superstep.
 Algorithm-specific logic is expressed within the `compute` method.
-The context parameter provides access to node properties of the in-memory graph and the algorithm configuration.
+The context parameter provides access to node properties of the projected graph and the algorithm configuration.
 
 The `compute` method is called individually for each node in every superstep as long as the node receives messages or has not voted to halt yet.
 Since an implementation of `PregelComputation` is stateless, a node can only communicate with other nodes via messages.

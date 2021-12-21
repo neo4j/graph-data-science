@@ -177,7 +177,7 @@ include::specific-configuration.adoc[]
 | relationshipsWritten   | Integer | The number of relationships created.
 | preProcessingMillis    | Integer | Milliseconds for preprocessing the data.
 | computeMillis          | Integer | Milliseconds for running the algorithm.
-| mutateMillis           | Integer | Milliseconds for adding properties to the in-memory graph.
+| mutateMillis           | Integer | Milliseconds for adding properties to the projected graph.
 | postProcessingMillis   | Integer | Milliseconds for computing percentiles.
 | similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
 | configuration          | Map     | The configuration used for running the algorithm.

@@ -11,7 +11,7 @@ In the development phase the goal is to establish a workflow of useful algorithm
 In order to do this, the system must be configured, graph projections must be defined, and algorithms must be selected.
 It is typical to make use of the memory estimation features of the library.
 This enables you to successfully configure your system to handle the amount of data to be processed.
-There are two kinds of resources to keep in mind: the in-memory graph and the algorithm data structures.
+There are two kinds of resources to keep in mind: the projected graph and the algorithm data structures.
 
 In the production phase, the system would be configured appropriately to successfully run the desired algorithms.
 The sequence of operations would normally be to project a graph, run one or more algorithms on it, and consume results.

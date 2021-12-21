@@ -3,8 +3,8 @@
 
 = Export a named graph to CSV
 
-We can export named in-memory graphs stored in the graph catalog to a set of CSV files.
-All nodes, relationships and properties present in an in-memory graph are exported.
+We can export projected graphs stored in the graph catalog to a set of CSV files.
+All nodes, relationships and properties present in a projected graph are exported.
 This includes data that has been projected with `gds.graph.project` and data that has been added by running algorithms in `mutate` mode.
 The location of the exported CSV files can be configured via the configuration parameter `gds.export.location` in the `neo4j.conf`.
 All files will be stored in a subfolder using the specified export name.
@@ -49,7 +49,7 @@ YIELD
 | exportName               | String              | none      | No       | The name of the directory where the graph is exported to. The absolute path of the exported CSV files depends on the configuration parameter `gds.export.location` in the `neo4j.conf`.
 | writeConcurrency         | Boolean             | 4         | yes      | The number of concurrent threads used for writing the database.
 | defaultRelationshipType  | String              | +__ALL__+ | yes      | Relationship type used for `*` relationship projections.
-| additionalNodeProperties | String, List or Map | {}        | yes      | Allows for exporting additional node properties from the original graph backing the in-memory graph.
+| additionalNodeProperties | String, List or Map | {}        | yes      | Allows for exporting additional node properties from the original graph backing the projected graph.
 |===
 
 

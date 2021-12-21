@@ -134,7 +134,7 @@ include::specific-configuration.adoc[]
 | didConverge            | Boolean   | Indicates if the algorithm converged.
 | preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
-| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
 | nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
