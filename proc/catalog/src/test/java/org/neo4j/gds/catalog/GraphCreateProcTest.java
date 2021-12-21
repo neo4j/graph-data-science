@@ -195,7 +195,7 @@ class GraphCreateProcTest extends BaseProcTest {
             var taskStore = new GlobalTaskStore();
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
 
-            proc.create("myGraph", "*", "*", Map.of());
+            proc.projectSubgraph("myGraph", "*", "*", Map.of());
 
             Assertions.assertThat(taskStore.taskStream().map(Task::description)).contains("Loading");
         });

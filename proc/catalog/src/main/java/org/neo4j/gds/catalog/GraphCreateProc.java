@@ -69,7 +69,7 @@ public class GraphCreateProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.project", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphCreateNativeResult> create(
+    public Stream<GraphCreateNativeResult> project(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProjection") @Nullable Object nodeProjection,
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
@@ -98,9 +98,20 @@ public class GraphCreateProc extends CatalogProc {
         return Stream.of(result);
     }
 
+    @Procedure(name = "gds.graph.create", mode = READ, deprecatedBy = "gds.graph.project")
+    @Description(DESCRIPTION)
+    public Stream<GraphCreateNativeResult> projectSubgraph(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeProjection") @Nullable Object nodeProjection,
+        @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return project(graphName, nodeProjection, relationshipProjection, configuration);
+    }
+
     @Procedure(name = "gds.graph.project.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> createEstimate(
+    public Stream<MemoryEstimateResult> projectEstimate(
         @Name(value = "nodeProjection") @Nullable Object nodeProjection,
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -119,9 +130,19 @@ public class GraphCreateProc extends CatalogProc {
         return estimateGraph(config);
     }
 
+    @Procedure(name = "gds.graph.create.estimate", mode = READ, deprecatedBy = "gds.graph.project.estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> createEstimate(
+        @Name(value = "nodeProjection") @Nullable Object nodeProjection,
+        @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return projectEstimate(nodeProjection, relationshipProjection, configuration);
+    }
+
     @Procedure(name = "gds.graph.project.cypher", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphCreateCypherResult> createCypher(
+    public Stream<GraphCreateCypherResult> projectCypher(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeQuery") String nodeQuery,
         @Name(value = "relationshipQuery") String relationshipQuery,
@@ -150,9 +171,20 @@ public class GraphCreateProc extends CatalogProc {
         return Stream.of(result);
     }
 
+    @Procedure(name = "gds.graph.create.cypher", mode = READ, deprecatedBy = "gds.graph.project.cypher")
+    @Description(DESCRIPTION)
+    public Stream<GraphCreateCypherResult> createCypher(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeQuery") String nodeQuery,
+        @Name(value = "relationshipQuery") String relationshipQuery,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return projectCypher(graphName, nodeQuery, relationshipQuery, configuration);
+    }
+
     @Procedure(name = "gds.graph.project.cypher.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> createCypherEstimate(
+    public Stream<MemoryEstimateResult> projectCypherEstimate(
         @Name(value = "nodeQuery") String nodeQuery,
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -172,9 +204,19 @@ public class GraphCreateProc extends CatalogProc {
         return estimateGraph(config);
     }
 
+    @Procedure(name = "gds.graph.create.cypher.estimate", mode = READ, deprecatedBy = "gds.graph.project.cypher.estimate")
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> createCypherEstimate(
+        @Name(value = "nodeQuery") String nodeQuery,
+        @Name(value = "relationshipQuery") String relationshipQuery,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return projectCypherEstimate(nodeQuery, relationshipQuery, configuration);
+    }
+
     @Procedure(name = "gds.beta.graph.project.subgraph", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphCreateSubgraphResult> create(
+    public Stream<GraphCreateSubgraphResult> projectSubgraph(
         @Name(value = "graphName") String graphName,
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "nodeFilter") String nodeFilter,
@@ -206,6 +248,18 @@ public class GraphCreateProc extends CatalogProc {
         );
 
         return Stream.of(result);
+    }
+
+    @Procedure(name = "gds.beta.graph.create.subgraph", mode = READ, deprecatedBy = "gds.beta.graph.project.subgraph")
+    @Description(DESCRIPTION)
+    public Stream<GraphCreateSubgraphResult> createSubgraph(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "fromGraphName") String fromGraphName,
+        @Name(value = "nodeFilter") String nodeFilter,
+        @Name(value = "relationshipFilter") String relationshipFilter,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return projectSubgraph(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
     }
 
     private GraphCreateSubgraphResult createGraphFromGraphStore(
