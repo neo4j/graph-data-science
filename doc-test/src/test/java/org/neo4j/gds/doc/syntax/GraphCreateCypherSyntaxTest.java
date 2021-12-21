@@ -32,6 +32,6 @@ class GraphCreateCypherSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "management-ops/graph-catalog/graph-create-cypher.adoc";
+        return "management-ops/graph-catalog/graph-project-cypher.adoc";
     }
 }

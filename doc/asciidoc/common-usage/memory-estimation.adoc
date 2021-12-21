@@ -50,14 +50,14 @@ CALL gds[.<tier>].<algorithm>.<execution-mode>.estimate(
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type          | Default   | Optional  | Description
-| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or a <<estimate-procedure-graph-create-config, configuration to project a graph>>.
+| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or a <<estimate-procedure-graph-project-config, configuration to project a graph>>.
 | configuration     | Map           | -         | no        | The configuration of the algorithm.
 |===
 
 The configuration map accepts the same configuration parameters as the estimated algorithm.
 See the specific algorithm documentation for more information.
 
-In contrast to procedures that execute algorithms, for memory estimation it is possible to define a <<estimate-procedure-graph-create-config, graph projection config>>.
+In contrast to procedures that execute algorithms, for memory estimation it is possible to define a <<estimate-procedure-graph-project-config, graph projection config>>.
 With this it is possible to measure the memory consumption of projecting a graph and executing the algorithm at the same time.
 
 .Results
@@ -76,7 +76,7 @@ With this it is possible to measure the memory consumption of projecting a graph
 |===
 
 
-[[estimate-procedure-graph-create-config]]
+[[estimate-procedure-graph-project-config]]
 === Graph creation configuration
 
 .Parameters

@@ -29,13 +29,13 @@ The projected graphs will reside in the catalog until:
 --
 
 
-[[graph-create-native-syntax]]
+[[graph-project-native-syntax]]
 == Syntax
 
 A native projection takes three mandatory arguments: `graphName`, `nodeProjection` and `relationshipProjection`.
 In addition, the optional `configuration` parameter allows us to further configure the graph creation.
 
-[.graph-create-syntax]
+[.graph-project-syntax]
 --
 [source, cypher, role=noplay]
 ----
@@ -213,13 +213,13 @@ NOTE: To get information about a stored graph, such as its schema, one can use <
 |===
 
 
-[[graph-create-examples]]
+[[graph-project-examples]]
 == Examples
 
 In order to demonstrate the GDS Graph Projection capabilities we are going to create a small social network graph in Neo4j.
 The example graph looks like this:
 
-image::example-graphs/graph-create-example.svg[Visualization of the example graph,align="center"]
+image::example-graphs/graph-project-example.svg[Visualization of the example graph,align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
@@ -239,7 +239,7 @@ CREATE
   (veselin)-[:READ]->(frankenstein)
 ----
 
-[[graph-create-example-single-label-type]]
+[[graph-project-example-single-label-type]]
 === Simple graph
 
 A simple graph is a graph with only one node label and relationship type, i.e., a monopartite graph.
@@ -347,7 +347,7 @@ YIELD
 
 To specify the orientation, we need to write the `relationshipProjection` with the extended Map-syntax.
 Projecting the `KNOWS` relationships `UNDIRECTED`, loads each relationship in both directions.
-Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in <<graph-create-example-single-label-type>>.
+Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in <<graph-project-example-single-label-type>>.
 
 
 [[node-properties-example]]
@@ -629,10 +629,10 @@ We can see, that the two READ relationships between Florentin and the Hobbit sum
 
 === Validate relationships flag
 
-As mentioned in the <<graph-create-native-syntax, syntax section>>, the `validateRelationships` flag controls whether an error will be raised when attempting to project a relationship where either the source or target node is not present in the <<node-projection-syntax, node projection>>.
+As mentioned in the <<graph-project-native-syntax, syntax section>>, the `validateRelationships` flag controls whether an error will be raised when attempting to project a relationship where either the source or target node is not present in the <<node-projection-syntax, node projection>>.
 Note that even if the flag is set to `false` such a relationship will still not be projected but the loading process will not be aborted.
 
-We can simulate such a case with the <<graph-create-examples, graph present in the Neo4j database>>:
+We can simulate such a case with the <<graph-project-examples, graph present in the Neo4j database>>:
 
 --
 .Project `READ` and `KNOWS` relationships but only `Person` nodes, with `validateRelationships` set to true:

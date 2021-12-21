@@ -39,6 +39,6 @@ class GraphCreateCypherDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "management-ops/graph-catalog/graph-create-cypher.adoc";
+        return "management-ops/graph-catalog/graph-project-cypher.adoc";
     }
 }

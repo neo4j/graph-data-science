@@ -58,9 +58,9 @@
 
         <d:tocentry linkend="management-ops"><?dbhtml filename="management-ops/index.html"?>
             <d:tocentry linkend="graph-catalog-ops"><?dbhtml filename="management-ops/graph-catalog-ops/index.html"?>
-                <d:tocentry linkend="catalog-graph-project"><?dbhtml filename="graph-create/index.html"?>
+                <d:tocentry linkend="catalog-graph-project"><?dbhtml filename="graph-project/index.html"?>
                 </d:tocentry>
-                <d:tocentry linkend="catalog-graph-project-cypher"><?dbhtml filename="graph-create-cypher/index.html"?>
+                <d:tocentry linkend="catalog-graph-project-cypher"><?dbhtml filename="graph-project-cypher/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="catalog-graph-list"><?dbhtml filename="graph-list/index.html"?>
                 </d:tocentry>

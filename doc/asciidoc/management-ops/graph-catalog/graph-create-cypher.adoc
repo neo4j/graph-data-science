@@ -29,13 +29,13 @@ The projected graph will reside in the catalog until:
 --
 
 
-[[graph-create-cypher-syntax]]
+[[graph-project-cypher-syntax]]
 == Syntax
 
 A Cypher projection takes three mandatory arguments: `graphName`, `nodeQuery` and `relationshipQuery`.
 In addition, the optional `configuration` parameter allows us to further configure graph creation.
 
-[.graph-create-cypher-syntax]
+[.graph-project-cypher-syntax]
 --
 [source, cypher, role=noplay]
 ----
@@ -88,13 +88,13 @@ CALL gds.graph.project.cypher(
 NOTE: To get information about a stored graph, such as its schema, one can use <<catalog-graph-list, gds.graph.list>>.
 
 
-[[graph-create-examples]]
+[[graph-project-examples]]
 == Examples
 
 In order to demonstrate the GDS Graph Project capabilities we are going to create a small social network graph in Neo4j.
 The example graph looks like this:
 
-image::example-graphs/graph-create-example.svg[Visualization of the example graph,align="center"]
+image::example-graphs/graph-project-example.svg[Visualization of the example graph,align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
@@ -115,7 +115,7 @@ CREATE
 ----
 
 
-[[graph-create-example-single-label-type]]
+[[graph-project-example-single-label-type]]
 === Simple graph
 
 A simple graph is a graph with only one node label and relationship type, i.e., a monopartite graph.
