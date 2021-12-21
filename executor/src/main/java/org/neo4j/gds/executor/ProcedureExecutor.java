@@ -41,16 +41,16 @@ public class ProcedureExecutor<
 > {
 
     private final AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ?> algoSpec;
-    private final PipelineSpec<ALGO, ALGO_RESULT, CONFIG> pipelineSpec;
+    private final ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec;
     private final ExecutionContext executionContext;
 
     public ProcedureExecutor(
         AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ?> algoSpec,
-        PipelineSpec<ALGO, ALGO_RESULT, CONFIG> pipelineSpec,
+        ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec,
         ExecutionContext executionContext
     ) {
         this.algoSpec = algoSpec;
-        this.pipelineSpec = pipelineSpec;
+        this.executorSpec = executorSpec;
 
         this.executionContext = executionContext;
     }
@@ -63,11 +63,11 @@ public class ProcedureExecutor<
     ) {
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
 
-        CONFIG config = pipelineSpec.configParser(algoSpec.newConfigFunction(), executionContext).processInput(configuration);
+        CONFIG config = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext).processInput(configuration);
 
         setAlgorithmMetaDataToTransaction(config);
 
-        var graphCreation = pipelineSpec.graphCreationFactory(executionContext).create(config, graphName);
+        var graphCreation = executorSpec.graphCreationFactory(executionContext).create(config, graphName);
 
         var memoryEstimationInBytes = graphCreation.validateMemoryEstimation(algoSpec.algorithmFactory());
 
@@ -76,7 +76,7 @@ public class ProcedureExecutor<
 
         try (ProgressTimer timer = ProgressTimer.start(builder::preProcessingMillis)) {
             var graphCreateConfig = graphCreation.graphCreateConfig();
-            var validator = pipelineSpec.validator(algoSpec.validationConfig());
+            var validator = executorSpec.validator(algoSpec.validationConfig());
             validator.validateConfigsBeforeLoad(graphCreateConfig, config);
             graphStore = graphCreation.graphStore();
             validator.validateConfigWithGraphStore(graphStore, graphCreateConfig, config);

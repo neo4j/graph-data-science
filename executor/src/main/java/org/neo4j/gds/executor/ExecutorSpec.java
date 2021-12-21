@@ -24,7 +24,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.executor.validation.Validator;
 
-public interface PipelineSpec<
+public interface ExecutorSpec<
     ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig

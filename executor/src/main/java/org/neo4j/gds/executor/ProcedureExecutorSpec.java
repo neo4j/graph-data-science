@@ -24,13 +24,13 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.executor.validation.Validator;
 
-public class ProcedurePipelineSpec<
+public class ProcedureExecutorSpec<
     ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig
-> implements PipelineSpec<ALGO, ALGO_RESULT, CONFIG> {
+> implements ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> {
 
-    public ProcedurePipelineSpec() { }
+    public ProcedureExecutorSpec() { }
 
     @Override
     public ProcConfigParser<CONFIG> configParser(NewConfigFunction<CONFIG> newConfigFunction, ExecutionContext executionContext) {

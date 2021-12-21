@@ -27,16 +27,16 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ExecutorSpec;
 import org.neo4j.gds.executor.GraphCreationFactory;
 import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.MemoryUsageValidator;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.executor.PipelineSpec;
 import org.neo4j.gds.executor.ProcConfigParser;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.executor.ProcedureGraphCreationFactory;
-import org.neo4j.gds.executor.ProcedurePipelineSpec;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.executor.validation.Validator;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -92,7 +92,7 @@ public abstract class AlgoBaseProc<
     ) {
         return new MemoryEstimationExecutor<>(
             this,
-            new ProcedurePipelineSpec<>(),
+            new ProcedureExecutorSpec<>(),
             executionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
@@ -120,7 +120,7 @@ public abstract class AlgoBaseProc<
     }
 
     private ProcedureExecutor<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> procedureExecutor() {
-        var pipelineSpec = new AlgoBasePipelineSpec();
+        var pipelineSpec = new AlgoBaseExecutorSpec();
 
         var name = name();
         var factory = algorithmFactory();
@@ -160,7 +160,7 @@ public abstract class AlgoBaseProc<
         );
     }
 
-    private final class AlgoBasePipelineSpec implements PipelineSpec<ALGO, ALGO_RESULT, CONFIG> {
+    private final class AlgoBaseExecutorSpec implements ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> {
         @Override
         public ProcConfigParser<CONFIG> configParser(
             NewConfigFunction<CONFIG> newConfigFunction, ExecutionContext executionContext

@@ -71,7 +71,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
 
         memoryEstimationExecutor = new MemoryEstimationExecutor<>(
             new TestMutateSpec(),
-            new ProcedurePipelineSpec<>(),
+            new ProcedureExecutorSpec<>(),
             executionContext
         );
     }

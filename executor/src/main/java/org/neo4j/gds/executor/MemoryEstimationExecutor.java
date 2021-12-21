@@ -46,16 +46,16 @@ public class MemoryEstimationExecutor<
     > {
 
     private final AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec;
-    private final PipelineSpec<ALGO, ALGO_RESULT, CONFIG> pipelineSpec;
+    private final ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec;
     private final ExecutionContext executionContext;
 
     public MemoryEstimationExecutor(
         AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec,
-        PipelineSpec<ALGO, ALGO_RESULT, CONFIG> pipelineSpec,
+        ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec,
         ExecutionContext executionContext
     ) {
         this.algoSpec = algoSpec;
-        this.pipelineSpec = pipelineSpec;
+        this.executorSpec = executorSpec;
         this.executionContext = executionContext;
     }
 
@@ -63,7 +63,7 @@ public class MemoryEstimationExecutor<
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var configParser = pipelineSpec.configParser(algoSpec.newConfigFunction(), executionContext);
+        var configParser = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext);
         CONFIG algoConfig = configParser.processInput(algoConfiguration);
         GraphDimensions graphDimensions;
         Optional<MemoryEstimation> memoryEstimation;

@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.executor.ProcedurePipelineSpec;
+import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -50,7 +50,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var mutateSpec = new WccMutateSpec();
-        var pipelineSpec = new ProcedurePipelineSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
+        var pipelineSpec = new ProcedureExecutorSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new ProcedureExecutor<>(
             mutateSpec,
@@ -66,7 +66,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         var mutateSpec = new WccMutateSpec();
-        var pipelineSpec = new ProcedurePipelineSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
+        var pipelineSpec = new ProcedureExecutorSpec<Wcc, DisjointSetStruct, WccMutateConfig>();
 
         return new MemoryEstimationExecutor<>(
             mutateSpec,
