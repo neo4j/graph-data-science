@@ -1,4 +1,4 @@
-[[catalog-graph-create]]
+[[catalog-graph-project]]
 = Creating graphs
 
 [abstract]

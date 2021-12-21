@@ -104,7 +104,7 @@ CREATE
   (florentin)-[:KNOWS { since: 2018 }]->(veselin)
 ----
 
-Additionally, we will project a few graphs to the graph catalog, for more details see <<catalog-graph-create, native projections>> and <<catalog-graph-create-cypher, Cypher projections>>.
+Additionally, we will project a few graphs to the graph catalog, for more details see <<catalog-graph-project, native projections>> and <<catalog-graph-project-cypher, Cypher projections>>.
 
 .Project `Person` nodes and `KNOWS` relationships using native projections:
 [source, cypher, role=noplay graph-create-query]

@@ -1,4 +1,4 @@
-[[catalog-graph-create-subgraph]]
+[[catalog-graph-project-subgraph]]
 [.beta]
 = Creating a subgraph
 

@@ -12,7 +12,7 @@ Graph projections are stored entirely in-memory using compressed data structures
 
 The graph catalog is a concept within the GDS library that allows managing multiple graph projections by name.
 Using its name, a graph projection can be used many times in the analytical workflow.
-Named graphs can be projected using either a <<catalog-graph-create, Native projection>> or a <<catalog-graph-create-cypher, Cypher projection>>.
+Named graphs can be projected using either a <<catalog-graph-project, Native projection>> or a <<catalog-graph-project-cypher, Cypher projection>>.
 After usage, named graphs can be removed from the catalog to free up main memory.
 
 [NOTE]
@@ -27,9 +27,9 @@ This chapter explains the available graph catalog operations.
 [opts=header,cols="1m,1"]
 |===
 | Name                                                                          | Description
-| <<catalog-graph-create, gds.graph.project>>                                   | Adds a graph to the catalog using Native projection.
-| <<catalog-graph-create-cypher, gds.graph.project.cypher>>                     | Adds a graph to the catalog using Cypher projection.
-| <<catalog-graph-create-subgraph, gds.beta.graph.project.subgraph>>            | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
+| <<catalog-graph-project, gds.graph.project>>                                  | Adds a graph to the catalog using Native projection.
+| <<catalog-graph-project-cypher, gds.graph.project.cypher>>                    | Adds a graph to the catalog using Cypher projection.
+| <<catalog-graph-project-subgraph, gds.beta.graph.project.subgraph>>           | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
 | <<catalog-graph-list, gds.graph.list>>                                        | Prints information about graphs that are currently stored in the catalog.
 | <<catalog-graph-exists, gds.graph.exists>>                                    | Checks if a named graph is stored in the catalog.
 | <<graph-catalog-node-ops, gds.graph.removeNodeProperties>>                    | Removes node properties from a named graph.

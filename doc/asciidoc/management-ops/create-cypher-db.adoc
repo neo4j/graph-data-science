@@ -83,7 +83,7 @@ CREATE
   (alice)-[:KNOWS]->(carl)
 ----
 
-We will now load a graph projection of the created graph via the <<catalog-graph-create, graph create>> procedure:
+We will now load a graph projection of the created graph via the <<catalog-graph-project, graph project>> procedure:
 
 .Project `Person` nodes and `KNOWS` relationships:
 [source, cypher, role=noplay]

@@ -1,4 +1,4 @@
-[[catalog-graph-create-cypher]]
+[[catalog-graph-project-cypher]]
 = Projecting graphs using Cypher
 
 [abstract]
@@ -11,7 +11,7 @@ A projected graph can be stored in the catalog under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.
 This allows multiple algorithms to use the same graph without having to project it on each algorithm run.
 
-Using Cypher projections is a more flexible and expressive approach with diminished focus on performance compared to the <<catalog-graph-create, native projections>>.
+Using Cypher projections is a more flexible and expressive approach with diminished focus on performance compared to the <<catalog-graph-project, native projections>>.
 Cypher projections are primarily recommended for the development phase (see <<common-usage>>).
 
 [NOTE]
@@ -481,7 +481,7 @@ ORDER BY person ASC, numberOfPages DESC
 --
 
 If we compare the results to the ones from <<cypher-relationship-properties>>, we can see that using `IS NOT NULL` is filtering out the relationship from Veselin to the book Frankenstein.
-This functionality is only expressible with <<catalog-graph-create, native projections>> by creating a <<catalog-graph-create-subgraph,subraph>>.
+This functionality is only expressible with <<catalog-graph-project, native projections>> by projecting a <<catalog-graph-project-subgraph,subgraph>>.
 
 [[cypher-projection-parameters]]
 === Using query parameters

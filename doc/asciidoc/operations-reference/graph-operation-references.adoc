@@ -8,17 +8,17 @@
 [opts=header,cols="1, 1"]
 |===
 |Description | Operation
-.4+<.^|<<catalog-graph-create, Project Graph>>
+.4+<.^|<<catalog-graph-project, Project Graph>>
 | `gds.graph.project`
 | `gds.graph.project.estimate`
 | `gds.graph.project.cypher`
 | `gds.graph.project.cypher.estimate`
-.4+<.^|<<catalog-graph-create, Deprecated: Create Graph>>
+.4+<.^|<<catalog-graph-project, Deprecated: Create Graph>>
 | `gds.graph.create`
 | `gds.graph.create.estimate`
 | `gds.graph.create.cypher`
 | `gds.graph.create.cypher.estimate`
-.2+<.^|<<catalog-graph-exists, Check if a named graph exists>>
+.2+<.^|<<catalog-graph-exists, Check if a graph exists>>
 | `gds.graph.exists`
 | `_gds.graph.exists_`
 |<<catalog-graph-list, List graphs>> | `gds.graph.list`
