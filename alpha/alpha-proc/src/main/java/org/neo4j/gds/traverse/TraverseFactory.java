@@ -22,9 +22,12 @@ package org.neo4j.gds.traverse;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.traverse.Traverse;
 import org.neo4j.gds.impl.traverse.TraverseConfig;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -93,5 +96,16 @@ public class TraverseFactory<CONFIG extends TraverseConfig> extends GraphAlgorit
         return "Traverse";
     }
 
+    @Override
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
+        MemoryEstimations.Builder builder = MemoryEstimations.builder(Traverse.class);
+        builder.perNode("visited ", MemoryUsage::sizeOfBitset);
+        builder.perNode("nodes", MemoryUsage::sizeOfLongArrayList);
+        builder.perNode("sources", MemoryUsage::sizeOfLongArrayList);
+        builder.perNode("weights", MemoryUsage::sizeOfDoubleArrayList);
+        builder.perNode("resultNodes", MemoryUsage::sizeOfLongArray);
 
+
+        return builder.build();
+    }
 }
