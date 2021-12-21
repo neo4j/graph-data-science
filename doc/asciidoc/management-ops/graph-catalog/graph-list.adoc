@@ -50,19 +50,19 @@ CALL gds.graph.list(
 |===
 | Name                   | Type     | Description
 | graphName              | String   | Name of the graph.
-| database               | String   | Name of the database in which the graph has been created.
-| nodeProjection         | Map      | Node projection used to create the graph. If a Cypher projection was used, this will be a derived node projection.
-| relationshipProjection | Map      | Relationship projection used to create the graph. If a Cypher projection was used, this will be a derived relationship projection.
-| nodeQuery              | String   | Node query used to create the graph. If a native projection was used, this will be `null`.
-| relationshipQuery      | String   | Relationship query used to create the graph. If a native projection was used, this will be `null`.
+| database               | String   | Name of the database in which the graph has been projected.
+| nodeProjection         | Map      | Node projection used to project the graph. If a Cypher projection was used, this will be a derived node projection.
+| relationshipProjection | Map      | Relationship projection used to project the graph. If a Cypher projection was used, this will be a derived relationship projection.
+| nodeQuery              | String   | Node query used to project the graph. If a native projection was used, this will be `null`.
+| relationshipQuery      | String   | Relationship query used to project the graph. If a native projection was used, this will be `null`.
 | nodeFilter             | String   | The node filter used when creating this subgraph from another in-memory graph. If the graph has been created from Neo4j, this will be `null`.
 | relationshipFilter     | String   | The relationship filter used when creating this subgraph from another in-memory graph. If the graph has been created from Neo4j, this will be `null`.
 | nodeCount              | Integer  | Number of nodes in the graph.
 | relationshipCount      | Integer  | Number of relationships in the graph.
-| schema                 | Map      | Node labels, Relationship types and properties contained in the in-memory graph.
+| schema                 | Map      | Node labels, relationship types and properties contained in the projected graph.
 | degreeDistribution     | Map      | Histogram of degrees in the graph.
 | density                | Float    | Density of the graph.
-| creationTime           | Datetime | Time when the graph was created.
+| creationTime           | Datetime | Time when the graph was projected.
 | modificationTime       | Datetime | Time when the graph was last modified.
 | sizeInBytes            | Integer  | Number of bytes used in the Java heap to store the graph.
 | memoryUsage            | String   | Human readable description of `sizeInBytes`.
@@ -70,11 +70,11 @@ CALL gds.graph.list(
 --
 
 The information contains basic statistics about the graph, e.g., the node and relationship count.
-The result field `creationTime` indicates when the graph was created in memory.
+The result field `creationTime` indicates when the graph was projected in memory.
 The result field `modificationTime` indicates when the graph was updated by an algorithm running in `mutate` mode.
 
-The `database` column refers to the name of the database the corresponding graph has been created on.
-Referring to a named graph in a procedure is only allowed on the database it has been created on.
+The `database` column refers to the name of the database the corresponding graph has been projected on.
+Referring to a named graph in a procedure is only allowed on the database it has been projected on.
 
 The `schema` consists of information about the nodes and relationships stored in the graph.
 For each node label, the schema maps the label to its property keys and their corresponding property types.
@@ -104,7 +104,7 @@ CREATE
   (florentin)-[:KNOWS { since: 2018 }]->(veselin)
 ----
 
-Additionally we will project a few graphs to the graph catalog, for more details see <<catalog-graph-create, native projections>> and <<catalog-graph-create-cypher, Cypher projections>>.
+Additionally, we will project a few graphs to the graph catalog, for more details see <<catalog-graph-create, native projections>> and <<catalog-graph-create-cypher, Cypher projections>>.
 
 .Project `Person` nodes and `KNOWS` relationships using native projections:
 [source, cypher, role=noplay graph-create-query]
@@ -124,7 +124,7 @@ CALL gds.graph.project.cypher(
 .Project `Person` nodes with property `age` and `KNOWS` relationships using Native projections:
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'personsWithAgeNative',
   {
     Person: {properties: 'age'}

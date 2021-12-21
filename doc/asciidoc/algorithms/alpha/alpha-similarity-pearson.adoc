@@ -64,7 +64,7 @@ RETURN gds.alpha.similarity.pearson([5,8,7,5,4,9], [7,8,6,6,4,5]) AS similarity
 
 We can also use it to compute the similarity of nodes based on lists computed by a Cypher query.
 
-.The following will create a sample graph:
+.The following will project a sample graph:
 [source, cypher, role=noplay]
 ----
 MERGE (home_alone:Movie {name:'Home Alone'})

@@ -65,13 +65,13 @@ This is the only execution mode that will attempt to make modifications to the N
 The written data can be node properties (such as Page Rank scores), new relationships (such as Node Similarity similarities), or relationship properties.
 The `write` mode can be very useful for use cases where the algorithm results would be inspected multiple times by separate queries since the computational results are handled entirely by the library.
 
-In order for the results from a `write` mode computation to be used by another algorithm, a new graph must be created from the Neo4j database with the updated graph.
+In order for the results from a `write` mode computation to be used by another algorithm, a new graph must be projected from the Neo4j database with the updated graph.
 
 [[algorithms-syntax-configuration-parameters]]
 == Common Configuration parameters
 
 All algorithms allow adjustment of their runtime characteristics through a set of configuration parameters.
-Although some of the parameters are algorithm-specific, many are shared between algorithms and execution modes.
+Although some parameters are algorithm-specific, many are shared between algorithms and execution modes.
 
 [NOTE]
 To learn more about algorithm specific parameters and to find out if an algorithm supports a certain parameter, please consult the algorithm-specific documentation page.
@@ -85,12 +85,12 @@ For more details on the concurrency settings and limitations please see <<system
 
 [[common-configuration-node-labels]]
 nodeLabels - List of String::
-If the graph, on which the algorithm is run, was created with multiple node label projections, this parameter can be used to select only a subset of the projected labels.
+If the graph, on which the algorithm is run, was projected with multiple node label projections, this parameter can be used to select only a subset of the projected labels.
 The algorithm will only consider nodes with the selected labels.
 
 [[common-configuration-relationship-types]]
 relationshipTypes - List of String::
-If the graph, on which the algorithm is run, was created with multiple relationship type projections, this parameter can be used to select only a subset of the projected types.
+If the graph, on which the algorithm is run, was projected with multiple relationship type projections, this parameter can be used to select only a subset of the projected types.
 The algorithm will only consider relationships with the selected types.
 
 [[common-configuration-node-weight-property]]

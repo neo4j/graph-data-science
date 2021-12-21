@@ -139,7 +139,7 @@ CREATE
 
 In the example, we will use the Greedy algorithm to find `k` nodes subset.
 
-.The following statement will create the graph and store it in the graph catalog.
+.The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=graph-create-query no-play]
 ----
 CALL gds.graph.project(

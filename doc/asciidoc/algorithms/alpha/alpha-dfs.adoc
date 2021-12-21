@@ -78,7 +78,7 @@ CREATE
        (nC)-[:REL {cost: 5.0}]->(nD)
 ----
 
-.The following statement will create the graph and store it in the graph catalog.
+.The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.project('myGraph', 'Node', 'REL', { relationshipProperties: 'cost' })

@@ -225,11 +225,11 @@ CALL gds.graph.project(
     }
 )
 ----
-We can now go ahead and create an in-memory graph with all the `User` nodes and the `LINK` relationships with `UNDIRECTED` orientation.
+We can now go ahead and project a graph with all the `User` nodes and the `LINK` relationships with `UNDIRECTED` orientation.
 
 include::../shared/examples-named-native-note.adoc[]
 
-.The following statement will create the graph and store it in the graph catalog.
+.The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.project('myGraph', 'Person', 'LIKES')

@@ -105,7 +105,7 @@ CREATE (home:Page {name: 'Home'}),
 
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
     'myGraph',
     '*',
     { LINKS: { orientation: 'UNDIRECTED' } }

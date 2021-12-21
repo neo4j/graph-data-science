@@ -8,7 +8,7 @@ This section details projecting GDS graphs using `native` projections.
 
 A projected graph can be stored in the <<graph-catalog-ops, catalog>> under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.
-This allows multiple algorithms to use the same graph without having to re-create it on each algorithm run.
+This allows multiple algorithms to use the same graph without having to project it on each algorithm run.
 
 Native projections provide the best performance by reading from the Neo4j store files.
 Recommended for both the development, and the production phase.
@@ -85,7 +85,7 @@ NOTE: To get information about a stored graph, such as its schema, one can use <
 | nodeCount              | Integer  | The number of nodes stored in the projected graph.
 | relationshipProjection | Map      | The <<relationship-projection-syntax, relationship projections>> used to project the graph.
 | relationshipCount      | Integer  | The number of relationships stored in the projected graph.
-| createMillis           | Integer  | Milliseconds for creating the graph.
+| createMillis           | Integer  | Milliseconds for projecting the graph.
 |===
 --
 
@@ -216,7 +216,7 @@ NOTE: To get information about a stored graph, such as its schema, one can use <
 [[graph-create-examples]]
 == Examples
 
-In order to demonstrate the GDS Graph Create capabilities we are going to create a small social network graph in Neo4j.
+In order to demonstrate the GDS Graph Projection capabilities we are going to create a small social network graph in Neo4j.
 The example graph looks like this:
 
 image::example-graphs/graph-create-example.svg[Visualization of the example graph,align="center"]
@@ -250,7 +250,7 @@ We are going to start with demonstrating how to load a simple graph by projectin
 .Project `Person` nodes and `KNOWS` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'persons',            // <1>
   'Person',             // <2>
   'KNOWS'               // <3>
@@ -286,7 +286,7 @@ To project multiple node labels and relationship types, we can adjust the projec
 .Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'personsAndBooks',    // <1>
   ['Person', 'Book'],   // <2>
   ['KNOWS', 'READ']     // <3>
@@ -322,7 +322,7 @@ Additionally, we provide the functionality to load the relationships in the `REV
 .Project `Person` nodes and undirected `KNOWS` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'undirectedKnows',                    // <1>
   'Person',                             // <2>
   {KNOWS: {orientation: 'UNDIRECTED'}}  // <3>
@@ -360,7 +360,7 @@ To project node properties, we can either use the `nodeProperties` configuration
 .Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'graphWithProperties',                                // <1>
   {                                                     // <2>
     Person: {properties: 'age'},                        // <3>
@@ -428,7 +428,7 @@ Analogous to node properties, we can either use the `relationshipProperties` con
 .Project `Person` and `Book` nodes and `READ` relationships with `numberOfPages` property:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'readWithProperties',                     // <1>
   ['Person', 'Book'],                       // <2>
   {                                         // <3>
@@ -501,7 +501,7 @@ If we do not need the count, we could use the `SINGLE` aggregation.
 .Project `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'readCount',                      // <1>
   ['Person', 'Book'],               // <2>
   {
@@ -574,7 +574,7 @@ For graphs with relationship properties we can also use other aggregations.
 .Project `Person` and `Book` nodes and aggregated `READ` relationships by summing the `numberOfPages`:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'readSums',                                                   // <1>
   ['Person', 'Book'],                                           // <2>
   {READ: {properties: {numberOfPages: {aggregation: 'SUM'}}}}   // <3>
@@ -629,8 +629,8 @@ We can see, that the two READ relationships between Florentin and the Hobbit sum
 
 === Validate relationships flag
 
-As mentioned in the <<graph-create-native-syntax, syntax section>>, the `validateRelationships` flag controls whether an error will be raised when attempting to create a relationship where either the source or target node is not present in the <<node-projection-syntax, node projection>>.
-Note that even if the flag is set to `false` such a relationship will still not be created but the loading process will not be aborted.
+As mentioned in the <<graph-create-native-syntax, syntax section>>, the `validateRelationships` flag controls whether an error will be raised when attempting to project a relationship where either the source or target node is not present in the <<node-projection-syntax, node projection>>.
+Note that even if the flag is set to `false` such a relationship will still not be projected but the loading process will not be aborted.
 
 We can simulate such a case with the <<graph-create-examples, graph present in the Neo4j database>>:
 
@@ -638,7 +638,7 @@ We can simulate such a case with the <<graph-create-examples, graph present in t
 .Project `READ` and `KNOWS` relationships but only `Person` nodes, with `validateRelationships` set to true:
 [source, cypher]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'danglingRelationships',
   'Person',
   ['READ', 'KNOWS'],
@@ -655,7 +655,7 @@ YIELD
 
 .Results
 ----
-org.neo4j.graphdb.QueryExecutionException: Failed to invoke procedure `gds.graph.create`: Caused by: java.lang.IllegalArgumentException: Failed to load a relationship because its target-node with id 3 is not part of the node query or projection. To ignore the relationship, set the configuration parameter `validateRelationships` to false.
+org.neo4j.graphdb.QueryExecutionException: Failed to invoke procedure `gds.graph.project`: Caused by: java.lang.IllegalArgumentException: Failed to load a relationship because its target-node with id 3 is not part of the node query or projection. To ignore the relationship, set the configuration parameter `validateRelationships` to false.
 ----
 --
 

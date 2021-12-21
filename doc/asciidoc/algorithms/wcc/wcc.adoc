@@ -229,7 +229,7 @@ The relationships that connect the nodes in each component have a property `weig
 
 include::../shared/examples-named-native-note.adoc[]
 
-.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.project(
@@ -445,7 +445,7 @@ To demonstrate this in practice, we will go through a few steps:
 
 . We will run the algorithm and write the results to Neo4j.
 . Then we will add another node to our graph, this node will not have the property computed in Step 1.
-. We will create a new in-memory graph that has the result from Step 1 as `nodeProperty`
+. We will project a new graph that has the result from Step 1 as `nodeProperty`
 . And then we will run the algorithm again, this time in `stream` mode, and we will use the `seedProperty` configuration parameter.
 
 We will use the weighted variant of WCC.
@@ -488,12 +488,12 @@ CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})
 
 _Step 3_
 
-Note, that we cannot use our already created graph as it does not contain the component id.
-We will therefore create a second in-memory graph that contains the previously computed component id.
+Note, that we cannot use our already projected graph as it does not contain the component id.
+We will therefore project a second graph that contains the previously computed component id.
 
 [role=query-example, no-result=true, group=seeding]
 --
-.The following will create a new graph containing the previously computed component id:
+.The following will project a new graph containing the previously computed component id:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
@@ -539,7 +539,7 @@ ORDER BY componentId, name
 |===
 --
 
-The result shows that despite not having the `seedProperty` when it was created, the node 'Mats' has been assigned to the same component as the node 'Bridget'.
+The result shows that despite not having the `seedProperty` when it was projected, the node 'Mats' has been assigned to the same component as the node 'Bridget'.
 This is correct because these two nodes are connected.
 
 [[algorithms-wcc-examples-seed-write]]

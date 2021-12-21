@@ -9,7 +9,7 @@ This section explains the currently supported node properties.
 --
 
 The Neo4j Graph Data Science Library is capable of augmenting nodes with additional properties.
-These properties can be loaded from the database when the graph projection is created.
+These properties can be loaded from the database when the graph is projected.
 Many algorithms can also persist their result as one or more node properties when they are run using the `mutate` mode.
 
 == Supported types

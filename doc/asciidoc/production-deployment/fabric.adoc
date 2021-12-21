@@ -40,13 +40,13 @@ Every `Person` node also stores an identifying property `id` and the persons `na
 
 The other shard, the analytical database, stores a graph with the same data, except that the only property is the unique identifier.
 
-First we need to create a named graph on the analytical database shard.
+First we need to project a named graph on the analytical database shard.
 
 [source, cypher, role=noplay]
 ----
 CALL {
   USE FABRIC_DB_NAME.ANALYTICS_DB
-  CALL gds.graph.create('graph', 'Person', 'KNOWS')
+  CALL gds.graph.project('graph', 'Person', 'KNOWS')
   YIELD graphName
   RETURN graphName
 }

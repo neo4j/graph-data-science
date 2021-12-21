@@ -111,12 +111,12 @@ This graph has two clusters of _Users_, that are closely connected.
 Between those clusters there is one single edge.
 The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
 
-We can now create the graph and store it in the graph catalog.
+We can now project the graph and store it in the graph catalog.
 We load the `LINK` relationships with orientation set to `UNDIRECTED` as this works best with the Louvain algorithm which we will use to create the communities that we evaluate using Conductance.
 
 include::../../shared/examples-named-native-note.adoc[]
 
-.The following statement will create the graph and store it in the graph catalog.
+.The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create(

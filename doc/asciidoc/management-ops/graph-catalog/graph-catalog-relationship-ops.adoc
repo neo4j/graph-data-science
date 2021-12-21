@@ -8,7 +8,7 @@ This section details the operations available over relationships and relationshi
 
 The graphs in the Neo4j Graph Data Science Library support properties for relationships.
 We provide multiple operations to work with the stored relationship-properties in projected graphs.
-Relationship properties are either created during the graph creation or when using the `mutate` mode of our graph algorithms.
+Relationship properties are either added during the graph projection or when using the `mutate` mode of our graph algorithms.
 
 To inspect stored relationship property values, the `streamRelationshipProperties` procedure can be used.
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
@@ -19,7 +19,7 @@ This is similar to what an algorithm `write` execution mode does, but allows mor
 By default, no relationship properties will be written. To write relationship properties, these have to be explicitly specified.
 
 We can also remove relationships from a named graph in the catalog.
-This is useful to free up main memory or to remove accidentally created relationship types.
+This is useful to free up main memory or to remove accidentally added relationship types.
 
 == Syntax
 
@@ -247,7 +247,7 @@ CREATE
 .Project the graph:
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'personsAndInstruments',
   ['Person', 'Instrument'],         // <1>
   {
@@ -280,8 +280,8 @@ CALL gds.nodeSimilarity.mutate('personsAndInstruments', {   // <1>
 })
 ----
 <1> Run NodeSimilarity in `mutate` mode on `personsAndInstruments` projected graph.
-<2> The algorithm will create relationships of type `SIMILAR` in the projected graph.
-<3> The algorithm will create relationship property `score` for each created relationship.
+<2> The algorithm will add relationships of type `SIMILAR` to the projected graph.
+<3> The algorithm will add relationship property `score` for each added relationship.
 
 
 === Stream
@@ -564,7 +564,7 @@ YIELD
 === Delete
 
 We can delete all relationships of a given type from a named graph in the catalog.
-This is useful to free up main memory or to remove accidentally created relationship types.
+This is useful to free up main memory or to remove accidentally added relationship types.
 
 [NOTE]
 ====

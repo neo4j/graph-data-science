@@ -53,7 +53,7 @@ RETURN gds.alpha.linkprediction.commonNeighbors(node1:Node, node2:Node, {
 [[algorithms-linkprediction-common-neighbors-sample]]
 == Common Neighbors algorithm sample
 
-.The following will create a sample graph:
+.The following will project a sample graph:
 [source, cypher, role=noplay]
 ----
 CREATE

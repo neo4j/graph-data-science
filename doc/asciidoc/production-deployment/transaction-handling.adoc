@@ -14,7 +14,7 @@ When an algorithm procedure is called from Cypher, the procedure call is execute
 During graph projection, new transactions are used that do not inherit the transaction state of the Cypher transaction.
 This means that changes from the Cypher transaction state are not visible to the graph projection transactions.
 
-For example, the following statement will only create an empty graph (assuming the `MyLabel` label was not already present in the Neo4j database):
+For example, the following statement will only project an empty graph (assuming the `MyLabel` label was not already present in the Neo4j database):
 
 [role=query-example]
 --
@@ -22,7 +22,7 @@ For example, the following statement will only create an empty graph (assuming t
 ----
 CREATE (n:MyLabel) // the new node is part of Cypher transaction state
 WITH *
-CALL gds.graph.create('myGraph', 'MyLabel', '*')
+CALL gds.graph.project('myGraph', 'MyLabel', '*')
 YIELD nodeCount
 RETURN nodeCount
 ----

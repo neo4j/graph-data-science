@@ -10,7 +10,7 @@ This section explains administration capabilities in the Neo4j Graph Data Scienc
 The GDS catalog offers elevated access to administrator users.
 Any user granted a role with the name `admin` is considered an administrator by GDS.
 
-A GDS administrator has access to graphs created by any other user.
+A GDS administrator has access to graphs projected by any other user.
 This includes the ability to list, drop and run algorithms over these graphs.
 
 
@@ -40,8 +40,8 @@ GRANT ROLE admin TO carol;
 As we can see, `alice` and `bob` are standard users with read access to the database.
 `carol` is an administrator by virtue of being granted the `admin` role (for more information about this role see the https://neo4j.com/docs/cypher-manual/current/administration/security/administration/#administration-security-administration-introduction[Cypher manual]).
 
-Now `alice` and `bob` each create a few graphs.
-They both create a graph called `graphA` and `bob` also creates a graph called `graphB`.
+Now `alice` and `bob` each project a few graphs.
+They both project a graph called `graphA` and `bob` also projects a graph called `graphB`.
 
 
 === Listing

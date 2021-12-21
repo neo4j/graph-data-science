@@ -86,7 +86,7 @@ CREATE (a:Loc {name: 'A'}),
 
 ----
 
-.The following will create and store a graph using native projection:
+.The following will project and store a graph using native projection:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
@@ -147,7 +147,7 @@ We do not have to save this reversed relationship, we can project it using *Cyph
 Note that relationship query does not specify direction of the relationship.
 This is applicable to all other algorithms that use Cypher loading.
 
-.The following will create and store an undirected graph using cypher projection:
+.The following will project and store an undirected graph using cypher projection:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(

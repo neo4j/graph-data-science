@@ -277,7 +277,7 @@ Each relationship has a property called `weight`, which describes the importance
 
 include::../shared/examples-named-native-note.adoc[]
 
-.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.project(

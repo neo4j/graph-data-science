@@ -44,7 +44,7 @@ For example, to get movie recommendations based on the preferences of users who 
 [[algorithms-similarity-cosine-syntax]]
 == Syntax
 
-.The following will create an anonymous graph to run the algorithm on and write back results:
+.The following query will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.similarity.cosine.write(configuration: Map)
@@ -100,7 +100,7 @@ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, me
 | p100                  | Float   | The 100 percentile of similarities scores computed.
 |===
 
-.The following will create an anonymous graph to run the algorithm on and stream results:
+.The following query will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.similarity.cosine.stream(configuration: Map)

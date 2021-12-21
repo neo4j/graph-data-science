@@ -271,7 +271,7 @@ In the example graph, the Eve node will not be compared to other Person nodes.
 
 include::../shared/examples-named-native-note.adoc[]
 
-.The following statement will create the graph and store it in the graph catalog.
+.The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.project(

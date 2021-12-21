@@ -494,10 +494,10 @@ In fact, setting the `samplingSize` to the node count of the graph (seven, in ou
 Betweenness Centrality can also be run on undirected graphs.
 To illustrate this, we will project our example graph using the `UNDIRECTED` orientation.
 
-.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myUndirectedGraph'.
+.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myUndirectedGraph'.
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create('myUndirectedGraph', 'User', {FOLLOWS: {orientation: 'UNDIRECTED'}})
+CALL gds.graph.project('myUndirectedGraph', 'User', {FOLLOWS: {orientation: 'UNDIRECTED'}})
 ----
 
 Now we can run Betweenness Centrality on our undirected graph.

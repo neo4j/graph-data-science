@@ -261,7 +261,7 @@ This is because the Triangle Count algorithm is defined only for undirected grap
 
 include::../shared/examples-named-native-note.adoc[]
 
-.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.project(
@@ -275,7 +275,7 @@ CALL gds.graph.project(
 )
 ----
 
-WARNING: The Triangle Count algorithm requires the graph to be created using the `UNDIRECTED` orientation for relationships.
+WARNING: The Triangle Count algorithm requires the graph to be projected using the `UNDIRECTED` orientation for relationships.
 
 In the following examples we will demonstrate using the Triangle Count algorithm on this graph.
 
@@ -303,7 +303,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 |===
 --
 
-Note that the relationship count is 16 although we only created 8 relationships in the original Cypher statement.
+Note that the relationship count is 16, although we only projected 8 relationships in the original Cypher statement.
 This is because we used the `UNDIRECTED` orientation, which will project each relationship in each direction, effectively doubling the number of relationships.
 
 

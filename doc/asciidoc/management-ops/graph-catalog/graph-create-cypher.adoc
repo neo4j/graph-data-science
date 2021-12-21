@@ -1,5 +1,5 @@
 [[catalog-graph-create-cypher]]
-= Creating graphs using Cypher
+= Projecting graphs using Cypher
 
 [abstract]
 --
@@ -9,7 +9,7 @@ This section details projecting GDS graphs using `Cypher` projections.
 
 A projected graph can be stored in the catalog under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.
-This allows multiple algorithms to use the same graph without having to re-create it on each algorithm run.
+This allows multiple algorithms to use the same graph without having to project it on each algorithm run.
 
 Using Cypher projections is a more flexible and expressive approach with diminished focus on performance compared to the <<catalog-graph-create, native projections>>.
 Cypher projections are primarily recommended for the development phase (see <<common-usage>>).
@@ -91,7 +91,7 @@ NOTE: To get information about a stored graph, such as its schema, one can use <
 [[graph-create-examples]]
 == Examples
 
-In order to demonstrate the GDS Graph Create capabilities we are going to create a small social network graph in Neo4j.
+In order to demonstrate the GDS Graph Project capabilities we are going to create a small social network graph in Neo4j.
 The example graph looks like this:
 
 image::example-graphs/graph-create-example.svg[Visualization of the example graph,align="center"]
@@ -126,7 +126,7 @@ We are going to start with demonstrating how to load a simple graph by projectin
 .Project `Person` nodes and `KNOWS` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'persons',
   'MATCH (n:Person) RETURN id(n) AS id',
   'MATCH (n:Person)-[r:KNOWS]->(m:Person) RETURN id(n) AS source, id(m) AS target')
@@ -154,7 +154,7 @@ To retain the label and type information when we load multiple node labels and r
 .Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'personsAndBooks',
   'MATCH (n) WHERE n:Person OR n:Book RETURN id(n) AS id, labels(n) AS labels',
   'MATCH (n)-[r:KNOWS|READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type')
@@ -180,7 +180,7 @@ It is thus not possible to project graphs in `UNDIRECTED` or `REVERSE` orientati
 [NOTE]
 --
 Some algorithms require that the graph was loaded with `UNDIRECTED` orientation.
-These algorithms can not be used with a graph created by a Cypher projection.
+These algorithms can not be used with a graph projected by a Cypher projection.
 --
 
 
@@ -195,7 +195,7 @@ Thereby, we use the Cypher function https://neo4j.com/docs/cypher-manual/current
 .Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'graphWithProperties',
   'MATCH (n)
    WHERE n:Book OR n:Person
@@ -260,7 +260,7 @@ Analogous to node properties, we can project relationship properties using the `
 .Project `Person` and `Book` nodes and `READ` relationships with `numberOfPages` property:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'readWithProperties',
   'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
   'MATCH (n)-[r:READ]->(m)
@@ -322,7 +322,7 @@ Alternatively, we can aggregate the parallel relationship by using the https://n
 .Project `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'readCount',
   'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
   'MATCH (n)-[r:READ]->(m)
@@ -378,7 +378,7 @@ For graphs with relationship properties we can also use other aggregations docum
 .Project `Person` and `Book` nodes and aggregated `READ` relationships by summing the `numberOfPages`:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'readSums',
   'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
   'MATCH (n)-[r:READ]->(m)
@@ -435,7 +435,7 @@ The following examples will demonstrate how we to filter out `READ` relationship
 .Project `Person` and `Book` nodes and `READ` relationships where `numberOfPages` is present:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'existingNumberOfPages',
   'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
   'MATCH (n)-[r:READ]->(m)
@@ -494,7 +494,7 @@ In the following example we supply a list of strings to limit the cities we want
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'existingNumberOfPages',
   'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
   'MATCH (n)-[r:READ]->(m)
@@ -525,7 +525,7 @@ For example, pre-computing the list of nodes can be useful if the node filter is
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'personSubset',
   'MATCH (n)
     WHERE n.age < 20 AND NOT n.name STARTS WITH "V"
@@ -557,7 +557,7 @@ By passing the relevant Persons as a parameter, the above query can be transform
 MATCH (n)
 WHERE n.age < 20 AND NOT n.name STARTS WITH "V"
 WITH collect(n) AS olderPersons
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'personSubsetViaParameters',
   'UNWIND $nodes AS n RETURN id(n) AS id, labels(n) AS labels',
   'MATCH (n)-[r:KNOWS]->(m)

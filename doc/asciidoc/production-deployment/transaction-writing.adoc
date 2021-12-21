@@ -14,7 +14,7 @@ Example for incorrect use.
 ----
 :BEGIN
 
-// Create the in-memory graph
+// Project a graph
 CALL gds.graph.project.cypher(
   'test',
   'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) AS id',
@@ -52,13 +52,13 @@ MATCH ()-[r:SIMILAR_TO]->() DELETE r;
 :COMMIT
 ----
 
-Create the in-memory graph.
+Project a graph.
 
 [source, cypher, role=noplay]
 ----
 :BEGIN
 
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'test',
   'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) AS id',
   'MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)
@@ -96,9 +96,9 @@ The same issue can be seen using the Java API, the examples are below.
 static final String CYPHER_DROP_GDS_GRAPH_IF_EXISTS =
     "CALL gds.graph.drop('test', false)";
 
-// Creates the in-memory graph
-static final String CYPHER_CREATE_GDS_GRAPH_ARTIST_GENRE =
-    "CALL gds.graph.create.cypher(" +
+// Projects a graph
+static final String CYPHER_PROJECT_GDS_GRAPH_ARTIST_GENRE =
+    "CALL gds.graph.project.cypher(" +
     "    'test', " +
     "    'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) AS id', " +
     "    'MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre) " +
@@ -122,7 +122,7 @@ try (var session = driver.session()) {
 	var params = Map.<String, Object>of("graphName", "genre-related-to-artist");
 	session.writeTransaction(tx -> {
 		tx.run(CYPHER_DROP_GDS_GRAPH_IF_EXISTS, params).consume();
-		tx.run(CYPHER_CREATE_GDS_GRAPH_ARTIST_GENRE, params).consume();
+		tx.run(CYPHER_PROJECT_GDS_GRAPH_ARTIST_GENRE, params).consume();
 		tx.run("MATCH ()-[r:SIMILAR_TO]->() DELETE r").consume();
 		return tx.run(CYPHER_WRITE_SIMILAR_TO, params).consume();
 	});
@@ -142,11 +142,11 @@ try (var session = driver.session()) {
         return tx.run("MATCH ()-[r:SIMILAR_TO]->() DELETE r").consume();
     });
 
-    // Create the in-memory graph
+    // Project a graph
     var params = Map.<String, Object>of("graphName", "genre-related-to-artist");
 	session.writeTransaction(tx -> {
 	    tx.run(CYPHER_DROP_GDS_GRAPH_IF_EXISTS, params).consume();
-	    return tx.run(CYPHER_CREATE_GDS_GRAPH_ARTIST_GENRE, params).consume();
+	    return tx.run(CYPHER_PROJECT_GDS_GRAPH_ARTIST_GENRE, params).consume();
     });
 
 	// Run the algorithm

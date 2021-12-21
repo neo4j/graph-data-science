@@ -50,15 +50,15 @@ CALL gds[.<tier>].<algorithm>.<execution-mode>.estimate(
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type          | Default   | Optional  | Description
-| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or a <<estimate-procedure-graph-create-config, configuration to create a graph>>.
+| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or a <<estimate-procedure-graph-create-config, configuration to project a graph>>.
 | configuration     | Map           | -         | no        | The configuration of the algorithm.
 |===
 
 The configuration map accepts the same configuration parameters as the estimated algorithm.
 See the specific algorithm documentation for more information.
 
-In contrast to procedures that execute algorithms, for memory estimation it is possible to define a <<estimate-procedure-graph-create-config, graph creation config>>.
-With this it is possible to measure the memory consumption of creating a graph and executing the algorithm at the same time.
+In contrast to procedures that execute algorithms, for memory estimation it is possible to define a <<estimate-procedure-graph-create-config, graph projection config>>.
+With this it is possible to measure the memory consumption of projecting a graph and executing the algorithm at the same time.
 
 .Results
 [opts="header",cols="1m,1,6"]
@@ -97,7 +97,7 @@ With this it is possible to measure the memory consumption of creating a graph a
 == Estimating memory requirements for graphs
 
 The <<catalog-graph-create, `gds.graph.project`>> procedures also support `.estimate` to estimate memory usage for just the graph.
-Those procedures don't accept the graph name as the first argument, as they don't actually create the graph.
+Those procedures don't accept the graph name as the first argument, as they don't actually project the graph.
 
 .Syntax
 [source, cypher, role=noplay]
@@ -106,7 +106,7 @@ CALL gds.graph.project.estimate(nodeProjection: String|List|Map, relationshipPro
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
 ----
 
-The `nodeProjection` and `relationshipProjection` parameters follow the same syntax as in <<catalog-graph-create, `gds.graph.create`>>.
+The `nodeProjection` and `relationshipProjection` parameters follow the same syntax as in <<catalog-graph-create, `gds.graph.project`>>.
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
@@ -117,7 +117,7 @@ The `nodeProjection` and `relationshipProjection` parameters follow the same syn
 | configuration          | Map                   | {}        | yes       | Additional configuration, such as concurrency.
 |===
 
-The result of running `gds.graph.create.estimate` has the same form as the algorithm memory estimation results above.
+The result of running `gds.graph.project.estimate` has the same form as the algorithm memory estimation results above.
 
 It is also possible to estimate the memory of a fictive graph, by explicitly specifying its node and relationship count.
 Using this feature, one can estimate the memory consumption of an arbitrarily sized graph.
@@ -140,7 +140,7 @@ The query below is an example of estimating a fictive graph with 100 nodes and 1
 .Example
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.estimate('*', '*', {
+CALL gds.graph.project.estimate('*', '*', {
   nodeCount: 100,
   relationshipCount: 1000,
   nodeProperties: 'foo',
@@ -156,12 +156,12 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 | "593 KiB" | 607576   | 607576   | 100       | 1000
 |===
 
-The <<catalog-graph-create-cypher, `gds.graph.create.cypher`>> procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
+The <<catalog-graph-create-cypher, `gds.graph.project.cypher`>> procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
 
 .Syntax
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher.estimate(nodeQuery: String, relationshipQuery: String, configuration: Map)
+CALL gds.graph.project.cypher.estimate(nodeQuery: String, relationshipQuery: String, configuration: Map)
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
 ----
 

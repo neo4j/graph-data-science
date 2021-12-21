@@ -8,7 +8,7 @@ This section details the operations available over node-properties stored in pro
 
 The graphs in the Neo4j Graph Data Science Library support properties for nodes.
 We provide multiple operations to work with the stored node-properties in projected graphs.
-Node properties are either created during the graph creation or when using the `mutate` mode of our graph algorithms.
+Node properties are either added during the graph projection or when using the `mutate` mode of our graph algorithms.
 
 To inspect stored values, the `gds.graph.streamNodeProperties` procedure can be used.
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
@@ -18,7 +18,7 @@ Similar to streaming node properties, it is also possible to write those back to
 This is similar to what an algorithm `write` execution mode does, but allows more fine-grained control over the operations.
 
 We can also remove node properties from a named graph in the catalog.
-This is useful to free up main memory or to remove accidentally created node properties.
+This is useful to free up main memory or to remove accidentally added node properties.
 
 == Syntax
 
@@ -230,7 +230,7 @@ CREATE
 .Project the small social network graph:
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'socialGraph',
   {
     Person: {properties: "age"},

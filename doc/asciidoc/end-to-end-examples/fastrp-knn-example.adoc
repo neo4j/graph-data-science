@@ -62,9 +62,9 @@ The graph can be visualized in the following way:
 
 image::example-graphs/knn-fastrp.png[Visualization of the example graph,align="center"]
 
-Now we can proceed to create an in-memory graph which we can run the algorithms on.
+Now we can proceed to project a graph which we can run the algorithms on.
 
-.Create the in-memory graph and store it in the graph catalog:
+.Project a graph called 'purchases' and store it in the graph catalog:
 [source, cypher, role=graph-create-query no-play]
 ----
 CALL gds.graph.project(
