@@ -67,9 +67,7 @@ final class PageRankProc {
             public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
                 return List.of(
                     (graphCreateConfig, config) -> {
-                        if (config.cacheWeights()) {
-                            log.warn("The configuration parameter `cacheWeights` is deprecated and has no effect.");
-                        }
+                        
                     }
                 );
             }

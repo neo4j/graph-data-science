@@ -62,13 +62,7 @@ public interface PageRankConfig extends
     default ScalarScaler.Variant scaler() {
         return ScalarScaler.Variant.NONE;
     }
-
-    @Deprecated
-    @Value.Default
-    default boolean cacheWeights() {
-        return false;
-    }
-
+    
     @Override
     @Value.Default
     @Configuration.Ignore

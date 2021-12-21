@@ -30,7 +30,6 @@ import org.neo4j.graphdb.QueryExecutionException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -100,7 +99,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
     }
 
     @Test
-    void testCacheWeightsDeprecation() {
+    void testCacheWeightsIsUnknown() {
         loadGraph(DEFAULT_GRAPH_NAME);
         var config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
             "tolerance", 3.14,
@@ -109,12 +108,13 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
         var log = new TestLog();
 
-        applyOnProcedure(proc -> {
-            proc.log = log;
-            ((PageRankStreamProc) proc).stream(DEFAULT_GRAPH_NAME, config.toMap());
-        });
-
-        assertThat(log.getMessages(TestLog.WARN)).anyMatch(message -> message.contains("deprecated"));
+        assertThatThrownBy(() -> {
+            applyOnProcedure(proc -> {
+                ((PageRankStreamProc) proc).stream(DEFAULT_GRAPH_NAME, config.toMap());
+            });
+        })
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Unexpected configuration key: cacheWeights");
     }
 
     @Test
