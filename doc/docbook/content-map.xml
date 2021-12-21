@@ -68,7 +68,7 @@
                 </d:tocentry>
                 <d:tocentry linkend="catalog-graph-drop"><?dbhtml filename="graph-drop/index.html"?>
                 </d:tocentry>
-                <d:tocentry linkend="catalog-graph-project-subgraph"><?dbhtml filename="create-subgraph/index.html"?>
+                <d:tocentry linkend="catalog-graph-project-subgraph"><?dbhtml filename="graph-project-subgraph/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="graph-catalog-node-ops"><?dbhtml filename="graph-catalog-node-ops/index.html"?>
                 </d:tocentry>
