@@ -38,7 +38,6 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
 
     public NodePropertyStep(
         GdsCallableFinder.GdsCallableDefinition callableDefinition,
-        // TODO: pass in the config instead
         Map<String, Object> config
     ) {
         this.callableDefinition = callableDefinition;
@@ -46,7 +45,6 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     }
 
     @Override
-    // TODO make this return the actual configuration
     public Map<String, Object> config() {
         return config;
     }
