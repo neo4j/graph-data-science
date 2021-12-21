@@ -24,7 +24,6 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.AlgorithmMetaData;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.ImmutableComputationResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;

@@ -25,6 +25,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;

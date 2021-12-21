@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.impl.walking.CollapsePath;
 import org.neo4j.gds.impl.walking.CollapsePathAlgorithmFactory;
 import org.neo4j.gds.impl.walking.CollapsePathConfig;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;

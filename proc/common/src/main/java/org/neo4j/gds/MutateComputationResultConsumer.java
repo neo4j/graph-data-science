@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -38,7 +39,7 @@ public abstract class MutateComputationResultConsumer<ALGO extends Algorithm<ALG
     }
 
     @Override
-    public Stream<RESULT> consume(AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext) {
+    public Stream<RESULT> consume(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext) {
         return runWithExceptionLogging("Graph mutation failed", executionContext.log(), () -> {
             CONFIG config = computationResult.config();
 
@@ -58,7 +59,7 @@ public abstract class MutateComputationResultConsumer<ALGO extends Algorithm<ALG
 
     protected abstract void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
-        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
         ExecutionContext executionContext
     );
 }

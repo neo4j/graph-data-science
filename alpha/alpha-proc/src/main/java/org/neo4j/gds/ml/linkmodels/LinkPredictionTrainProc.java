@@ -26,6 +26,7 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
 import org.neo4j.gds.pipeline.validation.GraphCreateConfigValidations;

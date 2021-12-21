@@ -26,6 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.AfterLoadValidation;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;

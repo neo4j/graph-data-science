@@ -27,6 +27,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.AfterLoadValidation;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;

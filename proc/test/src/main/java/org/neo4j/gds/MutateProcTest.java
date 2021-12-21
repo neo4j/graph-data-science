@@ -28,6 +28,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.pipeline.ComputationResult;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
         assertThrows(
             NullPointerException.class,
             () -> applyOnProcedure(procedure -> {
-                var computationResult = mock(AlgoBaseProc.ComputationResult.class);
+                var computationResult = mock(ComputationResult.class);
                 log.add(0, ((TestLog) procedure.log));
                 procedure.computationResultConsumer().consume(computationResult, procedure.executionContext());
             })

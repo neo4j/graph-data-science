@@ -25,6 +25,7 @@ import org.neo4j.gds.core.huge.FilteredNodeProperties;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -50,7 +51,7 @@ public final class MutatePropertyComputationResultConsumer<ALGO extends Algorith
     @Override
     protected void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
-        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
         ExecutionContext executionContext
     ) {
         var graph = computationResult.graph();

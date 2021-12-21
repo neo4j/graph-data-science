@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.pipeline.ComputationResult;
+import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 final class K1ColoringProc {
@@ -35,7 +35,7 @@ final class K1ColoringProc {
 
     static <PROC_RESULT, CONFIG extends K1ColoringConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         K1ColoringResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult,
+        ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult,
         ProcedureCallContext callContext
     ) {
         if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
@@ -47,7 +47,7 @@ final class K1ColoringProc {
             .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.algorithm().didConverge());
     }
 
-    static <CONFIG extends K1ColoringConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult) {
+    static <CONFIG extends K1ColoringConfig> NodeProperties nodeProperties(ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult) {
         return computeResult.result().asNodeProperties();
     }
 

@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -35,7 +35,7 @@ final class LabelPropagationProc {
     private LabelPropagationProc() {}
 
     static <CONFIG extends LabelPropagationBaseConfig> NodeProperties nodeProperties(
-        AlgoBaseProc.ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult,
+        ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult,
         String resultProperty,
         AllocationTracker allocationTracker
     ) {
@@ -52,7 +52,7 @@ final class LabelPropagationProc {
 
     static <PROC_RESULT, CONFIG extends LabelPropagationBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         LabelPropagationResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computeResult
+        ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computeResult
     ) {
         return procResultBuilder
             .didConverge(!computeResult.isGraphEmpty() ? computeResult.result().didConverge() : false)

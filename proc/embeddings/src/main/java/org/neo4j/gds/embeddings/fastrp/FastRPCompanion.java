@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
+import org.neo4j.gds.pipeline.ComputationResult;
 
 final class FastRPCompanion {
 
@@ -29,7 +29,7 @@ final class FastRPCompanion {
 
     private FastRPCompanion() {}
 
-    static <CONFIG extends FastRPBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<FastRP, FastRP.FastRPResult, CONFIG> computationResult) {
+    static <CONFIG extends FastRPBaseConfig> NodeProperties getNodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, CONFIG> computationResult) {
         var nodeCount = computationResult.graph().nodeCount();
         var embeddings = computationResult.result().embeddings();
 

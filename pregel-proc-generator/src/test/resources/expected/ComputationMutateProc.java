@@ -22,8 +22,9 @@ package org.neo4j.gds.beta.pregel.cc;
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
-import org.neo4j.gds.AlgoBaseProc;
+
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Pregel;
@@ -76,7 +77,7 @@ public final class ComputationMutateProc extends PregelMutateProc<ComputationAlg
 
     @Override
     protected AbstractResultBuilder<PregelMutateResult> resultBuilder(
-            AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelProcedureConfig> computeResult,
+            ComputationResult<ComputationAlgorithm, PregelResult, PregelProcedureConfig> computeResult,
             ExecutionContext executionContext) {
         var ranIterations = computeResult.result().ranIterations();
         var didConverge = computeResult.result().didConverge();

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.pregel.proc;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
@@ -30,6 +29,7 @@ import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.pipeline.ComputationResult;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,7 +40,7 @@ final class PregelBaseProc {
 
     static <ALGO extends Algorithm<PregelResult>, CONFIG extends PregelConfig>
     List<NodeProperty> nodeProperties(
-        AlgoBaseProc.ComputationResult<ALGO, PregelResult, CONFIG> computationResult,
+        ComputationResult<ALGO, PregelResult, CONFIG> computationResult,
         String propertyPrefix
     ) {
         var compositeNodeValue = computationResult.result().nodeValues();

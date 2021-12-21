@@ -31,6 +31,7 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;

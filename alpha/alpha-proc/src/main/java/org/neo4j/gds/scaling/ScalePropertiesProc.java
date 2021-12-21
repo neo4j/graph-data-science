@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
+import org.neo4j.gds.pipeline.ComputationResult;
 
 public class ScalePropertiesProc {
 
-    static NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<ScaleProperties, ScaleProperties.Result, ? extends ScalePropertiesBaseConfig> computationResult) {
+    static NodeProperties nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ? extends ScalePropertiesBaseConfig> computationResult) {
         var size = computationResult.graph().nodeCount();
         var scaledProperties = computationResult.result().scaledProperties();
 

@@ -41,6 +41,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.core.write.NativeRelationshipExporter;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporter;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -200,14 +201,14 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 graphStore
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> computationResult1 = proc.compute(
+            ComputationResult<?, RESULT, CONFIG> computationResult1 = proc.compute(
                 loadedGraphName,
                 configMap,
                 releaseAlgorithm(),
                 true
             );
 
-            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> computationResult2 = proc.compute(
+            ComputationResult<?, RESULT, CONFIG> computationResult2 = proc.compute(
                 loadedGraphName,
                 configMap,
                 releaseAlgorithm(),
@@ -251,13 +252,13 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 graphLoader(graphCreateConfig).graphStore()
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(
+            ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(
                 loadedGraphName,
                 configMap,
                 releaseAlgorithm(),
                 true
             );
-            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(
+            ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(
                 loadedGraphName,
                 configMap,
                 releaseAlgorithm(),

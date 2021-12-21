@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
 import org.neo4j.gds.pipeline.validation.GraphCreateConfigValidations;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
@@ -38,7 +38,7 @@ final class BetweennessCentralityProc {
 
     private BetweennessCentralityProc() {}
 
-    static <CONFIG extends BetweennessCentralityBaseConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult) {
+    static <CONFIG extends BetweennessCentralityBaseConfig> NodeProperties nodeProperties(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult) {
         return computeResult.result().asNodeProperties();
     }
 
@@ -48,7 +48,7 @@ final class BetweennessCentralityProc {
 
     static <PROC_RESULT, CONFIG extends BetweennessCentralityBaseConfig> AbstractCentralityResultBuilder<PROC_RESULT> resultBuilder(
         BetweennessCentralityResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult
+        ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult
     ) {
         if (computeResult.result() != null) {
             HugeAtomicDoubleArray centrality = computeResult.result();

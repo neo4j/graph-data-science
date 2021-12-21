@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.WriteRelationshipsProc;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -30,6 +29,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
 
 import java.util.stream.Stream;
@@ -44,9 +44,9 @@ public abstract class SimilarityWriteProc<
 
     public abstract String procedureName();
 
-    protected abstract SimilarityProc.SimilarityResultBuilder<PROC_RESULT> resultBuilder(AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
+    protected abstract SimilarityProc.SimilarityResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
 
-    protected Stream<PROC_RESULT> write(AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected Stream<PROC_RESULT> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         return computationResultConsumer().consume(computationResult, executionContext());
     }
 

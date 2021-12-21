@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.ImmutableRelationship;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.values.storable.Value;

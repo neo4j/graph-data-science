@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
 import org.neo4j.gds.pipeline.validation.GraphCreateConfigValidations;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
@@ -38,13 +38,13 @@ final class TriangleCountCompanion {
         "determine the number of triangles passing through each node in the graph.";
 
 
-    static <CONFIG extends TriangleCountBaseConfig> NodeProperties nodePropertyTranslator(AlgoBaseProc.ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult) {
+    static <CONFIG extends TriangleCountBaseConfig> NodeProperties nodePropertyTranslator(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult) {
         return computeResult.result().asNodeProperties();
     }
 
     static <PROC_RESULT, CONFIG extends TriangleCountBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         TriangleCountResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult
+        ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult
     ) {
         var result = Optional.ofNullable(computeResult.result()).orElse(EmptyResult.EMPTY_RESULT);
         return procResultBuilder.withGlobalTriangleCount(result.globalTriangles());

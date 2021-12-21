@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -61,7 +62,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
 
     @Override
     public Stream<RESULT> consume(
-        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext
     ) {
         return runWithExceptionLogging("Graph write failed", executionContext.log(), () -> {
             CONFIG config = computationResult.config();
@@ -82,7 +83,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
 
     void writeToNeo(
         AbstractResultBuilder<?> resultBuilder,
-        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
         ExecutionContext executionContext
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
@@ -121,7 +122,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
     NodePropertyExporter createNodePropertyExporter(
         Graph graph,
         ProgressTracker progressTracker,
-        AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         return nodePropertyExporterBuilder
             .withIdMapping(graph)

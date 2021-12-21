@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer.MutateNodePropertyListFunction;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -73,7 +73,7 @@ public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccM
     }
 
     private AbstractCommunityResultBuilder<WccMutateProc.MutateResult> resultBuilder(
-        AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult,
+        ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
         return WccProc.resultBuilder(

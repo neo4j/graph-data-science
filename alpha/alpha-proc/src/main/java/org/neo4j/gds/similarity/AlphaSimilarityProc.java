@@ -32,6 +32,7 @@ import org.neo4j.gds.impl.similarity.Computations;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.ProcConfigParser;
 import org.neo4j.gds.results.SimilarityResult;

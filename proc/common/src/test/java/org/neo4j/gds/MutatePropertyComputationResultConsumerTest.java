@@ -38,7 +38,9 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.pipeline.ImmutableComputationResult;
 import org.neo4j.gds.pipeline.ImmutableExecutionContext;
 import org.neo4j.gds.test.ImmutableTestMutateConfig;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
@@ -137,7 +139,7 @@ class MutatePropertyComputationResultConsumerTest {
     }
 
     @NotNull
-    private AlgoBaseProc.ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> getComputationResult(
+    private ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> getComputationResult(
         GraphStore graphStore,
         Graph graph,
         TestMutateConfig config

@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.beta.modularity;
 
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
+import org.neo4j.gds.pipeline.ComputationResult;
+import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 final class ModularityOptimizationProc {
@@ -33,7 +33,7 @@ final class ModularityOptimizationProc {
 
     static <PROC_RESULT, CONFIG extends ModularityOptimizationConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         ModularityOptimizationResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<ModularityOptimization, ModularityOptimization, CONFIG> computeResult
+        ComputationResult<ModularityOptimization, ModularityOptimization, CONFIG> computeResult
     ) {
         ModularityOptimization result = computeResult.result();
 
@@ -47,7 +47,7 @@ final class ModularityOptimizationProc {
     }
 
     static <CONFIG extends ModularityOptimizationConfig> NodeProperties nodeProperties(
-        AlgoBaseProc.ComputationResult<ModularityOptimization, ModularityOptimization, CONFIG> computationResult,
+        ComputationResult<ModularityOptimization, ModularityOptimization, CONFIG> computationResult,
         AllocationTracker allocationTracker
     ) {
         LongNodeProperties resultCommunities = computationResult.result().asNodeProperties();

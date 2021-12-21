@@ -30,6 +30,7 @@ import org.neo4j.gds.impl.msbfs.AllShortestPathsStream;
 import org.neo4j.gds.impl.msbfs.MSBFSASPAlgorithm;
 import org.neo4j.gds.impl.msbfs.MSBFSAllShortestPaths;
 import org.neo4j.gds.impl.msbfs.WeightedAllShortestPaths;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.procedure.Description;

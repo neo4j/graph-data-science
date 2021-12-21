@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;

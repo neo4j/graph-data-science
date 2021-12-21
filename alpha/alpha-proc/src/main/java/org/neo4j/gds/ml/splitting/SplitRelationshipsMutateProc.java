@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.AfterLoadValidation;

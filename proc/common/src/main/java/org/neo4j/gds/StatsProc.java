@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;

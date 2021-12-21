@@ -17,24 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pregel.proc;
+package org.neo4j.gds.pipeline;
 
+import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
-import org.neo4j.gds.beta.pregel.PregelResult;
-import org.neo4j.gds.core.write.NodeProperty;
-import org.neo4j.gds.pipeline.ComputationResult;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
-import java.util.List;
+@ValueClass
+public interface ComputationResult<A extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
+    long preProcessingMillis();
 
-public abstract class PregelMutateProc<
-    ALGO extends Algorithm<PregelResult>,
-    CONFIG extends PregelProcedureConfig>
-    extends MutatePropertyProc<ALGO, PregelResult, PregelMutateResult, CONFIG> {
+    long computeMillis();
 
-    @Override
-    protected List<NodeProperty> nodePropertyList(ComputationResult<ALGO, PregelResult, CONFIG> computationResult) {
-        return PregelBaseProc.nodeProperties(computationResult, computationResult.config().mutateProperty());
+    @Nullable
+    A algorithm();
+
+    @Nullable
+    ALGO_RESULT result();
+
+    Graph graph();
+
+    GraphStore graphStore();
+
+    CONFIG config();
+
+    @Value.Default
+    default boolean isGraphEmpty() {
+        return false;
     }
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;

@@ -19,16 +19,12 @@
  */
 package org.neo4j.gds;
 
-import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.pipeline.AlgoConfigParser;
 import org.neo4j.gds.pipeline.AlgorithmSpec;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GraphCreationFactory;
@@ -162,30 +158,6 @@ public abstract class AlgoBaseProc<
             pipelineSpec,
             executionContext()
         );
-    }
-
-    @ValueClass
-    public interface ComputationResult<A extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
-        long preProcessingMillis();
-
-        long computeMillis();
-
-        @Nullable
-        A algorithm();
-
-        @Nullable
-        ALGO_RESULT result();
-
-        Graph graph();
-
-        GraphStore graphStore();
-
-        CONFIG config();
-
-        @Value.Default
-        default boolean isGraphEmpty() {
-            return false;
-        }
     }
 
     private final class AlgoBasePipelineSpec implements PipelineSpec<ALGO, ALGO_RESULT, CONFIG> {

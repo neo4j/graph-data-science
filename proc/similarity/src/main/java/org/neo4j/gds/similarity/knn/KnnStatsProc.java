@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -88,7 +88,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
     }
 
     @Override
-    public Stream<Result> stats(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computationResult) {
+    public Stream<Result> stats(ComputationResult<Knn, Knn.Result, KnnStatsConfig> computationResult) {
         return runWithExceptionLogging("Graph stats failed", () -> {
             KnnStatsConfig config = computationResult.config();
 

@@ -31,6 +31,7 @@ import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.gds.pipeline.ImmutableComputationResult;
 import org.neo4j.gds.pipeline.ImmutableExecutionContext;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;

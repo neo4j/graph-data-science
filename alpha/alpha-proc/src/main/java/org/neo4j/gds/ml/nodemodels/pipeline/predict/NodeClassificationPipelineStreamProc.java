@@ -28,6 +28,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationStreamResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -72,10 +73,10 @@ public class NodeClassificationPipelineStreamProc
     @Override
     protected Stream<NodeClassificationStreamResult> stream(
         ComputationResult<
-            NodeClassificationPredictPipelineExecutor,
-            NodeClassificationResult,
-            NodeClassificationPredictPipelineStreamConfig
-            > computationResult
+                    NodeClassificationPredictPipelineExecutor,
+                    NodeClassificationResult,
+                    NodeClassificationPredictPipelineStreamConfig
+                    > computationResult
     ) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();

@@ -27,6 +27,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;

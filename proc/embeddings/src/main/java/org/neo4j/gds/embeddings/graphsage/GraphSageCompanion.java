@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
@@ -29,6 +28,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.pipeline.GraphStoreValidation;
 import org.neo4j.gds.pipeline.validation.AfterLoadValidation;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
@@ -47,7 +47,7 @@ public final class GraphSageCompanion {
     private GraphSageCompanion() {}
 
     @NotNull
-    public static <T extends GraphSageBaseConfig> DoubleArrayNodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<GraphSage, GraphSage.GraphSageResult, T> computationResult) {
+    public static <T extends GraphSageBaseConfig> DoubleArrayNodeProperties getNodeProperties(ComputationResult<GraphSage, GraphSage.GraphSageResult, T> computationResult) {
         var size = computationResult.graph().nodeCount();
         var embeddings = computationResult.result().embeddings();
 

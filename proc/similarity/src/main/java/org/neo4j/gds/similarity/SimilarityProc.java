@@ -20,11 +20,11 @@
 package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.pipeline.ComputationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -48,7 +48,7 @@ public final class SimilarityProc {
 
     public static <RESULT, PROC_RESULT, CONFIG extends AlgoBaseConfig> SimilarityResultBuilder<PROC_RESULT> withGraphsizeAndTimings(
         SimilarityResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<? extends Algorithm<?>, RESULT, CONFIG> computationResult,
+        ComputationResult<? extends Algorithm<?>, RESULT, CONFIG> computationResult,
         Function<RESULT, SimilarityGraphResult> graphResultFunc
     ) {
         RESULT result = computationResult.result();
@@ -62,7 +62,7 @@ public final class SimilarityProc {
 
     public static <PROC_RESULT, CONFIG extends AlgoBaseConfig> SimilarityResultBuilder<PROC_RESULT> resultBuilderWithTimings(
         SimilarityResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<? extends Algorithm<?>, ?, CONFIG> computationResult
+        ComputationResult<? extends Algorithm<?>, ?, CONFIG> computationResult
     ) {
         procResultBuilder
             .withPreProcessingMillis(computationResult.preProcessingMillis())
