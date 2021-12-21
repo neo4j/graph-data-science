@@ -42,6 +42,7 @@
 |===
 |Description                                | Operation
 |<<catalog-graph-project-subgraph, Project a graph from a graph in the catalog>> | `gds.beta.graph.project.subgraph`
+|<<catalog-graph-project-subgraph, Deprecated: Project a graph from a graph in the catalog>> | `gds.beta.graph.create.subgraph`
 |<<graph-generation, Generate Random Graph>>| `gds.beta.graph.generate`
 .2+<.^|<<catalog-graph-export-csv, CSV Export>>
 | `gds.beta.graph.export.csv`
