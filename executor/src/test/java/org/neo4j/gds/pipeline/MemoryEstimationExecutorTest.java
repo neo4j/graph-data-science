@@ -27,15 +27,15 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestMutateConfig;
-import org.neo4j.gds.test.TestMutateSpec;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
@@ -54,8 +54,6 @@ class MemoryEstimationExecutorTest extends BaseTest {
 
     @BeforeEach
     void setup() throws Exception {
-        GraphDatabaseApiProxy.registerProcedures(db, GraphCreateProc.class);
-
         var procedureTransaction = db.beginTx();
         var transaction = GraphDatabaseApiProxy.kernelTransaction(procedureTransaction);
 
@@ -86,6 +84,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
     @Test
     void testMemoryEstimate() {
         var graphName = "memoryEstimateGraph";
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("", graphName), GdlGraphs.EMPTY_GRAPH_STORE);
         runQuery(GdsCypher.call(graphName)
                 .graphCreate()
                 .loadEverything()

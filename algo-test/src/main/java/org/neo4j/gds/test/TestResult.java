@@ -37,7 +37,7 @@ public final class TestResult {
         this.configuration = configuration;
     }
 
-    static class TestResultBuilder extends AbstractResultBuilder<TestResult> {
+    public static class TestResultBuilder extends AbstractResultBuilder<TestResult> {
 
         long relationshipCount = 0;
 
@@ -51,7 +51,7 @@ public final class TestResult {
             );
         }
 
-        TestResultBuilder withRelationshipCount(long relationshipCount) {
+        public TestResultBuilder withRelationshipCount(long relationshipCount) {
             this.relationshipCount = relationshipCount;
             return this;
         }

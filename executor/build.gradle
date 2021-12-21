@@ -1,6 +1,6 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Procedures :: Common'
+description = 'Neo4j Graph Data Science :: Executor'
 
 group = 'org.neo4j.gds'
 
@@ -10,26 +10,18 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
-    api(project(':algo'))
-
     implementation project(':annotations')
+    implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':config-api')
     implementation project(':core')
-    implementation project(':executor')
-    implementation project(':licensing')
-    implementation project(':edition-api')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
-    implementation project(':neo4j-adapter')
     implementation project(':open-model-catalog')
-    implementation project(':open-licensing')
-    implementation project(':pregel')
     implementation project(':transaction')
     implementation project(':string-formatting')
 
     implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
-    implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
@@ -40,16 +32,10 @@ dependencies {
         }
     }
 
-    compileOnly group: 'org.neo4j', name: 'neo4j-unsafe', version: ver.'neo4j'
+    testImplementation project(':algo-test')
+    testImplementation project(':test-utils')
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
-    testAnnotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
-
-    testImplementation project(':algo-test')
-    testImplementation project(':proc-test')
-    testImplementation project(':graph-schema-api')
-    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
-    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
 }

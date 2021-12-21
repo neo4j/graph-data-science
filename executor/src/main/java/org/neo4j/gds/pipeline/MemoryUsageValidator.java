@@ -20,7 +20,6 @@
 package org.neo4j.gds.pipeline;
 
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -40,6 +39,11 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MemoryUsageValidator {
 
+    @FunctionalInterface
+    public interface FreeMemoryInspector {
+        long freeMemory();
+    }
+
     private final Log log;
     private final GraphDatabaseAPI api;
 
@@ -55,7 +59,7 @@ public class MemoryUsageValidator {
     public <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(
         C config,
         Function<C, MemoryTreeWithDimensions> runEstimation,
-        BaseProc.FreeMemoryInspector inspector
+        FreeMemoryInspector inspector
     ) {
         MemoryTreeWithDimensions memoryTreeWithDimensions = null;
 

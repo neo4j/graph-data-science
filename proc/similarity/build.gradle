@@ -16,6 +16,7 @@ dependencies {
     implementation project(':algo-common')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':executor')
     implementation project(':memory-usage')
     implementation project(':neo4j-adapter')
     implementation project(':string-formatting')

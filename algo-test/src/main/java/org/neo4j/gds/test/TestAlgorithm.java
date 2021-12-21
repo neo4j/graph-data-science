@@ -64,7 +64,7 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm> {
     @Override
     public void release() {}
 
-    long relationshipCount() {
+    public long relationshipCount() {
         return relationshipCount;
     }
 }

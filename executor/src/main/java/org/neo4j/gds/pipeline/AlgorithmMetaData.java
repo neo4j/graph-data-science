@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.pipeline;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +29,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public class AlgorithmMetaData extends AbstractMap<String, Object> implements Map<String, Object> {
-    public static final String SIGNATURE_PROPERTY = "gds.procedure.signature";
+    private static final String SIGNATURE_PROPERTY = "gds.procedure.signature";
 
     private @Nullable BaseConfig config;
 

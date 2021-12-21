@@ -17,11 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.test;
+package org.neo4j.gds.pipeline;
 
-import org.neo4j.gds.pipeline.AlgorithmSpec;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.pipeline.NewConfigFunction;
+import org.neo4j.gds.test.TestAlgorithm;
+import org.neo4j.gds.test.TestAlgorithmFactory;
+import org.neo4j.gds.test.TestMutateConfig;
+import org.neo4j.gds.test.TestMutateConfigImpl;
+import org.neo4j.gds.test.TestResult;
 
 public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorithm, TestMutateConfig, TestResult, TestAlgorithmFactory<TestMutateConfig>> {
 

@@ -173,9 +173,4 @@ public abstract class BaseProc {
             .username(username())
             .build();
     }
-
-    @FunctionalInterface
-    public interface FreeMemoryInspector {
-        long freeMemory();
-    }
 }

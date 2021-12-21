@@ -21,7 +21,6 @@ package org.neo4j.gds.pipeline;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlgorithmMetaData;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
