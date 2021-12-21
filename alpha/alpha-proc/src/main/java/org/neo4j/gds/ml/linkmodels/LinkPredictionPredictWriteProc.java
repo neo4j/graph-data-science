@@ -23,9 +23,9 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteStreamOfRelationshipsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.pipeline.ComputationResult;
-import org.neo4j.gds.pipeline.GdsCallable;
-import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
@@ -37,8 +37,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
-import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_RELATIONSHIP;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 

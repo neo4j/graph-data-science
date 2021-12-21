@@ -25,9 +25,9 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.ShortestPathDeltaStepping;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.DeltaSteppingProcResult;
 import org.neo4j.procedure.Description;
@@ -37,7 +37,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_RELATIONSHIP;
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 import static org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 

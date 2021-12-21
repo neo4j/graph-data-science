@@ -24,8 +24,8 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.NodeWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.executor.validation.Validator;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.pipeline.validation.Validator;
 
 import java.util.List;
 

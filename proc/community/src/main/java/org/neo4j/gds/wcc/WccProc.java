@@ -20,7 +20,7 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.pipeline.ComputationResult;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;

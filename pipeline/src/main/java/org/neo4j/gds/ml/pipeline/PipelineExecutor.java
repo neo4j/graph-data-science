@@ -26,7 +26,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionContext;
 
 import java.util.Collection;
 import java.util.Map;

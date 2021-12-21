@@ -24,7 +24,7 @@ import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.write.NodeProperty;
-import org.neo4j.gds.pipeline.ComputationResult;
+import org.neo4j.gds.executor.ComputationResult;
 
 import java.util.List;
 

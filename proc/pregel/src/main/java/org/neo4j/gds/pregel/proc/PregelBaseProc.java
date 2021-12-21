@@ -29,7 +29,7 @@ import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
-import org.neo4j.gds.pipeline.ComputationResult;
+import org.neo4j.gds.executor.ComputationResult;
 
 import java.util.List;
 import java.util.stream.Collectors;

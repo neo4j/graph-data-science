@@ -22,12 +22,12 @@ package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.GraphStoreValidation;
+import org.neo4j.gds.executor.validation.AfterLoadValidation;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.pipeline.GraphStoreValidation;
-import org.neo4j.gds.pipeline.validation.AfterLoadValidation;
-import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 
 import java.util.Collection;
 import java.util.List;

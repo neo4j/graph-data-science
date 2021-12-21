@@ -23,8 +23,8 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.pipeline.ComputationResult;
 
 import java.util.stream.Stream;
 

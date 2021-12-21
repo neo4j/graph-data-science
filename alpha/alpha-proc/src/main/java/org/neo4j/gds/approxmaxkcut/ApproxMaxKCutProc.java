@@ -21,10 +21,10 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutFactory;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
-import org.neo4j.gds.pipeline.ComputationResult;
 
 public final class ApproxMaxKCutProc {
 

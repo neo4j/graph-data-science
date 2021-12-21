@@ -24,7 +24,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.pipeline.ComputationResult;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;

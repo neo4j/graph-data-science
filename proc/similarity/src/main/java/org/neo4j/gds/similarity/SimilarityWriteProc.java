@@ -29,8 +29,8 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.pipeline.ComputationResult;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 
 import java.util.stream.Stream;
 

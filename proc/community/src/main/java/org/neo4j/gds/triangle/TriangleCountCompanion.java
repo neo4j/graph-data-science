@@ -22,10 +22,10 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.gds.pipeline.ComputationResult;
-import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
-import org.neo4j.gds.pipeline.validation.GraphCreateConfigValidations;
-import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.validation.BeforeLoadValidation;
+import org.neo4j.gds.executor.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;

@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
-import org.neo4j.gds.pipeline.ComputationResult;
+import org.neo4j.gds.executor.ComputationResult;
 
 final class FastRPCompanion {
 

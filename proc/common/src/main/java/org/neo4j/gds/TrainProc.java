@@ -25,10 +25,10 @@ import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.model.ModelConfig;
-import org.neo4j.gds.pipeline.ComputationResult;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
-import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.validation.BeforeLoadValidation;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 
 import java.util.HashMap;

@@ -28,10 +28,10 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.pipeline.ComputationResult;
-import org.neo4j.gds.pipeline.GraphStoreValidation;
-import org.neo4j.gds.pipeline.validation.AfterLoadValidation;
-import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.GraphStoreValidation;
+import org.neo4j.gds.executor.validation.AfterLoadValidation;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.List;

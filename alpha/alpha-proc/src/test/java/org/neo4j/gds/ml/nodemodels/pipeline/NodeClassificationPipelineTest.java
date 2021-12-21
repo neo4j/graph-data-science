@@ -22,9 +22,9 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
-import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.List;
 import java.util.Map;

@@ -25,12 +25,12 @@ import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.validation.AfterLoadValidation;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
-import org.neo4j.gds.pipeline.ComputationResult;
-import org.neo4j.gds.pipeline.ExecutionContext;
-import org.neo4j.gds.pipeline.GdsCallable;
-import org.neo4j.gds.pipeline.validation.AfterLoadValidation;
-import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardWriteResult;
 import org.neo4j.procedure.Context;
@@ -44,8 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
-import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdsCallable(name = "gds.alpha.ml.pipeline.nodeClassification.predict.write", description = PREDICT_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)

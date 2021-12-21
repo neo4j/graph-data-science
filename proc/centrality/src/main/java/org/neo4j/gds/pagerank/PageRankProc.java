@@ -20,9 +20,9 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.pipeline.ComputationResult;
-import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
-import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.validation.BeforeLoadValidation;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;

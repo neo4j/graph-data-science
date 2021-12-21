@@ -27,11 +27,11 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.triangle.TriangleStream;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.pipeline.GdsCallable;
-import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
-import org.neo4j.gds.pipeline.validation.GraphCreateConfigValidations;
-import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.validation.BeforeLoadValidation;
+import org.neo4j.gds.executor.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
+import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.triangle.TriangleProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 

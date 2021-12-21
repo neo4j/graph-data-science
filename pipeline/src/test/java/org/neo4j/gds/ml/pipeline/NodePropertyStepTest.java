@@ -30,8 +30,8 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.pipeline.GdsCallableFinder;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;

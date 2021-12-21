@@ -19,22 +19,22 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.pipeline.ComputationResult;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer.MutateNodePropertyListFunction;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
-import org.neo4j.gds.pipeline.AlgorithmSpec;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.pipeline.ExecutionContext;
-import org.neo4j.gds.pipeline.GdsCallable;
-import org.neo4j.gds.pipeline.NewConfigFunction;
+import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
 
 @GdsCallable(name = "gds.wcc.mutate", description = WCC_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)

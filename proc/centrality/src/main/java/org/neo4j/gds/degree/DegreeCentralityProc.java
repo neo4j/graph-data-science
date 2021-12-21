@@ -22,7 +22,7 @@ package org.neo4j.gds.degree;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.gds.pipeline.ComputationResult;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 public final class DegreeCentralityProc {

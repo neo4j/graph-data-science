@@ -20,8 +20,8 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.config.MutateConfig;
-import org.neo4j.gds.pipeline.ComputationResult;
-import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;

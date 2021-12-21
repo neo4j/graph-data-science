@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionContext;
 
 import java.util.Collection;
 import java.util.Map;

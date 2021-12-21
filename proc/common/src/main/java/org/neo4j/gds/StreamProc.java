@@ -23,9 +23,9 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.pipeline.ComputationResult;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
