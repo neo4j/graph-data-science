@@ -138,7 +138,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 pipeline,
                 modelData,
                 config,
-                caller,
+                caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER
@@ -184,7 +184,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 pipeline,
                 modelData,
                 config,
-                caller,
+                caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER
@@ -241,7 +241,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var log = new TestLog();
             var progressTracker = new TestProgressTracker(
-                new LinkPredictionPredictPipelineAlgorithmFactory<>(caller, modelCatalog).progressTask(graphStore, config),
+                new LinkPredictionPredictPipelineAlgorithmFactory<>(caller.executionContext(), modelCatalog).progressTask(graphStore, config),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE
@@ -251,7 +251,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 pipeline,
                 modelData,
                 config,
-                caller,
+                caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
                 progressTracker

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.Model;
@@ -29,6 +28,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.Map;
 import java.util.Optional;
@@ -37,8 +37,7 @@ import java.util.stream.Collectors;
 public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
     LinkPredictionTrainConfig,
     LinkPredictionPipeline,
-    Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>,
-    LinkPredictionTrainPipelineExecutor
+    Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>
 > {
 
     private final RelationshipSplitter relationshipSplitter;
@@ -46,7 +45,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
     public LinkPredictionTrainPipelineExecutor(
         LinkPredictionPipeline pipeline,
         LinkPredictionTrainConfig config,
-        BaseProc caller,
+        ExecutionContext executionContext,
         GraphStore graphStore,
         String graphName,
         ProgressTracker progressTracker
@@ -54,7 +53,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
         super(
             pipeline,
             config,
-            caller,
+            executionContext,
             graphStore,
             graphName,
             progressTracker
@@ -63,7 +62,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
         this.relationshipSplitter = new RelationshipSplitter(
             graphName,
             pipeline.splitConfig(),
-            caller,
+            executionContext,
             progressTracker
         );
     }

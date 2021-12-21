@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.Collection;
 import java.util.Map;
@@ -30,7 +30,7 @@ import java.util.Map;
 public interface ExecutableNodePropertyStep extends ToMapConvertible {
 
     void execute(
-        BaseProc caller,
+        ExecutionContext executionContext,
         String graphName,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relTypes

@@ -19,13 +19,15 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig;
-import org.neo4j.gds.ml.pipeline.proc.ProcedureReflection;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
+import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.pipeline.ProcedureExecutor;
+import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,18 +42,18 @@ public class RelationshipSplitter {
 
     private final String graphName;
     private final LinkPredictionSplitConfig splitConfig;
-    private final BaseProc caller;
+    private final ExecutionContext executionContext;
     private final ProgressTracker progressTracker;
 
     RelationshipSplitter(
         String graphName,
         LinkPredictionSplitConfig splitConfig,
-        BaseProc caller,
+        ExecutionContext executionContext,
         ProgressTracker progressTracker
     ) {
         this.graphName = graphName;
         this.splitConfig = splitConfig;
-        this.caller = caller;
+        this.executionContext = executionContext;
         this.progressTracker = progressTracker;
     }
 
@@ -129,7 +131,12 @@ public class RelationshipSplitter {
             randomSeed.ifPresent(seed -> put("randomSeed", seed));
         }};
 
-        var procReflection = ProcedureReflection.INSTANCE;
-        procReflection.invokeProc(caller, graphName, procReflection.findProcedureMethod("splitRelationships"), splitRelationshipProcConfig);
+        var splitRelationshipsMutateProc = new SplitRelationshipsMutateProc();
+
+        new ProcedureExecutor<>(
+            splitRelationshipsMutateProc,
+            new ProcedurePipelineSpec<>(),
+            executionContext
+        ).compute(graphName, splitRelationshipProcConfig, false, false);
     }
 }

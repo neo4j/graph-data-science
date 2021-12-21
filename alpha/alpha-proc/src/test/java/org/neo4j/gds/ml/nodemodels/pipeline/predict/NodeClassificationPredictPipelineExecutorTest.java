@@ -134,7 +134,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
                 pipeline,
                 config,
-                caller,
+                caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
@@ -175,7 +175,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
                 pipeline,
                 config,
-                caller,
+                caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
@@ -234,7 +234,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
             var log = new TestLog();
             var progressTracker = new TestProgressTracker(
-                new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, caller).progressTask(graphStore, config),
+                new NodeClassificationPredictPipelineAlgorithmFactory<>(caller.executionContext(), modelCatalog).progressTask(graphStore, config),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE
@@ -243,7 +243,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
                 pipeline,
                 config,
-                caller,
+                caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
                 progressTracker,
@@ -276,7 +276,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
     void validateFeaturesExistOnGraph() {
         addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 3, List.of("a", "b", "d"));
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var factory = new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, caller);
+            var factory = new NodeClassificationPredictPipelineAlgorithmFactory<>(caller.executionContext(), modelCatalog);
             var streamConfig = ImmutableNodeClassificationPredictPipelineBaseConfig.builder()
                 .username(getUsername())
                 .modelName(MODEL_NAME)

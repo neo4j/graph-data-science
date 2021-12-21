@@ -82,7 +82,7 @@ class NodePropertyStepTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(
             db,
             TestProc.class,
-            proc -> step.execute(proc, GRAPH_NAME, List.of(NodeLabel.ALL_NODES), List.of(RelationshipType.ALL_RELATIONSHIPS))
+            proc -> step.execute(proc.executionContext(), GRAPH_NAME, List.of(NodeLabel.ALL_NODES), List.of(RelationshipType.ALL_RELATIONSHIPS))
         );
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), GRAPH_NAME).graphStore();

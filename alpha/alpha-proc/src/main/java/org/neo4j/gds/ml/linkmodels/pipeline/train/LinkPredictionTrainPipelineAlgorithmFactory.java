@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -30,15 +29,16 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.List;
 
 public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> {
-    private final BaseProc caller;
+    private final ExecutionContext executionContext;
     private final ModelCatalog modelCatalog;
 
-    public LinkPredictionTrainPipelineAlgorithmFactory(BaseProc caller, ModelCatalog modelCatalog) {
-        this.caller = caller;
+    public LinkPredictionTrainPipelineAlgorithmFactory(ExecutionContext executionContext, ModelCatalog modelCatalog) {
+        this.executionContext = executionContext;
         this.modelCatalog = modelCatalog;
     }
 
@@ -55,7 +55,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
         return new LinkPredictionTrainPipelineExecutor(
             pipeline,
             trainConfig,
-            caller,
+            executionContext,
             graphStore,
             trainConfig.graphName(),
             progressTracker

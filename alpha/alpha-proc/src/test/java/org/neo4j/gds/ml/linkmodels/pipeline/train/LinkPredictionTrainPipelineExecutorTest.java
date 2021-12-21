@@ -169,7 +169,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             var actualModel = new LinkPredictionTrainPipelineExecutor(
                 pipeline,
                 config,
-                caller,
+                caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER
@@ -205,7 +205,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             var executor = new LinkPredictionTrainPipelineExecutor(
                 pipeline,
                 ImmutableLinkPredictionTrainConfig.builder().graphName(GRAPH_NAME).modelName("foo").pipeline("bar").build(),
-                caller,
+                caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER
@@ -248,7 +248,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             var executor = new LinkPredictionTrainPipelineExecutor(
                 pipeline,
                 linkPredictionTrainConfig,
-                caller,
+                caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER
@@ -289,7 +289,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             var executor = new LinkPredictionTrainPipelineExecutor(
                 pipeline,
                 linkPredictionTrainConfig,
-                caller,
+                caller.executionContext(),
                 invalidGraphStore,
                 graphName,
                 ProgressTracker.NULL_TRACKER
@@ -342,7 +342,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var log = new TestLog();
             var progressTracker = new TestProgressTracker(
-                new LinkPredictionTrainPipelineAlgorithmFactory(caller, modelCatalog).progressTask(graphStore, config),
+                new LinkPredictionTrainPipelineAlgorithmFactory(caller.executionContext(), modelCatalog).progressTask(graphStore, config),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE
@@ -350,7 +350,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             new LinkPredictionTrainPipelineExecutor(
                 pipeline,
                 config,
-                caller,
+                caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
                 progressTracker

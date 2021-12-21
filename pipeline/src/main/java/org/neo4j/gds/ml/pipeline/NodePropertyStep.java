@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallableFinder;
 import org.neo4j.gds.pipeline.ProcedureExecutor;
 import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
@@ -57,9 +57,8 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     }
 
     @Override
-    // Todo pass in ExecutionContext and the graph to operate on instead
     public void execute(
-        BaseProc caller,
+        ExecutionContext executionContext,
         String graphName,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relTypes
@@ -73,7 +72,7 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         new ProcedureExecutor<>(
             callableDefinition.algorithmSpec(),
             new ProcedurePipelineSpec<>(),
-            caller.executionContext()
+            executionContext
         ).compute(graphName, configCopy, false, false);
     }
 

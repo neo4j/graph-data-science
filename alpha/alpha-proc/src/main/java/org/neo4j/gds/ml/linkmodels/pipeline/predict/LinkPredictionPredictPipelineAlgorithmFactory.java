@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -29,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.similarity.knn.KnnFactory;
 
 import java.util.List;
@@ -36,12 +36,12 @@ import java.util.List;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.getTrainedLPPipelineModel;
 
 public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPredictionPredictPipelineBaseConfig> extends GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, CONFIG> {
-    private final BaseProc caller;
+    private final ExecutionContext executionContext;
     private final ModelCatalog modelCatalog;
 
-    LinkPredictionPredictPipelineAlgorithmFactory(BaseProc caller, ModelCatalog modelCatalog) {
+    LinkPredictionPredictPipelineAlgorithmFactory(ExecutionContext executionContext, ModelCatalog modelCatalog) {
         super();
-        this.caller = caller;
+        this.executionContext = executionContext;
         this.modelCatalog = modelCatalog;
     }
 
@@ -86,7 +86,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             linkPredictionPipeline,
             model.data(),
             configuration,
-            caller,
+            executionContext,
             graphStore,
             configuration.graphName(),
             progressTracker

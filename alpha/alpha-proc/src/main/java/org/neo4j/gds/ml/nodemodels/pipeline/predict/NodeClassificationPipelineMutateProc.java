@@ -119,7 +119,7 @@ public class NodeClassificationPipelineMutateProc
 
     @Override
     public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig> algorithmFactory() {
-        return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this);
+        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog);
     }
 
     @SuppressWarnings("unused")

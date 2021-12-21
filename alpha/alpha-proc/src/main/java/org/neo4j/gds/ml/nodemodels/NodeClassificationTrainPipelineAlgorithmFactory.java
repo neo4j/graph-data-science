@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -32,16 +31,17 @@ import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.List;
 
 public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainConfig> {
 
-    private final BaseProc caller;
+    private final ExecutionContext executionContext;
     private final ModelCatalog modelCatalog;
 
-    public NodeClassificationTrainPipelineAlgorithmFactory(BaseProc caller, ModelCatalog modelCatalog) {
-        this.caller = caller;
+    public NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext executionContext, ModelCatalog modelCatalog) {
+        this.executionContext = executionContext;
         this.modelCatalog = modelCatalog;
     }
 
@@ -62,7 +62,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
         return new NodeClassificationTrainPipelineExecutor(
             pipeline,
             configuration,
-            this.caller,
+            executionContext,
             graphStore,
             configuration.graphName(),
             progressTracker

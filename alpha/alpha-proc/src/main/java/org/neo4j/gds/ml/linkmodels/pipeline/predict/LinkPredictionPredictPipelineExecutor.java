@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -29,6 +28,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.Map;
 import java.util.Optional;
@@ -36,8 +36,7 @@ import java.util.Optional;
 public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     LinkPredictionPredictPipelineBaseConfig,
     LinkPredictionPipeline,
-    LinkPredictionResult,
-    LinkPredictionPredictPipelineExecutor
+    LinkPredictionResult
 > {
     private final LinkLogisticRegressionData linkLogisticRegressionData;
 
@@ -45,12 +44,12 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         LinkPredictionPipeline pipeline,
         LinkLogisticRegressionData linkLogisticRegressionData,
         LinkPredictionPredictPipelineBaseConfig config,
-        BaseProc caller,
+        ExecutionContext executionContext,
         GraphStore graphStore,
         String graphName,
         ProgressTracker progressTracker
     ) {
-        super(pipeline, config, caller, graphStore, graphName, progressTracker);
+        super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
         this.linkLogisticRegressionData = linkLogisticRegressionData;
     }
 

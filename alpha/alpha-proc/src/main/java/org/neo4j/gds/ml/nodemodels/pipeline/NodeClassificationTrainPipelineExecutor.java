@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -29,6 +28,7 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.Map;
 import java.util.Optional;
@@ -40,19 +40,19 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     Model<
         NodeLogisticRegressionData,
         NodeClassificationPipelineTrainConfig,
-        NodeClassificationPipelineModelInfo>,
-    NodeClassificationTrainPipelineExecutor> {
+        NodeClassificationPipelineModelInfo>
+> {
     public static final String MODEL_TYPE = "Node classification pipeline";
 
     public NodeClassificationTrainPipelineExecutor(
         NodeClassificationPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
-        BaseProc caller,
+        ExecutionContext executionContext,
         GraphStore graphStore,
         String graphName,
         ProgressTracker progressTracker
     ) {
-        super(pipeline, config, caller, graphStore, graphName, progressTracker);
+        super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         var relationshipTypes = config.internalRelationshipTypes(graphStore);
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.empty());
         var innerModel = NodeClassificationTrain
-            .create(graph, innerConfig(), caller.allocationTracker, progressTracker)
+            .create(graph, innerConfig(), executionContext.allocationTracker(), progressTracker)
             .compute();
 
         var innerInfo = innerModel.customInfo();

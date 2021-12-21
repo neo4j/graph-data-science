@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredict;
@@ -30,28 +29,28 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPred
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.Map;
 import java.util.Optional;
 
-public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor
-    <NodeClassificationPredictPipelineBaseConfig,
+public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
+    NodeClassificationPredictPipelineBaseConfig,
     NodeClassificationPipeline,
-    NodeClassificationResult,
-    NodeClassificationPredictPipelineExecutor>
-{
+    NodeClassificationResult
+> {
     private final NodeLogisticRegressionData modelData;
 
     NodeClassificationPredictPipelineExecutor(
         NodeClassificationPipeline pipeline,
         NodeClassificationPredictPipelineBaseConfig config,
-        BaseProc caller,
+        ExecutionContext executionContext,
         GraphStore graphStore,
         String graphName,
         ProgressTracker progressTracker,
         NodeLogisticRegressionData modelData
     ) {
-        super(pipeline, config, caller, graphStore, graphName, progressTracker);
+        super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
         this.modelData = modelData;
     }
 
@@ -80,7 +79,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor
             config.concurrency(),
             config.includePredictedProbabilities(),
             pipeline.featureProperties(),
-            caller.allocationTracker,
+            executionContext.allocationTracker(),
             progressTracker
         );
         return innerAlgo.compute();

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -33,6 +32,7 @@ import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictAlgorithmFactory;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConfigImpl;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.List;
 
@@ -44,14 +44,14 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
 {
 
     private final ModelCatalog modelCatalog;
-    private final BaseProc caller;
+    private final ExecutionContext executionContext;
     private final NodeClassificationPredictAlgorithmFactory<NodeClassificationPredictConfig> innerFactory;
 
-    NodeClassificationPredictPipelineAlgorithmFactory(ModelCatalog modelCatalog, BaseProc caller) {
+    NodeClassificationPredictPipelineAlgorithmFactory(ExecutionContext executionContext, ModelCatalog modelCatalog) {
         super();
         this.modelCatalog = modelCatalog;
-        this.caller = caller;
         this.innerFactory = new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
+        this.executionContext = executionContext;
     }
 
     @Override
@@ -104,7 +104,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
         return new NodeClassificationPredictPipelineExecutor(
             nodeClassificationPipeline,
             configuration,
-            caller,
+            executionContext,
             graphStore,
             configuration.graphName(),
             progressTracker,

@@ -20,13 +20,13 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.Collection;
 import java.util.Map;
@@ -36,8 +36,7 @@ import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 public abstract class PipelineExecutor<
     PIPELINE_CONFIG extends AlgoBaseConfig,
     PIPELINE extends Pipeline<?, ?>,
-    RESULT,
-    SELF extends PipelineExecutor<PIPELINE_CONFIG, PIPELINE, RESULT, SELF>
+    RESULT
 > extends Algorithm<RESULT> {
 
     public enum DatasetSplits {
@@ -49,14 +48,14 @@ public abstract class PipelineExecutor<
 
     protected final PIPELINE pipeline;
     protected final PIPELINE_CONFIG config;
-    protected final BaseProc caller;
+    protected final ExecutionContext executionContext;
     protected final GraphStore graphStore;
     protected final String graphName;
 
     public PipelineExecutor(
         PIPELINE pipeline,
         PIPELINE_CONFIG config,
-        BaseProc caller,
+        ExecutionContext executionContext,
         GraphStore graphStore,
         String graphName,
         ProgressTracker progressTracker
@@ -64,7 +63,7 @@ public abstract class PipelineExecutor<
         super(progressTracker);
         this.pipeline = pipeline;
         this.config = config;
-        this.caller = caller;
+        this.executionContext = executionContext;
         this.graphStore = graphStore;
         this.graphName = graphName;
     }
@@ -106,7 +105,7 @@ public abstract class PipelineExecutor<
     private void executeNodePropertySteps(GraphFilter graphFilter) {
         for (ExecutableNodePropertyStep step : pipeline.nodePropertySteps()) {
             progressTracker.beginSubTask();
-            step.execute(caller, graphName, graphFilter.nodeLabels(), graphFilter.relationshipTypes());
+            step.execute(executionContext, graphName, graphFilter.nodeLabels(), graphFilter.relationshipTypes());
             progressTracker.endSubTask();
         }
     }

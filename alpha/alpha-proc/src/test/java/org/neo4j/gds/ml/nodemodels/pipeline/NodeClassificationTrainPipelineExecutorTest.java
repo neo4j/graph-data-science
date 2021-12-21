@@ -132,7 +132,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             var ncPipeTrain = new NodeClassificationTrainPipelineExecutor(
                 pipeline,
                 config,
-                caller,
+                caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER
@@ -170,7 +170,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             NodeClassificationTrainPipelineExecutor executor = new NodeClassificationTrainPipelineExecutor(
                 new NodeClassificationPipeline(),
                 config,
-                caller,
+                caller.executionContext(),
                 graphStore,
                 "g",
                 ProgressTracker.NULL_TRACKER

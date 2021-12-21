@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestLog;
@@ -36,6 +35,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.nodeproperties.LongTestProperties;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.Collection;
 import java.util.List;
@@ -163,7 +163,7 @@ class PipelineExecutorTest {
         }
     }
 
-    private class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<FeatureStep, ToMapConvertible>, String, SucceedingPipelineExecutor> {
+    private class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<FeatureStep, ToMapConvertible>, String> {
         SucceedingPipelineExecutor(
             Pipeline<FeatureStep, ToMapConvertible> pipelineStub,
             AlgoBaseConfig config,
@@ -172,7 +172,7 @@ class PipelineExecutorTest {
             super(
                 pipelineStub,
                 config,
-                null,
+                ExecutionContext.EMPTY,
                 PipelineExecutorTest.this.graphStore,
                 "graph",
                 progressTracker
@@ -220,7 +220,7 @@ class PipelineExecutorTest {
 
         @Override
         public void execute(
-            BaseProc caller,
+            ExecutionContext executionContext,
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes
@@ -252,7 +252,7 @@ class PipelineExecutorTest {
 
         @Override
         public void execute(
-            BaseProc caller,
+            ExecutionContext executionContext,
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes
