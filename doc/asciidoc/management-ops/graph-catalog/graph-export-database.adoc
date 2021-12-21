@@ -3,7 +3,7 @@
 
 We can create new Neo4j databases from named in-memory graphs stored in the graph catalog.
 All nodes, relationships and properties present in an in-memory graph are written to a new Neo4j database.
-This includes data that has been projected in `gds.graph.create` and data that has been added by running algorithms in `mutate` mode.
+This includes data that has been projected in `gds.graph.project` and data that has been added by running algorithms in `mutate` mode.
 The newly created database will be stored in the Neo4j `databases` directory using a given database name.
 
 The feature is useful in the following, exemplary scenarios:

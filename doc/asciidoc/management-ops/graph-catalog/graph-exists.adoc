@@ -60,7 +60,7 @@ CREATE
 .Project `Person` nodes and `KNOWS` relationships:
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create('persons', 'Person', 'KNOWS')
+CALL gds.graph.project('persons', 'Person', 'KNOWS')
 ----
 
 

@@ -229,7 +229,7 @@ In the example, we will use the HITS algorithm to calculate the authority and hu
 .The following statement will create the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'myGraph',
   'Website',
   'LINK'

@@ -187,7 +187,7 @@ CREATE (dave)-[:LIKES]->(bongos);
 
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
+CALL gds.graph.project('myGraph', ['Person', 'Instrument'], 'LIKES');
 ----
 
 [role=query-example,no-result=true]

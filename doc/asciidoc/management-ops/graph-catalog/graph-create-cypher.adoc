@@ -39,7 +39,7 @@ In addition, the optional `configuration` parameter allows us to further configu
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
     graphName: String,
     nodeQuery: String,
     relationshipQuery: String,

@@ -96,13 +96,13 @@ With this it is possible to measure the memory consumption of creating a graph a
 [[estimate-procedure-graph]]
 == Estimating memory requirements for graphs
 
-The <<catalog-graph-create, `gds.graph.create`>> procedures also support `.estimate` to estimate memory usage for just the graph.
+The <<catalog-graph-create, `gds.graph.project`>> procedures also support `.estimate` to estimate memory usage for just the graph.
 Those procedures don't accept the graph name as the first argument, as they don't actually create the graph.
 
 .Syntax
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.estimate(nodeProjection: String|List|Map, relationshipProjection: String|List|Map, configuration: Map)
+CALL gds.graph.project.estimate(nodeProjection: String|List|Map, relationshipProjection: String|List|Map, configuration: Map)
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
 ----
 

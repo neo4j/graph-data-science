@@ -41,8 +41,7 @@
 [opts=header,cols="1, 1"]
 |===
 |Description                                | Operation
-|<<catalog-graph-create-subgraph, Project a graph from a named graph>> | `gds.beta.graph.project.subgraph`
-|<<catalog-graph-create-subgraph, Deprecated: Create a graph from a named graph>> | `gds.beta.graph.create.subgraph`
+|<<catalog-graph-create-subgraph, Create a graph from a named graph>> | `gds.beta.graph.create.subgraph`
 |<<graph-generation, Generate Random Graph>>| `gds.beta.graph.generate`
 .2+<.^|<<catalog-graph-export-csv, CSV Export>>
 | `gds.beta.graph.export.csv`

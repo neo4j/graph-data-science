@@ -67,7 +67,7 @@ Now we can proceed to create an in-memory graph which we can run the algorithms 
 .Create the in-memory graph and store it in the graph catalog:
 [source, cypher, role=graph-create-query no-play]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'purchases',
   ['Person','Product'],
   {

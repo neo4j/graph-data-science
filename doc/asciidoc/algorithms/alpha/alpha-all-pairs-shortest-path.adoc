@@ -89,7 +89,7 @@ CREATE (a:Loc {name: 'A'}),
 .The following will create and store a graph using native projection:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'nativeGraph',
   'Loc',
   {
@@ -150,7 +150,7 @@ This is applicable to all other algorithms that use Cypher loading.
 .The following will create and store an undirected graph using cypher projection:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'cypherGraph',
   'MATCH (n:Loc) RETURN id(n) AS id',
   'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) AS source, id(p) AS target, r.cost AS cost'

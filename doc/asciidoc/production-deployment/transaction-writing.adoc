@@ -15,7 +15,7 @@ Example for incorrect use.
 :BEGIN
 
 // Create the in-memory graph
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'test',
   'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) AS id',
   'MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)

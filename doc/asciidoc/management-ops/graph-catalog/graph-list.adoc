@@ -109,13 +109,13 @@ Additionally we will project a few graphs to the graph catalog, for more details
 .Project `Person` nodes and `KNOWS` relationships using native projections:
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create('personsNative', 'Person', 'KNOWS')
+CALL gds.graph.project('personsNative', 'Person', 'KNOWS')
 ----
 
 .Project `Person` nodes and `KNOWS` relationships using Cypher projections:
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'personsCypher',
   'MATCH (n:Person) RETURN id(n) AS id, labels(n) as labels',
   'MATCH (n:Person)-[r:KNOWS]->(m:Person) RETURN id(n) AS source, id(m) AS target, type(r) as type')

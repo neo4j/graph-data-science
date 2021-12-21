@@ -226,7 +226,7 @@ CREATE
 
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'persons',
   {
     Person: {
@@ -348,7 +348,7 @@ CREATE
 
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'persons_with_instruments',
   {
     Person: {

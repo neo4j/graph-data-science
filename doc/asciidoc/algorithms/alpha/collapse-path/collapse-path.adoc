@@ -107,7 +107,7 @@ The following query will create such a graph:
 
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'persons',
   ['Person', 'Instrument'],
   {

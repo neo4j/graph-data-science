@@ -176,7 +176,7 @@ This is because the Link Prediction pipelines are defined only for undirected gr
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-create-query, group=lp]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'myGraph',
   {
     Person: {

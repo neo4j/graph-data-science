@@ -82,7 +82,7 @@ CREATE
 .The following statement will create the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create('myGraph', 'Node', 'REL', { relationshipProperties: 'cost' })
+CALL gds.graph.project('myGraph', 'Node', 'REL', { relationshipProperties: 'cost' })
 ----
 
 In the following examples we will demonstrate using the Breadth First Search algorithm on this graph.

@@ -234,7 +234,7 @@ In the example, we will use the SLLPA algorithm to find the communities in the g
 .The following statement will create the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'myGraph',
   'Person',
   {

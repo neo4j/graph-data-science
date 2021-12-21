@@ -264,7 +264,7 @@ include::../shared/examples-named-native-note.adoc[]
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create('myGraph', 'User', 'FOLLOWS')
+CALL gds.graph.project('myGraph', 'User', 'FOLLOWS')
 ----
 
 In the following examples we will demonstrate using the Betweenness Centrality algorithm on this graph.

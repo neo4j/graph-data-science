@@ -141,7 +141,7 @@ CREATE (nMichael)-[:FOLLOW]->(nBridget);
 .The following will create and store a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('graph', 'User', 'FOLLOW')
+CALL gds.graph.project('graph', 'User', 'FOLLOW')
 ----
 
 .The following will run the algorithm and write back results:

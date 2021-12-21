@@ -135,7 +135,7 @@ CREATE
 .Project the social network graph:
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'social-graph',
   {
     Person: { properties: 'age' },    // <1>

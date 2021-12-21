@@ -215,7 +215,7 @@ It should therefore not be possible for any other node to be assigned the same c
 
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
     'myGraph',
     'User',
     {
@@ -232,7 +232,7 @@ include::../shared/examples-named-native-note.adoc[]
 .The following statement will create the graph and store it in the graph catalog.
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('myGraph', 'Person', 'LIKES')
+CALL gds.graph.project('myGraph', 'Person', 'LIKES')
 ----
 
 In the following examples we will demonstrate using the K-1 Coloring algorithm on this graph.

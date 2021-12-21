@@ -115,7 +115,7 @@ Negative relationships will be randomly generated, i.e., they do not exist in th
 
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
     'graph',
     'Label',
     { TYPE: { orientation: 'UNDIRECTED' } }

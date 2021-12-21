@@ -232,7 +232,7 @@ include::../shared/examples-named-native-note.adoc[]
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'myGraph',
   'User',
   'LINK',
@@ -496,7 +496,7 @@ We will therefore create a second in-memory graph that contains the previously c
 .The following will create a new graph containing the previously computed component id:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'myGraph-seeded',
   'User',
   'LINK',

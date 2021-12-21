@@ -5,7 +5,7 @@
 
 We can export named in-memory graphs stored in the graph catalog to a set of CSV files.
 All nodes, relationships and properties present in an in-memory graph are exported.
-This includes data that has been projected with `gds.graph.create` and data that has been added by running algorithms in `mutate` mode.
+This includes data that has been projected with `gds.graph.project` and data that has been added by running algorithms in `mutate` mode.
 The location of the exported CSV files can be configured via the configuration parameter `gds.export.location` in the `neo4j.conf`.
 All files will be stored in a subfolder using the specified export name.
 The export will fail if a folder with the given export name already exists.
