@@ -29,6 +29,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -41,33 +42,41 @@ public final class GdsCallableFinder {
         "org.neo4j.gds"
     );
 
-    private static final List<String> PACKAGES_BLACKLIST = List.of(
+    private static final List<String> DEFAULT_PACKAGE_BLACKLIST = List.of(
         "org.neo4j.gds.pregel",
         "org.neo4j.gds.test"
     );
 
     public static Stream<GdsCallableDefinition> findAll() {
-        return allGdsCallables().sorted(Comparator.comparing(
+        return findAll(DEFAULT_PACKAGE_BLACKLIST);
+    }
+
+    public static Stream<GdsCallableDefinition> findAll(Collection<String> blacklist) {
+        return allGdsCallables(blacklist).sorted(Comparator.comparing(
             GdsCallableDefinition::name,
             String.CASE_INSENSITIVE_ORDER
         ));
     }
 
-    public static Optional<GdsCallableDefinition> findAByName(String name) {
+    public static Optional<GdsCallableDefinition> findByName(String name) {
+        return findByName(name, DEFAULT_PACKAGE_BLACKLIST);
+    }
+
+    public static Optional<GdsCallableDefinition> findByName(String name, Collection<String> blacklist) {
         var lowerCaseName = name.toLowerCase(Locale.ROOT);
-        return allGdsCallables()
+        return allGdsCallables(blacklist)
             .filter(callable -> callable.name().toLowerCase(Locale.ROOT).equals(lowerCaseName))
             .findFirst();
     }
 
     @NotNull
-    private static Stream<GdsCallableDefinition> allGdsCallables() {
+    private static Stream<GdsCallableDefinition> allGdsCallables(Collection<String> blacklist) {
         return PACKAGES_TO_SCAN.stream()
             .map(pkg -> new Reflections(pkg, Scanners.TypesAnnotated))
             .flatMap(reflections -> reflections.getTypesAnnotatedWith(GdsCallable.class).stream())
-            .filter(clazz -> PACKAGES_BLACKLIST
+            .filter(clazz -> blacklist
                 .stream()
-                .noneMatch(blacklist -> clazz.getPackageName().startsWith(blacklist)))
+                .noneMatch(item -> clazz.getPackageName().startsWith(item)))
             .peek(clazz -> {assert AlgorithmSpec.class.isAssignableFrom(clazz);})
             .map(clazz -> {
                 GdsCallable gdsCallable = clazz.getAnnotation(GdsCallable.class);
