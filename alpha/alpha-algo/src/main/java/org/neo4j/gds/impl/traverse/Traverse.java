@@ -25,6 +25,7 @@ import com.carrotsearch.hppc.LongArrayDeque;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.function.ObjDoubleConsumer;
@@ -42,6 +43,7 @@ public final class Traverse extends Algorithm<Traverse> {
     private final Aggregator aggregatorFunction;
     private final ObjLongConsumer<LongArrayDeque> nodeFunc;
     private final ObjDoubleConsumer<DoubleArrayDeque> weightFunc;
+    private final AllocationTracker allocationTracker;
     private final Graph graph;
     private LongArrayDeque nodes;
     private final LongArrayDeque sources;
@@ -56,9 +58,11 @@ public final class Traverse extends Algorithm<Traverse> {
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
         ObjLongConsumer<LongArrayDeque> nodeFunc,
-        ObjDoubleConsumer<DoubleArrayDeque> weightFunc
+        ObjDoubleConsumer<DoubleArrayDeque> weightFunc,
+        ProgressTracker progressTracker,
+        AllocationTracker allocationTracker
     ) {
-        super(ProgressTracker.NULL_TRACKER);
+        super(progressTracker);
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.startNodeId = startNodeId;
@@ -70,13 +74,16 @@ public final class Traverse extends Algorithm<Traverse> {
         this.sources = new LongArrayDeque(nodeCount);
         this.weights = new DoubleArrayDeque(nodeCount);
         this.visited = new BitSet(nodeCount);
+        this.allocationTracker = allocationTracker;
     }
 
     public static Traverse dfs(
         Graph graph,
         long startNodeId,
         ExitPredicate exitPredicate,
-        Aggregator aggregatorFunction
+        Aggregator aggregatorFunction,
+        ProgressTracker progressTracker,
+        AllocationTracker allocationTracker
     ) {
         return new Traverse(
             graph,
@@ -84,7 +91,9 @@ public final class Traverse extends Algorithm<Traverse> {
             exitPredicate,
             aggregatorFunction,
             LongArrayDeque::addFirst,
-            DoubleArrayDeque::addFirst
+            DoubleArrayDeque::addFirst,
+            progressTracker,
+            allocationTracker
         );
     }
 
@@ -92,7 +101,9 @@ public final class Traverse extends Algorithm<Traverse> {
         Graph graph,
         long startNodeId,
         ExitPredicate exitPredicate,
-        Aggregator aggregatorFunction
+        Aggregator aggregatorFunction,
+        ProgressTracker progressTracker,
+        AllocationTracker allocationTracker
     ) {
         return new Traverse(
             graph,
@@ -100,7 +111,9 @@ public final class Traverse extends Algorithm<Traverse> {
             exitPredicate,
             aggregatorFunction,
             LongArrayDeque::addLast,
-            DoubleArrayDeque::addLast
+            DoubleArrayDeque::addLast,
+            progressTracker,
+            allocationTracker
         );
     }
 
