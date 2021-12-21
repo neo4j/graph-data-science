@@ -137,7 +137,7 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
                     "The value of `%s` is expected to be unique, but %s was already specified in the %s procedure.",
                     MUTATE_PROPERTY_KEY,
                     newMutatePropertyName,
-                    nodePropertyStep.procMethod().getName()
+                    nodePropertyStep.procName()
                 ));
             }
         });

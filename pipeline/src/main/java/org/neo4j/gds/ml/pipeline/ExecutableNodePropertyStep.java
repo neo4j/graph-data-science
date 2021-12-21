@@ -24,12 +24,10 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.ToMapConvertible;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 
 public interface ExecutableNodePropertyStep extends ToMapConvertible {
-    Method procMethod();
 
     void execute(
         BaseProc caller,

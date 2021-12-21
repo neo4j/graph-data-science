@@ -37,7 +37,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.nodeproperties.LongTestProperties;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -220,11 +219,6 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public Method procMethod() {
-            return null;
-        }
-
-        @Override
         public void execute(
             BaseProc caller,
             String graphName,
@@ -254,11 +248,6 @@ class PipelineExecutorTest {
         @Override
         public String procName() {
             return "FailingNodePropertyStep";
-        }
-
-        @Override
-        public Method procMethod() {
-            return null;
         }
 
         @Override

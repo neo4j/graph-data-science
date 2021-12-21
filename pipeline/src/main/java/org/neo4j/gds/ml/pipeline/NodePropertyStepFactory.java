@@ -19,44 +19,83 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.pipeline.proc.ProcedureReflection;
+import org.neo4j.gds.pipeline.AlgoConfigParser;
+import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.pipeline.ExecutionMode;
+import org.neo4j.gds.pipeline.GdsCallableFinder;
+import org.neo4j.gds.pipeline.NewConfigFunction;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodePropertyStepFactory {
-    private static final List<String> RESERVED_CONFIG_KEYS = List.of(AlgoBaseConfig.NODE_LABELS_KEY, AlgoBaseConfig.RELATIONSHIP_TYPES_KEY);
+    private static final List<String> RESERVED_CONFIG_KEYS = List.of(
+        AlgoBaseConfig.NODE_LABELS_KEY,
+        AlgoBaseConfig.RELATIONSHIP_TYPES_KEY
+    );
 
-    public static NodePropertyStep createNodePropertyStep(BaseProc caller, String taskName, Map<String, Object> procedureConfig) {
-        validateReservedConfigKeys(procedureConfig);
-        validateConfig(caller, taskName, procedureConfig);
-        return NodePropertyStep.of(taskName, procedureConfig);
-    }
+    public static NodePropertyStep createNodePropertyStep(
+        ExecutionContext executionContext,
+        String taskName,
+        Map<String, Object> configMap
+    ) {
+        var normalizedName = normalizeName(taskName);
 
-    private static void validateConfig(BaseProc caller, String taskName, Map<String, Object> procedureConfig) {
-        var wrappedConfig = CypherMapWrapper.create(procedureConfig);
-        var procedureMethod = ProcedureReflection.INSTANCE.findProcedureMethod(taskName);
-        Optional<AlgoBaseConfig> typedConfig = ProcedureReflection.INSTANCE.createAlgoConfig(
-            caller,
-            procedureMethod,
-            wrappedConfig
+        var gdsCallableDefinition = GdsCallableFinder
+            .findByName(normalizedName)
+            .orElseThrow(() -> new IllegalArgumentException(formatWithLocale(
+                "Could not find a procedure called %s",
+                normalizedName
+            )));
+
+        if (gdsCallableDefinition.executionMode() != ExecutionMode.MUTATE_NODE_PROPERTY) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The procedure %s does not mutate node properties and is thus not allowed as node property step",
+                normalizedName
+            ));
+        }
+
+        validateReservedConfigKeys(configMap);
+
+        AlgoBaseConfig config = parseConfig(
+            executionContext.username(),
+            gdsCallableDefinition,
+            configMap
         );
-        typedConfig.ifPresent(config -> wrappedConfig.requireOnlyKeysFrom(config.configKeys()));
+
+        return new NodePropertyStep(gdsCallableDefinition, configMap);
     }
 
-    public static void validateReservedConfigKeys(Map<String, Object> procedureConfig) {
+    private static AlgoBaseConfig parseConfig(
+        String username,
+        GdsCallableFinder.GdsCallableDefinition callableDefinition,
+        Map<String, Object> configuration
+    ) {
+        NewConfigFunction<AlgoBaseConfig> newConfigFunction = callableDefinition
+            .algorithmSpec()
+            .newConfigFunction();
+
+        return new AlgoConfigParser<>(username, newConfigFunction).processInput(configuration);
+    }
+
+    private static void validateReservedConfigKeys(Map<String, Object> procedureConfig) {
         if (RESERVED_CONFIG_KEYS.stream().anyMatch(procedureConfig::containsKey)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Cannot configure %s for an individual node property step, but can only be configured at `train` and `predict` mode.",
                 StringJoining.join(RESERVED_CONFIG_KEYS)
             ));
         }
+    }
+
+    private static String normalizeName(String input) {
+        input = input.toLowerCase(Locale.ROOT);
+        input = !input.startsWith("gds.") ? formatWithLocale("gds.%s", input) : input;
+        input = !input.endsWith(".mutate") ? formatWithLocale("%s.mutate", input) : input;
+        return input;
     }
 }

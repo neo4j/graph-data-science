@@ -52,8 +52,9 @@ import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
@@ -314,7 +315,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         pipeline.setTrainingParameterSpace(List.of(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))));
 
-        pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
+        pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree")));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array", "degree")));
 
         var config = LinkPredictionTrainConfig

@@ -39,8 +39,9 @@ import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
@@ -105,7 +106,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     @Test
     void trainsAModel() {
         var pipeline = insertPipelineIntoCatalog();
-        pipeline.nodePropertySteps().add(NodePropertyStep.of("pageRank", Map.of("mutateProperty", "pr")));
+        pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "pageRank", Map.of("mutateProperty", "pr")));
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
 
         var metricSpecification = MetricSpecification.parse("F1(class=1)");

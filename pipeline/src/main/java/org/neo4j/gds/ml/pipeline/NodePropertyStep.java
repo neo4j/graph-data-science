@@ -23,62 +23,62 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.ml.pipeline.proc.ProcedureReflection;
+import org.neo4j.gds.pipeline.GdsCallableFinder;
+import org.neo4j.gds.pipeline.ProcedureExecutor;
+import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class NodePropertyStep implements ExecutableNodePropertyStep {
-    private final String procName;
-    private final Method procMethod;
+    private final GdsCallableFinder.GdsCallableDefinition callableDefinition;
     private final Map<String, Object> config;
 
-    public static NodePropertyStep of(String procName,  Map<String, Object> config) {
-        var procedureMethod = ProcedureReflection.INSTANCE.findProcedureMethod(procName);
-
-        return new NodePropertyStep(procName, procedureMethod, config);
-    }
-
-    private NodePropertyStep(String procName, Method procMethod, Map<String, Object> config) {
-        this.procName = procName;
-        this.procMethod = procMethod;
+    public NodePropertyStep(
+        GdsCallableFinder.GdsCallableDefinition callableDefinition,
+        // TODO: pass in the config instead
+        Map<String, Object> config
+    ) {
+        this.callableDefinition = callableDefinition;
         this.config = config;
     }
 
     @Override
+    // TODO make this return the actual configuration
     public Map<String, Object> config() {
-        return this.config;
+        return config;
     }
 
     @Override
     public String procName() {
-        return this.procName;
+        return callableDefinition.name();
     }
 
     @Override
-    public Method procMethod() {
-        return this.procMethod;
-    }
-
-    public void execute(BaseProc caller, String graphName, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relTypes) {
+    // Todo pass in ExecutionContext and the graph to operate on instead
+    public void execute(
+        BaseProc caller,
+        String graphName,
+        Collection<NodeLabel> nodeLabels,
+        Collection<RelationshipType> relTypes
+    ) {
         var configCopy = new HashMap<>(config);
         var nodeLabelStrings = nodeLabels.stream().map(ElementIdentifier::name).collect(Collectors.toList());
         var relTypeStrings = relTypes.stream().map(ElementIdentifier::name).collect(Collectors.toList());
         configCopy.put("nodeLabels", nodeLabelStrings);
         configCopy.put("relationshipTypes", relTypeStrings);
 
-        execute(caller, graphName, configCopy);
-    }
-
-    private void execute(BaseProc caller, String graphName, Map<String, Object> config) {
-        ProcedureReflection.INSTANCE.invokeProc(caller, graphName, procMethod, config);
+        new ProcedureExecutor<>(
+            callableDefinition.algorithmSpec(),
+            new ProcedurePipelineSpec<>(),
+            caller.executionContext()
+        ).compute(graphName, configCopy, false, false);
     }
 
     @Override
     public Map<String, Object> toMap() {
-        return Map.of("name", ProcedureReflection.INSTANCE.procedureName(procMethod), "config", config);
+        return Map.of("name", procName(), "config", config);
     }
 }

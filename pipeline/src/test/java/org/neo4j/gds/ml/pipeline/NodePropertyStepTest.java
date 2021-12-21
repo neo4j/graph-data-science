@@ -31,6 +31,7 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.pipeline.GdsCallableFinder;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
@@ -73,7 +74,11 @@ class NodePropertyStepTest extends BaseProcTest {
 
     @Test
     void testInvokeProc() {
-        var step = NodePropertyStep.of("gds.testProc.mutate", Map.of("mutateProperty", PROPERTY_NAME));
+        var gdsCallableDefinition = GdsCallableFinder
+            .findByName("gds.testProc.mutate", List.of())
+            .get();
+
+        var step = new NodePropertyStep(gdsCallableDefinition, Map.of("mutateProperty", PROPERTY_NAME));
         TestProcedureRunner.applyOnProcedure(
             db,
             TestProc.class,

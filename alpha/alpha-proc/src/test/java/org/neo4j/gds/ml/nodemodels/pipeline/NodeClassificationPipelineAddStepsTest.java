@@ -142,7 +142,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
             ))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(
-                    "The value of `mutateProperty` is expected to be unique, but pr was already specified in the mutate procedure.");
+                    "The value of `mutateProperty` is expected to be unique, but pr was already specified in the gds.pageRank.mutate procedure.");
         });
     }
 
@@ -268,7 +268,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
             Map.of("mutateProperty", "pr")
         ))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Invalid procedure name `juggleSpoons` for pipelining."));
+            .hasMessageContaining("Could not find a procedure called gds.jugglespoons.mutate"));
     }
 
     @Test

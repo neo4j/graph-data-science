@@ -33,7 +33,8 @@ import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
     public static void addPipelineModelWithFeatures(ModelCatalog modelCatalog, String graphName, String username, int dimensionOfNodeFeatures, List<String> nodeFeatures) {
         var pipeline = new NodeClassificationPipeline();
 
-        pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
+        pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree")));
         for (String nodeFeature : nodeFeatures) {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of(nodeFeature));
         }

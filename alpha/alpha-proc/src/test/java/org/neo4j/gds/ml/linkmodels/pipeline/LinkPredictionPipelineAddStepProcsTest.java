@@ -118,7 +118,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
         ))
             .hasRootCauseInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
-                "The value of `mutateProperty` is expected to be unique, but pr was already specified in the mutate procedure.");
+                "The value of `mutateProperty` is expected to be unique, but pr was already specified in the gds.pageRank.mutate procedure.");
     }
 
     @Test
@@ -134,7 +134,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'foo'})");
         assertError(
             "CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'bar'})",
-            "Node property steps added to a pipeline may not have different non-null values for `relationshipWeightProperty`. Pipeline already contains tasks `pageRank` which use the value `foo`."
+            "Node property steps added to a pipeline may not have different non-null values for `relationshipWeightProperty`. Pipeline already contains tasks `gds.pageRank.mutate` which use the value `foo`."
         );
     }
 
@@ -206,7 +206,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
     void shouldThrowInvalidNodePropertyStepName() {
         assertError(
             "CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'juggleSpoons', {mutateProperty: 'pr'})",
-            "Invalid procedure name `juggleSpoons` for pipelining."
+            "Could not find a procedure called gds.jugglespoons.mutate"
         );
     }
 

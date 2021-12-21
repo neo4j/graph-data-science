@@ -51,7 +51,8 @@ import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2Feature
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.ArrayList;
@@ -166,7 +167,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var pipeline = new LinkPredictionPipeline();
-            pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
+            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree")));
             pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 
             var modelData = ImmutableLinkLogisticRegressionData.of(
@@ -210,7 +211,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var pipeline = new LinkPredictionPipeline();
-            pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
+            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree")));
             pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 
             var modelData = ImmutableLinkLogisticRegressionData.of(

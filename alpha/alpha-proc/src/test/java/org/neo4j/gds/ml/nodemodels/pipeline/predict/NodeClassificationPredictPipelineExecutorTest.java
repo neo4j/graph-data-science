@@ -51,7 +51,8 @@ import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.ArrayList;
@@ -163,7 +164,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var pipeline = new NodeClassificationPipeline();
-            pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
+            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree")));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
@@ -203,7 +204,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var pipeline = new NodeClassificationPipeline();
-            pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
+            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree")));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
