@@ -20,25 +20,21 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
-import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.functions.NodePropertyFunc;
 
 import java.util.List;
 
-class GraphCreateCypherDocTest extends DocTestBase {
-    @Override
-    List<Class<?>> functions() {
-        return List.of(AsNodeFunc.class, NodePropertyFunc.class);
-    }
+final class GraphProjectSubgraphDocTest extends DocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(GraphCreateProc.class, GraphStreamRelationshipPropertiesProc.class);
+        return List.of(
+            GraphCreateProc.class
+        );
     }
 
     @Override
     protected String adocFile() {
-        return "management-ops/graph-catalog/graph-project-cypher.adoc";
+        return "management-ops/graph-catalog/graph-project-subgraph.adoc";
     }
+
 }
