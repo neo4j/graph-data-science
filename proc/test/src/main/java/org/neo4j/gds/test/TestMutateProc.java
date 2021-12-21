@@ -27,6 +27,7 @@ import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
@@ -71,7 +72,10 @@ public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgori
     }
 
     @Override
-    protected AbstractResultBuilder<TestResult> resultBuilder(ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computeResult) {
+    protected AbstractResultBuilder<TestResult> resultBuilder(
+        ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());
     }
 

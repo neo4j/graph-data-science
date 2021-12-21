@@ -25,6 +25,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -72,7 +73,10 @@ public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, A
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(
+        ComputationResult<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutMutateConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return new MutateResult.Builder(computeResult.result().cutCost());
     }
 

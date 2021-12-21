@@ -25,6 +25,7 @@ import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -79,7 +80,10 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
     }
 
     @Override
-    protected AbstractResultBuilder<Result> resultBuilder(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computeResult) {
+    protected AbstractResultBuilder<Result> resultBuilder(
+        ComputationResult<Knn, Knn.Result, KnnStatsConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         throw new UnsupportedOperationException("Knn handles result building individually.");
     }
 

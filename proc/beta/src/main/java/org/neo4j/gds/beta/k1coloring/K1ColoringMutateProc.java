@@ -25,6 +25,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -71,12 +72,15 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(
+        ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return K1ColoringProc.resultBuilder(new MutateResult.Builder(
-            callContext,
+            executionContext.callContext(),
             computeResult.config().concurrency(),
             allocationTracker()
-        ), computeResult, callContext);
+        ), computeResult, executionContext.callContext());
     }
 
     @Override

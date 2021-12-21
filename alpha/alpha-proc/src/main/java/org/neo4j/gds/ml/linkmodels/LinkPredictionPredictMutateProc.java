@@ -93,16 +93,15 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateConfig> computeResult
+        ComputationResult<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateConfig> computeResult,
+        ExecutionContext executionContext
     ) {
         return new MutateResult.Builder();
     }
 
     @Override
     public MutateComputationResultConsumer<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateConfig, MutateResult> computationResultConsumer() {
-        return new MutateComputationResultConsumer<>(
-            (computationResult, executionContext) -> resultBuilder(computationResult)
-        ) {
+        return new MutateComputationResultConsumer<>(this::resultBuilder) {
             @Override
             protected void updateGraphStore(
                 AbstractResultBuilder<?> resultBuilder,

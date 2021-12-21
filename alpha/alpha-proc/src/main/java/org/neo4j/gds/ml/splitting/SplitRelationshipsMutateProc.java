@@ -108,15 +108,16 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(
+        ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return new MutateResult.Builder();
     }
 
     @Override
     public MutateComputationResultConsumer<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig, MutateResult> computationResultConsumer() {
-        return new MutateComputationResultConsumer<>(
-            (computationResult, executionContext) -> resultBuilder(computationResult)
-        ) {
+        return new MutateComputationResultConsumer<>(this::resultBuilder) {
             @Override
             protected void updateGraphStore(
                 AbstractResultBuilder<?> resultBuilder,

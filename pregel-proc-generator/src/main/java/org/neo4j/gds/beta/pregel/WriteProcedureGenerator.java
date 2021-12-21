@@ -22,11 +22,12 @@ package org.neo4j.gds.beta.pregel;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pregel.proc.PregelWriteProc;
 import org.neo4j.gds.pregel.proc.PregelWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
@@ -78,6 +79,7 @@ class WriteProcedureGenerator extends ProcedureGenerator {
                 ClassName.get(PregelResult.class),
                 pregelSpec.configTypeName()
             ), "computeResult")
+            .addParameter(ExecutionContext.class, "executionContext")
             .addStatement("var ranIterations = computeResult.result().ranIterations()")
             .addStatement("var didConverge = computeResult.result().didConverge()")
             .addStatement("return new $T().withRanIterations(ranIterations).didConverge(didConverge)", procResultBuilderClass())

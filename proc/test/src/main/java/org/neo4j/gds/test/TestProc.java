@@ -22,6 +22,7 @@ package org.neo4j.gds.test;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -61,7 +62,10 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestResult
     }
 
     @Override
-    protected TestResult.TestResultBuilder resultBuilder(ComputationResult<TestAlgorithm, TestAlgorithm, TestWriteConfig> computeResult) {
+    protected TestResult.TestResultBuilder resultBuilder(
+        ComputationResult<TestAlgorithm, TestAlgorithm, TestWriteConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());
     }
 

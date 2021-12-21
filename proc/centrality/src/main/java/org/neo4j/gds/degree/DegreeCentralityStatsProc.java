@@ -24,6 +24,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -75,7 +76,10 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStatsConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(
+        ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStatsConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return DegreeCentralityProc.resultBuilder(
             new StatsResult.Builder(callContext, computeResult.config().concurrency()),
             computeResult

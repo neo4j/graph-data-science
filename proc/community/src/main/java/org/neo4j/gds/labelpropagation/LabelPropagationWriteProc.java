@@ -24,6 +24,7 @@ import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -70,7 +71,10 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computeResult) {
+    protected AbstractResultBuilder<WriteResult> resultBuilder(
+        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return LabelPropagationProc.resultBuilder(
             new WriteResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
             computeResult

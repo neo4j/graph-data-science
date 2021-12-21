@@ -66,7 +66,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
 
     @Override
     public MutateComputationResultConsumer<CollapsePath, Relationships, CollapsePathConfig, MutateResult> computationResultConsumer() {
-        return new MutateComputationResultConsumer<>((computationResult, executionContext) -> resultBuilder(computationResult)) {
+        return new MutateComputationResultConsumer<>(this::resultBuilder) {
             @Override
             protected void updateGraphStore(
                 AbstractResultBuilder<?> resultBuilder,
@@ -131,7 +131,10 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<CollapsePath, Relationships, CollapsePathConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(
+        ComputationResult<CollapsePath, Relationships, CollapsePathConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return new MutateResult.Builder();
     }
 }

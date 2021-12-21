@@ -24,6 +24,7 @@ import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -63,7 +64,10 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<K1Coloring, HugeLongArray, K1ColoringStatsConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(
+        ComputationResult<K1Coloring, HugeLongArray, K1ColoringStatsConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         StatsResult.Builder builder = new StatsResult.Builder(
             callContext,
             computeResult.config().concurrency(),

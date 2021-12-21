@@ -51,6 +51,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Description;
@@ -272,7 +273,10 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AbstractResultBuilder<PregelMutateResult> resultBuilder(ComputationResult<CompositeTestAlgorithm, PregelResult, TestPregelConfig> computeResult) {
+        protected AbstractResultBuilder<PregelMutateResult> resultBuilder(
+            ComputationResult<CompositeTestAlgorithm, PregelResult, TestPregelConfig> computeResult,
+            ExecutionContext executionContext
+        ) {
             var ranIterations = computeResult.result().ranIterations();
             var didConverge = computeResult.result().didConverge();
             return new PregelMutateResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
@@ -340,7 +344,10 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AbstractResultBuilder<PregelWriteResult> resultBuilder(ComputationResult<CompositeTestAlgorithm, PregelResult, TestPregelConfig> computeResult) {
+        protected AbstractResultBuilder<PregelWriteResult> resultBuilder(
+            ComputationResult<CompositeTestAlgorithm, PregelResult, TestPregelConfig> computeResult,
+            ExecutionContext executionContext
+        ) {
             var ranIterations = computeResult.result().ranIterations();
             var didConverge = computeResult.result().didConverge();
             return new PregelWriteResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);

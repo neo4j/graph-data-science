@@ -24,6 +24,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -80,9 +81,12 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, Pa
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<PageRankAlgorithm, PageRankResult, PageRankMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(
+        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankMutateConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return PageRankProc.resultBuilder(
-            new MutateResult.Builder(callContext, computeResult.config().concurrency()),
+            new MutateResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
             computeResult
         );
     }

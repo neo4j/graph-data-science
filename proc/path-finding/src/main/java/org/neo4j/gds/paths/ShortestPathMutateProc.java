@@ -44,9 +44,7 @@ public abstract class ShortestPathMutateProc<ALGO extends Algorithm<DijkstraResu
     extends MutateProc<ALGO, DijkstraResult, MutateResult, CONFIG> {
     @Override
     public MutateComputationResultConsumer<ALGO, DijkstraResult, CONFIG, MutateResult> computationResultConsumer() {
-        return new MutateComputationResultConsumer<ALGO, DijkstraResult, CONFIG, MutateResult>(
-            (computationResult, executionContext) -> resultBuilder(computationResult)
-        ) {
+        return new MutateComputationResultConsumer<>(this::resultBuilder) {
             @Override
             protected void updateGraphStore(
                 AbstractResultBuilder<?> resultBuilder,
@@ -92,7 +90,10 @@ public abstract class ShortestPathMutateProc<ALGO extends Algorithm<DijkstraResu
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<ALGO, DijkstraResult, CONFIG> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(
+        ComputationResult<ALGO, DijkstraResult, CONFIG> computeResult,
+        ExecutionContext executionContext
+    ) {
         return new MutateResult.Builder()
             .withPreProcessingMillis(computeResult.preProcessingMillis())
             .withComputeMillis(computeResult.computeMillis())

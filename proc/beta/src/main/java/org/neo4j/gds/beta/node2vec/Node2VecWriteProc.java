@@ -29,6 +29,7 @@ import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -84,7 +85,10 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig> computeResult) {
+    protected AbstractResultBuilder<WriteResult> resultBuilder(
+        ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return new WriteResult.Builder();
     }
 

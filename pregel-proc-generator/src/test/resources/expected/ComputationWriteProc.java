@@ -34,6 +34,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.ExecutionMode;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pregel.proc.PregelWriteProc;
@@ -75,7 +76,8 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
 
     @Override
     protected AbstractResultBuilder<PregelWriteResult> resultBuilder(
-            AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelProcedureConfig> computeResult) {
+        AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelProcedureConfig> computeResult,
+        ExecutionContext executionContext) {
         var ranIterations = computeResult.result().ranIterations();
         var didConverge = computeResult.result().didConverge();
         return new PregelWriteResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);

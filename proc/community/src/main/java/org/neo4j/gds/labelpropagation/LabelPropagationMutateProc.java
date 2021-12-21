@@ -24,6 +24,7 @@ import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -80,9 +81,12 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(
+        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return LabelPropagationProc.resultBuilder(
-            new MutateResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
+            new MutateResult.Builder(executionContext.callContext(), computeResult.config().concurrency(), allocationTracker()),
             computeResult
         );
     }

@@ -34,6 +34,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.ExecutionMode;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pregel.proc.PregelMutateProc;
@@ -75,7 +76,8 @@ public final class ComputationMutateProc extends PregelMutateProc<ComputationAlg
 
     @Override
     protected AbstractResultBuilder<PregelMutateResult> resultBuilder(
-            AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelProcedureConfig> computeResult) {
+            AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelProcedureConfig> computeResult,
+            ExecutionContext executionContext) {
         var ranIterations = computeResult.result().ranIterations();
         var didConverge = computeResult.result().didConverge();
         return new PregelMutateResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);

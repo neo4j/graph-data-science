@@ -25,7 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.pipeline.ExecutionContext;
 
 import java.util.List;
 import java.util.Map;
@@ -68,13 +69,13 @@ class LinkPredictionPipelineTest {
     @Test
     void canAddNodePropertySteps() {
         var pipeline = new LinkPredictionPipeline();
-        var pageRankPropertyStep = NodePropertyStep.of("pageRank", Map.of("mutateProperty", "pr"));
+        var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "pageRank", Map.of("mutateProperty", "pr"));
         pipeline.addNodePropertyStep(pageRankPropertyStep);
 
         assertThat(pipeline)
             .returns(List.of(pageRankPropertyStep), LinkPredictionPipeline::nodePropertySteps);
 
-        var degreeNodePropertyStep = NodePropertyStep.of("degree", Map.of("mutateProperty", "degree"));
+        var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree"));
         pipeline.addNodePropertyStep(degreeNodePropertyStep);
 
         assertThat(pipeline)
@@ -164,7 +165,7 @@ class LinkPredictionPipelineTest {
         @Test
         void returnsCorrectMapWithFullConfiguration() {
             var pipeline = new LinkPredictionPipeline();
-            var pageRankPropertyStep = NodePropertyStep.of("pageRank", Map.of("mutateProperty", "pr"));
+            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "pageRank", Map.of("mutateProperty", "pr"));
             pipeline.addNodePropertyStep(pageRankPropertyStep);
 
             var hadamardFeatureStep = new HadamardFeatureStep(List.of("a"));
@@ -230,7 +231,7 @@ class LinkPredictionPipelineTest {
         @Test
         void deepCopiesNodePropertySteps() {
             var pipeline = new LinkPredictionPipeline();
-            var pageRankPropertyStep = NodePropertyStep.of("pageRank", Map.of("mutateProperty", "pr"));
+            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "pageRank", Map.of("mutateProperty", "pr"));
             pipeline.addNodePropertyStep(pageRankPropertyStep);
 
             var copy = pipeline.copy();
@@ -240,7 +241,7 @@ class LinkPredictionPipelineTest {
                     .isNotSameAs(pipeline.nodePropertySteps())
                     .containsExactly(pageRankPropertyStep));
 
-            var degreeNodePropertyStep = NodePropertyStep.of("degree", Map.of("mutateProperty", "degree"));
+            var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree"));
             pipeline.addNodePropertyStep(degreeNodePropertyStep);
 
             assertThat(copy.nodePropertySteps()).doesNotContain(degreeNodePropertyStep);

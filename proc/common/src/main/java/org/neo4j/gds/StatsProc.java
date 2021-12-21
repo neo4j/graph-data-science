@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
@@ -31,12 +32,15 @@ public abstract class StatsProc<
     PROC_RESULT,
     CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> {
 
-    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
+    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult,
+        ExecutionContext executionContext
+    );
 
     @Override
     public ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging("Stats call failed", () -> Stream.of(
-            resultBuilder(computationResult)
+            resultBuilder(computationResult, executionContext)
                 .withPreProcessingMillis(computationResult.preProcessingMillis())
                 .withComputeMillis(computationResult.computeMillis())
                 .withNodeCount(computationResult.graph().nodeCount())

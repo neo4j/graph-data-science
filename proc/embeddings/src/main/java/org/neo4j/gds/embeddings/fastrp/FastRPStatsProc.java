@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.fastrp;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -63,7 +64,10 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FastRPResult, Fast
 
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<FastRP, FastRP.FastRPResult, FastRPStatsConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(
+        ComputationResult<FastRP, FastRP.FastRPResult, FastRPStatsConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return new StatsResult.Builder();
     }
 

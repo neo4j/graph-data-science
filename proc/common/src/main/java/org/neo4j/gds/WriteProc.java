@@ -24,6 +24,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -35,7 +36,10 @@ public abstract class WriteProc<
     PROC_RESULT,
     CONFIG extends WritePropertyConfig & AlgoBaseConfig> extends NodePropertiesWriter<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> {
 
-    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
+    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult,
+        ExecutionContext executionContext
+    );
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
@@ -53,7 +57,7 @@ public abstract class WriteProc<
     @Override
     public WriteNodePropertiesComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
-            (computationResult, executionContext) -> resultBuilder(computationResult),
+            this::resultBuilder,
             (computationResult, allocationTracker) -> nodePropertyList(computationResult),
             nodePropertyExporterBuilder,
             name()

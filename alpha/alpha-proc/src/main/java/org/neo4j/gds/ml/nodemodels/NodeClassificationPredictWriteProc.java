@@ -26,6 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -115,7 +116,10 @@ public class NodeClassificationPredictWriteProc extends WriteProc<NodeClassifica
     }
 
     @Override
-    protected AbstractResultBuilder<Result> resultBuilder(ComputationResult<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig> computeResult) {
+    protected AbstractResultBuilder<Result> resultBuilder(
+        ComputationResult<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return new Result.Builder();
     }
 

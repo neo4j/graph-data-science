@@ -26,6 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -71,7 +72,8 @@ public class NodeClassificationPredictMutateProc extends MutatePropertyProc<Node
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<NodeClassificationPredict, NodeClassificationResult, NodeClassificationMutateConfig> computeResult
+        ComputationResult<NodeClassificationPredict, NodeClassificationResult, NodeClassificationMutateConfig> computeResult,
+        ExecutionContext executionContext
     ) {
         return new MutateResult.Builder();
     }

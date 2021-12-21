@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.transaction.SecurityContextWrapper;
 import org.neo4j.graphdb.Transaction;
@@ -32,6 +33,7 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
+import org.neo4j.logging.NullLog;
 
 // TODO Remove the @Nullable annotations once the EstimationCli uses ProcedureExecutors
 @ValueClass
@@ -74,4 +76,46 @@ public interface ExecutionContext {
             .resolveDependency(api(), SecurityContextWrapper.class)
             .isAdmin(transaction().securityContext());
     }
+
+    ExecutionContext EMPTY = new ExecutionContext() {
+        @Override
+        public @Nullable GraphDatabaseAPI api() {
+            return null;
+        }
+
+        @Override
+        public @Nullable Log log() {
+            return NullLog.getInstance();
+        }
+
+        @Override
+        public @Nullable Transaction procedureTransaction() {
+            return null;
+        }
+
+        @Override
+        public @Nullable KernelTransaction transaction() {
+            return null;
+        }
+
+        @Override
+        public @Nullable ProcedureCallContext callContext() {
+            return ProcedureCallContext.EMPTY;
+        }
+
+        @Override
+        public AllocationTracker allocationTracker() {
+            return AllocationTracker.empty();
+        }
+
+        @Override
+        public @Nullable TaskRegistryFactory taskRegistryFactory() {
+            return EmptyTaskRegistryFactory.INSTANCE;
+        }
+
+        @Override
+        public String username() {
+            return "";
+        }
+    };
 }

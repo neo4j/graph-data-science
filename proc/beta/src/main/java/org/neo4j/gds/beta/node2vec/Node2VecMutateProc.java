@@ -29,6 +29,7 @@ import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -85,7 +86,10 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
     }
 
     @Override
-    protected MutateResult.Builder resultBuilder(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig> computeResult) {
+    protected MutateResult.Builder resultBuilder(
+        ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return new MutateResult.Builder();
     }
 

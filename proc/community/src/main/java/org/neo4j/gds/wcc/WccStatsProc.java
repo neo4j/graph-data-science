@@ -24,6 +24,7 @@ import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.pipeline.ExecutionMode;
 import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
@@ -67,7 +68,10 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccStatsConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(
+        ComputationResult<Wcc, DisjointSetStruct, WccStatsConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         return WccProc.resultBuilder(
             new StatsResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
             computeResult

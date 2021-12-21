@@ -81,21 +81,22 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(
+        ComputationResult<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
         var builder = new MutateResult.Builder()
             .withSamplingStats(computeResult.result().samplingStats());
-        if (callContext.outputFields().anyMatch(s -> s.equalsIgnoreCase("probabilityDistribution"))) {
+
+        if (executionContext.callContext().outputFields().anyMatch(s -> s.equalsIgnoreCase("probabilityDistribution"))) {
             builder.withHistogram();
         }
-
         return builder;
     }
 
     @Override
     public MutateComputationResultConsumer<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig, MutateResult> computationResultConsumer() {
-        return new MutateComputationResultConsumer<>(
-            (computationResult, executionContext) -> resultBuilder(computationResult)
-        ) {
+        return new MutateComputationResultConsumer<>(this::resultBuilder) {
             @Override
             protected void updateGraphStore(
                 AbstractResultBuilder<?> resultBuilder,

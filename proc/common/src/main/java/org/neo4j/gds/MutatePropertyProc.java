@@ -49,7 +49,7 @@ public abstract class MutatePropertyProc<
     public MutatePropertyComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             (computationResult, allocationTracker) -> nodePropertyList(computationResult),
-            (computationResult, executionContext) -> resultBuilder(computationResult)
+            this::resultBuilder
         );
     }
 }

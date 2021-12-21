@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.pipeline.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
@@ -30,7 +31,10 @@ public abstract class MutateProc<
     PROC_RESULT,
     CONFIG extends MutateConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> {
 
-    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
+    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult,
+        ExecutionContext executionContext
+    );
 
     protected Stream<PROC_RESULT> mutate(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
         return computationResultConsumer().consume(computeResult, executionContext());
