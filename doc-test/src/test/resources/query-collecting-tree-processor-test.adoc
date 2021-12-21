@@ -13,19 +13,19 @@ CREATE (bob:Person {name: 'Bob'})
 ----
 
 .Before each query 1
-[sourcem cypher, role=noplay graph-create-query]
+[sourcem cypher, role=noplay graph-project-query]
 ----
 MATCH (n) RETURN n
 ----
 
 .Before each query 2
-[sourcem cypher, role=noplay graph-create-query]
+[sourcem cypher, role=noplay graph-project-query]
 ----
 MATCH (m) RETURN m
 ----
 
 .Before each query 3
-[sourcem cypher, role=noplay graph-create-query]
+[sourcem cypher, role=noplay graph-project-query]
 ----
 MATCH (q) RETURN q
 ----

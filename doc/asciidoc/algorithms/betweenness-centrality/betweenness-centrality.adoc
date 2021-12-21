@@ -262,7 +262,7 @@ We do this using a native projection targeting the `User` nodes and the `FOLLOWS
 include::../shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project('myGraph', 'User', 'FOLLOWS')
 ----
@@ -495,7 +495,7 @@ Betweenness Centrality can also be run on undirected graphs.
 To illustrate this, we will project our example graph using the `UNDIRECTED` orientation.
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myUndirectedGraph'.
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project('myUndirectedGraph', 'User', {FOLLOWS: {orientation: 'UNDIRECTED'}})
 ----

@@ -205,7 +205,7 @@ With the graph in Neo4j we can now project it into the graph catalog to prepare 
 We do this using a native projection targeting the `Person` nodes and the `TRANSACTION` relationships.
 
 .The following statement will project a graph store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'myGraph',

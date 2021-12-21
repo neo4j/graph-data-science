@@ -103,7 +103,7 @@ CREATE (home:Page {name: 'Home'}),
        (d)-[:LINKS]->(home)
 ----
 
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
     'myGraph',

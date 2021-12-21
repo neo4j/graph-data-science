@@ -228,7 +228,7 @@ CREATE
 ----
 
 .Project the small social network graph:
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'socialGraph',
@@ -241,7 +241,7 @@ CALL gds.graph.project(
 ----
 
 .Compute the Degree Centrality in our social graph:
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.degree.mutate('socialGraph', {mutateProperty: 'score'})
 ----
@@ -427,7 +427,7 @@ The above example requires all given properties to be present on _at least one_ 
 Consider we compute the Degree Centrality only for a subset of the graph.
 
 .Compute the Degree Centrality for only the `Book` nodes in our social graph:
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.degree.mutate('socialGraph', {nodeLabels: ['Book'], mutateProperty: 'degree'})
 ----

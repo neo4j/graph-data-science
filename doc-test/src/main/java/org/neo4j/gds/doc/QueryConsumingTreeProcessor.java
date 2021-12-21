@@ -54,7 +54,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     private static final String TABLE_CONTEXT = ":table";
 
     private static final String SETUP_QUERY_ROLE = "setup-query";
-    private static final String GRAPH_CREATE_QUERY_ROLE = "graph-create-query";
+    private static final String GRAPH_CREATE_QUERY_ROLE = "graph-project-query";
     private static final String QUERY_EXAMPLE_ROLE = "query-example";
     private static final String TEST_TYPE_NO_RESULT = "no-result";
     private static final String TEST_GROUP_ATTRIBUTE = "group";

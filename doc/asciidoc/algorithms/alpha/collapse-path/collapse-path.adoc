@@ -105,7 +105,7 @@ In our source graph only the `PLAYS` relationship type exists.
 The `PLAYED_BY` relationship type can be created by loading the `PLAYS` relationship type in `REVERSE` direction.
 The following query will project such a graph:
 
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'persons',

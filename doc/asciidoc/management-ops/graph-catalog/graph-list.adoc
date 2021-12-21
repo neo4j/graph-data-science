@@ -107,13 +107,13 @@ CREATE
 Additionally, we will project a few graphs to the graph catalog, for more details see <<catalog-graph-project, native projections>> and <<catalog-graph-project-cypher, Cypher projections>>.
 
 .Project `Person` nodes and `KNOWS` relationships using native projections:
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project('personsNative', 'Person', 'KNOWS')
 ----
 
 .Project `Person` nodes and `KNOWS` relationships using Cypher projections:
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project.cypher(
   'personsCypher',
@@ -122,7 +122,7 @@ CALL gds.graph.project.cypher(
 ----
 
 .Project `Person` nodes with property `age` and `KNOWS` relationships using Native projections:
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'personsWithAgeNative',

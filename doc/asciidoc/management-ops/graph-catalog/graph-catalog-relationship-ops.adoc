@@ -245,7 +245,7 @@ CREATE
 ----
 
 .Project the graph:
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'personsAndInstruments',
@@ -272,7 +272,7 @@ CALL gds.graph.project(
 <4> Project property `score` of relationship type `LIKES`.
 
 .Compute the Node Similarity in our graph:
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.nodeSimilarity.mutate('personsAndInstruments', {   // <1>
   mutateRelationshipType: 'SIMILAR',                        // <2>

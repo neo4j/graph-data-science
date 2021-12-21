@@ -195,7 +195,7 @@ We will also project the `sizeOfStory` property to use as a model feature, and t
 include::../../shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-create-query, group=nc]
+[source, cypher, role=noplay graph-project-query, group=nc]
 ----
 CALL gds.graph.project('myGraph', {
     House: { properties: ['sizePerStory', 'class'] },

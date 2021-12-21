@@ -65,7 +65,7 @@ image::example-graphs/knn-fastrp.png[Visualization of the example graph,align="c
 Now we can proceed to project a graph which we can run the algorithms on.
 
 .Project a graph called 'purchases' and store it in the graph catalog:
-[source, cypher, role=graph-create-query no-play]
+[source, cypher, role=graph-project-query no-play]
 ----
 CALL gds.graph.project(
   'purchases',

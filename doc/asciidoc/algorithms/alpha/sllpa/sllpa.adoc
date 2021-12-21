@@ -232,7 +232,7 @@ CREATE
 In the example, we will use the SLLPA algorithm to find the communities in the graph.
 
 .The following statement will project the graph and store it in the graph catalog.
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'myGraph',

@@ -133,7 +133,7 @@ CREATE
 ----
 
 .Project the social network graph:
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'social-graph',

@@ -185,7 +185,7 @@ CREATE (dave)-[:LIKES]->(synth)
 CREATE (dave)-[:LIKES]->(bongos);
 ----
 
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project('myGraph', ['Person', 'Instrument'], 'LIKES');
 ----

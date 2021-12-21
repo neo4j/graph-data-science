@@ -316,7 +316,7 @@ We will also project the `sizeOfStory` property to use as a model feature, and t
 include::../../shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project('myGraph', {
     House: { properties: ['sizePerStory', 'class'] },
@@ -375,7 +375,7 @@ In this example we will train a model to predict the class in which a house belo
 
 [[algorithms-ml-nodeclassification-examples-train-query]]
 .Train a Node Classification model:
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.alpha.ml.nodeClassification.train('myGraph', {
   nodeLabels: ['House'],

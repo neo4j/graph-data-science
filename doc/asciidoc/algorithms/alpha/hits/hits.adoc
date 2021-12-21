@@ -227,7 +227,7 @@ CREATE
 In the example, we will use the HITS algorithm to calculate the authority and hub scores.
 
 .The following statement will project the graph and store it in the graph catalog.
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'myGraph',

@@ -224,7 +224,7 @@ CREATE
   (john)-[:KNOWS {relWeight: 5.0}]->(jeff)
 ----
 
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'persons',
@@ -346,7 +346,7 @@ CREATE
   (john)-[:LIKES]->(trumpet)
 ----
 
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'persons_with_instruments',
@@ -421,7 +421,7 @@ The following example illustrates calling Degree Centrality in `mutate` mode and
 For the purpose of this example we are going to use the `Persons` graph, but we will not load any properties to the in-memory graph.
 
 .Create a graph projection without any node properties
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'noPropertiesGraph',

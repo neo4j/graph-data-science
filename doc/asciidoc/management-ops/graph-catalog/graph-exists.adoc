@@ -58,7 +58,7 @@ CREATE
 ----
 
 .Project `Person` nodes and `KNOWS` relationships:
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project('persons', 'Person', 'KNOWS')
 ----

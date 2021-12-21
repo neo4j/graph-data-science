@@ -258,7 +258,7 @@ We load the `LINK` relationships with orientation set to `UNDIRECTED` as this wo
 include::../shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
     'myGraph',
@@ -541,7 +541,7 @@ CREATE (m)-[:TYPE]->(n);
 ----
 
 .The following statement will project the graph and store it in the graph catalog.
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
     'myGraph2',
