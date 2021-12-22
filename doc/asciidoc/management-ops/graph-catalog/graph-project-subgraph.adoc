@@ -114,7 +114,7 @@ A relationship predicate must refer to variable `r`.
 
 == Examples
 
-In order to demonstrate the GDS create subgraph capabilities we are going to create a small social graph in Neo4j.
+In order to demonstrate the GDS project subgraph capabilities we are going to create a small social graph in Neo4j.
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]

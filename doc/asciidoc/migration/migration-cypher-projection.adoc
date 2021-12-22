@@ -23,7 +23,7 @@ CALL algo.graph.load(
 |
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'myGraph',
   'MATCH (n:MyLabel)
    RETURN id(n) AS id',
@@ -53,7 +53,7 @@ CALL algo.graph.load(
 |
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.project.cypher(
   'myGraph',
   'MATCH (n:MyLabel)
    RETURN id(n) AS id',

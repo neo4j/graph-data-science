@@ -39,7 +39,7 @@ CALL algo.graph.load(
 |
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'myGraph',
   'MyLabel',
   'MY_RELATIONSHIP_TYPE'
@@ -63,7 +63,7 @@ CALL algo.graph.load(
 |
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'myGraph',
   'MyLabel',
   {
@@ -93,7 +93,7 @@ CALL algo.graph.load(
 |
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'myGraph',
   'MyLabel',
   {
@@ -125,7 +125,7 @@ CALL algo.graph.load(
 |
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
+CALL gds.graph.project(
   'myGraph',
   'MyLabel',
   {

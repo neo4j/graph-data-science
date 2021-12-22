@@ -33,7 +33,7 @@ CALL algo.memrec(
 |
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.estimate(
+CALL gds.graph.project.estimate(
   'MyLabel',
   'MY_RELATIONSHIP_TYPE'
 )
@@ -55,7 +55,7 @@ CALL algo.memrec(
 |
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create.cypher.estimate(
+CALL gds.graph.project.cypher.estimate(
   'MATCH (n:MyLabel) RETURN id(n) AS id',
   'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
    RETURN id(s) AS source, id(t) AS target'
