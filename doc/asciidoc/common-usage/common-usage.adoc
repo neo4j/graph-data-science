@@ -34,7 +34,7 @@ To get an overview of the status of the system you can use the <<monitoring-syst
 The more detail on each individual operation, see the corresponding section:
 
 1. <<graph-catalog-ops>>
-2. <<creating-graphs>>
+2. <<projecting-graphs>>
 3. <<running-algos>>
 
 
@@ -43,7 +43,7 @@ In this chapter, we will go through these aspects and guide you towards the most
 This chapter is divided into the following sections:
 
 * <<memory-estimation>>
-* <<creating-graphs>>
+* <<projecting-graphs>>
 * <<running-algos>>
 * <<logging>>
 * <<monitoring-system>>
@@ -51,7 +51,7 @@ This chapter is divided into the following sections:
 
 include::memory-estimation.adoc[leveloffset=+1]
 
-include::creating-graphs.adoc[leveloffset=+1]
+include::projecting-graphs.adoc[leveloffset=+1]
 
 include::running-algorihms.adoc[leveloffset=+1]
 

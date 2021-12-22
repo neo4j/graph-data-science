@@ -1,5 +1,5 @@
-[[creating-graphs]]
-= Creating graphs
+[[projecting-graphs]]
+= Projecting graphs
 
 [abstract]
 --
@@ -7,6 +7,6 @@ This section discusses creating named graphs to be used for algorithm computatio
 --
 
 In order for any algorithm in the GDS library to run, we must first project a graph to run on.
-The graph is created as a _named graph_.
+The graph is projected as a _named graph_.
 A named graph is given a name and stored in the graph catalog.
 For a detailed guide on all graph catalog operations, see <<graph-catalog-ops>>.
