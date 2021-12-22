@@ -214,16 +214,16 @@ include::../algorithms/algorithm-tiers.adoc[]
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
-|Algorithm name | Operation
-.1+<.^|<<alpha-algorithm-all-pairs-shortest-path, All Shortest Paths>>
+|Algorithm name | Operation .1+<.^|<<alpha-algorithm-all-pairs-shortest-path, All Shortest Paths>>
 | `gds.alpha.allShortestPaths.stream`
 .4+<.^|<<alpha-algorithms-approx-max-k-cut,Approximate Maximum k-cut>>
 | `gds.alpha.maxkcut.mutate`
 | `gds.alpha.maxkcut.mutate.estimate`
 | `gds.alpha.maxkcut.stream`
 | `gds.alpha.maxkcut.stream.estimate`
-.1+<.^|<<algorithms-bfs, Breadth First Search>>
+.2+<.^|<<algorithms-bfs, Breadth First Search>>
 | `gds.alpha.bfs.stream`
+| `gds.alpha.bfs.stream.estimate`
 .4+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
 | `gds.alpha.closeness.stream`
 | `gds.alpha.closeness.write`
@@ -231,8 +231,9 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.closeness.harmonic.write`
 .1+<.^|<<algorithms-collapse-path, Collapse Path>>
 | `gds.alpha.collapsePath.mutate`
-.1+<.^|<<algorithms-dfs, Depth First Search>>
+.2+<.^|<<algorithms-dfs, Depth First Search>>
 | `gds.alpha.dfs.stream`
+| `gds.alpha.dfs.stream.estimate`
 .8+<.^|<<algorithms-hits, HITS>>
 | `gds.alpha.hits.mutate`
 | `gds.alpha.hits.mutate.estimate`
