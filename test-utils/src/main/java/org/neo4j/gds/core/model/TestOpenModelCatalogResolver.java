@@ -67,7 +67,7 @@ public class TestOpenModelCatalogResolver implements ParameterResolver, TestInst
     throws ParameterResolutionException {
         return modelCatalogFromExtensionStore(
             extensionContext,
-            parameterContext.findAnnotation(INJECT_CLASS).get()
+            parameterContext.findAnnotation(INJECT_CLASS).orElseThrow(/* programmer error if we got here */)
         );
     }
 

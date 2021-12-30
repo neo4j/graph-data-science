@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
+import java.util.Optional;
 
 public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRegressionData> {
     private final LinkLogisticRegressionData modelData;
@@ -61,8 +62,10 @@ public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRe
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
-        if (modelData.bias().isPresent()) {
-            return List.of(modelData.weights(), modelData.bias().get());
+        Optional<Weights<Scalar>> bias = modelData.bias();
+        if (bias.isPresent()) {
+            Weights<Scalar> weights = bias.get();
+            return List.of(modelData.weights(), weights);
         } else {
             return List.of(modelData.weights());
         }
@@ -76,8 +79,9 @@ public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRe
 
         LogisticLoss unpenalizedLoss;
 
-        if (modelData.bias().isPresent()) {
-            Weights<Scalar> bias = modelData.bias().get();
+        Optional<Weights<Scalar>> potentialBias = modelData.bias();
+        if (potentialBias.isPresent()) {
+            Weights<Scalar> bias = potentialBias.get();
             var weightedFeaturesWithBias = new EWiseAddMatrixScalar(weightedFeatures, bias);
             var predictions = new Sigmoid<>(weightedFeaturesWithBias);
             unpenalizedLoss = new LogisticLoss(modelData.weights(), bias, predictions, features, targets);
