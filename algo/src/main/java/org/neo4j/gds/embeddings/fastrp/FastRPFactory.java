@@ -65,7 +65,7 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
     public Task progressTask(Graph graph, CONFIG config) {
         var tasks = new ArrayList<Task>();
         tasks.add(Tasks.leaf("Initialize random vectors", graph.nodeCount()));
-        if (config.nodeSelfInfluence().floatValue() != 0.0) {
+        if (Float.compare(config.nodeSelfInfluence().floatValue(), 0.0f) != 0) {
             tasks.add(Tasks.leaf("Apply node self-influence", graph.nodeCount()));
         }
         tasks.add(Tasks.iterativeFixed(

@@ -196,7 +196,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
     }
 
     void addInitialVectorsToEmbedding() {
-        if (nodeSelfInfluence.floatValue() == 0f) return;
+        if (Float.compare(nodeSelfInfluence.floatValue(), 0.0f) == 0) return;
         progressTracker.beginSubTask();
 
         var tasks = partitions.stream()

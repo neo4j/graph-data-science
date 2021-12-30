@@ -155,13 +155,13 @@ class NeighborList {
             }
 
             int elementsWithPriorityCapacity = elementCapacity * 2;
-            if (upperBoundIdxExclusive == elementsWithPriorityCapacity && lowestPriority == priority) {
+            if (upperBoundIdxExclusive == elementsWithPriorityCapacity && Double.compare(lowestPriority, priority) == 0) {
                 // TODO: Perturbation (maybe replace last element)
                 return NOT_INSERTED;
             }
 
             if (lowerBoundIdxInclusive < currNumElementsWithPriority &&
-                priority == Double.longBitsToDouble(priorityElementPairs[lowerBoundIdxInclusive])
+                Double.compare(priority, Double.longBitsToDouble(priorityElementPairs[lowerBoundIdxInclusive])) == 0
             ) {
                 var upperBound = Math.max(upperBoundIdxExclusive, lowerBoundIdxInclusive + 2);
                 for (int i = lowerBoundIdxInclusive; i < upperBound; i += 2) {

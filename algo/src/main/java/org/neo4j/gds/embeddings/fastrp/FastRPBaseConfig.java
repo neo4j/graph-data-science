@@ -74,7 +74,7 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
         if (nodeSelfInfluence().floatValue() < 0) {
             throw new IllegalArgumentException("The value of `nodeSelfInfluence` may not be negative.");
         }
-        if (iterationWeights().isEmpty() && nodeSelfInfluence().floatValue() == 0f) {
+        if (iterationWeights().isEmpty() && Float.compare(nodeSelfInfluence().floatValue(), 0.0f) == 0) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The value of `%s` must not be empty if `nodeSelfInfluence` is zero.",
                 "iterationWeights"
