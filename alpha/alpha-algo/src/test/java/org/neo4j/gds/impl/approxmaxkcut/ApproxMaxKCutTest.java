@@ -151,6 +151,7 @@ final class ApproxMaxKCutTest {
         var configBuilder = ImmutableApproxMaxKCutConfig.builder()
             .minimize(minimize)
             .concurrency(concurrency)
+            .randomSeed(42L)
             .k((byte) 2)
             .vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder)
             // We should not need as many iterations if we do VNS.
