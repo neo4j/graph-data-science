@@ -38,13 +38,19 @@ public class GraphInfo {
     public final String database;
     public final String memoryUsage;
     public final long sizeInBytes;
+    @Deprecated
     public final Map<String, Object> nodeProjection;
+    @Deprecated
     public final Map<String, Object> relationshipProjection;
+    @Deprecated
     public final String nodeQuery;
+    @Deprecated
     public final String relationshipQuery;
     public final long nodeCount;
     public final long relationshipCount;
+    @Deprecated
     public final String nodeFilter;
+    @Deprecated
     public final String relationshipFilter;
     public final double density;
     public final ZonedDateTime creationTime;
