@@ -133,15 +133,15 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
             relationshipProjections().allProperties(),
             "relationship"
         );
-
-        return ImmutableGraphProjectFromStoreConfig
-            .builder()
-            .from(this)
-            .nodeProjections(nodeProjections().addPropertyMappings(nodeProperties))
-            .nodeProperties(PropertyMappings.of())
-            .relationshipProjections(relationshipProjections().addPropertyMappings(relationshipProperties))
-            .relationshipProperties(PropertyMappings.of())
-            .build();
+        var thisToMap = this.toMap();
+        thisToMap.put(NODE_PROJECTION_KEY, nodeProjections().addPropertyMappings(nodeProperties));
+        thisToMap.put(NODE_PROPERTIES_KEY, PropertyMappings.of());
+        thisToMap.put(
+            RELATIONSHIP_PROJECTION_KEY,
+            relationshipProjections().addPropertyMappings(relationshipProperties)
+        );
+        thisToMap.put(RELATIONSHIP_PROPERTIES_KEY, PropertyMappings.of());
+        return GraphProjectFromStoreConfigImpl.of(this.username(), this.graphName(), CypherMapWrapper.create(thisToMap));
     }
 
     @Configuration.Ignore

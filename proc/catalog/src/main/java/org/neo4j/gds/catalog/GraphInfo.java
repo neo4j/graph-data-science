@@ -52,6 +52,7 @@ public class GraphInfo {
     public final String nodeFilter;
     @Deprecated
     public final String relationshipFilter;
+    public final Map<String, Object> configuration;
     public final double density;
     public final ZonedDateTime creationTime;
     public final ZonedDateTime modificationTime;
@@ -72,7 +73,8 @@ public class GraphInfo {
         long relationshipCount,
         ZonedDateTime creationTime,
         ZonedDateTime modificationTime,
-        Map<String, Object> schema
+        Map<String, Object> schema,
+        Map<String, Object> configuration
     ) {
         this.graphName = graphName;
         this.database = database;
@@ -90,6 +92,7 @@ public class GraphInfo {
         this.creationTime = creationTime;
         this.modificationTime = modificationTime;
         this.schema = schema;
+        this.configuration = configuration;
     }
 
     static GraphInfo withMemoryUsage(GraphProjectConfig graphProjectConfig, GraphStore graphStore) {
@@ -137,7 +140,8 @@ public class GraphInfo {
             graphStore.relationshipCount(),
             graphProjectConfig.creationTime(),
             graphStore.modificationTime(),
-            graphStore.schema().toMap()
+            graphStore.schema().toMap(),
+            configVisitor.configuration
         );
     }
 
@@ -146,17 +150,22 @@ public class GraphInfo {
         String nodeQuery, relationshipQuery = null;
         Map<String, Object> nodeProjection, relationshipProjection = null;
         String nodeFilter, relationshipFilter = null;
-
+        Map<String, Object> configuration = null;
         @Override
         public void visit(GraphProjectFromStoreConfig storeConfig) {
             nodeProjection = storeConfig.nodeProjections().toObject();
             relationshipProjection = storeConfig.relationshipProjections().toObject();
+            configuration = storeConfig.toMap();
+            configuration.put("nodeProjection", storeConfig.nodeProjections().toObject());
+            configuration.put("relationshipProjection", storeConfig.relationshipProjections().toObject());
+
         }
 
         @Override
         public void visit(GraphProjectFromCypherConfig cypherConfig) {
             nodeQuery = cypherConfig.nodeQuery();
             relationshipQuery = cypherConfig.relationshipQuery();
+            configuration = cypherConfig.toMap();
         }
 
         @Override
@@ -164,12 +173,22 @@ public class GraphInfo {
             graphConfig.originalConfig().accept(this);
             nodeFilter = graphConfig.nodeFilter();
             relationshipFilter = graphConfig.relationshipFilter();
+            configuration = graphConfig.toMap();
+
         }
 
         @Override
         public void visit(RandomGraphGeneratorConfig randomGraphConfig) {
             nodeProjection = randomGraphConfig.nodeProjections().toObject();
             relationshipProjection = randomGraphConfig.relationshipProjections().toObject();
+            configuration = randomGraphConfig.toMap();
+            configuration.put("nodeProjections", randomGraphConfig.nodeProjections().toObject());
+            configuration.put("relationshipProjections", randomGraphConfig.relationshipProjections().toObject());
+            configuration.put("aggregation", randomGraphConfig.aggregation().toString());
+            configuration.put("orientation", randomGraphConfig.orientation().toString());
+            configuration.put("relationshipDistribution", randomGraphConfig.relationshipDistribution().toString());
+
+
         }
     }
 }

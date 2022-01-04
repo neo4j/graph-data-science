@@ -94,6 +94,7 @@ class GraphListProcTest extends BaseProcTest {
                         "properties", emptyMap()
                     )
                 ),
+                "configuration", isA(Map.class),
                 "relationshipProjection", map(
                     "REL", map(
                         "type", "REL",
@@ -177,6 +178,7 @@ class GraphListProcTest extends BaseProcTest {
                         "properties", emptyMap()
                     )
                 ),
+                "configuration", isA(Map.class),
                 "relationshipProjection", map(
                     "REL", map(
                         "type", "REL",
@@ -252,6 +254,7 @@ class GraphListProcTest extends BaseProcTest {
                     "nodes", map(ALL_NODES.name, map()),
                     "relationships", map(ALL_RELATIONSHIPS.name, map())
                 ),
+                "configuration", isA(Map.class),
                 "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
                 "nodeFilter", null,
