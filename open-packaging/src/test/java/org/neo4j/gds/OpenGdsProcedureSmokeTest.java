@@ -42,7 +42,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.create.cypherdb",
 
         "gds.alpha.allShortestPaths.stream",
+
         "gds.alpha.bfs.stream",
+        "gds.alpha.bfs.stream.estimate",
 
         "gds.alpha.collapsePath.mutate",
 
@@ -57,7 +59,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.maxkcut.mutate.estimate",
         "gds.alpha.maxkcut.stream",
         "gds.alpha.maxkcut.stream.estimate",
+
         "gds.alpha.dfs.stream",
+        "gds.alpha.dfs.stream.estimate",
 
         "gds.alpha.hits.mutate",
         "gds.alpha.hits.mutate.estimate",
