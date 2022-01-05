@@ -15,6 +15,7 @@ dependencies {
     implementation project(':algo-common')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':edition-api')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':open-model-catalog')
@@ -34,6 +35,7 @@ dependencies {
 
     testImplementation project(':algo-test')
     testImplementation project(':test-utils')
+    testImplementation project(':proc-catalog')
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')

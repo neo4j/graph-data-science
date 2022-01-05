@@ -27,6 +27,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestLog;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -56,6 +57,8 @@ class MemoryEstimationExecutorTest extends BaseTest {
     void setup() throws Exception {
         var procedureTransaction = db.beginTx();
         var transaction = GraphDatabaseApiProxy.kernelTransaction(procedureTransaction);
+
+        GraphDatabaseApiProxy.registerProcedures(db, GraphCreateProc.class);
 
         executionContext = ImmutableExecutionContext
             .builder()

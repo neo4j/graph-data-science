@@ -1,30 +1,9 @@
-/*
- * Copyright (c) "Neo4j"
- * Neo4j Sweden AB [http://neo4j.com]
- *
- * This file is part of Neo4j.
- *
- * Neo4j is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package org.neo4j.gds.beta.pregel.cc;
 
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
-
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Pregel;
@@ -35,6 +14,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
@@ -55,23 +35,23 @@ import org.neo4j.procedure.Procedure;
 @Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
 public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgorithm, PregelProcedureConfig> {
     @Procedure(
-            name = "gds.pregel.test.write",
-            mode = Mode.WRITE
+        name = "gds.pregel.test.write",
+        mode = Mode.WRITE
     )
     @Description("Test computation description")
     public Stream<PregelWriteResult> write(@Name("graphName") String graphName,
-            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
+                                           @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
         return write(compute(graphName, configuration));
     }
 
     @Procedure(
-            name = "gds.pregel.test.write.estimate",
-            mode = Mode.READ
+        name = "gds.pregel.test.write.estimate",
+        mode = Mode.READ
     )
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-            @Name("graphNameOrConfiguration") Object graphNameOrConfiguration,
-            @Name("algoConfiguration") Map<String, Object> algoConfiguration) {
+        @Name("graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name("algoConfiguration") Map<String, Object> algoConfiguration) {
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
