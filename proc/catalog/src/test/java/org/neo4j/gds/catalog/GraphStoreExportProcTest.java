@@ -36,6 +36,7 @@ import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.io.fs.DefaultFileSystemAbstraction;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -73,6 +74,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
+        builder.setFileSystem(new DefaultFileSystemAbstraction());
         builder.setConfig(GraphStoreExportSettings.export_location_setting, tempDir);
     }
 
