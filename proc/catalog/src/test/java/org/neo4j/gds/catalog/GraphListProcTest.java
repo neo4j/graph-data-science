@@ -43,11 +43,8 @@ import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -453,7 +450,7 @@ class GraphListProcTest extends BaseProcTest {
                 .collect(toList())
         );
 
-        assertThat(actualNames, containsInAnyOrder(names));
+        assertThat(actualNames).containsExactlyInAnyOrder(names);
     }
 
     @Test
@@ -473,14 +470,14 @@ class GraphListProcTest extends BaseProcTest {
                 .collect(toList())
         );
 
-        assertThat(actualNames.size(), is(1));
-        assertThat(actualNames, contains(name));
+        assertThat(actualNames).hasSize(1);
+        assertThat(actualNames).contains(name);
     }
 
     @Test
     void returnEmptyStreamWhenNoGraphsAreLoaded() {
         long numberOfRows = runQuery("CALL gds.graph.list()", r -> r.stream().count());
-        assertThat(numberOfRows, is(0L));
+        assertThat(numberOfRows).isEqualTo(0L);
     }
 
     @ParameterizedTest(name = "name argument: ''{0}''")
@@ -498,7 +495,7 @@ class GraphListProcTest extends BaseProcTest {
             result -> result.stream().count()
         );
 
-        assertThat(numberOfRows, is(0L));
+        assertThat(numberOfRows).isEqualTo(0L);
     }
 
     @Test
