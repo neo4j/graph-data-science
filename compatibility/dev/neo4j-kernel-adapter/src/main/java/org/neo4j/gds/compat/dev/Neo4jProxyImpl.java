@@ -95,7 +95,6 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.StoreVersion;
-import org.neo4j.values.storable.ValueGroup;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -303,7 +302,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public CompatIndexQuery rangeAllIndexQuery(int propertyKeyId) {
-        return new CompatIndexQueryImpl(PropertyIndexQuery.range(propertyKeyId, ValueGroup.NUMBER));
+        return new CompatIndexQueryImpl(PropertyIndexQuery.range(propertyKeyId, (Number) null, true, null, true));
     }
 
     @Override
