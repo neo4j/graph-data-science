@@ -159,12 +159,12 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
 
             return gradient.scalarMultiplyMutate(1.0D / numberOfExamples);
         } else {
-            // assume other variables do not require gradient
+            // assume feature and target variables do not require gradient
             return ctx.data(parent).createWithSameDimensions();
         }
     }
 
-    private void validateVectorDimensions(int[] dimensions, int vectorLength) {
+    private static void validateVectorDimensions(int[] dimensions, int vectorLength) {
         if (!isVector(dimensions) || totalSize(dimensions) != vectorLength) {
             throw new IllegalStateException(formatWithLocale(
                 "Expected a vector of size %d. Got %s",

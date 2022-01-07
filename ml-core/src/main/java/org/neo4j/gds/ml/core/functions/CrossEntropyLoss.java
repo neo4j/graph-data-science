@@ -86,6 +86,7 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
             }
             return gradient;
         } else {
+            // targets should never require a gradient
             return ctx.data(parent).createWithSameDimensions();
         }
     }
