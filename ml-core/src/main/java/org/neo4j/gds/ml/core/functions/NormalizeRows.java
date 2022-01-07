@@ -33,26 +33,24 @@ public class NormalizeRows extends SingleParentVariable<Matrix, Matrix> {
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        Matrix parentMatrix = ctx.data(parent);
+        var parentMatrix = ctx.data(parent);
         int rows = parentMatrix.rows();
         int cols = parentMatrix.cols();
 
-        double[] parentData = parentMatrix.data();
-
-        double[] result = new double[rows * cols];
+        var result = parentMatrix.createWithSameDimensions();
         for (int row = 0; row < rows; row++) {
-            double sum = 0;
+            double squaredSum = 0;
             for (int col = 0; col < cols; col++) {
-                int elementIndex = row * cols + col;
-                sum += Math.pow(parentData[elementIndex], 2);
+                squaredSum += parentMatrix.dataAt(row, col) * parentMatrix.dataAt(row, col);
             }
-            double l2 = Math.sqrt(sum);
+
+            // adding EPSILON to avoid division by zero
+            double l2 = Math.sqrt(squaredSum) + EPSILON;
             for (int col = 0; col < cols; col++) {
-                int elementIndex = row * cols + col;
-                result[elementIndex] = parentData[elementIndex] / (l2 + EPSILON);
+                result.setDataAt(row, col, parentMatrix.dataAt(row, col) / l2);
             }
         }
-        return new Matrix(result, rows, cols);
+        return result;
     }
 
     @Override
