@@ -73,7 +73,7 @@ public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRe
 
     @Override
     public Variable<Scalar> loss(Batch relationshipBatch, long trainSize) {
-        Constant<Vector> targets = makeTargetsArray(relationshipBatch);
+        Constant<Vector> batchedTargets = makeTargetsArray(relationshipBatch);
         Constant<Matrix> features = features(relationshipBatch, linkFeatures);
         Variable<Matrix> weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.of(features, modelData.weights());
 
@@ -84,10 +84,10 @@ public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRe
             Weights<Scalar> bias = potentialBias.get();
             var weightedFeaturesWithBias = new EWiseAddMatrixScalar(weightedFeatures, bias);
             var predictions = new Sigmoid<>(weightedFeaturesWithBias);
-            unpenalizedLoss = new LogisticLoss(modelData.weights(), bias, predictions, features, targets);
+            unpenalizedLoss = new LogisticLoss(modelData.weights(), bias, predictions, features, batchedTargets);
         } else {
             var predictions = new Sigmoid<>(weightedFeatures);
-            unpenalizedLoss = new LogisticLoss(modelData.weights(), predictions, features, targets);
+            unpenalizedLoss = new LogisticLoss(modelData.weights(), predictions, features, batchedTargets);
         }
 
         var penaltyVariable = new ConstantScale<>(
