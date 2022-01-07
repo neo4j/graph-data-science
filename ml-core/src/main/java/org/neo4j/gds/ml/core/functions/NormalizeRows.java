@@ -74,14 +74,16 @@ public class NormalizeRows extends SingleParentVariable<Matrix, Matrix> {
             for (int col = 0; col < cols; col++) {
                 double parentCellValue = parentData.dataAt(row, col);
                 for (int gradCol = 0; gradCol < cols; gradCol++) {
+                    double partialGradient;
                     if (col == gradCol) {
-                        double partialGradient = thisGradient.dataAt(row, col) * (l2Squared - parentCellValue * parentCellValue) / l2Cubed;
-                        parentGradient.addDataAt(row, col, partialGradient);
+                        partialGradient = thisGradient.dataAt(row, col) * (l2Squared - parentCellValue * parentCellValue);
                     } else {
-                        double partialGradient = -thisGradient.dataAt(row, gradCol) * (parentCellValue * parentData.dataAt(row, gradCol)) / l2Cubed;
-                        parentGradient.addDataAt(row, col, partialGradient);
+                        partialGradient = -thisGradient.dataAt(row, gradCol) * (parentCellValue * parentData.dataAt(row, gradCol));
                     }
+                    parentGradient.addDataAt(row, col, partialGradient);
                 }
+
+                parentGradient.setDataAt(row, col, parentGradient.dataAt(row, col) / l2Cubed);
             }
         }
         return parentGradient;
