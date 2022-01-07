@@ -32,6 +32,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionPipelineTrainProc;
+import org.neo4j.gds.model.catalog.ModelListProc;
 
 import java.util.List;
 import java.util.Map;
@@ -95,6 +96,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             GraphCreateProc.class,
+            ModelListProc.class,
             LinkPredictionPipelineMutateProc.class,
             LinkPredictionPipelineTrainProc.class,
             LinkPredictionPipelineCreateProc.class,
