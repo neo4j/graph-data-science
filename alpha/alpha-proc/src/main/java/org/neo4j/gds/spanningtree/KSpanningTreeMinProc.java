@@ -20,8 +20,8 @@
 package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.spanningTrees.Prim;
-import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -29,7 +29,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.pipeline.ExecutionMode.WRITE_NODE_PROPERTY;
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.spanningtree.KSpanningTreeMinProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 

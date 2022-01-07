@@ -1,0 +1,43 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Executor'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    annotationProcessor project(':annotations')
+
+    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
+    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+
+    implementation project(':annotations')
+    implementation project(':algo')
+    implementation project(':algo-common')
+    implementation project(':config-api')
+    implementation project(':core')
+    implementation project(':edition-api')
+    implementation project(':memory-usage')
+    implementation project(':model-catalog-api')
+    implementation project(':open-model-catalog')
+    implementation project(':transaction')
+    implementation project(':string-formatting')
+
+    implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
+
+    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
+
+    testImplementation project(':algo-test')
+    testImplementation project(':test-utils')
+    testImplementation project(':proc-catalog')
+
+    testAnnotationProcessor project(':annotations')
+    testAnnotationProcessor project(':config-generator')
+    testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+}

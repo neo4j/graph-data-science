@@ -31,7 +31,7 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.impl.spanningTrees.Prim;
 import org.neo4j.gds.impl.spanningTrees.SpanningGraph;
 import org.neo4j.gds.impl.spanningTrees.SpanningTree;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.utils.InputNodeValidator;
 import org.neo4j.procedure.Context;
 

@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
-import org.neo4j.gds.pipeline.validation.GraphCreateConfigValidations;
-import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.validation.BeforeLoadValidation;
+import org.neo4j.gds.executor.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -48,7 +48,7 @@ final class LocalClusteringCoefficientCompanion {
     private LocalClusteringCoefficientCompanion() {}
 
     static <CONFIG extends LocalClusteringCoefficientBaseConfig> NodeProperties nodeProperties(
-        AlgoBaseProc.ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
+        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
     ) {
         return computeResult.result().asNodeProperties();
     }
@@ -63,7 +63,7 @@ final class LocalClusteringCoefficientCompanion {
 
     static <PROC_RESULT, CONFIG extends LocalClusteringCoefficientBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         ResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
+        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
     ) {
         var result = Optional.ofNullable(computeResult.result())
             .orElse(EmptyResult.EMPTY_RESULT);

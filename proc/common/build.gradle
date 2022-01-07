@@ -16,12 +16,14 @@ dependencies {
     implementation project(':algo-common')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':executor')
     implementation project(':licensing')
     implementation project(':edition-api')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-adapter')
     implementation project(':open-model-catalog')
+    implementation project(':open-licensing')
     implementation project(':pregel')
     implementation project(':transaction')
     implementation project(':string-formatting')
@@ -44,7 +46,7 @@ dependencies {
     testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
-    implementation project(':open-licensing')
+    testImplementation project(':algo-test')
     testImplementation project(':proc-test')
     testImplementation project(':graph-schema-api')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'

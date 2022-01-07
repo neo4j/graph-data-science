@@ -22,12 +22,12 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
-import org.neo4j.gds.pipeline.ExecutionContext;
-import org.neo4j.gds.pipeline.ProcedureExecutor;
-import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
 
 import java.util.HashMap;
 import java.util.List;
@@ -135,7 +135,7 @@ public class RelationshipSplitter {
 
         new ProcedureExecutor<>(
             splitRelationshipsMutateProc,
-            new ProcedurePipelineSpec<>(),
+            new ProcedureExecutorSpec<>(),
             executionContext
         ).compute(graphName, splitRelationshipProcConfig, false, false);
     }

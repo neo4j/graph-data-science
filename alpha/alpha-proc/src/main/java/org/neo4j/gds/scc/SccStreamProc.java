@@ -22,10 +22,10 @@ package org.neo4j.gds.scc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.scc.SccAlgorithm;
 import org.neo4j.gds.impl.scc.SccConfig;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
+import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.scc.SccProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 

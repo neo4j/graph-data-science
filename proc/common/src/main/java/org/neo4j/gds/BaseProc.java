@@ -30,10 +30,10 @@ import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.pipeline.ExecutionContext;
-import org.neo4j.gds.pipeline.GraphStoreFromCatalogLoader;
-import org.neo4j.gds.pipeline.ImmutableExecutionContext;
-import org.neo4j.gds.pipeline.MemoryUsageValidator;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
+import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.executor.MemoryUsageValidator;
 import org.neo4j.gds.transaction.SecurityContextWrapper;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.Transaction;
@@ -172,10 +172,5 @@ public abstract class BaseProc {
             .taskRegistryFactory(taskRegistryFactory)
             .username(username())
             .build();
-    }
-
-    @FunctionalInterface
-    public interface FreeMemoryInspector {
-        long freeMemory();
     }
 }

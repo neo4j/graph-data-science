@@ -23,8 +23,9 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -39,7 +40,7 @@ public abstract class StreamProc<
 
     @Override
     public ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
-        return (AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext) ->
+        return (ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext) ->
             runWithExceptionLogging("Result streaming failed", () -> {
                 if (computationResult.isGraphEmpty()) {
                     return Stream.empty();

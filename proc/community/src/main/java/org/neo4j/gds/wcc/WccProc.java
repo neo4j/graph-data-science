@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -40,13 +40,13 @@ final class WccProc {
 
     static <PROC_RESULT, CONFIG extends WccBaseConfig> AbstractCommunityResultBuilder<PROC_RESULT> resultBuilder(
         AbstractCommunityResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult
+        ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult
     ) {
         return procResultBuilder.withCommunityFunction(!computationResult.isGraphEmpty() ? computationResult.result()::setIdOf : null);
     }
 
     static <CONFIG extends WccBaseConfig> NodeProperties nodeProperties(
-        AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult,
+        ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult,
         String resultProperty,
         AllocationTracker allocationTracker
     ) {

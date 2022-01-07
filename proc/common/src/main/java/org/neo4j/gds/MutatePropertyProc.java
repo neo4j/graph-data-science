@@ -23,6 +23,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.executor.ComputationResult;
 
 import java.util.List;
 

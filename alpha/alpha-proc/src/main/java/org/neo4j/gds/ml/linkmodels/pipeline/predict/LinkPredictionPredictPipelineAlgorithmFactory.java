@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.similarity.knn.KnnFactory;
 
 import java.util.List;

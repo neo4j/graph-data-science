@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -36,7 +36,7 @@ final class LouvainProc {
     private LouvainProc() {}
 
     static <CONFIG extends LouvainBaseConfig> NodeProperties nodeProperties(
-        AlgoBaseProc.ComputationResult<Louvain, Louvain, CONFIG> computationResult,
+        ComputationResult<Louvain, Louvain, CONFIG> computationResult,
         String resultProperty,
         AllocationTracker allocationTracker
     ) {
@@ -71,7 +71,7 @@ final class LouvainProc {
 
     static <PROC_RESULT, CONFIG extends LouvainBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         LouvainResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<Louvain, Louvain, CONFIG> computeResult
+        ComputationResult<Louvain, Louvain, CONFIG> computeResult
     ) {
         Louvain result = computeResult.result();
         boolean nonEmpty = !computeResult.isGraphEmpty();

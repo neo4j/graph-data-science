@@ -26,9 +26,10 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
-import org.neo4j.gds.pipeline.GdsCallable;
-import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.pipeline.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.alpha.ml.nodeClassification.predict.stream", description = "Predicts classes for all nodes based on a previously trained model", executionMode = MUTATE_NODE_PROPERTY)
 public class NodeClassificationPredictStreamProc extends StreamProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationStreamResult, NodeClassificationStreamConfig> {
@@ -74,8 +75,8 @@ public class NodeClassificationPredictStreamProc extends StreamProc<NodeClassifi
     @Override
     protected Stream<NodeClassificationStreamResult> stream(
         ComputationResult<
-        NodeClassificationPredict, NodeClassificationResult, NodeClassificationStreamConfig
-        > computationResult
+                NodeClassificationPredict, NodeClassificationResult, NodeClassificationStreamConfig
+                > computationResult
     ) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();

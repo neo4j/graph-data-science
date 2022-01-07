@@ -6,6 +6,9 @@ project(':algo').projectDir = file('algo')
 include('algo-common')
 project(':algo-common').projectDir = file('algo-common')
 
+include('algo-test')
+project(':algo-test').projectDir = file('algo-test')
+
 include('alpha-algo')
 project(':alpha-algo').projectDir = file('alpha/alpha-algo')
 
@@ -59,6 +62,9 @@ project(':doc-test').projectDir = file('doc-test')
 
 include('edition-api')
 project(':edition-api').projectDir = file('edition-api')
+
+include('executor')
+project(':executor').projectDir = file('executor')
 
 include('graph-dimensions')
 project(':graph-dimensions').projectDir = file('graph-dimensions')

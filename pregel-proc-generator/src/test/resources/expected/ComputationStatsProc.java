@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.pregel.cc;
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
@@ -34,9 +33,10 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.pipeline.ExecutionContext;
-import org.neo4j.gds.pipeline.ExecutionMode;
-import org.neo4j.gds.pipeline.GdsCallable;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionMode;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.pregel.proc.PregelStatsProc;
 import org.neo4j.gds.pregel.proc.PregelStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -54,29 +54,29 @@ import org.neo4j.procedure.Procedure;
 @Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
 public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgorithm, PregelProcedureConfig> {
     @Procedure(
-            name = "gds.pregel.test.stats",
-            mode = Mode.READ
+        name = "gds.pregel.test.stats",
+        mode = Mode.READ
     )
     @Description("Test computation description")
     public Stream<PregelStatsResult> stats(@Name("graphName") String graphName,
-            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
+                                           @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
         return stats(compute(graphName, configuration));
     }
 
     @Procedure(
-            name = "gds.pregel.test.stats.estimate",
-            mode = Mode.READ
+        name = "gds.pregel.test.stats.estimate",
+        mode = Mode.READ
     )
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-            @Name("graphNameOrConfiguration") Object graphNameOrConfiguration,
-            @Name("algoConfiguration") Map<String, Object> algoConfiguration) {
+        @Name("graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name("algoConfiguration") Map<String, Object> algoConfiguration) {
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
     protected AbstractResultBuilder<PregelStatsResult> resultBuilder(
-        AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelProcedureConfig> computeResult,
+        ComputationResult<ComputationAlgorithm, PregelResult, PregelProcedureConfig> computeResult,
         ExecutionContext executionContext) {
         var ranIterations = computeResult.result().ranIterations();
         var didConverge = computeResult.result().didConverge();

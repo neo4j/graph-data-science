@@ -15,6 +15,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':executor')
     implementation project(':ml-core')
     implementation project(':graph-schema-api')
     implementation project(':model-catalog-api')

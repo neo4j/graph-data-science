@@ -19,20 +19,20 @@
  */
 package org.neo4j.gds.beta.node2vec;
 
-import org.neo4j.gds.embeddings.node2vec.Node2Vec;
-import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
-import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.embeddings.node2vec.Node2Vec;
+import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 
 final class Node2VecCompanion {
 
     static final String DESCRIPTION = "The Node2Vec algorithm computes embeddings for nodes based on random walks.";
 
     static <CONFIG extends Node2VecBaseConfig> NodeProperties nodeProperties(
-        AlgoBaseProc.ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, CONFIG> computationResult
+        ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, CONFIG> computationResult
     ) {
         var size = computationResult.graph().nodeCount();
         var embeddings = computationResult.result();

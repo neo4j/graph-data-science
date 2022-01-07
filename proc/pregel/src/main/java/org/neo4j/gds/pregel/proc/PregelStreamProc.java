@@ -26,6 +26,7 @@ import org.neo4j.gds.beta.pregel.Element;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
+import org.neo4j.gds.executor.ComputationResult;
 
 import java.util.Map;
 import java.util.stream.Collectors;

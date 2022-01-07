@@ -28,7 +28,7 @@ import org.neo4j.gds.impl.traverse.Traverse;
 import org.neo4j.gds.impl.traverse.TraverseConfig;
 import org.neo4j.gds.impl.walking.WalkPath;
 import org.neo4j.gds.impl.walking.WalkResult;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 
 import java.util.List;
 import java.util.stream.Collectors;

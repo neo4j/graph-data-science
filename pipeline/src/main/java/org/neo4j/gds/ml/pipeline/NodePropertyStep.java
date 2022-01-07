@@ -22,10 +22,10 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.pipeline.ExecutionContext;
-import org.neo4j.gds.pipeline.GdsCallableFinder;
-import org.neo4j.gds.pipeline.ProcedureExecutor;
-import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.GdsCallableFinder;
+import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.executor.ProcedureExecutorSpec;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -69,7 +69,7 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
 
         new ProcedureExecutor<>(
             callableDefinition.algorithmSpec(),
-            new ProcedurePipelineSpec<>(),
+            new ProcedureExecutorSpec<>(),
             executionContext
         ).compute(graphName, configCopy, false, false);
     }

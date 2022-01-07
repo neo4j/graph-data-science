@@ -26,9 +26,10 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationStreamResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
-import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -43,8 +44,8 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
-import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.alpha.ml.pipeline.nodeClassification.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
 public class NodeClassificationPipelineStreamProc
@@ -72,10 +73,10 @@ public class NodeClassificationPipelineStreamProc
     @Override
     protected Stream<NodeClassificationStreamResult> stream(
         ComputationResult<
-            NodeClassificationPredictPipelineExecutor,
-            NodeClassificationResult,
-            NodeClassificationPredictPipelineStreamConfig
-            > computationResult
+                    NodeClassificationPredictPipelineExecutor,
+                    NodeClassificationResult,
+                    NodeClassificationPredictPipelineStreamConfig
+                    > computationResult
     ) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();

@@ -20,11 +20,11 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.pipeline.AlgoConfigParser;
-import org.neo4j.gds.pipeline.ExecutionContext;
-import org.neo4j.gds.pipeline.ExecutionMode;
-import org.neo4j.gds.pipeline.GdsCallableFinder;
-import org.neo4j.gds.pipeline.NewConfigFunction;
+import org.neo4j.gds.executor.AlgoConfigParser;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionMode;
+import org.neo4j.gds.executor.GdsCallableFinder;
+import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;

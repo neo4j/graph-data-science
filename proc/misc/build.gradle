@@ -8,6 +8,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':core')
     implementation project(':csv')
+    implementation project(':executor')
     implementation project(':memory-usage')
     implementation project(':neo4j-adapter')
     implementation project(':proc-catalog')

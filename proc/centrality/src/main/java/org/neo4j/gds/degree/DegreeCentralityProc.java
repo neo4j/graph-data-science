@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.degree;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 public final class DegreeCentralityProc {
@@ -37,7 +37,7 @@ public final class DegreeCentralityProc {
 
     static <PROC_RESULT, CONFIG extends DegreeCentralityConfig> AbstractCentralityResultBuilder<PROC_RESULT> resultBuilder(
         AbstractCentralityResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, CONFIG> computeResult
+        ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, CONFIG> computeResult
     ) {
         var result = computeResult.result();
         procResultBuilder
@@ -46,7 +46,7 @@ public final class DegreeCentralityProc {
         return procResultBuilder;
     }
 
-    static NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, ? extends DegreeCentralityConfig> computationResult) {
+    static NodeProperties nodeProperties(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, ? extends DegreeCentralityConfig> computationResult) {
         var size = computationResult.graph().nodeCount();
         var degrees = computationResult.result();
 

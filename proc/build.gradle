@@ -20,6 +20,7 @@ dependencies {
 
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':executor')
     implementation project(':model-catalog-api')
     implementation project(':open-model-catalog')
     implementation project(':string-formatting')
@@ -43,6 +44,7 @@ dependencies {
 
     testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
 
+    testImplementation project(':executor')
     testImplementation project(':model-catalog-api')
     testImplementation project(':proc-test')
 }

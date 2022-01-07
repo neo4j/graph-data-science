@@ -22,9 +22,9 @@ package org.neo4j.gds.beta.pregel;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
-import org.neo4j.gds.pipeline.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.pregel.proc.PregelWriteProc;
 import org.neo4j.gds.pregel.proc.PregelWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -74,7 +74,7 @@ class WriteProcedureGenerator extends ProcedureGenerator {
             .addModifiers(Modifier.PROTECTED)
             .returns(ParameterizedTypeName.get(AbstractResultBuilder.class, procResultClass()))
             .addParameter(ParameterizedTypeName.get(
-                ClassName.get(AlgoBaseProc.ComputationResult.class),
+                ClassName.get(ComputationResult.class),
                 computationClassName(pregelSpec, ALGORITHM_SUFFIX),
                 ClassName.get(PregelResult.class),
                 pregelSpec.configTypeName()

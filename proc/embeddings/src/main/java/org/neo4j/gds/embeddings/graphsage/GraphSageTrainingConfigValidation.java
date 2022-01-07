@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.pipeline.validation.AfterLoadValidation;
+import org.neo4j.gds.executor.validation.AfterLoadValidation;
 
 import java.util.List;
 import java.util.stream.Collectors;

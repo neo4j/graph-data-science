@@ -12,15 +12,16 @@ dependencies {
 
     compileOnly         group: 'com.google.auto.service',  name: 'auto-service',       version: ver.'auto-service'
 
-    implementation  project(':annotations')
-    implementation  project(':algo-common')
-    implementation  project(':config-api')
-    implementation  project(':core')
+    implementation project(':annotations')
+    implementation project(':algo-common')
+    implementation project(':config-api')
+    implementation project(':core')
+    implementation project(':executor')
     implementation project(':memory-usage')
-    implementation  project(':proc-common')
-    implementation  project(':pregel')
-    implementation  project(':proc-pregel')
-    implementation  project(':string-formatting')
+    implementation project(':proc-common')
+    implementation project(':pregel')
+    implementation project(':proc-pregel')
+    implementation project(':string-formatting')
 
     implementation             group: 'org.neo4j',                name: 'neo4j-logging',        version: ver.'neo4j'
     implementation             group: 'org.neo4j',                name: 'neo4j-procedure-api',  version: ver.'neo4j'

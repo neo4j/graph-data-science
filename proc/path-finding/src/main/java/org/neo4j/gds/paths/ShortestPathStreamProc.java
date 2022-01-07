@@ -20,11 +20,11 @@
 package org.neo4j.gds.paths;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.stream.Stream;
 
@@ -40,7 +40,7 @@ public abstract class ShortestPathStreamProc<
     }
 
     @Override
-    public Stream<StreamResult> stream(AlgoBaseProc.ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
+    public Stream<StreamResult> stream(ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
         return runWithExceptionLogging("Result streaming failed", () -> {
             var graph = computationResult.graph();
 

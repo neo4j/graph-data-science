@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.similarity.ann;
 
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm;
 import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfig;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.gds.impl.similarity.SimilarityInput;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.pipeline.GdsCallable;
 import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -33,7 +33,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.pipeline.ExecutionMode.STREAM;
+import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.similarity.ann.ApproxNearestNeighborsProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 

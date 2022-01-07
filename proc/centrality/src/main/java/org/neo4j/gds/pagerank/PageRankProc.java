@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.pipeline.validation.BeforeLoadValidation;
-import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.validation.BeforeLoadValidation;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
@@ -45,7 +45,7 @@ final class PageRankProc {
 
     static <PROC_RESULT, CONFIG extends PageRankConfig> PageRankResultBuilder<PROC_RESULT> resultBuilder(
         PageRankResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult
+        ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult
     ) {
         var result = computeResult.result();
         procResultBuilder
@@ -57,7 +57,7 @@ final class PageRankProc {
         return procResultBuilder;
     }
 
-    static <CONFIG extends PageRankConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult) {
+    static <CONFIG extends PageRankConfig> NodeProperties nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult) {
         return computeResult.result().scores().asNodeProperties();
     }
 

@@ -19,30 +19,26 @@
  */
 package org.neo4j.gds;
 
-import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.pipeline.AlgoConfigParser;
-import org.neo4j.gds.pipeline.AlgorithmSpec;
-import org.neo4j.gds.pipeline.ComputationResultConsumer;
-import org.neo4j.gds.pipeline.ExecutionContext;
-import org.neo4j.gds.pipeline.GraphCreationFactory;
-import org.neo4j.gds.pipeline.GraphStoreFromCatalogLoader;
-import org.neo4j.gds.pipeline.MemoryEstimationExecutor;
-import org.neo4j.gds.pipeline.MemoryUsageValidator;
-import org.neo4j.gds.pipeline.NewConfigFunction;
-import org.neo4j.gds.pipeline.PipelineSpec;
-import org.neo4j.gds.pipeline.ProcConfigParser;
-import org.neo4j.gds.pipeline.ProcedureExecutor;
-import org.neo4j.gds.pipeline.ProcedureGraphCreationFactory;
-import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
-import org.neo4j.gds.pipeline.validation.ValidationConfiguration;
-import org.neo4j.gds.pipeline.validation.Validator;
+import org.neo4j.gds.executor.AlgoConfigParser;
+import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ExecutorSpec;
+import org.neo4j.gds.executor.GraphCreationFactory;
+import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.MemoryUsageValidator;
+import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.executor.ProcConfigParser;
+import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.executor.ProcedureExecutorSpec;
+import org.neo4j.gds.executor.ProcedureGraphCreationFactory;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.executor.validation.Validator;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
@@ -96,7 +92,7 @@ public abstract class AlgoBaseProc<
     ) {
         return new MemoryEstimationExecutor<>(
             this,
-            new ProcedurePipelineSpec<>(),
+            new ProcedureExecutorSpec<>(),
             executionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
@@ -124,7 +120,7 @@ public abstract class AlgoBaseProc<
     }
 
     private ProcedureExecutor<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> procedureExecutor() {
-        var pipelineSpec = new AlgoBasePipelineSpec();
+        var pipelineSpec = new AlgoBaseExecutorSpec();
 
         var name = name();
         var factory = algorithmFactory();
@@ -164,31 +160,7 @@ public abstract class AlgoBaseProc<
         );
     }
 
-    @ValueClass
-    public interface ComputationResult<A extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
-        long preProcessingMillis();
-
-        long computeMillis();
-
-        @Nullable
-        A algorithm();
-
-        @Nullable
-        ALGO_RESULT result();
-
-        Graph graph();
-
-        GraphStore graphStore();
-
-        CONFIG config();
-
-        @Value.Default
-        default boolean isGraphEmpty() {
-            return false;
-        }
-    }
-
-    private final class AlgoBasePipelineSpec implements PipelineSpec<ALGO, ALGO_RESULT, CONFIG> {
+    private final class AlgoBaseExecutorSpec implements ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> {
         @Override
         public ProcConfigParser<CONFIG> configParser(
             NewConfigFunction<CONFIG> newConfigFunction, ExecutionContext executionContext
