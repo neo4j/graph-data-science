@@ -139,6 +139,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
             var model = ncPipeTrain.compute();
 
+            assertThat(model.creator()).isEqualTo(getUsername());
+
             // using explicit type intentionally :)
             NodeClassificationPipelineModelInfo customInfo = model.customInfo();
             assertThat(customInfo.metrics().get(metric).validation()).hasSize(1);
@@ -154,6 +156,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     void passesAllParameters() {
         var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
             .pipeline(PIPELINE_NAME)
+            .username("myUser")
             .modelName("myModel")
             .concurrency(1)
             .randomSeed(42L)
@@ -177,6 +180,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             NodeClassificationTrainConfig actualConfig = executor.innerConfig();
 
             assertThat(actualConfig)
+                .matches(innerConfig -> innerConfig.username().equals(config.username()))
                 .matches(innerConfig -> innerConfig.modelName().equals("myModel"))
                 .matches(innerConfig -> innerConfig.concurrency() == 1 )
                 .matches(innerConfig -> innerConfig.randomSeed().orElseThrow().equals(42L) )

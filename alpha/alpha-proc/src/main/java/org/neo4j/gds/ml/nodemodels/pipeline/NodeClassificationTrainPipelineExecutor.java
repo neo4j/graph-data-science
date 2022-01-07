@@ -110,6 +110,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         return NodeClassificationTrainConfig.builder()
             .modelName(config.modelName())
             .concurrency(config.concurrency())
+            .username(config.username())
             .metrics(config.metrics())
             .targetProperty(config.targetProperty())
             .featureProperties(pipeline.featureProperties())
