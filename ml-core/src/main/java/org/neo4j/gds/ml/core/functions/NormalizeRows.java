@@ -55,36 +55,35 @@ public class NormalizeRows extends SingleParentVariable<Matrix, Matrix> {
 
     @Override
     public Matrix gradientForParent(ComputationContext ctx) {
-        Matrix parentMatrix = ctx.data(parent);
-        int rows = parentMatrix.rows();
-        int cols = parentMatrix.cols();
+        Matrix parentData = ctx.data(parent);
+        Matrix thisGradient = ctx.gradient(this);
 
-        double[] parentData = parentMatrix.data();
-        double[] gradientData = ctx.gradient(this).data();
-        double[] result = new double[parentData.length];
+        Matrix parentGradient = parentData.createWithSameDimensions();
+        int rows = parentData.rows();
+        int cols = parentData.cols();
+
         for (int row = 0; row < rows; row++) {
             double l2Squared = 0;
             for (int col = 0; col < cols; col++) {
-                int elementIndex = row * cols + col;
-                l2Squared += parentData[elementIndex] * parentData[elementIndex];
+                double cellValue = parentData.dataAt(row, col);
+                l2Squared += cellValue * cellValue;
             }
             double l2 = Math.sqrt(l2Squared);
             double l2Cubed = l2 * l2Squared;
+
             for (int col = 0; col < cols; col++) {
-                int elementIndex = row * cols + col;
+                double parentCellValue = parentData.dataAt(row, col);
                 for (int gradCol = 0; gradCol < cols; gradCol++) {
                     if (col == gradCol) {
-                        result[elementIndex] +=
-                            gradientData[elementIndex] *
-                            (l2Squared - parentData[elementIndex] * parentData[elementIndex]) / l2Cubed;
+                        double partialGradient = thisGradient.dataAt(row, col) * (l2Squared - parentCellValue * parentCellValue) / l2Cubed;
+                        parentGradient.addDataAt(row, col, partialGradient);
                     } else {
-                        result[elementIndex] -=
-                            gradientData[row * cols + gradCol] *
-                            (parentData[elementIndex] * parentData[row * cols + gradCol]) / l2Cubed;
+                        double partialGradient = -thisGradient.dataAt(row, gradCol) * (parentCellValue * parentData.dataAt(row, gradCol)) / l2Cubed;
+                        parentGradient.addDataAt(row, col, partialGradient);
                     }
                 }
             }
         }
-        return new Matrix(result, rows, cols);
+        return parentGradient;
     }
 }
