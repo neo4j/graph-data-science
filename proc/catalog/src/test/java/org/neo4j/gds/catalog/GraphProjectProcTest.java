@@ -1321,7 +1321,7 @@ class GraphProjectProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
-    @MethodSource("org.neo4j.gds.catalog.GraphCreateProcTest#invalidGraphNames")
+    @MethodSource("org.neo4j.gds.catalog.GraphProjectProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
             "CALL gds.graph.project($graphName, {}, {})",

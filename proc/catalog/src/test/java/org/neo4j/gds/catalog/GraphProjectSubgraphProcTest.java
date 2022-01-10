@@ -38,7 +38,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-class GraphCreateSubgraphProcTest extends BaseProcTest {
+class GraphProjectSubgraphProcTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB = "CREATE (a:A)-[:REL]->(b:B)";

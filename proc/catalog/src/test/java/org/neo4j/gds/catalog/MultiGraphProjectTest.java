@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class MultiGraphCreateTest extends BaseProcTest {
+class MultiGraphProjectTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {

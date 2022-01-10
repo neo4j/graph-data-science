@@ -628,7 +628,7 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.catalog.GraphCreateProcTest#invalidGraphNames")
+    @MethodSource("org.neo4j.gds.catalog.GraphProjectProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
         if (invalidName != null) { // null is not a valid name, but we use it to mean 'list all'
             assertError(

@@ -21,17 +21,17 @@ package org.neo4j.gds.doc.syntax;
 
 import java.util.List;
 
-class GraphCreateSyntaxTest extends SyntaxTestBase {
+import static org.neo4j.gds.doc.syntax.SyntaxMode.PROJECT_SUBGRAPH;
+
+class ProjectSubgraphSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(SyntaxMode.GRAPH_CREATE)
-        );
+        return List.of(SyntaxModeMeta.of(PROJECT_SUBGRAPH));
     }
 
     @Override
     protected String adocFile() {
-        return "management-ops/graph-catalog/graph-project.adoc";
+        return "management-ops/graph-catalog/graph-project-subgraph.adoc";
     }
 }

@@ -250,7 +250,7 @@ class GraphDropProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
-    @MethodSource("org.neo4j.gds.catalog.GraphCreateProcTest#invalidGraphNames")
+    @MethodSource("org.neo4j.gds.catalog.GraphProjectProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
         var params = new HashMap<String, Object>();
         params.put("graphName", invalidName);

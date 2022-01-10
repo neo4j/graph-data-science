@@ -21,12 +21,12 @@ package org.neo4j.gds.doc.syntax;
 
 import java.util.List;
 
-class GraphCreateCypherSyntaxTest extends SyntaxTestBase {
+class GraphProjectCypherSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.GRAPH_CREATE_CYPHER)
+            SyntaxModeMeta.of(SyntaxMode.GRAPH_PROJECT_CYPHER)
         );
     }
 

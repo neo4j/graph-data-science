@@ -79,7 +79,7 @@ class GraphExistsProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.catalog.GraphCreateProcTest#invalidGraphNames")
+    @MethodSource("org.neo4j.gds.catalog.GraphProjectProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
             "CALL gds.graph.exists($graphName)",
