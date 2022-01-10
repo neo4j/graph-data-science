@@ -123,7 +123,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
 
         String resultGraphName = "simGraph";
         String loadQuery = GdsCypher.call(resultGraphName)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("id")
             .withRelationshipType("SIMILAR")
@@ -143,7 +143,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
         var graphName = "undirectedGraph";
 
         var graphCreateQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("knn")
             .withRelationshipType("IGNORE", Orientation.UNDIRECTED)
@@ -171,7 +171,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
         var graphName = "undirectedGraph";
 
         var graphCreateQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("knn")
             .withRelationshipType("IGNORE", Orientation.UNDIRECTED)
@@ -207,7 +207,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
                  "CREATE (bob:Foo {name: 'Bob', age: 48})");
 
         String createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
             .withNodeProperty("age")

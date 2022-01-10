@@ -19,29 +19,29 @@
  */
 package org.neo4j.gds.core;
 
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 
 import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public final class GraphDimensionsValidation {
 
     private GraphDimensionsValidation() {}
 
-    public static void validate(GraphDimensions dimensions, GraphCreateFromStoreConfig config) {
+    public static void validate(GraphDimensions dimensions, GraphProjectFromStoreConfig config) {
         checkValidNodePredicate(dimensions, config);
         checkValidPropertyTokens("Node", dimensions.nodePropertyTokens());
         checkValidRelationshipTypePredicate(dimensions, config);
         checkValidPropertyTokens("Relationship", dimensions.relationshipPropertyTokens());
     }
 
-    private static void checkValidNodePredicate(GraphDimensions dimensions, GraphCreateFromStoreConfig config) {
+    private static void checkValidNodePredicate(GraphDimensions dimensions, GraphProjectFromStoreConfig config) {
         if (!config.nodeProjections().isEmpty() && dimensions.nodeLabelTokens().contains(NO_SUCH_LABEL)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Invalid node projection, one or more labels not found: '%s'",
@@ -50,7 +50,10 @@ public final class GraphDimensionsValidation {
         }
     }
 
-    private static void checkValidRelationshipTypePredicate(GraphDimensions dimensions, GraphCreateFromStoreConfig config) {
+    private static void checkValidRelationshipTypePredicate(
+        GraphDimensions dimensions,
+        GraphProjectFromStoreConfig config
+    ) {
         if (!config.relationshipProjections().isEmpty() && dimensions
             .relationshipTypeTokens()
             .contains(NO_SUCH_RELATIONSHIP_TYPE)) {

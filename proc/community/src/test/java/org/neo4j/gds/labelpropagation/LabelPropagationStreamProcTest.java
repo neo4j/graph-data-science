@@ -90,7 +90,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
 
             String graphCreateQuery = GdsCypher
                 .call("nodeFilteredGraph")
-                .graphCreate()
+                .graphProject()
                 .withNodeLabels("A", "B")
                 .withNodeProperty("id", DefaultValue.of(-1))
                 .withNodeProperty("seed", DefaultValue.of(Long.MIN_VALUE))

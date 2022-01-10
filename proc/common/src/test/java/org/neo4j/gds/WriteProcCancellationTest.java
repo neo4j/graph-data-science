@@ -28,11 +28,11 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
-import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.gdl.GdlGraphs;
-import org.neo4j.gds.gdl.ImmutableGraphCreateFromGdlConfig;
 import org.neo4j.gds.executor.ImmutableComputationResult;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.gdl.GdlGraphs;
+import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestResult;
@@ -84,7 +84,11 @@ class WriteProcCancellationTest extends BaseTest {
             var graphStore = GdlFactory
                 .builder()
                 .namedDatabaseId(db.databaseId())
-                .createConfig(ImmutableGraphCreateFromGdlConfig.builder().graphName("foo").gdlGraph("(a)").build())
+                .graphProjectConfig(ImmutableGraphProjectFromGdlConfig
+                    .builder()
+                    .graphName("foo")
+                    .gdlGraph("(a)")
+                    .build())
                 .build()
                 .build()
                 .graphStore();

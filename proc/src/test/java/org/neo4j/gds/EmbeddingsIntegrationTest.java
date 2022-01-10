@@ -86,7 +86,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
 
         runQuery(GdsCypher
             .call(TEST_GRAPH)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("nodeId")
             .withRelationshipType("TYPE")

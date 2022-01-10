@@ -24,7 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -43,7 +43,7 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
 
     private final AlgoBaseConfig config;
     private final GraphStore graphStore;
-    private final GraphCreateConfig graphCreateConfig;
+    private final GraphProjectConfig graphProjectConfig;
 
     public GraphStoreFromCatalogLoader(
         String graphName,
@@ -55,12 +55,12 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
         this.config = config;
         var graphStoreWithConfig = graphStoreFromCatalog(graphName, config, username, databaseId, isGdsAdmin);
         this.graphStore = graphStoreWithConfig.graphStore();
-        this.graphCreateConfig = graphStoreWithConfig.config();
+        this.graphProjectConfig = graphStoreWithConfig.config();
     }
 
     @Override
-    public GraphCreateConfig graphCreateConfig() {
-        return this.graphCreateConfig;
+    public GraphProjectConfig graphProjectConfig() {
+        return this.graphProjectConfig;
     }
 
     @Override

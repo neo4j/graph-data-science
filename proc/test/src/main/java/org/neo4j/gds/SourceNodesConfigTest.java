@@ -57,14 +57,14 @@ public interface SourceNodesConfigTest<ALGORITHM extends Algorithm<RESULT>, CONF
             new NodeEntity(null, 1337)
         );
 
-        var graphCreateConfig = withNameAndNodeProjections(
+        var graphProjectConfig = withNameAndNodeProjections(
             "",
             graphName,
             NodeProjections.ALL
         );
 
-        var graphStore = graphLoader(graphCreateConfig).graphStore();
-        GraphStoreCatalog.set(graphCreateConfig, graphStore);
+        var graphStore = graphLoader(graphProjectConfig).graphStore();
+        GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
         var mapWrapper = CypherMapWrapper.create(MapUtil.map("sourceNodes", sourceNodes));
         var config = createMinimalConfig(mapWrapper).toMap();
@@ -82,14 +82,14 @@ public interface SourceNodesConfigTest<ALGORITHM extends Algorithm<RESULT>, CONF
         var graphName = "loadedGraph";
         runQuery(graphDb(), "CREATE (), (), ()");
 
-        var graphCreateConfig = withNameAndNodeProjections(
+        var graphProjectConfig = withNameAndNodeProjections(
             "",
             graphName,
             NodeProjections.ALL
         );
 
-        var graphStore = graphLoader(graphCreateConfig).graphStore();
-        GraphStoreCatalog.set(graphCreateConfig, graphStore);
+        var graphStore = graphLoader(graphProjectConfig).graphStore();
+        GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
         var mapWrapper = CypherMapWrapper.create(MapUtil.map("sourceNodes", sourceNodes));
         var config = createMinimalConfig(mapWrapper).toMap();
@@ -104,14 +104,14 @@ public interface SourceNodesConfigTest<ALGORITHM extends Algorithm<RESULT>, CONF
 
         var sourceNodes = List.of("0L", "1L");
 
-        var graphCreateConfig = withNameAndNodeProjections(
+        var graphProjectConfig = withNameAndNodeProjections(
             "",
             graphName,
             NodeProjections.ALL
         );
 
-        var graphStore = graphLoader(graphCreateConfig).graphStore();
-        GraphStoreCatalog.set(graphCreateConfig, graphStore);
+        var graphStore = graphLoader(graphProjectConfig).graphStore();
+        GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
         var mapWrapper = CypherMapWrapper.create(MapUtil.map("sourceNodes", sourceNodes));
         var config = createMinimalConfig(mapWrapper).toMap();

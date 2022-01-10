@@ -21,7 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -54,13 +54,13 @@ public class GraphListProc extends CatalogProc {
         }
 
         return graphEntries.map(e -> {
-            GraphCreateConfig graphCreateConfig = e.getKey();
+            GraphProjectConfig graphProjectConfig = e.getKey();
             GraphStore graphStore = e.getValue();
             boolean computeDegreeDistribution = callContext
                 .outputFields()
                 .anyMatch(s -> s.equalsIgnoreCase("degreeDistribution"));
 
-            return GraphInfoWithHistogram.of(graphCreateConfig, graphStore, computeDegreeDistribution);
+            return GraphInfoWithHistogram.of(graphProjectConfig, graphStore, computeDegreeDistribution);
         });
     }
 }

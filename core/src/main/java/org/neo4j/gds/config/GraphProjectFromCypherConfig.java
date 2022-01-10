@@ -26,8 +26,8 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.CypherFactory;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.loading.CypherFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,9 +39,14 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
+public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
 
-    List<String> FORBIDDEN_KEYS = Arrays.asList(GraphCreateFromStoreConfig.NODE_PROJECTION_KEY, GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY, GraphCreateFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY);
+    List<String> FORBIDDEN_KEYS = Arrays.asList(
+        GraphProjectFromStoreConfig.NODE_PROJECTION_KEY,
+        GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY,
+        GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY,
+        GraphProjectFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY
+    );
 
     String NODE_QUERY_KEY = "nodeQuery";
     String RELATIONSHIP_QUERY_KEY = "relationshipQuery";
@@ -72,15 +77,15 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     default GraphStoreFactory.Supplier graphStoreFactory() {
         return new GraphStoreFactory.Supplier() {
             @Override
-            public GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> get(GraphLoaderContext loaderContext) {
-                return new CypherFactory(GraphCreateFromCypherConfig.this, loaderContext);
+            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext) {
+                return new CypherFactory(GraphProjectFromCypherConfig.this, loaderContext);
             }
 
             @Override
-            public GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> getWithDimension(
+            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
                 GraphLoaderContext loaderContext, GraphDimensions graphDimensions
             ) {
-                return new CypherFactory(GraphCreateFromCypherConfig.this, loaderContext, graphDimensions);
+                return new CypherFactory(GraphProjectFromCypherConfig.this, loaderContext, graphDimensions);
             }
         };
     }
@@ -98,7 +103,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         return visitor.cypher(this);
     }
 
-    static GraphCreateFromCypherConfig of(
+    static GraphProjectFromCypherConfig of(
         String userName,
         String graphName,
         String nodeQuery,
@@ -113,16 +118,16 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         if (relationshipQuery != null) {
             config = config.withString(RELATIONSHIP_QUERY_KEY, relationshipQuery);
         }
-        return new GraphCreateFromCypherConfigImpl(
+        return new GraphProjectFromCypherConfigImpl(
             userName,
             graphName,
             config
         );
     }
 
-    static GraphCreateFromCypherConfig fromProcedureConfig(String username, CypherMapWrapper config) {
+    static GraphProjectFromCypherConfig fromProcedureConfig(String username, CypherMapWrapper config) {
         assertNoProjectionsOrExplicitProperties(config);
-        return new GraphCreateFromCypherConfigImpl(
+        return new GraphProjectFromCypherConfigImpl(
             username,
             IMPLICIT_GRAPH_NAME,
             config

@@ -79,7 +79,7 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
             @Override
             public List<AfterLoadValidation<NodeClassificationTrainConfig>> afterLoadValidations() {
                 return List.of(
-                    (graphStore, graphCreateConfig, config) -> {
+                    (graphStore, graphProjectConfig, config) -> {
                         Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
                         if (!graphStore.hasNodeProperty(filterLabels, config.targetProperty())) {
                             throw new IllegalArgumentException(formatWithLocale(

@@ -54,7 +54,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
         registerProcedures(GraphCreateProc.class, ScalePropertiesMutateProc.class);
         var loadQuery = GdsCypher
             .call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyRelationshipType()
             .withNodeLabel("A")
             .withNodeProperty("id")

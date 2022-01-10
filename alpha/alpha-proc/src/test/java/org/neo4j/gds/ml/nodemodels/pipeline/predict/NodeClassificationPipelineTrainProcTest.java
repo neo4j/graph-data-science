@@ -88,7 +88,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         );
 
         String createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("N")
             .withRelationshipType("R")
             .withNodeProperties(List.of("array", "scalar", "t"), DefaultValue.DEFAULT)

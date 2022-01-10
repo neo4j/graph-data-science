@@ -96,7 +96,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
         var createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withRelationshipProperty("cost")
             .loadEverything()
             .yields();
@@ -125,7 +125,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
         var createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withRelationshipProperty("cost")
             .withRelationshipType("TYPE", Orientation.REVERSE)
@@ -155,7 +155,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
         var createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withRelationshipProperty("cost")
             .withRelationshipType("TYPE", Orientation.UNDIRECTED)
@@ -183,7 +183,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
     @Test
     void testWriteBack() {
         var createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withRelationshipProperty("cost")
             .loadEverything()
             .yields();
@@ -219,7 +219,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
     @Test
     void testProgressTracking() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withAnyRelationshipType()
             .yields();
@@ -253,7 +253,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         runQuery("CREATE (:Invalid)");
 
         var createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withAnyRelationshipType()
             .yields();

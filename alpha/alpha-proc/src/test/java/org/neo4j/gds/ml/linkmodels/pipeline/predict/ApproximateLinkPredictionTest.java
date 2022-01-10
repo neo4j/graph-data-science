@@ -74,7 +74,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             GraphStreamNodePropertiesProc.class
         );
         String createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("N")
             .withRelationshipType("T", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)

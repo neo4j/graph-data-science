@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class GraphCreateConfigFromStoreTest {
+class GraphProjectConfigFromStoreTest {
 
     @Test
     void testThrowOnOverlappingNodeProperties() {
@@ -54,7 +54,7 @@ class GraphCreateConfigFromStoreTest {
         ));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            ImmutableGraphCreateFromStoreConfig.builder()
+            ImmutableGraphProjectFromStoreConfig.builder()
                 .graphName("graph")
                 .relationshipProjections(RelationshipProjections.of())
                 .nodeProperties(propertyMappings)
@@ -81,7 +81,7 @@ class GraphCreateConfigFromStoreTest {
         );
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            ImmutableGraphCreateFromStoreConfig.builder()
+            ImmutableGraphProjectFromStoreConfig.builder()
                 .graphName("graph")
                 .relationshipProperties(propertyMappings)
                 .relationshipProjections(relProjections)
@@ -106,17 +106,17 @@ class GraphCreateConfigFromStoreTest {
             NodeLabel.of("A"), NodeProjection.of("A", propertyMappings2)
         ));
 
-        GraphCreateFromStoreConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
+        GraphProjectFromStoreConfig graphProjectConfig = ImmutableGraphProjectFromStoreConfig.builder()
             .graphName("graph")
             .relationshipProjections(RelationshipProjections.all())
             .nodeProperties(propertyMappings1)
             .nodeProjections(nodeProjections)
             .build();
 
-        Set<String> allProperties = graphCreateConfig.nodeProjections().allProperties();
+        Set<String> allProperties = graphProjectConfig.nodeProjections().allProperties();
         assertTrue(allProperties.contains("foo"));
         assertTrue(allProperties.contains("bar"));
-        assertEquals(0, graphCreateConfig.nodeProperties().numberOfMappings());
+        assertEquals(0, graphProjectConfig.nodeProperties().numberOfMappings());
     }
 
     @Test
@@ -138,16 +138,16 @@ class GraphCreateConfigFromStoreTest {
                 .build()
         );
 
-        GraphCreateFromStoreConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
+        GraphProjectFromStoreConfig graphProjectConfig = ImmutableGraphProjectFromStoreConfig.builder()
             .graphName("graph")
             .nodeProjections(NodeProjections.all())
             .relationshipProperties(propertyMappings1)
             .relationshipProjections(relProjections)
             .build();
 
-        Set<String> allProperties = graphCreateConfig.relationshipProjections().allProperties();
+        Set<String> allProperties = graphProjectConfig.relationshipProjections().allProperties();
         assertTrue(allProperties.contains("foo"));
         assertTrue(allProperties.contains("bar"));
-        assertEquals(0, graphCreateConfig.relationshipProperties().numberOfMappings());
+        assertEquals(0, graphProjectConfig.relationshipProperties().numberOfMappings());
     }
 }

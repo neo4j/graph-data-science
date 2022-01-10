@@ -91,7 +91,7 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
         );
 
         String createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .loadEverything()
             .yields();
 

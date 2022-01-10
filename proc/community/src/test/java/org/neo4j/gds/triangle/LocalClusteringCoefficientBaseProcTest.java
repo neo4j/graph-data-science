@@ -44,7 +44,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalClusteringCoefficientBaseConfig> extends BaseProcTest
@@ -178,7 +178,7 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     @Override
     public void loadGraph(String graphName){
         String graphCreateQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withRelationshipType("T", Orientation.UNDIRECTED)
             .yields();

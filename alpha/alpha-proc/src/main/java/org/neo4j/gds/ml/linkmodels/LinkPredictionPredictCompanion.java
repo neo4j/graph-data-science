@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
-import org.neo4j.gds.executor.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 
 import java.util.List;
@@ -32,7 +32,7 @@ class LinkPredictionPredictCompanion {
         return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
-                return List.of(new GraphCreateConfigValidations.UndirectedGraphValidation<>());
+                return List.of(new GraphProjectConfigValidations.UndirectedGraphValidation<>());
             }
         };
     }

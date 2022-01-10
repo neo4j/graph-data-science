@@ -104,7 +104,7 @@ class TraverseProcTest extends BaseProcTest {
     @Test
     void testFindAnyOf() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE")
             .yields();
@@ -127,7 +127,7 @@ class TraverseProcTest extends BaseProcTest {
     @Test
     void testMaxDepthOut() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE")
             .yields();
@@ -149,7 +149,7 @@ class TraverseProcTest extends BaseProcTest {
     @Test
     void testMaxDepthIn() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.REVERSE)
             .yields();
@@ -172,7 +172,7 @@ class TraverseProcTest extends BaseProcTest {
     @Test
     void testDfsPath() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.REVERSE)
             .yields();
@@ -204,7 +204,7 @@ class TraverseProcTest extends BaseProcTest {
     @Test
     void testBfsPath() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.REVERSE)
             .yields();
@@ -235,7 +235,7 @@ class TraverseProcTest extends BaseProcTest {
     @Test
     void worksOnGraphWithLoop() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withAnyRelationshipType()
             .yields();

@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GraphCreateConfigSupport;
+import org.neo4j.gds.GraphProjectConfigSupport;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -53,18 +53,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.similarity.AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
 
 public abstract class AlphaSimilarityProcTest<
     ALGORITHM extends SimilarityAlgorithm<ALGORITHM, INPUT>,
     INPUT extends SimilarityInput
-    > extends BaseProcTest implements GraphCreateConfigSupport {
+    > extends BaseProcTest implements GraphProjectConfigSupport {
 
     abstract List<Class<? extends AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig, ?>>> getProcedureClazzes();
 

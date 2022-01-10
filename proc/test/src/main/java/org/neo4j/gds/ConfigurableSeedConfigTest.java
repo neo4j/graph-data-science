@@ -24,9 +24,9 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConfigurableSeedConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
@@ -82,15 +82,15 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<RESULT>,
         List<PropertyMapping> nodeProperties = Stream.of("a", "b", "c").map(PropertyMapping::of)
             .collect(Collectors.toList());
 
-        GraphCreateFromStoreConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.of(
+        GraphProjectFromStoreConfig graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
             "",
             graphName,
             NodeProjections.single(NodeLabel.of("A"), NodeProjection.of("A", PropertyMappings.of(nodeProperties))),
             allRelationshipsProjection()
         );
 
-        GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
-        GraphStoreCatalog.set(graphCreateConfig, graphStore);
+        GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
+        GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
 
         Map<String, Object> config = createMinimalConfig(CypherMapWrapper
@@ -111,16 +111,16 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<RESULT>,
     @Test
     default void shouldFailWithInvalidSeedProperty() {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
+        GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
             "",
             loadedGraphName,
             allRelationshipsProjection()
         );
 
         applyOnProcedure((proc) -> {
-            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
+            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
 
-            GraphStoreCatalog.set(graphCreateConfig, graphStore);
+            GraphStoreCatalog.set(graphProjectConfig, graphStore);
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
                 seedPropertyKeyOverride(),
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"

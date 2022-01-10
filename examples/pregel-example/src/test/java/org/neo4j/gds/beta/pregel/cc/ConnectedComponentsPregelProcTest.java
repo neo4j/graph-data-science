@@ -143,7 +143,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
     @Test
     void streamSeeded() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeProperty("seedProperty")
             .loadEverything()
             .yields();
@@ -197,7 +197,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
     @Test
     void mutate() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withAnyRelationshipType()
             .yields();

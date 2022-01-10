@@ -110,7 +110,7 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
         ids5 = new long[]{idA, idC, idE, idD, idF};
 
         runQuery(GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Label")
             .withAnyRelationshipType()
             .withRelationshipProperty("cost")

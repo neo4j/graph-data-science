@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
@@ -49,7 +49,7 @@ abstract class CypherRecordLoader<R> {
 
     static final long NO_COUNT = -1L;
 
-    final GraphCreateFromCypherConfig cypherConfig;
+    final GraphProjectFromCypherConfig cypherConfig;
     final GraphLoaderContext loadingContext;
 
     private final long recordCount;
@@ -58,7 +58,7 @@ abstract class CypherRecordLoader<R> {
     CypherRecordLoader(
         String loadQuery,
         long recordCount,
-        GraphCreateFromCypherConfig cypherConfig,
+        GraphProjectFromCypherConfig cypherConfig,
         GraphLoaderContext loadingContext
     ) {
         this.loadQuery = loadQuery;

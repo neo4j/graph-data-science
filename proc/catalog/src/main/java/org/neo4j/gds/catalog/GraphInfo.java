@@ -20,10 +20,10 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
-import org.neo4j.gds.config.GraphCreateFromGraphConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromGraphConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.mem.MemoryUsage;
 
@@ -86,21 +86,21 @@ public class GraphInfo {
         this.schema = schema;
     }
 
-    static GraphInfo withMemoryUsage(GraphCreateConfig graphCreateConfig, GraphStore graphStore) {
+    static GraphInfo withMemoryUsage(GraphProjectConfig graphProjectConfig, GraphStore graphStore) {
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
         var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
 
         return create(
-            graphCreateConfig,
+            graphProjectConfig,
             graphStore,
             memoryUsage,
             sizeInBytes
         );
     }
 
-    static GraphInfo withoutMemoryUsage(GraphCreateConfig graphCreateConfig, GraphStore graphStore) {
+    static GraphInfo withoutMemoryUsage(GraphProjectConfig graphProjectConfig, GraphStore graphStore) {
         return create(
-            graphCreateConfig,
+            graphProjectConfig,
             graphStore,
             "",
             -1L
@@ -108,16 +108,16 @@ public class GraphInfo {
     }
 
     private static GraphInfo create(
-        GraphCreateConfig graphCreateConfig,
+        GraphProjectConfig graphProjectConfig,
         GraphStore graphStore,
         String memoryUsage,
         long sizeInBytes
     ) {
         var configVisitor = new Visitor();
-        graphCreateConfig.accept(configVisitor);
+        graphProjectConfig.accept(configVisitor);
 
         return new GraphInfo(
-            graphCreateConfig.graphName(),
+            graphProjectConfig.graphName(),
             graphStore.databaseId().name(),
             memoryUsage,
             sizeInBytes,
@@ -129,32 +129,32 @@ public class GraphInfo {
             configVisitor.relationshipFilter,
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
-            graphCreateConfig.creationTime(),
+            graphProjectConfig.creationTime(),
             graphStore.modificationTime(),
             graphStore.schema().toMap()
         );
     }
 
-    static final class Visitor implements GraphCreateConfig.Visitor {
+    static final class Visitor implements GraphProjectConfig.Visitor {
 
         String nodeQuery, relationshipQuery = null;
         Map<String, Object> nodeProjection, relationshipProjection = null;
         String nodeFilter, relationshipFilter = null;
 
         @Override
-        public void visit(GraphCreateFromStoreConfig storeConfig) {
+        public void visit(GraphProjectFromStoreConfig storeConfig) {
             nodeProjection = storeConfig.nodeProjections().toObject();
             relationshipProjection = storeConfig.relationshipProjections().toObject();
         }
 
         @Override
-        public void visit(GraphCreateFromCypherConfig cypherConfig) {
+        public void visit(GraphProjectFromCypherConfig cypherConfig) {
             nodeQuery = cypherConfig.nodeQuery();
             relationshipQuery = cypherConfig.relationshipQuery();
         }
 
         @Override
-        public void visit(GraphCreateFromGraphConfig graphConfig) {
+        public void visit(GraphProjectFromGraphConfig graphConfig) {
             graphConfig.originalConfig().accept(this);
             nodeFilter = graphConfig.nodeFilter();
             relationshipFilter = graphConfig.relationshipFilter();

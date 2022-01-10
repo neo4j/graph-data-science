@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.graphdb.Transaction;
 
 import java.util.Set;
@@ -34,7 +34,7 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
     CountingCypherRecordLoader(
         String cypherQuery,
         QueryType queryType,
-        GraphCreateFromCypherConfig cypherConfig,
+        GraphProjectFromCypherConfig cypherConfig,
         GraphLoaderContext loadingContext
     ) {
         super(cypherQuery, NO_COUNT, cypherConfig, loadingContext);

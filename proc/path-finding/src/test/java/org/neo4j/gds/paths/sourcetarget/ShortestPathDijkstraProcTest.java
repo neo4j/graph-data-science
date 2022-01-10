@@ -100,7 +100,7 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
         costs0 = new double[]{0.0, 2.0, 5.0, 9.0, 20.0};
 
         runQuery(GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Label")
             .withAnyRelationshipType()
             .withRelationshipProperty("cost")

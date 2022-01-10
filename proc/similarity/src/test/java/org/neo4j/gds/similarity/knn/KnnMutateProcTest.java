@@ -156,7 +156,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         var graphName = "undirectedGraph";
 
         var graphCreateQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("knn")
             .withRelationshipType("IGNORE", Orientation.UNDIRECTED)
@@ -211,7 +211,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         runQuery(nodeCreateQuery);
 
         String createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
             .withNodeProperty("age")
@@ -258,7 +258,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         runQuery(nodeCreateQuery);
 
         String createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Person")
             .withNodeProperty("age")
             .withAnyRelationshipType()

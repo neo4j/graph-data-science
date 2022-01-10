@@ -22,9 +22,9 @@ package org.neo4j.gds;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.lang.reflect.InvocationTargetException;
@@ -33,9 +33,9 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.QueryRunner.runQueryWithRowConsumer;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface WriteRelationshipWithPropertyTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends WriteConfig & AlgoBaseConfig, RESULT>
     extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
@@ -75,7 +75,7 @@ public interface WriteRelationshipWithPropertyTest<ALGORITHM extends Algorithm<R
         setupStoreLoader(storeLoaderBuilder, config);
 
         var loader = storeLoaderBuilder.build();
-        GraphStoreCatalog.set(loader.createConfig(), loader.graphStore());
+        GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)

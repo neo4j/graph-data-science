@@ -115,7 +115,7 @@ public class NodeSimilarityWriteProcTest
 
         String resultGraphName = "simGraph_" + orientation.name();
         String loadQuery = GdsCypher.call(resultGraphName)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel(orientation == REVERSE ? "Item" : "Person")
             .withRelationshipType("SIMILAR", orientation)
             .withNodeProperty("id")
@@ -203,7 +203,7 @@ public class NodeSimilarityWriteProcTest
         var graphName = "undirectedGraph";
 
         var graphCreateQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withRelationshipType("LIKES", Orientation.UNDIRECTED)
             .yields();
@@ -239,7 +239,7 @@ public class NodeSimilarityWriteProcTest
                  "CREATE (bob)-[:KNOWS]->(a)");
 
         String createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
             .withNodeLabel("Bar")

@@ -103,7 +103,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
     @Test
     void shouldComputeWithWeight() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withNodeLabel("Node2")
             .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0.0f))

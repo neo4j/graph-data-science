@@ -36,7 +36,7 @@ final class LouvainAlmostEmptyGraphTest extends BaseProcTest {
         registerProcedures(LouvainStreamProc.class, GraphCreateProc.class);
         runQuery("CREATE (:Node)");
         runQuery(GdsCypher.call("myGraph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withAnyRelationshipType()
             .yields());

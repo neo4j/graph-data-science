@@ -20,15 +20,15 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.procedure.Context;
 
 import java.util.HashMap;
@@ -94,7 +94,7 @@ public abstract class TrainProc<ALGO extends Algorithm<Model<TRAIN_RESULT, TRAIN
 
         @Override
         public void validateConfigsBeforeLoad(
-            GraphCreateConfig graphCreateConfig,
+            GraphProjectConfig graphProjectConfig,
             TRAIN_CONFIG config
         ) {
             modelCatalog.verifyModelCanBeStored(

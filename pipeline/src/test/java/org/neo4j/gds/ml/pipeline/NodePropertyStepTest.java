@@ -60,7 +60,7 @@ class NodePropertyStepTest extends BaseProcTest {
             GraphStreamNodePropertiesProc.class
         );
         String createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .loadEverything()
             .yields();
 

@@ -51,7 +51,7 @@ public class RemoveNodePropertiesIntegrationTest extends BaseProcTest {
 
         runQuery(GdsCypher
             .call("testGraph")
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withRelationshipType("TYPE")
             .yields());

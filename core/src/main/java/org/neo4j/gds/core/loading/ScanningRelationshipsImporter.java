@@ -26,7 +26,7 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -41,7 +41,7 @@ import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 
 public final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, ObjectLongMap<RelationshipType>> {
 
-    private final GraphCreateConfig graphCreateConfig;
+    private final GraphProjectConfig graphProjectConfig;
     private final GraphLoaderContext loadingContext;
 
     private final IdMapping idMap;
@@ -49,7 +49,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
     private final Map<RelationshipType, LongAdder> allRelationshipCounters;
 
     public ScanningRelationshipsImporter(
-        GraphCreateConfig graphCreateConfig,
+        GraphProjectConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
@@ -64,7 +64,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             progressTracker,
             concurrency
         );
-        this.graphCreateConfig = graphCreateConfig;
+        this.graphProjectConfig = graphProjectConfig;
         this.loadingContext = loadingContext;
         this.idMap = idMap;
         this.allBuilders = allBuilders;
@@ -135,7 +135,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             typeId,
             importer,
             relationshipCounter,
-            graphCreateConfig.validateRelationships()
+            graphProjectConfig.validateRelationships()
         );
     }
 

@@ -76,7 +76,7 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
         runQuery(nodeCreateQuery);
 
         String createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
             .withNodeProperty("age")

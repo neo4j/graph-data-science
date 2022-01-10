@@ -93,7 +93,7 @@ class CELFProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
 
         String graphCreateQuery = GdsCypher.call("celfGraph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType(
                 "RELATIONSHIP",

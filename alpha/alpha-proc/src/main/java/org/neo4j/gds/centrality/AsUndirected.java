@@ -21,25 +21,25 @@ package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 
-public enum AsUndirected implements GraphCreateConfig.Rewriter {
+public enum AsUndirected implements GraphProjectConfig.Rewriter {
 
     INSTANCE;
 
-    static GraphCreateConfig rewrite(GraphCreateConfig config) {
+    static GraphProjectConfig rewrite(GraphProjectConfig config) {
         return INSTANCE.apply(config);
     }
 
     @Override
-    public GraphCreateConfig store(GraphCreateFromStoreConfig storeConfig) {
+    public GraphProjectConfig store(GraphProjectFromStoreConfig storeConfig) {
         RelationshipProjections.Builder builder = RelationshipProjections.builder();
         storeConfig.relationshipProjections().projections().forEach(
             (id, projection) -> builder.putProjection(id, projection.withOrientation(Orientation.UNDIRECTED))
         );
-        return ImmutableGraphCreateFromStoreConfig.builder()
+        return ImmutableGraphProjectFromStoreConfig.builder()
             .from(storeConfig)
             .relationshipProjections(builder.build())
             .build();

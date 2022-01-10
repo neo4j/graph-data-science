@@ -113,7 +113,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         );
 
         String createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabels("N", "Ignore")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipType("IGNORED", Orientation.UNDIRECTED)
@@ -122,7 +122,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             .yields();
 
         String createQueryWeighted = GdsCypher.call("weighted_graph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabels("N", "Ignore")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipType("IGNORED", Orientation.UNDIRECTED)

@@ -32,7 +32,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.utils.StatementFunction;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.id.IdGeneratorFactory;
@@ -55,18 +55,18 @@ import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
 
-public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends StatementFunction<GraphDimensions> {
+public abstract class GraphDimensionsReader<T extends GraphProjectConfig> extends StatementFunction<GraphDimensions> {
 
     private final IdGeneratorFactory idGeneratorFactory;
-    protected T graphCreateConfig;
+    protected T graphProjectConfig;
 
     GraphDimensionsReader(
         TransactionContext tx,
-        T graphCreateConfig,
+        T graphProjectConfig,
         IdGeneratorFactory idGeneratorFactory
     ) {
         super(tx);
-        this.graphCreateConfig = graphCreateConfig;
+        this.graphProjectConfig = graphProjectConfig;
         this.idGeneratorFactory = idGeneratorFactory;
     }
 

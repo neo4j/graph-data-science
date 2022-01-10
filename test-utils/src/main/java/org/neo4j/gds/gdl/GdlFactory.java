@@ -72,7 +72,7 @@ import java.util.stream.IntStream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlConfig> {
+public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlConfig> {
 
     private final GDLHandler gdlHandler;
     private final NamedDatabaseId databaseId;
@@ -91,16 +91,16 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         Optional<NamedDatabaseId> namedDatabaseId,
         Optional<String> userName,
         Optional<String> graphName,
-        Optional<GraphCreateFromGdlConfig> createConfig,
+        Optional<GraphProjectFromGdlConfig> graphProjectConfig,
         Optional<LongSupplier> nodeIdFunction
     ) {
-        var config = createConfig.isEmpty()
-            ? ImmutableGraphCreateFromGdlConfig.builder()
+        var config = graphProjectConfig.isEmpty()
+            ? ImmutableGraphProjectFromGdlConfig.builder()
             .username(userName.orElse(Username.EMPTY_USERNAME.username()))
             .graphName(graphName.orElse("graph"))
             .gdlGraph(gdlGraph.orElse(""))
             .build()
-            : createConfig.get();
+            : graphProjectConfig.get();
 
         var databaseId = namedDatabaseId.orElse(GdlSupportExtension.DATABASE_ID);
 
@@ -121,11 +121,11 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
 
     private GdlFactory(
         GDLHandler gdlHandler,
-        GraphCreateFromGdlConfig graphCreateConfig,
+        GraphProjectFromGdlConfig graphProjectConfig,
         GraphDimensions graphDimensions,
         NamedDatabaseId databaseId
     ) {
-        super(graphCreateConfig, GraphLoaderContext.NULL_CONTEXT, graphDimensions);
+        super(graphProjectConfig, GraphLoaderContext.NULL_CONTEXT, graphDimensions);
         this.gdlHandler = gdlHandler;
         this.databaseId = databaseId;
     }
@@ -163,7 +163,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                         PropertyState.PERSISTENT,
                         propertyValues,
                         DefaultValue.forDouble(),
-                        graphCreateConfig.aggregation()
+                        graphProjectConfig.aggregation()
                     )
                 );
             });
@@ -379,15 +379,15 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                     var propertyConfigs = propertyKeys
                         .stream()
                         .map(key -> GraphFactory.PropertyConfig.of(
-                            graphCreateConfig.aggregation(),
+                            graphProjectConfig.aggregation(),
                             DefaultValue.forDouble()
                         ))
                         .collect(Collectors.toList());
 
                     return GraphFactory.initRelationshipsBuilder()
                         .nodes(nodeMapping)
-                        .orientation(graphCreateConfig.orientation())
-                        .aggregation(graphCreateConfig.aggregation())
+                        .orientation(graphProjectConfig.orientation())
+                        .aggregation(graphProjectConfig.aggregation())
                         .addAllPropertyConfigs(propertyConfigs)
                         .executorService(loadingContext.executor())
                         .allocationTracker(loadingContext.allocationTracker())

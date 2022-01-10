@@ -22,7 +22,7 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.IdsAndProperties;
@@ -36,14 +36,14 @@ import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> extends GraphStoreFactory<CSRGraphStore, CONFIG> {
+public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> extends GraphStoreFactory<CSRGraphStore, CONFIG> {
 
     public CSRGraphStoreFactory(
-        CONFIG graphCreateConfig,
+        CONFIG graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions
     ) {
-        super(graphCreateConfig, loadingContext, dimensions);
+        super(graphProjectConfig, loadingContext, dimensions);
     }
 
     protected CSRGraphStore createGraphStore(
@@ -93,7 +93,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
             idsAndProperties.properties(),
             relationships,
             relationshipPropertyStores,
-            graphCreateConfig.readConcurrency(),
+            graphProjectConfig.readConcurrency(),
             allocationTracker
         );
     }

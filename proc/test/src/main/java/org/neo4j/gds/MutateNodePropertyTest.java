@@ -20,10 +20,10 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
@@ -34,9 +34,9 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.QueryRunner.runQueryWithRowConsumer;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
     extends MutatePropertyProcTest<ALGORITHM, CONFIG, RESULT> {
@@ -62,7 +62,7 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
 
         GraphLoader loader = storeLoaderBuilder.build();
-        GraphStoreCatalog.set(loader.createConfig(), loader.graphStore());
+        GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)

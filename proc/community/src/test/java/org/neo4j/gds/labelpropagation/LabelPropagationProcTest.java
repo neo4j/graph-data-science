@@ -35,7 +35,7 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
@@ -131,11 +131,11 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
         return graphCreateQuery(graphName, orientation).yields();
     }
 
-    static GdsCypher.GraphCreateBuilder graphCreateQuery(String graphName, Orientation orientation) {
+    static GdsCypher.GraphProjectBuilder graphCreateQuery(String graphName, Orientation orientation) {
         return GdsCypher
             .call(graphName)
-            .graphCreate()
-            .withGraphCreateConfig(ImmutableGraphCreateFromStoreConfig
+            .graphProject()
+            .withGraphProjectConfig(ImmutableGraphProjectFromStoreConfig
                 .builder()
                 .graphName("")
                 .nodeProjections(NodeProjections.fromObject(MapUtil.map("A", "A", "B", "B")))

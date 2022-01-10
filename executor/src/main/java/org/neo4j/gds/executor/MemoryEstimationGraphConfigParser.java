@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.executor;
 
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
@@ -38,11 +38,11 @@ public class MemoryEstimationGraphConfigParser {
         return username;
     }
 
-    public GraphCreateConfig processInput(Object graphNameOrConfig) {
+    public GraphProjectConfig processInput(Object graphNameOrConfig) {
         if (graphNameOrConfig instanceof Map) {
             var createConfigMap = (Map<String, Object>) graphNameOrConfig;
             var createConfigMapWrapper = CypherMapWrapper.create(createConfigMap);
-            return GraphCreateConfig.createImplicit(username(), createConfigMapWrapper);
+            return GraphProjectConfig.createImplicit(username(), createConfigMapWrapper);
         }
         throw new IllegalArgumentException(formatWithLocale(
             "Could not parse input. Expected a configuration map, but got %s.",

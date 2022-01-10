@@ -27,7 +27,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
@@ -63,9 +63,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.CYPHER;
 import static org.neo4j.gds.QueryRunner.runQuery;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY;
+import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
@@ -75,7 +75,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * clears the data after each test.
  */
 public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends AlgoBaseConfig, RESULT>
-    extends GraphCreateConfigSupport {
+    extends GraphProjectConfigSupport {
 
     String TEST_USERNAME = Username.EMPTY_USERNAME.username();
 
@@ -187,7 +187,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         var taskStore = new InvocationCountingTaskStore();
 
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
+        GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
             "",
             loadedGraphName,
             relationshipProjections()
@@ -195,9 +195,9 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         applyOnProcedure(proc -> {
             proc.taskRegistryFactory = () -> new TaskRegistry("", taskStore);
 
-            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
+            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
             GraphStoreCatalog.set(
-                graphCreateConfig,
+                graphProjectConfig,
                 graphStore
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
@@ -242,14 +242,14 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     @AllGraphStoreFactoryTypesTest
     default void testRunMultipleTimesOnLoadedGraph(GraphFactoryTestSupport.FactoryType factoryType) {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = factoryType == CYPHER
+        GraphProjectConfig graphProjectConfig = factoryType == CYPHER
             ? emptyWithNameCypher(TEST_USERNAME, loadedGraphName)
             : withNameAndRelationshipProjections(TEST_USERNAME, loadedGraphName, relationshipProjections());
 
         applyOnProcedure((proc) -> {
             GraphStoreCatalog.set(
-                graphCreateConfig,
-                graphLoader(graphCreateConfig).graphStore()
+                graphProjectConfig,
+                graphLoader(graphProjectConfig).graphStore()
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
             ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(
@@ -276,13 +276,13 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         applyOnProcedure((proc) -> {
             GraphStoreCatalog.removeAllLoadedGraphs();
             var loadedGraphName = "graph";
-            GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
+            GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
                 "",
                 loadedGraphName,
                 relationshipProjections()
             );
-            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
-            GraphStoreCatalog.set(graphCreateConfig, graphStore);
+            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
+            GraphStoreCatalog.set(graphProjectConfig, graphStore);
             getWriteAndStreamProcedures(proc)
                 .forEach(method -> {
                     Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
@@ -332,7 +332,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         runQuery(
             graphDb(),
             GdsCypher.call(graphName)
-                .graphCreate()
+                .graphProject()
                 .loadEverything(orientation)
                 .yields()
         );
@@ -389,14 +389,14 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     }
 
     @NotNull
-    default GraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
-        return graphLoader(graphDb(), graphCreateConfig);
+    default GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
+        return graphLoader(graphDb(), graphProjectConfig);
     }
 
     @NotNull
     default GraphLoader graphLoader(
         GraphDatabaseAPI db,
-        GraphCreateConfig graphCreateConfig
+        GraphProjectConfig graphProjectConfig
     ) {
         return ImmutableGraphLoader
             .builder()
@@ -407,7 +407,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 .log(new TestLog())
                 .build())
             .username("")
-            .createConfig(graphCreateConfig)
+            .projectConfig(graphProjectConfig)
             .build();
     }
 

@@ -63,7 +63,7 @@ class NodeClassificationPredictStreamProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
 
         String loadQuery = GdsCypher.call("g")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("N")
             .withAnyRelationshipType()
             .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))

@@ -66,7 +66,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
     void setupGraph() throws Exception {
         registerProcedures(KSpanningTreeMinProc.class, KSpanningTreeMaxProc.class, GraphCreateProc.class);
         var createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withRelationshipProperty("w")
             .loadEverything(Orientation.UNDIRECTED)
             .yields();

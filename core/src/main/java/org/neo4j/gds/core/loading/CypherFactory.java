@@ -33,8 +33,8 @@ import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsCypherReader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -57,35 +57,35 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherConfig> {
+public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherConfig> {
 
-    private final GraphCreateFromCypherConfig cypherConfig;
+    private final GraphProjectFromCypherConfig cypherConfig;
     private EstimationResult nodeEstimation;
     private EstimationResult relationshipEstimation;
 
     public CypherFactory(
-        GraphCreateFromCypherConfig graphCreateConfig,
+        GraphProjectFromCypherConfig graphProjectConfig,
         GraphLoaderContext loadingContext
     ) {
         this(
-            graphCreateConfig,
+            graphProjectConfig,
             loadingContext,
             new GraphDimensionsCypherReader(
                 loadingContext.transactionContext().withRestrictedAccess(READ),
-                graphCreateConfig,
+                graphProjectConfig,
                 GraphDatabaseApiProxy.resolveDependency(loadingContext.api(), IdGeneratorFactory.class)
             ).call()
         );
     }
 
     public CypherFactory(
-        GraphCreateFromCypherConfig graphCreateConfig,
+        GraphProjectFromCypherConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions graphDimensions
     ) {
-        super(graphCreateConfig, loadingContext, graphDimensions);
-        this.cypherConfig = getCypherConfig(graphCreateConfig).orElseThrow(() -> new IllegalArgumentException(
-            "Expected GraphCreateConfig to be a cypher config."));
+        super(graphProjectConfig, loadingContext, graphDimensions);
+        this.cypherConfig = getCypherConfig(graphProjectConfig).orElseThrow(() -> new IllegalArgumentException(
+            "Expected GraphProjectConfig to be a cypher config."));
     }
 
     public final MemoryEstimation memoryEstimation() {
@@ -183,26 +183,26 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
         return new TaskProgressTracker(
             task,
             loadingContext.log(),
-            graphCreateConfig.readConcurrency(),
+            graphProjectConfig.readConcurrency(),
             loadingContext.taskRegistryFactory()
         );
     }
 
     private String nodeQuery() {
-        return getCypherConfig(graphCreateConfig)
+        return getCypherConfig(graphProjectConfig)
             .orElseThrow(() -> new IllegalArgumentException("Missing node query"))
             .nodeQuery();
     }
 
     private String relationshipQuery() {
-        return getCypherConfig(graphCreateConfig)
+        return getCypherConfig(graphProjectConfig)
             .orElseThrow(() -> new IllegalArgumentException("Missing relationship query"))
             .relationshipQuery();
     }
 
-    private static Optional<GraphCreateFromCypherConfig> getCypherConfig(GraphCreateConfig config) {
-        if (config instanceof GraphCreateFromCypherConfig) {
-            return Optional.of((GraphCreateFromCypherConfig) config);
+    private static Optional<GraphProjectFromCypherConfig> getCypherConfig(GraphProjectConfig config) {
+        if (config instanceof GraphProjectFromCypherConfig) {
+            return Optional.of((GraphProjectFromCypherConfig) config);
         }
         return Optional.empty();
     }

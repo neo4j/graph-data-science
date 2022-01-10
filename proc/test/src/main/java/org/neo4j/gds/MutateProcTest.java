@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -110,14 +110,14 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
     default String ensureGraphExists() {
         return mutateGraphName().orElseGet(() -> {
             String loadedGraphName = "loadGraph";
-            GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
+            GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
                 TEST_USERNAME,
                 loadedGraphName,
                 relationshipProjections()
             );
             GraphStoreCatalog.set(
-                graphCreateConfig,
-                graphLoader(graphCreateConfig).graphStore()
+                graphProjectConfig,
+                graphLoader(graphProjectConfig).graphStore()
             );
             return loadedGraphName;
         });

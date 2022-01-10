@@ -24,7 +24,7 @@ import org.neo4j.gds.CypherLoaderBuilder;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
@@ -250,7 +250,7 @@ class GraphLoaderDirectionalityTest extends BaseTest {
 
             graphLoader = new CypherLoaderBuilder()
                 .api(db)
-                .nodeQuery(GraphCreateFromCypherConfig.ALL_NODES_QUERY)
+                .nodeQuery(GraphProjectFromCypherConfig.ALL_NODES_QUERY)
                 .relationshipQuery(relationshipQuery)
                 .build();
         } else {

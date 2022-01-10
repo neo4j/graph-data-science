@@ -138,7 +138,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
         String graphCreateQuery = GdsCypher
             .call("nodeFilterGraph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabels("Label", "Label2", "Ignore")
             .withAnyRelationshipType()
             .yields("nodeCount", "relationshipCount");
@@ -164,7 +164,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
     @Test
     void testWriteWithLabel() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Label")
             .withAnyRelationshipType()
             .yields();
@@ -185,7 +185,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
     @Test
     void testWriteWithSeed() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("seedId")
             .withAnyRelationshipType()
@@ -205,7 +205,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
     @Test
     void testWriteWithSeedAndSameWriteProperty() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("seedId")
             .withAnyRelationshipType()
@@ -257,7 +257,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
     @MethodSource("componentSizeInputs")
     void testWriteWithMinComponentSize(Map<String, Object> parameters, Long[] expectedComponentIds) {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withAnyRelationshipType()
             .withNodeProperty(SEED_PROPERTY)
@@ -337,7 +337,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
 
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
             .yields();

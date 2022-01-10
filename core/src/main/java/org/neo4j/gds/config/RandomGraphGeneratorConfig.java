@@ -22,17 +22,17 @@ package org.neo4j.gds.config;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.NodeProjection;
+import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.NodeProjection;
-import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collections;
@@ -41,7 +41,7 @@ import java.util.Map;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface RandomGraphGeneratorConfig extends GraphCreateConfig {
+public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
 
     String RELATIONSHIP_SEED_KEY = "relationshipSeed";
     String RELATIONSHIP_PROPERTY_KEY = "relationshipProperty";

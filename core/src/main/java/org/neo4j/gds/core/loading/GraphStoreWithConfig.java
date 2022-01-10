@@ -20,16 +20,16 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.GraphProjectConfig;
 
 @ValueClass
 public interface GraphStoreWithConfig {
     GraphStore graphStore();
 
-    GraphCreateConfig config();
+    GraphProjectConfig config();
 
-    static GraphStoreWithConfig of(GraphStore graphStore, GraphCreateConfig config) {
+    static GraphStoreWithConfig of(GraphStore graphStore, GraphProjectConfig config) {
         return ImmutableGraphStoreWithConfig.of(graphStore, config);
     }
 }

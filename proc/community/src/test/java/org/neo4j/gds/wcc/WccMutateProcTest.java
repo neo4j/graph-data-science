@@ -188,7 +188,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
 
         String graphName = "emptyGraph";
         var loadQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
             .yields();

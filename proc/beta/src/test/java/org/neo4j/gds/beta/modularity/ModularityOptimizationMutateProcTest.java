@@ -33,8 +33,8 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -205,7 +205,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     }
 
     static String graphCreateQuery() {
-        GraphCreateFromStoreConfig config = ImmutableGraphCreateFromStoreConfig
+        GraphProjectFromStoreConfig config = ImmutableGraphProjectFromStoreConfig
             .builder()
             .graphName("")
             .nodeProjections(NodeProjections.of())
@@ -224,8 +224,8 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
 
         return GdsCypher
             .call(TEST_GRAPH_NAME)
-            .graphCreate()
-            .withGraphCreateConfig(config)
+            .graphProject()
+            .withGraphProjectConfig(config)
             .yields();
     }
 }

@@ -22,15 +22,15 @@ package org.neo4j.gds.config;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.api.GraphStoreFactory;
 
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphCreateFromGraphConfig extends GraphCreateConfig {
+public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
 
     @Configuration.Parameter
     String graphName();
@@ -45,7 +45,7 @@ public interface GraphCreateFromGraphConfig extends GraphCreateConfig {
     String relationshipFilter();
 
     @Configuration.Parameter
-    GraphCreateConfig originalConfig();
+    GraphProjectConfig originalConfig();
 
     @Value.Default
     @Value.Parameter(false)
@@ -91,16 +91,16 @@ public interface GraphCreateFromGraphConfig extends GraphCreateConfig {
         return false;
     }
 
-    static GraphCreateFromGraphConfig of(
+    static GraphProjectFromGraphConfig of(
         String userName,
         String graphName,
         String fromGraphName,
         String nodeFilter,
         String relationshipFilter,
-        GraphCreateConfig originalConfig,
+        GraphProjectConfig originalConfig,
         CypherMapWrapper procedureConfig
     ) {
-        return new GraphCreateFromGraphConfigImpl(
+        return new GraphProjectFromGraphConfigImpl(
             graphName,
             fromGraphName,
             nodeFilter,

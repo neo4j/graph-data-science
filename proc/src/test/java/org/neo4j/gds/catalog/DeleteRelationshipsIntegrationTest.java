@@ -70,7 +70,7 @@ class DeleteRelationshipsIntegrationTest extends BaseProcTest {
 
         runQuery(GdsCypher
             .call("testGraph")
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("nodeId")
             .withRelationshipType("TYPE")
@@ -78,7 +78,7 @@ class DeleteRelationshipsIntegrationTest extends BaseProcTest {
 
         runQuery(GdsCypher
             .call(TEST_GRAPH2)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("nodeId")
             .withRelationshipType("TYPE")

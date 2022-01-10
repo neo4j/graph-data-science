@@ -21,7 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Map;
@@ -56,13 +56,13 @@ public class GraphInfoWithHistogram extends GraphInfo {
         this.degreeDistribution = degreeDistribution;
     }
 
-    static GraphInfoWithHistogram of(GraphCreateConfig graphCreateConfig, GraphStore graphStore, boolean computeHistogram) {
-        var graphInfo = GraphInfo.withMemoryUsage(graphCreateConfig, graphStore);
+    static GraphInfoWithHistogram of(GraphProjectConfig graphProjectConfig, GraphStore graphStore, boolean computeHistogram) {
+        var graphInfo = GraphInfo.withMemoryUsage(graphProjectConfig, graphStore);
 
         Optional<Map<String, Object>> maybeDegreeDistribution = GraphStoreCatalog.getDegreeDistribution(
-            graphCreateConfig.username(),
+            graphProjectConfig.username(),
             graphStore.databaseId(),
-            graphCreateConfig.graphName()
+            graphProjectConfig.graphName()
         );
 
         var degreeDistribution = maybeDegreeDistribution.orElseGet(() -> {
@@ -70,9 +70,9 @@ public class GraphInfoWithHistogram extends GraphInfo {
                 var newHistogram = GraphInfoHelper.degreeDistribution(graphStore.getUnion());
                 // Cache the computed degree distribution in the Catalog
                 GraphStoreCatalog.setDegreeDistribution(
-                    graphCreateConfig.username(),
+                    graphProjectConfig.username(),
                     graphStore.databaseId(),
-                    graphCreateConfig.graphName(),
+                    graphProjectConfig.graphName(),
                     newHistogram
                 );
                 return newHistogram;

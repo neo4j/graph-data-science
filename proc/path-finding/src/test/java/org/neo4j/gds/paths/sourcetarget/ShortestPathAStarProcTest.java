@@ -34,10 +34,10 @@ import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.SourceNodeConfigTest;
 import org.neo4j.gds.TargetNodeConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromCypherConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromCypherConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -131,7 +131,7 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
         costs0 = new double[]{0.0, 29.0, 723.0, 895.0, 996.0, 1353.0, 1652.0, 2392.0, 2979.0};
 
         runQuery(GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Label")
             .withNodeProperty(LATITUDE_PROPERTY)
             .withNodeProperty(LONGITUDE_PROPERTY)
@@ -168,19 +168,19 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
      * From here it's just some voodoo to make all this test machinery work ...
      */
     @Override
-    public @NotNull GraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
-        GraphCreateConfig configWithNodeProperty = graphCreateConfig instanceof GraphCreateFromStoreConfig
-            ? ImmutableGraphCreateFromStoreConfig
+    public @NotNull GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
+        GraphProjectConfig configWithNodeProperty = graphProjectConfig instanceof GraphProjectFromStoreConfig
+            ? ImmutableGraphProjectFromStoreConfig
             .builder()
-            .from(graphCreateConfig)
+            .from(graphProjectConfig)
             .nodeProperties(PropertyMappings.of(
                 PropertyMapping.of(LONGITUDE_PROPERTY),
                 PropertyMapping.of(LATITUDE_PROPERTY))
             )
             .build()
-            : ImmutableGraphCreateFromCypherConfig
+            : ImmutableGraphProjectFromCypherConfig
                 .builder()
-                .from(graphCreateConfig)
+                .from(graphProjectConfig)
                 .nodeQuery(NODE_QUERY)
                 .build();
 
@@ -192,7 +192,7 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
         QueryRunner.runQuery(
             graphDb(),
             GdsCypher.call(graphName)
-                .graphCreate()
+                .graphProject()
                 .withAnyLabel()
                 .withNodeProperty(LATITUDE_PROPERTY)
                 .withNodeProperty(LONGITUDE_PROPERTY)

@@ -23,7 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.TokenRead;
@@ -31,11 +31,11 @@ import org.neo4j.internal.kernel.api.TokenRead;
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
 
-public class GraphDimensionsCypherReader extends GraphDimensionsReader<GraphCreateFromCypherConfig> {
+public class GraphDimensionsCypherReader extends GraphDimensionsReader<GraphProjectFromCypherConfig> {
 
     public GraphDimensionsCypherReader(
         TransactionContext tx,
-        GraphCreateFromCypherConfig config,
+        GraphProjectFromCypherConfig config,
         IdGeneratorFactory idGeneratorFactory
     ) {
         super(tx, config, idGeneratorFactory);

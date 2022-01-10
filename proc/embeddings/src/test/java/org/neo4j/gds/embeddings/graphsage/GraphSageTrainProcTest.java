@@ -28,7 +28,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
@@ -100,7 +100,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         runQuery("CREATE (:A {a1: 1.0, a2: 2.0})-[:REL]->(:B {b1: 42.0, b2: 1337.0})");
 
         String query = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel(
                 "A",
                 NodeProjection.of("A", PropertyMappings.of(
@@ -192,7 +192,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                     .forEach(validation ->
                         validation.validateConfigsAfterLoad(
                             GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
-                            GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName),
+                            GraphProjectFromStoreConfig.emptyWithName(getUsername(), graphName),
                             config
                         )
                     );
@@ -224,7 +224,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                     .forEach(validation ->
                         validation.validateConfigsAfterLoad(
                             GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
-                            GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName),
+                            GraphProjectFromStoreConfig.emptyWithName(getUsername(), graphName),
                             config
                         )
                     );

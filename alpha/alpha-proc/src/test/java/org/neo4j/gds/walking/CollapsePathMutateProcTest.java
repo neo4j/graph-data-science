@@ -125,7 +125,7 @@ class CollapsePathMutateProcTest extends BaseProcTest implements
     void testMutateYields() {
         String graphName = "graph";
         String loadQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withRelationshipType("KNOWS")
             .yields();

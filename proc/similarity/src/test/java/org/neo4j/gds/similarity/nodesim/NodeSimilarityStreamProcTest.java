@@ -306,7 +306,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
         runQuery(graphCreateQuery);
 
         String createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
             .withNodeLabel("Bar")

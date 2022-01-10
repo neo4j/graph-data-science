@@ -27,8 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.graphdb.Direction;
 
@@ -442,7 +442,7 @@ class GdsCypherTest {
             )
         );
 
-        GraphCreateFromStoreConfig parsedConfig = ImmutableGraphCreateFromStoreConfig
+        GraphProjectFromStoreConfig parsedConfig = ImmutableGraphProjectFromStoreConfig
             .builder()
             .username("")
             .graphName("")
@@ -464,7 +464,7 @@ class GdsCypherTest {
             .addProperty("relProp", "RelationshipPropertyName", DefaultValue.of(1337), Aggregation.MAX)
             .build();
 
-        GraphCreateFromStoreConfig configFromBuilder = ImmutableGraphCreateFromStoreConfig
+        GraphProjectFromStoreConfig configFromBuilder = ImmutableGraphProjectFromStoreConfig
             .builder()
             .username("")
             .graphName("")
@@ -501,21 +501,21 @@ class GdsCypherTest {
             arguments(
                 GdsCypher
                     .call("graph")
-                    .graphCreate()
-                    .withGraphCreateConfig(parsedConfig),
+                    .graphProject()
+                    .withGraphProjectConfig(parsedConfig),
                 "config from cypher string"
             ),
             arguments(
                 GdsCypher
                     .call("graph")
-                    .graphCreate()
-                    .withGraphCreateConfig(configFromBuilder),
+                    .graphProject()
+                    .withGraphProjectConfig(configFromBuilder),
                 "config from builder"
             ),
             arguments(
                 GdsCypher
                     .call("graph")
-                    .graphCreate()
+                    .graphProject()
                     .withNodeLabel("FooNode", fooNode)
                     .withNodeProperty("GlobalNodeProp")
                     .withRelationshipType("Rel", "TYPE")
@@ -580,7 +580,7 @@ class GdsCypherTest {
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("graphCreateBuilders")
-    void generatesGraphCreateFromImplicitConfig(GdsCypher.GraphCreateBuilder queryBuilder, String testName) {
+    void generatesGraphCreateFromImplicitConfig(GdsCypher.GraphProjectBuilder queryBuilder, String testName) {
         String query = queryBuilder
             .addParameter("nodeProjection", "SOMETHING | ELSE")
             .yields();
@@ -596,7 +596,7 @@ class GdsCypherTest {
     void loadEverything() {
         String query = GdsCypher
             .call("graph")
-            .graphCreate()
+            .graphProject()
             .yields();
 
         assertThat(query).isEqualTo("CALL gds.graph.project('graph', '*', '*')");
@@ -606,7 +606,7 @@ class GdsCypherTest {
     void loadEverythingWithRelationshipProperty() {
         String query = GdsCypher
             .call("graph")
-            .graphCreate()
+            .graphProject()
             .withRelationshipProperty("weight")
             .loadEverything()
             .yields();
@@ -631,7 +631,7 @@ class GdsCypherTest {
     void testExplicitNanDefaultValueInNodeProperties() {
         String query = GdsCypher
             .call("graph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("N")
             .withAnyRelationshipType()
             .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))

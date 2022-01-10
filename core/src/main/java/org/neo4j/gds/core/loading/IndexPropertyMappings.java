@@ -24,7 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -50,11 +50,11 @@ import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 final class IndexPropertyMappings {
 
     static LoadablePropertyMappings prepareProperties(
-        GraphCreateFromStoreConfig graphCreateConfig,
+        GraphProjectFromStoreConfig graphProjectConfig,
         GraphDimensions graphDimensions,
         TransactionContext transaction
     ) {
-        Map<NodeLabel, PropertyMappings> storeLoadedProperties = graphCreateConfig
+        Map<NodeLabel, PropertyMappings> storeLoadedProperties = graphProjectConfig
             .nodeProjections()
             .projections()
             .entrySet()

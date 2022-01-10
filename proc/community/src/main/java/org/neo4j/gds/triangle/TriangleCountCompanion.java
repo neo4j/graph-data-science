@@ -24,7 +24,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
-import org.neo4j.gds.executor.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -55,7 +55,7 @@ final class TriangleCountCompanion {
             @Override
             public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
                 return List.of(
-                    new GraphCreateConfigValidations.UndirectedGraphValidation<>()
+                    new GraphProjectConfigValidations.UndirectedGraphValidation<>()
                 );
             }
         };

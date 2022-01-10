@@ -26,7 +26,7 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
-import org.neo4j.gds.executor.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
@@ -91,8 +91,8 @@ public class LinkPredictionTrainProc extends TrainProc<LinkPredictionTrain, Link
             @Override
             public List<BeforeLoadValidation<LinkPredictionTrainConfig>> beforeLoadValidations() {
                 return List.of(
-                    new GraphCreateConfigValidations.UndirectedGraphValidation<>(),
-                    (graphCreateConfig, config) -> {
+                    new GraphProjectConfigValidations.UndirectedGraphValidation<>(),
+                    (graphProjectConfig, config) -> {
                         if (config.params().isEmpty()) {
                             throw new IllegalArgumentException(formatWithLocale(
                                 "No model candidates (params) specified, we require at least one"));

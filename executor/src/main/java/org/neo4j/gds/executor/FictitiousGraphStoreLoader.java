@@ -22,8 +22,8 @@ package org.neo4j.gds.executor;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -37,38 +37,38 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class FictitiousGraphStoreLoader implements GraphStoreCreator {
 
-    private final GraphCreateConfig graphCreateConfig;
+    private final GraphProjectConfig graphProjectConfig;
 
-    public FictitiousGraphStoreLoader(GraphCreateConfig graphCreateConfig) {
-        this.graphCreateConfig = graphCreateConfig;
+    public FictitiousGraphStoreLoader(GraphProjectConfig graphProjectConfig) {
+        this.graphProjectConfig = graphProjectConfig;
     }
 
     @Override
-    public GraphCreateConfig graphCreateConfig() {
-        return this.graphCreateConfig;
+    public GraphProjectConfig graphProjectConfig() {
+        return this.graphProjectConfig;
     }
 
     @Override
     public GraphDimensions graphDimensions() {
         var labelCount = 0;
-        if (graphCreateConfig() instanceof GraphCreateFromStoreConfig) {
-            var storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig();
+        if (graphProjectConfig() instanceof GraphProjectFromStoreConfig) {
+            var storeConfig = (GraphProjectFromStoreConfig) graphProjectConfig();
             Set<NodeLabel> nodeLabels = storeConfig.nodeProjections().projections().keySet();
             labelCount = nodeLabels.stream().allMatch(isEqual(NodeLabel.ALL_NODES)) ? 0 : nodeLabels.size();
         }
 
         return ImmutableGraphDimensions.builder()
-            .nodeCount(graphCreateConfig().nodeCount())
-            .highestPossibleNodeCount(graphCreateConfig().nodeCount())
+            .nodeCount(graphProjectConfig().nodeCount())
+            .highestPossibleNodeCount(graphProjectConfig().nodeCount())
             .estimationNodeLabelCount(labelCount)
-            .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, graphCreateConfig().relationshipCount()))
-            .maxRelCount(Math.max(graphCreateConfig().relationshipCount(), 0))
+            .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, graphProjectConfig().relationshipCount()))
+            .maxRelCount(Math.max(graphProjectConfig().relationshipCount(), 0))
             .build();
     }
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        return graphCreateConfig
+        return graphProjectConfig
             .graphStoreFactory()
             .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions())
             .memoryEstimation();

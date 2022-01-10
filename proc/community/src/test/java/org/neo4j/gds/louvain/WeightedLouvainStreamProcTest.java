@@ -86,7 +86,7 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
     List<String> graphCreateQueries() {
         return Arrays.asList(
             GdsCypher.call("weightedLouvainGraph")
-                .graphCreate()
+                .graphProject()
                 .withNodeLabel("User")
                 .withNodeProperty("seed")
                 .withRelationshipType(
@@ -100,7 +100,7 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
                 .withRelationshipProperty(PropertyMapping.of("weight", 0.0d))
                 .yields(),
             GdsCypher.call("unweightedGraph")
-                .graphCreate()
+                .graphProject()
                 .withNodeLabel("User")
                 .withNodeProperty("seed")
                 .withRelationshipType(

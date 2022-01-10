@@ -26,7 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
@@ -71,8 +71,8 @@ public class ProcedureGraphCreation<
     }
 
     @Override
-    public GraphCreateConfig graphCreateConfig() {
-        return graphStoreLoader.graphCreateConfig();
+    public GraphProjectConfig graphProjectConfig() {
+        return graphStoreLoader.graphProjectConfig();
     }
 
     @Override

@@ -90,7 +90,7 @@ class GreedyProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
 
         String graphCreateQuery = GdsCypher.call("greedyGraph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType(
                 "RELATIONSHIP",

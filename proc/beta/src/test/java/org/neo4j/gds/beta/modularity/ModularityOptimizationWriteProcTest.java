@@ -57,7 +57,7 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
     @Test
     void testWritingWeighted() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withRelationshipProperty("weight")
             .loadEverything(Orientation.UNDIRECTED)
             .yields();
@@ -82,7 +82,7 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
     @Test
     void testWritingSeeded() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeProperty("seed1")
             .loadEverything(Orientation.UNDIRECTED)
             .yields();

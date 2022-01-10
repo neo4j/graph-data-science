@@ -149,7 +149,7 @@ public class BaseProcTest extends BaseTest {
 
     protected void loadCompleteGraph(String graphName, Orientation orientation) {
         var createQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .loadEverything(orientation)
             .yields();
         runQuery(createQuery);

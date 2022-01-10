@@ -59,7 +59,7 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
         runQuery(DB_CYPHER);
 
         String query = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withAnyRelationshipType()

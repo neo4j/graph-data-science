@@ -41,7 +41,7 @@ import org.neo4j.gds.extension.GdlSupportExtension;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
@@ -123,7 +123,7 @@ public final class TestSupport {
     public static TestGraph fromGdl(String gdl, Orientation orientation, String name) {
         Objects.requireNonNull(gdl);
 
-        var config = ImmutableGraphCreateFromGdlConfig.builder()
+        var config = ImmutableGraphProjectFromGdlConfig.builder()
             .gdlGraph(gdl)
             .graphName("graph")
             .orientation(orientation)
@@ -131,7 +131,7 @@ public final class TestSupport {
 
         var gdlFactory = GdlFactory
             .builder()
-            .createConfig(config)
+            .graphProjectConfig(config)
             .namedDatabaseId(GdlSupportExtension.DATABASE_ID)
             .build();
 

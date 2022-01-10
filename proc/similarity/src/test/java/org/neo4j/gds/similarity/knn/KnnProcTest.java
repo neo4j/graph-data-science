@@ -35,10 +35,10 @@ import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromCypherConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromCypherConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -101,7 +101,7 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
         );
 
         String graphCreateQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("knn")
             .withAnyRelationshipType()
@@ -126,16 +126,16 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
     }
 
     @Override
-    public @NotNull GraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
-        GraphCreateConfig configWithNodeProperty = graphCreateConfig instanceof GraphCreateFromStoreConfig
-            ? ImmutableGraphCreateFromStoreConfig
+    public @NotNull GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
+        GraphProjectConfig configWithNodeProperty = graphProjectConfig instanceof GraphProjectFromStoreConfig
+            ? ImmutableGraphProjectFromStoreConfig
                 .builder()
-                .from(graphCreateConfig)
+                .from(graphProjectConfig)
                 .nodeProperties(PropertyMappings.of(PropertyMapping.of("knn")))
                 .build()
-            : ImmutableGraphCreateFromCypherConfig
+            : ImmutableGraphProjectFromCypherConfig
                 .builder()
-                .from(graphCreateConfig)
+                .from(graphProjectConfig)
                 .nodeQuery("MATCH (n) RETURN id(n) AS id, n.knn AS knn")
                 .build();
 
@@ -147,7 +147,7 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
         QueryRunner.runQuery(
             graphDb(),
             GdsCypher.call(graphName)
-                .graphCreate()
+                .graphProject()
                 .withAnyLabel()
                 .withNodeProperty("knn")
                 .withAnyRelationshipType()

@@ -22,32 +22,32 @@ package org.neo4j.gds.executor;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 public class GraphStoreFromDatabaseLoader implements GraphStoreCreator {
 
-    private final GraphCreateConfig graphCreateConfig;
+    private final GraphProjectConfig graphProjectConfig;
     private final String username;
     private final GraphLoaderContext graphLoaderContext;
     private final GraphStoreFactory<?, ?> graphStoreFactory;
 
     public GraphStoreFromDatabaseLoader(
-        GraphCreateConfig graphCreateConfig,
+        GraphProjectConfig graphProjectConfig,
         String username,
         GraphLoaderContext graphLoaderContext
     ) {
-        this.graphCreateConfig = graphCreateConfig;
+        this.graphProjectConfig = graphProjectConfig;
         this.username = username;
         this.graphLoaderContext = graphLoaderContext;
         this.graphStoreFactory = graphStoreFactory();
     }
 
     @Override
-    public GraphCreateConfig graphCreateConfig() {
-        return this.graphCreateConfig;
+    public GraphProjectConfig graphProjectConfig() {
+        return this.graphProjectConfig;
     }
 
     @Override
@@ -70,7 +70,7 @@ public class GraphStoreFromDatabaseLoader implements GraphStoreCreator {
             .builder()
             .context(graphLoaderContext)
             .username(username)
-            .createConfig(graphCreateConfig)
+            .projectConfig(graphProjectConfig)
             .build()
             .graphStoreFactory();
     }
