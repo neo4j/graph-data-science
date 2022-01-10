@@ -20,10 +20,11 @@
 package org.neo4j.gds.traverse;
 
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.impl.traverse.TraverseConfig;
-import org.neo4j.gds.impl.walking.WalkResult;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.impl.traverse.TraverseConfig;
+import org.neo4j.gds.impl.walking.WalkResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -49,6 +50,15 @@ public class TraverseProcDFS extends TraverseProc {
     ) {
         var computationResult = compute(graphName, configuration);
         return computationResultConsumer().consume(computationResult, executionContext());
+    }
+
+    @Procedure(value = "gds.alpha.dfs.stream.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

@@ -20,12 +20,14 @@
 package org.neo4j.gds.impl.traverse;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.impl.traverse.Traverse.ExitPredicate.Result;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.impl.traverse.Traverse.ExitPredicate.Result;
 
 import java.util.Arrays;
 
@@ -96,7 +98,9 @@ class TraverseTest {
             naturalGraph,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
-            (s, t, w) -> 1.
+            (s, t, w) -> 1.,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
         ).compute().resultNodes();
 
         assertContains(new String[]{"a", "b", "c", "d"}, nodes);
@@ -114,7 +118,9 @@ class TraverseTest {
             naturalGraph,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
-            DEFAULT_AGGREGATOR
+            DEFAULT_AGGREGATOR,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
         ).compute().resultNodes();
 
         assertEquals(5, nodes.length);
@@ -131,7 +137,9 @@ class TraverseTest {
             naturalGraph,
             source,
             (s, t, w) -> Result.FOLLOW,
-            DEFAULT_AGGREGATOR
+            DEFAULT_AGGREGATOR,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
         ).compute().resultNodes();
         assertEquals(7, nodes.length); // should contain all nodes
     }
@@ -148,7 +156,9 @@ class TraverseTest {
             reverseGraph,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
-            DEFAULT_AGGREGATOR
+            DEFAULT_AGGREGATOR,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
         ).compute().resultNodes();
         assertEquals(5, nodes.length);
     }
@@ -166,7 +176,9 @@ class TraverseTest {
             reverseGraph,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
-            DEFAULT_AGGREGATOR
+            DEFAULT_AGGREGATOR,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
         ).compute().resultNodes();
         assertEquals(7, nodes.length);
     }
@@ -185,19 +197,33 @@ class TraverseTest {
             naturalGraph,
             source,
             (s, t, w) -> w >= maxHops ? Result.CONTINUE : Result.FOLLOW,
-            (s, t, w) -> w + 1.
+            (s, t, w) -> w + 1.,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
         ).compute().resultNodes();
         assertContains(new String[]{"a", "b", "c", "d"}, nodes);
     }
 
     @Test
     void testBfsOnLoopGraph() {
-        Traverse.bfs(loopGraph, 0, (s, t, w) -> Result.FOLLOW, Traverse.DEFAULT_AGGREGATOR).compute();
+        Traverse.bfs(loopGraph, 0,
+            (s, t, w) -> Result.FOLLOW,
+            Traverse.DEFAULT_AGGREGATOR,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        ).compute();
     }
 
     @Test
     void testDfsOnLoopGraph() {
-        Traverse.dfs(loopGraph, 0, (s, t, w) -> Result.FOLLOW, Traverse.DEFAULT_AGGREGATOR).compute();
+        Traverse.dfs(
+            loopGraph,
+            0,
+            (s, t, w) -> Result.FOLLOW,
+            Traverse.DEFAULT_AGGREGATOR,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        ).compute();
     }
 
     /**

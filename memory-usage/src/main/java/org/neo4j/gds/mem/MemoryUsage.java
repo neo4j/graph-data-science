@@ -21,6 +21,7 @@ package org.neo4j.gds.mem;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.Containers;
+import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.HashContainers;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongDoubleHashMap;
@@ -252,6 +253,10 @@ public final class MemoryUsage {
 
     public static long sizeOfLongArrayList(long length) {
         return sizeOfInstance(LongArrayList.class) + length * Long.BYTES;
+    }
+
+    public static long sizeOfDoubleArrayList(long length) {
+        return sizeOfInstance(DoubleArrayList.class) + length * Double.BYTES;
     }
 
     public static long sizeOfOpenHashContainer(final long elements) {
