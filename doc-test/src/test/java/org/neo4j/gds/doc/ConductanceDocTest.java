@@ -46,5 +46,4 @@ class ConductanceDocTest extends DocTestBase {
     protected String adocFile() {
         return "algorithms/alpha/conductance/conductance.adoc";
     }
-
 }

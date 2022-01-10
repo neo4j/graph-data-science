@@ -150,7 +150,6 @@ YIELD communityCount
 |===
 | communityCount
 | 3
-|1 row
 |===
 --
 

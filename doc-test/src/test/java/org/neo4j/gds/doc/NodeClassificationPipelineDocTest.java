@@ -30,6 +30,7 @@ import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineMu
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineStreamProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineTrainProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineWriteProc;
+import org.neo4j.gds.scaling.ScalePropertiesMutateProc;
 
 import java.util.List;
 
@@ -52,7 +53,8 @@ class NodeClassificationPipelineDocTest extends DocTestBase {
             NodeClassificationPipelineConfigureSplitProc.class,
             NodeClassificationPipelineConfigureParamsProc.class,
             GraphStreamNodePropertiesProc.class,
-            GraphCreateProc.class
+            GraphCreateProc.class,
+            ScalePropertiesMutateProc.class
         );
     }
 

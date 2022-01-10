@@ -161,7 +161,7 @@ include::pipelineInfoResult.adoc[]
 .The following will add a node property step to the pipeline. Here we assume that the input graph contains a property `sizePerStory`.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty('pipe', 'scaleProperties', {
+CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty('pipe', 'alpha.scaleProperties', {
   nodeProperties: 'sizePerStory',
   scaler: 'L1Norm',
   mutateProperty:'scaledSizes'
