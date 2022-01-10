@@ -69,7 +69,7 @@ class EmptyGraphProcTest extends BaseProcTest {
         );
 
         var createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .loadEverything()
             .yields();
         runQuery(createQuery);
@@ -141,7 +141,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testTriangleStream() {
         var createQuery = GdsCypher.call("undirectedGraph")
-            .graphCreate()
+            .graphProject()
             .loadEverything(Orientation.UNDIRECTED)
             .yields();
         runQuery(createQuery);

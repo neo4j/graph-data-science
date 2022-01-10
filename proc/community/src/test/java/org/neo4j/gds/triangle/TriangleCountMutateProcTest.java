@@ -96,7 +96,7 @@ class TriangleCountMutateProcTest
                  "CREATE (d)-[:REL]->(n)");
 
         var createQuery = GdsCypher.call("testGraph")
-            .graphCreate()
+            .graphProject()
             .loadEverything(Orientation.UNDIRECTED)
             .yields();
 

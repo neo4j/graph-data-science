@@ -23,9 +23,9 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
@@ -50,7 +50,7 @@ public final class GraphLoaderBuilders {
 
     /**
      * Factory method that defines the generation of a {@link GraphLoader}
-     * using a {@link GraphCreateFromStoreConfig}. Use {@link StoreLoaderBuilder}
+     * using a {@link org.neo4j.gds.config.GraphProjectFromStoreConfig}. Use {@link StoreLoaderBuilder}
      * to create the input for that method in a convenient way.
      */
     @Builder.Factory
@@ -79,7 +79,7 @@ public final class GraphLoaderBuilders {
         Optional<Boolean> validateRelationships
     ) {
 
-        GraphCreateFromStoreConfig graphCreateConfig = GraphCreateConfigBuilders.storeConfig(
+        GraphProjectFromStoreConfig graphProjectConfig = GraphProjectConfigBuilders.storeConfig(
             userName.or(() -> transactionContext.map(TransactionContext::username)),
             graphName,
             nodeLabels,
@@ -104,7 +104,7 @@ public final class GraphLoaderBuilders {
             terminationFlag,
             log,
             userName,
-            graphCreateConfig
+            graphProjectConfig
         );
     }
 
@@ -118,7 +118,7 @@ public final class GraphLoaderBuilders {
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
-        GraphCreateFromStoreConfig graphCreateConfig
+        GraphProjectFromStoreConfig graphProjectConfig
     ) {
         return createGraphLoader(
             api,
@@ -128,13 +128,13 @@ public final class GraphLoaderBuilders {
             terminationFlag,
             log,
             userName,
-            graphCreateConfig
+            graphProjectConfig
         );
     }
 
     /**
      * Factory method that defines the generation of a {@link GraphLoader}
-     * using a {@link GraphCreateFromCypherConfig}. Use {@link CypherLoaderBuilder}
+     * using a {@link org.neo4j.gds.config.GraphProjectFromCypherConfig}. Use {@link CypherLoaderBuilder}
      * to create the input for that method in a convenient way.
      */
     @Builder.Factory
@@ -154,7 +154,7 @@ public final class GraphLoaderBuilders {
         Optional<Boolean> validateRelationships,
         Optional<Map<String, Object>> parameters
     ) {
-        GraphCreateFromCypherConfig graphCreateConfig = GraphCreateConfigBuilders.cypherConfig(
+        GraphProjectFromCypherConfig graphProjectConfig = GraphProjectConfigBuilders.cypherConfig(
             userName.or(() -> transactionContext.map(TransactionContext::username)),
             graphName,
             nodeQuery,
@@ -172,7 +172,7 @@ public final class GraphLoaderBuilders {
             terminationFlag,
             log,
             userName,
-            graphCreateConfig
+            graphProjectConfig
         );
     }
 
@@ -185,7 +185,7 @@ public final class GraphLoaderBuilders {
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
-        GraphCreateConfig graphCreateConfig
+        GraphProjectConfig graphProjectConfig
     ) {
         return ImmutableGraphLoader.builder()
             .context(ImmutableGraphLoaderContext.builder()
@@ -200,7 +200,7 @@ public final class GraphLoaderBuilders {
             .username(userName
                 .or(() -> transactionContext.map(TransactionContext::username))
                 .orElse(""))
-            .createConfig(graphCreateConfig)
+            .projectConfig(graphProjectConfig)
             .build();
     }
 }

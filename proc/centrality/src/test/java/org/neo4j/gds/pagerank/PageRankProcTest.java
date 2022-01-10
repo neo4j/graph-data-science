@@ -172,7 +172,7 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
         return Arrays.asList(
             GdsCypher
                 .call("graphLabel3")
-                .graphCreate()
+                .graphProject()
                 .withNodeLabel("Label3")
                 .withRelationshipType("TYPE3", RelationshipProjection.of(
                     "TYPE3",
@@ -181,7 +181,7 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
                 ).withProperties(PropertyMappings.of(PropertyMapping.of("equalWeight"))))
                 .yields(),
             GdsCypher.call("graphLabel1")
-                .graphCreate()
+                .graphProject()
                 .withNodeLabel("Label1")
                 .withRelationshipType("TYPE1", RelationshipProjection.builder().type("TYPE1")
                     .addProperties(PropertyMapping.of("equalWeight"), PropertyMapping.of("weight"))

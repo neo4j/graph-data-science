@@ -42,9 +42,9 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -92,12 +92,12 @@ import static org.neo4j.gds.TestSupport.getCypherAggregation;
 import static org.neo4j.gds.compat.MapUtil.genericMap;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.config.BaseConfig.SUDO_KEY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphCreateProcTest extends BaseProcTest {
@@ -415,7 +415,7 @@ class GraphCreateProcTest extends BaseProcTest {
         Long expectedRelationshipCount = orientation.equals("UNDIRECTED") ? 2L : 1L;
 
         String graphCreate = GdsCypher.call(name)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withRelationshipType(
                 "B",
@@ -451,7 +451,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String name = "g";
 
         String graphCreate = GdsCypher.call(name)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withRelationshipType(
                 "B", RelationshipProjection.builder()
@@ -630,7 +630,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String cypher = "cypher";
 
         String graphCreateStandard = GdsCypher.call(standard)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withRelationshipType(
                 "KNOWS",
@@ -782,7 +782,7 @@ class GraphCreateProcTest extends BaseProcTest {
     void shouldFailOnTooBigGraphNative() {
         assertThatThrownBy(() -> {
             applyOnProcedure(proc -> {
-                GraphCreateConfig config = GraphCreateFromStoreConfig.fromProcedureConfig(
+                GraphProjectConfig config = GraphProjectFromStoreConfig.fromProcedureConfig(
                     "",
                     CypherMapWrapper.create(MapUtil.map(
                         NODE_PROJECTION_KEY, "*",
@@ -798,7 +798,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void shouldNotFailOnTooBigGraphIfInSudoModeNative() {
         applyOnProcedure(proc -> {
-            GraphCreateConfig config = GraphCreateFromStoreConfig.fromProcedureConfig(
+            GraphProjectConfig config = GraphProjectFromStoreConfig.fromProcedureConfig(
                 "",
                 CypherMapWrapper.create(MapUtil.map(
                     NODE_PROJECTION_KEY, "*",
@@ -813,7 +813,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void shouldNotFailOnTooBigGraphIfInSudoModeCypher() {
         applyOnProcedure(proc -> {
-            GraphCreateConfig config = GraphCreateFromCypherConfig.fromProcedureConfig(
+            GraphProjectConfig config = GraphProjectFromCypherConfig.fromProcedureConfig(
                 "",
                 CypherMapWrapper.create(MapUtil.map(
                     NODE_QUERY_KEY, "MATCH (n) RETURN n",
@@ -829,7 +829,7 @@ class GraphCreateProcTest extends BaseProcTest {
     void shouldFailOnTooBigGraphCypher() {
         assertThatThrownBy(() -> {
             applyOnProcedure(proc -> {
-                GraphCreateConfig config = GraphCreateFromCypherConfig.fromProcedureConfig(
+                GraphProjectConfig config = GraphProjectFromCypherConfig.fromProcedureConfig(
                     "",
                     CypherMapWrapper.create(MapUtil.map(
                         NODE_QUERY_KEY, "MATCH (n) RETURN n",
@@ -888,7 +888,7 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(testGraph, Collections.emptyMap());
         String query = GdsCypher
             .call("g")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withAnyRelationshipType()
             .withNodeProperty("fooProp", "foo")
@@ -920,7 +920,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         String query = GdsCypher
             .call("aggGraph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipProperty(PropertyMapping.of("sumWeight", "weight", DefaultValue.of(1.0), Aggregation.SUM))
             .withRelationshipProperty(PropertyMapping.of("minWeight", "weight", Aggregation.MIN))
@@ -968,7 +968,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         String query = GdsCypher
             .call("g")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipProperty("agg", "property", DefaultValue.of(Double.NaN), aggregation)
             .withRelationshipType("TYPE")
@@ -996,7 +996,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         String query = GdsCypher
             .call("g")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipProperty("agg", "property", DefaultValue.of(Double.NaN), aggregation)
             .withRelationshipType("TYPE")
@@ -1023,7 +1023,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         String query = GdsCypher
             .call("g")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipProperty("agg", "property", DefaultValue.of(42), aggregation)
             .withRelationshipType("TYPE")
@@ -1050,7 +1050,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         String query = GdsCypher
             .call("countGraph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipProperty("count", "*", DefaultValue.of(42), Aggregation.COUNT)
             .withRelationshipType("TYPE_1")
@@ -1090,7 +1090,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         String query = GdsCypher
             .call("countGraph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipProperty("count", "foo", DefaultValue.of(42L), Aggregation.COUNT)
             .withRelationshipType("TYPE")
@@ -1130,7 +1130,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         String query = GdsCypher
             .call("countGraph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipProperty("count", "*", DefaultValue.of(42), Aggregation.COUNT)
             .withRelationshipProperty("foo", "foo", DefaultValue.of(42), Aggregation.SUM)

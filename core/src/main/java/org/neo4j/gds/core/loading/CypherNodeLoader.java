@@ -20,15 +20,15 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.Transaction;
@@ -52,7 +52,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     CypherNodeLoader(
         String nodeQuery,
         long nodeCount,
-        GraphCreateFromCypherConfig config,
+        GraphProjectFromCypherConfig config,
         GraphLoaderContext loadingContext,
         GraphDimensions outerDimensions,
         ProgressTracker progressTracker

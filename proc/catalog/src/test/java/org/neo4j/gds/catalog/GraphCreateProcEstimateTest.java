@@ -214,7 +214,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
         String graphName = "foo";
 
         String query = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withRelationshipType("X")
             .withRelationshipType("Y")
@@ -260,7 +260,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
     @Test
     void silentlyDropRelsWithUnloadedNodes() {
         String query = GdsCypher.call("g")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("A")
             .withAnyRelationshipType()
             .yields("nodeCount", "relationshipCount");
@@ -287,7 +287,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
     @Test
     void failCreationWitIncompleteNodeQuery() {
         String query = GdsCypher.call("g")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("A")
             .withAnyRelationshipType()
             .addParameter("validateRelationships", true)

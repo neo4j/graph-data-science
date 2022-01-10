@@ -24,16 +24,16 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
@@ -120,7 +120,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         String graphNamePrefix = gdlGraphSetup.graphNamePrefix();
         String graphName = graphNamePrefix.isBlank() ? "graph" : graphNamePrefix + "Graph";
 
-        var createConfig = ImmutableGraphCreateFromGdlConfig.builder()
+        var graphProjectConfig = ImmutableGraphProjectFromGdlConfig.builder()
             .username(gdlGraphSetup.username())
             .graphName(graphName)
             .gdlGraph(gdlGraphSetup.gdlGraph())
@@ -128,14 +128,19 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             .aggregation(gdlGraphSetup.aggregation())
             .build();
 
-        GdlFactory gdlFactory = GdlFactory.builder().createConfig(createConfig).namedDatabaseId(DATABASE_ID).build();
+        GdlFactory gdlFactory = GdlFactory
+            .builder()
+            .graphProjectConfig(graphProjectConfig)
+            .namedDatabaseId(DATABASE_ID)
+            .build();
+
         CSRGraphStore graphStore = gdlFactory.build().graphStore();
         CSRGraph graph = graphStore.getUnion();
         IdFunction idFunction = gdlFactory::nodeId;
         TestGraph testGraph = new TestGraph(graph, idFunction, graphName);
 
         if (gdlGraphSetup.addToCatalog()) {
-            GraphStoreCatalog.set(createConfig, graphStore);
+            GraphStoreCatalog.set(graphProjectConfig, graphStore);
         }
 
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {

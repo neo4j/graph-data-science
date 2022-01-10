@@ -35,7 +35,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
     @BeforeEach
     void graphSetup() {
         var createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withRelationshipProperty("weight")
             .withNodeProperty("seed1")
             .loadEverything(Orientation.UNDIRECTED)

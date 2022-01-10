@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.executor.validation.AfterLoadValidation;
 
@@ -32,7 +32,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class GraphSageTrainingConfigValidation implements AfterLoadValidation<GraphSageTrainConfig> {
     @Override
     public void validateConfigsAfterLoad(
-        GraphStore graphStore, GraphCreateConfig graphCreateConfig, GraphSageTrainConfig config
+        GraphStore graphStore, GraphProjectConfig graphProjectConfig, GraphSageTrainConfig config
     ) {
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
         var nodePropertyNames = config.featureProperties();

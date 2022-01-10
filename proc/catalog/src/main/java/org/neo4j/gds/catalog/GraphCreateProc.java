@@ -26,10 +26,10 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.GraphStoreFilter;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
-import org.neo4j.gds.config.GraphCreateFromGraphConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromGraphConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -61,10 +61,10 @@ public class GraphCreateProc extends CatalogProc {
     private static final String DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
 
     private static final Set<String> DISALLOWED_CONFIG_KEYS = Set.of(
-        GraphCreateFromStoreConfig.NODE_PROJECTION_KEY,
-        GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY,
-        GraphCreateFromCypherConfig.NODE_QUERY_KEY,
-        GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY
+        GraphProjectFromStoreConfig.NODE_PROJECTION_KEY,
+        GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY,
+        GraphProjectFromCypherConfig.NODE_QUERY_KEY,
+        GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY
     );
 
     @Procedure(name = "gds.graph.project", mode = READ)
@@ -80,7 +80,7 @@ public class GraphCreateProc extends CatalogProc {
 
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphCreateFromStoreConfig config = GraphCreateFromStoreConfig.of(
+        GraphProjectFromStoreConfig config = GraphProjectFromStoreConfig.of(
             username(),
             graphName,
             nodeProjection,
@@ -119,7 +119,7 @@ public class GraphCreateProc extends CatalogProc {
         ProcPreconditions.check();
 
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphCreateConfig config = GraphCreateFromStoreConfig.of(
+        GraphProjectConfig config = GraphProjectFromStoreConfig.of(
             username(),
             NO_GRAPH_NAME,
             nodeProjection,
@@ -153,7 +153,7 @@ public class GraphCreateProc extends CatalogProc {
 
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphCreateFromCypherConfig config = GraphCreateFromCypherConfig.of(
+        GraphProjectFromCypherConfig config = GraphProjectFromCypherConfig.of(
             username(),
             graphName,
             nodeQuery,
@@ -192,7 +192,7 @@ public class GraphCreateProc extends CatalogProc {
         ProcPreconditions.check();
 
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphCreateFromCypherConfig config = GraphCreateFromCypherConfig.of(
+        GraphProjectFromCypherConfig config = GraphProjectFromCypherConfig.of(
             username(),
             NO_GRAPH_NAME,
             nodeQuery,
@@ -230,7 +230,7 @@ public class GraphCreateProc extends CatalogProc {
 
         var fromGraphStore = graphStoreFromCatalog(fromGraphName);
 
-        var graphCreateConfig = GraphCreateFromGraphConfig.of(
+        var graphProjectConfig = GraphProjectFromGraphConfig.of(
             username(),
             graphName,
             fromGraphName,
@@ -240,11 +240,11 @@ public class GraphCreateProc extends CatalogProc {
             procedureConfig
         );
 
-        validateConfig(procedureConfig, graphCreateConfig);
+        validateConfig(procedureConfig, graphProjectConfig);
 
         GraphCreateSubgraphResult result = runWithExceptionLogging(
             "Graph creation failed",
-            ExceptionUtil.supplier(() -> createGraphFromGraphStore(fromGraphStore.graphStore(), graphCreateConfig))
+            ExceptionUtil.supplier(() -> createGraphFromGraphStore(fromGraphStore.graphStore(), graphProjectConfig))
         );
 
         return Stream.of(result);
@@ -264,7 +264,7 @@ public class GraphCreateProc extends CatalogProc {
 
     private GraphCreateSubgraphResult createGraphFromGraphStore(
         GraphStore fromGraphStore,
-        GraphCreateFromGraphConfig config
+        GraphProjectFromGraphConfig config
     ) throws
         ParseException,
         SemanticErrors {
@@ -301,10 +301,10 @@ public class GraphCreateProc extends CatalogProc {
         );
     }
 
-    private void validateConfig(CypherMapWrapper cypherConfig, GraphCreateConfig createConfig) {
-        var allowedKeys = createConfig.isFictitiousLoading()
-            ? createConfig.configKeys()
-            : createConfig.configKeys()
+    private void validateConfig(CypherMapWrapper cypherConfig, GraphProjectConfig graphProjectConfig) {
+        var allowedKeys = graphProjectConfig.isFictitiousLoading()
+            ? graphProjectConfig.configKeys()
+            : graphProjectConfig.configKeys()
                 .stream()
                 .filter(key -> !DISALLOWED_CONFIG_KEYS.contains(key))
                 .collect(Collectors.toList());
@@ -321,15 +321,19 @@ public class GraphCreateProc extends CatalogProc {
         return AllocationTracker.empty();
     }
 
-    private GraphCreateResult createGraph(GraphCreateConfig config) {
+    private GraphCreateResult createGraph(GraphProjectConfig config) {
         memoryUsageValidator().tryValidateMemoryUsage(config, this::memoryTreeWithDimensions);
 
-        GraphCreateResult.Builder builder = config instanceof GraphCreateFromCypherConfig
-            ? new GraphCreateCypherResult.Builder((GraphCreateFromCypherConfig) config)
-            : new GraphCreateNativeResult.Builder((GraphCreateFromStoreConfig) config);
+        GraphCreateResult.Builder builder = config instanceof GraphProjectFromCypherConfig
+            ? new GraphCreateCypherResult.Builder((GraphProjectFromCypherConfig) config)
+            : new GraphCreateNativeResult.Builder((GraphProjectFromStoreConfig) config);
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
-            GraphStore graphStore = new GraphStoreFromDatabaseLoader(config, username(), graphLoaderContext()).graphStore();
+            GraphStore graphStore = new GraphStoreFromDatabaseLoader(
+                config,
+                username(),
+                graphLoaderContext()
+            ).graphStore();
 
             builder
                 .withNodeCount(graphStore.nodeCount())
@@ -341,11 +345,11 @@ public class GraphCreateProc extends CatalogProc {
         return builder.build();
     }
 
-    private Stream<MemoryEstimateResult> estimateGraph(GraphCreateConfig config) {
+    private Stream<MemoryEstimateResult> estimateGraph(GraphProjectConfig config) {
         return Stream.of(new MemoryEstimateResult(memoryTreeWithDimensions(config)));
     }
 
-    MemoryTreeWithDimensions memoryTreeWithDimensions(GraphCreateConfig config) {
+    MemoryTreeWithDimensions memoryTreeWithDimensions(GraphProjectConfig config) {
         GraphStoreCreator graphStoreCreator;
         if (config.isFictitiousLoading()) {
             graphStoreCreator = new FictitiousGraphStoreLoader(config);
@@ -390,7 +394,7 @@ public class GraphCreateProc extends CatalogProc {
             long relationshipCount;
             long createMillis;
 
-            Builder(GraphCreateConfig config) {
+            Builder(GraphProjectConfig config) {
                 this.graphName = config.graphName();
             }
 
@@ -436,7 +440,7 @@ public class GraphCreateProc extends CatalogProc {
             private final NodeProjections nodeProjections;
             private final RelationshipProjections relationshipProjections;
 
-            Builder(GraphCreateFromStoreConfig config) {
+            Builder(GraphProjectFromStoreConfig config) {
                 super(config);
                 this.nodeProjections = config.nodeProjections();
                 this.relationshipProjections = config.relationshipProjections();
@@ -477,7 +481,7 @@ public class GraphCreateProc extends CatalogProc {
             private final String nodeQuery;
             private final String relationshipQuery;
 
-            Builder(GraphCreateFromCypherConfig config) {
+            Builder(GraphProjectFromCypherConfig config) {
                 super(config);
                 this.nodeQuery = config.nodeQuery();
                 this.relationshipQuery = config.relationshipQuery();

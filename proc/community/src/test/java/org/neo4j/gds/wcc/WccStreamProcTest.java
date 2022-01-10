@@ -26,8 +26,8 @@ import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -77,7 +77,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
 
     @Test
     void testStreamRunsOnLoadedGraph() {
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig
+        GraphProjectConfig graphProjectConfig = ImmutableGraphProjectFromStoreConfig
             .builder()
             .graphName("testGraph")
             .nodeProjections(NodeProjections.all())
@@ -85,8 +85,8 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
             .build();
 
         GraphStoreCatalog.set(
-            graphCreateConfig,
-            graphLoader(graphCreateConfig).graphStore()
+            graphProjectConfig,
+            graphLoader(graphProjectConfig).graphStore()
         );
 
         String query = GdsCypher.call("testGraph")
@@ -111,7 +111,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
 
         String graphCreateQuery = GdsCypher
             .call("nodeFilterGraph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabels("Label", "Label2", "Ignore")
             .withAnyRelationshipType()
             .yields();

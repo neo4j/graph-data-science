@@ -20,11 +20,12 @@
 package org.neo4j.gds.executor;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 
 public interface GraphStoreLoader {
-    GraphCreateConfig graphCreateConfig();
+    GraphProjectConfig graphProjectConfig();
+
     GraphStore graphStore();
     GraphDimensions graphDimensions();
 }

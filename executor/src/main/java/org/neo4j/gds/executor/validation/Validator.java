@@ -21,7 +21,7 @@ package org.neo4j.gds.executor.validation;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.executor.GraphStoreValidation;
 
 public class Validator<CONFIG extends AlgoBaseConfig> {
@@ -32,15 +32,15 @@ public class Validator<CONFIG extends AlgoBaseConfig> {
         this.validationConfiguration = validationConfiguration;
     }
 
-    public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG config) {
+    public void validateConfigsBeforeLoad(GraphProjectConfig graphProjectConfig, CONFIG config) {
         validationConfiguration
             .beforeLoadValidations()
-            .forEach(validation -> validation.validateConfigsBeforeLoad(graphCreateConfig, config));
+            .forEach(validation -> validation.validateConfigsBeforeLoad(graphProjectConfig, config));
     }
 
     public void validateConfigWithGraphStore(
         GraphStore graphStore,
-        GraphCreateConfig graphCreateConfig,
+        GraphProjectConfig graphProjectConfig,
         CONFIG config
     ) {
         config.graphStoreValidation(
@@ -52,6 +52,6 @@ public class Validator<CONFIG extends AlgoBaseConfig> {
 
         validationConfiguration
             .afterLoadValidations()
-            .forEach(validation -> validation.validateConfigsAfterLoad(graphStore, graphCreateConfig, config));
+            .forEach(validation -> validation.validateConfigsAfterLoad(graphStore, graphProjectConfig, config));
     }
 }

@@ -33,7 +33,7 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Inject;
@@ -104,7 +104,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
 
         String query = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("King")
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withNodeProperty(PropertyMapping.of("birth_year", 1.0))
@@ -163,7 +163,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
     static Stream<Arguments> missingNodeProperties() {
         return Stream.of(
             Arguments.of(
-                ImmutableGraphCreateFromStoreConfig.builder()
+                ImmutableGraphProjectFromStoreConfig.builder()
                     .graphName("implicitWeightedGraph")
                     .nodeProjections(NodeProjections
                         .builder()
@@ -184,7 +184,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
                 List.of("King")
             ),
             Arguments.of(
-                ImmutableGraphCreateFromStoreConfig.builder()
+                ImmutableGraphProjectFromStoreConfig.builder()
                     .graphName("implicitWeightedGraph")
                     .nodeProjections(NodeProjections
                         .builder()
@@ -206,7 +206,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
                 List.of("King")
             ),
             Arguments.of(
-                ImmutableGraphCreateFromStoreConfig.of(
+                ImmutableGraphProjectFromStoreConfig.of(
                     "",
                     "",
                     NodeProjections.fromString(PROJECT_ALL),

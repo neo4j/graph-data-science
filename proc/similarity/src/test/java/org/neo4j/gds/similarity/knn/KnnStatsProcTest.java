@@ -51,7 +51,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
     @Test
     void testStatsYields() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeProperty("knn")
             .loadEverything()
             .yields();

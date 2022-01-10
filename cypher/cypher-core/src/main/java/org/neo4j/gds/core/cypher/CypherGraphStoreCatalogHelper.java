@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.cypher;
 
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
@@ -27,7 +27,7 @@ public final class CypherGraphStoreCatalogHelper {
 
     private CypherGraphStoreCatalogHelper() {}
 
-    public static void setWrappedGraphStore(GraphCreateConfig config, GraphStoreWrapper graphStoreWrapper) {
+    public static void setWrappedGraphStore(GraphProjectConfig config, GraphStoreWrapper graphStoreWrapper) {
         var catalogRequest = CatalogRequest.of(config.username(), graphStoreWrapper.databaseId());
         var graphName = config.graphName();
         var graphStore = GraphStoreCatalog.get(

@@ -102,7 +102,7 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
         );
 
         String createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .loadEverything()
             .yields();
 

@@ -104,7 +104,7 @@ class PageRankPregelProcTest extends BaseProcTest {
     @Test
     void streamSeeded() {
         var createGraphQuery = GdsCypher.call("test")
-            .graphCreate()
+            .graphProject()
             .loadEverything()
             .yields();
 

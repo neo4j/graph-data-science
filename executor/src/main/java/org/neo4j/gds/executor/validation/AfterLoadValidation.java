@@ -21,13 +21,13 @@ package org.neo4j.gds.executor.validation;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 
 @FunctionalInterface
 public interface AfterLoadValidation<CONFIG extends AlgoBaseConfig> {
     void validateConfigsAfterLoad(
         GraphStore graphStore,
-        GraphCreateConfig graphCreateConfig,
+        GraphProjectConfig graphProjectConfig,
         CONFIG config
     );
 }

@@ -66,8 +66,8 @@ final class PageRankProc {
             @Override
             public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
                 return List.of(
-                    (graphCreateConfig, config) -> {
-                        
+                    (graphProjectConfig, config) -> {
+
                     }
                 );
             }

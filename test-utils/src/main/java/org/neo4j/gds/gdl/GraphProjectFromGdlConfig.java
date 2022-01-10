@@ -20,16 +20,16 @@
 package org.neo4j.gds.gdl;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.GraphStoreFactory;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 
 @ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface GraphCreateFromGdlConfig extends GraphCreateConfig {
+public interface GraphProjectFromGdlConfig extends GraphProjectConfig {
 
     String gdlGraph();
 
@@ -47,22 +47,22 @@ public interface GraphCreateFromGdlConfig extends GraphCreateConfig {
     default GraphStoreFactory.Supplier graphStoreFactory() {
         return loaderContext -> GdlFactory
             .builder()
-            .createConfig(this)
+            .graphProjectConfig(this)
             .namedDatabaseId(loaderContext.api().databaseId())
             .build();
     }
 
     @Override
     @Configuration.Ignore
-    default <R> R accept(GraphCreateConfig.Cases<R> cases) {
+    default <R> R accept(GraphProjectConfig.Cases<R> cases) {
         if (cases instanceof Cases) {
             return ((Cases<R>) cases).gdl(this);
         }
         throw new IllegalArgumentException("Expected Visitor of type " + Cases.class.getName());
     }
 
-    interface Cases<R> extends GraphCreateConfig.Cases<R> {
+    interface Cases<R> extends GraphProjectConfig.Cases<R> {
 
-        R gdl(GraphCreateFromGdlConfig gdlConfig);
+        R gdl(GraphProjectFromGdlConfig gdlConfig);
     }
 }

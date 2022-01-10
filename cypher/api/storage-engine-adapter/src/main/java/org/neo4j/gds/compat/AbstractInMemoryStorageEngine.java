@@ -25,7 +25,7 @@ import org.neo4j.counts.CountsStore;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.function.TriFunction;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
@@ -246,7 +246,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
                 graphName,
                 GraphStoreCatalog.getAllGraphStores()
                     .map(GraphStoreCatalog.GraphStoreWithUserNameAndConfig::config)
-                    .map(GraphCreateConfig::graphName)
+                    .map(GraphProjectConfig::graphName)
                     .collect(Collectors.toList())
             )))
             .graphStore();

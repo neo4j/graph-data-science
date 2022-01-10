@@ -33,7 +33,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.NodeMapping;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -83,7 +83,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     CypherRelationshipLoader(
         String relationshipQuery,
         NodeMapping nodeMapping,
-        GraphCreateFromCypherConfig config,
+        GraphProjectFromCypherConfig config,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker

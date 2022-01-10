@@ -22,8 +22,8 @@ package org.neo4j.gds.executor.validation;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -32,16 +32,18 @@ import java.util.Collections;
 import static java.util.stream.Collectors.toList;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class GraphCreateConfigValidations {
+public final class GraphProjectConfigValidations {
 
     public static class UndirectedGraphValidation<CONFIG extends AlgoBaseConfig> implements BeforeLoadValidation<CONFIG> {
         @Override
-        public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG config) {
-            graphCreateConfig.accept(new GraphCreateConfig.Visitor() {
+        public void validateConfigsBeforeLoad(GraphProjectConfig graphProjectConfig, CONFIG config) {
+            graphProjectConfig.accept(new GraphProjectConfig.Visitor() {
                 @Override
-                public void visit(GraphCreateFromStoreConfig storeConfig) {
+                public void visit(GraphProjectFromStoreConfig storeConfig) {
                     storeConfig.relationshipProjections().projections().entrySet().stream()
-                        .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(ElementProjection.PROJECT_ALL)) ||
+                        .filter(entry -> config
+                                             .relationshipTypes()
+                                             .equals(Collections.singletonList(ElementProjection.PROJECT_ALL)) ||
                                          config.relationshipTypes().contains(entry.getKey().name()))
                         .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
                         .forEach(entry -> {
@@ -63,10 +65,10 @@ public final class GraphCreateConfigValidations {
      */
     public static class OrientationValidation<CONFIG extends AlgoBaseConfig> implements BeforeLoadValidation<CONFIG> {
         @Override
-        public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG algorithmConfig) {
-            graphCreateConfig.accept(new GraphCreateConfig.Visitor() {
+        public void validateConfigsBeforeLoad(GraphProjectConfig graphProjectConfig, CONFIG algorithmConfig) {
+            graphProjectConfig.accept(new GraphProjectConfig.Visitor() {
                 @Override
-                public void visit(GraphCreateFromStoreConfig storeConfig) {
+                public void visit(GraphProjectFromStoreConfig storeConfig) {
                     var filteredProjections = storeConfig
                         .relationshipProjections()
                         .projections()

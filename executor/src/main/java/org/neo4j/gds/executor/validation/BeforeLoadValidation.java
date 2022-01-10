@@ -20,9 +20,9 @@
 package org.neo4j.gds.executor.validation;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 
 @FunctionalInterface
 public interface BeforeLoadValidation<CONFIG extends AlgoBaseConfig> {
-    void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG config);
+    void validateConfigsBeforeLoad(GraphProjectConfig graphProjectConfig, CONFIG config);
 }

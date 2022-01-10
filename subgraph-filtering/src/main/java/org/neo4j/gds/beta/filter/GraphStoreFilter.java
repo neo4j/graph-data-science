@@ -27,7 +27,7 @@ import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.beta.filter.expression.ExpressionParser;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
 import org.neo4j.gds.beta.filter.expression.ValidationContext;
-import org.neo4j.gds.config.GraphCreateFromGraphConfig;
+import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -78,7 +78,7 @@ public final class GraphStoreFilter {
     @NotNull
     public static GraphStore filter(
         GraphStore graphStore,
-        GraphCreateFromGraphConfig config,
+        GraphProjectFromGraphConfig config,
         ExecutorService executorService,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker

@@ -140,7 +140,7 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
     void shouldProduceEmbeddingsWithSpecificValues() {
 
             String graphCreateQuery = GdsCypher.call("g2labels")
-                .graphCreate()
+                .graphProject()
                 .withNodeLabel("Node")
                 .withNodeLabel("Node2")
                 .withRelationshipType("REL2", Orientation.UNDIRECTED)

@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
@@ -134,15 +134,15 @@ public final class GraphStoreCatalog {
         return get(CatalogRequest.of(username, databaseId), graphName);
     }
 
-    public static void set(GraphCreateConfig config, GraphStore graphStore) {
+    public static void set(GraphProjectConfig config, GraphStore graphStore) {
         set(config, graphStore, false);
     }
 
-    public static void overwrite(GraphCreateConfig config, GraphStore graphStore) {
+    public static void overwrite(GraphProjectConfig config, GraphStore graphStore) {
         set(config, graphStore, true);
     }
 
-    private static void set(GraphCreateConfig config, GraphStore graphStore, boolean overwrite) {
+    private static void set(GraphProjectConfig config, GraphStore graphStore, boolean overwrite) {
         graphStore.canRelease(false);
         userCatalogs.compute(config.username(), (user, userCatalog) -> {
             if (userCatalog == null) {
@@ -210,11 +210,11 @@ public final class GraphStoreCatalog {
         userCatalogs.forEach((user, userCatalog) -> userCatalog.remove(databaseId.name()));
     }
 
-    public static Map<GraphCreateConfig, GraphStore> getGraphStores(String username) {
+    public static Map<GraphProjectConfig, GraphStore> getGraphStores(String username) {
         return getUserCatalog(username).getGraphStores();
     }
 
-    public static Map<GraphCreateConfig, GraphStore> getGraphStores(String username, NamedDatabaseId databaseId) {
+    public static Map<GraphProjectConfig, GraphStore> getGraphStores(String username, NamedDatabaseId databaseId) {
         return getUserCatalog(username).getGraphStores(databaseId);
     }
 
@@ -236,7 +236,7 @@ public final class GraphStoreCatalog {
 
         String userName();
 
-        GraphCreateConfig config();
+        GraphProjectConfig config();
     }
 
     static class UserCatalog {
@@ -265,7 +265,7 @@ public final class GraphStoreCatalog {
 
         private void set(
             UserCatalogKey userCatalogKey,
-            GraphCreateConfig config,
+            GraphProjectConfig config,
             GraphStore graphStore,
             boolean overwrite
         ) {
@@ -372,7 +372,7 @@ public final class GraphStoreCatalog {
                 ));
         }
 
-        private Map<GraphCreateConfig, GraphStore> getGraphStores() {
+        private Map<GraphProjectConfig, GraphStore> getGraphStores() {
             return graphsByName.values().stream()
                 .collect(Collectors.toMap(
                     GraphStoreWithConfig::config,
@@ -381,7 +381,7 @@ public final class GraphStoreCatalog {
                 );
         }
 
-        private Map<GraphCreateConfig, GraphStore> getGraphStores(NamedDatabaseId databaseId) {
+        private Map<GraphProjectConfig, GraphStore> getGraphStores(NamedDatabaseId databaseId) {
             return graphsByName.entrySet().stream()
                 .filter(entry -> entry.getKey().databaseName().equals(databaseId.name()))
                 .collect(Collectors.toMap(

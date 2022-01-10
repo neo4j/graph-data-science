@@ -85,7 +85,7 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
         );
 
         String loadQuery = GdsCypher.call(BC_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType(
                 "REL",

@@ -22,7 +22,7 @@ package org.neo4j.gds.api;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.AdjacencyListWithPropertiesBuilder;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -33,27 +33,30 @@ import java.util.Map;
 /**
  * The Abstract Factory defines the construction of the graph
  */
-public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends GraphCreateConfig> {
+public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends GraphProjectConfig> {
 
     public interface Supplier {
-        GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> get(GraphLoaderContext loaderContext);
+        GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext);
 
-        default GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> getWithDimension(GraphLoaderContext loaderContext, GraphDimensions graphDimensions) {
+        default GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
+            GraphLoaderContext loaderContext,
+            GraphDimensions graphDimensions
+        ) {
             return get(loaderContext);
         }
     }
 
-    protected final CONFIG graphCreateConfig;
+    protected final CONFIG graphProjectConfig;
     protected final GraphLoaderContext loadingContext;
     protected final GraphDimensions dimensions;
     protected final ProgressTracker progressTracker;
 
     public GraphStoreFactory(
-        CONFIG graphCreateConfig,
+        CONFIG graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions
     ) {
-        this.graphCreateConfig = graphCreateConfig;
+        this.graphProjectConfig = graphProjectConfig;
         this.loadingContext = loadingContext;
         this.dimensions = dimensions;
         this.progressTracker = initProgressTracker();

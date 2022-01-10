@@ -65,7 +65,7 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
         registerProcedures(GraphCreateProc.class, NodeClassificationPipelineWriteProc.class);
 
         String loadQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("N")
             .withAnyRelationshipType()
             .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))

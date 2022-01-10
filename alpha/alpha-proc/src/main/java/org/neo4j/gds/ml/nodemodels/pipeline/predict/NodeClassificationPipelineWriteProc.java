@@ -76,7 +76,7 @@ public class NodeClassificationPipelineWriteProc
             @Override
             public List<AfterLoadValidation<NodeClassificationPredictPipelineWriteConfig>> afterLoadValidations() {
                 return List.of(
-                    (graphStore, graphCreateConfig, config) -> config.predictedProbabilityProperty()
+                    (graphStore, graphProjectConfig, config) -> config.predictedProbabilityProperty()
                         .ifPresent(predictedProbabilityProperty -> {
                             if (config.writeProperty().equals(predictedProbabilityProperty)) {
                                 throw new IllegalArgumentException(

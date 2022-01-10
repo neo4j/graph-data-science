@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.opencypher.v9_0.parser.javacc.ParseException;
@@ -48,7 +48,7 @@ class GraphCreateSubgraphProcTest extends BaseProcTest {
         registerProcedures(GraphCreateProc.class, GraphListProc.class);
 
         runQuery(GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("A")
             .withNodeLabel("B")
             .withAnyRelationshipType()
@@ -80,12 +80,12 @@ class GraphCreateSubgraphProcTest extends BaseProcTest {
         // name is the name of the new subgraph and the filters expressions
         // are added.
 
-        var originalGraphCreateConfig = (GraphCreateFromStoreConfig) GraphStoreCatalog
+        var originalGraphProjectConfig = (GraphProjectFromStoreConfig) GraphStoreCatalog
             .get(getUsername(), db.databaseId(), "graph")
             .config();
-        var expectedNodeProjection = originalGraphCreateConfig.nodeProjections().toObject();
-        var expectedRelationshipProjection = originalGraphCreateConfig.relationshipProjections().toObject();
-        var originalCreationTime = originalGraphCreateConfig.creationTime();
+        var expectedNodeProjection = originalGraphProjectConfig.nodeProjections().toObject();
+        var expectedRelationshipProjection = originalGraphProjectConfig.relationshipProjections().toObject();
+        var originalCreationTime = originalGraphProjectConfig.creationTime();
 
         var listQuery = "CALL gds.graph.list('subgraph') " +
                         "YIELD graphName, nodeCount, relationshipCount, creationTime, nodeFilter, relationshipFilter, nodeProjection, relationshipProjection";
@@ -113,7 +113,7 @@ class GraphCreateSubgraphProcTest extends BaseProcTest {
     @Test
     void throwsOnExistingGraph() {
         runQuery(GdsCypher.call("subgraph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("A")
             .withNodeLabel("B")
             .withAnyRelationshipType()

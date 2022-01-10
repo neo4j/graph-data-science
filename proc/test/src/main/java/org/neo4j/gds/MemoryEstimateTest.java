@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
@@ -88,15 +88,19 @@ public interface MemoryEstimateTest<ALGORITHM extends Algorithm<RESULT>, CONFIG 
                 .filter(procMethod -> getProcedureMethodName(procMethod).endsWith(".estimate"))
                 .forEach(estimateMethod -> {
                     Map<String, Object> algoConfig = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-                    Map<String, Object> graphCreateConfig = CypherMapWrapper.empty()
-                        .withEntry(GraphCreateFromStoreConfig.NODE_PROJECTION_KEY, NodeProjections.all())
-                        .withEntry(GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, relationshipProjections())
+                    Map<String, Object> graphProjectConfig = CypherMapWrapper.empty()
+                        .withEntry(GraphProjectFromStoreConfig.NODE_PROJECTION_KEY, NodeProjections.all())
+                        .withEntry(GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, relationshipProjections())
                         .withNumber("nodeCount", 100_000_000L)
                         .withNumber("relationshipCount", 20_000_000_000L)
                         .withoutEntry("nodeProperties")
                         .toMap();
                     try {
-                        Stream<MemoryEstimateResult> result = (Stream) estimateMethod.invoke(proc, graphCreateConfig, algoConfig);
+                        Stream<MemoryEstimateResult> result = (Stream) estimateMethod.invoke(
+                            proc,
+                            graphProjectConfig,
+                            algoConfig
+                        );
                         result.forEach(row -> {
                             assertEquals(100_000_000L, row.nodeCount);
                             assertEquals(20_000_000_000L, row.relationshipCount);

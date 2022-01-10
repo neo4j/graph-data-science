@@ -99,7 +99,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
     @Test
     void failOnRelationshipWithoutProperty() {
         String graphQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("King")
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withRelationshipType("REL", Orientation.UNDIRECTED)
@@ -122,7 +122,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
     @Test
     void doesNotFailOnRelationshipWithoutPropertyWithDefaultValue() {
         String graphQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("King")
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withRelationshipType("REL", Orientation.UNDIRECTED)
@@ -158,7 +158,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
     @MethodSource("procQueries")
     void failOnRelationshipWithoutPropertyInInductiveSetting(String embeddingQuery, String mode) {
         String graphQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("King")
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withRelationshipType("REL", Orientation.UNDIRECTED)
@@ -178,7 +178,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
         runQuery(trainQuery);
 
         String graphCreateForStream = GdsCypher.call("inductiveGraph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("King")
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withRelationshipType("REL", Orientation.UNDIRECTED)

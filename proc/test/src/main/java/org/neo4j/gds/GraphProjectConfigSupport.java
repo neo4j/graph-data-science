@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
-public interface GraphCreateConfigSupport {
+public interface GraphProjectConfigSupport {
 
-    default GraphCreateFromStoreConfig emptyWithNameNative(String userName, String graphName) {
+    default GraphProjectFromStoreConfig emptyWithNameNative(String userName, String graphName) {
         return withNameAndRelationshipProjections(
             userName,
             graphName,
@@ -37,12 +37,12 @@ public interface GraphCreateConfigSupport {
         );
     }
 
-    default GraphCreateFromStoreConfig withNameAndRelationshipProjections(
+    default GraphProjectFromStoreConfig withNameAndRelationshipProjections(
         String userName,
         String graphName,
         RelationshipProjections rels
     ) {
-        return ImmutableGraphCreateFromStoreConfig.of(
+        return ImmutableGraphProjectFromStoreConfig.of(
             userName,
             graphName,
             NodeProjections.all(),
@@ -50,12 +50,12 @@ public interface GraphCreateConfigSupport {
         );
     }
 
-    default GraphCreateFromStoreConfig withNameAndNodeProjections(
+    default GraphProjectFromStoreConfig withNameAndNodeProjections(
         String userName,
         String graphName,
         NodeProjections nodes
     ) {
-        return ImmutableGraphCreateFromStoreConfig.of(
+        return ImmutableGraphProjectFromStoreConfig.of(
             userName,
             graphName,
             nodes,
@@ -63,7 +63,7 @@ public interface GraphCreateConfigSupport {
         );
     }
 
-    default GraphCreateFromCypherConfig emptyWithNameCypher(String userName, String graphName) {
+    default GraphProjectFromCypherConfig emptyWithNameCypher(String userName, String graphName) {
         return withNameAndRelationshipQuery(
             userName,
             graphName,
@@ -71,12 +71,12 @@ public interface GraphCreateConfigSupport {
         );
     }
 
-    default GraphCreateFromCypherConfig withNameAndRelationshipQuery(
+    default GraphProjectFromCypherConfig withNameAndRelationshipQuery(
         String userName,
         String graphName,
         String relationshipQuery
     ) {
-        return GraphCreateFromCypherConfig.of(
+        return GraphProjectFromCypherConfig.of(
             userName,
             graphName,
             ALL_NODES_QUERY,

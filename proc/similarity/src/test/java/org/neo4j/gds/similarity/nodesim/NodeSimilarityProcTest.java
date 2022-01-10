@@ -105,7 +105,7 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
         TestSupport.allDirectedProjections().forEach(orientation -> {
             String name = "myGraph" + orientation.name();
             String createQuery = GdsCypher.call(name)
-                .graphCreate()
+                .graphProject()
                 .withAnyLabel()
                 .withRelationshipType(
                     "LIKES",

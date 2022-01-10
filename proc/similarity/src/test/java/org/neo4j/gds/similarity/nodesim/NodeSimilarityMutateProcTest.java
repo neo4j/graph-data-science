@@ -176,7 +176,7 @@ class NodeSimilarityMutateProcTest
         var graphName = "undirectedGraph";
 
         var graphCreateQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withRelationshipType("LIKES", Orientation.UNDIRECTED)
             .yields();
@@ -214,7 +214,7 @@ class NodeSimilarityMutateProcTest
         runQuery(graphCreateQuery);
 
         String createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
             .withNodeLabel("Bar")

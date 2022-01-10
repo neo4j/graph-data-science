@@ -23,9 +23,9 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.GraphStoreFactory;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.config.GraphProjectConfig;
 
 @ValueClass
 public interface GraphLoader {
@@ -34,10 +34,10 @@ public interface GraphLoader {
 
     @Value.Default
     default String username() {
-        return createConfig().username();
+        return projectConfig().username();
     }
 
-    GraphCreateConfig createConfig();
+    GraphProjectConfig projectConfig();
 
     default Graph graph() {
         return graphStore().getUnion();
@@ -47,7 +47,7 @@ public interface GraphLoader {
         return graphStoreFactory().build().graphStore();
     }
 
-    default GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> graphStoreFactory() {
-        return createConfig().graphStoreFactory().get(context());
+    default GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> graphStoreFactory() {
+        return projectConfig().graphStoreFactory().get(context());
     }
 }

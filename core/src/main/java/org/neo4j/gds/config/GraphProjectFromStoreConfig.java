@@ -20,18 +20,18 @@
 package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.Configuration.ConvertWith;
-import org.neo4j.gds.annotation.Configuration.Key;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.Configuration.ConvertWith;
+import org.neo4j.gds.annotation.Configuration.Key;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.NativeFactory;
 
@@ -44,7 +44,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
+public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
 
     String NODE_PROJECTION_KEY = "nodeProjection";
     String RELATIONSHIP_PROJECTION_KEY = "relationshipProjection";
@@ -78,15 +78,15 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     default GraphStoreFactory.Supplier graphStoreFactory() {
         return new GraphStoreFactory.Supplier() {
             @Override
-            public GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> get(GraphLoaderContext loaderContext) {
-                return new NativeFactory(GraphCreateFromStoreConfig.this, loaderContext);
+            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext) {
+                return new NativeFactory(GraphProjectFromStoreConfig.this, loaderContext);
             }
 
             @Override
-            public GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> getWithDimension(
+            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
                 GraphLoaderContext loaderContext, GraphDimensions graphDimensions
             ) {
-                return new NativeFactory(GraphCreateFromStoreConfig.this, loaderContext, graphDimensions);
+                return new NativeFactory(GraphProjectFromStoreConfig.this, loaderContext, graphDimensions);
             }
         };
     }
@@ -107,7 +107,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     }
 
     @Value.Check
-    default GraphCreateFromStoreConfig withNormalizedPropertyMappings() {
+    default GraphProjectFromStoreConfig withNormalizedPropertyMappings() {
         PropertyMappings nodeProperties = nodeProperties();
         PropertyMappings relationshipProperties = relationshipProperties();
 
@@ -134,7 +134,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
             "relationship"
         );
 
-        return ImmutableGraphCreateFromStoreConfig
+        return ImmutableGraphProjectFromStoreConfig
             .builder()
             .from(this)
             .nodeProjections(nodeProjections().addPropertyMappings(nodeProperties))
@@ -167,10 +167,10 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
         return visitor.store(this);
     }
 
-    static GraphCreateFromStoreConfig emptyWithName(String userName, String graphName) {
+    static GraphProjectFromStoreConfig emptyWithName(String userName, String graphName) {
         NodeProjections nodeProjections = NodeProjections.all();
         RelationshipProjections relationshipProjections = RelationshipProjections.all();
-        return ImmutableGraphCreateFromStoreConfig.of(
+        return ImmutableGraphProjectFromStoreConfig.of(
             userName,
             graphName,
             nodeProjections,
@@ -178,7 +178,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
         );
     }
 
-    static GraphCreateFromStoreConfig of(
+    static GraphProjectFromStoreConfig of(
         String userName,
         String graphName,
         Object nodeProjections,
@@ -192,15 +192,15 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
             config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, relationshipProjections);
         }
 
-        return GraphCreateFromStoreConfigImpl.of(
+        return GraphProjectFromStoreConfigImpl.of(
             userName,
             graphName,
             config
         );
     }
 
-    static GraphCreateFromStoreConfig all(String userName, String graphName) {
-        return ImmutableGraphCreateFromStoreConfig.builder()
+    static GraphProjectFromStoreConfig all(String userName, String graphName) {
+        return ImmutableGraphProjectFromStoreConfig.builder()
             .username(userName)
             .graphName(graphName)
             .nodeProjections(NodeProjections.all())
@@ -208,7 +208,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
             .build();
     }
 
-    static GraphCreateFromStoreConfig fromProcedureConfig(String username, CypherMapWrapper config) {
+    static GraphProjectFromStoreConfig fromProcedureConfig(String username, CypherMapWrapper config) {
         if (!config.containsKey(NODE_PROJECTION_KEY)) {
             config = config.withEntry(NODE_PROJECTION_KEY, NodeProjections.all());
         }
@@ -216,7 +216,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
             config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.all());
         }
 
-        return GraphCreateFromStoreConfigImpl.of(
+        return GraphProjectFromStoreConfigImpl.of(
             username,
             IMPLICIT_GRAPH_NAME,
             config

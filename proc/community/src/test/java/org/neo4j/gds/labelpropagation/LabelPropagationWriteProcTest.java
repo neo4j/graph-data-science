@@ -368,7 +368,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     void testWriteWithMinCommunitySize(Map<String, Object> parameters, Long[] expectedCommunityIds) {
         String writeProp = "writeProp";
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withAnyRelationshipType()
             .withNodeProperty("seed")
@@ -420,7 +420,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
 
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
             .yields();
@@ -446,7 +446,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         void shouldRunLabelPropagationNaturalOnFilteredNodes() {
             String graphCreateQuery = GdsCypher
                 .call("nodeFilterGraph")
-                .graphCreate()
+                .graphProject()
                 .withNodeLabels("A", "B")
                 .withNodeProperty("id", DefaultValue.of(-1))
                 .withNodeProperty("seed", DefaultValue.of(Long.MIN_VALUE))

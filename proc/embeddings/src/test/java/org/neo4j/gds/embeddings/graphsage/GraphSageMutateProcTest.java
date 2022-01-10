@@ -25,7 +25,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.StoreLoaderWithConfigBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -74,12 +74,17 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
 
     @ParameterizedTest(name = "Graph Properties: {2} - Algo Properties: {1}")
     @MethodSource("missingNodeProperties")
-    void shouldFailOnMissingNodeProperties(GraphCreateFromStoreConfig config, List<String> nodeProperties, List<String> graphProperties, List<String> label) {
+    void shouldFailOnMissingNodeProperties(
+        GraphProjectFromStoreConfig config,
+        List<String> nodeProperties,
+        List<String> graphProperties,
+        List<String> label
+    ) {
         train(16, "mean", ActivationFunction.SIGMOID);
 
         var graphStore = new StoreLoaderWithConfigBuilder()
             .api(db)
-            .graphCreateConfig(config)
+            .graphProjectConfig(config)
             .build()
             .graphStore();
         GraphStoreCatalog.set(config, graphStore);

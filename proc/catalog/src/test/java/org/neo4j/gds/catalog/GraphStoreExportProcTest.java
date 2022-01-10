@@ -337,7 +337,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
     private void createGraph() {
         runQuery(GdsCypher.call("test-graph")
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("prop1")
             .withNodeProperty("prop2")

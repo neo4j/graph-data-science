@@ -31,12 +31,12 @@ import org.neo4j.gds.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
 
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
-public interface GraphCreateConfig extends BaseConfig {
+public interface GraphProjectConfig extends BaseConfig {
 
     String IMPLICIT_GRAPH_NAME = "";
     String NODE_COUNT_KEY = "nodeCount";
@@ -109,7 +109,7 @@ public interface GraphCreateConfig extends BaseConfig {
         return StringIdentifierValidations.validateNoWhiteCharacter(input, "graphName");
     }
 
-    static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
+    static GraphProjectConfig createImplicit(String username, CypherMapWrapper config) {
         CypherMapWrapper.PairResult result = config.verifyMutuallyExclusivePairs(
             NODE_PROJECTION_KEY,
             RELATIONSHIP_PROJECTION_KEY,
@@ -118,18 +118,18 @@ public interface GraphCreateConfig extends BaseConfig {
             "Missing information for implicit graph creation."
         );
         if (result == CypherMapWrapper.PairResult.FIRST_PAIR) {
-            return GraphCreateFromStoreConfig.fromProcedureConfig(username, config);
+            return GraphProjectFromStoreConfig.fromProcedureConfig(username, config);
         } else {
-            return GraphCreateFromCypherConfig.fromProcedureConfig(username, config);
+            return GraphProjectFromCypherConfig.fromProcedureConfig(username, config);
         }
     }
 
     interface Cases<R> {
-        R store(GraphCreateFromStoreConfig storeConfig);
+        R store(GraphProjectFromStoreConfig storeConfig);
 
-        R cypher(GraphCreateFromCypherConfig cypherConfig);
+        R cypher(GraphProjectFromCypherConfig cypherConfig);
 
-        R graph(GraphCreateFromGraphConfig graphConfig);
+        R graph(GraphProjectFromGraphConfig graphConfig);
 
         R random(RandomGraphGeneratorConfig randomGraphConfig);
     }
@@ -137,19 +137,19 @@ public interface GraphCreateConfig extends BaseConfig {
     interface Visitor extends Cases<Void> {
 
         @Override
-        default Void store(GraphCreateFromStoreConfig storeConfig) {
+        default Void store(GraphProjectFromStoreConfig storeConfig) {
             visit(storeConfig);
             return null;
         }
 
         @Override
-        default Void cypher(GraphCreateFromCypherConfig cypherConfig) {
+        default Void cypher(GraphProjectFromCypherConfig cypherConfig) {
             visit(cypherConfig);
             return null;
         }
 
         @Override
-        default Void graph(GraphCreateFromGraphConfig graphConfig) {
+        default Void graph(GraphProjectFromGraphConfig graphConfig) {
             visit(graphConfig);
             return null;
         }
@@ -160,38 +160,38 @@ public interface GraphCreateConfig extends BaseConfig {
             return null;
         }
 
-        default void visit(GraphCreateFromStoreConfig storeConfig) {}
+        default void visit(GraphProjectFromStoreConfig storeConfig) {}
 
-        default void visit(GraphCreateFromCypherConfig cypherConfig) {}
+        default void visit(GraphProjectFromCypherConfig cypherConfig) {}
 
-        default void visit(GraphCreateFromGraphConfig graphConfig) {}
+        default void visit(GraphProjectFromGraphConfig graphConfig) {}
 
         default void visit(RandomGraphGeneratorConfig randomGraphConfig) {}
     }
 
-    interface Rewriter extends Cases<GraphCreateConfig> {
+    interface Rewriter extends Cases<GraphProjectConfig> {
 
         @Override
-        default GraphCreateConfig store(GraphCreateFromStoreConfig storeConfig) {
+        default GraphProjectConfig store(GraphProjectFromStoreConfig storeConfig) {
             return storeConfig;
         }
 
         @Override
-        default GraphCreateConfig cypher(GraphCreateFromCypherConfig cypherConfig) {
+        default GraphProjectConfig cypher(GraphProjectFromCypherConfig cypherConfig) {
             return cypherConfig;
         }
 
         @Override
-        default GraphCreateConfig graph(GraphCreateFromGraphConfig graphConfig) {
+        default GraphProjectConfig graph(GraphProjectFromGraphConfig graphConfig) {
             return graphConfig;
         }
 
         @Override
-        default GraphCreateConfig random(RandomGraphGeneratorConfig randomGraphConfig) {
+        default GraphProjectConfig random(RandomGraphGeneratorConfig randomGraphConfig) {
             return randomGraphConfig;
         }
 
-        default GraphCreateConfig apply(GraphCreateConfig config) {
+        default GraphProjectConfig apply(GraphProjectConfig config) {
             return config.accept(this);
         }
     }

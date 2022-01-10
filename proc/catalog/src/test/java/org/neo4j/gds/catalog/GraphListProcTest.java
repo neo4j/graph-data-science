@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
 
@@ -53,12 +53,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.compat.MapUtil.map;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphListProcTest extends BaseProcTest {
 

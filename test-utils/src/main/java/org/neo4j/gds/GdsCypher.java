@@ -31,8 +31,8 @@ import org.neo4j.cypherdsl.core.renderer.Configuration;
 import org.neo4j.cypherdsl.core.renderer.Renderer;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 
 import java.util.ArrayList;
@@ -86,8 +86,8 @@ public abstract class GdsCypher {
             this.graphName = graphName;
         }
 
-        public GraphCreateBuilder graphCreate() {
-            return new GraphCreateBuilder(graphName);
+        public GraphProjectBuilder graphProject() {
+            return new GraphProjectBuilder(graphName);
         }
 
         public ModeBuildStage algo(Iterable<String> namespace, String algoName) {
@@ -238,7 +238,7 @@ public abstract class GdsCypher {
 
     private static Expression[] queryArguments(
         String graphName,
-        GraphCreateFromStoreConfig config,
+        GraphProjectFromStoreConfig config,
         Map<String, Object> parameters
     ) {
         var queryArguments = new ArrayList<Expression>();
@@ -313,19 +313,19 @@ public abstract class GdsCypher {
     }
 
 
-    public static final class GraphCreateBuilder {
+    public static final class GraphProjectBuilder {
         private final String graphName;
-        private final InlineGraphCreateConfigBuilder graphCreateConfigBuilder;
+        private final InlineGraphProjectConfigBuilder graphProjectConfigBuilder;
         private final Map<String, Object> parameters;
 
-        private GraphCreateBuilder(String graphName) {
+        private GraphProjectBuilder(String graphName) {
             this.graphName = graphName;
-            graphCreateConfigBuilder = new InlineGraphCreateConfigBuilder().graphName(graphName);
+            graphProjectConfigBuilder = new InlineGraphProjectConfigBuilder().graphName(graphName);
             parameters = new LinkedHashMap<>();
         }
 
-        public GraphCreateBuilder withGraphCreateConfig(GraphCreateFromStoreConfig config) {
-            graphCreateConfigBuilder
+        public GraphProjectBuilder withGraphProjectConfig(GraphProjectFromStoreConfig config) {
+            graphProjectConfigBuilder
                 .graphName(config.graphName())
                 .nodeProjections(config.nodeProjections().projections())
                 .relProjections(config.relationshipProjections().projections())
@@ -344,7 +344,7 @@ public abstract class GdsCypher {
          * To load properties, call one of {@link #withNodeProperty(String)}
          * or {@link #withRelationshipProperty(String)} or their variants.
          */
-        public GraphCreateBuilder loadEverything() {
+        public GraphProjectBuilder loadEverything() {
             return loadEverything(NATURAL);
         }
 
@@ -357,7 +357,7 @@ public abstract class GdsCypher {
          * To load properties, call one of {@link #withNodeProperty(String)}
          * or {@link #withRelationshipProperty(String)} or their variants.
          */
-        public GraphCreateBuilder loadEverything(Orientation orientation) {
+        public GraphProjectBuilder loadEverything(Orientation orientation) {
             return this
                 .withNodeLabel(ALL_NODES.name, NodeProjection.all())
                 .withRelationshipType(
@@ -366,65 +366,65 @@ public abstract class GdsCypher {
                 );
         }
 
-        public GraphCreateBuilder withAnyLabel() {
+        public GraphProjectBuilder withAnyLabel() {
             return withNodeLabel(ALL_NODES.name, NodeProjection.all());
         }
 
-        public GraphCreateBuilder withNodeLabel(String label) {
+        public GraphProjectBuilder withNodeLabel(String label) {
             return withNodeLabels(label);
         }
 
-        public GraphCreateBuilder withNodeLabel(String label, NodeProjection nodeProjection) {
+        public GraphProjectBuilder withNodeLabel(String label, NodeProjection nodeProjection) {
             return withNodeLabels(Map.of(label, nodeProjection));
         }
 
-        public GraphCreateBuilder withNodeLabels(String... labels) {
+        public GraphProjectBuilder withNodeLabels(String... labels) {
             return withNodeLabels(Arrays.stream(labels).collect(Collectors.toMap(
                 Function.identity(),
                 label -> NodeProjection.builder().label(label).build()
             )));
         }
 
-        public GraphCreateBuilder withNodeLabels(Map<String, NodeProjection> nodeProjections) {
-            nodeProjections.forEach((label, nodeProjection) -> graphCreateConfigBuilder.putNodeProjection(
+        public GraphProjectBuilder withNodeLabels(Map<String, NodeProjection> nodeProjections) {
+            nodeProjections.forEach((label, nodeProjection) -> graphProjectConfigBuilder.putNodeProjection(
                 NodeLabel.of(label),
                 nodeProjection
             ));
             return this;
         }
 
-        public GraphCreateBuilder withAnyRelationshipType() {
+        public GraphProjectBuilder withAnyRelationshipType() {
             return withRelationshipType(ALL_RELATIONSHIPS.name(), RelationshipProjection.all());
         }
 
-        public GraphCreateBuilder withRelationshipType(String type) {
+        public GraphProjectBuilder withRelationshipType(String type) {
             return withRelationshipType(type, RelationshipProjection.builder().type(type).build());
         }
 
-        public GraphCreateBuilder withRelationshipType(String type, Orientation orientation) {
+        public GraphProjectBuilder withRelationshipType(String type, Orientation orientation) {
             return withRelationshipType(
                 type,
                 RelationshipProjection.builder().type(type).orientation(orientation).build()
             );
         }
 
-        public GraphCreateBuilder withRelationshipType(String type, String neoType) {
+        public GraphProjectBuilder withRelationshipType(String type, String neoType) {
             return withRelationshipType(type, RelationshipProjection.builder().type(neoType).build());
         }
 
-        public GraphCreateBuilder withRelationshipType(
+        public GraphProjectBuilder withRelationshipType(
             String type,
             RelationshipProjection relationshipProjection
         ) {
-            graphCreateConfigBuilder.putRelProjection(RelationshipType.of(type), relationshipProjection);
+            graphProjectConfigBuilder.putRelProjection(RelationshipType.of(type), relationshipProjection);
             return this;
         }
 
-        public GraphCreateBuilder withNodeProperty(String nodeProperty) {
+        public GraphProjectBuilder withNodeProperty(String nodeProperty) {
             return withNodeProperty(ImmutablePropertyMapping.builder().propertyKey(nodeProperty).build());
         }
 
-        public GraphCreateBuilder withNodeProperty(String propertyKey, String neoPropertyKey) {
+        public GraphProjectBuilder withNodeProperty(String propertyKey, String neoPropertyKey) {
             return withNodeProperty(ImmutablePropertyMapping
                 .builder()
                 .propertyKey(propertyKey)
@@ -432,11 +432,11 @@ public abstract class GdsCypher {
                 .build());
         }
 
-        public GraphCreateBuilder withNodeProperty(String neoPropertyKey, DefaultValue defaultValue) {
+        public GraphProjectBuilder withNodeProperty(String neoPropertyKey, DefaultValue defaultValue) {
             return withNodeProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
         }
 
-        public GraphCreateBuilder withNodeProperty(
+        public GraphProjectBuilder withNodeProperty(
             String propertyKey,
             String neoPropertyKey,
             DefaultValue defaultValue
@@ -444,7 +444,7 @@ public abstract class GdsCypher {
             return withNodeProperty(PropertyMapping.of(propertyKey, neoPropertyKey, defaultValue));
         }
 
-        public GraphCreateBuilder withNodeProperty(
+        public GraphProjectBuilder withNodeProperty(
             String propertyKey,
             DefaultValue defaultValue,
             Aggregation aggregation
@@ -452,14 +452,14 @@ public abstract class GdsCypher {
             return withNodeProperty(PropertyMapping.of(propertyKey, defaultValue, aggregation));
         }
 
-        public GraphCreateBuilder withNodeProperty(
+        public GraphProjectBuilder withNodeProperty(
             String propertyKey,
             Aggregation aggregation
         ) {
             return withNodeProperty(PropertyMapping.of(propertyKey, aggregation));
         }
 
-        public GraphCreateBuilder withNodeProperty(
+        public GraphProjectBuilder withNodeProperty(
             String propertyKey,
             String neoPropertyKey,
             DefaultValue defaultValue,
@@ -473,24 +473,24 @@ public abstract class GdsCypher {
             ));
         }
 
-        public GraphCreateBuilder withNodeProperty(PropertyMapping propertyMapping) {
-            graphCreateConfigBuilder.addNodeProperty(propertyMapping);
+        public GraphProjectBuilder withNodeProperty(PropertyMapping propertyMapping) {
+            graphProjectConfigBuilder.addNodeProperty(propertyMapping);
             return this;
         }
 
-        public GraphCreateBuilder withNodeProperties(Iterable<String> properties, DefaultValue defaultValue) {
+        public GraphProjectBuilder withNodeProperties(Iterable<String> properties, DefaultValue defaultValue) {
             properties.forEach(property -> withNodeProperty(property, defaultValue));
             return this;
         }
 
-        public GraphCreateBuilder withRelationshipProperty(String relationshipProperty) {
+        public GraphProjectBuilder withRelationshipProperty(String relationshipProperty) {
             return withRelationshipProperty(ImmutablePropertyMapping
                 .builder()
                 .propertyKey(relationshipProperty)
                 .build());
         }
 
-        public GraphCreateBuilder withRelationshipProperty(String propertyKey, String neoPropertyKey) {
+        public GraphProjectBuilder withRelationshipProperty(String propertyKey, String neoPropertyKey) {
             return withRelationshipProperty(ImmutablePropertyMapping
                 .builder()
                 .propertyKey(propertyKey)
@@ -498,11 +498,11 @@ public abstract class GdsCypher {
                 .build());
         }
 
-        public GraphCreateBuilder withRelationshipProperty(String neoPropertyKey, DefaultValue defaultValue) {
+        public GraphProjectBuilder withRelationshipProperty(String neoPropertyKey, DefaultValue defaultValue) {
             return withRelationshipProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
         }
 
-        public GraphCreateBuilder withRelationshipProperty(
+        public GraphProjectBuilder withRelationshipProperty(
             String propertyKey,
             String neoPropertyKey,
             DefaultValue defaultValue
@@ -510,7 +510,7 @@ public abstract class GdsCypher {
             return withRelationshipProperty(PropertyMapping.of(propertyKey, neoPropertyKey, defaultValue));
         }
 
-        public GraphCreateBuilder withRelationshipProperty(
+        public GraphProjectBuilder withRelationshipProperty(
             String propertyKey,
             DefaultValue defaultValue,
             Aggregation aggregation
@@ -518,14 +518,14 @@ public abstract class GdsCypher {
             return withRelationshipProperty(PropertyMapping.of(propertyKey, defaultValue, aggregation));
         }
 
-        public GraphCreateBuilder withRelationshipProperty(
+        public GraphProjectBuilder withRelationshipProperty(
             String propertyKey,
             Aggregation aggregation
         ) {
             return withRelationshipProperty(PropertyMapping.of(propertyKey, aggregation));
         }
 
-        public GraphCreateBuilder withRelationshipProperty(
+        public GraphProjectBuilder withRelationshipProperty(
             String propertyKey,
             String neoPropertyKey,
             DefaultValue defaultValue,
@@ -539,12 +539,12 @@ public abstract class GdsCypher {
             ));
         }
 
-        public GraphCreateBuilder withRelationshipProperty(PropertyMapping propertyMapping) {
-            graphCreateConfigBuilder.addRelProperty(propertyMapping);
+        public GraphProjectBuilder withRelationshipProperty(PropertyMapping propertyMapping) {
+            graphProjectConfigBuilder.addRelProperty(propertyMapping);
             return this;
         }
 
-        public GraphCreateBuilder addParameter(String key, Object value) {
+        public GraphProjectBuilder addParameter(String key, Object value) {
             parameters.put(key, value);
             return this;
         }
@@ -558,7 +558,7 @@ public abstract class GdsCypher {
         public String yields(Collection<String> elements) {
             var procedureName = "gds.graph.project";
 
-            var queryArguments = queryArguments(graphName, graphCreateConfigBuilder.build(), parameters);
+            var queryArguments = queryArguments(graphName, graphProjectConfigBuilder.build(), parameters);
             var yieldsFields = yieldsFields(elements);
 
             var query = Cypher.call(procedureName).withArgs(queryArguments);
@@ -640,7 +640,7 @@ public abstract class GdsCypher {
 
 
     @Builder.Factory
-    static GraphCreateFromStoreConfig inlineGraphCreateConfig(
+    static GraphProjectFromStoreConfig inlineGraphProjectConfig(
         Optional<String> graphName,
         Map<NodeLabel, NodeProjection> nodeProjections,
         Map<RelationshipType, RelationshipProjection> relProjections,
@@ -657,7 +657,7 @@ public abstract class GdsCypher {
             relProjections.put(ALL_RELATIONSHIPS, RelationshipProjection.all());
         }
 
-        return ImmutableGraphCreateFromStoreConfig.builder()
+        return ImmutableGraphProjectFromStoreConfig.builder()
             .graphName(graphName.orElse(""))
             .nodeProjections(NodeProjections.create(nodeProjections))
             .relationshipProjections(RelationshipProjections.builder().putAllProjections(relProjections).build())

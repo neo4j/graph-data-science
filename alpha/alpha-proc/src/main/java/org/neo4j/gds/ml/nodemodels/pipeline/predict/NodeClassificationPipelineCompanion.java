@@ -44,7 +44,7 @@ public final class NodeClassificationPipelineCompanion {
             @Override
             public List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
                 return List.of(
-                    (graphStore, graphCreateConfig, config) -> {
+                    (graphStore, graphProjectConfig, config) -> {
                         if (config instanceof NodeClassificationPredictPipelineMutateConfig) {
                             var mutateConfig = (NodeClassificationPredictPipelineMutateConfig) config;
 

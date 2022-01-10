@@ -34,10 +34,10 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromCypherConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromCypherConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -86,7 +86,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
         runQuery(DB_CYPHER);
 
         String loadQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("N")
             .withAnyRelationshipType()
             .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))
@@ -201,16 +201,16 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     }
 
     @Override
-    public @NotNull GraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
-        GraphCreateConfig configWithNodeProperty = graphCreateConfig instanceof GraphCreateFromStoreConfig
-            ? ImmutableGraphCreateFromStoreConfig
+    public @NotNull GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
+        GraphProjectConfig configWithNodeProperty = graphProjectConfig instanceof GraphProjectFromStoreConfig
+            ? ImmutableGraphProjectFromStoreConfig
             .builder()
-            .from(graphCreateConfig)
+            .from(graphProjectConfig)
             .nodeProperties(PropertyMappings.of(PropertyMapping.of("a"), PropertyMapping.of("b")))
             .build()
-            : ImmutableGraphCreateFromCypherConfig
+            : ImmutableGraphProjectFromCypherConfig
                 .builder()
-                .from(graphCreateConfig)
+                .from(graphProjectConfig)
                 .nodeQuery("MATCH (n) RETURN id(n) AS id, n.a AS a, n.b AS b")
                 .build();
 

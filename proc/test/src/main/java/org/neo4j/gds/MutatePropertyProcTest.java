@@ -21,7 +21,6 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -29,6 +28,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.lang.reflect.InvocationTargetException;
@@ -39,10 +39,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.NATIVE;
+import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
     extends MutateProcTest<ALGORITHM, CONFIG, RESULT> {
@@ -94,8 +94,8 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
             .graphStore();
 
         String graphName = "myGraph";
-        var createConfig = withNameAndRelationshipProjections("", graphName, relationshipProjections());
-        GraphStoreCatalog.set(createConfig, graphStore);
+        var graphProjectConfig = withNameAndRelationshipProjections("", graphName, relationshipProjections());
+        GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
         CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
             "nodeLabels",

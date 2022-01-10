@@ -75,11 +75,11 @@ public class ProcedureExecutor<
         Graph graph;
 
         try (ProgressTimer timer = ProgressTimer.start(builder::preProcessingMillis)) {
-            var graphCreateConfig = graphCreation.graphCreateConfig();
+            var graphProjectConfig = graphCreation.graphProjectConfig();
             var validator = executorSpec.validator(algoSpec.validationConfig());
-            validator.validateConfigsBeforeLoad(graphCreateConfig, config);
+            validator.validateConfigsBeforeLoad(graphProjectConfig, config);
             graphStore = graphCreation.graphStore();
-            validator.validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
+            validator.validateConfigWithGraphStore(graphStore, graphProjectConfig, config);
             graph = graphCreation.createGraph(graphStore);
         }
 

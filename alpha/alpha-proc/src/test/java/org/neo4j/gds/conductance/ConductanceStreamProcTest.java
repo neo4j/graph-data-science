@@ -73,7 +73,7 @@ class ConductanceStreamProcTest extends BaseProcTest {
         );
 
         String createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeProperty("community")
             .loadEverything()
             .yields();

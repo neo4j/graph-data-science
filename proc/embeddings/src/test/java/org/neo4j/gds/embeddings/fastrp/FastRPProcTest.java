@@ -112,7 +112,7 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
     @Override
     public void loadGraph(String graphName) {
         String graphCreateQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("f1","f2"), DefaultValue.of(0.0f))

@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
-import org.neo4j.gds.executor.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
@@ -65,7 +65,7 @@ public final class LinkPredictionPipelineCompanion {
         return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
-                return List.of(new GraphCreateConfigValidations.UndirectedGraphValidation<>());
+                return List.of(new GraphProjectConfigValidations.UndirectedGraphValidation<>());
             }
         };
     }

@@ -149,7 +149,7 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
 
         var createQuery = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withRelationshipProperty("cost")
             .loadEverything()
             .yields();

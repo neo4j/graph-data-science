@@ -85,7 +85,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
         registerProcedures(GraphCreateProc.class, PageRankMutateProc.class, GraphWriteNodePropertiesProc.class);
 
         String loadQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withAnyRelationshipType()
             .yields();

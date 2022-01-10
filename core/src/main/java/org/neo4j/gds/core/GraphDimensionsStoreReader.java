@@ -23,7 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.TokenRead;
@@ -34,11 +34,11 @@ import static org.neo4j.gds.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
 
-public class GraphDimensionsStoreReader extends GraphDimensionsReader<GraphCreateFromStoreConfig> {
+public class GraphDimensionsStoreReader extends GraphDimensionsReader<GraphProjectFromStoreConfig> {
 
     public GraphDimensionsStoreReader(
         TransactionContext tx,
-        GraphCreateFromStoreConfig config,
+        GraphProjectFromStoreConfig config,
         IdGeneratorFactory idGeneratorFactory
     ) {
         super(tx, config, idGeneratorFactory);
@@ -48,7 +48,7 @@ public class GraphDimensionsStoreReader extends GraphDimensionsReader<GraphCreat
     protected TokenElementIdentifierMappings<NodeLabel> getNodeLabelTokens(TokenRead tokenRead) {
         var labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<NodeLabel>(
             ANY_LABEL);
-        graphCreateConfig.nodeProjections()
+        graphProjectConfig.nodeProjections()
             .projections()
             .forEach((nodeLabel, projection) -> {
                 var labelToken = projection.projectAll() ? ANY_LABEL : getNodeLabelToken(tokenRead, projection.label());
@@ -61,7 +61,7 @@ public class GraphDimensionsStoreReader extends GraphDimensionsReader<GraphCreat
     protected TokenElementIdentifierMappings<RelationshipType> getRelationshipTypeTokens(TokenRead tokenRead) {
         var typeTokenRelTypeMappings = new TokenElementIdentifierMappings<RelationshipType>(
             ANY_RELATIONSHIP_TYPE);
-        graphCreateConfig.relationshipProjections()
+        graphProjectConfig.relationshipProjections()
             .projections()
             .forEach((relType, projection) -> {
                 var typeToken = projection.projectAll() ? ANY_RELATIONSHIP_TYPE : getRelationshipTypeToken(
@@ -75,12 +75,12 @@ public class GraphDimensionsStoreReader extends GraphDimensionsReader<GraphCreat
 
     @Override
     protected NodeProjections getNodeProjections() {
-        return graphCreateConfig.nodeProjections();
+        return graphProjectConfig.nodeProjections();
     }
 
     @Override
     protected RelationshipProjections getRelationshipProjections() {
-        return graphCreateConfig.relationshipProjections();
+        return graphProjectConfig.relationshipProjections();
     }
 
     private int getNodeLabelToken(TokenRead tokenRead, String nodeLabel) {

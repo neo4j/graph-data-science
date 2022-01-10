@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -73,14 +73,19 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
 
     @ParameterizedTest(name = "Graph Properties: {2} - Algo Properties: {1}")
     @MethodSource("missingNodeProperties")
-    void shouldFailOnMissingNodeProperties(GraphCreateFromStoreConfig config, List<String> nodeProperties, List<String> graphProperties, List<String> label) {
+    void shouldFailOnMissingNodeProperties(
+        GraphProjectFromStoreConfig config,
+        List<String> nodeProperties,
+        List<String> graphProperties,
+        List<String> label
+    ) {
         train(42, "mean", ActivationFunction.SIGMOID);
 
         runQuery(
             GdsCypher
                 .call(DEFAULT_GRAPH_NAME)
-                .graphCreate()
-                .withGraphCreateConfig(config)
+                .graphProject()
+                .withGraphProjectConfig(config)
                 .yields()
         );
 

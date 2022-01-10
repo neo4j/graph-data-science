@@ -22,23 +22,23 @@ package org.neo4j.gds.config;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.AbstractProjections;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.fromProcedureConfig;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.fromProcedureConfig;
 
-class GraphCreateConfigFromCypherTest {
+class GraphProjectConfigFromCypherTest {
 
     @ParameterizedTest
     @MethodSource("invalidKeys")
@@ -58,9 +58,9 @@ class GraphCreateConfigFromCypherTest {
 
     static Stream<Arguments> invalidKeys() {
         return Stream.of(
-            Arguments.of(GraphCreateFromStoreConfig.NODE_PROJECTION_KEY, NodeProjections.of()),
-            Arguments.of(GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.of()),
-            Arguments.of(GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY, NodeProjections.of())
+            Arguments.of(GraphProjectFromStoreConfig.NODE_PROJECTION_KEY, NodeProjections.of()),
+            Arguments.of(GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.of()),
+            Arguments.of(GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY, NodeProjections.of())
         );
     }
 

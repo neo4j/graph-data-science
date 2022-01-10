@@ -59,7 +59,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         registerProcedures(SplitRelationshipsMutateProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
         var createQuery = GdsCypher.call("graph")
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("id")
             .withRelationshipType("T", Orientation.UNDIRECTED)

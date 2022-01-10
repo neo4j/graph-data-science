@@ -155,7 +155,7 @@ class GraphDropProcTest extends BaseProcTest {
         runQuery(testGraph);
 
         String query = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withRelationshipType("X")
             .withRelationshipType("Y")

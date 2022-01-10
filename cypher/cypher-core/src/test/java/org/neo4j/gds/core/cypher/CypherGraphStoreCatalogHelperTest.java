@@ -22,7 +22,7 @@ package org.neo4j.gds.core.cypher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -56,7 +56,7 @@ class CypherGraphStoreCatalogHelperTest {
     void shouldSetWrapperForExistingGraphStore() {
         var graphStoreWrapper = new TestGraphStoreWrapper(aGraphStore);
         var graphName = "testGraph";
-        var config = GraphCreateFromStoreConfig.emptyWithName("", graphName);
+        var config = GraphProjectFromStoreConfig.emptyWithName("", graphName);
         GraphStoreCatalog.set(config, aGraphStore);
         CypherGraphStoreCatalogHelper.setWrappedGraphStore(config, graphStoreWrapper);
         assertThat(graphStoreWrapper).isSameAs(GraphStoreCatalog.get("", aGraphStore.databaseId(), graphName).graphStore());
@@ -66,7 +66,7 @@ class CypherGraphStoreCatalogHelperTest {
     void shouldFailWhenSettingIncompatibleWrapper() {
         var graphStoreWrapper = new TestGraphStoreWrapper(bGraphStore);
         var graphName = "testGraph";
-        var config = GraphCreateFromStoreConfig.emptyWithName("", graphName);
+        var config = GraphProjectFromStoreConfig.emptyWithName("", graphName);
         GraphStoreCatalog.set(config, aGraphStore);
         assertThatThrownBy(() -> CypherGraphStoreCatalogHelper.setWrappedGraphStore(config, graphStoreWrapper))
             .isInstanceOf(IllegalArgumentException.class)
@@ -77,7 +77,7 @@ class CypherGraphStoreCatalogHelperTest {
     void shouldNotReleaseTheOldGraphStore() {
         var graphStoreWrapper = new TestGraphStoreWrapper(aGraphStore);
         var graphName = "testGraph";
-        var config = GraphCreateFromStoreConfig.emptyWithName("", graphName);
+        var config = GraphProjectFromStoreConfig.emptyWithName("", graphName);
         GraphStoreCatalog.set(config, aGraphStore);
         CypherGraphStoreCatalogHelper.setWrappedGraphStore(config, graphStoreWrapper);
         assertDoesNotThrow(() -> aGraphStore.getUnion().degree(0L));

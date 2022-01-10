@@ -168,7 +168,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         String graphName = "emptyGraph";
 
         var loadQuery = GdsCypher.call(graphName)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
             .yields();
@@ -199,7 +199,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
 
             String loadQuery = GdsCypher
                 .call(graphName)
-                .graphCreate()
+                .graphProject()
                 .withNodeLabels("Ignore", "A", "B")
                 .withAnyRelationshipType()
                 .yields();

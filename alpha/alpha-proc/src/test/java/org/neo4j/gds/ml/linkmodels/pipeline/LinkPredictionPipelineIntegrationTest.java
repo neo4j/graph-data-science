@@ -106,7 +106,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         );
 
         String createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabels("N", "Ignore")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipType("IGNORED", Orientation.UNDIRECTED)

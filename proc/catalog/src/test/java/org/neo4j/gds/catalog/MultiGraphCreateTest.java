@@ -43,13 +43,13 @@ class MultiGraphCreateTest extends BaseProcTest {
     @Test
     void testMultipleGraphLoadsAfterDbChange() {
         String create1 = GdsCypher.call("graph1")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node1")
             .withRelationshipType("TYPE1", Orientation.UNDIRECTED)
             .yields();
 
         String create2 = GdsCypher.call("graph2")
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node2")
             .withRelationshipType("TYPE2", Orientation.UNDIRECTED)
             .yields();

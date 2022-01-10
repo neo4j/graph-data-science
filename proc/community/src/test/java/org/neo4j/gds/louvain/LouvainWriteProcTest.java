@@ -134,7 +134,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
     })
     void testWriteRequiresWritePropertyToBeSet(String writePropertyParameter) {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.UNDIRECTED)
             .yields();
@@ -190,7 +190,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
         runQuery("CALL db.createLabel('VeryTemp')");
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
             .yields();
@@ -221,7 +221,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
     @MethodSource("communitySizeInputs")
     void testWriteWithMinCommunitySize(Map<String, Object> parameters, Long[] expectedCommunityIds) {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withAnyRelationshipType()
             .withNodeProperty(SEED_PROPERTY)

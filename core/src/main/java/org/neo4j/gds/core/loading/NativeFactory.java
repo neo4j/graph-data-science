@@ -27,7 +27,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsStoreReader;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
@@ -51,32 +51,32 @@ import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.core.GraphDimensionsValidation.validate;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromStoreConfig> {
+public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConfig> {
 
-    private final GraphCreateFromStoreConfig storeConfig;
+    private final GraphProjectFromStoreConfig storeConfig;
 
     public NativeFactory(
-        GraphCreateFromStoreConfig graphCreateConfig,
+        GraphProjectFromStoreConfig graphProjectConfig,
         GraphLoaderContext loadingContext
     ) {
         this(
-            graphCreateConfig,
+            graphProjectConfig,
             loadingContext,
             new GraphDimensionsStoreReader(
                 loadingContext.transactionContext(),
-                graphCreateConfig,
+                graphProjectConfig,
                 GraphDatabaseApiProxy.resolveDependency(loadingContext.api(), IdGeneratorFactory.class)
             ).call()
         );
     }
 
     public NativeFactory(
-        GraphCreateFromStoreConfig graphCreateConfig,
+        GraphProjectFromStoreConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions graphDimensions
     ) {
-        super(graphCreateConfig, loadingContext, graphDimensions);
-        this.storeConfig = graphCreateConfig;
+        super(graphProjectConfig, loadingContext, graphDimensions);
+        this.storeConfig = graphProjectConfig;
     }
 
     @Override
@@ -121,7 +121,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
     @Override
     protected ProgressTracker initProgressTracker() {
-        long relationshipCount = graphCreateConfig
+        long relationshipCount = graphProjectConfig
             .relationshipProjections()
             .projections()
             .entrySet()
@@ -137,7 +137,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             }).mapToLong(Long::longValue).sum();
 
         var properties = IndexPropertyMappings.prepareProperties(
-            graphCreateConfig,
+            graphProjectConfig,
             dimensions,
             loadingContext.transactionContext()
         );
@@ -157,7 +157,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         return new TaskProgressTracker(
             task,
             loadingContext.log(),
-            graphCreateConfig.readConcurrency(),
+            graphProjectConfig.readConcurrency(),
             loadingContext.taskRegistryFactory()
         );
     }
@@ -166,7 +166,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
     public ImportResult<CSRGraphStore> build() {
         validate(dimensions, storeConfig);
 
-        int concurrency = graphCreateConfig.readConcurrency();
+        int concurrency = graphProjectConfig.readConcurrency();
         AllocationTracker allocationTracker = loadingContext.allocationTracker();
         try {
             progressTracker.beginSubTask();
@@ -184,7 +184,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
     private IdsAndProperties loadNodes(int concurrency) {
         var properties = IndexPropertyMappings.prepareProperties(
-            graphCreateConfig,
+            graphProjectConfig,
             dimensions,
             loadingContext.transactionContext()
         );
@@ -192,7 +192,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         var pair = IdMapBehaviorServiceProvider.idMapBehavior().create(true, loadingContext.allocationTracker());
 
         var scanningNodesImporter = new ScanningNodesImporter<>(
-            graphCreateConfig,
+            graphProjectConfig,
             loadingContext,
             dimensions,
             progressTracker,
@@ -216,7 +216,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         IdsAndProperties idsAndProperties,
         int concurrency
     ) {
-        Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders = graphCreateConfig
+        Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders = graphProjectConfig
             .relationshipProjections()
             .projections()
             .entrySet()
@@ -233,7 +233,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             ));
 
         ScanningRelationshipsImporter scanningRelationshipsImporter = new ScanningRelationshipsImporter(
-            graphCreateConfig,
+            graphProjectConfig,
             loadingContext,
             dimensions,
             progressTracker,

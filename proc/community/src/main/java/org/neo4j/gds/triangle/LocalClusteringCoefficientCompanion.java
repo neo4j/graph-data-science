@@ -21,13 +21,13 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
-import org.neo4j.gds.executor.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -54,7 +54,7 @@ final class LocalClusteringCoefficientCompanion {
     }
 
     static void warnOnGraphWithParallelRelationships(
-        GraphCreateConfig graphCreateConfig,
+        GraphProjectConfig graphProjectConfig,
         LocalClusteringCoefficientBaseConfig config,
         Log log
     ) {
@@ -77,7 +77,7 @@ final class LocalClusteringCoefficientCompanion {
             @Override
             public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
                 return List.of(
-                    new GraphCreateConfigValidations.UndirectedGraphValidation<>(),
+                    new GraphProjectConfigValidations.UndirectedGraphValidation<>(),
                     new WarnOnGraphsWithParallelRelationships<>(log)
                 );
             }
@@ -123,9 +123,9 @@ final class LocalClusteringCoefficientCompanion {
         }
 
         @Override
-        public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG config) {
-            if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
-                GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
+        public void validateConfigsBeforeLoad(GraphProjectConfig graphProjectConfig, CONFIG config) {
+            if (graphProjectConfig instanceof GraphProjectFromStoreConfig) {
+                GraphProjectFromStoreConfig storeConfig = (GraphProjectFromStoreConfig) graphProjectConfig;
                 storeConfig.relationshipProjections().projections().entrySet().stream()
                     .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
                                      config.relationshipTypes().contains(entry.getKey().name()))

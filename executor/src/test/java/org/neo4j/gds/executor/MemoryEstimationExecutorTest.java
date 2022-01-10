@@ -29,7 +29,7 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -87,11 +87,11 @@ class MemoryEstimationExecutorTest extends BaseTest {
     @Test
     void testMemoryEstimate() {
         var graphName = "memoryEstimateGraph";
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("", graphName), GdlGraphs.EMPTY_GRAPH_STORE);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("", graphName), GdlGraphs.EMPTY_GRAPH_STORE);
         runQuery(GdsCypher.call(graphName)
-                .graphCreate()
-                .loadEverything()
-                .yields());
+            .graphProject()
+            .loadEverything()
+            .yields());
 
         var estimationResult = memoryEstimationExecutor.computeEstimate(
             graphName,
@@ -109,16 +109,16 @@ class MemoryEstimationExecutorTest extends BaseTest {
 
     @Test
     void testMemoryEstimateOnExplicitDimensions() {
-        Map<String, Object> graphCreateConfig = CypherMapWrapper.empty()
-            .withEntry(GraphCreateFromStoreConfig.NODE_PROJECTION_KEY, NodeProjections.all())
-            .withEntry(GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.all())
+        Map<String, Object> graphProjectConfig = CypherMapWrapper.empty()
+            .withEntry(GraphProjectFromStoreConfig.NODE_PROJECTION_KEY, NodeProjections.all())
+            .withEntry(GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.all())
             .withNumber("nodeCount", 100_000_000L)
             .withNumber("relationshipCount", 20_000_000_000L)
             .withoutEntry("nodeProperties")
             .toMap();
 
         var estimationResult = memoryEstimationExecutor.computeEstimate(
-            graphCreateConfig,
+            graphProjectConfig,
             Map.of("mutateProperty", "foo")
         );
 

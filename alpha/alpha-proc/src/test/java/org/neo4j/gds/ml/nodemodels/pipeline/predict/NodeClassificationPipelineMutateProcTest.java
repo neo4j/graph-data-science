@@ -67,7 +67,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
 
         String loadQuery = GdsCypher.call(GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("N")
             .withAnyRelationshipType()
             .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))

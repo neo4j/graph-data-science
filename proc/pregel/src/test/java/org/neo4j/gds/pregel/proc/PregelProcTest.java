@@ -78,7 +78,7 @@ public class PregelProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery("CREATE (:OffsetId), (:RealNode)");
         registerProcedures(GraphCreateProc.class, StreamProc.class, WriteProc.class, MutateProc.class);
-        runQuery(GdsCypher.call(DEFAULT_GRAPH_NAME).graphCreate().withNodeLabel("RealNode").withAnyRelationshipType().yields());
+        runQuery(GdsCypher.call(DEFAULT_GRAPH_NAME).graphProject().withNodeLabel("RealNode").withAnyRelationshipType().yields());
     }
 
     @Test

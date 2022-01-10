@@ -22,10 +22,10 @@ package org.neo4j.gds;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromCypherConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromCypherConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromCypherConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 
 import java.util.Collections;
@@ -37,19 +37,19 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
-public final class GraphCreateConfigBuilders {
+public final class GraphProjectConfigBuilders {
 
-    private GraphCreateConfigBuilders() { }
+    private GraphProjectConfigBuilders() {}
 
     /**
      * Factory method that defines the generation of {@link StoreConfigBuilder}.
      */
     @Builder.Factory
-    public static GraphCreateFromStoreConfig storeConfig(
+    public static GraphProjectFromStoreConfig storeConfig(
         Optional<String> userName,
         Optional<String> graphName,
         List<String> nodeLabels,
@@ -110,7 +110,7 @@ public final class GraphCreateConfigBuilders {
             Map.Entry::getValue
         )));
 
-        return ImmutableGraphCreateFromStoreConfig.builder()
+        return ImmutableGraphProjectFromStoreConfig.builder()
             .username(userName.orElse(""))
             .graphName(graphName.orElse(""))
             .nodeProjections(np)
@@ -127,7 +127,7 @@ public final class GraphCreateConfigBuilders {
      * Factory method that defines the generation of {@link CypherConfigBuilder}.
      */
     @Builder.Factory
-    public static GraphCreateFromCypherConfig cypherConfig(
+    public static GraphProjectFromCypherConfig cypherConfig(
         Optional<String> userName,
         Optional<String> graphName,
         Optional<String> nodeQuery,
@@ -137,7 +137,7 @@ public final class GraphCreateConfigBuilders {
         Optional<Map<String, Object>> parameters
     ) {
 
-        return ImmutableGraphCreateFromCypherConfig.builder()
+        return ImmutableGraphProjectFromCypherConfig.builder()
             .username(userName.orElse(""))
             .graphName(graphName.orElse(""))
             .nodeQuery(nodeQuery.orElse(ALL_NODES_QUERY))

@@ -86,10 +86,10 @@ public class MemoryEstimationExecutor<
                     )).build();
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
-            var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfiguration);
-            var graphStoreCreator = graphCreateConfig.isFictitiousLoading()
-                ? new FictitiousGraphStoreLoader(graphCreateConfig)
-                : new GraphStoreFromDatabaseLoader(graphCreateConfig, executionContext.username(), graphLoaderContext);
+            var graphProjectConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfiguration);
+            var graphStoreCreator = graphProjectConfig.isFictitiousLoading()
+                ? new FictitiousGraphStoreLoader(graphProjectConfig)
+                : new GraphStoreFromDatabaseLoader(graphProjectConfig, executionContext.username(), graphLoaderContext);
 
             graphDimensions = graphStoreCreator.graphDimensions();
             memoryEstimation = Optional.of(graphStoreCreator.memoryEstimation());

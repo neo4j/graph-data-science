@@ -37,7 +37,7 @@ final class NodeClassificationCompanion {
             @Override
             public List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
                 return List.of(
-                    (graphStore, graphCreateConfig, config) -> {
+                    (graphStore, graphProjectConfig, config) -> {
                         if (config instanceof NodeClassificationMutateConfig) {
                             var mutateConfig = (NodeClassificationMutateConfig) config;
                             validateProperties(

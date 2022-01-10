@@ -29,8 +29,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.database.DatabaseIdFactory;
@@ -76,7 +76,7 @@ final class GraphInfoTest {
 
     private GraphInfo create(
         PropertyProducer<?> nodePropertyProducer,
-        BiFunction<GraphCreateConfig, GraphStore, GraphInfo> constructor
+        BiFunction<GraphProjectConfig, GraphStore, GraphInfo> constructor
     ) {
         var graph = new RandomGraphGeneratorBuilder()
             .nodeCount(133_742)
@@ -85,7 +85,7 @@ final class GraphInfoTest {
             .nodePropertyProducer(nodePropertyProducer)
             .build()
             .generate();
-        var storeConfig = ImmutableGraphCreateFromStoreConfig.builder()
+        var storeConfig = ImmutableGraphProjectFromStoreConfig.builder()
             .graphName("foo")
             .nodeProjections(NodeProjections.ALL)
             .relationshipProjections(RelationshipProjections.ALL)

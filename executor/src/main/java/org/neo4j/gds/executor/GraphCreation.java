@@ -24,17 +24,20 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 public interface GraphCreation<
     ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig
-> {
+    > {
     GraphStore graphStore();
+
     Graph createGraph(GraphStore graphStore);
-    GraphCreateConfig graphCreateConfig();
+
+    GraphProjectConfig graphProjectConfig();
+
     MemoryRange validateMemoryEstimation(AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory);
 
 }

@@ -26,7 +26,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -49,7 +49,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilder<ALLOCATOR>, ALLOCATOR extends IdMappingAllocator> extends ScanningRecordsImporter<NodeReference, IdsAndProperties> {
 
-    private final GraphCreateFromStoreConfig graphCreateConfig;
+    private final GraphProjectFromStoreConfig graphProjectConfig;
     private final TerminationFlag terminationFlag;
     private final IndexPropertyMappings.LoadablePropertyMappings properties;
     private final InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR> internalIdMappingBuilderFactory;
@@ -61,7 +61,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     private LabelInformation.Builder labelInformationBuilder;
 
     public ScanningNodesImporter(
-        GraphCreateFromStoreConfig graphCreateConfig,
+        GraphProjectFromStoreConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
@@ -79,7 +79,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             concurrency
         );
 
-        this.graphCreateConfig = graphCreateConfig;
+        this.graphProjectConfig = graphProjectConfig;
         this.terminationFlag = loadingContext.terminationFlag();
         this.properties = properties;
         this.internalIdMappingBuilderFactory = internalIdMappingBuilderFactory;
@@ -110,7 +110,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 
         labelInformationBuilder =
-            graphCreateConfig.nodeProjections().allProjections().size() == 1
+            graphProjectConfig.nodeProjections().allProjections().size() == 1
             && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
                 ? LabelInformation.emptyBuilder(allocationTracker)
                 : LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping, allocationTracker);

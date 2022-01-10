@@ -140,7 +140,7 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
     List<String> graphCreateQueries() {
         return singletonList(
             GdsCypher.call(LOUVAIN_GRAPH)
-                .graphCreate()
+                .graphProject()
                 .withNodeLabel("Node")
                 .withNodeProperty("seed")
                 .withRelationshipType(

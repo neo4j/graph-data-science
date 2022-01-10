@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -50,7 +50,7 @@ class GraphStoreCatalogTest {
 
     private static final String USER_NAME = "alice";
     private static final String GRAPH_NAME = "graph";
-    private static final GraphCreateFromStoreConfig CONFIG = GraphCreateFromStoreConfig.emptyWithName(USER_NAME, GRAPH_NAME);
+    private static final GraphProjectFromStoreConfig CONFIG = GraphProjectFromStoreConfig.emptyWithName(USER_NAME, GRAPH_NAME);
 
     @GdlGraph
     private static final String TEST_GRAPH = "()";
@@ -73,9 +73,9 @@ class GraphStoreCatalogTest {
 
     @Test
     void overwrite() {
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName(USER_NAME, GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName(USER_NAME, GRAPH_NAME), graphStore);
         assertThat(GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME).graphStore()).isEqualTo(graphStore);
-        GraphStoreCatalog.overwrite(GraphCreateFromStoreConfig.emptyWithName(USER_NAME, GRAPH_NAME), otherGraphStore);
+        GraphStoreCatalog.overwrite(GraphProjectFromStoreConfig.emptyWithName(USER_NAME, GRAPH_NAME), otherGraphStore);
         assertThat(GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME).graphStore()).isEqualTo(otherGraphStore);
         assertThat(GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME).graphStore()).isNotEqualTo(graphStore);
     }
@@ -104,7 +104,7 @@ class GraphStoreCatalogTest {
 
     @Test
     void getAsAdminReturnsGraphsFromOwnCatalogIfAvailable() {
-        var adminConfig = GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
+        var adminConfig = GraphProjectFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
         GraphStoreCatalog.set(adminConfig, graphStore); // {} -> admin -> DB -> GRAPH_NAME -> graphStore
         GraphStoreCatalog.set(CONFIG, graphStore);      // {} -> alice -> DB -> GRAPH_NAME -> graphStore
 
@@ -125,8 +125,8 @@ class GraphStoreCatalogTest {
 
     @Test
     void getAsAdminFailsOnMultipleGraphsMatching() {
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME), graphStore);
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("alice", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
 
         assertThatThrownBy(() -> GraphStoreCatalog.get(CatalogRequest.ofAdmin("admin", DATABASE_ID), GRAPH_NAME))
             .hasMessage("Multiple graphs that match '%s' are found from the users alice and bob.", GRAPH_NAME);
@@ -134,9 +134,9 @@ class GraphStoreCatalogTest {
 
     @Test
     void getAsAdminUsesTheUserOverrideToSelectFromMultipleGraphsMatching() {
-        var aliceConfig = GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME);
+        var aliceConfig = GraphProjectFromStoreConfig.emptyWithName("alice", GRAPH_NAME);
         GraphStoreCatalog.set(aliceConfig, graphStore);
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
 
         var graphStoreWithConfig = GraphStoreCatalog.get(
             CatalogRequest.ofAdmin("admin", Optional.of("alice"), DATABASE_ID),
@@ -148,7 +148,7 @@ class GraphStoreCatalogTest {
 
     @Test
     void getAsAdminReturnsTheGraphFromTheOverrideEvenIfAGraphFromOwnCatalogIsAvailable() {
-        var adminConfig = GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
+        var adminConfig = GraphProjectFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
         GraphStoreCatalog.set(adminConfig, graphStore);
         GraphStoreCatalog.set(CONFIG, graphStore);
 
@@ -163,7 +163,7 @@ class GraphStoreCatalogTest {
 
     @Test
     void getAsAdminReturnsOnlyTheGraphFromTheOverrideEvenIfAGraphFromOwnCatalogIsAvailable() {
-        var adminConfig = GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
+        var adminConfig = GraphProjectFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
         GraphStoreCatalog.set(adminConfig, graphStore);
 
         assertThatThrownBy(() -> GraphStoreCatalog.get(
@@ -175,7 +175,7 @@ class GraphStoreCatalogTest {
 
     @Test
     void getAsAdminReturnsOnlyTheGraphFromTheOverrideEvenIfAGraphFromADifferentUserIsAvailable() {
-        var bobConfig = GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME);
+        var bobConfig = GraphProjectFromStoreConfig.emptyWithName("bob", GRAPH_NAME);
         GraphStoreCatalog.set(bobConfig, graphStore);
 
         assertThatThrownBy(() -> GraphStoreCatalog.get(
@@ -214,7 +214,7 @@ class GraphStoreCatalogTest {
 
     @Test
     void removeAsAdminPrefersOwnGraphCatalog() {
-        var adminConfig = GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
+        var adminConfig = GraphProjectFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
         GraphStoreCatalog.set(adminConfig, graphStore);
         GraphStoreCatalog.set(CONFIG, graphStore);
 
@@ -254,8 +254,8 @@ class GraphStoreCatalogTest {
 
     @Test
     void removeAsAdminFailsOnMultipleGraphsMatching() {
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME), graphStore);
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("alice", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
 
         assertThatThrownBy(() -> GraphStoreCatalog.remove(
             CatalogRequest.ofAdmin("admin", DATABASE_ID),
@@ -268,8 +268,8 @@ class GraphStoreCatalogTest {
 
     @Test
     void removeAsAdminUsesTheUserOverrideToSelectFromMultipleGraphsMatching() {
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME), graphStore);
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("alice", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
 
         GraphStoreCatalog.remove(
             CatalogRequest.ofAdmin("admin", Optional.of("alice"), DATABASE_ID),
@@ -285,7 +285,7 @@ class GraphStoreCatalogTest {
 
     @Test
     void removeDoesNotRemoveOtherUsersGraphs() {
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
 
         GraphStoreCatalog.remove(
             CatalogRequest.of(USER_NAME, DATABASE_ID),
@@ -298,7 +298,7 @@ class GraphStoreCatalogTest {
 
     @Test
     void removeAsAdminReturnsTheGraphFromTheOverrideEvenIfAGraphFromOwnCatalogIsAvailable() {
-        var adminConfig = GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
+        var adminConfig = GraphProjectFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
         GraphStoreCatalog.set(adminConfig, graphStore);
         GraphStoreCatalog.set(CONFIG, graphStore);
 
@@ -316,7 +316,7 @@ class GraphStoreCatalogTest {
 
     @Test
     void removeAsAdminReturnsOnlyTheGraphFromTheOverrideEvenIfAGraphFromOwnCatalogIsAvailable() {
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("admin", GRAPH_NAME), graphStore);
 
         assertThatThrownBy(() -> GraphStoreCatalog.remove(
             CatalogRequest.ofAdmin("admin", Optional.of(USER_NAME), DATABASE_ID),
@@ -331,7 +331,7 @@ class GraphStoreCatalogTest {
 
     @Test
     void removeAsAdminReturnsOnlyTheGraphFromTheOverrideEvenIfAGraphFromADifferentUserIsAvailable() {
-        var bobConfig = GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME);
+        var bobConfig = GraphProjectFromStoreConfig.emptyWithName("bob", GRAPH_NAME);
         GraphStoreCatalog.set(bobConfig, graphStore);
 
         assertThatThrownBy(() -> GraphStoreCatalog.remove(
@@ -364,9 +364,9 @@ class GraphStoreCatalogTest {
         assertEquals(0, GraphStoreCatalog.graphStoresCount());
         GraphStoreCatalog.set(CONFIG, graphStore);
         assertEquals(1, GraphStoreCatalog.graphStoresCount());
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
         assertEquals(2, GraphStoreCatalog.graphStoresCount());
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("clive", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("clive", GRAPH_NAME), graphStore);
         assertEquals(3, GraphStoreCatalog.graphStoresCount());
         GraphStoreCatalog.remove(
             CatalogRequest.of(USER_NAME, DATABASE_ID),
@@ -387,8 +387,8 @@ class GraphStoreCatalogTest {
 
     @Test
     void multipleDatabaseIds() {
-        GraphCreateFromStoreConfig config0 = GraphCreateFromStoreConfig.emptyWithName(USER_NAME, "graph0");
-        GraphCreateFromStoreConfig config1 = GraphCreateFromStoreConfig.emptyWithName(USER_NAME, "graph1");
+        GraphProjectFromStoreConfig config0 = GraphProjectFromStoreConfig.emptyWithName(USER_NAME, "graph0");
+        GraphProjectFromStoreConfig config1 = GraphProjectFromStoreConfig.emptyWithName(USER_NAME, "graph1");
 
         NamedDatabaseId namedDatabaseId0 = DatabaseIdFactory.from("DB_0", UUID.fromString("0-0-0-0-0"));
         NamedDatabaseId namedDatabaseId1 = DatabaseIdFactory.from("DB_1", UUID.fromString("0-0-0-0-1"));

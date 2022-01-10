@@ -73,7 +73,7 @@ public final class GraphSageCompanion {
             @Override
             public List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
                 return List.of(
-                    (graphStore, graphCreateConfig, graphSageConfig) -> {
+                    (graphStore, graphProjectConfig, graphSageConfig) -> {
                         Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model = GraphSageModelResolver.resolveModel(
                             catalog,
                             username,

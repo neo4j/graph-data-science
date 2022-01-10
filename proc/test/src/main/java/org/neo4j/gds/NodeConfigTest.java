@@ -21,10 +21,10 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.config.NodeConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.internal.recordstorage.RecordStorageEngine;
 
@@ -36,7 +36,7 @@ public interface NodeConfigTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
     default void testNodeValidation(String configKey, String... expectedMessageSubstrings) {
         runQuery(graphDb(), "CREATE (:A)");
 
-        var graphCreateConfig = ImmutableGraphCreateFromStoreConfig.of(
+        var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
             "",
             "loadedGraph",
             NodeProjections.all(),
@@ -51,7 +51,7 @@ public interface NodeConfigTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
             return Neo4jProxy.getHighestPossibleIdInUse(nodeStore, ktx);
         });
 
-        GraphStoreCatalog.set(graphCreateConfig, graphLoader(graphCreateConfig).graphStore());
+        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
 
         var config = createMinimalConfig(CypherMapWrapper.empty())
             .withNumber(configKey, nodeId + 42L)

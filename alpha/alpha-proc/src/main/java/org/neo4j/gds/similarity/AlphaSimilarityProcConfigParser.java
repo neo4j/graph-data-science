@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity;
 
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.executor.ProcConfigParser;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
@@ -30,10 +30,10 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
 
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.similarity.AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
 import static org.neo4j.gds.similarity.AlphaSimilarityProc.removeGraph;
 
@@ -67,7 +67,7 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> im
 
         // We put the fake graph store into the graph catalog
         GraphStoreCatalog.set(
-            ImmutableGraphCreateFromStoreConfig.of(
+            ImmutableGraphProjectFromStoreConfig.of(
                 username,
                 graphName,
                 NodeProjections.ALL,

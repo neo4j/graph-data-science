@@ -132,7 +132,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
     @Test
     void testMinimum() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.UNDIRECTED)
             .withRelationshipProperty("cost", DefaultValue.of(1.0D))
@@ -165,7 +165,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
     @Test
     void testMaximum() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.UNDIRECTED)
             .withRelationshipProperty("cost", DefaultValue.of(1.0D))
@@ -237,7 +237,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
 
     void loadGraph() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withAnyRelationshipType()
             .yields();

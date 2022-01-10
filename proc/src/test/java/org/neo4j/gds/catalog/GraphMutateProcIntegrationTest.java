@@ -128,7 +128,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
 
         runQuery(GdsCypher
             .call(TEST_GRAPH)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("nodeId")
             .withRelationshipType("TYPE")
@@ -239,7 +239,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         // re-create named graph from written node and relationship properties
         runQuery(formatWithLocale("CALL gds.graph.drop('%s')", TEST_GRAPH));
         runQuery(GdsCypher.call(TEST_GRAPH)
-            .graphCreate()
+            .graphProject()
             .withAnyLabel()
             .withNodeProperty("nodeId")
             .withNodeProperty("pageRank")

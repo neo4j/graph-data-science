@@ -78,7 +78,7 @@ class LinkPredictionPredictStreamProcTest extends BaseProcTest {
     private String createQuery(String graphName, Orientation orientation) {
         return GdsCypher
             .call(graphName)
-            .graphCreate()
+            .graphProject()
             .withNodeLabel("N")
             .withNodeProperty("a")
             .withRelationshipType("IGNORED", RelationshipProjection.of("*", orientation))
