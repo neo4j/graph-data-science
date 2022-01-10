@@ -54,7 +54,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     private static final String TABLE_CONTEXT = ":table";
 
     private static final String SETUP_QUERY_ROLE = "setup-query";
-    private static final String GRAPH_CREATE_QUERY_ROLE = "graph-project-query";
+    private static final String GRAPH_PROJECT_QUERY_ROLE = "graph-project-query";
     private static final String QUERY_EXAMPLE_ROLE = "query-example";
     private static final String TEST_TYPE_NO_RESULT = "no-result";
     private static final String TEST_GROUP_ATTRIBUTE = "group";
@@ -65,7 +65,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     private final QueryExampleNoResultConsumer queryExampleNoResultConsumer;
     private final Runnable cleanup;
 
-    private List<String> graphCreateQueries;
+    private List<String> graphProjectQueries;
 
     public QueryConsumingTreeProcessor(
         SetupQueryConsumer setupQueryConsumer,
@@ -78,13 +78,13 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
         this.queryExampleNoResultConsumer = queryExampleNoResultConsumer;
         this.cleanup = cleanup;
 
-        graphCreateQueries = new ArrayList<>();
+        graphProjectQueries = new ArrayList<>();
     }
 
     @Override
     public Document process(Document document) {
         consumeSetupQueries(document);
-        graphCreateQueries = collectSetupQueries(document, GRAPH_CREATE_QUERY_ROLE);
+        graphProjectQueries = collectSetupQueries(document, GRAPH_PROJECT_QUERY_ROLE);
         consumeQueryExamples(document);
         return document;
     }
@@ -161,13 +161,13 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     }
 
     private void processExample(Runnable example) {
-        setupQueryConsumer.consume(graphCreateQueries);
+        setupQueryConsumer.consume(graphProjectQueries);
         example.run();
         cleanup.run();
     }
 
     private void processExamples(Iterable<Runnable> examples) {
-        setupQueryConsumer.consume(graphCreateQueries);
+        setupQueryConsumer.consume(graphProjectQueries);
         examples.forEach(Runnable::run);
         cleanup.run();
     }

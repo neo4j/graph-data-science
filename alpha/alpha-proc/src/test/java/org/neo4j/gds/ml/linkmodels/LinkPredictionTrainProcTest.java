@@ -113,10 +113,10 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
         registerProcedures(LinkPredictionTrainProc.class, GraphProjectProc.class);
         runQuery(GRAPH);
 
-        runQuery(createQuery("g", UNDIRECTED));
+        runQuery(projectQuery("g", UNDIRECTED));
     }
 
-    private String createQuery(String graphName, Orientation orientation) {
+    private String projectQuery(String graphName, Orientation orientation) {
         return GdsCypher
             .call(graphName)
             .graphProject()
@@ -209,7 +209,7 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
 
     @Test
     void requiresUndirectedGraph() {
-        runQuery(createQuery("g2", Orientation.NATURAL));
+        runQuery(projectQuery("g2", Orientation.NATURAL));
 
         var trainQuery =
             "CALL gds.alpha.ml.linkPrediction.train('g2', { " +
@@ -227,7 +227,7 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
 
     @Test
     void validateRelTypesExist() {
-        runQuery(createQuery("g2", Orientation.NATURAL));
+        runQuery(projectQuery("g2", Orientation.NATURAL));
 
         var query =
             "CALL gds.alpha.ml.linkPrediction.train('g', { " +
@@ -245,7 +245,7 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
 
     @Test
     void shouldNotAcceptEmptyModelCandidates() {
-        runQuery(createQuery("g2", Orientation.NATURAL));
+        runQuery(projectQuery("g2", Orientation.NATURAL));
 
         var query =
             "CALL gds.alpha.ml.linkPrediction.train('g', { " +

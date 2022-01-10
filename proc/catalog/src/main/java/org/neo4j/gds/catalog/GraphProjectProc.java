@@ -244,7 +244,7 @@ public class GraphProjectProc extends CatalogProc {
 
         GraphProjectSubgraphResult result = runWithExceptionLogging(
             "Graph creation failed",
-            ExceptionUtil.supplier(() -> createGraphFromGraphStore(fromGraphStore.graphStore(), graphProjectConfig))
+            ExceptionUtil.supplier(() -> projectGraphFromGraphStore(fromGraphStore.graphStore(), graphProjectConfig))
         );
 
         return Stream.of(result);
@@ -262,7 +262,7 @@ public class GraphProjectProc extends CatalogProc {
         return projectSubgraph(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
     }
 
-    private GraphProjectSubgraphResult createGraphFromGraphStore(
+    private GraphProjectSubgraphResult projectGraphFromGraphStore(
         GraphStore fromGraphStore,
         GraphProjectFromGraphConfig config
     ) throws

@@ -72,7 +72,7 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
 
         withModelInCatalog();
 
-        runQuery(createQuery("g", Orientation.UNDIRECTED));
+        runQuery(projectQuery("g", Orientation.UNDIRECTED));
     }
 
     private void withModelInCatalog() {
@@ -105,7 +105,7 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
         ));
     }
 
-    String createQuery(String graphName, Orientation orientation) {
+    String projectQuery(String graphName, Orientation orientation) {
         return GdsCypher.call(graphName)
             .graphProject()
             .withNodeLabel("N")

@@ -83,7 +83,7 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
                                        ", (nMichael)-[:LINK {weight: 1}]->(nMark)";
 
     @Override
-    List<String> graphCreateQueries() {
+    List<String> graphProjectQueries() {
         return Arrays.asList(
             GdsCypher.call("weightedLouvainGraph")
                 .graphProject()

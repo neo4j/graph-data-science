@@ -128,7 +128,7 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
 
     @Test
     void trainAndPredict() {
-        createGraph();
+        projectGraph();
         testSplit();
         trainSplit();
         fastRPEmbeddings();
@@ -138,7 +138,7 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
         //getResults();
     }
 
-    private void createGraph() {
+    private void projectGraph() {
         var graphCreateQuery =
             "CALL gds.graph.project(" +
             "  $graphName," +

@@ -75,10 +75,10 @@ class LinkPredictionPredictWriteProcTest extends BaseProcTest {
         registerProcedures(LinkPredictionPredictWriteProc.class, GraphStreamRelationshipPropertiesProc.class, GraphProjectProc.class);
         runQuery(GRAPH);
 
-        runQuery(createQuery("g", UNDIRECTED));
+        runQuery(projectQuery("g", UNDIRECTED));
     }
 
-    private String createQuery(String graphName, Orientation orientation) {
+    private String projectQuery(String graphName, Orientation orientation) {
         return GdsCypher
             .call(graphName)
             .graphProject()
@@ -145,7 +145,7 @@ class LinkPredictionPredictWriteProcTest extends BaseProcTest {
 
     @Test
     void requiresUndirectedGraph() {
-        runQuery(createQuery("g2", Orientation.NATURAL));
+        runQuery(projectQuery("g2", Orientation.NATURAL));
 
         addModel("model", GraphSchema.empty());
 
