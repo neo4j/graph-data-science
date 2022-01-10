@@ -33,60 +33,59 @@ public class NormalizeRows extends SingleParentVariable<Matrix, Matrix> {
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        Matrix parentMatrix = ctx.data(parent);
+        var parentMatrix = ctx.data(parent);
         int rows = parentMatrix.rows();
         int cols = parentMatrix.cols();
 
-        double[] parentData = parentMatrix.data();
-
-        double[] result = new double[rows * cols];
+        var result = parentMatrix.createWithSameDimensions();
         for (int row = 0; row < rows; row++) {
-            double sum = 0;
+            double squaredSum = 0;
             for (int col = 0; col < cols; col++) {
-                int elementIndex = row * cols + col;
-                sum += Math.pow(parentData[elementIndex], 2);
+                squaredSum += parentMatrix.dataAt(row, col) * parentMatrix.dataAt(row, col);
             }
-            double l2 = Math.sqrt(sum);
+
+            // adding EPSILON to avoid division by zero
+            double l2 = Math.sqrt(squaredSum) + EPSILON;
             for (int col = 0; col < cols; col++) {
-                int elementIndex = row * cols + col;
-                result[elementIndex] = parentData[elementIndex] / (l2 + EPSILON);
+                result.setDataAt(row, col, parentMatrix.dataAt(row, col) / l2);
             }
         }
-        return new Matrix(result, rows, cols);
+        return result;
     }
 
     @Override
     public Matrix gradientForParent(ComputationContext ctx) {
-        Matrix parentMatrix = ctx.data(parent);
-        int rows = parentMatrix.rows();
-        int cols = parentMatrix.cols();
+        Matrix parentData = ctx.data(parent);
+        Matrix thisGradient = ctx.gradient(this);
 
-        double[] parentData = parentMatrix.data();
-        double[] gradientData = ctx.gradient(this).data();
-        double[] result = new double[parentData.length];
+        Matrix parentGradient = parentData.createWithSameDimensions();
+        int rows = parentData.rows();
+        int cols = parentData.cols();
+
         for (int row = 0; row < rows; row++) {
             double l2Squared = 0;
             for (int col = 0; col < cols; col++) {
-                int elementIndex = row * cols + col;
-                l2Squared += parentData[elementIndex] * parentData[elementIndex];
+                double cellValue = parentData.dataAt(row, col);
+                l2Squared += cellValue * cellValue;
             }
             double l2 = Math.sqrt(l2Squared);
             double l2Cubed = l2 * l2Squared;
+
             for (int col = 0; col < cols; col++) {
-                int elementIndex = row * cols + col;
+                double parentCellValue = parentData.dataAt(row, col);
                 for (int gradCol = 0; gradCol < cols; gradCol++) {
+                    double partialGradient;
                     if (col == gradCol) {
-                        result[elementIndex] +=
-                            gradientData[elementIndex] *
-                            (l2Squared - parentData[elementIndex] * parentData[elementIndex]) / l2Cubed;
+                        partialGradient = thisGradient.dataAt(row, col) * (l2Squared - parentCellValue * parentCellValue);
                     } else {
-                        result[elementIndex] -=
-                            gradientData[row * cols + gradCol] *
-                            (parentData[elementIndex] * parentData[row * cols + gradCol]) / l2Cubed;
+                        partialGradient = -thisGradient.dataAt(row, gradCol) * (parentCellValue * parentData.dataAt(row, gradCol));
                     }
+                    parentGradient.addDataAt(row, col, partialGradient);
                 }
+
+                parentGradient.setDataAt(row, col, parentGradient.dataAt(row, col) / l2Cubed);
             }
         }
-        return new Matrix(result, rows, cols);
+        return parentGradient;
     }
 }

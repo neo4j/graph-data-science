@@ -214,19 +214,13 @@ class GraphSageModelTrainerTest {
                 "GraphSageTrain :: train epoch 1 of 2 :: iteration 1 of 2 100%",
                 "GraphSageTrain :: train epoch 1 of 2 :: iteration 1 of 2 :: Finished",
                 "GraphSageTrain :: train epoch 1 of 2 :: iteration 2 of 2 :: Start",
-                "GraphSageTrain :: train epoch 1 of 2 :: iteration 2 of 2 :: LOSS: 531.5699087433",
                 "GraphSageTrain :: train epoch 1 of 2 :: iteration 2 of 2 100%",
                 "GraphSageTrain :: train epoch 1 of 2 :: iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: train epoch 1 of 2 :: Finished",
                 "GraphSageTrain :: train epoch 2 of 2 :: Start",
                 "GraphSageTrain :: train epoch 2 of 2 :: iteration 1 of 2 :: Start",
-                "GraphSageTrain :: train epoch 2 of 2 :: iteration 1 of 2 :: LOSS: 531.5699087433",
                 "GraphSageTrain :: train epoch 2 of 2 :: iteration 1 of 2 100%",
                 "GraphSageTrain :: train epoch 2 of 2 :: iteration 1 of 2 :: Finished",
-                "GraphSageTrain :: train epoch 2 of 2 :: iteration 2 of 2 :: Start",
-                "GraphSageTrain :: train epoch 2 of 2 :: iteration 2 of 2 :: LOSS: 531.5699087433",
-                "GraphSageTrain :: train epoch 2 of 2 :: iteration 2 of 2 100%",
-                "GraphSageTrain :: train epoch 2 of 2 :: iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: train epoch 2 of 2 :: Finished",
                 "GraphSageTrain :: Finished"
             );
@@ -289,16 +283,16 @@ class GraphSageModelTrainerTest {
             .isInstanceOf(List.class)
             .asList()
             .containsExactly(
-                91.33327272493334,
-                88.17940500579795,
-                87.68340477199389,
-                85.60797746024537,
-                85.59108701774032,
-                85.5900723408756,
-                81.44403525117445,
-                81.44260858480706,
-                81.44349342539118,
-                81.45612978301318
+                91.33327272493327,
+                88.17940500579815,
+                87.68340477199385,
+                85.607977460245,
+                85.59108701774008,
+                85.59007234087558,
+                81.44403525117595,
+                81.44260858480696,
+                81.44349342539466,
+                81.45612978302191
             );
     }
 
@@ -337,15 +331,15 @@ class GraphSageModelTrainerTest {
             .asList()
             .containsExactly(
                 90.53361989137981,
-                83.29795301874604,
-                74.75620220928317,
-                74.61031578945892,
-                74.68090735517063,
-                74.55875643599765,
-                74.4087249239107,
-                74.57257264047709,
-                74.4061551497545,
-                74.4057348185484
+                83.29795301874563,
+                74.75620220935929,
+                74.61031578960346,
+                74.68091082872694,
+                74.54970955093637,
+                74.46081171572466,
+                74.47827421525395,
+                74.4115578642775,
+                74.41138199618251
             );
     }
 

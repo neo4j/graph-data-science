@@ -100,9 +100,9 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
     @Override
     public Scalar apply(ComputationContext ctx) {
         ctx.forward(predictions);
+
         var predVector = ctx.data(predictions);
         var targetVector = ctx.data(targets);
-
         var numberOfExamples = targetVector.length();
 
         double result = 0;
@@ -128,7 +128,6 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         if (parent == weights) {
-
             ctx.forward(predictions);
             var predVector = ctx.data(predictions);
             var targetVector = ctx.data(targets);
@@ -139,9 +138,9 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
             int numberOfExamples = targetVector.length();
 
             for (int idx = 0; idx < numberOfExamples; idx++) {
-                double errorPerNode = (predVector.dataAt(idx) - targetVector.dataAt(idx)) / numberOfExamples;
+                double errorPerExample = (predVector.dataAt(idx) - targetVector.dataAt(idx)) / numberOfExamples;
                 for (int feature = 0; feature < featureCount; feature++) {
-                    gradient.addDataAt(feature, errorPerNode * featuresTensor.dataAt(idx * featureCount + feature));
+                    gradient.addDataAt(feature, errorPerExample * featuresTensor.dataAt(idx, feature));
                 }
             }
             return gradient;
@@ -153,18 +152,18 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
             int numberOfExamples = targetVector.length();
 
             for (int idx = 0; idx < numberOfExamples; idx++) {
-                double errorPerNode = (predVector.dataAt(idx) - targetVector.dataAt(idx));
-                gradient.addDataAt(0, errorPerNode);
+                double errorPerExample = (predVector.dataAt(idx) - targetVector.dataAt(idx));
+                gradient.addDataAt(0, errorPerExample);
             }
 
             return gradient.scalarMultiplyMutate(1.0D / numberOfExamples);
         } else {
-            // assume other variables do not require gradient
+            // assume feature and target variables do not require gradient
             return ctx.data(parent).createWithSameDimensions();
         }
     }
 
-    private void validateVectorDimensions(int[] dimensions, int vectorLength) {
+    private static void validateVectorDimensions(int[] dimensions, int vectorLength) {
         if (!isVector(dimensions) || totalSize(dimensions) != vectorLength) {
             throw new IllegalStateException(formatWithLocale(
                 "Expected a vector of size %d. Got %s",
