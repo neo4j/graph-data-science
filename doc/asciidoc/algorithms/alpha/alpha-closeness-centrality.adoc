@@ -38,6 +38,12 @@ The formula for *normalized closeness centrality* of node _u_ is as follows:
 `normalized closeness centrality(_u_) = (number of nodes - 1) / sum(distance from _u_ to all other nodes)`
 // end::formula[]
 
+ Wasserman and Faust have proposed an improved formula for dealing with unconnected graphs.
+Assuming that _n_  is the number of nodes reachable from _u_ (counting also itself),
+their corrected formula for a given node _u_ is given as follows
+
+`Wasserman-Faust normalized closeness centrality(_u_) = (_n_-1)^2/ ((number of nodes - 1) * sum(distance from _u_ to all other nodes))`
+
 Note that in the case of a directed graph, closeness centrality is defined alternatively.
 That is, rather than considering distances from _u_ to every other node, we instead sum and average the distance from every other node to _u_.
 
@@ -82,13 +88,15 @@ YIELD nodes, createMillis, computeMillis, writeMillis, centralityDistribution
 ----
 
 .Parameters
-[opts="header",cols="1,1,1,1,4"]
+[opts="header",cols="1,1,1,1,5"]
 |===
 | Name                          | Type    | Default                | Optional | Description
-| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
+Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | writeProperty                 | string  | 'centrality'           | yes      | The property name written back to.
+| improved                      | boolean | false                  | yes      | Denotes whether the Wasserman-Faust formula is used.
 |===
 
 .Results
