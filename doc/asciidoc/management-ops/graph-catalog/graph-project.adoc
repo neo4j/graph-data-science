@@ -51,7 +51,7 @@ YIELD
   nodeCount: Integer,
   relationshipProjection: Map,
   relationshipCount: Integer,
-  createMillis: Integer
+  projectMillis: Integer
 ----
 
 NOTE: To get information about a stored graph, such as its schema, one can use <<catalog-graph-list, gds.graph.list>>.
@@ -85,7 +85,7 @@ NOTE: To get information about a stored graph, such as its schema, one can use <
 | nodeCount              | Integer  | The number of nodes stored in the projected graph.
 | relationshipProjection | Map      | The <<relationship-projection-syntax, relationship projections>> used to project the graph.
 | relationshipCount      | Integer  | The number of relationships stored in the projected graph.
-| createMillis           | Integer  | Milliseconds for projecting the graph.
+| projectMillis          | Integer  | Milliseconds for projecting the graph.
 |===
 --
 

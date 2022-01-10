@@ -72,7 +72,7 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
             "relationshipFilter", "true",
             "nodeCount", 1L,
             "relationshipCount", 0L,
-            "createMillis", greaterThan(0L)
+            "projectMillis", greaterThan(0L)
         )));
 
         // Verify that we get the correct output for gds.graph.list().

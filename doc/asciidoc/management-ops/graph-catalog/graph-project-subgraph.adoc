@@ -36,7 +36,7 @@ CALL gds.beta.graph.project.subgraph(
   relationshipFilter: String,
   nodeCount: Integer,
   relationshipCount: Integer,
-  createMillis: Integer
+  projectMillis: Integer
 ----
 
 .Parameters
@@ -67,7 +67,7 @@ CALL gds.beta.graph.project.subgraph(
 | relationshipFilter     | String   | Filter predicate for relationships.
 | nodeCount              | Integer  | Number of nodes in the subgraph.
 | relationshipCount      | Integer  | Number of relationships in the subgraph.
-| createMillis           | Integer  | Milliseconds for creating the subgraph.
+| projectMillis           | Integer  | Milliseconds for projecting the subgraph.
 |===
 --
 
@@ -146,7 +146,7 @@ CALL gds.graph.project(
     READS: {}                         // <4>
   }
 )
-YIELD graphName, nodeCount, relationshipCount, createMillis
+YIELD graphName, nodeCount, relationshipCount, projectMillis
 ----
 <1> Project `Person` nodes with their `age` property.
 <2> Project `Book` nodes without any of their properties.
