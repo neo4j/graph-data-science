@@ -1,64 +1,58 @@
 [[migration-memory-estimation]]
 = Memory estimation
 
-.Changes in the YIELD fields
-[opts=header,cols="1,1"]
-|===
-|Graph Algorithms v3.5 |Graph Data Science v1.0
-| `requiredMemory`    | `requiredMemory`
-| `bytesMin`          | `bytesMin`
-| `bytesMax`          | `bytesMax`
-| `mapView`           | `mapView`
-| -                   | `treeView`
-| -                   | `nodeCount`
-| -                   | `relationshipCount`
-|===
-
-The most significant change in memory estimation is that in GDS to estimate an operation you suffix it with `.estimate` while in GA the operation had to be passed as parameter to `algo.memrec`.
-
-.Estimating the memory requirements of loading a named graph:
+.Estimating memory for algorithms without loading the graph:
 [opts=header,cols="1a,1a"]
 |===
-|Graph Algorithms v3.5 |Graph Data Science v1.0
-2+| Native Projections:
+| 1.x | 2.x
+2+| Algorithm estimation on anonymous graphs:
 |
 [source, cypher, role=noplay]
 ----
-CALL algo.memrec(
-  'MyLabel',
-  'MY_RELATIONSHIP_TYPE',
-  'graph.load'
-)
-----
-|
-[source, cypher, role=noplay]
-----
-CALL gds.graph.project.estimate(
-  'MyLabel',
-  'MY_RELATIONSHIP_TYPE'
-)
-----
-2+| Cypher Projections:
-|
-[source, cypher, role=noplay]
-----
-CALL algo.memrec(
-  'MATCH (n:MyLabel) RETURN id(n) AS id',
-  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
-   RETURN id(s) AS source, id(t) AS target',
-  'graph.load',
+CALL gds.ALGO_NAME.estimate(
   {
-    graph: 'cypher'
+    nodeProjection: NODE_PROJECTION,
+    relationshipProjection: REL_PROJECTION,
+    // algorithm specific configuration
   }
 )
 ----
 |
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.project.cypher.estimate(
-  'MATCH (n:MyLabel) RETURN id(n) AS id',
-  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
-   RETURN id(s) AS source, id(t) AS target'
+CALL gds.ALGO_NAME.estimate(
+  {
+    nodeProjection: NODE_PROJECTION,
+    relationshipProjection: REL_PROJECTION
+  },
+  ALGORIGHM_CONFIGURATION_MAP
+)
+----
+2+| Algorithm estimation on fictitious graphs::
+|
+[source, cypher, role=noplay]
+----
+CALL gds.ALGO_NAME.estimate(
+  {
+    nodeCount: NODE_COUNT,
+    relationshipCount: RELATIONSHIP_COUNT,
+    [ nodeProjection: NODE_PROJECTION, ]
+    [ relationshipProjection: REL_PROJECTION, ]
+    // algorithm specific configuration
+  }
+)
+----
+|
+[source, cypher, role=noplay]
+----
+CALL gds.ALGO_NAME.estimate(
+  {
+    nodeCount: NODE_COUNT,
+    relationshipCount: RELATIONSHIP_COUNT,
+    [ nodeProjection: NODE_PROJECTION, ]
+    [ relationshipProjection: REL_PROJECTION, ]
+  },
+  ALGORIGHM_CONFIGURATION_MAP
 )
 ----
 |===
