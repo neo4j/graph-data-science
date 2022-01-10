@@ -22,7 +22,7 @@ package org.neo4j.gds.doc;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationWriteProc;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.List;
@@ -40,7 +40,7 @@ class ModularityOptimizationDocTest extends DocTestBase {
             ModularityOptimizationMutateProc.class,
             ModularityOptimizationStreamProc.class,
             ModularityOptimizationWriteProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

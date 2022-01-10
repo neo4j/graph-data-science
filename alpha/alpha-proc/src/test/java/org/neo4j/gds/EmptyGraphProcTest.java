@@ -22,7 +22,7 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.centrality.ClosenessCentralityStreamProc;
 import org.neo4j.gds.centrality.ClosenessCentralityWriteProc;
 import org.neo4j.gds.centrality.HarmonicCentralityStreamProc;
@@ -65,7 +65,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             TriangleProc.class,
             GreedyProc.class,
             CELFProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
 
         var createQuery = GdsCypher.call(GRAPH_NAME)

@@ -26,7 +26,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -89,7 +89,7 @@ class CELFProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(CELFProc.class, GraphCreateProc.class);
+        registerProcedures(CELFProc.class, GraphProjectProc.class);
         runQuery(DB_CYPHER);
 
         String graphCreateQuery = GdsCypher.call("celfGraph")

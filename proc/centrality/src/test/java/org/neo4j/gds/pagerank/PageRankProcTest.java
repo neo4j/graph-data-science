@@ -35,7 +35,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.SourceNodesConfigTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
@@ -135,7 +135,7 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
     void setupGraph() throws Exception {
         registerProcedures(
             getProcedureClazz(),
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphWriteNodePropertiesProc.class
         );
 

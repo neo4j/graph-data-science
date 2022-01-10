@@ -32,7 +32,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
@@ -103,7 +103,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     void setupGraph() throws Exception {
         registerProcedures(
             getProcedureClazz(),
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphWriteNodePropertiesProc.class
         );
         // Create explicit graphs with both projection variants

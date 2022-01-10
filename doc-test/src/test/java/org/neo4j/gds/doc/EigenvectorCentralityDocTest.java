@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.pagerank.EigenvectorMutateProc;
 import org.neo4j.gds.pagerank.EigenvectorStatsProc;
@@ -42,7 +42,7 @@ class EigenvectorCentralityDocTest extends DocTestBase {
             EigenvectorWriteProc.class,
             EigenvectorMutateProc.class,
             EigenvectorStatsProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

@@ -67,7 +67,7 @@ class GraphListProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphGenerateProc.class,
             GraphListProc.class
         );

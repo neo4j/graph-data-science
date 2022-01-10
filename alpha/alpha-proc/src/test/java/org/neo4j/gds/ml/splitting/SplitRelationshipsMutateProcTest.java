@@ -26,7 +26,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
@@ -56,7 +56,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(SplitRelationshipsMutateProc.class, GraphCreateProc.class);
+        registerProcedures(SplitRelationshipsMutateProc.class, GraphProjectProc.class);
         runQuery(DB_CYPHER);
         var createQuery = GdsCypher.call("graph")
             .graphProject()

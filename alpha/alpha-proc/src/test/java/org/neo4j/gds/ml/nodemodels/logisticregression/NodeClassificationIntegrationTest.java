@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Inject;
@@ -74,7 +74,7 @@ class NodeClassificationIntegrationTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphStreamNodePropertiesProc.class,
             NodeClassificationTrainProc.class,
             NodeClassificationPredictMutateProc.class

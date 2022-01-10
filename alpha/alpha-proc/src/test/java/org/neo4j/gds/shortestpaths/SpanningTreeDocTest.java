@@ -22,7 +22,7 @@ package org.neo4j.gds.shortestpaths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.spanningtree.KSpanningTreeProc;
 import org.neo4j.gds.spanningtree.SpanningTreeProcMax;
@@ -58,7 +58,7 @@ class SpanningTreeDocTest extends BaseProcTest {
             SpanningTreeProcMin.class,
             SpanningTreeProcMax.class,
             KSpanningTreeProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
 
         runQuery("CALL gds.graph.project(" +

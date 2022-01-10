@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,7 +83,7 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(AllShortestPathsProc.class, GraphCreateProc.class);
+        registerProcedures(AllShortestPathsProc.class, GraphProjectProc.class);
         runInTransaction(db, tx -> {
             startNodeId = tx.findNode(Label.label("Node"), "name", "s").getId();
             targetNodeId = tx.findNode(Label.label("Node"), "name", "x").getId();

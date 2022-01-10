@@ -64,7 +64,7 @@ class FilterOnCypherGraphIntegrationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, LabelPropagationStatsProc.class);
+        registerProcedures(GraphProjectProc.class, LabelPropagationStatsProc.class);
         runQuery(DB_CYPHER);
 
         runQuery(

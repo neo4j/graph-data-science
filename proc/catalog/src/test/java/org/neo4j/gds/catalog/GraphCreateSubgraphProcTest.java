@@ -45,7 +45,7 @@ class GraphCreateSubgraphProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, GraphListProc.class);
+        registerProcedures(GraphProjectProc.class, GraphListProc.class);
 
         runQuery(GdsCypher.call("graph")
             .graphProject()

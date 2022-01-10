@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.shortestpaths.AllShortestPathsProc;
 import org.neo4j.graphdb.Result;
@@ -49,7 +49,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(AllShortestPathsProc.class, GraphCreateProc.class);
+        registerProcedures(AllShortestPathsProc.class, GraphProjectProc.class);
         registerFunctions(IsFiniteFunc.class);
         runQuery(DB_CYPHER);
     }

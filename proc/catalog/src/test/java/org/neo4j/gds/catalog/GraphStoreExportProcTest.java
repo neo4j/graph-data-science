@@ -80,7 +80,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, GraphStoreExportProc.class);
+        registerProcedures(GraphProjectProc.class, GraphStoreExportProc.class);
         runQuery(DB_CYPHER);
     }
 

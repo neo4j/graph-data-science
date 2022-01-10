@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.assertj.ConditionFactory;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -49,7 +49,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(NodeClassificationTrainProc.class, GraphCreateProc.class);
+        registerProcedures(NodeClassificationTrainProc.class, GraphProjectProc.class);
         runQuery(createQuery());
 
         runQuery("CALL gds.graph.project('g', 'N', '*', {nodeProperties: ['a', 'b', 't']})");

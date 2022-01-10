@@ -26,7 +26,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Inject;
@@ -68,7 +68,7 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, getProcedureClazz());
+        registerProcedures(GraphProjectProc.class, getProcedureClazz());
 
         withModelInCatalog();
 

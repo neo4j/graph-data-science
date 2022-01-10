@@ -25,7 +25,7 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -82,7 +82,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(GraphCreateProc.class, PageRankMutateProc.class, GraphWriteNodePropertiesProc.class);
+        registerProcedures(GraphProjectProc.class, PageRankMutateProc.class, GraphWriteNodePropertiesProc.class);
 
         String loadQuery = GdsCypher.call(GRAPH_NAME)
             .graphProject()

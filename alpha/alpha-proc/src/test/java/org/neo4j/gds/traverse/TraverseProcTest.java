@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -67,7 +67,7 @@ class TraverseProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(TraverseProcBFS.class, TraverseProcDFS.class, GraphCreateProc.class);
+        registerProcedures(TraverseProcBFS.class, TraverseProcDFS.class, GraphProjectProc.class);
         runQuery(DB_CYPHER);
     }
 

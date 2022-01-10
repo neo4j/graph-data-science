@@ -65,7 +65,7 @@ class DeleteRelationshipsIntegrationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, NodeSimilarityMutateProc.class, GraphDeleteRelationshipProc.class);
+        registerProcedures(GraphProjectProc.class, NodeSimilarityMutateProc.class, GraphDeleteRelationshipProc.class);
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher

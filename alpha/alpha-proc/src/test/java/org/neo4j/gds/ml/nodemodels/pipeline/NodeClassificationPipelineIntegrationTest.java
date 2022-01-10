@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.functions.AsNodeFunc;
@@ -96,7 +96,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             ModelListProc.class,
             NodeClassificationPipelineCreateProc.class,
             NodeClassificationPipelineAddStepProcs.class,

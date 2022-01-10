@@ -34,7 +34,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, TestProc.class);
+        registerProcedures(GraphProjectProc.class, TestProc.class);
     }
 
     @Test

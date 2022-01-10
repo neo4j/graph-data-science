@@ -53,7 +53,7 @@ public class AllocationTrackerProcTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(GraphCreateProc.class, FastRPStreamProc.class, AllocationTrackingTestProc.class);
+        registerProcedures(GraphProjectProc.class, FastRPStreamProc.class, AllocationTrackingTestProc.class);
     }
 
     @Test

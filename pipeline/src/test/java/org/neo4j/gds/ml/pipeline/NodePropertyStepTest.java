@@ -27,7 +27,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.executor.GdsCallableFinder;
@@ -56,7 +56,7 @@ class NodePropertyStepTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphStreamNodePropertiesProc.class
         );
         String createQuery = GdsCypher.call(GRAPH_NAME)

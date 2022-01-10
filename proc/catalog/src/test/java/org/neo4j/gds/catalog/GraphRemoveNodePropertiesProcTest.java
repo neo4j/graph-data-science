@@ -66,7 +66,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphRemoveNodePropertiesProc.class,
             FastRPMutateProc.class,
             DegreeCentralityMutateProc.class

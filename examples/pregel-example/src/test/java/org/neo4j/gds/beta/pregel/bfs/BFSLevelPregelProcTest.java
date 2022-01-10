@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +56,7 @@ class BFSLevelPregelProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery(TEST_GRAPH);
 
-        registerProcedures(BFSLevelPregelStreamProc.class, GraphCreateProc.class);
+        registerProcedures(BFSLevelPregelStreamProc.class, GraphProjectProc.class);
     }
 
     @Test

@@ -39,7 +39,7 @@ import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.compat.MapUtil.map;
 
-class GraphCreateProcEstimateTest extends BaseProcTest {
+class GraphProjectProcEstimateTest extends BaseProcTest {
 
     private static final String DB_CYPHER_ESTIMATE =
         "CREATE" +
@@ -60,7 +60,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, TestProc.class);
+        registerProcedures(GraphProjectProc.class, TestProc.class);
         runQuery(DB_CYPHER_ESTIMATE);
     }
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.wcc.WccMutateProc;
@@ -43,7 +43,7 @@ class WccDocTest extends DocTestBase {
             WccWriteProc.class,
             WccMutateProc.class,
             WccStatsProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

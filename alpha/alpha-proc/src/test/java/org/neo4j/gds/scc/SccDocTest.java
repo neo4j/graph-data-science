@@ -22,7 +22,7 @@ package org.neo4j.gds.scc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.graphdb.Result;
 
@@ -51,7 +51,7 @@ class SccDocTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(SccWriteProc.class, SccStreamProc.class, GraphCreateProc.class);
+        registerProcedures(SccWriteProc.class, SccStreamProc.class, GraphProjectProc.class);
         registerFunctions(AsNodeFunc.class);
 
         runQuery("CALL gds.graph.project('graph', 'User', 'FOLLOW')");

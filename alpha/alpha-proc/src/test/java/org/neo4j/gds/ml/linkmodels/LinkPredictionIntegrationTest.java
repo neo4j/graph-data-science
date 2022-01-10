@@ -23,7 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
@@ -112,7 +112,7 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             FastRPMutateProc.class,
             GraphStreamRelationshipPropertiesProc.class,
             SplitRelationshipsMutateProc.class,

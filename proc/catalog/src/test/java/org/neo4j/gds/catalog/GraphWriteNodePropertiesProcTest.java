@@ -70,7 +70,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphWriteNodePropertiesProc.class,
             DegreeCentralityMutateProc.class,
             PageRankMutateProc.class

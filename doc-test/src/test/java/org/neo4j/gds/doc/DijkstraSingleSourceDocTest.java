@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraMutateProc;
 import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraStreamProc;
@@ -40,7 +40,7 @@ class DijkstraSingleSourceDocTest extends DocTestBase {
             AllShortestPathsDijkstraStreamProc.class,
             AllShortestPathsDijkstraWriteProc.class,
             AllShortestPathsDijkstraMutateProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

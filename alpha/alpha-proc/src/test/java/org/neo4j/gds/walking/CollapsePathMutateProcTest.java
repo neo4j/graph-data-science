@@ -29,7 +29,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateRelationshipsTest;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -66,7 +66,7 @@ class CollapsePathMutateProcTest extends BaseProcTest implements
     void setupGraph() throws Exception {
         registerProcedures(
             getProcedureClazz(),
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphWriteNodePropertiesProc.class
         );
     }

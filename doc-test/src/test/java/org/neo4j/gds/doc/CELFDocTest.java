@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.influenceMaximization.CELFProc;
 
@@ -34,7 +34,7 @@ class CELFDocTest extends DocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(CELFProc.class, GraphCreateProc.class);
+        return List.of(CELFProc.class, GraphProjectProc.class);
     }
 
     @Override

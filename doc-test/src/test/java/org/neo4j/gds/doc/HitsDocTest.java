@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.pregel.HitsStreamProc;
 
@@ -36,7 +36,7 @@ class HitsDocTest extends DocTestBase {
     protected List<Class<?>> procedures() {
         return List.of(
             HitsStreamProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

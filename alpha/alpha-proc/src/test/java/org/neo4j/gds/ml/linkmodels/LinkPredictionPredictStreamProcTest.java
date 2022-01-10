@@ -27,7 +27,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -69,7 +69,7 @@ class LinkPredictionPredictStreamProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(LinkPredictionPredictStreamProc.class, GraphCreateProc.class);
+        registerProcedures(LinkPredictionPredictStreamProc.class, GraphProjectProc.class);
         runQuery(GRAPH);
 
         runQuery(createQuery("g", UNDIRECTED));

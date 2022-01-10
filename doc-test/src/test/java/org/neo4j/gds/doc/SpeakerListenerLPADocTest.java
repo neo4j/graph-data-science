@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.pregel.SpeakerListenerLPAStreamProc;
 
@@ -36,7 +36,7 @@ class SpeakerListenerLPADocTest extends DocTestBase {
     protected List<Class<?>> procedures() {
         return List.of(
             SpeakerListenerLPAStreamProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

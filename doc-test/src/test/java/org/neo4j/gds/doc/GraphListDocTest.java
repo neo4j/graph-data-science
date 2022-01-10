@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphListProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ class GraphListDocTest extends DocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(GraphCreateProc.class, GraphListProc.class);
+        return List.of(GraphProjectProc.class, GraphListProc.class);
     }
 
     @Override

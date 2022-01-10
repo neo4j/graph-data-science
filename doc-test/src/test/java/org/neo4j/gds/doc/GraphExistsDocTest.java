@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphExistsFunc;
 import org.neo4j.gds.catalog.GraphExistsProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ class GraphExistsDocTest extends DocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(GraphCreateProc.class, GraphExistsProc.class);
+        return List.of(GraphProjectProc.class, GraphExistsProc.class);
     }
 
     @Override

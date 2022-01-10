@@ -41,7 +41,7 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphDeleteRelationshipProc.class, GraphCreateProc.class);
+        registerProcedures(GraphDeleteRelationshipProc.class, GraphProjectProc.class);
         runQuery(DB_CYPHER);
         runQuery("CALL gds.graph.project($graphName, 'A', ['T1', { T2: { properties: 'p'}}])", params);
     }

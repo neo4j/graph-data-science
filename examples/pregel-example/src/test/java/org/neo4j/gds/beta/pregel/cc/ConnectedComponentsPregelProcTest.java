@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 
 import java.util.HashMap;
@@ -94,7 +94,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
         runQuery(TEST_GRAPH);
 
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphStreamNodePropertiesProc.class,
             ConnectedComponentsPregelStreamProc.class,
             ConnectedComponentsPregelWriteProc.class,

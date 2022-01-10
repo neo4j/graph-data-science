@@ -22,7 +22,7 @@ package org.neo4j.gds.testproc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -34,7 +34,7 @@ public class ProcedureFailTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(ProcedureThatFailsDuringTask.class, GraphCreateProc.class);
+        registerProcedures(ProcedureThatFailsDuringTask.class, GraphProjectProc.class);
     }
 
     @Test

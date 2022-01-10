@@ -22,7 +22,7 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -38,7 +38,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class);
+        registerProcedures(GraphProjectProc.class);
         runQuery("CREATE (n)-[:REL]->(m)");
         runQuery("CALL gds.graph.project('g', '*', '*')");
     }

@@ -30,7 +30,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.SourceNodeConfigTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -85,7 +85,7 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
     void setup() throws Exception {
         registerProcedures(
             getProcedureClazz(),
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
 
         idA = idFunction.of("a");

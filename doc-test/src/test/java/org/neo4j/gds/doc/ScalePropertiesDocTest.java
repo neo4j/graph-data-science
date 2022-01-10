@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.scaling.ScalePropertiesMutateProc;
 import org.neo4j.gds.scaling.ScalePropertiesStreamProc;
-import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ class ScalePropertiesDocTest extends DocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             ScalePropertiesStreamProc.class,
             ScalePropertiesMutateProc.class
         );

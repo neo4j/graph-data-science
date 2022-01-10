@@ -39,7 +39,7 @@ class GraphExistsProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, GraphExistsProc.class);
+        registerProcedures(GraphProjectProc.class, GraphExistsProc.class);
         registerFunctions(GraphExistsFunc.class);
 
         runQuery(DB_CYPHER);

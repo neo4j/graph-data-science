@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 
 import java.util.List;
 import java.util.Map;
@@ -44,7 +44,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery(DB_CYPHER);
 
-        registerProcedures(GraphCreateProc.class, ScalePropertiesStreamProc.class);
+        registerProcedures(GraphProjectProc.class, ScalePropertiesStreamProc.class);
         var loadQuery = GdsCypher
             .call(GRAPH_NAME)
             .graphProject()

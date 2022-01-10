@@ -27,7 +27,7 @@ import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.OrientationCombinationTest;
 import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
@@ -73,7 +73,7 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
         registerProcedures(
             getProcedureClazz(),
             GraphWriteNodePropertiesProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
 
         expected = List.of(

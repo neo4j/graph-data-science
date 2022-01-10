@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 
@@ -33,7 +33,7 @@ class SplitRelationshipsDocTest extends DocTestBase {
         return Arrays.asList(
             SplitRelationshipsMutateProc.class,
             GraphStreamRelationshipPropertiesProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

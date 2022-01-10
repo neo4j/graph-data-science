@@ -21,9 +21,9 @@ package org.neo4j.gds.similarity.knn;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -32,7 +32,7 @@ class KnnFilteredGraphTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(GraphCreateProc.class, KnnMutateProc.class, GraphStreamRelationshipPropertiesProc.class);
+        registerProcedures(GraphProjectProc.class, KnnMutateProc.class, GraphStreamRelationshipPropertiesProc.class);
     }
 
     @Neo4jGraph

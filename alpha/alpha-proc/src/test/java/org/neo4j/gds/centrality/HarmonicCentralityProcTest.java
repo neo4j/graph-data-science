@@ -26,7 +26,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -56,7 +56,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(HarmonicCentralityWriteProc.class, HarmonicCentralityStreamProc.class, GraphCreateProc.class);
+        registerProcedures(HarmonicCentralityWriteProc.class, HarmonicCentralityStreamProc.class, GraphProjectProc.class);
     }
 
     @Test

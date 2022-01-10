@@ -62,7 +62,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, GraphWriteRelationshipProc.class);
+        registerProcedures(GraphProjectProc.class, GraphWriteRelationshipProc.class);
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher.call(TEST_GRAPH_NAME)

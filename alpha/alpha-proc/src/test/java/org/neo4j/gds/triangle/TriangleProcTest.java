@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 
 import java.util.HashSet;
 
@@ -63,7 +63,7 @@ class TriangleProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(TriangleProc.class, GraphCreateProc.class);
+        registerProcedures(TriangleProc.class, GraphProjectProc.class);
         runQuery(dbCypher());
         idToName = new String[9];
 

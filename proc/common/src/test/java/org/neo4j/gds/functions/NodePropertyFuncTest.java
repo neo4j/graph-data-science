@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Arrays;
@@ -40,7 +40,7 @@ class NodePropertyFuncTest  extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(GraphCreateProc.class);
+        registerProcedures(GraphProjectProc.class);
         registerFunctions(NodePropertyFunc.class);
         runQuery(DB_CYPHER);
         runQuery(GdsCypher

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Arrays;
@@ -41,7 +41,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(GraphCreateProc.class, PageRankStatsProc.class);
+        registerProcedures(GraphProjectProc.class, PageRankStatsProc.class);
         runQuery("CALL gds.graph.project('graphLabel1', '*', '*')");
     }
 

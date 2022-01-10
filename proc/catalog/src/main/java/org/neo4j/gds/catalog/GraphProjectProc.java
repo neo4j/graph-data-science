@@ -55,7 +55,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphCreateProc extends CatalogProc {
+public class GraphProjectProc extends CatalogProc {
 
     private static final String NO_GRAPH_NAME = "";
     private static final String DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
@@ -69,7 +69,7 @@ public class GraphCreateProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.project", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphCreateNativeResult> project(
+    public Stream<GraphProjectNativeResult> project(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProjection") @Nullable Object nodeProjection,
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
@@ -90,9 +90,9 @@ public class GraphCreateProc extends CatalogProc {
         validateConfig(cypherConfig, config);
 
         // computation
-        GraphCreateNativeResult result = runWithExceptionLogging(
+        GraphProjectNativeResult result = runWithExceptionLogging(
             "Graph creation failed",
-            () -> (GraphCreateNativeResult) createGraph(config)
+            () -> (GraphProjectNativeResult) projectGraph(config)
         );
         // result
         return Stream.of(result);
@@ -100,7 +100,7 @@ public class GraphCreateProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.create", mode = READ, deprecatedBy = "gds.graph.project")
     @Description(DESCRIPTION)
-    public Stream<GraphCreateNativeResult> projectSubgraph(
+    public Stream<GraphProjectNativeResult> projectSubgraph(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProjection") @Nullable Object nodeProjection,
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
@@ -142,7 +142,7 @@ public class GraphCreateProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.project.cypher", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphCreateCypherResult> projectCypher(
+    public Stream<GraphProjectCypherResult> projectCypher(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeQuery") String nodeQuery,
         @Name(value = "relationshipQuery") String relationshipQuery,
@@ -163,9 +163,9 @@ public class GraphCreateProc extends CatalogProc {
         validateConfig(cypherConfig, config);
 
         // computation
-        GraphCreateCypherResult result = runWithExceptionLogging(
+        GraphProjectCypherResult result = runWithExceptionLogging(
             "Graph creation failed",
-            () -> (GraphCreateCypherResult) createGraph(config)
+            () -> (GraphProjectCypherResult) projectGraph(config)
         );
         // result
         return Stream.of(result);
@@ -173,7 +173,7 @@ public class GraphCreateProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.create.cypher", mode = READ, deprecatedBy = "gds.graph.project.cypher")
     @Description(DESCRIPTION)
-    public Stream<GraphCreateCypherResult> createCypher(
+    public Stream<GraphProjectCypherResult> createCypher(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeQuery") String nodeQuery,
         @Name(value = "relationshipQuery") String relationshipQuery,
@@ -216,7 +216,7 @@ public class GraphCreateProc extends CatalogProc {
 
     @Procedure(name = "gds.beta.graph.project.subgraph", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphCreateSubgraphResult> projectSubgraph(
+    public Stream<GraphProjectSubgraphResult> projectSubgraph(
         @Name(value = "graphName") String graphName,
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "nodeFilter") String nodeFilter,
@@ -242,7 +242,7 @@ public class GraphCreateProc extends CatalogProc {
 
         validateConfig(procedureConfig, graphProjectConfig);
 
-        GraphCreateSubgraphResult result = runWithExceptionLogging(
+        GraphProjectSubgraphResult result = runWithExceptionLogging(
             "Graph creation failed",
             ExceptionUtil.supplier(() -> createGraphFromGraphStore(fromGraphStore.graphStore(), graphProjectConfig))
         );
@@ -252,7 +252,7 @@ public class GraphCreateProc extends CatalogProc {
 
     @Procedure(name = "gds.beta.graph.create.subgraph", mode = READ, deprecatedBy = "gds.beta.graph.project.subgraph")
     @Description(DESCRIPTION)
-    public Stream<GraphCreateSubgraphResult> createSubgraph(
+    public Stream<GraphProjectSubgraphResult> createSubgraph(
         @Name(value = "graphName") String graphName,
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "nodeFilter") String nodeFilter,
@@ -262,7 +262,7 @@ public class GraphCreateProc extends CatalogProc {
         return projectSubgraph(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
     }
 
-    private GraphCreateSubgraphResult createGraphFromGraphStore(
+    private GraphProjectSubgraphResult createGraphFromGraphStore(
         GraphStore fromGraphStore,
         GraphProjectFromGraphConfig config
     ) throws
@@ -290,7 +290,7 @@ public class GraphCreateProc extends CatalogProc {
 
         var createMillis = progressTimer.stop().getDuration();
 
-        return new GraphCreateSubgraphResult(
+        return new GraphProjectSubgraphResult(
             config.graphName(),
             config.fromGraphName(),
             config.nodeFilter(),
@@ -321,12 +321,12 @@ public class GraphCreateProc extends CatalogProc {
         return AllocationTracker.empty();
     }
 
-    private GraphCreateResult createGraph(GraphProjectConfig config) {
+    private GraphProjectResult projectGraph(GraphProjectConfig config) {
         memoryUsageValidator().tryValidateMemoryUsage(config, this::memoryTreeWithDimensions);
 
-        GraphCreateResult.Builder builder = config instanceof GraphProjectFromCypherConfig
-            ? new GraphCreateCypherResult.Builder((GraphProjectFromCypherConfig) config)
-            : new GraphCreateNativeResult.Builder((GraphProjectFromStoreConfig) config);
+        GraphProjectResult.Builder builder = config instanceof GraphProjectFromCypherConfig
+            ? new GraphProjectCypherResult.Builder((GraphProjectFromCypherConfig) config)
+            : new GraphProjectNativeResult.Builder((GraphProjectFromStoreConfig) config);
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             GraphStore graphStore = new GraphStoreFromDatabaseLoader(
@@ -370,13 +370,13 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     @SuppressWarnings("unused")
-    public static class GraphCreateResult {
+    public static class GraphProjectResult {
         public final String graphName;
         public final long nodeCount;
         public final long relationshipCount;
         public final long createMillis;
 
-        GraphCreateResult(
+        GraphProjectResult(
             String graphName,
             long nodeCount,
             long relationshipCount,
@@ -413,17 +413,17 @@ public class GraphCreateProc extends CatalogProc {
                 return this;
             }
 
-            abstract GraphCreateResult build();
+            abstract GraphProjectResult build();
         }
     }
 
     @SuppressWarnings("unused")
-    public static class GraphCreateNativeResult extends GraphCreateResult {
+    public static class GraphProjectNativeResult extends GraphProjectResult {
 
         public final Map<String, Object> nodeProjection;
         public final Map<String, Object> relationshipProjection;
 
-        GraphCreateNativeResult(
+        GraphProjectNativeResult(
             String graphName,
             Map<String, Object> nodeProjection,
             Map<String, Object> relationshipProjection,
@@ -436,7 +436,7 @@ public class GraphCreateProc extends CatalogProc {
             this.relationshipProjection = relationshipProjection;
         }
 
-        protected static final class Builder extends GraphCreateResult.Builder {
+        protected static final class Builder extends GraphProjectResult.Builder {
             private final NodeProjections nodeProjections;
             private final RelationshipProjections relationshipProjections;
 
@@ -446,8 +446,8 @@ public class GraphCreateProc extends CatalogProc {
                 this.relationshipProjections = config.relationshipProjections();
             }
 
-            GraphCreateNativeResult build() {
-                return new GraphCreateNativeResult(
+            GraphProjectNativeResult build() {
+                return new GraphProjectNativeResult(
                     graphName,
                     nodeProjections.toObject(),
                     relationshipProjections.toObject(),
@@ -460,11 +460,11 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     @SuppressWarnings("unused")
-    public static class GraphCreateCypherResult extends GraphCreateResult {
+    public static class GraphProjectCypherResult extends GraphProjectResult {
         public final String nodeQuery;
         public final String relationshipQuery;
 
-        GraphCreateCypherResult(
+        GraphProjectCypherResult(
             String graphName,
             String nodeQuery,
             String relationshipQuery,
@@ -477,7 +477,7 @@ public class GraphCreateProc extends CatalogProc {
             this.relationshipQuery = relationshipQuery;
         }
 
-        protected static final class Builder extends GraphCreateResult.Builder {
+        protected static final class Builder extends GraphProjectResult.Builder {
             private final String nodeQuery;
             private final String relationshipQuery;
 
@@ -487,8 +487,8 @@ public class GraphCreateProc extends CatalogProc {
                 this.relationshipQuery = config.relationshipQuery();
             }
 
-            GraphCreateCypherResult build() {
-                return new GraphCreateCypherResult(
+            GraphProjectCypherResult build() {
+                return new GraphProjectCypherResult(
                     graphName,
                     nodeQuery,
                     relationshipQuery,
@@ -501,12 +501,12 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     @SuppressWarnings("unused")
-    public static class GraphCreateSubgraphResult extends GraphCreateResult {
+    public static class GraphProjectSubgraphResult extends GraphProjectResult {
         public final String fromGraphName;
         public final String nodeFilter;
         public final String relationshipFilter;
 
-        GraphCreateSubgraphResult(
+        GraphProjectSubgraphResult(
             String graphName,
             String fromGraphName,
             String nodeFilter,

@@ -22,10 +22,10 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
-import org.neo4j.gds.wcc.WccMutateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
+import org.neo4j.gds.wcc.WccMutateProc;
 
 import static java.util.Collections.singletonList;
 import static org.neo4j.gds.compat.MapUtil.map;
@@ -37,7 +37,7 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphListProc.class,
             WccMutateProc.class,
             NodeSimilarityMutateProc.class

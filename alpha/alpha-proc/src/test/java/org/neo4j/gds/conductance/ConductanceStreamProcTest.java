@@ -26,7 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
@@ -69,7 +69,7 @@ class ConductanceStreamProcTest extends BaseProcTest {
     void setupGraph() throws Exception {
         registerProcedures(
             ConductanceStreamProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
 
         String createQuery = GdsCypher.call(GRAPH_NAME)

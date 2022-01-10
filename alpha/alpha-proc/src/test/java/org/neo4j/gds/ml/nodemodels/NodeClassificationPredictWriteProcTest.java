@@ -33,7 +33,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromCypherConfig;
@@ -81,7 +81,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, NodeClassificationPredictWriteProc.class);
+        registerProcedures(GraphProjectProc.class, NodeClassificationPredictWriteProc.class);
 
         runQuery(DB_CYPHER);
 

@@ -28,7 +28,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -108,7 +108,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             LinkPredictionPipelineAddStepProcs.class,
             LinkPredictionPipelineConfigureParamsProc.class,
             LinkPredictionPipelineConfigureSplitProc.class,
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             ModelDropProc.class
         );
 

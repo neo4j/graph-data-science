@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.node2vec.Node2VecWriteProc;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
@@ -77,7 +77,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery(DB_CYPHER);
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphSageTrainProc.class,
             GraphSageStreamProc.class,
             FastRPWriteProc.class,

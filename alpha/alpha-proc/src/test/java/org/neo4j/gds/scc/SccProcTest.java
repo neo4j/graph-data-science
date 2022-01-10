@@ -27,7 +27,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -71,7 +71,7 @@ class SccProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(SccWriteProc.class, SccStreamProc.class, GraphCreateProc.class);
+        registerProcedures(SccWriteProc.class, SccStreamProc.class, GraphProjectProc.class);
     }
 
     @Test

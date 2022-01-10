@@ -113,7 +113,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery(DB_CYPHER);
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphDropProc.class,
             GraphWriteNodePropertiesProc.class,
             GraphWriteRelationshipProc.class,

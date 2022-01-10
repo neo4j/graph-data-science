@@ -46,7 +46,7 @@ public class RemoveNodePropertiesIntegrationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, WccMutateProc.class, GraphRemoveNodePropertiesProc.class);
+        registerProcedures(GraphProjectProc.class, WccMutateProc.class, GraphRemoveNodePropertiesProc.class);
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher

@@ -36,7 +36,7 @@ class TransactionsWhileProjectingIntegrationTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(GraphCreateProc.class);
+        registerProcedures(GraphProjectProc.class);
         runQuery(CREATE_A_NODE);
     }
 

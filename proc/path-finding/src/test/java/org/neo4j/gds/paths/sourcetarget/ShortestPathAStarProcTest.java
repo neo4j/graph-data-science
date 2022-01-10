@@ -33,7 +33,7 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.SourceNodeConfigTest;
 import org.neo4j.gds.TargetNodeConfigTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromCypherConfig;
@@ -114,7 +114,7 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     void setup() throws Exception {
         registerProcedures(
             getProcedureClazz(),
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
 
         idA = idFunction.of("nA");

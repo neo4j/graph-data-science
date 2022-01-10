@@ -100,13 +100,13 @@ import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_K
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class GraphCreateProcTest extends BaseProcTest {
+class GraphProjectProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER = "CREATE (:A {age: 2})-[:REL {weight: 55}]->(:A)";
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, TestProc.class);
+        registerProcedures(GraphProjectProc.class, TestProc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -191,7 +191,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void testNativeProgressTracking() {
-        TestProcedureRunner.applyOnProcedure(db, GraphCreateProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
 
@@ -203,7 +203,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void testCypherProgressTracking() {
-        TestProcedureRunner.applyOnProcedure(db, GraphCreateProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
 
@@ -844,8 +844,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)\\.");
     }
 
-    void applyOnProcedure(Consumer<GraphCreateProc> func) {
-        TestProcedureRunner.applyOnProcedure(db, GraphCreateProc.class, func);
+    void applyOnProcedure(Consumer<GraphProjectProc> func) {
+        TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, func);
     }
 
     @Test

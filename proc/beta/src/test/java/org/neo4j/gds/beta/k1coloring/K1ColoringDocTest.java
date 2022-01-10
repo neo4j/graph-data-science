@@ -22,10 +22,10 @@ package org.neo4j.gds.beta.k1coloring;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +37,7 @@ final class K1ColoringDocTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(K1ColoringMutateProc.class, K1ColoringWriteProc.class, K1ColoringStreamProc.class);
-        registerProcedures(GraphCreateProc.class);
+        registerProcedures(GraphProjectProc.class);
         registerFunctions(AsNodeFunc.class);
 
         String dbQuery =

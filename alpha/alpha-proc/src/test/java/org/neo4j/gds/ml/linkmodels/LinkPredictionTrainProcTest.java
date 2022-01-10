@@ -28,7 +28,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.assertj.ConditionFactory;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -110,7 +110,7 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(LinkPredictionTrainProc.class, GraphCreateProc.class);
+        registerProcedures(LinkPredictionTrainProc.class, GraphProjectProc.class);
         runQuery(GRAPH);
 
         runQuery(createQuery("g", UNDIRECTED));

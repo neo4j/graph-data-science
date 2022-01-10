@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.similarity.knn.KnnWriteProc;
 
@@ -30,7 +30,7 @@ class FastRPKnnDocTest extends DocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             FastRPMutateProc.class,
             KnnWriteProc.class
         );

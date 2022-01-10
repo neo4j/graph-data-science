@@ -27,7 +27,7 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -76,7 +76,7 @@ abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends B
     void setup() throws Exception {
         registerProcedures(
             getProcedureClazz(),
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
         loadGraph(K1COLORING_GRAPH);
     }

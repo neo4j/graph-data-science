@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphRemoveNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
@@ -34,7 +34,7 @@ final class NodeOperationsDocTest extends DocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             DegreeCentralityMutateProc.class,
             GraphStreamNodePropertiesProc.class,
             GraphWriteNodePropertiesProc.class,

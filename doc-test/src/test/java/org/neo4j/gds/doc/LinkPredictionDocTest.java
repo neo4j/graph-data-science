@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Inject;
@@ -52,7 +52,7 @@ class LinkPredictionDocTest extends DocTestBase {
             LinkPredictionPredictMutateProc.class,
             LinkPredictionPredictWriteProc.class,
             SplitRelationshipsMutateProc.class,
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             AsNodeFunc.class
         );
     }

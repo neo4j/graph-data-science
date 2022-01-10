@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.wcc.WccStatsProc;
 
 import java.util.Arrays;
@@ -31,7 +31,7 @@ class TransactionHandlingDocTest extends DocTestBase {
     protected List<Class<?>> procedures() {
         return Arrays.asList(
             WccStatsProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

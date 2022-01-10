@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.pagerank.ArticleRankMutateProc;
 import org.neo4j.gds.pagerank.ArticleRankStatsProc;
@@ -42,7 +42,7 @@ class ArticleRankDocTest extends DocTestBase {
             ArticleRankWriteProc.class,
             ArticleRankMutateProc.class,
             ArticleRankStatsProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

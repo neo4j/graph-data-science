@@ -40,7 +40,7 @@ import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -77,7 +77,7 @@ public class PregelProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery("CREATE (:OffsetId), (:RealNode)");
-        registerProcedures(GraphCreateProc.class, StreamProc.class, WriteProc.class, MutateProc.class);
+        registerProcedures(GraphProjectProc.class, StreamProc.class, WriteProc.class, MutateProc.class);
         runQuery(GdsCypher.call(DEFAULT_GRAPH_NAME).graphProject().withNodeLabel("RealNode").withAnyRelationshipType().yields());
     }
 

@@ -26,7 +26,7 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
@@ -98,7 +98,7 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
         registerProcedures(
             getProcedureClazz(),
             GraphWriteNodePropertiesProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
 
         String createQuery = GdsCypher.call(GRAPH_NAME)

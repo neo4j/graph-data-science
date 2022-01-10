@@ -63,7 +63,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, GraphStreamRelationshipPropertiesProc.class);
+        registerProcedures(GraphProjectProc.class, GraphStreamRelationshipPropertiesProc.class);
         registerFunctions(AsNodeFunc.class);
         runQuery(DB_CYPHER);
 

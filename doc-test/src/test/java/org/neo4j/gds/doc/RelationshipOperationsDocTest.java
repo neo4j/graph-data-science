@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphDeleteRelationshipProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
 import org.neo4j.gds.functions.AsNodeFunc;
@@ -38,7 +38,7 @@ final class RelationshipOperationsDocTest extends DocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             NodeSimilarityMutateProc.class,
             GraphStreamRelationshipPropertiesProc.class,
             GraphWriteRelationshipProc.class,

@@ -23,7 +23,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.similarity.cosine.CosineStatsProc;
@@ -73,7 +73,7 @@ class CosineDocTest extends BaseProcTest {
                              "CREATE (karin)-[:LIKES {score: 10}]->(portuguese)";
 
         runQuery(createGraph);
-        registerProcedures(CosineStatsProc.class, CosineStreamProc.class, CosineWriteProc.class, GraphCreateProc.class);
+        registerProcedures(CosineStatsProc.class, CosineStreamProc.class, CosineWriteProc.class, GraphProjectProc.class);
         registerFunctions(AsNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
     }
 

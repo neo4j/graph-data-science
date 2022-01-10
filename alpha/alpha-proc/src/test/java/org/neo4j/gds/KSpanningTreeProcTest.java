@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -64,7 +64,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(KSpanningTreeMinProc.class, KSpanningTreeMaxProc.class, GraphCreateProc.class);
+        registerProcedures(KSpanningTreeMinProc.class, KSpanningTreeMaxProc.class, GraphProjectProc.class);
         var createQuery = GdsCypher.call(GRAPH_NAME)
             .graphProject()
             .withRelationshipProperty("w")

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -51,7 +51,7 @@ class NodeClassificationDocTest extends DocTestBase {
             NodeClassificationPredictStreamProc.class,
             NodeClassificationPredictMutateProc.class,
             NodeClassificationPredictWriteProc.class,
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphStreamNodePropertiesProc.class
         );
     }

@@ -25,7 +25,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
@@ -68,7 +68,7 @@ public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extend
     void setUp() throws Exception {
         registerProcedures(
             getProcedureClazz(),
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

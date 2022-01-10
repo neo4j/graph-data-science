@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.triangle.TriangleCountMutateProc;
 import org.neo4j.gds.triangle.TriangleCountStatsProc;
@@ -44,7 +44,7 @@ class TriangleCountDocTest extends DocTestBase {
             TriangleCountMutateProc.class,
             TriangleCountStatsProc.class,
             TriangleProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

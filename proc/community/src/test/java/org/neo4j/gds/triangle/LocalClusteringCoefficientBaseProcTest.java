@@ -32,7 +32,7 @@ import org.neo4j.gds.OnlyUndirectedTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -93,7 +93,7 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphWriteNodePropertiesProc.class,
             getProcedureClazz()
         );

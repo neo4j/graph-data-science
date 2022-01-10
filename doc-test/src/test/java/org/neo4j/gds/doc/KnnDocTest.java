@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.similarity.knn.KnnMutateProc;
 import org.neo4j.gds.similarity.knn.KnnStatsProc;
@@ -42,7 +42,7 @@ class KnnDocTest extends DocTestBase {
             KnnWriteProc.class,
             KnnStatsProc.class,
             KnnMutateProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

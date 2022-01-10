@@ -52,7 +52,7 @@ class GraphDropProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             GraphExistsProc.class,
             GraphDropProc.class
         );

@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -87,7 +87,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(ShortestPathDeltaSteppingStreamProc.class, ShortestPathDeltaSteppingWriteProc.class, GraphCreateProc.class);
+        registerProcedures(ShortestPathDeltaSteppingStreamProc.class, ShortestPathDeltaSteppingWriteProc.class, GraphProjectProc.class);
         runQuery(DB_CYPHER);
     }
 

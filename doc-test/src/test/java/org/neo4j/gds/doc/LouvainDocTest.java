@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.louvain.LouvainStatsProc;
@@ -42,7 +42,7 @@ class LouvainDocTest extends DocTestBase {
             LouvainWriteProc.class,
             LouvainStatsProc.class,
             LouvainMutateProc.class,
-            GraphCreateProc.class
+            GraphProjectProc.class
         );
     }
 

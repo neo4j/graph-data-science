@@ -28,7 +28,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.SourceNodesConfigTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
@@ -68,7 +68,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(RandomWalkStreamProc.class, GraphCreateProc.class);
+        registerProcedures(RandomWalkStreamProc.class, GraphProjectProc.class);
         runQuery(DB_CYPHER);
 
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)

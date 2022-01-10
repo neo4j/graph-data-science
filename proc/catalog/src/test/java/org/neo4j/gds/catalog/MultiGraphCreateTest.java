@@ -37,7 +37,7 @@ class MultiGraphCreateTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class);
+        registerProcedures(GraphProjectProc.class);
     }
 
     @Test
