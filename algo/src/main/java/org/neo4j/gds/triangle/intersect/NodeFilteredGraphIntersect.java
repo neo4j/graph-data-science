@@ -43,7 +43,7 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
 
     @Override
     public void intersectAll(long nodeIdA, IntersectionConsumer consumer) {
-        wrappedRelationshipIntersect.intersectAll(nodeIdA, (a, b, c) -> {
+        wrappedRelationshipIntersect.intersectAll(filteredGraph.toRootNodeId(nodeIdA), (a, b, c) -> {
             if (filteredGraph.contains(a) && filteredGraph.contains(b) && filteredGraph.contains(c)) {
                 consumer.accept(
                     filteredGraph.toMappedNodeId(a),
