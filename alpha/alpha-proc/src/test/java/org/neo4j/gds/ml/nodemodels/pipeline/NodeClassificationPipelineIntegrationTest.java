@@ -28,6 +28,7 @@ import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineStreamProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineTrainProc;
+import org.neo4j.gds.model.catalog.ModelListProc;
 
 import java.util.List;
 import java.util.Map;
@@ -96,6 +97,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
     void setUp() throws Exception {
         registerProcedures(
             GraphCreateProc.class,
+            ModelListProc.class,
             NodeClassificationPipelineCreateProc.class,
             NodeClassificationPipelineAddStepProcs.class,
             NodeClassificationPipelineConfigureSplitProc.class,
@@ -140,6 +142,11 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
                  " metrics: ['F1_WEIGHTED']," +
                  " randomSeed: 2" +
                  "})");
+
+        assertCypherResult(
+            "CALL gds.beta.model.list() YIELD modelInfo RETURN count(*) AS modelCount",
+            List.of(Map.of("modelCount", 2L))
+        );
 
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.nodeClassification.predict.stream('g', {" +
