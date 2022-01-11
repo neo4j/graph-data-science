@@ -162,6 +162,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 ),
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -182,6 +183,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -228,6 +230,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 RELATIONSHIP_QUERY_KEY, relationshipQuery,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -259,6 +262,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
                 "nodeCount", 1L,
                 "relationshipCount", 0L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -304,6 +308,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -327,6 +332,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -355,6 +361,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 RELATIONSHIP_QUERY_KEY, relationshipQuery,
                 "nodeCount", 1L,
                 "relationshipCount", 1L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -379,6 +386,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -400,6 +408,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 RELATIONSHIP_PROJECTION_KEY, desugaredRelProjection,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -438,6 +447,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 )),
                 "nodeCount", 2L,
                 "relationshipCount", expectedRelationshipCount,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -474,6 +484,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 ),
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -497,6 +508,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 RELATIONSHIP_QUERY_KEY, relationshipQuery,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -561,6 +573,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 ),
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -602,6 +615,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 ),
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
+                "projectMillis", instanceOf(Long.class),
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -711,6 +725,7 @@ class GraphProjectProcTest extends BaseProcTest {
             ),
             "nodeCount", 2L,
             "relationshipCount", 1L,
+            "projectMillis", instanceOf(Long.class),
             "createMillis", instanceOf(Long.class)
         )));
     }
@@ -739,6 +754,7 @@ class GraphProjectProcTest extends BaseProcTest {
             RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
             "nodeCount", 2L,
             "relationshipCount", 1L,
+            "projectMillis", instanceOf(Long.class),
             "createMillis", instanceOf(Long.class)
         )));
     }

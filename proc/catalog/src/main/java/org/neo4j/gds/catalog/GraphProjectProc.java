@@ -288,7 +288,7 @@ public class GraphProjectProc extends CatalogProc {
 
         GraphStoreCatalog.set(config, graphStore);
 
-        var createMillis = progressTimer.stop().getDuration();
+        var projectMillis = progressTimer.stop().getDuration();
 
         return new GraphProjectSubgraphResult(
             config.graphName(),
@@ -297,7 +297,7 @@ public class GraphProjectProc extends CatalogProc {
             config.relationshipFilter(),
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
-            createMillis
+            projectMillis
         );
     }
 
@@ -328,7 +328,7 @@ public class GraphProjectProc extends CatalogProc {
             ? new GraphProjectCypherResult.Builder((GraphProjectFromCypherConfig) config)
             : new GraphProjectNativeResult.Builder((GraphProjectFromStoreConfig) config);
 
-        try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
+        try (ProgressTimer ignored = ProgressTimer.start(builder::withProjectMillis)) {
             GraphStore graphStore = new GraphStoreFromDatabaseLoader(
                 config,
                 username(),
@@ -374,25 +374,28 @@ public class GraphProjectProc extends CatalogProc {
         public final String graphName;
         public final long nodeCount;
         public final long relationshipCount;
+        public final long projectMillis;
         public final long createMillis;
 
         GraphProjectResult(
             String graphName,
             long nodeCount,
             long relationshipCount,
-            long createMillis
+            long projectMillis
         ) {
             this.graphName = graphName;
             this.nodeCount = nodeCount;
             this.relationshipCount = relationshipCount;
-            this.createMillis = createMillis;
+            this.projectMillis = projectMillis;
+            // kept for backwards compatibility
+            this.createMillis = projectMillis;
         }
 
         protected abstract static class Builder {
             final String graphName;
             long nodeCount;
             long relationshipCount;
-            long createMillis;
+            long projectMillis;
 
             Builder(GraphProjectConfig config) {
                 this.graphName = config.graphName();
@@ -408,8 +411,8 @@ public class GraphProjectProc extends CatalogProc {
                 return this;
             }
 
-            Builder withCreateMillis(long createMillis) {
-                this.createMillis = createMillis;
+            Builder withProjectMillis(long projectMillis) {
+                this.projectMillis = projectMillis;
                 return this;
             }
 
@@ -429,9 +432,9 @@ public class GraphProjectProc extends CatalogProc {
             Map<String, Object> relationshipProjection,
             long nodeCount,
             long relationshipCount,
-            long createMillis
+            long projectMillis
         ) {
-            super(graphName, nodeCount, relationshipCount, createMillis);
+            super(graphName, nodeCount, relationshipCount, projectMillis);
             this.nodeProjection = nodeProjection;
             this.relationshipProjection = relationshipProjection;
         }
@@ -453,7 +456,7 @@ public class GraphProjectProc extends CatalogProc {
                     relationshipProjections.toObject(),
                     nodeCount,
                     relationshipCount,
-                    createMillis
+                    projectMillis
                 );
             }
         }
@@ -470,9 +473,9 @@ public class GraphProjectProc extends CatalogProc {
             String relationshipQuery,
             long nodeCount,
             long relationshipCount,
-            long createMillis
+            long projectMillis
         ) {
-            super(graphName, nodeCount, relationshipCount, createMillis);
+            super(graphName, nodeCount, relationshipCount, projectMillis);
             this.nodeQuery = nodeQuery;
             this.relationshipQuery = relationshipQuery;
         }
@@ -494,7 +497,7 @@ public class GraphProjectProc extends CatalogProc {
                     relationshipQuery,
                     nodeCount,
                     relationshipCount,
-                    createMillis
+                    projectMillis
                 );
             }
         }
@@ -513,9 +516,9 @@ public class GraphProjectProc extends CatalogProc {
             String relationshipFilter,
             long nodeCount,
             long relationshipCount,
-            long createMillis
+            long projectMillis
         ) {
-            super(graphName, nodeCount, relationshipCount, createMillis);
+            super(graphName, nodeCount, relationshipCount, projectMillis);
             this.fromGraphName = fromGraphName;
             this.nodeFilter = nodeFilter;
             this.relationshipFilter = relationshipFilter;
