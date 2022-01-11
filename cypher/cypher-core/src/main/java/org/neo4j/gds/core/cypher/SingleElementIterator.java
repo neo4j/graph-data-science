@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.core.cypher;
 
-import java.util.Iterator;
+import com.carrotsearch.hppc.AbstractIterator;
 
-public class SingleElementIterator<T> implements Iterator<T> {
+public class SingleElementIterator<T> extends AbstractIterator<T> {
 
     private final T element;
     private boolean firstIteration;
@@ -32,12 +32,10 @@ public class SingleElementIterator<T> implements Iterator<T> {
     }
 
     @Override
-    public boolean hasNext() {
-        return firstIteration;
-    }
-
-    @Override
-    public T next() {
+    protected T fetch() {
+        if (!firstIteration) {
+            return done();
+        }
         firstIteration = false;
         return element;
     }

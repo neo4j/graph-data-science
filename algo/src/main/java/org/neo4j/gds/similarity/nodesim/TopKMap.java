@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
+import com.carrotsearch.hppc.AbstractIterator;
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -28,9 +28,9 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
 import org.neo4j.gds.core.utils.queue.BoundedLongPriorityQueue;
+import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.PrimitiveIterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -130,18 +130,16 @@ public class TopKMap {
 
         Stream<SimilarityResult> stream(long node1) {
 
-            Iterable<SimilarityResult> iterable = () -> new Iterator<SimilarityResult>() {
+            Iterable<SimilarityResult> iterable = () -> new AbstractIterator<>() {
 
                 final PrimitiveIterator.OfLong elementsIter = queue.elements().iterator();
                 final PrimitiveIterator.OfDouble prioritiesIter = queue.priorities().iterator();
 
                 @Override
-                public boolean hasNext() {
-                    return elementsIter.hasNext() && prioritiesIter.hasNext();
-                }
-
-                @Override
-                public SimilarityResult next() {
+                protected SimilarityResult fetch() {
+                    if (!elementsIter.hasNext() || !prioritiesIter.hasNext()) {
+                        return done();
+                    }
                     return new SimilarityResult(node1, elementsIter.nextLong(), prioritiesIter.nextDouble());
                 }
             };

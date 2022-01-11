@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.gds.core.loading.ZigZagLongDecoding;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
@@ -92,7 +93,7 @@ public class CompressedRandomWalks {
         return walkLengths.get(index);
     }
 
-    public static class CompressedWalkIterator implements Iterator<long[]> {
+    public static class CompressedWalkIterator extends AbstractIterator<long[]> {
         private final HugeCursor<byte[][]> cursor;
         private final HugeIntArray walkLengths;
         private final long[] outputBuffer;
@@ -116,25 +117,20 @@ public class CompressedRandomWalks {
             outputBuffer = new long[maxWalkLength];
         }
 
-        @Override
-        public boolean hasNext() {
-            if (currentIndex < cursor.limit) return true;
-
-            if (cursor.next()) {
-                currentIndex = cursor.offset;
-                return true;
-            }
-
-            return false;
-        }
-
         /**
          * Returns the next random walk in the specified range.
          * The long array returned by this method will be reused in the following call to `next` and must not be shared.
          * If the current walk is shorter than the maximum walk length, the remaining elements will be filled with -1.
          */
         @Override
-        public long[] next() {
+        protected long[] fetch() {
+            if (currentIndex >= cursor.limit) {
+                if (!cursor.next()) {
+                    return done();
+                }
+                currentIndex = cursor.offset;
+            }
+
             var compressedWalk = cursor.array[currentIndex];
             var walkLength = walkLengths.get(cursor.base + currentIndex);
             Arrays.fill(outputBuffer, -1L);

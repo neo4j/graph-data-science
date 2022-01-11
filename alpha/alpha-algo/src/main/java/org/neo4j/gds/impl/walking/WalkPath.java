@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.impl.walking;
 
+import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
@@ -136,22 +137,16 @@ public class WalkPath implements Path {
 
     @Override
     public final Iterator<Entity> iterator() {
-        return new Iterator<>() {
+        return new AbstractIterator<>() {
             int i = 0;
 
             @Override
-            public boolean hasNext() {
-                return i < 2 * size;
-            }
-
-            @Override
-            public Entity next() {
+            protected Entity fetch() {
                 var i = this.i++;
-                if (i % 2 == 0) {
-                    return nodes.get(i / 2);
-                } else {
-                    return relationships.get(i / 2);
+                if (i > 2 * size) {
+                    return done();
                 }
+                return i % 2 == 0 ? nodes.get(i / 2) : relationships.get(i / 2);
             }
         };
     }

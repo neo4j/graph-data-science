@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.similarity.SimilarityResult;
+import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
+import org.neo4j.gds.similarity.SimilarityResult;
 
-import java.util.Iterator;
 import java.util.PrimitiveIterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -52,20 +52,22 @@ public class TopNList {
     }
 
     public Stream<SimilarityResult> stream() {
-        Iterable<SimilarityResult> iterable = () -> new Iterator<SimilarityResult>() {
+        Iterable<SimilarityResult> iterable = () -> new AbstractIterator<>() {
 
             final PrimitiveIterator.OfLong elements1Iter = queue.elements1().iterator();
             final PrimitiveIterator.OfLong elements2Iter = queue.elements2().iterator();
             final PrimitiveIterator.OfDouble prioritiesIter = queue.priorities().iterator();
 
             @Override
-            public boolean hasNext() {
-                return elements1Iter.hasNext();
-            }
-
-            @Override
-            public SimilarityResult next() {
-                return new SimilarityResult(elements1Iter.nextLong(), elements2Iter.nextLong(), prioritiesIter.nextDouble());
+            protected SimilarityResult fetch() {
+                if (!elements1Iter.hasNext() || !elements2Iter.hasNext() || !prioritiesIter.hasNext()) {
+                    return done();
+                }
+                return new SimilarityResult(
+                    elements1Iter.nextLong(),
+                    elements2Iter.nextLong(),
+                    prioritiesIter.nextDouble()
+                );
             }
         };
 

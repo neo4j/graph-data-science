@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.impl.triangle;
 
+import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
@@ -102,17 +103,12 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result
         progressTracker.beginSubTask(graph.nodeCount());
         submitTasks();
         final TerminationFlag flag = getTerminationFlag();
-        final Iterator<Result> it = new Iterator<>() {
+        final Iterator<Result> it = new AbstractIterator<>() {
 
             @Override
-            public boolean hasNext() {
-                return flag.running() && (runningThreads.get() > 0 || !resultQueue.isEmpty());
-            }
-
-            @Override
-            public Result next() {
-                Result result = null;
-                while (hasNext() && result == null) {
+            protected Result fetch() {
+                var result = done();
+                while (flag.running() && (runningThreads.get() > 0 || !resultQueue.isEmpty()) {
                     result = resultQueue.poll();
                 }
                 return result;
