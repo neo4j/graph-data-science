@@ -94,12 +94,6 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "graphName", name,
                 "database", "neo4j",
-                "nodeProjection", map(
-                    "A", map(
-                        "label", "A",
-                        "properties", emptyMap()
-                    )
-                ),
                 "configuration",
                 new Condition<>(config -> {
                     assertThat(config)
@@ -147,23 +141,11 @@ class GraphListProcTest extends BaseProcTest {
 
                     return true;
                 }, "Assert native `configuration` map"),
-                "relationshipProjection", map(
-                    "REL", map(
-                        "type", "REL",
-                        "orientation", "NATURAL",
-                        "aggregation", "DEFAULT",
-                        "properties", emptyMap()
-                    )
-                ),
                 "schema", map(
                     "nodes", map("A", map()),
                     "relationships", map("REL", map()
                     )
                 ),
-                "nodeQuery", null,
-                "relationshipQuery", null,
-                "nodeFilter", null,
-                "relationshipFilter", null,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "density", 0.5D,
@@ -224,12 +206,6 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "graphName", name,
                 "database", "neo4j",
-                "nodeProjection", map(
-                    "10_Nodes", map(
-                        "label", "10_Nodes",
-                        "properties", emptyMap()
-                    )
-                ),
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
@@ -289,23 +265,11 @@ class GraphListProcTest extends BaseProcTest {
                         .hasEntrySatisfying("username", username -> assertThat(username).isNull());
                     return true;
                 }, "Assert generated `configuration` map"),
-                "relationshipProjection", map(
-                    "REL", map(
-                        "type", "REL",
-                        "orientation", "NATURAL",
-                        "aggregation", "NONE",
-                        "properties", emptyMap()
-                    )
-                ),
                 "schema", map(
                     "nodes", map("__ALL__", map()),
                     "relationships", map("REL", map()
                     )
                 ),
-                "nodeQuery", null,
-                "relationshipQuery", null,
-                "nodeFilter", null,
-                "relationshipFilter", null,
                 "nodeCount", 10L,
                 "relationshipCount", 50L,
                 "degreeDistribution", map(
@@ -358,8 +322,6 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "graphName", name,
                 "database", "neo4j",
-                "nodeProjection", null,
-                "relationshipProjection", null,
                 "schema", map(
                     "nodes", map(ALL_NODES.name, map()),
                     "relationships", map(ALL_RELATIONSHIPS.name, map())
@@ -372,7 +334,7 @@ class GraphListProcTest extends BaseProcTest {
                         .hasEntrySatisfying(
                             "relationshipQuery",
                             stringAssertConsumer(relationshipQuery -> relationshipQuery.isEqualTo(
-                                "MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target"))
+                                ALL_RELATIONSHIPS_QUERY))
                         )
                         .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
                         .hasEntrySatisfying(
@@ -381,7 +343,7 @@ class GraphListProcTest extends BaseProcTest {
                         )
                         .hasEntrySatisfying(
                             "nodeQuery",
-                            stringAssertConsumer(nodeQuery -> nodeQuery.isEqualTo("MATCH (n) RETURN id(n) AS id"))
+                            stringAssertConsumer(nodeQuery -> nodeQuery.isEqualTo(ALL_NODES_QUERY))
                         )
                         .hasEntrySatisfying("nodeCount", longAssertConsumer(nodeCount -> nodeCount.isEqualTo(-1L)))
                         .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
@@ -399,10 +361,6 @@ class GraphListProcTest extends BaseProcTest {
 
                     return true;
                 }, "Assert Cypher `configuration` map"),
-                "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
-                "nodeFilter", null,
-                "relationshipFilter", null,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "degreeDistribution", map(
@@ -478,23 +436,10 @@ class GraphListProcTest extends BaseProcTest {
         runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
 
         assertCypherResult(
-            "CALL gds.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodeCount, relationshipCount",
+            "CALL gds.graph.list() YIELD graphName, nodeCount, relationshipCount",
             singletonList(
                 map(
                     "graphName", name,
-                    "nodeProjection", map(
-                        "A", map(
-                            "label", "A",
-                            "properties", emptyMap()
-                        )
-                    ),
-                    "relationshipProjection", map(
-                        "REL", map(
-                            "type", "REL",
-                            "orientation", "NATURAL",
-                            "aggregation", "DEFAULT",
-                            "properties", emptyMap()
-                        )),
                     "nodeCount", 2L,
                     "relationshipCount", 1L
                 )

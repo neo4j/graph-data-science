@@ -39,20 +39,14 @@ public class GraphInfoWithHistogram extends GraphInfo {
         super(
             graphInfo.graphName,
             graphInfo.database,
+            graphInfo.configuration,
             graphInfo.memoryUsage,
             graphInfo.sizeInBytes,
-            graphInfo.nodeProjection,
-            graphInfo.relationshipProjection,
-            graphInfo.nodeQuery,
-            graphInfo.relationshipQuery,
-            graphInfo.nodeFilter,
-            graphInfo.relationshipFilter,
             graphInfo.nodeCount,
             graphInfo.relationshipCount,
             graphInfo.creationTime,
             graphInfo.modificationTime,
-            graphInfo.schema,
-            graphInfo.configuration
+            graphInfo.schema
         );
         this.degreeDistribution = degreeDistribution;
     }

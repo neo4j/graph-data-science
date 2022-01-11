@@ -155,15 +155,15 @@ ORDER BY graphName ASC
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsCypher')
-YIELD graphName, nodeProjection, nodeQuery
+YIELD graphName, configuration
+RETURN graphName, configuration.nodeQuery AS nodeQuery
 ----
 
 .Results
-[opts="header",cols="1,1,3"]
+[opts="header"]
 |===
-| graphName | nodeProjection | nodeQuery
+| graphName | nodeQuery
 | "personsCypher"
-| null
 | "MATCH (n:Person) RETURN id(n) AS id, labels(n) as labels"
 |===
 --
@@ -174,16 +174,16 @@ YIELD graphName, nodeProjection, nodeQuery
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsNative')
-YIELD graphName, nodeProjection, nodeQuery
+YIELD graphName, configuration
+RETURN graphName, configuration.nodeProjection AS nodeProjection
 ----
 
 .Results
-[opts="header",cols="1,3,1"]
+[opts="header"]
 |===
-| graphName       | nodeProjection | nodeQuery
+| graphName       | nodeProjection
 | "personsNative"
 | {Person={label=Person, properties={}}}
-| null
 |===
 --
 
