@@ -320,7 +320,7 @@ class PipelineExecutorTest {
         public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
 
         @Override
-        public void validate(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {}
     }
 
     private class FailingNodePropertyPipeline extends Pipeline<FeatureStep, ToMapConvertible> {
@@ -346,6 +346,6 @@ class PipelineExecutorTest {
         public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
 
         @Override
-        public void validate(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {}
     }
 }
