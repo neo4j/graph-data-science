@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.assertj.core.api.AbstractBooleanAssert;
+import org.assertj.core.api.AbstractIterableAssert;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -52,6 +54,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.assertj.AssertionsHelper.booleanAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.creationTimeAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.intAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.listAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.longAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.stringAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.stringObjectMapAssertFactory;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -91,7 +100,53 @@ class GraphListProcTest extends BaseProcTest {
                         "properties", emptyMap()
                     )
                 ),
-                "configuration", isA(Map.class),
+                "configuration",
+                new Condition<>(config -> {
+                    assertThat(config)
+                        .asInstanceOf(stringObjectMapAssertFactory())
+                        .hasSize(11)
+                        .containsEntry(
+                            "nodeProjection", map(
+                                "A", map(
+                                    "label", "A",
+                                    "properties", emptyMap()
+                                )
+                            )
+                        )
+                        .containsEntry(
+                            "relationshipProjection", map(
+                                "REL", map(
+                                    "type", "REL",
+                                    "orientation", "NATURAL",
+                                    "aggregation", "DEFAULT",
+                                    "properties", emptyMap()
+                                )
+                            )
+                        )
+                        .hasEntrySatisfying(
+                            "relationshipProperties",
+                            listAssertConsumer(AbstractIterableAssert::isEmpty)
+                        )
+                        .hasEntrySatisfying("nodeProperties", listAssertConsumer(AbstractIterableAssert::isEmpty))
+                        .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
+                        .hasEntrySatisfying(
+                            "validateRelationships",
+                            booleanAssertConsumer(AbstractBooleanAssert::isFalse)
+                        )
+                        .hasEntrySatisfying("nodeCount", longAssertConsumer(nodeCount -> nodeCount.isEqualTo(-1L)))
+                        .hasEntrySatisfying(
+                            "relationshipCount",
+                            longAssertConsumer(relationshipCount -> relationshipCount.isEqualTo(-1L))
+                        )
+                        .hasEntrySatisfying(
+                            "readConcurrency",
+                            intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
+                        )
+                        .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
+                        .hasEntrySatisfying("username", username -> assertThat(username).isNull());
+
+                    return true;
+                }, "Assert native `configuration` map"),
                 "relationshipProjection", map(
                     "REL", map(
                         "type", "REL",
@@ -175,7 +230,65 @@ class GraphListProcTest extends BaseProcTest {
                         "properties", emptyMap()
                     )
                 ),
-                "configuration", isA(Map.class),
+                "configuration", new Condition<>(config -> {
+                    assertThat(config)
+                        .asInstanceOf(stringObjectMapAssertFactory())
+                        .hasSize(14)
+                        .containsEntry("nodeProjections", map(
+                            "10_Nodes", map(
+                                "label", "10_Nodes",
+                                "properties", emptyMap()
+                            )
+                        ))
+                        .containsEntry("relationshipProjections", map(
+                            "REL", map(
+                                "type", "REL",
+                                "orientation", "NATURAL",
+                                "aggregation", "NONE",
+                                "properties", emptyMap()
+                            )
+                        ))
+                        .hasEntrySatisfying(
+                            "orientation",
+                            stringAssertConsumer(orientation -> orientation.isEqualTo("NATURAL"))
+                        )
+                        .hasEntrySatisfying(
+                            "relationshipProperty",
+                            relationshipProperty -> assertThat(relationshipProperty)
+                                .asInstanceOf(stringObjectMapAssertFactory())
+                                .isEmpty()
+                        )
+                        .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
+                        .hasEntrySatisfying(
+                            "validateRelationships",
+                            booleanAssertConsumer(AbstractBooleanAssert::isFalse)
+                        )
+                        .hasEntrySatisfying(
+                            "aggregation",
+                            stringAssertConsumer(aggregation -> aggregation.isEqualTo("NONE"))
+                        )
+                        .hasEntrySatisfying("allowSelfLoops", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
+                        .hasEntrySatisfying(
+                            "readConcurrency",
+                            intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
+                        )
+                        .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
+                        .hasEntrySatisfying(
+                            "relationshipDistribution",
+                            stringAssertConsumer(relationshipDistribution -> relationshipDistribution.isEqualTo(
+                                "UNIFORM"))
+                        )
+                        .hasEntrySatisfying(
+                            "relationshipSeed",
+                            relationshipSeed -> assertThat(relationshipSeed).isNull()
+                        )
+                        .hasEntrySatisfying(
+                            "relationshipCount",
+                            longAssertConsumer(relationshipCount -> relationshipCount.isEqualTo(-1L))
+                        )
+                        .hasEntrySatisfying("username", username -> assertThat(username).isNull());
+                    return true;
+                }, "Assert generated `configuration` map"),
                 "relationshipProjection", map(
                     "REL", map(
                         "type", "REL",
@@ -251,7 +364,41 @@ class GraphListProcTest extends BaseProcTest {
                     "nodes", map(ALL_NODES.name, map()),
                     "relationships", map(ALL_RELATIONSHIPS.name, map())
                 ),
-                "configuration", isA(Map.class),
+                "configuration", new Condition<>(config -> {
+                    System.out.println("config = " + config);
+                    assertThat(config)
+                        .asInstanceOf(stringObjectMapAssertFactory())
+                        .hasSize(10)
+                        .hasEntrySatisfying(
+                            "relationshipQuery",
+                            stringAssertConsumer(relationshipQuery -> relationshipQuery.isEqualTo(
+                                "MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target"))
+                        )
+                        .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
+                        .hasEntrySatisfying(
+                            "validateRelationships",
+                            booleanAssertConsumer(AbstractBooleanAssert::isTrue)
+                        )
+                        .hasEntrySatisfying(
+                            "nodeQuery",
+                            stringAssertConsumer(nodeQuery -> nodeQuery.isEqualTo("MATCH (n) RETURN id(n) AS id"))
+                        )
+                        .hasEntrySatisfying("nodeCount", longAssertConsumer(nodeCount -> nodeCount.isEqualTo(-1L)))
+                        .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
+                        .hasEntrySatisfying(
+                            "readConcurrency",
+                            intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
+                        )
+                        .hasEntrySatisfying("parameters", parameters -> assertThat(parameters).asInstanceOf(
+                            stringObjectMapAssertFactory()).isEmpty())
+                        .hasEntrySatisfying(
+                            "relationshipCount",
+                            longAssertConsumer(relationshipCount -> relationshipCount.isEqualTo(-1L))
+                        )
+                        .hasEntrySatisfying("username", username -> assertThat(username).isNull())
+                    ;
+                    return true;
+                }, "Assert Cypher `configuration` map"),
                 "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
                 "nodeFilter", null,
