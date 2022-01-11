@@ -107,16 +107,11 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
             long postProcessingMillis,
             long mutateMillis,
             @Nullable Map<String, Object> centralityDistribution,
-            double scoreSum,
-            double minimumScore,
-            double maximumScore,
+
             Map<String, Object> config
         ) {
             super(
                 centralityDistribution,
-                scoreSum,
-                minimumScore,
-                maximumScore,
                 preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
@@ -141,9 +136,6 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
                     postProcessingMillis,
                     mutateMillis,
                     centralityHistogram,
-                    sumCentrality,
-                    minCentrality,
-                    maxCentrality,
                     config.toMap()
                 );
             }

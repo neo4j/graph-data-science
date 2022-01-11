@@ -100,18 +100,9 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     public static class StatsResult extends StandardStatsResult {
 
         public final Map<String, Object> centralityDistribution;
-        @Deprecated
-        public final double minimumScore;
-        @Deprecated
-        public final double maximumScore;
-        @Deprecated
-        public final double scoreSum;
 
         StatsResult(
             @Nullable Map<String, Object> centralityDistribution,
-            double scoreSum,
-            double minimumScore,
-            double maximumScore,
             long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
@@ -119,9 +110,6 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
         ) {
             super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
             this.centralityDistribution = centralityDistribution;
-            this.maximumScore = maximumScore;
-            this.minimumScore = minimumScore;
-            this.scoreSum = scoreSum;
         }
 
         static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<StatsResult> {
@@ -133,9 +121,6 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
             public StatsResult buildResult() {
                 return new StatsResult(
                     centralityHistogram,
-                    sumCentrality,
-                    minCentrality,
-                    maxCentrality,
                     preProcessingMillis,
                     computeMillis,
                     postProcessingMillis,

@@ -50,16 +50,15 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             .call(DEFAULT_GRAPH_NAME)
             .algo("betweenness")
             .statsMode()
-            .yields("centralityDistribution", "preProcessingMillis", "computeMillis", "postProcessingMillis", "minimumScore", "maximumScore", "scoreSum");
+            .yields("centralityDistribution", "preProcessingMillis", "computeMillis", "postProcessingMillis");
 
         runQueryWithRowConsumer(query, row -> {
             Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
             assertNotNull(centralityDistribution);
             assertEquals(0.0, centralityDistribution.get("min"));
             assertEquals(4.0, (double) centralityDistribution.get("max"), 1e-4);
-            assertEquals(10.0, row.getNumber("scoreSum"));
-
-
+            assertEquals(2.0, (double) centralityDistribution.get("mean"), 1e-4);
+            
             assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
@@ -73,13 +72,9 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             .call(DEFAULT_GRAPH_NAME)
             .algo("betweenness")
             .statsMode()
-            .yields("preProcessingMillis", "computeMillis", "postProcessingMillis", "minimumScore", "maximumScore", "scoreSum");
+            .yields("preProcessingMillis", "computeMillis", "postProcessingMillis");
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(0.0, row.getNumber("minimumScore"));
-            assertEquals(4.0, row.getNumber("maximumScore"));
-            assertEquals(10.0, row.getNumber("scoreSum"));
-
 
             assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
