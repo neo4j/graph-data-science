@@ -21,23 +21,31 @@ include::alpha-note.adoc[]
 == History and explanation
 
 // tag::explanation[]
-For each node, the Closeness Centrality algorithm calculates the sum of its distances to all other nodes, based on calculating the shortest paths between all pairs of nodes.
+For each node _u_, the Closeness Centrality algorithm calculates the sum of its distances to all other nodes, based on calculating the shortest paths between all pairs of nodes.
 The resulting sum is then inverted to determine the closeness centrality score for that node.
 // end::explanation[]
 
 // tag::formula[]
-The *raw closeness centrality* of a node is calculated using the following formula:
+The *raw closeness centrality* of a node _u_ is calculated using the following formula:
 
-`raw closeness centrality(node) = 1 / sum(distance from node to all other nodes)`
+`raw closeness centrality(_u_) = 1 / sum(distance from _u_ to all other nodes)`
 
 It is more common to normalize this score so that it represents the average length of the shortest paths rather than their sum.
 This adjustment allow comparisons of the closeness centrality of nodes of graphs of different sizes
 
-The formula for *normalized closeness centrality* is as follows:
+The formula for *normalized closeness centrality* of node _u_ is as follows:
 
-`normalized closeness centrality(node) = (number of nodes - 1) / sum(distance from node to all other nodes)`
+`normalized closeness centrality(_u_) = (number of nodes - 1) / sum(distance from _u_ to all other nodes)`
 // end::formula[]
 
+ Wasserman and Faust have proposed an improved formula for dealing with unconnected graphs.
+Assuming that _n_  is the number of nodes reachable from _u_ (counting also itself),
+their corrected formula for a given node _u_ is given as follows
+
+`Wasserman-Faust normalized closeness centrality(_u_) = (_n_-1)^2/ ((number of nodes - 1) * sum(distance from _u_ to all other nodes))`
+
+Note that in the case of a directed graph, closeness centrality is defined alternatively.
+That is, rather than considering distances from _u_ to every other node, we instead sum and average the distance from every other node to _u_.
 
 [[algorithms-closeness-centrality-usecase]]
 == Use-cases - when to use the Closeness Centrality algorithm
@@ -45,14 +53,14 @@ The formula for *normalized closeness centrality* is as follows:
 // tag::use-case[]
 
 * Closeness centrality is used to research organizational networks, where individuals with high closeness centrality are in a favourable position to control and acquire vital information and resources within the organization.
-  One such study is http://www.orgnet.com/MappingTerroristNetworks.pdf["Mapping Networks of Terrorist Cells"^] by Valdis E. Krebs.
+One such study is http://www.orgnet.com/MappingTerroristNetworks.pdf["Mapping Networks of Terrorist Cells"^] by Valdis E. Krebs.
 
 * Closeness centrality can be interpreted as an estimated time of arrival of information flowing through telecommunications or package delivery networks where information flows through shortest paths to a predefined target.
-  It can also be used in networks where information spreads through all shortest paths simultaneously, such as infection spreading through a social network.
-  Find more details in http://www.analytictech.com/borgatti/papers/centflow.pdf["Centrality and network flow"] by Stephen P. Borgatti.
+It can also be used in networks where information spreads through all shortest paths simultaneously, such as infection spreading through a social network.
+Find more details in http://www.analytictech.com/borgatti/papers/centflow.pdf["Centrality and network flow"] by Stephen P. Borgatti.
 
 * Closeness centrality has been used to estimate the importance of words in a document, based on a graph-based keyphrase extraction process.
-  This process is described by Florian Boudin in https://www.aclweb.org/anthology/I/I13/I13-1102.pdf["A Comparison of Centrality Measures for Graph-Based Keyphrase Extraction"].
+This process is described by Florian Boudin in https://www.aclweb.org/anthology/I/I13/I13-1102.pdf["A Comparison of Centrality Measures for Graph-Based Keyphrase Extraction"].
 
 // end::use-case[]
 
@@ -62,8 +70,8 @@ The formula for *normalized closeness centrality* is as follows:
 
 // tag::constraint[]
 * Academically, closeness centrality works best on connected graphs.
-  If we use the original formula on an unconnected graph, we can end up with an infinite distance between two nodes in separate connected components.
-  This means that we'll end up with an infinite closeness centrality score when we sum up all the distances from that node.
+If we use the original formula on an unconnected graph, we can end up with an infinite distance between two nodes in separate connected components.
+This means that we'll end up with an infinite closeness centrality score when we sum up all the distances from that node.
 +
 In practice, a variation on the original formula is used so that we don't run into these issues.
 // end::constraint[]
@@ -83,13 +91,15 @@ YIELD nodes, preProcessingMillis, computeMillis, writeMillis, centralityDistribu
 ----
 
 .Parameters
-[opts="header",cols="1,1,1,1,4"]
+[opts="header",cols="1,1,1,1,5"]
 |===
 | Name                          | Type    | Default                | Optional | Description
-| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
+Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | writeProperty                 | string  | 'centrality'           | yes      | The property name written back to.
+| improved                      | boolean | false                  | yes      | Denotes whether the Wasserman-Faust formula is used.
 |===
 
 .Results
