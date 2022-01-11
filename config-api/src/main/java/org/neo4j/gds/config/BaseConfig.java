@@ -25,6 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("immutables:subtype")
@@ -59,6 +60,6 @@ public interface BaseConfig extends ToMapConvertible {
     @Value.Auxiliary
     @Value.Derived
     default Map<String, Object> toMap() {
-        return Collections.emptyMap();
+        return new HashMap<>();
     }
 }
