@@ -29,32 +29,17 @@ class CloseableThreadLocalTest {
 
     @Test
     void testInitValue() {
-        InitValueThreadLocal tl = new InitValueThreadLocal();
-        String str = (String)tl.get();
+        CloseableThreadLocal<String> tl = new CloseableThreadLocal<>(() -> TEST_VALUE);
+        String str = tl.get();
         assertEquals(TEST_VALUE, str);
     }
 
     @Test
-    void testNullValue() throws Exception {
+    void testNullValue() {
         // Tests that null can be set as a valid value (LUCENE-1805). This
         // previously failed in get().
-        CloseableThreadLocal<Object> ctl = new CloseableThreadLocal<>();
+        CloseableThreadLocal<Object> ctl = new CloseableThreadLocal<>(() -> null);
         ctl.set(null);
         assertNull(ctl.get());
-    }
-
-    @Test
-    void testDefaultValueWithoutSetting() throws Exception {
-        // LUCENE-1805: make sure default get returns null,
-        // twice in a row
-        CloseableThreadLocal<Object> ctl = new CloseableThreadLocal<>();
-        assertNull(ctl.get());
-    }
-
-    public static class InitValueThreadLocal extends CloseableThreadLocal<Object> {
-        @Override
-        protected Object initialValue() {
-            return TEST_VALUE;
-        }
     }
 }
