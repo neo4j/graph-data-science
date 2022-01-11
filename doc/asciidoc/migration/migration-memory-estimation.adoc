@@ -28,7 +28,7 @@ CALL gds.ALGO_NAME.estimate(
   ALGORIGHM_CONFIGURATION_MAP
 )
 ----
-2+| Algorithm estimation on fictitious graphs::
+2+| Algorithm estimation on fictive graphs::
 |
 [source, cypher, role=noplay]
 ----
