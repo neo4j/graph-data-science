@@ -27,6 +27,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.GraphStoreValidation;
 
 import java.util.Collection;
 import java.util.Map;
@@ -84,7 +85,7 @@ public abstract class PipelineExecutor<
             executeNodePropertySteps(featureInputGraphFilter);
             progressTracker.endSubTask("execute node property steps");
 
-            this.pipeline.validate(graphStore, config);
+            validate(graphStore, config);
 
             var result = execute(dataSplits);
             progressTracker.endSubTask();
@@ -92,6 +93,11 @@ public abstract class PipelineExecutor<
         } finally {
             cleanUpGraphStore(dataSplits);
         }
+    }
+
+    protected void validate(GraphStore graphStore, PIPELINE_CONFIG config) {
+        this.pipeline.validateFeatureProperties(graphStore, config);
+        GraphStoreValidation.validate(graphStore, config);
     }
 
     @Override
