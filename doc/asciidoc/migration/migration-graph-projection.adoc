@@ -1,0 +1,78 @@
+[[migration-graph-projection]]
+= Graph projection
+
+.Changes in the YIELD fields
+[opts=header, cols="1,1"]
+|====
+| 1.x               | 2.x
+| `createMillis`    | `projectMillis`
+|====
+
+.Projecting a graph
+[opts=header,cols="1a,1a"]
+|===
+| 1.x               | 2.x
+2+| Native Projection:
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create(
+  'myGraph',
+  NODE_PROJECTION,
+  RELATIONSHIP_PROJECTION,
+  ADDITIONAL_CONFIGURATION
+)
+----
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project(
+  'myGraph',
+  NODE_PROJECTION,
+  RELATIONSHIP_PROJECTION,
+  ADDITIONAL_CONFIGURATION
+)
+----
+2+| Cypher Projection:
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'myGraph',
+  NODE_QUERY,
+  RELATIONSHIP_QUERY
+  ADDITIONAL_CONFIGURATION
+)
+----
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project.cypher(
+  'myGraph',
+  NODE_QUERY,
+  RELATIONSHIP_QUERY
+  ADDITIONAL_CONFIGURATION
+)
+----
+2+| Projecting subgraphs:
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.subgraph(
+  'myGraph',
+  NODE_QUERY,
+  RELATIONSHIP_QUERY
+  ADDITIONAL_CONFIGURATION
+)
+----
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project.cypher(
+  'myGraph',
+  NODE_QUERY,
+  RELATIONSHIP_QUERY
+  ADDITIONAL_CONFIGURATION
+)
+----
+|===
