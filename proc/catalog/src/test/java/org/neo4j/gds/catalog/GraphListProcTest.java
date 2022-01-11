@@ -327,7 +327,6 @@ class GraphListProcTest extends BaseProcTest {
                     "relationships", map(ALL_RELATIONSHIPS.name, map())
                 ),
                 "configuration", new Condition<>(config -> {
-                    System.out.println("config = " + config);
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
                         .hasSize(10)
