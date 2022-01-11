@@ -89,8 +89,6 @@ public abstract class PipelineExecutor<
             var result = execute(dataSplits);
             progressTracker.endSubTask();
             return result;
-        } catch (Exception e) {
-            throw e;
         } finally {
             cleanUpGraphStore(dataSplits);
         }
