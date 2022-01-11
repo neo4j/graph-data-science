@@ -524,17 +524,8 @@ public final class MultiSourceBFS implements Runnable {
     }
 
     private static final class LocalHugeLongArray extends CloseableThreadLocal<HugeLongArray> {
-        private final long size;
-        private final AllocationTracker allocationTracker;
-
         private LocalHugeLongArray(final long size, final AllocationTracker allocationTracker) {
-            this.size = size;
-            this.allocationTracker = allocationTracker;
-        }
-
-        @Override
-        protected HugeLongArray initialValue() {
-            return HugeLongArray.newArray(size, allocationTracker);
+            super(() -> HugeLongArray.newArray(size, allocationTracker));
         }
 
         @Override

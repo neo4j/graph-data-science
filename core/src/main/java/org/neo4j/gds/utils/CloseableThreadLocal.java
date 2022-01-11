@@ -54,20 +54,13 @@ import java.util.function.Supplier;
 
 public class CloseableThreadLocal<T> implements Closeable {
 
-    public static <T> CloseableThreadLocal<T> withInitial(Supplier<T> initialValueSupplier) {
-        return new CloseableThreadLocal<T>() {
-            @Override
-            protected T initialValue() {
-                return initialValueSupplier.get();
-            }
-        };
-    }
+    private final Supplier<T> initialValueSupplier;
 
-    private ThreadLocal<WeakReference<T>> t = new ThreadLocal<>();
+    protected ThreadLocal<WeakReference<T>> t = new ThreadLocal<>();
 
     // Use a WeakHashMap so that if a Thread exits and is
     // GC'able, its entry may be removed:
-    private Map<Thread, T> hardRefs = new WeakHashMap<>();
+    Map<Thread, T> hardRefs = new WeakHashMap<>();
 
     // Increase this to decrease frequency of purging in get:
     private static final int PURGE_MULTIPLIER = 20;
@@ -78,8 +71,17 @@ public class CloseableThreadLocal<T> implements Closeable {
     // amortized cost of purging linear.
     private final AtomicInteger countUntilPurge = new AtomicInteger(PURGE_MULTIPLIER);
 
+
+    public static <T> CloseableThreadLocal<T> withInitial(Supplier<T> initialValueSupplier) {
+        return new CloseableThreadLocal<>(initialValueSupplier);
+    }
+
+    public CloseableThreadLocal(Supplier<T> constructor) {
+        this.initialValueSupplier = constructor;
+    }
+
     protected T initialValue() {
-        return null;
+        return initialValueSupplier.get();
     }
 
     public T get() {
