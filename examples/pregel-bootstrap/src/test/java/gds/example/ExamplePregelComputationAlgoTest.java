@@ -52,7 +52,7 @@ class ExamplePregelComputationAlgoTest {
 
     @Inject
     private TestGraph graph;
-    
+
     @Test
     void runExamplePregelComputation() {
         int maxIterations = 10;

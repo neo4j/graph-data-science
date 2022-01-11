@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.GdlGraph;
 
 import java.util.HashMap;
@@ -48,14 +48,14 @@ class ExamplePregelComputationProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(MY_TEST_GRAPH);
-        registerProcedures(ExamplePregelComputationStreamProc.class, GraphCreateProc.class);
+        registerProcedures(ExamplePregelComputationStreamProc.class, GraphProjectProc.class);
     }
 
     @Test
     void stream() {
         var createQuery = GdsCypher.call("graph")
-                .graphCreate()
-                .yields();
+            .graphProject()
+            .yields();
         runQuery(createQuery);
 
         // GdsCypher creates procedure statements, such as:
@@ -70,7 +70,7 @@ class ExamplePregelComputationProcTest extends BaseProcTest {
             .yields("nodeId", "values");
 
         var actual = new HashMap<Long, Long>();
-        
+
         runQueryWithRowConsumer(query, r -> {
             actual.put(
                 r.getNumber("nodeId").longValue(),
