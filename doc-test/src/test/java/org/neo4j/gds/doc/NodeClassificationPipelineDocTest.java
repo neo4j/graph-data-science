@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineAddStepProcs;
@@ -53,7 +53,7 @@ class NodeClassificationPipelineDocTest extends DocTestBase {
             NodeClassificationPipelineConfigureSplitProc.class,
             NodeClassificationPipelineConfigureParamsProc.class,
             GraphStreamNodePropertiesProc.class,
-            GraphCreateProc.class,
+            GraphProjectProc.class,
             ScalePropertiesMutateProc.class
         );
     }
