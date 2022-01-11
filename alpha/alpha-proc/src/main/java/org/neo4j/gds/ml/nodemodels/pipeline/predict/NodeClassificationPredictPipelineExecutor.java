@@ -39,6 +39,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     NodeClassificationPipeline,
     NodeClassificationResult
 > {
+    private static final int BATCH_SIZE = 100;
     private final NodeLogisticRegressionData modelData;
 
     NodeClassificationPredictPipelineExecutor(
@@ -75,7 +76,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         var innerAlgo = new NodeClassificationPredict(
             new NodeLogisticRegressionPredictor(modelData, pipeline.featureProperties()),
             graph,
-            config.batchSize(),
+            BATCH_SIZE,
             config.concurrency(),
             config.includePredictedProbabilities(),
             pipeline.featureProperties(),

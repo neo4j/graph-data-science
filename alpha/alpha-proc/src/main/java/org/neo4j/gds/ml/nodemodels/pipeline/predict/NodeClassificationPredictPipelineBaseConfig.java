@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -33,9 +32,4 @@ public interface NodeClassificationPredictPipelineBaseConfig extends AlgoBaseCon
 
     // TODO make this a parameter
     String graphName();
-
-    @Value.Default
-    default int batchSize() {
-        return 100;
-    }
 }
