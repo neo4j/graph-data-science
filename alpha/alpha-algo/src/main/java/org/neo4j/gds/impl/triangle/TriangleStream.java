@@ -108,7 +108,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result
             @Override
             protected Result fetch() {
                 var result = done();
-                while (flag.running() && (runningThreads.get() > 0 || !resultQueue.isEmpty()) {
+                while (flag.running() && (runningThreads.get() > 0 || !resultQueue.isEmpty())) {
                     result = resultQueue.poll();
                 }
                 return result;
