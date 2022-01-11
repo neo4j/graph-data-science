@@ -408,7 +408,7 @@ class GdsCypherTest {
         }
     }
 
-    static Stream<Arguments> graphCreateBuilders() {
+    static Stream<Arguments> graphProjectBuilders() {
         var configMap = Map.of(
             "nodeProjection", Map.of(
                 "FooNode", Map.of(
@@ -579,8 +579,8 @@ class GdsCypherTest {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("graphCreateBuilders")
-    void generatesGraphCreateFromImplicitConfig(GdsCypher.GraphProjectBuilder queryBuilder, String testName) {
+    @MethodSource("graphProjectBuilders")
+    void generatesGraphProjectFromImplicitConfig(GdsCypher.GraphProjectBuilder queryBuilder, String testName) {
         String query = queryBuilder
             .addParameter("nodeProjection", "SOMETHING | ELSE")
             .yields();

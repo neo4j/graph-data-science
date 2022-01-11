@@ -38,7 +38,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     }
 
     @Test
-    void additionalKeyForGraphCreate() {
+    void additionalKeyForGraphProject() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
             () -> runQuery("CALL gds.graph.project('foo', '*', '*', {readConcurrency: 4, maxIterations: 1337})")

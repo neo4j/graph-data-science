@@ -66,7 +66,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     @Override
     void setup() throws Exception{
         super.setup();
-        runQuery(graphCreateQuery());
+        runQuery(graphProjectQuery());
     }
 
     @Test
@@ -204,7 +204,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
         return GdsCypher.call(TEST_GRAPH_NAME).algo("gds", "beta", "modularityOptimization");
     }
 
-    static String graphCreateQuery() {
+    static String graphProjectQuery() {
         GraphProjectFromStoreConfig config = ImmutableGraphProjectFromStoreConfig
             .builder()
             .graphName("")

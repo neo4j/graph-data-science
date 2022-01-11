@@ -93,7 +93,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop50)
     @Test
     void exportGraph() {
-        createGraph();
+        projectGraph();
 
         var exportQuery = "CALL gds.graph.export('test-graph', {dbName: 'test-db'})";
 
@@ -112,7 +112,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop50)
     @Test
     void exportGraphWithAdditionalNodeProperties() {
-        createGraph();
+        projectGraph();
 
         var exportQuery = "CALL gds.graph.export(" +
                           "  'test-graph', {" +
@@ -139,7 +139,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop50)
     @Test
     void exportGraphWithAdditionalNodePropertiesShortHandSyntax() {
-        createGraph();
+        projectGraph();
 
         var exportQuery = "CALL gds.graph.export(" +
                           "  'test-graph', {" +
@@ -165,7 +165,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     @Test
     void exportGraphWithAdditionalNodePropertiesDuplicateProperties() {
-        createGraph();
+        projectGraph();
 
         var exportQuery = "CALL gds.graph.export(" +
                           "  'test-graph', {" +
@@ -186,7 +186,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
     @Test
     void exportCsv() {
-        createGraph();
+        projectGraph();
 
         var exportQuery = "CALL gds.beta.graph.export.csv('test-graph', {exportName: 'export'})";
 
@@ -203,7 +203,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
     @Test
     void exportCsvWithAdditionalNodeProperties() {
-        createGraph();
+        projectGraph();
 
         var exportQuery = "CALL gds.beta.graph.export.csv(" +
                           "  'test-graph', {" +
@@ -231,7 +231,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
         var exportName = "export";
         Files.createDirectories(tempDir.resolve(EXPORT_DIR).resolve(exportName));
 
-        createGraph();
+        projectGraph();
 
         var exportQuery = formatWithLocale(
             "CALL gds.beta.graph.export.csv('test-graph', {" +
@@ -252,7 +252,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void failsWhenTryingToEscapeExportLocation() {
         var exportName = "../export";
 
-        createGraph();
+        projectGraph();
 
         var exportQuery = formatWithLocale(
             "CALL gds.beta.graph.export.csv('test-graph', {" +
@@ -276,7 +276,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
     @Test
     void failIfExportLocationIsNotSet() {
-        createGraph();
+        projectGraph();
 
         GraphDatabaseApiProxy
             .resolveDependency(db, Config.class)
@@ -301,7 +301,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     @Test
     void exportCsvWithAdditionalNodePropertiesDuplicateProperties() {
-        createGraph();
+        projectGraph();
 
         var exportQuery = "CALL gds.beta.graph.export.csv(" +
                           "  'test-graph', {" +
@@ -322,7 +322,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
     @Test
     void csvEstimation() {
-        createGraph();
+        projectGraph();
 
         var exportQuery =
             "CALL gds.beta.graph.export.csv.estimate('test-graph', {" +
@@ -335,7 +335,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
         });
     }
 
-    private void createGraph() {
+    private void projectGraph() {
         runQuery(GdsCypher.call("test-graph")
             .graphProject()
             .withAnyLabel()

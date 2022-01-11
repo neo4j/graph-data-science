@@ -49,7 +49,7 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
     private static final String TABLE_CONTEXT = ":table";
 
     private static final String SETUP_QUERY_ROLE = "setup-query";
-    private static final String GRAPH_CREATE_QUERY_ROLE = "graph-project-query";
+    private static final String GRAPH_PROJECT_QUERY_ROLE = "graph-project-query";
     private static final String QUERY_EXAMPLE_ROLE = "query-example";
     private static final String TEST_TYPE_NO_RESULT = "no-result";
     private static final String TEST_GROUP_ATTRIBUTE = "group";
@@ -84,7 +84,7 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
     }
 
     private List<String> collectBeforeEachQueries(StructuralNode document) {
-        return collectSetupQueries(document, GRAPH_CREATE_QUERY_ROLE);
+        return collectSetupQueries(document, GRAPH_PROJECT_QUERY_ROLE);
     }
 
     private List<String> collectSetupQueries(StructuralNode node, String setupQueryType) {

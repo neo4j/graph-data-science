@@ -144,7 +144,7 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
 
     @Test
     void requiresUndirectedGraph() {
-        runQuery(createQuery("g2", Orientation.NATURAL));
+        runQuery(projectQuery("g2", Orientation.NATURAL));
 
         var query = GdsCypher
             .call("g2")

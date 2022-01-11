@@ -134,10 +134,10 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
         );
         registerFunctions(AsNodeFunc.class);
 
-        graphCreateQueries().forEach(this::runQuery);
+        graphProjectQueries().forEach(this::runQuery);
     }
 
-    List<String> graphCreateQueries() {
+    List<String> graphProjectQueries() {
         return singletonList(
             GdsCypher.call(LOUVAIN_GRAPH)
                 .graphProject()

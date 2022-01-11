@@ -199,7 +199,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         String graphName = "myGraphUndirected";
         String writeProperty = "community";
 
-        runQuery(graphCreateQuery(Orientation.UNDIRECTED, graphName));
+        runQuery(graphProjectQuery(Orientation.UNDIRECTED, graphName));
         @Language("Cypher")
         String query = "CALL gds.labelPropagation.write(" +
                        "        $graph, {" +
@@ -239,7 +239,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     void shouldRunLabelPropagationReverse() {
         String writeProperty = "community";
 
-        var createQuery = graphCreateQuery(DEFAULT_GRAPH_NAME, Orientation.REVERSE).yields();
+        var createQuery = graphProjectQuery(DEFAULT_GRAPH_NAME, Orientation.REVERSE).yields();
         runQuery(createQuery);
 
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)

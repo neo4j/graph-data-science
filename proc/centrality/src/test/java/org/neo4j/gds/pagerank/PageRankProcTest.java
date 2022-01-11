@@ -139,7 +139,7 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
             GraphWriteNodePropertiesProc.class
         );
 
-        graphCreateQueries().forEach(this::runQuery);
+        graphProjectQueries().forEach(this::runQuery);
 
         expected = List.of(
             Map.of("nodeId", idFunction.of("a"), "score", closeTo(0.24301, RESULT_ERROR)),
@@ -168,7 +168,7 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
         );
     }
 
-    List<String> graphCreateQueries() {
+    List<String> graphProjectQueries() {
         return Arrays.asList(
             GdsCypher
                 .call("graphLabel3")

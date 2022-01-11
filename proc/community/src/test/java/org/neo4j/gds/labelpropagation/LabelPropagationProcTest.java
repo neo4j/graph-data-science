@@ -107,7 +107,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
             GraphWriteNodePropertiesProc.class
         );
         // Create explicit graphs with both projection variants
-        runQuery(graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME));
+        runQuery(graphProjectQuery(Orientation.NATURAL, TEST_GRAPH_NAME));
         runQuery(formatWithLocale(
             "CALL gds.graph.project.cypher('%s', '%s', '%s', {})",
             TEST_CYPHER_GRAPH_NAME,
@@ -127,11 +127,11 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    static String graphCreateQuery(Orientation orientation, String graphName) {
-        return graphCreateQuery(graphName, orientation).yields();
+    static String graphProjectQuery(Orientation orientation, String graphName) {
+        return graphProjectQuery(graphName, orientation).yields();
     }
 
-    static GdsCypher.GraphProjectBuilder graphCreateQuery(String graphName, Orientation orientation) {
+    static GdsCypher.GraphProjectBuilder graphProjectQuery(String graphName, Orientation orientation) {
         return GdsCypher
             .call(graphName)
             .graphProject()
