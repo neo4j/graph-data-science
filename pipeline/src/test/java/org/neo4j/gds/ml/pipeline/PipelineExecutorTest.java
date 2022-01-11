@@ -136,8 +136,7 @@ class PipelineExecutorTest {
                 "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 :: Start",
                 "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 100%",
                 "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 :: Finished",
-                "FailingPipelineExecutor :: execute node property steps :: Finished",
-                "FailingPipelineExecutor :: Failed"
+                "FailingPipelineExecutor :: execute node property steps :: Finished"
             );
     }
 
