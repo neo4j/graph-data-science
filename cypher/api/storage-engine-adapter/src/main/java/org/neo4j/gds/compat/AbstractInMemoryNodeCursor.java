@@ -30,7 +30,6 @@ import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
-import java.util.List;
 import java.util.Set;
 
 import static java.lang.Math.min;
@@ -50,6 +49,10 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
         this.tokenHolders = tokenHolders;
         this.hasProperties = !graphStore.nodePropertyKeys().values().stream().allMatch(Set::isEmpty);
     }
+
+    public abstract void properties(StoragePropertyCursor propertyCursor);
+
+    protected abstract void setLabelField(NodeRecord record, long firstLabelToken);
 
     @Override
     public long[] labels() {
@@ -134,8 +137,6 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
         return this.hasProperties;
     }
 
-    public abstract void properties(StoragePropertyCursor propertyCursor);
-
     @Override
     public long entityReference() {
         return getId();
@@ -192,7 +193,7 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
         var nodeLabelIterator = nodeLabels.iterator();
         if (nodeLabelIterator.hasNext()) {
             var firstLabelToken = tokenHolders.labelTokens().getIdByName(nodeLabelIterator.next().name());
-            record.setLabelField(firstLabelToken, List.of());
+            setLabelField(record, firstLabelToken);
         }
     }
 }
