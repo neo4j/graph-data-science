@@ -194,6 +194,17 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     }
 
     @Test
+    void failsWhenMissingNodeProperty() {
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
+        runQuery(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'l2', {nodeProperties: ['missingNodeProperty']})");
+        assertError(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.train('g', {modelName: 'm', pipeline: 'pipe', concurrency:2})",
+            "Node properties [missingNodeProperty] defined in the feature steps do not exist in the graph or part of the pipeline"
+        );
+    }
+
+    @Test
     void trainOnNodeLabelFilteredGraph() {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe4')");
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe4', 'pageRank', {mutateProperty: 'pr'})");
