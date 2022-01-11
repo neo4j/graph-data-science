@@ -97,6 +97,7 @@ class GraphDropProcTest extends BaseProcTest {
                             "properties", Map.of()
                         )
                     )),
+                    entry("configuration", isA(Map.class)),
                     entry("nodeQuery", nullValue()),
                     entry("relationshipQuery", nullValue()),
                     entry("nodeFilter", nullValue()),

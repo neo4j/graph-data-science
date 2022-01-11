@@ -395,8 +395,8 @@ class GraphListProcTest extends BaseProcTest {
                             "relationshipCount",
                             longAssertConsumer(relationshipCount -> relationshipCount.isEqualTo(-1L))
                         )
-                        .hasEntrySatisfying("username", username -> assertThat(username).isNull())
-                    ;
+                        .hasEntrySatisfying("username", username -> assertThat(username).isNull());
+
                     return true;
                 }, "Assert Cypher `configuration` map"),
                 "nodeQuery", ALL_NODES_QUERY,
