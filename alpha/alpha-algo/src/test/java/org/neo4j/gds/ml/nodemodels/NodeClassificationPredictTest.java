@@ -255,13 +255,10 @@ class NodeClassificationPredictTest {
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .doesNotHaveDuplicates()
-            .hasSize(7)
+            .hasSize(4)
             .containsExactly(
                 "Node classification predict :: Start",
-                "Node classification predict 20%",
-                "Node classification predict 40%",
                 "Node classification predict 60%",
-                "Node classification predict 80%",
                 "Node classification predict 100%",
                 "Node classification predict :: Finished"
             );
