@@ -1,0 +1,15 @@
+[[migration-algorithms-betweenness-centrality]]
+== Betweenness Centrality
+
+.Changes in YIELD fields
+[header, cols=2]
+|===
+| 1.x
+| 2.x
+| `minimumScore`
+| Use `centralityDistribution.min`
+| `maximumScore`
+| Use `centralityDistribution.max`
+| `scoreSum`
+| No direct equivalent. For average, use `centralityDistribution.mean`.
+|===

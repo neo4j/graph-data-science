@@ -6,32 +6,6 @@
 This section covers migration for all algorithms in the Neo4j Graph Data Science library.
 --
 
+include::migration-algorithms-betweenness-centrality.adoc[leveloffset=+3]
 
-[[migration-algorithms-betweenness-centrality]]
-== Betweenness Centrality
-
-.Changes in YIELD fields
-[header, cols=2]
-|===
-| 1.x
-| 2.x
-| `minimumScore`
-| Use `centralityDistribution.min`
-| `maximumScore`
-| Use `centralityDistribution.max`
-| `scoreSum`
-| No direct equivalent. For average, use `centralityDistribution.mean`.
-|===
-
-
-[[migration-algorithms-node-classification-pipeline-predict]]
-== Node Classification Pipeline predict
-
-.Changes in configuration
-[header, cols=2]
-|===
-| 1.x
-| 2.x
-| `batchSize`
-| Batch size is optimized internally and no longer user-configurable.
-|===
+include::migration-algorithms-node-classification-pipeline-predict.adoc[leveloffset=+3]
