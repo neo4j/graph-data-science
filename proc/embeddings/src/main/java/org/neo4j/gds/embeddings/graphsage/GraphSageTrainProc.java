@@ -45,7 +45,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DE
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 
 @GdsCallable(name = "gds.beta.graphSage.mutate", description = GRAPHSAGE_DESCRIPTION, executionMode = TRAIN)
-public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics, TrainProc.TrainResult> {
+public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig, TrainProc.TrainResult> {
 
     @Description(GRAPHSAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.train", mode = Mode.READ)
@@ -81,6 +81,21 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
     }
 
     @Override
+    protected TrainResult constructProcResult(ComputationResult<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig> computationResult) {
+        return new TrainResult(
+            computationResult.result(),
+            computationResult.computeMillis(),
+            computationResult.graph().nodeCount(),
+            computationResult.graph().relationshipCount()
+        );
+    }
+
+    @Override
+    protected Model<?, ?, ?> extractModel(Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model) {
+        return model;
+    }
+
+    @Override
     public ValidationConfiguration<GraphSageTrainConfig> validationConfig() {
         return new ValidationConfiguration<>() {
             @Override
@@ -95,19 +110,6 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
                 );
             }
         };
-    }
-
-    @Override
-    protected TrainResult constructResult(
-        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model,
-        ComputationResult<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig> computationResult
-    ) {
-        return new TrainResult(
-            model,
-            computationResult.computeMillis(),
-            computationResult.graph().nodeCount(),
-            computationResult.graph().relationshipCount()
-        );
     }
 }
 

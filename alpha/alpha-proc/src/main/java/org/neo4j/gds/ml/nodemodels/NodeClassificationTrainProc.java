@@ -46,7 +46,7 @@ import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdsCallable(name = "gds.alpha.ml.nodeClassification.train", description = "Trains a node classification model", executionMode = TRAIN)
-public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo, MLTrainResult> {
+public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>, NodeClassificationTrainConfig, MLTrainResult> {
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model")
@@ -71,6 +71,16 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     @Override
     protected String modelType() {
         return NodeClassificationTrain.MODEL_TYPE;
+    }
+
+    @Override
+    protected MLTrainResult constructProcResult(ComputationResult<NodeClassificationTrain, Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>, NodeClassificationTrainConfig> computationResult) {
+        return  new MLTrainResult(computationResult.result(), computationResult.computeMillis());
+    }
+
+    @Override
+    protected Model<?, ?, ?> extractModel(Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> algoResult) {
+        return algoResult;
     }
 
     @Override
@@ -103,13 +113,5 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     @Override
     public GraphAlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> algorithmFactory() {
         return new NodeClassificationTrainAlgorithmFactory();
-    }
-
-    @Override
-    protected MLTrainResult constructResult(
-        Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> model,
-        ComputationResult<NodeClassificationTrain, Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>, NodeClassificationTrainConfig> computationResult
-    ) {
-        return  new MLTrainResult(model, computationResult.computeMillis());
     }
 }

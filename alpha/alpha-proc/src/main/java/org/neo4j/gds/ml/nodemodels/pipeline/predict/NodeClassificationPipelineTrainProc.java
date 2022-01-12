@@ -45,13 +45,11 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 
 @GdsCallable(name = "gds.alpha.ml.pipeline.nodeClassification.train", description = "Trains a node classification model based on a pipeline", executionMode = TRAIN)
-public class NodeClassificationPipelineTrainProc
-    extends TrainProc<
-        NodeClassificationTrainPipelineExecutor,
-        NodeLogisticRegressionData,
-        NodeClassificationPipelineTrainConfig,
-        NodeClassificationPipelineModelInfo,
-        MLTrainResult
+public class NodeClassificationPipelineTrainProc extends TrainProc<
+    NodeClassificationTrainPipelineExecutor,
+    Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo>,
+    NodeClassificationPipelineTrainConfig,
+    MLTrainResult
     > {
 
     @Context
@@ -84,10 +82,12 @@ public class NodeClassificationPipelineTrainProc
     }
 
     @Override
-    protected MLTrainResult constructResult(
-        Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
-        ComputationResult<NodeClassificationTrainPipelineExecutor, Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo>, NodeClassificationPipelineTrainConfig> computationResult
-    ) {
-        return new MLTrainResult(model, computationResult.computeMillis());
+    protected MLTrainResult constructProcResult(ComputationResult<NodeClassificationTrainPipelineExecutor, Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo>, NodeClassificationPipelineTrainConfig> computationResult) {
+        return new MLTrainResult(computationResult.result(), computationResult.computeMillis());
+    }
+
+    @Override
+    protected Model<?, ?, ?> extractModel(Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> algoResult) {
+        return algoResult;
     }
 }
