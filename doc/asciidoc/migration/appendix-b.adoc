@@ -30,4 +30,4 @@ include::migration-graph-projection.adoc[leveloffset=+2]
 
 include::migration-memory-estimation.adoc[leveloffset=+2]
 
-include::migration-production-ready-algorithms.adoc[leveloffset=+2]
+include::migration-algorithms.adoc[leveloffset=+2]
