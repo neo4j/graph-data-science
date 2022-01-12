@@ -199,4 +199,26 @@ public class Task {
             throw new IllegalStateException(formatWithLocale("Cannot retrieve next subtask, task `%s` is not running.", description()));
         }
     }
+
+    public String render() {
+        StringBuilder sb = new StringBuilder();
+        render(sb, this, 0);
+        return sb.toString();
+    }
+
+    static void render(StringBuilder sb, Task task, int depth) {
+        sb.append("\t".repeat(Math.max(0, depth - 1)));
+
+        if (depth > 0) {
+            sb.append("|-- ");
+        }
+
+        sb.append(task.description)
+            .append('(')
+            .append(task.status)
+            .append(')')
+            .append(System.lineSeparator());
+
+        task.subTasks().forEach(subtask -> render(sb, subtask, depth + 1));
+    }
 }
