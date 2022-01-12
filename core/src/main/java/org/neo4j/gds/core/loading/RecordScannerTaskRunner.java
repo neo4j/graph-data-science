@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 
 import java.util.ArrayList;
@@ -44,7 +45,6 @@ final class RecordScannerTaskRunner {
 
         long start = System.nanoTime();
         ParallelUtil.run(tasks, executorService);
-        recordScannerTaskFactory.prepareFlushTasks();
         ParallelUtil.run(recordScannerTaskFactory.flushTasks(), executorService);
         long took = System.nanoTime() - start;
 
@@ -55,36 +55,36 @@ final class RecordScannerTaskRunner {
             importedProperties += task.propertiesImported();
         }
 
-        return new ImportResult(took, importedRecords, importedProperties);
+        return ImmutableImportResult
+            .builder()
+            .importedRecords(importedRecords)
+            .importedProperties(importedProperties)
+            .durationNanos(took)
+            .build();
     }
 
-    static final class ImportResult {
-        final long tookNanos;
-        final long recordsImported;
-        final long propertiesImported;
+    @ValueClass
+    interface ImportResult {
+        long durationNanos();
 
-        ImportResult(long tookNanos, long recordsImported, long propertiesImported) {
-            this.tookNanos = tookNanos;
-            this.recordsImported = recordsImported;
-            this.propertiesImported = propertiesImported;
-        }
+        long importedRecords();
+
+        long importedProperties();
     }
 
     public interface RecordScannerTaskFactory {
 
         RecordScannerTask create(int taskIndex);
 
-        void prepareFlushTasks();
-
         Collection<Runnable> flushTasks();
     }
 
-    public static RecordScannerTaskFactory createEmptyScanner() {
+    public static RecordScannerTaskFactory createEmptyTaskScannerFactory() {
         return NoRecordsScannerTaskFactory.INSTANCE;
     }
 
     private static final class NoRecordsScannerTaskFactory implements RecordScannerTask, RecordScannerTaskFactory {
-        private static final NoRecordsScannerTaskFactory INSTANCE = new NoRecordsScannerTaskFactory();
+        private static final RecordScannerTaskFactory INSTANCE = new NoRecordsScannerTaskFactory();
 
         @Override
         public long propertiesImported() {
@@ -103,10 +103,6 @@ final class RecordScannerTaskRunner {
         @Override
         public RecordScannerTask create(final int taskIndex) {
             return this;
-        }
-
-        @Override
-        public void prepareFlushTasks() {
         }
 
         @Override

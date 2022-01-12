@@ -48,7 +48,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
         if (builders.isEmpty()) {
-            return RecordScannerTaskRunner.createEmptyScanner();
+            return RecordScannerTaskRunner.createEmptyTaskScannerFactory();
         }
         return new Factory(
             loadingContext.transactionContext(),
@@ -98,13 +98,9 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         }
 
         @Override
-        public void prepareFlushTasks() {
-            importerBuilders.forEach(SingleTypeRelationshipImporter.Builder.WithImporter::prepareFlushTasks);
-        }
-
-        @Override
         public Collection<Runnable> flushTasks() {
             return importerBuilders.stream()
+                .peek(SingleTypeRelationshipImporter.Builder.WithImporter::prepareFlushTasks)
                 .flatMap(SingleTypeRelationshipImporter.Builder.WithImporter::flushTasks)
                 .collect(Collectors.toList());
         }

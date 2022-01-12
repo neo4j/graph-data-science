@@ -81,9 +81,9 @@ public abstract class ScanningRecordsImporter<Record, T> {
             var importResult = taskRunner.runImport(executorService);
 
             long requiredBytes = storeScanner.storeSize(dimensions);
-            long recordsImported = importResult.recordsImported;
-            long propertiesImported = importResult.propertiesImported;
-            BigInteger bigNanos = BigInteger.valueOf(importResult.tookNanos);
+            long recordsImported = importResult.importedRecords();
+            long propertiesImported = importResult.importedProperties();
+            BigInteger bigNanos = BigInteger.valueOf(importResult.durationNanos());
             double tookInSeconds = new BigDecimal(bigNanos)
                 .divide(new BigDecimal(A_BILLION), 9, RoundingMode.CEILING)
                 .doubleValue();
