@@ -26,40 +26,28 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 
-public final class InternalImporter {
+final class RecordScannerTaskRunner {
 
-    public interface RecordScannerTaskFactory {
+    private final int threadCount;
+    private final RecordScannerTaskFactory recordScannerTaskFactory;
 
-        RecordScannerTask create(int taskIndex);
-
-        void prepareFlushTasks();
-
-        Collection<Runnable> flushTasks();
+    RecordScannerTaskRunner(int threadCount, RecordScannerTaskFactory recordScannerTaskFactory) {
+        this.threadCount = threadCount;
+        this.recordScannerTaskFactory = recordScannerTaskFactory;
     }
 
-    public static RecordScannerTaskFactory createEmptyScanner() {
-        return NoRecordsScannerTaskFactory.INSTANCE;
-    }
-
-    private final int numberOfThreads;
-    private final RecordScannerTaskFactory recordScannerBuilder;
-
-    InternalImporter(int numberOfThreads, RecordScannerTaskFactory recordScannerBuilder) {
-        this.numberOfThreads = numberOfThreads;
-        this.recordScannerBuilder = recordScannerBuilder;
-    }
-
-    ImportResult runImport(ExecutorService pool) {
-        Collection<RecordScannerTask> tasks = new ArrayList<>(numberOfThreads);
-        for (int i = 0; i < numberOfThreads; i++) {
-            tasks.add(recordScannerBuilder.create(i));
+    ImportResult runImport(ExecutorService executorService) {
+        Collection<RecordScannerTask> tasks = new ArrayList<>(threadCount);
+        for (int i = 0; i < threadCount; i++) {
+            tasks.add(recordScannerTaskFactory.create(i));
         }
 
-        long scannerStart = System.nanoTime();
-        ParallelUtil.run(tasks, pool);
-        recordScannerBuilder.prepareFlushTasks();
-        ParallelUtil.run(recordScannerBuilder.flushTasks(), pool);
-        long took = System.nanoTime() - scannerStart;
+        long start = System.nanoTime();
+        ParallelUtil.run(tasks, executorService);
+        recordScannerTaskFactory.prepareFlushTasks();
+        ParallelUtil.run(recordScannerTaskFactory.flushTasks(), executorService);
+        long took = System.nanoTime() - start;
+
         long importedRecords = 0L;
         long importedProperties = 0L;
         for (RecordScannerTask task : tasks) {
@@ -80,6 +68,19 @@ public final class InternalImporter {
             this.recordsImported = recordsImported;
             this.propertiesImported = propertiesImported;
         }
+    }
+
+    public interface RecordScannerTaskFactory {
+
+        RecordScannerTask create(int taskIndex);
+
+        void prepareFlushTasks();
+
+        Collection<Runnable> flushTasks();
+    }
+
+    public static RecordScannerTaskFactory createEmptyScanner() {
+        return NoRecordsScannerTaskFactory.INSTANCE;
     }
 
     private static final class NoRecordsScannerTaskFactory implements RecordScannerTask, RecordScannerTaskFactory {

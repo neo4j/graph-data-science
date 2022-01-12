@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 public final class RelationshipsScannerTask extends StatementAction implements RecordScannerTask {
 
-    public static InternalImporter.RecordScannerTaskFactory factory(
+    public static RecordScannerTaskRunner.RecordScannerTaskFactory factory(
         GraphLoaderContext loadingContext,
         ProgressTracker progressTracker,
         IdMapping idMap,
@@ -48,7 +48,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
         if (builders.isEmpty()) {
-            return InternalImporter.createEmptyScanner();
+            return RecordScannerTaskRunner.createEmptyScanner();
         }
         return new Factory(
             loadingContext.transactionContext(),
@@ -60,7 +60,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         );
     }
 
-    static final class Factory implements InternalImporter.RecordScannerTaskFactory {
+    static final class Factory implements RecordScannerTaskRunner.RecordScannerTaskFactory {
         private final TransactionContext tx;
         private final ProgressTracker progressTracker;
         private final IdMapping idMap;

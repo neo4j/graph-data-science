@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.loading.InternalImporter.ImportResult;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -40,7 +39,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
 
     private final StoreScanner.Factory<Record> storeScannerFactory;
 
-    protected final ExecutorService threadPool;
+    protected final ExecutorService executorService;
     protected final TransactionContext transaction;
     protected final GraphDimensions dimensions;
     protected final AllocationTracker allocationTracker;
@@ -57,7 +56,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
         this.storeScannerFactory = storeScannerFactory;
         this.transaction = loadingContext.transactionContext();
         this.dimensions = dimensions;
-        this.threadPool = loadingContext.executor();
+        this.executorService = loadingContext.executor();
         this.allocationTracker = loadingContext.allocationTracker();
         this.progressTracker = progressTracker;
         this.concurrency = concurrency;
@@ -65,8 +64,8 @@ public abstract class ScanningRecordsImporter<Record, T> {
 
     public final T call() {
         long nodeCount = dimensions.nodeCount();
-        final ImportSizing sizing = ImportSizing.of(concurrency, nodeCount);
-        int numberOfThreads = sizing.numberOfThreads();
+        var sizing = ImportSizing.of(concurrency, nodeCount);
+        int threadCount = sizing.threadCount();
 
         try (StoreScanner<Record> storeScanner = storeScannerFactory.newScanner(
             StoreScanner.DEFAULT_PREFETCH_SIZE,
@@ -76,14 +75,10 @@ public abstract class ScanningRecordsImporter<Record, T> {
 
             progressTracker.logDebug(formatWithLocale("Start using %s", storeScanner.getClass().getSimpleName()));
 
-            InternalImporter.RecordScannerTaskFactory scannerTaskFactory = recordScannerTaskFactory(
-                nodeCount,
-                sizing,
-                storeScanner
-            );
-            InternalImporter importer = new InternalImporter(numberOfThreads, scannerTaskFactory);
+            var taskFactory = recordScannerTaskFactory(nodeCount, sizing, storeScanner);
+            var taskRunner = new RecordScannerTaskRunner(threadCount, taskFactory);
 
-            ImportResult importResult = importer.runImport(threadPool);
+            var importResult = taskRunner.runImport(executorService);
 
             long requiredBytes = storeScanner.storeSize(dimensions);
             long recordsImported = importResult.recordsImported;
@@ -109,9 +104,9 @@ public abstract class ScanningRecordsImporter<Record, T> {
                     (double) recordsImported / tookInSeconds,
                     humanReadable(bytesPerSecond),
                     bytesPerSecond,
-                    (double) recordsImported / tookInSeconds / numberOfThreads,
-                    humanReadable(bytesPerSecond / numberOfThreads),
-                    bytesPerSecond / numberOfThreads
+                    (double) recordsImported / tookInSeconds / threadCount,
+                    humanReadable(bytesPerSecond / threadCount),
+                    bytesPerSecond / threadCount
                 )
             );
 
@@ -121,7 +116,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
         return build();
     }
 
-    public abstract InternalImporter.RecordScannerTaskFactory recordScannerTaskFactory(
+    public abstract RecordScannerTaskRunner.RecordScannerTaskFactory recordScannerTaskFactory(
         long nodeCount,
         ImportSizing sizing,
         StoreScanner<Record> storeScanner

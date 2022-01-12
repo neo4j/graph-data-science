@@ -142,7 +142,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     }
 
     @Override
-    public InternalImporter.RecordScannerTaskFactory recordScannerTaskFactory(
+    public RecordScannerTaskRunner.RecordScannerTaskFactory recordScannerTaskFactory(
         long nodeCount,
         ImportSizing sizing,
         StoreScanner<NodeReference> storeScanner
@@ -222,14 +222,14 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
                         nodeMapping,
                         progressTracker,
                         terminationFlag,
-                        threadPool,
+                        executorService,
                         allocationTracker
                     ))
                 ).collect(Collectors.toList());
 
             if (!parallelIndexScan) {
                 // While we don't scan the index in parallel, try to at least scan all properties in parallel
-                ParallelUtil.run(indexScanningImporters, threadPool);
+                ParallelUtil.run(indexScanningImporters, executorService);
             }
             long recordsImported = 0L;
             for (IndexedNodePropertyImporter propertyImporter : indexScanningImporters) {

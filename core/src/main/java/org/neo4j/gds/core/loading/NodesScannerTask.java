@@ -33,7 +33,7 @@ import java.util.Collections;
 
 public final class NodesScannerTask extends StatementAction implements RecordScannerTask {
 
-    public static InternalImporter.RecordScannerTaskFactory factory(
+    public static RecordScannerTaskRunner.RecordScannerTaskFactory factory(
         TransactionContext tx,
         StoreScanner<NodeReference> scanner,
         long highestPossibleNodeCount,
@@ -55,7 +55,7 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
         );
     }
 
-    static final class Factory implements InternalImporter.RecordScannerTaskFactory {
+    static final class Factory implements RecordScannerTaskRunner.RecordScannerTaskFactory {
         private final TransactionContext tx;
         private final StoreScanner<NodeReference> scanner;
         private final long highestPossibleNodeCount;

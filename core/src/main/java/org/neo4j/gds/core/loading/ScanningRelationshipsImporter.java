@@ -72,7 +72,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
     }
 
     @Override
-    public InternalImporter.RecordScannerTaskFactory recordScannerTaskFactory(
+    public RecordScannerTaskRunner.RecordScannerTaskFactory recordScannerTaskFactory(
         long nodeCount,
         ImportSizing sizing,
         StoreScanner<RelationshipReference> storeScanner
