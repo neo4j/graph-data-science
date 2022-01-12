@@ -19,24 +19,21 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
+import org.neo4j.gds.config.TargetNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.List;
 
-import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
-import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, ModelConfig, RandomSeedConfig {
+public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, ModelConfig, RandomSeedConfig, TargetNodePropertyConfig {
 
     long serialVersionUID = 0x42L;
 
@@ -46,14 +43,7 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, M
     @Configuration.ToMapValue("org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification#specificationsToString")
     List<MetricSpecification> metrics();
 
-    @Configuration.ConvertWith("validateProperty")
-    String targetProperty();
-
     String pipeline();
-
-    static @Nullable String validateProperty(String input) {
-        return validateNoWhiteCharacter(emptyToNull(input), "targetProperty");
-    }
 
     static NodeClassificationPipelineTrainConfig of(String username, CypherMapWrapper config) {
         return new NodeClassificationPipelineTrainConfigImpl(username, config);

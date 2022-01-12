@@ -33,6 +33,7 @@ import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
 import org.neo4j.gds.config.SourceNodesConfig;
 import org.neo4j.gds.config.TargetNodeConfig;
+import org.neo4j.gds.config.TargetNodePropertyConfig;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.ArrayList;
@@ -70,6 +71,9 @@ public final class GraphStoreValidation {
         }
         if (config instanceof TargetNodeConfig) {
             validateTargetNode(graphStore, (TargetNodeConfig) config, filterLabels);
+        }
+        if (config instanceof TargetNodePropertyConfig) {
+            validateTargetNodeProperty(graphStore, (TargetNodePropertyConfig) config, filterLabels);
         }
     }
 
@@ -217,6 +221,21 @@ public final class GraphStoreValidation {
             .nodeLabels(internalNodeId)
             .stream()
             .noneMatch(filteredNodeLabels::contains);
+    }
+
+    private static void validateTargetNodeProperty(
+        GraphStore graphStore,
+        TargetNodePropertyConfig config,
+        Collection<NodeLabel> filterLabels
+    ) {
+        var targetProperty = config.targetProperty();
+        if (targetProperty != null && !graphStore.hasNodeProperty(filterLabels, targetProperty)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Target property `%s` not found in graph with node properties: %s",
+                targetProperty,
+                graphStore.nodePropertyKeys().values()
+            ));
+        }
     }
 
     private GraphStoreValidation() {}

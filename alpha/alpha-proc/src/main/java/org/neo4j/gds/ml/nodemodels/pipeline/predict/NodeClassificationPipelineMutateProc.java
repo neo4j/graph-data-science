@@ -70,7 +70,7 @@ public class NodeClassificationPipelineMutateProc
 
     @Override
     public ValidationConfiguration<NodeClassificationPredictPipelineMutateConfig> validationConfig() {
-        return NodeClassificationPipelineCompanion.getValidationConfig(modelCatalog);
+        return NodeClassificationPipelineCompanion.getValidationConfig();
     }
 
     @Override

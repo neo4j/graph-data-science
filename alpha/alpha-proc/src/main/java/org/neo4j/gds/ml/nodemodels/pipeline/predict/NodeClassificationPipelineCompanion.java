@@ -21,13 +21,8 @@ package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.GraphStoreValidation;
 import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
 
 import java.util.Collection;
 import java.util.List;
@@ -37,9 +32,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeClassificationPipelineCompanion {
 
-    static <CONFIG extends NodeClassificationPredictPipelineBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig(
-        ModelCatalog modelCatalog
-    ) {
+    static <CONFIG extends NodeClassificationPredictPipelineBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig() {
         return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
@@ -59,15 +52,6 @@ public final class NodeClassificationPipelineCompanion {
                                 mutateConfig.predictedProbabilityProperty()
                             );
                         }
-
-                        var trainConfig = modelCatalog.get(
-                            config.username(),
-                            config.modelName(),
-                            NodeLogisticRegressionData.class,
-                            NodeClassificationPipelineTrainConfig.class,
-                            NodeClassificationPipelineModelInfo.class
-                        ).trainConfig();
-                        GraphStoreValidation.validate(graphStore, trainConfig);
                     }
                 );
             }

@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor.MODEL_TYPE;
 
 @Neo4jModelCatalogExtension
@@ -199,6 +200,34 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                         .collect(Collectors.toList());
                     return metricNames.equals(List.of("F1_WEIGHTED"));
                 });
+        });
+    }
+
+    @Test
+    void failsOnInvalidTargetProperty() {
+        var pipeline = insertPipelineIntoCatalog();
+        pipeline.featureProperties().addAll(List.of("array"));
+
+        var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
+            .pipeline(PIPELINE_NAME)
+            .graphName(GRAPH_NAME)
+            .modelName("myModel")
+            .targetProperty("INVALID_PROPERTY")
+            .addMetric(MetricSpecification.parse("F1(class=1)"))
+            .build();
+
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var ncPipeTrain = new NodeClassificationTrainPipelineExecutor(
+                pipeline,
+                config,
+                caller.executionContext(),
+                graphStore,
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            );
+            assertThatThrownBy(ncPipeTrain::compute)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Target property `INVALID_PROPERTY` not found in graph with node properties:");
         });
     }
 
