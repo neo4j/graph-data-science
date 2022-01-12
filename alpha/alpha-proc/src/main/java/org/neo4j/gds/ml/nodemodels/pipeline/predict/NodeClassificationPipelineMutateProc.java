@@ -29,9 +29,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardMutateResult;
 import org.neo4j.procedure.Context;
@@ -89,15 +86,6 @@ public class NodeClassificationPipelineMutateProc
                 );
             }
         });
-
-        var trainConfig = modelCatalog.get(
-            config.username(),
-            config.modelName(),
-            NodeLogisticRegressionData.class,
-            NodeClassificationPipelineTrainConfig.class,
-            NodeClassificationPipelineModelInfo.class
-        ).trainConfig();
-        GraphStoreValidation.validate(graphStore, trainConfig);
     }
 
     @Override
