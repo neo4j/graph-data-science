@@ -39,33 +39,31 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 
-public abstract class TrainProc<ALGO extends Algorithm<Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>>,
-    TRAIN_RESULT,
-    TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig,
-    TRAIN_INFO extends ToMapConvertible,
+public abstract class TrainProc<
+    ALGO extends Algorithm<ALGO_RESULT>,
+    ALGO_RESULT,
+    TRAIN_CONFIG extends AlgoBaseConfig & ModelConfig,
     PROC_RESULT
-> extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG, PROC_RESULT> {
+    > extends AlgoBaseProc<ALGO, ALGO_RESULT, TRAIN_CONFIG, PROC_RESULT> {
 
     @Context
     public ModelCatalog modelCatalog;
 
     protected abstract String modelType();
 
-    protected abstract PROC_RESULT constructResult(
-        Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO> model,
-        ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG> computationResult
-    );
+    protected abstract PROC_RESULT constructProcResult(ComputationResult<ALGO, ALGO_RESULT, TRAIN_CONFIG> computationResult);
+
+    protected abstract Model<?, ?, ?> extractModel(ALGO_RESULT algo_result);
 
     @Override
-    public ComputationResultConsumer<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
+    public ComputationResultConsumer<ALGO, ALGO_RESULT, TRAIN_CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var model = computationResult.result();
-            modelCatalog.set(model);
-            return Stream.of(constructResult(model, computationResult));
+            modelCatalog.set(extractModel(computationResult.result()));
+            return Stream.of(constructProcResult(computationResult));
         };
     }
 
-    protected Stream<PROC_RESULT> trainAndStoreModelWithResult(ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG> computationResult) {
+    protected Stream<PROC_RESULT> trainAndStoreModelWithResult(ComputationResult<ALGO, ALGO_RESULT, TRAIN_CONFIG> computationResult) {
         return computationResultConsumer().consume(computationResult, executionContext());
     }
 
@@ -105,6 +103,7 @@ public abstract class TrainProc<ALGO extends Algorithm<Model<TRAIN_RESULT, TRAIN
         }
     }
 
+    // FIXME replace this with MLTrainResult (duplicate?)
     @SuppressWarnings("unused")
     public static class TrainResult {
 

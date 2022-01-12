@@ -23,7 +23,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.nodemodels.MetricData;
+import org.neo4j.gds.ml.nodemodels.BestMetricData;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,7 +33,7 @@ public interface LinkPredictionModelInfo extends ToMapConvertible {
 
     LinkLogisticRegressionTrainConfig bestParameters();
 
-    Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics();
+    Map<LinkMetric, BestMetricData<LinkLogisticRegressionTrainConfig>> metrics();
 
     LinkPredictionPipeline trainingPipeline();
 
@@ -51,7 +51,7 @@ public interface LinkPredictionModelInfo extends ToMapConvertible {
 
     static LinkPredictionModelInfo of(
         LinkLogisticRegressionTrainConfig bestParameters,
-        Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics,
+        Map<LinkMetric, BestMetricData<LinkLogisticRegressionTrainConfig>> metrics,
         LinkPredictionPipeline trainingPipeline
     ) {
         return ImmutableLinkPredictionModelInfo.of(bestParameters, metrics, trainingPipeline);

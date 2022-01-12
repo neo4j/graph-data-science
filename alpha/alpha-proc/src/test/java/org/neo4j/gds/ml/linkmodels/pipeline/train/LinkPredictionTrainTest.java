@@ -22,17 +22,14 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 
 import java.util.List;
@@ -113,7 +110,9 @@ class LinkPredictionTrainTest {
 
         LinkPredictionTrainConfig trainConfig = trainingConfig(modelName);
 
-        var actualModel = runLinkPrediction(trainConfig);
+        var result = runLinkPrediction(trainConfig);
+
+        var actualModel = result.model();
 
         assertThat(actualModel.name()).isEqualTo(modelName);
         assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrain.MODEL_TYPE);
@@ -122,8 +121,7 @@ class LinkPredictionTrainTest {
         assertThat(actualModel.data().weights().data().totalSize()).isEqualTo(7);
 
         var customInfo = actualModel.customInfo();
-        assertThat(customInfo.metrics().get(LinkMetric.AUCPR).validation())
-            .hasSize(2)
+        assertThat(result.modelSelectionStatistics().validationStats().get(LinkMetric.AUCPR))
             .satisfies(scores ->
                 assertThat(scores.get(0).avg()).isNotCloseTo(scores.get(1).avg(), Percentage.withPercentage(0.2))
             );
@@ -139,8 +137,8 @@ class LinkPredictionTrainTest {
 
         LinkPredictionTrainConfig trainConfig = trainingConfig(modelName);
 
-        var modelData = runLinkPrediction(trainConfig).data();
-        var modelDataRepeated = runLinkPrediction(trainConfig).data();
+        var modelData = runLinkPrediction(trainConfig).model().data();
+        var modelDataRepeated = runLinkPrediction(trainConfig).model().data();
 
         var modelWeights = modelData.weights().data();
         var modelBias = modelData.bias().get().data().value();
@@ -181,7 +179,7 @@ class LinkPredictionTrainTest {
             .build();
     }
 
-    private Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> runLinkPrediction(
+    private LinkPredictionTrainResult runLinkPrediction(
         LinkPredictionTrainConfig trainConfig
     ) {
         var linkPredictionTrain = new LinkPredictionTrain(

@@ -27,8 +27,6 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.MLTrainResult;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -41,14 +39,14 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 
 @GdsCallable(name = "gds.alpha.ml.pipeline.linkPrediction.train", description = "Trains a link prediction model based on a pipeline", executionMode = TRAIN)
-public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTrainPipelineExecutor, LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo, MLTrainResult> {
+public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainResult, LinkPredictionTrainConfig, LinkPredictionPipelineTrainProc.LPTrainResult> {
 
     @Context
     public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.train", mode = Mode.READ)
     @Description("Trains a link prediction model based on a pipeline")
-    public Stream<MLTrainResult> train(
+    public Stream<LPTrainResult> train(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> config
     ) {
@@ -73,10 +71,25 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
     }
 
     @Override
-    protected MLTrainResult constructResult(
-        Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
-        ComputationResult<LinkPredictionTrainPipelineExecutor, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>, LinkPredictionTrainConfig> computationResult
+    protected Model<?, ?, ?> extractModel(LinkPredictionTrainResult algoResult) {
+        return algoResult.model();
+    }
+
+    @Override
+    protected LPTrainResult constructProcResult(
+        ComputationResult<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainResult, LinkPredictionTrainConfig> computationResult
     ) {
-        return new MLTrainResult(model, computationResult.computeMillis());
+        return new LPTrainResult(computationResult.result(), computationResult.computeMillis());
+    }
+
+    public static class LPTrainResult extends MLTrainResult {
+
+        public final Map<String, Object> modelSelectionStats;
+
+        public LPTrainResult(LinkPredictionTrainResult algoResult, long trainMillis) {
+            super(algoResult.model(), trainMillis);
+
+            this.modelSelectionStats = algoResult.modelSelectionStatistics().toMap();
+        }
     }
 }

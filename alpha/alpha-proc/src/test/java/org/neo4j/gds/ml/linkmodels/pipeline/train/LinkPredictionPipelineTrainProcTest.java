@@ -156,6 +156,11 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasKey("metrics"),
                         Matchers.hasKey("trainingPipeline")
                     ),
+                    "modelSelectionStats", Matchers.allOf(
+                        Matchers.hasKey("validationStats"),
+                        Matchers.hasKey("trainStats"),
+                        Matchers.hasKey("bestParameters")
+                    ),
                     "trainMillis", greaterThan(-1L),
                     "configuration", aMapWithSize(10)
                 ))
@@ -212,6 +217,11 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasKey("bestParameters"),
                         Matchers.hasKey("metrics"),
                         Matchers.hasKey("trainingPipeline")
+                    ),
+                    "modelSelectionStats", Matchers.allOf(
+                        Matchers.hasKey("validationStats"),
+                        Matchers.hasKey("trainStats"),
+                        Matchers.hasKey("bestParameters")
                     ),
                     "trainMillis", greaterThan(-1L),
                     "configuration", aMapWithSize(10)

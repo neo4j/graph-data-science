@@ -166,7 +166,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .build();
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var actualModel = new LinkPredictionTrainPipelineExecutor(
+            var result = new LinkPredictionTrainPipelineExecutor(
                 pipeline,
                 config,
                 caller.executionContext(),
@@ -174,6 +174,8 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER
             ).compute();
+
+            var actualModel = result.model();
 
             assertThat(actualModel.name()).isEqualTo("model");
 
@@ -183,7 +185,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(actualModel.data().weights().data().totalSize()).isEqualTo(7);
 
             var customInfo = actualModel.customInfo();
-            assertThat(customInfo.metrics().get(LinkMetric.AUCPR).validation())
+            assertThat(result.modelSelectionStatistics().validationStats().get(LinkMetric.AUCPR))
                 .hasSize(2)
                 .satisfies(scores ->
                     assertThat(scores.get(0).avg()).isNotCloseTo(scores.get(1).avg(), Percentage.withPercentage(0.2))

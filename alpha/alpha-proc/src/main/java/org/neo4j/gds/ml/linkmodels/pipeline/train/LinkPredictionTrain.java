@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.immutables.value.Value;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
@@ -43,8 +44,8 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrain;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.nodemodels.BestMetricData;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
-import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
@@ -54,14 +55,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class LinkPredictionTrain
-    extends Algorithm<Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>> {
+public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
     public static final String MODEL_TYPE = "Link prediction pipeline";
 
@@ -102,7 +103,7 @@ public class LinkPredictionTrain
     }
 
     @Override
-    public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> compute() {
+    public LinkPredictionTrainResult compute() {
         progressTracker.beginSubTask();
 
         progressTracker.beginSubTask("extract train features");
@@ -130,14 +131,14 @@ public class LinkPredictionTrain
         progressTracker.endSubTask("evaluate on test data");
 
         var model = createModel(
-            modelSelectResult,
+            bestParameters,
             modelData,
-            mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics)
+            combineBestParameterMetrics(modelSelectResult, outerTrainMetrics, testMetrics)
         );
 
         progressTracker.endSubTask();
 
-        return model;
+        return ImmutableLinkPredictionTrainResult.of(model, modelSelectResult);
     }
 
     private FeaturesAndTargets extractFeaturesAndTargets(Graph graph) {
@@ -227,7 +228,7 @@ public class LinkPredictionTrain
 
         var bestConfig = winner.params();
 
-        return LinkPredictionTrain.ModelSelectResult.of(bestConfig, trainStats, validationStats);
+        return ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
     private Map<LinkMetric, Double> computeTestMetric(LinkLogisticRegressionData modelData) {
@@ -247,21 +248,32 @@ public class LinkPredictionTrain
         return result;
     }
 
-    private Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> mergeMetrics(
+    private static Map<LinkMetric, BestMetricData<LinkLogisticRegressionTrainConfig>> combineBestParameterMetrics(
         LinkPredictionTrain.ModelSelectResult modelSelectResult,
         Map<LinkMetric, Double> outerTrainMetrics,
         Map<LinkMetric, Double> testMetrics
     ) {
-        return modelSelectResult.validationStats().keySet().stream().collect(Collectors.toMap(
+        Set<LinkMetric> metrics = modelSelectResult.validationStats().keySet();
+
+        return metrics.stream().collect(Collectors.toMap(
             Function.identity(),
-            metric ->
-                MetricData.of(
-                    modelSelectResult.trainStats().get(metric),
-                    modelSelectResult.validationStats().get(metric),
-                    outerTrainMetrics.get(metric),
-                    testMetrics.get(metric)
-                )
+            metric -> BestMetricData.of(
+                findBestModelStats(modelSelectResult.trainStats().get(metric), modelSelectResult.bestParameters()),
+                findBestModelStats(modelSelectResult.validationStats().get(metric), modelSelectResult.bestParameters()),
+                outerTrainMetrics.get(metric),
+                testMetrics.get(metric)
+            )
         ));
+    }
+
+    private static ModelStats<LinkLogisticRegressionTrainConfig> findBestModelStats(
+        List<ModelStats<LinkLogisticRegressionTrainConfig>> metricStatsForModels,
+        LinkLogisticRegressionTrainConfig bestParams
+    ) {
+        return metricStatsForModels.stream()
+            .filter(metricStatsForModel -> metricStatsForModel.params() == bestParams)
+            .findFirst()
+            .orElseThrow();
     }
 
     private List<TrainingExamplesSplit> trainValidationSplits(ReadOnlyHugeLongArray trainRelationshipIds, HugeDoubleArray actualTargets) {
@@ -274,7 +286,7 @@ public class LinkPredictionTrain
         return splitter.splits();
     }
 
-    private Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> initStatsMap() {
+    private static Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> initStatsMap() {
         var statsMap = new HashMap<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>>();
         statsMap.put(LinkMetric.AUCPR, new ArrayList<>());
         return statsMap;
@@ -296,6 +308,22 @@ public class LinkPredictionTrain
         ) {
             return ImmutableModelSelectResult.of(bestConfig, trainStats, validationStats);
         }
+
+        @Value.Derived
+        default Map<String, Object> toMap() {
+            Function<Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>>, Map<String, Object>> statsConverter = stats ->
+                stats.entrySet().stream().collect(Collectors.toMap(
+                    entry -> entry.getKey().name(),
+                    value -> value.getValue().stream().map(ModelStats::toMap)
+                ));
+
+            return Map.of(
+                "bestParameters", bestParameters().toMap(),
+                "trainStats", statsConverter.apply(trainStats()),
+                "validationStats", statsConverter.apply(validationStats())
+            );
+        }
+
     }
 
 
@@ -392,9 +420,9 @@ public class LinkPredictionTrain
     }
 
     private Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
-        ModelSelectResult modelSelectResult,
+        LinkLogisticRegressionTrainConfig bestParameters,
         LinkLogisticRegressionData modelData,
-        Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics
+        Map<LinkMetric, BestMetricData<LinkLogisticRegressionTrainConfig>> winnerMetrics
     ) {
         return Model.of(
             trainConfig.username(),
@@ -404,8 +432,8 @@ public class LinkPredictionTrain
             modelData,
             trainConfig,
             LinkPredictionModelInfo.of(
-                modelSelectResult.bestParameters(),
-                metrics,
+                bestParameters,
+                winnerMetrics,
                 pipeline.copy()
             )
         );

@@ -45,7 +45,7 @@ import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdsCallable(name = "gds.alpha.ml.linkPrediction.train", description = "Trains a link prediction model", executionMode = TRAIN)
-public class LinkPredictionTrainProc extends TrainProc<LinkPredictionTrain, LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo, MLTrainResult> {
+public class LinkPredictionTrainProc extends TrainProc<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>, LinkPredictionTrainConfig, MLTrainResult> {
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.train", mode = Mode.READ)
     @Description("Trains a link prediction model")
@@ -86,6 +86,16 @@ public class LinkPredictionTrainProc extends TrainProc<LinkPredictionTrain, Link
     }
 
     @Override
+    protected MLTrainResult constructProcResult(ComputationResult<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>, LinkPredictionTrainConfig> computationResult) {
+        return new MLTrainResult(computationResult.result(), computationResult.computeMillis());
+    }
+
+    @Override
+    protected Model<?, ?, ?> extractModel(Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> algoResult) {
+        return algoResult;
+    }
+
+    @Override
     public ValidationConfiguration<LinkPredictionTrainConfig> validationConfig() {
         return new ValidationConfiguration<>() {
             @Override
@@ -106,13 +116,5 @@ public class LinkPredictionTrainProc extends TrainProc<LinkPredictionTrain, Link
     @Override
     public GraphAlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
         return new LinkPredictionTrainFactory();
-    }
-
-    @Override
-    protected MLTrainResult constructResult(
-        Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
-        ComputationResult<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>, LinkPredictionTrainConfig> computationResult
-    ) {
-        return new MLTrainResult(model, computationResult.computeMillis());
     }
 }
