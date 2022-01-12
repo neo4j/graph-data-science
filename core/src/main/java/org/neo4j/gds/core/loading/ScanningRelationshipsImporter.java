@@ -72,17 +72,17 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
     }
 
     @Override
-    public InternalImporter.CreateScanner creator(
-        final long nodeCount,
-        final ImportSizing sizing,
-        final StoreScanner<RelationshipReference> scanner
+    public InternalImporter.RecordScannerTaskFactory recordScannerTaskFactory(
+        long nodeCount,
+        ImportSizing sizing,
+        StoreScanner<RelationshipReference> storeScanner
     ) {
 
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();
 
         List<SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
-                .entrySet()
+            .entrySet()
                 .stream()
                 .map(entry -> {
                     var relationshipType = entry.getKey();
@@ -101,11 +101,11 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             allRelationshipCounters.put(importerBuilder.relationshipType(), importerBuilder.relationshipCounter());
         }
 
-        return RelationshipsScanner.of(
+        return RelationshipsScannerTask.factory(
             loadingContext,
             progressTracker,
             idMap,
-            scanner,
+            storeScanner,
             importerBuilders
         );
     }

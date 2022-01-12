@@ -76,8 +76,12 @@ public abstract class ScanningRecordsImporter<Record, T> {
 
             progressTracker.logDebug(formatWithLocale("Start using %s", storeScanner.getClass().getSimpleName()));
 
-            InternalImporter.CreateScanner creator = creator(nodeCount, sizing, storeScanner);
-            InternalImporter importer = new InternalImporter(numberOfThreads, creator);
+            InternalImporter.RecordScannerTaskFactory scannerTaskFactory = recordScannerTaskFactory(
+                nodeCount,
+                sizing,
+                storeScanner
+            );
+            InternalImporter importer = new InternalImporter(numberOfThreads, scannerTaskFactory);
 
             ImportResult importResult = importer.runImport(threadPool);
 
@@ -86,8 +90,8 @@ public abstract class ScanningRecordsImporter<Record, T> {
             long propertiesImported = importResult.propertiesImported;
             BigInteger bigNanos = BigInteger.valueOf(importResult.tookNanos);
             double tookInSeconds = new BigDecimal(bigNanos)
-                    .divide(new BigDecimal(A_BILLION), 9, RoundingMode.CEILING)
-                    .doubleValue();
+                .divide(new BigDecimal(A_BILLION), 9, RoundingMode.CEILING)
+                .doubleValue();
             long bytesPerSecond = A_BILLION
                 .multiply(BigInteger.valueOf(requiredBytes))
                 .divide(bigNanos)
@@ -117,10 +121,10 @@ public abstract class ScanningRecordsImporter<Record, T> {
         return build();
     }
 
-    public abstract InternalImporter.CreateScanner creator(
+    public abstract InternalImporter.RecordScannerTaskFactory recordScannerTaskFactory(
         long nodeCount,
         ImportSizing sizing,
-        StoreScanner<Record> scanner
+        StoreScanner<Record> storeScanner
     );
 
     public abstract T build();

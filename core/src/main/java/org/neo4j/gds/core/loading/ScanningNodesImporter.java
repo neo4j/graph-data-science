@@ -142,23 +142,25 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     }
 
     @Override
-    public InternalImporter.CreateScanner creator(
+    public InternalImporter.RecordScannerTaskFactory recordScannerTaskFactory(
         long nodeCount,
         ImportSizing sizing,
-        StoreScanner<NodeReference> scanner
+        StoreScanner<NodeReference> storeScanner
     ) {
-        return NodesScanner.of(
+        var nodeImporter = new NodeImporter(
+            idMapBuilder,
+            labelInformationBuilder,
+            dimensions.tokenNodeLabelMapping(),
+            nodePropertyImporter != null
+        );
+
+        return NodesScannerTask.factory(
             transaction,
-            scanner,
+            storeScanner,
             dimensions.highestPossibleNodeCount(),
             dimensions.nodeLabelTokens(),
             progressTracker,
-            new NodeImporter(
-                idMapBuilder,
-                labelInformationBuilder,
-                dimensions.tokenNodeLabelMapping(),
-                nodePropertyImporter != null
-            ),
+            nodeImporter,
             nodePropertyImporter,
             terminationFlag
         );

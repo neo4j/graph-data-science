@@ -31,47 +31,47 @@ import org.neo4j.kernel.api.KernelTransaction;
 import java.util.Collection;
 import java.util.Collections;
 
-public final class NodesScanner extends StatementAction implements RecordScanner {
+public final class NodesScannerTask extends StatementAction implements RecordScannerTask {
 
-    public static InternalImporter.CreateScanner of(
+    public static InternalImporter.RecordScannerTaskFactory factory(
         TransactionContext tx,
         StoreScanner<NodeReference> scanner,
         long highestPossibleNodeCount,
         LongSet labels,
         ProgressTracker progressTracker,
-        NodeImporter importer,
+        NodeImporter nodeImporter,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
         TerminationFlag terminationFlag
     ) {
-        return new NodesScanner.Creator(
+        return new Factory(
             tx,
             scanner,
             highestPossibleNodeCount,
             labels,
             progressTracker,
-            importer,
+            nodeImporter,
             nodePropertyImporter,
             terminationFlag
         );
     }
 
-    static final class Creator implements InternalImporter.CreateScanner {
+    static final class Factory implements InternalImporter.RecordScannerTaskFactory {
         private final TransactionContext tx;
         private final StoreScanner<NodeReference> scanner;
         private final long highestPossibleNodeCount;
         private final LongSet labels;
         private final ProgressTracker progressTracker;
-        private final NodeImporter importer;
+        private final NodeImporter nodeImporter;
         private final NativeNodePropertyImporter nodePropertyImporter;
         private final TerminationFlag terminationFlag;
 
-        Creator(
+        Factory(
             TransactionContext tx,
             StoreScanner<NodeReference> scanner,
             long highestPossibleNodeCount,
             LongSet labels,
             ProgressTracker progressTracker,
-            NodeImporter importer,
+            NodeImporter nodeImporter,
             @Nullable NativeNodePropertyImporter nodePropertyImporter,
             TerminationFlag terminationFlag
         ) {
@@ -80,22 +80,22 @@ public final class NodesScanner extends StatementAction implements RecordScanner
             this.highestPossibleNodeCount = highestPossibleNodeCount;
             this.labels = labels;
             this.progressTracker = progressTracker;
-            this.importer = importer;
+            this.nodeImporter = nodeImporter;
             this.nodePropertyImporter = nodePropertyImporter;
             this.terminationFlag = terminationFlag;
         }
 
         @Override
-        public RecordScanner create(int index) {
-            return new NodesScanner(
+        public RecordScannerTask create(int taskIndex) {
+            return new NodesScannerTask(
                 tx,
                 terminationFlag,
                 scanner,
                 highestPossibleNodeCount,
                 labels,
-                index,
+                taskIndex,
                 progressTracker,
-                importer,
+                nodeImporter,
                 nodePropertyImporter
             );
         }
@@ -115,20 +115,20 @@ public final class NodesScanner extends StatementAction implements RecordScanner
     private final StoreScanner<NodeReference> scanner;
     private final long highestPossibleNodeCount;
     private final LongSet labels;
-    private final int scannerIndex;
+    private final int taskIndex;
     private final ProgressTracker progressTracker;
     private final NodeImporter importer;
     private final NativeNodePropertyImporter nodePropertyImporter;
     private long propertiesImported;
     private long nodesImported;
 
-    private NodesScanner(
+    private NodesScannerTask(
         TransactionContext tx,
         TerminationFlag terminationFlag,
         StoreScanner<NodeReference> scanner,
         long highestPossibleNodeCount,
         LongSet labels,
-        int threadIndex,
+        int taskIndex,
         ProgressTracker progressTracker,
         NodeImporter importer,
         @Nullable NativeNodePropertyImporter nodePropertyImporter
@@ -138,7 +138,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         this.scanner = scanner;
         this.highestPossibleNodeCount = highestPossibleNodeCount;
         this.labels = labels;
-        this.scannerIndex = threadIndex;
+        this.taskIndex = taskIndex;
         this.progressTracker = progressTracker;
         this.importer = importer;
         this.nodePropertyImporter = nodePropertyImporter;
@@ -146,7 +146,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
 
     @Override
     public String threadName() {
-        return "node-store-scan-" + scannerIndex;
+        return "node-store-scan-" + taskIndex;
     }
 
     @Override

@@ -19,7 +19,11 @@
  */
 package org.neo4j.gds.core.loading;
 
-public interface RecordScanner extends Runnable {
+/**
+ * Exists per thread.
+ */
+public interface RecordScannerTask extends Runnable {
     long recordsImported();
+
     long propertiesImported();
 }

@@ -33,9 +33,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public final class RelationshipsScanner extends StatementAction implements RecordScanner {
+public final class RelationshipsScannerTask extends StatementAction implements RecordScannerTask {
 
-    public static InternalImporter.CreateScanner of(
+    public static InternalImporter.RecordScannerTaskFactory factory(
         GraphLoaderContext loadingContext,
         ProgressTracker progressTracker,
         IdMapping idMap,
@@ -50,7 +50,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
         if (builders.isEmpty()) {
             return InternalImporter.createEmptyScanner();
         }
-        return new RelationshipsScanner.Creator(
+        return new Factory(
             loadingContext.transactionContext(),
             progressTracker,
             idMap,
@@ -60,7 +60,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
         );
     }
 
-    static final class Creator implements InternalImporter.CreateScanner {
+    static final class Factory implements InternalImporter.RecordScannerTaskFactory {
         private final TransactionContext tx;
         private final ProgressTracker progressTracker;
         private final IdMapping idMap;
@@ -68,13 +68,14 @@ public final class RelationshipsScanner extends StatementAction implements Recor
         private final List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders;
         private final TerminationFlag terminationFlag;
 
-        Creator(
-                TransactionContext tx,
-                ProgressTracker progressTracker,
-                IdMapping idMap,
-                StoreScanner<RelationshipReference> scanner,
-                List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders,
-                TerminationFlag terminationFlag) {
+        Factory(
+            TransactionContext tx,
+            ProgressTracker progressTracker,
+            IdMapping idMap,
+            StoreScanner<RelationshipReference> scanner,
+            List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders,
+            TerminationFlag terminationFlag
+        ) {
             this.tx = tx;
             this.progressTracker = progressTracker;
             this.idMap = idMap;
@@ -84,14 +85,14 @@ public final class RelationshipsScanner extends StatementAction implements Recor
         }
 
         @Override
-        public RecordScanner create(final int index) {
-            return new RelationshipsScanner(
+        public RecordScannerTask create(final int taskIndex) {
+            return new RelationshipsScannerTask(
                 tx,
                 terminationFlag,
                 progressTracker,
                 idMap,
                 scanner,
-                index,
+                taskIndex,
                 importerBuilders
             );
         }
@@ -113,32 +114,33 @@ public final class RelationshipsScanner extends StatementAction implements Recor
     private final ProgressTracker progressTracker;
     private final IdMapping idMap;
     private final StoreScanner<RelationshipReference> scanner;
-    private final int scannerIndex;
+    private final int taskIndex;
     private final List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders;
 
     private long relationshipsImported;
     private long weightsImported;
 
-    private RelationshipsScanner(
-            TransactionContext tx,
-            TerminationFlag terminationFlag,
-            ProgressTracker progressTracker,
-            IdMapping idMap,
-            StoreScanner<RelationshipReference> scanner,
-            int threadIndex,
-            List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders) {
+    private RelationshipsScannerTask(
+        TransactionContext tx,
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker,
+        IdMapping idMap,
+        StoreScanner<RelationshipReference> scanner,
+        int taskIndex,
+        List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders
+    ) {
         super(tx);
         this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
         this.idMap = idMap;
         this.scanner = scanner;
-        this.scannerIndex = threadIndex;
+        this.taskIndex = taskIndex;
         this.importerBuilders = importerBuilders;
     }
 
     @Override
     public String threadName() {
-        return "relationship-store-scan-" + scannerIndex;
+        return "relationship-store-scan-" + taskIndex;
     }
 
     @Override

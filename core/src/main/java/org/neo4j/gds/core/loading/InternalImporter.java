@@ -28,42 +28,41 @@ import java.util.concurrent.ExecutorService;
 
 public final class InternalImporter {
 
-    public interface CreateScanner {
-        RecordScanner create(int index);
+    public interface RecordScannerTaskFactory {
+
+        RecordScannerTask create(int taskIndex);
 
         void prepareFlushTasks();
 
         Collection<Runnable> flushTasks();
     }
 
-    public static CreateScanner createEmptyScanner() {
-        return NoRecordsScanner.INSTANCE;
+    public static RecordScannerTaskFactory createEmptyScanner() {
+        return NoRecordsScannerTaskFactory.INSTANCE;
     }
 
     private final int numberOfThreads;
-    private final CreateScanner createScanner;
+    private final RecordScannerTaskFactory recordScannerBuilder;
 
-    InternalImporter(
-            final int numberOfThreads,
-            final CreateScanner createScanner) {
+    InternalImporter(int numberOfThreads, RecordScannerTaskFactory recordScannerBuilder) {
         this.numberOfThreads = numberOfThreads;
-        this.createScanner = createScanner;
+        this.recordScannerBuilder = recordScannerBuilder;
     }
 
     ImportResult runImport(ExecutorService pool) {
-        Collection<RecordScanner> tasks = new ArrayList<>(numberOfThreads);
+        Collection<RecordScannerTask> tasks = new ArrayList<>(numberOfThreads);
         for (int i = 0; i < numberOfThreads; i++) {
-            tasks.add(createScanner.create(i));
+            tasks.add(recordScannerBuilder.create(i));
         }
 
         long scannerStart = System.nanoTime();
         ParallelUtil.run(tasks, pool);
-        createScanner.prepareFlushTasks();
-        ParallelUtil.run(createScanner.flushTasks(), pool);
+        recordScannerBuilder.prepareFlushTasks();
+        ParallelUtil.run(recordScannerBuilder.flushTasks(), pool);
         long took = System.nanoTime() - scannerStart;
         long importedRecords = 0L;
         long importedProperties = 0L;
-        for (RecordScanner task : tasks) {
+        for (RecordScannerTask task : tasks) {
             importedRecords += task.recordsImported();
             importedProperties += task.propertiesImported();
         }
@@ -83,8 +82,8 @@ public final class InternalImporter {
         }
     }
 
-    private static final class NoRecordsScanner implements RecordScanner, InternalImporter.CreateScanner {
-        private static final NoRecordsScanner INSTANCE = new NoRecordsScanner();
+    private static final class NoRecordsScannerTaskFactory implements RecordScannerTask, RecordScannerTaskFactory {
+        private static final NoRecordsScannerTaskFactory INSTANCE = new NoRecordsScannerTaskFactory();
 
         @Override
         public long propertiesImported() {
@@ -101,7 +100,7 @@ public final class InternalImporter {
         }
 
         @Override
-        public RecordScanner create(final int index) {
+        public RecordScannerTask create(final int taskIndex) {
             return this;
         }
 
