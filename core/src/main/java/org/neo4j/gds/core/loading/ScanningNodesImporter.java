@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
-import com.carrotsearch.hppc.IntObjectMap;
+import org.immutables.builder.Builder;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
@@ -30,6 +30,7 @@ import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -39,51 +40,93 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-
 public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilder<ALLOCATOR>, ALLOCATOR extends IdMappingAllocator> extends ScanningRecordsImporter<NodeReference, IdsAndProperties> {
 
-    private final GraphProjectFromStoreConfig graphProjectConfig;
+    private final IndexPropertyMappings.LoadablePropertyMappings propertyMappings;
     private final TerminationFlag terminationFlag;
-    private final IndexPropertyMappings.LoadablePropertyMappings properties;
-    private final InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR> internalIdMappingBuilderFactory;
     private final NodeMappingBuilder nodeMappingBuilder;
+    private final BUILDER idMapBuilder;
+    private final LabelInformation.Builder labelInformationBuilder;
+    private final @Nullable NativeNodePropertyImporter nodePropertyImporter;
 
-    @Nullable
-    private NativeNodePropertyImporter nodePropertyImporter;
-    private BUILDER idMapBuilder;
-    private LabelInformation.Builder labelInformationBuilder;
-
-    public ScanningNodesImporter(
+    @Builder.Factory
+    public static <BUILDER extends InternalIdMappingBuilder<ALLOCATOR>, ALLOCATOR extends IdMappingAllocator> ScanningNodesImporter<BUILDER, ALLOCATOR> scanningNodesImporter(
         GraphProjectFromStoreConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
-        Log log,
         int concurrency,
-        IndexPropertyMappings.LoadablePropertyMappings properties,
+        IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
         InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR> internalIdMappingBuilderFactory,
         NodeMappingBuilder nodeMappingBuilder
     ) {
+        var allocationTracker = loadingContext.allocationTracker();
+        var expectedCapacity = dimensions.highestPossibleNodeCount();
+        var labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
+
+        var scannerFactory = scannerFactory(loadingContext.transactionContext(), dimensions, loadingContext.log());
+
+        var idMappingBuilder = internalIdMappingBuilderFactory.of(dimensions);
+
+        var labelInformationBuilder =
+            graphProjectConfig.nodeProjections().allProjections().size() == 1
+            && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
+                ? LabelInformation.emptyBuilder(allocationTracker)
+                : LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping, allocationTracker);
+
+        var nodePropertyImporter = initializeNodePropertyImporter(
+            propertyMappings,
+            dimensions,
+            concurrency,
+            allocationTracker
+        );
+
+        return new ScanningNodesImporter<>(
+            scannerFactory,
+            loadingContext,
+            dimensions,
+            progressTracker,
+            concurrency,
+            propertyMappings,
+            nodePropertyImporter,
+            idMappingBuilder,
+            nodeMappingBuilder,
+            labelInformationBuilder
+        );
+    }
+
+    private ScanningNodesImporter(
+        StoreScanner.Factory<NodeReference> scannerFactory,
+        GraphLoaderContext loadingContext,
+        GraphDimensions dimensions,
+        ProgressTracker progressTracker,
+        int concurrency,
+        IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
+        @Nullable NativeNodePropertyImporter nodePropertyImporter,
+        BUILDER idMapBuilder,
+        NodeMappingBuilder nodeMappingBuilder,
+        LabelInformation.Builder labelInformationBuilder
+    ) {
         super(
-            scannerFactory(loadingContext.transactionContext(), dimensions, log),
+            scannerFactory,
             loadingContext,
             dimensions,
             progressTracker,
             concurrency
         );
 
-        this.graphProjectConfig = graphProjectConfig;
         this.terminationFlag = loadingContext.terminationFlag();
-        this.properties = properties;
-        this.internalIdMappingBuilderFactory = internalIdMappingBuilderFactory;
+        this.propertyMappings = propertyMappings;
+        this.nodePropertyImporter = nodePropertyImporter;
         this.nodeMappingBuilder = nodeMappingBuilder;
+        this.idMapBuilder = idMapBuilder;
+        this.labelInformationBuilder = labelInformationBuilder;
     }
 
     private static StoreScanner.Factory<NodeReference> scannerFactory(
@@ -104,19 +147,6 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         ImportSizing sizing,
         StoreScanner<NodeReference> scanner
     ) {
-        idMapBuilder = internalIdMappingBuilderFactory.of(dimensions);
-        var expectedCapacity = dimensions.highestPossibleNodeCount();
-
-        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
-
-        labelInformationBuilder =
-            graphProjectConfig.nodeProjections().allProjections().size() == 1
-            && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
-                ? LabelInformation.emptyBuilder(allocationTracker)
-                : LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping, allocationTracker);
-
-        nodePropertyImporter = initializeNodePropertyImporter();
-
         return NodesScanner.of(
             transaction,
             scanner,
@@ -126,7 +156,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             new NodeImporter(
                 idMapBuilder,
                 labelInformationBuilder,
-                labelTokenNodeLabelMapping,
+                dimensions.tokenNodeLabelMapping(),
                 nodePropertyImporter != null
             ),
             nodePropertyImporter,
@@ -149,7 +179,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             ? new HashMap<>()
             : nodePropertyImporter.result(nodeMapping);
 
-        if (!properties.indexedProperties().isEmpty()) {
+        if (!propertyMappings.indexedProperties().isEmpty()) {
             importPropertiesFromIndex(nodeMapping, nodeProperties);
         }
 
@@ -174,7 +204,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             //   you need to add a check for the feature flag to IndexedNodePropertyImporter
             var concurrency = parallelIndexScan ? this.concurrency : 1;
 
-            var indexScanningImporters = properties.indexedProperties()
+            var indexScanningImporters = propertyMappings.indexedProperties()
                 .entrySet()
                 .stream()
                 .flatMap(labelAndProperties -> labelAndProperties
@@ -233,9 +263,13 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         }
     }
 
-    @Nullable
-    private NativeNodePropertyImporter initializeNodePropertyImporter() {
-        var propertyMappingsByLabel = properties.storedProperties();
+    private static @Nullable NativeNodePropertyImporter initializeNodePropertyImporter(
+        IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
+        GraphDimensions dimensions,
+        int concurrency,
+        AllocationTracker allocationTracker
+    ) {
+        var propertyMappingsByLabel = propertyMappings.storedProperties();
         boolean loadProperties = propertyMappingsByLabel
             .values()
             .stream()
@@ -249,8 +283,8 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
                 .propertyMappings(propertyMappingsByLabel)
                 .allocationTracker(allocationTracker)
                 .build();
-        } else {
-            return null;
         }
+
+        return null;
     }
 }

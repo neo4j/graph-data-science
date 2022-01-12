@@ -38,7 +38,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
 
     static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
 
-    private final StoreScanner.Factory<Record> factory;
+    private final StoreScanner.Factory<Record> storeScannerFactory;
 
     protected final ExecutorService threadPool;
     protected final TransactionContext transaction;
@@ -48,13 +48,13 @@ public abstract class ScanningRecordsImporter<Record, T> {
     protected final int concurrency;
 
     ScanningRecordsImporter(
-        StoreScanner.Factory<Record> factory,
+        StoreScanner.Factory<Record> storeScannerFactory,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
         int concurrency
     ) {
-        this.factory = factory;
+        this.storeScannerFactory = storeScannerFactory;
         this.transaction = loadingContext.transactionContext();
         this.dimensions = dimensions;
         this.threadPool = loadingContext.executor();
@@ -68,16 +68,20 @@ public abstract class ScanningRecordsImporter<Record, T> {
         final ImportSizing sizing = ImportSizing.of(concurrency, nodeCount);
         int numberOfThreads = sizing.numberOfThreads();
 
-        try (StoreScanner<Record> scanner = factory.newScanner(StoreScanner.DEFAULT_PREFETCH_SIZE, transaction)) {
+        try (StoreScanner<Record> storeScanner = storeScannerFactory.newScanner(
+            StoreScanner.DEFAULT_PREFETCH_SIZE,
+            transaction
+        )) {
             progressTracker.beginSubTask("Store Scan");
 
-            progressTracker.logDebug(formatWithLocale("Start using %s", scanner.getClass().getSimpleName()));
+            progressTracker.logDebug(formatWithLocale("Start using %s", storeScanner.getClass().getSimpleName()));
 
-            InternalImporter.CreateScanner creator = creator(nodeCount, sizing, scanner);
+            InternalImporter.CreateScanner creator = creator(nodeCount, sizing, storeScanner);
             InternalImporter importer = new InternalImporter(numberOfThreads, creator);
+
             ImportResult importResult = importer.runImport(threadPool);
 
-            long requiredBytes = scanner.storeSize(dimensions);
+            long requiredBytes = storeScanner.storeSize(dimensions);
             long recordsImported = importResult.recordsImported;
             long propertiesImported = importResult.propertiesImported;
             BigInteger bigNanos = BigInteger.valueOf(importResult.tookNanos);
