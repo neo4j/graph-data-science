@@ -39,6 +39,7 @@ CALL gds.alpha.ml.pipeline.linkPrediction.train(
 ) YIELD
   trainMillis: Integer,
   modelInfo: Map,
+  modelSelectionStats: Map,
   configuration: Map
 ----
 
@@ -61,10 +62,11 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type    | Description
-| trainMillis   | Integer | Milliseconds used for training.
-| modelInfo     | Map     | Information about the training and the winning model.
-| configuration | Map     | Configuration used for the train procedure.
+| Name                    | Type    | Description
+| trainMillis             | Integer | Milliseconds used for training.
+| modelInfo               | Map     | Information about the training and the winning model.
+| modelSelectionStats     | Map     | Statistics about evaluated metrics for all model candidates.
+| configuration           | Map     | Configuration used for the train procedure.
 |===
 
 The `modelInfo` can also be retrieved at a later time by using the <<catalog-model-list, Model List Procedure>>.
@@ -75,7 +77,7 @@ The `modelInfo` return field has the following algorithm-specific subfields:
 |===
 | Name                    | Type          | Description
 | bestParameters          | Map           | The model parameters which performed best on average on validation folds according to the primary metric.
-| metrics                 | Map           | Map from metric description to evaluated metrics for various models and subsets of the data, see below.
+| metrics                 | Map           | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
 | trainingPipeline        | Map           | The pipeline used for the training.
 |===
 
@@ -91,34 +93,16 @@ The structure of `modelInfo` is:
         AUCPR: {
             test: Float,        // <4>
             outerTrain: Float,  // <5>
-            train: [{           // <6>
+            train: {           // <6>
                 avg: Float,
                 max: Float,
                 min: Float,
-                params: Map
             },
-            {
+            validation: {      // <7>
                 avg: Float,
                 max: Float,
-                min: Float,
-                params: Map
-            },
-            ...
-            ],
-            validation: [{      // <7>
-                avg: Float,
-                max: Float,
-                min: Float,
-                params: Map
-            },
-            {
-                avg: Float,
-                max: Float,
-                min: Float,
-                params: Map
-            },
-            ...
-            ]
+                min: Float
+            }
         }
     }
 }
@@ -128,8 +112,8 @@ The structure of `modelInfo` is:
 <3> The `metrics` map contains an entry for each metric description (currently only `AUCPR`) and the corresponding results for that metric.
 <4> Numeric value for the evaluation of the best model on the test set.
 <5> Numeric value for the evaluation of the best model on the outer train set.
-<6> The `train` entry lists the scores over the `train` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
-<7> The `validation` entry lists the scores over the `validation` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
+<6> The `train` entry summarizes the metric results over the `train` set.
+<7> The `validation` entry summarizes the metric results over the `validation` set.
 --
 
 === Example
@@ -194,7 +178,6 @@ CALL gds.graph.project(
 WARNING: The Link Prediction model requires the graph to be created using the `UNDIRECTED` orientation for relationships.
 
 
-//TODO add model.list call to show how pipeline looks?
 [[algorithms-ml-linkprediction-pipeline-examples-train-query]]
 [role=query-example,group=lp]
 --
@@ -208,15 +191,16 @@ CALL gds.alpha.ml.pipeline.linkPrediction.train('myGraph', {
 }) YIELD modelInfo
 RETURN
   modelInfo.bestParameters AS winningModel,
-  modelInfo.metrics.AUCPR.outerTrain AS trainGraphScore,
-  modelInfo.metrics.AUCPR.test AS testGraphScore
+  modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,
+  modelInfo.metrics.AUCPR.outerTrain AS outerTrainScore,
+  modelInfo.metrics.AUCPR.test AS testScore
 ----
 
 .Results
-[opts="header", cols="6, 2, 2"]
+[opts="header", cols="6, 2, 2, 2"]
 |===
-| winningModel                                                                                         | trainGraphScore     | testGraphScore
-| {useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001} | 0.41666666666666663 | 0.7638888888888888
+| winningModel                                                                                               | avgTrainScore                                  | outerTrainScore     | testScore
+| {useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001} | 0.4523809523809523 |  0.41666666666666663 | 0.7638888888888888
 |===
 
 We can see the model configuration with `tolerance = 0.001` (and defaults filled for remaining parameters) was selected, and has a score of `0.76` on the test set.
