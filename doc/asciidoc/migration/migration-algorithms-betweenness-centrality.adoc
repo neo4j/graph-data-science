@@ -11,5 +11,5 @@
 | `maximumScore`
 | Use `centralityDistribution.max`
 | `scoreSum`
-| No direct equivalent. For average, use `centralityDistribution.mean`.
+| No direct equivalent. For mean, use `centralityDistribution.mean`.
 |===
