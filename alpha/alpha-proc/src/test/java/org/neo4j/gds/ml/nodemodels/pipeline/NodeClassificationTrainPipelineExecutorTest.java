@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
+import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -114,11 +115,11 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
 
         pipeline.setTrainingParameterSpace(List.of(NodeLogisticRegressionTrainCoreConfig.of(
-            Map.of("penalty", 1000, "maxEpochs", 1)
+            Map.of("penalty", 1, "maxEpochs", 1)
         )));
 
         pipeline.setSplitConfig(ImmutableNodeClassificationSplitConfig.builder()
-            .testFraction(0.01)
+            .testFraction(0.3)
             .validationFolds(2)
             .build()
         );
@@ -139,14 +140,20 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                 ProgressTracker.NULL_TRACKER
             );
 
-            var model = ncPipeTrain.compute();
+            var result = ncPipeTrain.compute();
+            var model = result.model();
 
             assertThat(model.creator()).isEqualTo(getUsername());
 
             // using explicit type intentionally :)
             NodeClassificationPipelineModelInfo customInfo = model.customInfo();
-            assertThat(customInfo.metrics().get(metric).validation()).hasSize(1);
-            assertThat(customInfo.metrics().get(metric).train()).hasSize(1);
+            assertThat(customInfo.metrics().get(metric).validation().toMap())
+                .usingComparatorForType(new DoubleComparator(1e-10), Double.class)
+                .isEqualTo(Map.of("avg",0.24999999687500002, "max",0.49999999375000004, "min",0.0));
+
+            assertThat(customInfo.metrics().get(metric).train().toMap())
+                .usingComparatorForType(new DoubleComparator(1e-10), Double.class)
+                .isEqualTo(Map.of("avg",0.399999996, "max",0.799999992, "min",0.0));
 
             assertThat(customInfo.trainingPipeline()).isNotEqualTo(pipeline);
             assertThat(customInfo.trainingPipeline()).usingRecursiveComparison().isEqualTo(pipeline);

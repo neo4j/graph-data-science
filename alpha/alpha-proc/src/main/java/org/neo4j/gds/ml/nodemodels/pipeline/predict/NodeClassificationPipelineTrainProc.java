@@ -29,9 +29,8 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFactory;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainResult;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -47,9 +46,9 @@ import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 @GdsCallable(name = "gds.alpha.ml.pipeline.nodeClassification.train", description = "Trains a node classification model based on a pipeline", executionMode = TRAIN)
 public class NodeClassificationPipelineTrainProc extends TrainProc<
     NodeClassificationTrainPipelineExecutor,
-    Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo>,
+    NodeClassificationPipelineTrainResult,
     NodeClassificationPipelineTrainConfig,
-    MLTrainResult
+    NodeClassificationPipelineTrainProc.NCTrainResult
     > {
 
     @Context
@@ -57,7 +56,7 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
 
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model based on a pipeline")
-    public Stream<MLTrainResult> train(
+    public Stream<NCTrainResult> train(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -82,12 +81,22 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
     }
 
     @Override
-    protected MLTrainResult constructProcResult(ComputationResult<NodeClassificationTrainPipelineExecutor, Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo>, NodeClassificationPipelineTrainConfig> computationResult) {
-        return new MLTrainResult(computationResult.result(), computationResult.computeMillis());
+    protected NCTrainResult constructProcResult(ComputationResult<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainResult, NodeClassificationPipelineTrainConfig> computationResult) {
+        return new NCTrainResult(computationResult.result(), computationResult.computeMillis());
     }
 
     @Override
-    protected Model<?, ?, ?> extractModel(Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> algoResult) {
-        return algoResult;
+    protected Model<?, ?, ?> extractModel(NodeClassificationPipelineTrainResult algoResult) {
+        return algoResult.model();
+    }
+
+    public static class NCTrainResult extends MLTrainResult {
+
+        public final Map<String, Object> modelSelectionStats;
+
+        public NCTrainResult(NodeClassificationPipelineTrainResult algoResult, long trainMillis) {
+            super(algoResult.model(), trainMillis);
+            this.modelSelectionStats = algoResult.modelSelectionStatistics().toMap();
+        }
     }
 }

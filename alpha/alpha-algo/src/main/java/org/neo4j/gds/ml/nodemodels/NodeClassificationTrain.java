@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
@@ -405,7 +406,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
     }
 
     @ValueClass
-    interface ModelSelectResult {
+    public interface ModelSelectResult {
         NodeLogisticRegressionTrainConfig bestParameters();
         Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> trainStats();
         Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> validationStats();
@@ -416,6 +417,21 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
             StatsMap validationStats
         ) {
             return ImmutableModelSelectResult.of(bestConfig, trainStats.getMap(), validationStats.getMap());
+        }
+
+        @Value.Derived
+        default Map<String, Object> toMap() {
+            Function<Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>>, Map<String, Object>> statsConverter = stats ->
+                stats.entrySet().stream().collect(Collectors.toMap(
+                    entry -> entry.getKey().name(),
+                    value -> value.getValue().stream().map(ModelStats::toMap)
+                ));
+
+            return Map.of(
+                "bestParameters", bestParameters().toMap(),
+                "trainStats", statsConverter.apply(trainStats()),
+                "validationStats", statsConverter.apply(validationStats())
+            );
         }
 
     }

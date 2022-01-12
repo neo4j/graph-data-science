@@ -23,13 +23,21 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.ml.nodemodels.BestMetricData;
+import org.neo4j.gds.ml.nodemodels.BestModelStats;
+import org.neo4j.gds.ml.nodemodels.ImmutableModelSelectResult;
+import org.neo4j.gds.ml.nodemodels.Metric;
+import org.neo4j.gds.ml.nodemodels.MetricData;
+import org.neo4j.gds.ml.nodemodels.ModelStats;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,10 +45,7 @@ import java.util.stream.Collectors;
 public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     NodeClassificationPipelineTrainConfig,
     NodeClassificationPipeline,
-    Model<
-        NodeLogisticRegressionData,
-        NodeClassificationPipelineTrainConfig,
-        NodeClassificationPipelineModelInfo>
+    NodeClassificationPipelineTrainResult
 > {
     public static final String MODEL_TYPE = "Node classification pipeline";
 
@@ -67,36 +72,70 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    protected Model<
-        NodeLogisticRegressionData,
-        NodeClassificationPipelineTrainConfig,
-        NodeClassificationPipelineModelInfo>
-    execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+    protected NodeClassificationPipelineTrainResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
         var relationshipTypes = config.internalRelationshipTypes(graphStore);
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.empty());
         var innerModel = NodeClassificationTrain
             .create(graph, innerConfig(), executionContext.allocationTracker(), progressTracker)
             .compute();
-
         var innerInfo = innerModel.customInfo();
 
+        var bestMetrics = innerInfo.metrics().entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            metricStats -> extractWinningModelStats(metricStats.getValue(), innerInfo.bestParameters())
+        ));
         var modelInfo = NodeClassificationPipelineModelInfo.builder()
             .classes(innerInfo.classes())
             .bestParameters(innerInfo.bestParameters())
-            .metrics(innerInfo.metrics())
+            .metrics(bestMetrics)
             .trainingPipeline(pipeline.copy())
             .build();
 
-        return Model.of(
-            innerModel.creator(),
-            innerModel.name(),
-            MODEL_TYPE,
-            innerModel.graphSchema(),
-            innerModel.data(),
-            config,
-            modelInfo
+        return ImmutableNodeClassificationPipelineTrainResult.of(
+            Model.of(
+                innerModel.creator(),
+                innerModel.name(),
+                MODEL_TYPE,
+                innerModel.graphSchema(),
+                innerModel.data(),
+                config,
+                modelInfo
+            ),
+            ImmutableModelSelectResult.of(
+                innerInfo.bestParameters(),
+                getTrainingStats(innerInfo),
+                getValidationStats(innerInfo)
+            )
         );
+    }
+
+
+    private Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> getTrainingStats(NodeClassificationModelInfo innerInfo) {
+        return innerInfo.metrics().entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            metricStats -> metricStats.getValue().train())
+        );
+    }
+
+    private Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> getValidationStats(NodeClassificationModelInfo innerInfo) {
+        return innerInfo.metrics().entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            metricStats -> metricStats.getValue().validation())
+        );
+    }
+
+    private BestMetricData extractWinningModelStats(
+        MetricData<NodeLogisticRegressionTrainConfig> oldStats,
+        NodeLogisticRegressionTrainConfig bestParams
+    ) {
+        return BestMetricData.of(
+            findBestModelStats(oldStats.train(), bestParams),
+            findBestModelStats(oldStats.validation(), bestParams),
+            oldStats.outerTrain(),
+            oldStats.test()
+        );
+
     }
 
     NodeClassificationTrainConfig innerConfig() {
@@ -117,5 +156,16 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
             .relationshipTypes(config.relationshipTypes())
             .minBatchSize(config.minBatchSize())
             .build();
+    }
+
+    private static BestModelStats findBestModelStats(
+        List<ModelStats<NodeLogisticRegressionTrainConfig>> metricStatsForModels,
+        NodeLogisticRegressionTrainConfig bestParams
+    ) {
+        return metricStatsForModels.stream()
+            .filter(metricStatsForModel -> metricStatsForModel.params() == bestParams)
+            .findFirst()
+            .map(BestModelStats::of)
+            .orElseThrow();
     }
 }

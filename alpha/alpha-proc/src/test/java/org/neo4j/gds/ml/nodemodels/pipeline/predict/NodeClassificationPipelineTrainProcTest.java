@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.assertj.core.util.DoubleComparator;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -148,14 +149,14 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             var metrics = modelInfo
                 .extractingByKey("metrics", soMap)
                 .extractingByKey("F1_class_1", soMap)
-                .containsKey("validation")
-                .containsKey("train");
-
-            metrics.extractingByKey("outerTrain", InstanceOfAssertFactories.DOUBLE)
-                .isBetween(0.0, 1.0);
-
-            metrics.extractingByKey("test", InstanceOfAssertFactories.DOUBLE)
-                .isBetween(0.0, 1.0);
+                .usingRecursiveComparison()
+                .withComparatorForType(new DoubleComparator(1e-6), Double.class)
+                .isEqualTo(Map.of(
+                    "validation", Map.of("avg", 0.666666, "max", 0.666666, "min", 0.666666),
+                    "train", Map.of("avg", 0.666666, "max", 0.666666, "min", 0.666666),
+                    "outerTrain",0.666666,
+                    "test",0.999999
+                ));
 
             var featurePipeline = modelInfo.extractingByKey("trainingPipeline", soMap)
                 .containsKey("splitConfig")
@@ -177,6 +178,13 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             return true;
         }, "a modelInfo map");
 
+        var modelSelectionStatsCheck = new Condition<>(mss -> {
+            var modelInfo = assertThat(mss).asInstanceOf(soMap)
+                .containsKey("bestParameters")
+                .containsKey("trainStats")
+                .containsKey("validationStats");
+            return true;
+        }, "a model selection statistics map");
 
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.nodeClassification.train(" +
@@ -196,7 +204,8 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasEntry("pipeline", PIPELINE_NAME),
                         Matchers.hasEntry("modelName", MODEL_NAME),
                         aMapWithSize(11)
-                    )
+                    ),
+                    "modelSelectionStats",modelSelectionStatsCheck
                 )
             )
         );
