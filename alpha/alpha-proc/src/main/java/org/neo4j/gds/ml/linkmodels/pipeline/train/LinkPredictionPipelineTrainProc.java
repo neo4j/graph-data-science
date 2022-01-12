@@ -39,7 +39,12 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 
 @GdsCallable(name = "gds.alpha.ml.pipeline.linkPrediction.train", description = "Trains a link prediction model based on a pipeline", executionMode = TRAIN)
-public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainResult, LinkPredictionTrainConfig, LinkPredictionPipelineTrainProc.LPTrainResult> {
+public class LinkPredictionPipelineTrainProc extends TrainProc<
+    LinkPredictionTrainPipelineExecutor,
+    LinkPredictionTrainResult,
+    LinkPredictionTrainConfig,
+    LinkPredictionPipelineTrainProc.LPTrainResult
+    > {
 
     @Context
     public ModelCatalog modelCatalog;
