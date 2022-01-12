@@ -45,6 +45,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrain;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.BestMetricData;
+import org.neo4j.gds.ml.nodemodels.BestModelStats;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
@@ -248,7 +249,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         return result;
     }
 
-    private static Map<LinkMetric, BestMetricData<LinkLogisticRegressionTrainConfig>> combineBestParameterMetrics(
+    private static Map<LinkMetric, BestMetricData> combineBestParameterMetrics(
         LinkPredictionTrain.ModelSelectResult modelSelectResult,
         Map<LinkMetric, Double> outerTrainMetrics,
         Map<LinkMetric, Double> testMetrics
@@ -266,13 +267,14 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         ));
     }
 
-    private static ModelStats<LinkLogisticRegressionTrainConfig> findBestModelStats(
+    private static BestModelStats findBestModelStats(
         List<ModelStats<LinkLogisticRegressionTrainConfig>> metricStatsForModels,
         LinkLogisticRegressionTrainConfig bestParams
     ) {
         return metricStatsForModels.stream()
             .filter(metricStatsForModel -> metricStatsForModel.params() == bestParams)
             .findFirst()
+            .map(BestModelStats::of)
             .orElseThrow();
     }
 
@@ -422,7 +424,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     private Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
         LinkLogisticRegressionTrainConfig bestParameters,
         LinkLogisticRegressionData modelData,
-        Map<LinkMetric, BestMetricData<LinkLogisticRegressionTrainConfig>> winnerMetrics
+        Map<LinkMetric, BestMetricData> winnerMetrics
     ) {
         return Model.of(
             trainConfig.username(),

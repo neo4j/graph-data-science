@@ -203,6 +203,13 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe4', 'L2', {nodeProperties: ['array', 'pr']})");
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe4', [{penalty: 1}, {penalty: 2}] )");
 
+        Object expectedMetrics = Map.of("AUCPR", Map.of(
+            "outerTrain", 1.0,
+            "test", 1.0,
+            "validation", Map.of("min", 0.0, "avg", 0.3333333333333333, "max", 1.0),
+            "train", Map.of("min", 0.0, "avg", 0.6666666666666666, "max", 1.0)
+        ));
+
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
@@ -214,8 +221,8 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                     "modelInfo", Matchers.allOf(
                         Matchers.hasEntry("modelName", "trainedModel4"),
                         Matchers.hasEntry("modelType", "Link prediction pipeline"),
+                        Matchers.hasEntry("metrics", expectedMetrics),
                         Matchers.hasKey("bestParameters"),
-                        Matchers.hasKey("metrics"),
                         Matchers.hasKey("trainingPipeline")
                     ),
                     "modelSelectionStats", Matchers.allOf(

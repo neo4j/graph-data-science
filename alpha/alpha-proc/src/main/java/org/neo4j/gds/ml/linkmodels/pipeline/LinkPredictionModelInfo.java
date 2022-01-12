@@ -33,7 +33,7 @@ public interface LinkPredictionModelInfo extends ToMapConvertible {
 
     LinkLogisticRegressionTrainConfig bestParameters();
 
-    Map<LinkMetric, BestMetricData<LinkLogisticRegressionTrainConfig>> metrics();
+    Map<LinkMetric, BestMetricData> metrics();
 
     LinkPredictionPipeline trainingPipeline();
 
@@ -51,7 +51,7 @@ public interface LinkPredictionModelInfo extends ToMapConvertible {
 
     static LinkPredictionModelInfo of(
         LinkLogisticRegressionTrainConfig bestParameters,
-        Map<LinkMetric, BestMetricData<LinkLogisticRegressionTrainConfig>> metrics,
+        Map<LinkMetric, BestMetricData> metrics,
         LinkPredictionPipeline trainingPipeline
     ) {
         return ImmutableLinkPredictionModelInfo.of(bestParameters, metrics, trainingPipeline);

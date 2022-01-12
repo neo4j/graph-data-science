@@ -21,51 +21,39 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 
 import java.util.Map;
 
-/**
- * The computed metrics for the best model.
- */
 @ValueClass
-public interface BestMetricData {
+public interface BestModelStats {
 
     /**
-     * Train metric
-     * @return the metric stats on the train set
+     * The average of the metric of the winning model
+     * @return
      */
-    BestModelStats train();
-
+    double avg();
     /**
-     * Validation metric
-     * @return the metric stats on the validation set
+     * The minimum of the metric of the winning model
+     * @return
      */
-    BestModelStats validation();
-
+    double min();
     /**
-     * Outer train metric
-     * @return the metric stats on the outer training set
+     * The maximum of the metric of the winning model
+     * @return
      */
-    double outerTrain();
-
-    /**
-     * Test metric
-     * @return the metric value on the test set (holdout)
-     */
-    double test();
+    double max();
 
     @Value.Derived
     default Map<String, Object> toMap() {
         return Map.of(
-            "outerTrain", outerTrain(),
-            "test", test(),
-            "validation", validation().toMap(),
-            "train", train().toMap()
+            "avg", avg(),
+            "min", min(),
+            "max", max()
         );
     }
 
-    static BestMetricData of(BestModelStats train, BestModelStats validation, double outerTrain, double test) {
-        return ImmutableBestMetricData.of(train, validation, outerTrain, test);
+    static BestModelStats of(ModelStats<LinkLogisticRegressionTrainConfig> modelStats) {
+        return ImmutableBestModelStats.of(modelStats.avg(), modelStats.min(), modelStats.max());
     }
 }
-
