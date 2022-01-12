@@ -2,7 +2,7 @@
 == Node Classification Pipeline predict
 
 .Changes in configuration
-[header, cols=2]
+[options=header, cols=2]
 |===
 | 1.x
 | 2.x
