@@ -23,4 +23,6 @@
 | Status of the system                                                      | `gds.debug.sysInfo`
 | <<create-cypher-db, Create an impermanent database backed by a projected graph>> | `gds.alpha.create.cypherdb`
 | <<monitoring-system, Get an overview of the system's workload and available resources>> | `gds.alpha.systemMonitor`
+| Back-up graphs and models to disk | `gds.alpha.backup`
+| Restore persisted graphs and models to memory | `gds.alpha.restore`
 |===
