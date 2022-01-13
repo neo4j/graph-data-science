@@ -15,9 +15,11 @@ This chapter is divided into the following sections:
 * <<utility-functions>>
 * <<create-cypher-db>>
 * <<administration>>
+* <<backup-restore>>
 
 include::graph-catalog/graph-catalog.adoc[leveloffset=+1]
 include::node-properties.adoc[leveloffset=+1]
 include::utility-functions.adoc[leveloffset=+1]
 include::create-cypher-db.adoc[leveloffset=+1]
 include::administration.adoc[leveloffset=+1]
+include::backup-restore.adoc[leveloffset=+1]

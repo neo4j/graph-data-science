@@ -1,0 +1,129 @@
+[.enterprise-edition]
+[.alpha]
+[[backup-restore]]
+= Backup and Restore
+
+[abstract]
+--
+This section explains how to back up and restore graphs and models in the Neo4j Graph Data Science library.
+--
+
+In the Neo4j Graph Data Science library, graphs and machine learning models are stored in-memory.
+This is necessary mainly for performance reasons but has the disadvantage that data will be lost after shutting down the database.
+There are already concepts to circumvent this limitation, such as running algorithms in <<running-algos-write, write mode>>, <<catalog-graph-export-csv, exporting graphs to csv>> or <<model-catalog-store-ops, storing models>>.
+The back-up and restore procedures described in this section will provide a simple and uniform way of saving graphs and models in order to load them back into memory after a database restart.
+
+[NOTE]
+====
+The `gds.export.location` parameter must be configured for this feature.
+====
+
+[[backup-restore-syntax]]
+== Syntax
+
+[.backup-syntax]
+--
+.Back-up in-memory graphs and models
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.backup
+YIELD
+  backupId: String,
+  backupTime: LocalDateTime,
+  exportMillis: Long
+----
+
+.Results
+[opts="header",cols="1,1,4"]
+|===
+| Name          | Type           | Description
+| backupId      | String         | The id of the backup in format of UUID.
+| backupTime    | LocalDateTime  | Point in time when the backup was performed.
+| exportMillis  | Long           | Amount of time exporting took in milliseconds.
+|===
+--
+
+[.restore-syntax]
+--
+.Restore graphs and models
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.restore
+YIELD
+  restoredGraphs: List of String,
+  restoredModels: List of String,
+  unableToRestore: Map of String,
+  restoreMillis: Long
+----
+
+.Results
+[opts="header",cols="1,1,4"]
+|===
+| Name              | Type           | Description
+| restoredGraphs    | List of String | List of graph names of restored graphs.
+| backupTime        | List of String | List of model names of restored models.
+| unableToRestore   | Map of String  | Map of model and graph names that were not restored along an error message.
+| restoreMillis     | Long           | Amount of time restoring took in milliseconds.
+|===
+--
+
+
+== Examples
+
+First we need to create a graph in the corresponding Neo4j database.
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (alice:Person {name: 'Alice'}),
+  (bridget:Person {name: 'Bridget'}),
+
+  (alice)-[:KNOWS]->(bridget),
+----
+
+Now we need to project an in-memory graph which we want to back-up.
+
+.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'myGraph',
+  'Person',
+  'KNOWS'
+)
+----
+
+We can now run the back-up procedure in order to store the in-memory graph on disk.
+
+.The following will run the back-up procedure:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.backup
+----
+
+It is now safe to drop the in-memory graph or shutdown the db, as we can restore it at a later point.
+
+.The following will drop the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.drop('myGraph')
+----
+
+If we want to restore the backed-up graph, we can simply run the restore procedure to load it back into memory.
+
+.The following will run the restore procedure:
+[source, cypher, role=noplay]
+----
+CALL gds.restore
+YIELD restoredGraphs
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| restoredGraphs
+| "myGraph"
+|===
+
+As we can see, one graph with name `myGraph` was restored by the procedure.
