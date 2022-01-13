@@ -21,38 +21,32 @@ package org.neo4j.gds.core.utils.paged;
 
 import com.carrotsearch.hppc.BitSet;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.function.LongConsumer;
 
-public class HugeAtomicBitSet {
+public final class HugeAtomicBitSet {
 
-    static final int NUM_BITS = Long.SIZE;
+    private static final int NUM_BITS = Long.SIZE;
 
-    protected HugeAtomicLongArray bits;
-    long numBits;
-    int remainder;
+    private final HugeAtomicLongArray bits;
+    private final long numBits;
+    private final int remainder;
 
     public static long memoryEstimation(long size) {
         var wordsSize = BitUtil.ceilDiv(size, NUM_BITS);
         return HugeAtomicLongArray.memoryEstimation(wordsSize) + MemoryUsage.sizeOfInstance(HugeAtomicBitSet.class);
     }
 
-    public static HugeAtomicBitSet fixed(long size, AllocationTracker allocationTracker) {
+    public static HugeAtomicBitSet create(long size, AllocationTracker allocationTracker) {
         var wordsSize = BitUtil.ceilDiv(size, NUM_BITS);
         int remainder = (int) (size % NUM_BITS);
         return new HugeAtomicBitSet(HugeAtomicLongArray.newArray(wordsSize, allocationTracker), size, remainder);
     }
 
-    public static HugeAtomicBitSet growing(long size, AllocationTracker allocationTracker) {
-        return HugeAtomicGrowingBitSet.create(size, allocationTracker);
-    }
-
-    HugeAtomicBitSet(HugeAtomicLongArray bits, long numBits, int remainder) {
+    private HugeAtomicBitSet(HugeAtomicLongArray bits, long numBits, int remainder) {
         this.bits = bits;
         this.numBits = numBits;
         this.remainder = remainder;
@@ -62,79 +56,21 @@ public class HugeAtomicBitSet {
      * Returns the state of the bit at the given index.
      */
     public boolean get(long index) {
-        assert (index < numBits);
-        long wordIndex = index / NUM_BITS;
-        int bitIndex = (int) index % NUM_BITS;
-        long bitmask = 1L << bitIndex;
-        return (bits.get(wordIndex) & bitmask) != 0;
+        return HugeAtomicBitSetOps.get(bits, numBits, index);
     }
 
     /**
      * Sets the bit at the given index to true.
      */
     public void set(long index) {
-        assert(index < numBits);
-
-        long wordIndex = index / NUM_BITS;
-        int bitIndex = (int) index % NUM_BITS;
-        long bitmask = 1L << bitIndex;
-
-        long oldWord = bits.get(wordIndex);
-        while (true) {
-            long newWord = oldWord | bitmask;
-            if (newWord == oldWord) {
-                // nothing to set
-                return;
-            }
-            long currentWord = bits.compareAndExchange(wordIndex, oldWord, newWord);
-            if (currentWord == oldWord) {
-                // CAS successful
-                return;
-            }
-            // CAS unsuccessful, try again
-            oldWord = currentWord;
-        }
+        HugeAtomicBitSetOps.set(bits, numBits, index);
     }
 
     /**
      * Sets the bits from the startIndex (inclusive) to the endIndex (exclusive).
      */
     public void set(long startIndex, long endIndex) {
-        long startWordIndex = startIndex / NUM_BITS;
-        // since endIndex is exclusive, we need the word before that index
-        long endWordIndex = (endIndex - 1) / NUM_BITS;
-
-        long startBitMask = -1L << startIndex;
-        long endBitMask = -1L >>> -endIndex;
-
-        if (startWordIndex == endWordIndex) {
-            // set within single word
-            setWord(startWordIndex, startBitMask & endBitMask);
-        } else {
-            // set within range
-            setWord(startWordIndex, startBitMask);
-            for (long wordIndex = startWordIndex + 1; wordIndex < endWordIndex; wordIndex++) {
-                bits.set(wordIndex, -1L);
-            }
-            setWord(endWordIndex, endBitMask);
-        }
-    }
-
-    private void setWord(long wordIndex, long bitMask) {
-        var oldWord = bits.get(wordIndex);
-        while (true) {
-            var newWord = oldWord | bitMask;
-            if (newWord == oldWord) {
-                // already set
-                return;
-            }
-            var currentWord = bits.compareAndExchange(wordIndex, oldWord, newWord);
-            if (currentWord == oldWord) {
-                // CAX successful
-                return;
-            }
-            oldWord = currentWord;
-        }
+        HugeAtomicBitSetOps.setRange(bits, numBits, startIndex, endIndex);
     }
 
     /**
@@ -142,50 +78,14 @@ public class HugeAtomicBitSet {
      * The index should be less than the BitSet size.
      */
     public boolean getAndSet(long index) {
-        assert(index < numBits);
-
-        long wordIndex = index / NUM_BITS;
-        int bitIndex = (int) index % NUM_BITS;
-        long bitmask = 1L << bitIndex;
-
-        long oldWord = bits.get(wordIndex);
-        while (true) {
-            long newWord = oldWord | bitmask;
-            if (newWord == oldWord) {
-                // already set
-                return true;
-            }
-            long currentWord = bits.compareAndExchange(wordIndex, oldWord, newWord);
-            if (currentWord == oldWord) {
-                // CAS successful
-                return false;
-            }
-            // CAS unsuccessful, try again
-            oldWord = currentWord;
-        }
+        return HugeAtomicBitSetOps.getAndSet(bits, numBits, index);
     }
 
     /**
      * Toggles the bit at the given index.
      */
     public void flip(long index) {
-        assert(index < numBits);
-
-        long wordIndex = index / NUM_BITS;
-        int bitIndex = (int) index % NUM_BITS;
-        long bitmask = 1L << bitIndex;
-
-        long oldWord = bits.get(wordIndex);
-        while (true) {
-            long newWord = oldWord ^ bitmask;
-            long currentWord = bits.compareAndExchange(wordIndex, oldWord, newWord);
-            if (currentWord == oldWord) {
-                // CAS successful
-                return;
-            }
-            // CAS unsuccessful, try again
-            oldWord = currentWord;
-        }
+        HugeAtomicBitSetOps.flip(bits, numBits, index);
     }
 
     /**
@@ -194,23 +94,7 @@ public class HugeAtomicBitSet {
      * This method is not thread-safe.
      */
     public void forEachSetBit(LongConsumer consumer) {
-        var cursor = bits.initCursor(bits.newCursor());
-
-        while (cursor.next()) {
-            long[] block = cursor.array;
-            int offset = cursor.offset;
-            int limit = cursor.limit;
-            long base = cursor.base;
-
-            for (int i = offset; i < limit; i++) {
-                long word = block[i];
-                while (word != 0) {
-                    long next = Long.numberOfTrailingZeros(word);
-                    consumer.accept(Long.SIZE * (base + i) + next);
-                    word = word ^ Long.lowestOneBit(word);
-                }
-            }
-        }
+        HugeAtomicBitSetOps.forEachSetBit(bits, consumer);
     }
 
     /**
@@ -219,13 +103,7 @@ public class HugeAtomicBitSet {
      * Note: this method is not thread-safe.
      */
     public long cardinality() {
-        long setBitCount = 0;
-
-        for (long wordIndex = 0; wordIndex < bits.size(); wordIndex++) {
-            setBitCount += Long.bitCount(bits.get(wordIndex));
-        }
-
-        return setBitCount;
+        return HugeAtomicBitSetOps.cardinality(bits);
     }
 
     /**
@@ -234,12 +112,7 @@ public class HugeAtomicBitSet {
      * Note: this method is not thread-safe.
      */
     public boolean isEmpty() {
-        for (long wordIndex = 0; wordIndex < bits.size(); wordIndex++) {
-            if (Long.bitCount(bits.get(wordIndex)) > 0) {
-                return false;
-            }
-        }
-        return true;
+        return HugeAtomicBitSetOps.isEmpty(bits);
     }
 
     /**
@@ -248,12 +121,7 @@ public class HugeAtomicBitSet {
      * Note: this method is not thread-safe.
      */
     public boolean allSet() {
-        for (long wordIndex = 0; wordIndex < bits.size() - 1; wordIndex++) {
-            if (Long.bitCount(bits.get(wordIndex)) < NUM_BITS) {
-                return false;
-            }
-        }
-        return Long.bitCount(bits.get(bits.size() - 1)) >= remainder;
+        return HugeAtomicBitSetOps.allSet(bits, remainder);
     }
 
     /**
@@ -269,44 +137,18 @@ public class HugeAtomicBitSet {
      * Note: this method is not thread-safe.
      */
     public void clear() {
-        bits.setAll(0);
+        HugeAtomicBitSetOps.clear(bits);
     }
 
     /**
      * Resets the bit at the given index.
      */
     public void clear(long index) {
-        assert(index < numBits);
-
-        long wordIndex = index / NUM_BITS;
-        int bitIndex = (int) index % NUM_BITS;
-        long bitmask = ~(1L << bitIndex);
-
-        long oldWord = bits.get(wordIndex);
-        while (true) {
-            long newWord = oldWord & bitmask;
-            if (newWord == oldWord) {
-                // already cleared
-                return;
-            }
-            long currentWord = bits.compareAndExchange(wordIndex, oldWord, newWord);
-            if (currentWord == oldWord) {
-                // CAS successful
-                return;
-            }
-            // CAS unsuccessful, try again
-            oldWord = currentWord;
-        }
+        HugeAtomicBitSetOps.clear(bits, numBits, index);
     }
 
     @TestOnly
     BitSet toHppcBitSet() {
-        if (bits.size() <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return new BitSet(((HugeAtomicLongArray.SingleHugeAtomicLongArray) bits).page(), (int) bits.size());
-        }
-        throw new UnsupportedOperationException(StringFormatting.formatWithLocale(
-            "Cannot convert HugeAtomicBitSet with more than %s entries.",
-            ArrayUtil.MAX_ARRAY_LENGTH
-        ));
+        return HugeAtomicBitSetOps.toHppcBitSet(bits);
     }
 }
