@@ -240,8 +240,7 @@ class NodeClassificationPredictTest {
             ImmutableNodeClassificationMutateConfig.builder()
                 .mutateProperty("foo")
                 .modelName(modelName)
-                .concurrency(2)
-                .batchSize(1)
+                .concurrency(1)
                 .build(),
             AllocationTracker.empty(),
             log,
@@ -255,10 +254,9 @@ class NodeClassificationPredictTest {
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .doesNotHaveDuplicates()
-            .hasSize(4)
+            .hasSize(3)
             .containsExactly(
                 "Node classification predict :: Start",
-                "Node classification predict 60%",
                 "Node classification predict 100%",
                 "Node classification predict :: Finished"
             );
