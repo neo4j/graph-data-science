@@ -99,7 +99,7 @@ public abstract class BaseProc {
         return GraphStoreFromCatalogLoader.graphStoreFromCatalog(graphName, config, username(), databaseId(), isGdsAdmin());
     }
 
-    protected boolean isGdsAdmin() {
+    public boolean isGdsAdmin() {
         if (transaction == null) {
             // No transaction available (likely we're in a test), no-one is admin here
             return false;
