@@ -19,11 +19,6 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import com.carrotsearch.hppc.BitSet;
-import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.core.utils.ArrayUtil;
-import org.neo4j.gds.utils.StringFormatting;
-
 import java.util.function.LongConsumer;
 
 public final class HugeAtomicBitSetOps {
@@ -265,17 +260,6 @@ public final class HugeAtomicBitSetOps {
             // CAS unsuccessful, try again
             oldWord = currentWord;
         }
-    }
-
-    @TestOnly
-    static BitSet toHppcBitSet(HugeAtomicLongArray bits) {
-        if (bits.size() <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return new BitSet(((HugeAtomicLongArray.SingleHugeAtomicLongArray) bits).page(), (int) bits.size());
-        }
-        throw new UnsupportedOperationException(StringFormatting.formatWithLocale(
-            "Cannot convert HugeAtomicBitSet with more than %s entries.",
-            ArrayUtil.MAX_ARRAY_LENGTH
-        ));
     }
 
     private HugeAtomicBitSetOps() {}

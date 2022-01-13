@@ -382,7 +382,9 @@ class HugeAtomicBitSetTest {
 
                     @Override
                     public BitSet toHppcBitSet() {
-                        return habs.toHppcBitSet();
+                        var bitSet = new BitSet(habs.size());
+                        habs.forEachSetBit(bitSet::set);
+                        return bitSet;
                     }
                 };
             },
@@ -451,7 +453,9 @@ class HugeAtomicBitSetTest {
 
                     @Override
                     public BitSet toHppcBitSet() {
-                        return habs.toHppcBitSet();
+                        var bitSet = new BitSet(habs.size());
+                        habs.forEachSetBit(bitSet::set);
+                        return bitSet;
                     }
 
                 };

@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import com.carrotsearch.hppc.BitSet;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.HugeArrays;
@@ -168,11 +166,6 @@ public final class HugeAtomicGrowingBitSet {
      */
     public void clear(long index) {
         HugeAtomicBitSetOps.clear(bits, numBits, index);
-    }
-
-    @TestOnly
-    BitSet toHppcBitSet() {
-        return HugeAtomicBitSetOps.toHppcBitSet(bits);
     }
 
     private void grow(long minNumBits) {
