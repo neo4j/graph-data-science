@@ -41,8 +41,8 @@ public class LazyBatch implements Batch {
             return new AbstractIterator<>() {
                 @Override
                 protected Long fetch() {
-                    var value = current.getAndIncrement();
-                    return (value < endId) ? value : done();
+                    long value = current.getAndIncrement();
+                    return (value < endId) ? Long.valueOf(value) : done();
                 }
             };
         };
