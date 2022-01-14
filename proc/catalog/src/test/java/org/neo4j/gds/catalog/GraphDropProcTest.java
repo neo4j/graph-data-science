@@ -41,7 +41,6 @@ import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.core.Is.isA;
-import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -83,24 +82,7 @@ class GraphDropProcTest extends BaseProcTest {
             List.of(
                 Map.ofEntries(
                     entry("graphName", GRAPH_NAME),
-                    entry("nodeProjection", Map.of(
-                        "A", Map.of(
-                            "label", "A",
-                            "properties", Map.of()
-                        )
-                    )),
-                    entry("relationshipProjection", Map.of(
-                        "REL", Map.of(
-                            "type", "REL",
-                            "orientation", "NATURAL",
-                            "aggregation", "DEFAULT",
-                            "properties", Map.of()
-                        )
-                    )),
-                    entry("nodeQuery", nullValue()),
-                    entry("relationshipQuery", nullValue()),
-                    entry("nodeFilter", nullValue()),
-                    entry("relationshipFilter", nullValue()),
+                    entry("configuration", isA(Map.class)),
                     entry("nodeCount", 2L),
                     entry("relationshipCount", 1L),
                     entry("creationTime", isA(ZonedDateTime.class)),

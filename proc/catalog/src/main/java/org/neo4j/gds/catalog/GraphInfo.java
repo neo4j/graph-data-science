@@ -38,14 +38,9 @@ public class GraphInfo {
     public final String database;
     public final String memoryUsage;
     public final long sizeInBytes;
-    public final Map<String, Object> nodeProjection;
-    public final Map<String, Object> relationshipProjection;
-    public final String nodeQuery;
-    public final String relationshipQuery;
     public final long nodeCount;
     public final long relationshipCount;
-    public final String nodeFilter;
-    public final String relationshipFilter;
+    public final Map<String, Object> configuration;
     public final double density;
     public final ZonedDateTime creationTime;
     public final ZonedDateTime modificationTime;
@@ -54,14 +49,9 @@ public class GraphInfo {
     GraphInfo(
         String graphName,
         String database,
+        Map<String, Object> configuration,
         String memoryUsage,
         long sizeInBytes,
-        Map<String, Object> nodeProjection,
-        Map<String, Object> relationshipProjection,
-        String nodeQuery,
-        String relationshipQuery,
-        String nodeFilter,
-        String relationshipFilter,
         long nodeCount,
         long relationshipCount,
         ZonedDateTime creationTime,
@@ -72,18 +62,13 @@ public class GraphInfo {
         this.database = database;
         this.memoryUsage = memoryUsage;
         this.sizeInBytes = sizeInBytes;
-        this.nodeProjection = nodeProjection;
-        this.relationshipProjection = relationshipProjection;
-        this.nodeQuery = nodeQuery;
-        this.relationshipQuery = relationshipQuery;
-        this.nodeFilter = nodeFilter;
-        this.relationshipFilter = relationshipFilter;
         this.nodeCount = nodeCount;
         this.relationshipCount = relationshipCount;
         this.density = density(nodeCount, relationshipCount);
         this.creationTime = creationTime;
         this.modificationTime = modificationTime;
         this.schema = schema;
+        this.configuration = configuration;
     }
 
     static GraphInfo withMemoryUsage(GraphProjectConfig graphProjectConfig, GraphStore graphStore) {
@@ -119,14 +104,9 @@ public class GraphInfo {
         return new GraphInfo(
             graphProjectConfig.graphName(),
             graphStore.databaseId().name(),
+            configVisitor.configuration,
             memoryUsage,
             sizeInBytes,
-            configVisitor.nodeProjection,
-            configVisitor.relationshipProjection,
-            configVisitor.nodeQuery,
-            configVisitor.relationshipQuery,
-            configVisitor.nodeFilter,
-            configVisitor.relationshipFilter,
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             graphProjectConfig.creationTime(),
@@ -137,33 +117,36 @@ public class GraphInfo {
 
     static final class Visitor implements GraphProjectConfig.Visitor {
 
-        String nodeQuery, relationshipQuery = null;
-        Map<String, Object> nodeProjection, relationshipProjection = null;
-        String nodeFilter, relationshipFilter = null;
+        Map<String, Object> configuration = null;
 
         @Override
         public void visit(GraphProjectFromStoreConfig storeConfig) {
-            nodeProjection = storeConfig.nodeProjections().toObject();
-            relationshipProjection = storeConfig.relationshipProjections().toObject();
+            configuration = storeConfig.toMap();
+            configuration.put("nodeProjection", storeConfig.nodeProjections().toObject());
+            configuration.put("relationshipProjection", storeConfig.relationshipProjections().toObject());
         }
 
         @Override
         public void visit(GraphProjectFromCypherConfig cypherConfig) {
-            nodeQuery = cypherConfig.nodeQuery();
-            relationshipQuery = cypherConfig.relationshipQuery();
+            configuration = cypherConfig.toMap();
         }
 
         @Override
         public void visit(GraphProjectFromGraphConfig graphConfig) {
             graphConfig.originalConfig().accept(this);
-            nodeFilter = graphConfig.nodeFilter();
-            relationshipFilter = graphConfig.relationshipFilter();
+            configuration.putAll(graphConfig.toMap());
+            configuration.put("nodeFilter", graphConfig.nodeFilter());
+            configuration.put("relationshipFilter", graphConfig.relationshipFilter());
         }
 
         @Override
         public void visit(RandomGraphGeneratorConfig randomGraphConfig) {
-            nodeProjection = randomGraphConfig.nodeProjections().toObject();
-            relationshipProjection = randomGraphConfig.relationshipProjections().toObject();
+            configuration = randomGraphConfig.toMap();
+            configuration.put("nodeProjections", randomGraphConfig.nodeProjections().toObject());
+            configuration.put("relationshipProjections", randomGraphConfig.relationshipProjections().toObject());
+            configuration.put("aggregation", randomGraphConfig.aggregation().toString());
+            configuration.put("orientation", randomGraphConfig.orientation().toString());
+            configuration.put("relationshipDistribution", randomGraphConfig.relationshipDistribution().toString());
         }
     }
 }

@@ -89,7 +89,12 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
         var originalCreationTime = originalGraphProjectConfig.creationTime();
 
         var listQuery = "CALL gds.graph.list('subgraph') " +
-                        "YIELD graphName, nodeCount, relationshipCount, creationTime, nodeFilter, relationshipFilter, nodeProjection, relationshipProjection";
+                        "YIELD graphName, nodeCount, relationshipCount, creationTime, configuration " +
+                        "RETURN graphName, nodeCount, relationshipCount, creationTime, " +
+                        "configuration.nodeFilter AS nodeFilter, " +
+                        "configuration.relationshipFilter AS relationshipFilter, " +
+                        "configuration.nodeProjection AS nodeProjection, " +
+                        "configuration.relationshipProjection AS relationshipProjection";
 
         assertCypherResult(listQuery, List.of(Map.of(
             "graphName", "subgraph",

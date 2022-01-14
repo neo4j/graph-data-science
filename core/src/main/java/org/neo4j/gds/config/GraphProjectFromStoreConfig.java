@@ -133,7 +133,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
             relationshipProjections().allProperties(),
             "relationship"
         );
-
+        
         return ImmutableGraphProjectFromStoreConfig
             .builder()
             .from(this)

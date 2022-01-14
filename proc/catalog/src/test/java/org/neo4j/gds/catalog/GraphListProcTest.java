@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.assertj.core.api.AbstractBooleanAssert;
+import org.assertj.core.api.AbstractIterableAssert;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -43,11 +45,8 @@ import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -55,6 +54,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.assertj.AssertionsHelper.booleanAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.creationTimeAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.intAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.listAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.longAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.stringAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.stringObjectMapAssertFactory;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -88,29 +94,58 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "graphName", name,
                 "database", "neo4j",
-                "nodeProjection", map(
-                    "A", map(
-                        "label", "A",
-                        "properties", emptyMap()
-                    )
-                ),
-                "relationshipProjection", map(
-                    "REL", map(
-                        "type", "REL",
-                        "orientation", "NATURAL",
-                        "aggregation", "DEFAULT",
-                        "properties", emptyMap()
-                    )
-                ),
+                "configuration",
+                new Condition<>(config -> {
+                    assertThat(config)
+                        .asInstanceOf(stringObjectMapAssertFactory())
+                        .hasSize(11)
+                        .containsEntry(
+                            "nodeProjection", map(
+                                "A", map(
+                                    "label", "A",
+                                    "properties", emptyMap()
+                                )
+                            )
+                        )
+                        .containsEntry(
+                            "relationshipProjection", map(
+                                "REL", map(
+                                    "type", "REL",
+                                    "orientation", "NATURAL",
+                                    "aggregation", "DEFAULT",
+                                    "properties", emptyMap()
+                                )
+                            )
+                        )
+                        .hasEntrySatisfying(
+                            "relationshipProperties",
+                            listAssertConsumer(AbstractIterableAssert::isEmpty)
+                        )
+                        .hasEntrySatisfying("nodeProperties", listAssertConsumer(AbstractIterableAssert::isEmpty))
+                        .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
+                        .hasEntrySatisfying(
+                            "validateRelationships",
+                            booleanAssertConsumer(AbstractBooleanAssert::isFalse)
+                        )
+                        .hasEntrySatisfying("nodeCount", longAssertConsumer(nodeCount -> nodeCount.isEqualTo(-1L)))
+                        .hasEntrySatisfying(
+                            "relationshipCount",
+                            longAssertConsumer(relationshipCount -> relationshipCount.isEqualTo(-1L))
+                        )
+                        .hasEntrySatisfying(
+                            "readConcurrency",
+                            intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
+                        )
+                        .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
+                        .hasEntrySatisfying("username", username -> assertThat(username).isNull());
+
+                    return true;
+                }, "Assert native `configuration` map"),
                 "schema", map(
                     "nodes", map("A", map()),
                     "relationships", map("REL", map()
                     )
                 ),
-                "nodeQuery", null,
-                "relationshipQuery", null,
-                "nodeFilter", null,
-                "relationshipFilter", null,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "density", 0.5D,
@@ -171,29 +206,70 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "graphName", name,
                 "database", "neo4j",
-                "nodeProjection", map(
-                    "10_Nodes", map(
-                        "label", "10_Nodes",
-                        "properties", emptyMap()
-                    )
-                ),
-                "relationshipProjection", map(
-                    "REL", map(
-                        "type", "REL",
-                        "orientation", "NATURAL",
-                        "aggregation", "NONE",
-                        "properties", emptyMap()
-                    )
-                ),
+                "configuration", new Condition<>(config -> {
+                    assertThat(config)
+                        .asInstanceOf(stringObjectMapAssertFactory())
+                        .hasSize(14)
+                        .containsEntry("nodeProjections", map(
+                            "10_Nodes", map(
+                                "label", "10_Nodes",
+                                "properties", emptyMap()
+                            )
+                        ))
+                        .containsEntry("relationshipProjections", map(
+                            "REL", map(
+                                "type", "REL",
+                                "orientation", "NATURAL",
+                                "aggregation", "NONE",
+                                "properties", emptyMap()
+                            )
+                        ))
+                        .hasEntrySatisfying(
+                            "orientation",
+                            stringAssertConsumer(orientation -> orientation.isEqualTo("NATURAL"))
+                        )
+                        .hasEntrySatisfying(
+                            "relationshipProperty",
+                            relationshipProperty -> assertThat(relationshipProperty)
+                                .asInstanceOf(stringObjectMapAssertFactory())
+                                .isEmpty()
+                        )
+                        .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
+                        .hasEntrySatisfying(
+                            "validateRelationships",
+                            booleanAssertConsumer(AbstractBooleanAssert::isFalse)
+                        )
+                        .hasEntrySatisfying(
+                            "aggregation",
+                            stringAssertConsumer(aggregation -> aggregation.isEqualTo("NONE"))
+                        )
+                        .hasEntrySatisfying("allowSelfLoops", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
+                        .hasEntrySatisfying(
+                            "readConcurrency",
+                            intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
+                        )
+                        .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
+                        .hasEntrySatisfying(
+                            "relationshipDistribution",
+                            stringAssertConsumer(relationshipDistribution -> relationshipDistribution.isEqualTo(
+                                "UNIFORM"))
+                        )
+                        .hasEntrySatisfying(
+                            "relationshipSeed",
+                            relationshipSeed -> assertThat(relationshipSeed).isNull()
+                        )
+                        .hasEntrySatisfying(
+                            "relationshipCount",
+                            longAssertConsumer(relationshipCount -> relationshipCount.isEqualTo(-1L))
+                        )
+                        .hasEntrySatisfying("username", username -> assertThat(username).isNull());
+                    return true;
+                }, "Assert generated `configuration` map"),
                 "schema", map(
                     "nodes", map("__ALL__", map()),
                     "relationships", map("REL", map()
                     )
                 ),
-                "nodeQuery", null,
-                "relationshipQuery", null,
-                "nodeFilter", null,
-                "relationshipFilter", null,
                 "nodeCount", 10L,
                 "relationshipCount", 50L,
                 "degreeDistribution", map(
@@ -246,16 +322,44 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "graphName", name,
                 "database", "neo4j",
-                "nodeProjection", null,
-                "relationshipProjection", null,
                 "schema", map(
                     "nodes", map(ALL_NODES.name, map()),
                     "relationships", map(ALL_RELATIONSHIPS.name, map())
                 ),
-                "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
-                "nodeFilter", null,
-                "relationshipFilter", null,
+                "configuration", new Condition<>(config -> {
+                    assertThat(config)
+                        .asInstanceOf(stringObjectMapAssertFactory())
+                        .hasSize(10)
+                        .hasEntrySatisfying(
+                            "relationshipQuery",
+                            stringAssertConsumer(relationshipQuery -> relationshipQuery.isEqualTo(
+                                ALL_RELATIONSHIPS_QUERY))
+                        )
+                        .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
+                        .hasEntrySatisfying(
+                            "validateRelationships",
+                            booleanAssertConsumer(AbstractBooleanAssert::isTrue)
+                        )
+                        .hasEntrySatisfying(
+                            "nodeQuery",
+                            stringAssertConsumer(nodeQuery -> nodeQuery.isEqualTo(ALL_NODES_QUERY))
+                        )
+                        .hasEntrySatisfying("nodeCount", longAssertConsumer(nodeCount -> nodeCount.isEqualTo(-1L)))
+                        .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
+                        .hasEntrySatisfying(
+                            "readConcurrency",
+                            intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
+                        )
+                        .hasEntrySatisfying("parameters", parameters -> assertThat(parameters).asInstanceOf(
+                            stringObjectMapAssertFactory()).isEmpty())
+                        .hasEntrySatisfying(
+                            "relationshipCount",
+                            longAssertConsumer(relationshipCount -> relationshipCount.isEqualTo(-1L))
+                        )
+                        .hasEntrySatisfying("username", username -> assertThat(username).isNull());
+
+                    return true;
+                }, "Assert Cypher `configuration` map"),
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "degreeDistribution", map(
@@ -331,23 +435,10 @@ class GraphListProcTest extends BaseProcTest {
         runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
 
         assertCypherResult(
-            "CALL gds.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodeCount, relationshipCount",
+            "CALL gds.graph.list() YIELD graphName, nodeCount, relationshipCount",
             singletonList(
                 map(
                     "graphName", name,
-                    "nodeProjection", map(
-                        "A", map(
-                            "label", "A",
-                            "properties", emptyMap()
-                        )
-                    ),
-                    "relationshipProjection", map(
-                        "REL", map(
-                            "type", "REL",
-                            "orientation", "NATURAL",
-                            "aggregation", "DEFAULT",
-                            "properties", emptyMap()
-                        )),
                     "nodeCount", 2L,
                     "relationshipCount", 1L
                 )
@@ -450,7 +541,7 @@ class GraphListProcTest extends BaseProcTest {
                 .collect(toList())
         );
 
-        assertThat(actualNames, containsInAnyOrder(names));
+        assertThat(actualNames).containsExactlyInAnyOrder(names);
     }
 
     @Test
@@ -470,14 +561,14 @@ class GraphListProcTest extends BaseProcTest {
                 .collect(toList())
         );
 
-        assertThat(actualNames.size(), is(1));
-        assertThat(actualNames, contains(name));
+        assertThat(actualNames).hasSize(1);
+        assertThat(actualNames).contains(name);
     }
 
     @Test
     void returnEmptyStreamWhenNoGraphsAreLoaded() {
         long numberOfRows = runQuery("CALL gds.graph.list()", r -> r.stream().count());
-        assertThat(numberOfRows, is(0L));
+        assertThat(numberOfRows).isEqualTo(0L);
     }
 
     @ParameterizedTest(name = "name argument: ''{0}''")
@@ -495,7 +586,7 @@ class GraphListProcTest extends BaseProcTest {
             result -> result.stream().count()
         );
 
-        assertThat(numberOfRows, is(0L));
+        assertThat(numberOfRows).isEqualTo(0L);
     }
 
     @Test
