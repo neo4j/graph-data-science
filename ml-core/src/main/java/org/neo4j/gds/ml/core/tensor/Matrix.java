@@ -39,7 +39,7 @@ public class Matrix extends Tensor<Matrix> {
     private final int rows;
 
     public static long sizeInBytes(int rows, int cols) {
-        return MemoryUsage.sizeOfDoubleArray(rows * cols);
+        return MemoryUsage.sizeOfDoubleArray((long) rows * cols);
     }
 
     public Matrix(double[] data, int rows, int cols) {
@@ -96,7 +96,7 @@ public class Matrix extends Tensor<Matrix> {
 
     @Override
     public Matrix createWithSameDimensions() {
-        return create(0D, rows(), cols());
+        return new Matrix(rows(), cols());
     }
 
     @Override
@@ -167,6 +167,12 @@ public class Matrix extends Tensor<Matrix> {
         }
 
         return new Vector(result);
+    }
+
+    public void setRow(int row, Matrix input, int inputRow) {
+        assert this.columns == input.columns;
+
+        System.arraycopy(input.data, inputRow * columns, this.data, row * columns, input.columns);
     }
 
     @Override

@@ -260,6 +260,21 @@ class MatrixTest {
     }
 
     @Test
+    void setRowFromMatrix() {
+        var matrix = new Matrix(new double[] {
+            1, 2, 3,
+            4, 5, 6
+        }, 2, 3);
+
+        var result = new Matrix(3, 3);
+
+        result.setRow(0, matrix, 1);
+        result.setRow(2, matrix, 0);
+
+        assertThat(result).isEqualTo(new Matrix(new double[] { 4, 5, 6, 0,0,0, 1,2,3}, 3, 3));
+    }
+
+    @Test
     void failSettingInvalidRow() {
         var matrix = Matrix.create(0, 3, 2);
         assertThatThrownBy(() -> matrix.setRow(1, new double[]{42}))

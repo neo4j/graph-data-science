@@ -27,42 +27,39 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 public class Slice extends SingleParentVariable<Matrix, Matrix> {
 
     private final int[] batchIds;
-    private final int rows;
-    private final int cols;
 
     public Slice(Variable<Matrix> parent, int[] batchIds) {
-        super(parent, Dimensions.matrix(batchIds.length, parent.dimension(1)));
+        super(parent, Dimensions.matrix(batchIds.length, parent.dimension(Dimensions.COLUMNS_INDEX)));
 
         this.batchIds = batchIds;
-        this.rows = batchIds.length;
-        this.cols = parent.dimension(1);
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        double[] parentData = ctx.data(parent).data();
+        Matrix parentData = ctx.data(parent);
+        var rows = batchIds.length;
 
-        double[] result = new double[rows * cols];
+        Matrix result = new Matrix(rows, parentData.cols());
 
         for (int row = 0; row < rows; row++) {
-            System.arraycopy(parentData, batchIds[row] * cols, result, row * cols, cols);
+            result.setRow(row, parentData, batchIds[row]);
         }
 
-        return new Matrix(result, rows, cols);
+        return result;
     }
 
     @Override
     public Matrix gradientForParent(ComputationContext ctx) {
-        Matrix result = ctx.data(parent).createWithSameDimensions();
+        Matrix thisGradient = ctx.gradient(this);
 
-        double[] selfGradient = ctx.gradient(this).data();
+        Matrix result = ctx.data(parent).createWithSameDimensions();
+        var rows = batchIds.length;
+        var cols = thisGradient.cols();
+
         for (int row = 0; row < rows; row++) {
             int childRow = batchIds[row];
             for (int col = 0; col < cols; col++) {
-                result.addDataAt(
-                    childRow * cols + col,
-                    selfGradient[row * cols + col]
-                );
+                result.addDataAt(childRow, col, thisGradient.dataAt(row, col));
             }
         }
 
