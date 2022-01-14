@@ -79,7 +79,7 @@ public class PositiveSampleProducer {
         progressTracker.logProgress();
         int filteredWalkLength = filter(walk);
 
-        while (walks.hasNext() && filteredWalkLength < 2) {
+        while (filteredWalkLength < 2 && walks.hasNext()) {
             walk = walks.next();
             filteredWalkLength = filter(walk);
         }

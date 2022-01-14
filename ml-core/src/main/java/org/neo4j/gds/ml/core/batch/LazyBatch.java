@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
-import java.util.Iterator;
+import com.carrotsearch.hppc.AbstractIterator;
+
 import java.util.concurrent.atomic.AtomicLong;
 
 public class LazyBatch implements Batch {
@@ -37,15 +38,11 @@ public class LazyBatch implements Batch {
     public Iterable<Long> nodeIds() {
         return () -> {
             AtomicLong current = new AtomicLong(startId);
-            return new Iterator<>() {
+            return new AbstractIterator<>() {
                 @Override
-                public boolean hasNext() {
-                    return current.get() < endId;
-                }
-
-                @Override
-                public Long next() {
-                    return current.getAndIncrement();
+                protected Long fetch() {
+                    long value = current.getAndIncrement();
+                    return (value < endId) ? Long.valueOf(value) : done();
                 }
             };
         };

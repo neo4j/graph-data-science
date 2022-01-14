@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
+import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
 import org.neo4j.gds.core.write.ImmutableRelationship;
 import org.neo4j.gds.core.write.Relationship;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.PrimitiveIterator;
 import java.util.stream.Stream;
@@ -51,19 +51,17 @@ public class ExhaustiveLinkPredictionResult implements LinkPredictionResult {
 
     @Override
     public Stream<PredictedLink> stream() {
-        Iterable<PredictedLink> iterable = () -> new Iterator<>() {
+        Iterable<PredictedLink> iterable = () -> new AbstractIterator<>() {
 
             final PrimitiveIterator.OfLong elements1Iter = predictionQueue.elements1().iterator();
             final PrimitiveIterator.OfLong elements2Iter = predictionQueue.elements2().iterator();
             final PrimitiveIterator.OfDouble prioritiesIter = predictionQueue.priorities().iterator();
 
             @Override
-            public boolean hasNext() {
-                return elements1Iter.hasNext();
-            }
-
-            @Override
-            public PredictedLink next() {
+            protected PredictedLink fetch() {
+                if (!elements1Iter.hasNext()) {
+                    return done();
+                }
                 return PredictedLink.of(
                     elements1Iter.nextLong(),
                     elements2Iter.nextLong(),
