@@ -46,7 +46,7 @@ CALL gds.graph.list(
 | Name                   | Type     | Description
 | graphName              | String   | Name of the graph.
 | database               | String   | Name of the database in which the graph has been projected.
-| configuration          | Map      | TODO : Configuration
+| configuration          | Map      | The configuration used to project the graph in memory.
 | nodeCount              | Integer  | Number of nodes in the graph.
 | relationshipCount      | Integer  | Number of relationships in the graph.
 | schema                 | Map      | Node labels, relationship types and properties contained in the projected graph.
