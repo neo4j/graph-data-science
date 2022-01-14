@@ -25,7 +25,7 @@ import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -161,13 +161,13 @@ public final class LabelInformation {
 
     public static final class Builder {
         private final long expectedCapacity;
-        final Map<NodeLabel, HugeAtomicBitSet> labelInformation;
+        final Map<NodeLabel, HugeAtomicGrowingBitSet> labelInformation;
         private final List<NodeLabel> starNodeLabelMappings;
         private final AllocationTracker allocationTracker;
 
         private Builder(
             long expectedCapacity,
-            Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+            Map<NodeLabel, HugeAtomicGrowingBitSet> labelInformation,
             List<NodeLabel> starNodeLabelMappings,
             AllocationTracker allocationTracker
         ) {
@@ -194,7 +194,7 @@ public final class LabelInformation {
 
             var nodeLabelBitSetMap = prepareLabelMap(
                 labelTokenNodeLabelMapping,
-                () -> HugeAtomicBitSet.growing(expectedCapacity, allocationTracker)
+                () -> HugeAtomicGrowingBitSet.create(expectedCapacity, allocationTracker)
             );
 
             return new Builder(expectedCapacity, nodeLabelBitSetMap, starNodeLabelMappings, allocationTracker);
@@ -221,7 +221,7 @@ public final class LabelInformation {
             labelInformation
                 .computeIfAbsent(
                     nodeLabel,
-                    (ignored) -> HugeAtomicBitSet.growing(expectedCapacity, allocationTracker)
+                    (ignored) -> HugeAtomicGrowingBitSet.create(expectedCapacity, allocationTracker)
                 ).set(nodeId);
         }
 

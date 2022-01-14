@@ -25,13 +25,20 @@ import org.neo4j.gds.mem.HugeArrays;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.LongConsumer;
 
-public final class HugeAtomicGrowingBitSet extends HugeAtomicBitSet {
+public final class HugeAtomicGrowingBitSet {
+
+    private static final int NUM_BITS = Long.SIZE;
+
+    private HugeAtomicLongArray bits;
+    private long numBits;
+    private int remainder;
 
     private final Lock growLock = new ReentrantLock(true);
     private final AllocationTracker allocationTracker;
 
-    static HugeAtomicGrowingBitSet create(long size, AllocationTracker allocationTracker) {
+    public static HugeAtomicGrowingBitSet create(long size, AllocationTracker allocationTracker) {
         var wordsSize = BitUtil.ceilDiv(size, NUM_BITS);
         int remainder = (int) (size % NUM_BITS);
         return new HugeAtomicGrowingBitSet(
@@ -48,40 +55,117 @@ public final class HugeAtomicGrowingBitSet extends HugeAtomicBitSet {
         int remainder,
         AllocationTracker allocationTracker
     ) {
-        super(bits, numBits, remainder);
+        this.bits = bits;
+        this.numBits = numBits;
+        this.remainder = remainder;
         this.allocationTracker = allocationTracker;
     }
 
-    @Override
+    /**
+     * Returns the state of the bit at the given index.
+     */
+    public boolean get(long index) {
+        return HugeAtomicBitSetOps.get(bits, numBits, index);
+    }
+
+    /**
+     * Sets the bit at the given index to true.
+     */
     public void set(long index) {
         if (index >= numBits) {
             grow(index + 1);
         }
-        super.set(index);
+        HugeAtomicBitSetOps.set(bits, numBits, index);
     }
 
-    @Override
+    /**
+     * Sets the bits from the startIndex (inclusive) to the endIndex (exclusive).
+     */
     public void set(long startIndex, long endIndex) {
         if (endIndex > numBits) {
             grow(endIndex);
         }
-        super.set(startIndex, endIndex);
+        HugeAtomicBitSetOps.setRange(bits, numBits, startIndex, endIndex);
     }
 
-    @Override
+    /**
+     * Sets a bit and returns the previous value.
+     * The index should be less than the BitSet size.
+     */
     public boolean getAndSet(long index) {
         if (index >= numBits) {
             grow(index + 1);
         }
-        return super.getAndSet(index);
+        return HugeAtomicBitSetOps.getAndSet(bits, numBits, index);
     }
 
-    @Override
+    /**
+     * Toggles the bit at the given index.
+     */
     public void flip(long index) {
         if (index >= numBits) {
             grow(index + 1);
         }
-        super.flip(index);
+        HugeAtomicBitSetOps.flip(bits, numBits, index);
+    }
+
+    /**
+     * Iterates the bit set in increasing order and calls the given consumer for each set bit.
+     *
+     * This method is not thread-safe.
+     */
+    public void forEachSetBit(LongConsumer consumer) {
+        HugeAtomicBitSetOps.forEachSetBit(bits, consumer);
+    }
+
+    /**
+     * Returns the number of set bits in the bit set.
+     * <p>
+     * Note: this method is not thread-safe.
+     */
+    public long cardinality() {
+        return HugeAtomicBitSetOps.cardinality(bits);
+    }
+
+    /**
+     * Returns true iff no bit is set.
+     * <p>
+     * Note: this method is not thread-safe.
+     */
+    public boolean isEmpty() {
+        return HugeAtomicBitSetOps.isEmpty(bits);
+    }
+
+    /**
+     * Returns true iff all bits are set.
+     * <p>
+     * Note: this method is not thread-safe.
+     */
+    public boolean allSet() {
+        return HugeAtomicBitSetOps.allSet(bits, remainder);
+    }
+
+    /**
+     * Returns the number of bits in the bitset.
+     */
+    public long size() {
+        return numBits;
+    }
+
+    /**
+     * Resets all bits in the bit set.
+     * <p>
+     * Note: this method is not thread-safe.
+     */
+    public void clear() {
+        HugeAtomicBitSetOps.clear(bits);
+    }
+
+    /**
+     * Resets the bit at the given index.
+     */
+    public void clear(long index) {
+        HugeAtomicBitSetOps.clear(bits, numBits, index);
     }
 
     private void grow(long minNumBits) {

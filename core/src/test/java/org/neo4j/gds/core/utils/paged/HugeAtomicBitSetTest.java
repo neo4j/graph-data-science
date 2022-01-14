@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -29,23 +30,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
+import java.util.function.LongConsumer;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class HugeAtomicBitSetTest {
-
-    interface HabsSupplier {
-        HugeAtomicBitSet get(long size, AllocationTracker tracker);
-    }
-
-    static Stream<HabsSupplier> suppliers() {
-        return Stream.of(
-            HugeAtomicBitSet::fixed,
-            HugeAtomicBitSet::growing
-        );
-    }
 
     @ParameterizedTest
     @MethodSource("suppliers")
@@ -189,12 +180,12 @@ class HugeAtomicBitSetTest {
     }
 
     private static final class SetTask implements Runnable {
-        private final HugeAtomicBitSet habs;
+        private final HabsOps habs;
         private final Phaser phaser;
         private final long startIndex;
         private final long endIndex;
 
-        private SetTask(HugeAtomicBitSet habs, Phaser phaser, long startIndex, long endIndex) {
+        private SetTask(HabsOps habs, Phaser phaser, long startIndex, long endIndex) {
             this.habs = habs;
             this.phaser = phaser;
             this.startIndex = startIndex;
@@ -290,5 +281,185 @@ class HugeAtomicBitSetTest {
         assertThat(atomicBitSet.allSet()).isTrue();
         atomicBitSet.flip(23);
         assertThat(atomicBitSet.allSet()).isFalse();
+    }
+
+    interface HabsOps {
+        boolean get(long index);
+
+        void set(long index);
+
+        void set(long startIndex, long endIndex);
+
+        boolean getAndSet(long index);
+
+        void flip(long index);
+
+        void forEachSetBit(LongConsumer consumer);
+
+        long cardinality();
+
+        boolean isEmpty();
+
+        boolean allSet();
+
+        long size();
+
+        void clear();
+
+        void clear(long index);
+
+        BitSet toHppcBitSet();
+    }
+
+    interface HabsSupplier {
+        HabsOps get(long size, AllocationTracker tracker);
+    }
+
+    static Stream<HabsSupplier> suppliers() {
+        return Stream.of(
+            (size, tracker) -> {
+                var habs = HugeAtomicBitSet.create(size, tracker);
+                return new HabsOps() {
+                    @Override
+                    public boolean get(long index) {
+                        return habs.get(index);
+                    }
+
+                    @Override
+                    public void set(long index) {
+                        habs.set(index);
+                    }
+
+                    @Override
+                    public void set(long startIndex, long endIndex) {
+                        habs.set(startIndex, endIndex);
+                    }
+
+                    @Override
+                    public boolean getAndSet(long index) {
+                        return habs.getAndSet(index);
+                    }
+
+                    @Override
+                    public void flip(long index) {
+                        habs.flip(index);
+                    }
+
+                    @Override
+                    public void forEachSetBit(LongConsumer consumer) {
+                        habs.forEachSetBit(consumer);
+                    }
+
+                    @Override
+                    public long cardinality() {
+                        return habs.cardinality();
+                    }
+
+                    @Override
+                    public boolean isEmpty() {
+                        return habs.isEmpty();
+                    }
+
+                    @Override
+                    public boolean allSet() {
+                        return habs.allSet();
+                    }
+
+                    @Override
+                    public long size() {
+                        return habs.size();
+                    }
+
+                    @Override
+                    public void clear() {
+                        habs.clear();
+                    }
+
+                    @Override
+                    public void clear(long index) {
+                        habs.clear(index);
+                    }
+
+                    @Override
+                    public BitSet toHppcBitSet() {
+                        var bitSet = new BitSet(habs.size());
+                        habs.forEachSetBit(bitSet::set);
+                        return bitSet;
+                    }
+                };
+            },
+            (size, tracker) -> {
+                var habs = HugeAtomicGrowingBitSet.create(size, tracker);
+                return new HabsOps() {
+                    @Override
+                    public boolean get(long index) {
+                        return habs.get(index);
+                    }
+
+                    @Override
+                    public void set(long index) {
+                        habs.set(index);
+                    }
+
+                    @Override
+                    public void set(long startIndex, long endIndex) {
+                        habs.set(startIndex, endIndex);
+                    }
+
+                    @Override
+                    public boolean getAndSet(long index) {
+                        return habs.getAndSet(index);
+                    }
+
+                    @Override
+                    public void flip(long index) {
+                        habs.flip(index);
+                    }
+
+                    @Override
+                    public void forEachSetBit(LongConsumer consumer) {
+                        habs.forEachSetBit(consumer);
+                    }
+
+                    @Override
+                    public long cardinality() {
+                        return habs.cardinality();
+                    }
+
+                    @Override
+                    public boolean isEmpty() {
+                        return habs.isEmpty();
+                    }
+
+                    @Override
+                    public boolean allSet() {
+                        return habs.allSet();
+                    }
+
+                    @Override
+                    public long size() {
+                        return habs.size();
+                    }
+
+                    @Override
+                    public void clear() {
+                        habs.clear();
+                    }
+
+                    @Override
+                    public void clear(long index) {
+                        habs.clear(index);
+                    }
+
+                    @Override
+                    public BitSet toHppcBitSet() {
+                        var bitSet = new BitSet(habs.size());
+                        habs.forEachSetBit(bitSet::set);
+                        return bitSet;
+                    }
+
+                };
+            }
+        );
     }
 }
