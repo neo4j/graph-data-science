@@ -37,9 +37,12 @@ YIELD
 [opts="header",cols="1,1,4"]
 |===
 | Name          | Type           | Description
-| backupId      | String         | The id of the backup in format of UUID.
+| graphName     | String         | The name of the persisted graph or an empty string if a model was persisted instead.
+| modelName     | String         | The name of the persisted model or an empty string if a graph was persisted instead.
+| exportPath    | String         | Path to which the graph/model was persisted to.
 | backupTime    | LocalDateTime  | Point in time when the backup was performed.
 | exportMillis  | Long           | Amount of time exporting took in milliseconds.
+| status        | String         | Status of the persistence operation. Either `SUCCESSFUL` or `FAILED`.
 |===
 --
 
@@ -50,9 +53,9 @@ YIELD
 ----
 CALL gds.alpha.restore
 YIELD
-  restoredGraphs: List of String,
-  restoredModels: List of String,
-  unableToRestore: Map of String,
+  restoredGraph: String,
+  restoredModel: String,
+  status: String,
   restoreMillis: Long
 ----
 
@@ -60,9 +63,9 @@ YIELD
 [opts="header",cols="1,1,4"]
 |===
 | Name              | Type           | Description
-| restoredGraphs    | List of String | List of graph names of restored graphs.
-| backupTime        | List of String | List of model names of restored models.
-| unableToRestore   | Map of String  | Map of model and graph names that were not restored along an error message.
+| restoredGraph     | String         | The name of the restored graph or an empty string if a model was restored instead.
+| restoredModel     | String         | The name of the restored model or an empty string if a graph was restored instead.
+| status            | String         | Status of the restore operation. Either `SUCCESSFUL` or an error message.
 | restoreMillis     | Long           | Amount of time restoring took in milliseconds.
 |===
 --
@@ -100,7 +103,15 @@ We can now run the back-up procedure in order to store the in-memory graph on di
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.backup
+YIELD graphName, status
 ----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| graphName | status
+| "myGraph" | "SUCCESSFUL"
+|===
 
 It is now safe to drop the in-memory graph or shutdown the db, as we can restore it at a later point.
 
@@ -122,7 +133,7 @@ YIELD restoredGraphs
 .Results
 [opts="header",cols="1m,1m"]
 |===
-| restoredGraphs
+| restoredGraph
 | "myGraph"
 |===
 
