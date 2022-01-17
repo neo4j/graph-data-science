@@ -27,28 +27,19 @@ public interface IdMappingAllocator {
 
     int allocatedSize();
 
-    int insert(
-        long[] nodeIds,
-        int length,
-        PropertyAllocator propertyAllocator,
-        NodeImporter.PropertyReader reader,
-        PropertyReference[] properties,
-        long[][] labelIds
-    );
+    void insert(long[] nodeIds, int length);
 
     @FunctionalInterface
     interface PropertyAllocator {
 
-        PropertyAllocator EMPTY = (reader, batch, properties, labelIds, batchIndex, length, internalIndex) -> 0;
+        PropertyAllocator EMPTY = (reader, batch, properties, labelIds, length) -> 0;
 
         int allocateProperties(
             NodeImporter.PropertyReader reader,
             long[] batch,
             PropertyReference[] properties,
             long[][] labelIds,
-            int batchIndex,
-            int length,
-            long internalIndex
+            int length
         );
     }
 }

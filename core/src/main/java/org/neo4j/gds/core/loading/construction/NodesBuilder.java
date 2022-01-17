@@ -333,7 +333,7 @@ public final class NodesBuilder {
         }
 
         private void flushBuffer() {
-            this.nodeImporter.importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
+            this.nodeImporter.importNodes(buffer, (nodeReference, labelIds, propertiesReference) -> {
                 if (!propertiesReference.isEmpty()) {
                     var propertyValueIndex = (int) ((LongPropertyReference) propertiesReference).id;
                     Map<String, Value> properties = batchNodeProperties.get(propertyValueIndex);

@@ -32,7 +32,7 @@ import java.util.List;
 public class NodeImporter {
 
     public interface PropertyReader {
-        int readProperty(long nodeReference, long[] labelIds, PropertyReference propertiesReference, long internalId);
+        int readProperty(long nodeReference, long[] labelIds, PropertyReference propertiesReference);
     }
 
     private final InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder;
@@ -59,7 +59,7 @@ public class NodeImporter {
         KernelTransaction kernelTransaction,
         @Nullable NativeNodePropertyImporter propertyImporter
     ) {
-        return importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
+        return importNodes(buffer, (nodeReference, labelIds, propertiesReference) -> {
             if (propertyImporter != null) {
                 return propertyImporter.importProperties(
                     nodeReference,
@@ -79,30 +79,41 @@ public class NodeImporter {
             return 0;
         }
 
-        @Nullable IdMappingAllocator adder = idMapBuilder.allocate(batchLength);
-        if (adder == null) {
+        @Nullable IdMappingAllocator idMappingAllocator = idMapBuilder.allocate(batchLength);
+        if (idMappingAllocator == null) {
             return 0;
         }
 
-        batchLength = adder.allocatedSize();
-
-        int importedProperties = 0;
+        //  Since we read the graph size in one transaction and load in multiple
+        //  different transactions, any new data that is being added during loading
+        //  will show up while scanning, but would not be accounted for when
+        //  sizing the data structures used for loading.
+        //
+        //  The node loading part only accepts nodes that are within the
+        //  calculated capacity that we have available.
+        batchLength = idMappingAllocator.allocatedSize();
 
         var batch = buffer.batch();
         var properties = buffer.properties();
         var labelIds = buffer.labelIds();
 
+        // Import node IDs
+        idMappingAllocator.insert(batch, batchLength);
+
+        // Import node labels
         if (buffer.hasLabelInformation()) {
             setNodeLabelInformation(
                 batch,
                 batchLength,
-                adder.startId(),
+                idMappingAllocator.startId(),
                 labelIds,
                 (nodeIds, startIndex, pos) -> nodeIds[pos]
             );
         }
 
-        importedProperties += adder.insert(batch, batchLength, propertyAllocator, reader, properties, labelIds);
+        // Import node properties
+        var importedProperties = propertyAllocator.allocateProperties(reader, batch, properties, labelIds, batchLength);
+
         return RawValues.combineIntInt(batchLength, importedProperties);
     }
 
@@ -129,19 +140,14 @@ public class NodeImporter {
         long[] batch,
         PropertyReference[] properties,
         long[][] labelIds,
-        int batchIndex,
-        int length,
-        long internalIndex
+        int length
     ) {
         int batchImportedProperties = 0;
         for (int i = 0; i < length; i++) {
-            long localIndex = internalIndex + i;
-            int indexInBatch = batchIndex + i;
             batchImportedProperties += reader.readProperty(
-                batch[indexInBatch],
+                batch[i],
                 labelIds[i],
-                properties[indexInBatch],
-                localIndex
+                properties[i]
             );
         }
         return batchImportedProperties;
