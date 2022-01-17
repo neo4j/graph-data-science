@@ -21,14 +21,19 @@ package org.neo4j.gds.utils;
 
 import org.immutables.builder.Builder;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public final class AutoCloseableThreadLocal<T extends AutoCloseable> extends CloseableThreadLocal<T> implements Supplier<T>, AutoCloseable {
+public final class AutoCloseableThreadLocal<T extends AutoCloseable> implements Supplier<T>, AutoCloseable {
 
+    private final CloseableThreadLocal<T> closeableThreadLocal;
     private final Consumer<? super T> destructor;
+    private final Set<T> copies;
 
     public static <T extends AutoCloseable> AutoCloseableThreadLocal<T> withInitial(CheckedSupplier<T, ?> initial) {
         return new AutoCloseableThreadLocal<>(initial, Optional.empty());
@@ -39,14 +44,24 @@ public final class AutoCloseableThreadLocal<T extends AutoCloseable> extends Clo
         @Builder.Parameter Supplier<T> constructor,
         Optional<Consumer<? super T>> destructor
     ) {
-        super(constructor);
         this.destructor = destructor.orElse(doNothing -> {});
+        copies = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        closeableThreadLocal = CloseableThreadLocal.withInitial(() -> {
+            var newElement = constructor.get();
+            copies.add(newElement);
+            return newElement;
+        });
+    }
+
+    @Override
+    public T get() {
+        return closeableThreadLocal.get();
     }
 
     @Override
     public void close() {
         var error = new AtomicReference<RuntimeException>();
-        for (T item : hardRefs.values()) {
+        copies.removeIf(item -> {
             try (item) {
                 destructor.accept(item);
             } catch (RuntimeException e) {
@@ -54,21 +69,13 @@ public final class AutoCloseableThreadLocal<T extends AutoCloseable> extends Clo
             } catch (Exception e) {
                 error.set(ExceptionUtil.chain(error.get(), new RuntimeException(e)));
             }
-        }
+            return true;
+        });
         var errorWhileClosing = error.get();
         if (errorWhileClosing != null) {
             throw errorWhileClosing;
         }
 
-        // Clear the hard refs; then, the only remaining refs to
-        // all values we were storing are weak (unless somewhere
-        // else is still using them) and so GC may reclaim them:
-        hardRefs = null;
-        // Take care of the current thread right now; others will be
-        // taken care of via the WeakReferences.
-        if (t != null) {
-            t.remove();
-        }
-        t = null;
+        closeableThreadLocal.close();
     }
 }
