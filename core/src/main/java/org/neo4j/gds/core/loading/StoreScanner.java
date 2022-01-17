@@ -46,7 +46,7 @@ public interface StoreScanner<Reference> extends AutoCloseable {
         void close();
     }
 
-    ScanCursor<Reference> getCursor(KernelTransaction transaction);
+    ScanCursor<Reference> createCursor(KernelTransaction transaction);
 
     long storeSize(GraphDimensions graphDimensions);
 

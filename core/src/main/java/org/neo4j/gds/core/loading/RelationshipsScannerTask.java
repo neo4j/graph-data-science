@@ -141,7 +141,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
 
     @Override
     public void accept(KernelTransaction transaction) {
-        try (StoreScanner.ScanCursor<RelationshipReference> cursor = scanner.getCursor(transaction)) {
+        try (StoreScanner.ScanCursor<RelationshipReference> cursor = scanner.createCursor(transaction)) {
             List<SingleTypeRelationshipImporter> importers = this.importerBuilders.stream()
                     .map(imports -> imports.withBuffer(idMap, scanner.bufferSize(), transaction))
                     .collect(Collectors.toList());

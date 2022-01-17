@@ -69,7 +69,7 @@ class MultipleNodeLabelIndexBasedScannerTest extends BaseTest {
             var labelIds = new int[]{labelAToken, labelBToken};
 
             try (var scanner = new MultipleNodeLabelIndexBasedScanner(labelIds, prefetchSize, txContext);
-                 var storeScanner = scanner.getCursor(ktx)) {
+                 var storeScanner = scanner.createCursor(ktx)) {
 
                 var actualNodeCount = new MutableInt();
 

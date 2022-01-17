@@ -147,7 +147,7 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
 
     @Override
     public void accept(KernelTransaction transaction) {
-        try (StoreScanner.ScanCursor<NodeReference> cursor = scanner.getCursor(transaction)) {
+        try (StoreScanner.ScanCursor<NodeReference> cursor = scanner.createCursor(transaction)) {
             NodesBatchBuffer nodesBatchBuffer = new NodesBatchBufferBuilder()
                 .highestPossibleNodeCount(highestPossibleNodeCount)
                 .nodeLabelIds(labels)
