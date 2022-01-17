@@ -38,20 +38,18 @@ public class NodeImporter {
     private final InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder;
     private final LabelInformation.Builder labelInformationBuilder;
     private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
-    private final IdMappingAllocator.PropertyAllocator propertyAllocator;
+    private final boolean importProperties;
 
     public NodeImporter(
         InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
-        boolean loadsProperties
+        boolean importProperties
     ) {
         this.idMapBuilder = idMapBuilder;
         this.labelInformationBuilder = labelInformationBuilder;
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
-        this.propertyAllocator = loadsProperties
-            ? NodeImporter::importProperties
-            : IdMappingAllocator.PropertyAllocator.EMPTY;
+        this.importProperties = importProperties;
     }
 
     long importNodes(
@@ -112,7 +110,9 @@ public class NodeImporter {
         }
 
         // Import node properties
-        var importedProperties = propertyAllocator.allocateProperties(reader, batch, properties, labelIds, batchLength);
+        var importedProperties = importProperties
+            ? importProperties(reader, batch, properties, labelIds, batchLength)
+            : 0;
 
         return RawValues.combineIntInt(batchLength, importedProperties);
     }
