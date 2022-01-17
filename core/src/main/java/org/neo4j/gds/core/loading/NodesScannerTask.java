@@ -155,9 +155,10 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
                 .hasLabelInformation(!labels.isEmpty())
                 .readProperty(nodePropertyImporter != null)
                 .build();
+
             while (nodesBatchBuffer.scan(cursor)) {
                 terminationFlag.assertRunning();
-                long imported = importer.importNodes(
+                long imported = importNodes(
                     nodesBatchBuffer,
                     transaction,
                     nodePropertyImporter
@@ -181,4 +182,22 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
         return nodesImported;
     }
 
+    private long importNodes(
+        NodesBatchBuffer buffer,
+        KernelTransaction kernelTransaction,
+        @Nullable NativeNodePropertyImporter propertyImporter
+    ) {
+        return importer.importNodes(buffer, (nodeReference, labelIds, propertiesReference) -> {
+            if (propertyImporter != null) {
+                return propertyImporter.importProperties(
+                    nodeReference,
+                    labelIds,
+                    propertiesReference,
+                    kernelTransaction
+                );
+            } else {
+                return 0;
+            }
+        });
+    }
 }

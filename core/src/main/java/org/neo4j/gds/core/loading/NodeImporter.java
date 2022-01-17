@@ -24,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.utils.RawValues;
-import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,25 +49,6 @@ public class NodeImporter {
         this.labelInformationBuilder = labelInformationBuilder;
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.importProperties = importProperties;
-    }
-
-    long importNodes(
-        NodesBatchBuffer buffer,
-        KernelTransaction kernelTransaction,
-        @Nullable NativeNodePropertyImporter propertyImporter
-    ) {
-        return importNodes(buffer, (nodeReference, labelIds, propertiesReference) -> {
-            if (propertyImporter != null) {
-                return propertyImporter.importProperties(
-                    nodeReference,
-                    labelIds,
-                    propertiesReference,
-                    kernelTransaction
-                );
-            } else {
-                return 0;
-            }
-        });
     }
 
     public long importNodes(NodesBatchBuffer buffer, PropertyReader reader) {
