@@ -169,10 +169,16 @@ public class Matrix extends Tensor<Matrix> {
         return new Vector(result);
     }
 
-    public void setRow(int row, Matrix input, int inputRow) {
-        assert this.columns == input.columns;
+    public void setRow(int rowIdx, Matrix input, int inputRowIdx) {
+        if (input.columns != this.columns) {
+            throw new ArithmeticException(formatWithLocale(
+                "Input matrix must have the same number of columns. Expected %s, but got %s.",
+                this.columns, input.columns
+            )
+            );
+        }
 
-        System.arraycopy(input.data, inputRow * columns, this.data, row * columns, input.columns);
+        System.arraycopy(input.data, inputRowIdx * input.columns, this.data, rowIdx * columns, input.columns);
     }
 
     @Override

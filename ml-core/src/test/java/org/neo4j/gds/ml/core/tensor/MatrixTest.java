@@ -275,6 +275,23 @@ class MatrixTest {
     }
 
     @Test
+    void failSetRowFromDifferentSizedMatrix() {
+        var matrix = new Matrix(new double[] {1, 2, 4, 5}, 2, 2);
+
+        var otherMatrix = new Matrix(new double[] {
+            6, 7, 8,
+            9, 10, 11,
+            12, 13, 14
+        }, 3, 3);
+
+        assertThatThrownBy(() -> otherMatrix.setRow(1, matrix, 0))
+            .hasMessage("Input matrix must have the same number of columns. Expected 3, but got 2.");
+
+        assertThatThrownBy(() -> matrix.setRow(2, otherMatrix, 0))
+            .hasMessage("Input matrix must have the same number of columns. Expected 2, but got 3.");
+    }
+
+    @Test
     void failSettingInvalidRow() {
         var matrix = Matrix.create(0, 3, 2);
         assertThatThrownBy(() -> matrix.setRow(1, new double[]{42}))
