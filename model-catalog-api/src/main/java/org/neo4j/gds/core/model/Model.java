@@ -94,6 +94,10 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
             .build();
     }
 
+    default boolean isPublished() {
+        return sharedWith().contains(ALL_USERS);
+    }
+
     static <D, C extends ModelConfig & BaseConfig, INFO extends ToMapConvertible> Model<D, C, INFO> of(
         String creator,
         String name,
