@@ -64,9 +64,7 @@ shadowJar {
 }
 
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+    mavenCentral()
     mavenLocal()
 
     // Used for internal CI support for that module.
