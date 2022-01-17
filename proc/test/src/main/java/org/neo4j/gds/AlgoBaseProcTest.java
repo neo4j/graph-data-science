@@ -164,8 +164,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     }
 
     class InvocationCountingTaskStore extends GlobalTaskStore {
-        int registerTaskInvocations;
-        int removeTaskInvocations;
+        public int registerTaskInvocations;
+        public int removeTaskInvocations;
 
         @Override
         public void store(
