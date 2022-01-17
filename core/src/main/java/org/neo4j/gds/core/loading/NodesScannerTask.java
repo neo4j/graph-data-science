@@ -148,17 +148,17 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
     @Override
     public void accept(KernelTransaction transaction) {
         try (StoreScanner.ScanCursor<NodeReference> cursor = scanner.getCursor(transaction)) {
-            NodesBatchBuffer batches = new NodesBatchBufferBuilder()
+            NodesBatchBuffer nodesBatchBuffer = new NodesBatchBufferBuilder()
                 .highestPossibleNodeCount(highestPossibleNodeCount)
                 .nodeLabelIds(labels)
                 .capacity(scanner.bufferSize())
                 .hasLabelInformation(!labels.isEmpty())
                 .readProperty(nodePropertyImporter != null)
                 .build();
-            while (batches.scan(cursor)) {
+            while (nodesBatchBuffer.scan(cursor)) {
                 terminationFlag.assertRunning();
                 long imported = importer.importNodes(
-                    batches,
+                    nodesBatchBuffer,
                     transaction,
                     nodePropertyImporter
                 );
