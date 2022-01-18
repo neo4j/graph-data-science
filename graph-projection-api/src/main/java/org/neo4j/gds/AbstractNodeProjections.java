@@ -159,6 +159,10 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
         return value;
     }
 
+    public static Map<String, Object> toObject(AbstractNodeProjections nodeProjections) {
+        return nodeProjections.toObject();
+    }
+
     private static void validateIdentifierName(String identifier) {
         if (identifier.equals(ALL_NODES.name())) {
             throw new IllegalArgumentException(formatWithLocale(

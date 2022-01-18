@@ -178,6 +178,11 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         return value;
     }
 
+    public static Map<String, Object> toObject(AbstractRelationshipProjections relationshipProjections) {
+        return relationshipProjections.toObject();
+    }
+
+
     private static void validateIdentifierName(String identifier) {
         if (identifier.equals(ALL_RELATIONSHIPS.name())) {
             throw new IllegalArgumentException(StringFormatting.formatWithLocale(

@@ -141,8 +141,6 @@ public class GraphInfo {
         @Override
         public void visit(GraphProjectFromStoreConfig storeConfig) {
             configuration = cleansed(storeConfig.toMap());
-            configuration.put("nodeProjection", storeConfig.nodeProjections().toObject());
-            configuration.put("relationshipProjection", storeConfig.relationshipProjections().toObject());
         }
 
         @Override
@@ -161,8 +159,6 @@ public class GraphInfo {
         @Override
         public void visit(RandomGraphGeneratorConfig randomGraphConfig) {
             configuration = cleansed(randomGraphConfig.toMap());
-            configuration.put("nodeProjections", randomGraphConfig.nodeProjections().toObject());
-            configuration.put("relationshipProjections", randomGraphConfig.relationshipProjections().toObject());
             configuration.put("aggregation", randomGraphConfig.aggregation().toString());
             configuration.put("orientation", randomGraphConfig.orientation().toString());
             configuration.put("relationshipDistribution", randomGraphConfig.relationshipDistribution().toString());

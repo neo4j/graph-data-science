@@ -53,10 +53,12 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
 
     @Key(NODE_PROJECTION_KEY)
     @ConvertWith("org.neo4j.gds.AbstractNodeProjections#fromObject")
+    @Configuration.ToMapValue("org.neo4j.gds.AbstractNodeProjections#toObject")
     NodeProjections nodeProjections();
 
     @Key(RELATIONSHIP_PROJECTION_KEY)
     @ConvertWith("org.neo4j.gds.AbstractRelationshipProjections#fromObject")
+    @Configuration.ToMapValue("org.neo4j.gds.AbstractRelationshipProjections#toObject")
     RelationshipProjections relationshipProjections();
 
     @Value.Default

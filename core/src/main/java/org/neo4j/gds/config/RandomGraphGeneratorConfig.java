@@ -92,6 +92,7 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
     }
 
     @Value.Default
+    @Configuration.ToMapValue("org.neo4j.gds.AbstractNodeProjections#toObject")
     default NodeProjections nodeProjections() {
         return NodeProjections.builder()
             .putProjection(
@@ -107,7 +108,7 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
     }
 
     @Value.Default
-    @Configuration.Ignore
+    @Configuration.ToMapValue("org.neo4j.gds.AbstractRelationshipProjections#toObject")
     default RelationshipProjections relationshipProjections() {
         return RelationshipProjections.builder()
             .putProjection(

@@ -43,8 +43,8 @@ public class GraphInfoWithHistogram extends GraphInfo {
             graphInfo.configuration,
             graphInfo.memoryUsage,
             graphInfo.sizeInBytes,
-            /*graphInfo.nodeCount*/-42,
-            /*graphInfo.relationshipCount*/-87,
+            graphInfo.nodeCount,
+            graphInfo.relationshipCount,
             graphInfo.creationTime,
             graphInfo.modificationTime,
             graphInfo.schema
