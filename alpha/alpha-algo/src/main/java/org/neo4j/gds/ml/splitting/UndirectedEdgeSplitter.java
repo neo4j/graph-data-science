@@ -70,8 +70,8 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
             ? newRelationshipsBuilderWithProp(graph, Orientation.UNDIRECTED)
             : newRelationshipsBuilder(graph, Orientation.UNDIRECTED);
         RelationshipWithPropertyConsumer remainingRelsConsumer = graph.hasRelationshipProperty()
-            ? (s, t, w) -> { remainingRelsBuilder.addFromInternal(s, t, w); return true; }
-            : (s, t, w) -> { remainingRelsBuilder.addFromInternal(s, t); return true; };
+            ? (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w); return true; }
+            : (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t)); return true; };
 
         var positiveSamples = (long) (graph.relationshipCount() * holdoutFraction) / 2;
         var positiveSamplesRemaining = new AtomicLong(positiveSamples);
@@ -120,9 +120,9 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
                 if (sample((double) 2 * positiveSamplesRemaining.get() / edgesRemaining.get())) {
                     positiveSamplesRemaining.decrementAndGet();
                     if (sample(0.5)) {
-                        selectedRelsBuilder.addFromInternal(source, target, POSITIVE);
+                        selectedRelsBuilder.addFromInternal(graph.toRootNodeId(source), graph.toRootNodeId(target), POSITIVE);
                     } else {
-                        selectedRelsBuilder.addFromInternal(target, source, POSITIVE);
+                        selectedRelsBuilder.addFromInternal(graph.toRootNodeId(target), graph.toRootNodeId(source), POSITIVE);
                     }
                 } else {
                     remainingRelsConsumer.accept(source, target, weight);
