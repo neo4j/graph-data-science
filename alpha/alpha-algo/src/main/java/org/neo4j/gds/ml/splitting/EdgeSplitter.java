@@ -131,7 +131,7 @@ public abstract class EdgeSplitter {
             // no self-relationships
             if (!neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
                 negativeSamplesRemaining.decrementAndGet();
-                selectedRelsBuilder.addFromInternal(nodeId, negativeTarget, NEGATIVE);
+                selectedRelsBuilder.addFromInternal(graph.toRootNodeId(nodeId), graph.toRootNodeId(negativeTarget), NEGATIVE);
             } else if (retries-- > 0) {
                 // we retry with a different negative target
                 // skipping here and relying on finding another source node is not safe

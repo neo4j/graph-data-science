@@ -21,9 +21,12 @@ package org.neo4j.gds.ml.splitting;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
@@ -48,18 +51,30 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                                             ",(n3:A {id: 3})" +
                                             ",(n4:A {id: 4})" +
                                             ",(n5:A {id: 5})" +
+                                            ",(m0:B {id: 6})" +
+                                            ",(m1:B {id: 7})" +
+                                            ",(m2:B {id: 8})" +
+                                            ",(m3:B {id: 9})" +
+                                            ",(m4:B {id: 10})" +
+                                            ",(m5:B {id: 11})" +
                                             ",(n0)-[:T {foo: 0}]->(n1)" +
                                             ",(n1)-[:T {foo: 1}]->(n2)" +
                                             ",(n2)-[:T {foo: 4}]->(n3)" +
                                             ",(n3)-[:T {foo: 9}]->(n4)" +
-                                            ",(n4)-[:T {foo: 16}]->(n5)";
+                                            ",(n4)-[:T {foo: 16}]->(n5)" +
+                                            ",(m0)-[:T {foo: 0}]->(m1)" +
+                                            ",(m1)-[:T {foo: 1}]->(m2)" +
+                                            ",(m2)-[:T {foo: 4}]->(m3)" +
+                                            ",(m3)-[:T {foo: 9}]->(m4)" +
+                                            ",(m4)-[:T {foo: 16}]->(m5)";
 
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(SplitRelationshipsMutateProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
         var createQuery = GdsCypher.call()
-            .withAnyLabel()
+            .withNodeLabel("A")
+            .withNodeLabel("B")
             .withNodeProperty("id")
             .withRelationshipType("T", Orientation.UNDIRECTED)
             .withRelationshipProperty("foo")
@@ -144,25 +159,33 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             ));
     }
 
-    @Test
-    void shouldSplit() {
-        var expectedTest = "CREATE" +
-                              " (a {id: 0})" +
-                              ",(b {id: 1})" +
-                              ",(c {id: 2})" +
-                              ",(d {id: 3})" +
-                              ",(e {id: 4})" +
-                              ",(f {id: 5})" +
+    @ParameterizedTest
+    @ValueSource(strings = {"A", "B"})
+    void shouldSplit(String nodeLabel) {
+        var labelIdOffset = nodeLabel.equals("A") ? 0 : 6;
+        var nodeId0 = 0 + labelIdOffset;
+        var nodeId1 = 1 + labelIdOffset;
+        var nodeId2 = 2 + labelIdOffset;
+        var nodeId3 = 3 + labelIdOffset;
+        var nodeId4 = 4 + labelIdOffset;
+        var nodeId5 = 5 + labelIdOffset;
+        var expectedTest = formatWithLocale("CREATE" +
+                              " (a:" + nodeLabel + " {id: %d})" +
+                              ",(b:" + nodeLabel + " {id: %d})" +
+                              ",(c:" + nodeLabel + " {id: %d})" +
+                              ",(d:" + nodeLabel + " {id: %d})" +
+                              ",(e:" + nodeLabel + " {id: %d})" +
+                              ",(f:" + nodeLabel + " {id: %d})" +
                               ",(c)-[{w: 0.0}]->(f)" +
                               ",(e)-[{w: 0.0}]->(c)" +
-                              ",(d)-[{w: 1.0}]->(c)";
-        var expectedTrain = "CREATE" +
-                               " (a {id: 0})" +
-                               ",(b {id: 1})" +
-                               ",(c {id: 2})" +
-                               ",(d {id: 3})" +
-                               ",(e {id: 4})" +
-                               ",(f {id: 5})" +
+                              ",(d)-[{w: 1.0}]->(c)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
+        var expectedTrain = formatWithLocale("CREATE" +
+                               " (a:" + nodeLabel + " {id: %d})" +
+                               ",(b:" + nodeLabel + " {id: %d})" +
+                               ",(c:" + nodeLabel + " {id: %d})" +
+                               ",(d:" + nodeLabel + " {id: %d})" +
+                               ",(e:" + nodeLabel + " {id: %d})" +
+                               ",(f:" + nodeLabel + " {id: %d})" +
                                ",(a)<-[]-(b)" +
                                ",(b)<-[]-(c)" +
                                ",(d)<-[]-(e)" +
@@ -170,11 +193,12 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                                ",(a)-[]->(b)" +
                                ",(b)-[]->(c)" +
                                ",(d)-[]->(e)" +
-                               ",(e)-[]->(f)";
+                               ",(e)-[]->(f)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
         var query = GdsCypher.call()
             .explicitCreation("graph")
             .algo("gds.alpha.ml.splitRelationships")
             .mutateMode()
+            .addParameter("nodeLabels", List.of(nodeLabel))
             .addParameter("holdoutRelationshipType", "test")
             .addParameter("remainingRelationshipType", "train")
             .addParameter("holdoutFraction", 0.2)
@@ -184,43 +208,52 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         runQuery(query);
 
         var graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore();
-        var testGraph = graphStore.getGraph(RelationshipType.of("test"), Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY));
-        var trainGraph = graphStore.getGraph(RelationshipType.of("train"));
+        var testGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("test"), Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY));
+        var trainGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("train"), Optional.empty());
         assertTrue(trainGraph.isUndirected());
         assertFalse(testGraph.isUndirected());
         TestSupport.assertGraphEquals(fromGdl(expectedTest), testGraph);
         TestSupport.assertGraphEquals(fromGdl(expectedTrain), trainGraph);
     }
 
-    @Test
-    void shouldSplitWithMasterGraph() {
-        var expectedTest = "CREATE" +
-                              " (a {id: 0})" +
-                              ",(b {id: 1})" +
-                              ",(c {id: 2})" +
-                              ",(d {id: 3})" +
-                              ",(e {id: 4})" +
-                              ",(f {id: 5})" +
+    @ParameterizedTest
+    @ValueSource(strings = {"A", "B"})
+    void shouldSplitWithMasterGraph(String nodeLabel) {
+        var labelIdOffset = nodeLabel.equals("A") ? 0 : 6;
+        var nodeId0 = 0 + labelIdOffset;
+        var nodeId1 = 1 + labelIdOffset;
+        var nodeId2 = 2 + labelIdOffset;
+        var nodeId3 = 3 + labelIdOffset;
+        var nodeId4 = 4 + labelIdOffset;
+        var nodeId5 = 5 + labelIdOffset;
+        var expectedTest = formatWithLocale("CREATE" +
+                              " (a:" + nodeLabel + " {id: %d})" +
+                              ",(b:" + nodeLabel + " {id: %d})" +
+                              ",(c:" + nodeLabel + " {id: %d})" +
+                              ",(d:" + nodeLabel + " {id: %d})" +
+                              ",(e:" + nodeLabel + " {id: %d})" +
+                              ",(f:" + nodeLabel + " {id: %d})" +
                               ",(c)-[{w: 0.0}]->(e)" +
                               ",(e)-[{w: 0.0}]->(c)" +
-                              ",(d)-[{w: 1.0}]->(e)";
-        var expectedTrain = "CREATE" +
-                               " (a {id: 0})" +
-                               ",(b {id: 1})" +
-                               ",(c {id: 2})" +
-                               ",(d {id: 3})" +
-                               ",(e {id: 4})" +
-                               ",(f {id: 5})" +
+                              ",(d)-[{w: 1.0}]->(e)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
+        var expectedTrain = formatWithLocale("CREATE" +
+                               " (a:" + nodeLabel + "{id: %d})" +
+                               ",(b:" + nodeLabel + "{id: %d})" +
+                               ",(c:" + nodeLabel + "{id: %d})" +
+                               ",(d:" + nodeLabel + "{id: %d})" +
+                               ",(e:" + nodeLabel + "{id: %d})" +
+                               ",(f:" + nodeLabel + "{id: %d})" +
                                ",(a)<-[]-(b)" +
                                ",(b)<-[]-(c)" +
                                ",(e)<-[]-(f)" +
                                ",(a)-[]->(b)" +
                                ",(b)-[]->(c)" +
-                               ",(e)-[]->(f)";
+                               ",(e)-[]->(f)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
         var outerSplitQuery = GdsCypher.call()
             .explicitCreation("graph")
             .algo("gds.alpha.ml.splitRelationships")
             .mutateMode()
+            .addParameter("nodeLabels", List.of(nodeLabel))
             .addParameter("holdoutRelationshipType", "test")
             .addParameter("remainingRelationshipType", "train")
             .addParameter("holdoutFraction", 0.2)
@@ -233,6 +266,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .explicitCreation("graph")
             .algo("gds.alpha.ml.splitRelationships")
             .mutateMode()
+            .addParameter("nodeLabels", List.of(nodeLabel))
             .addParameter("relationshipTypes", List.of("train"))
             .addParameter("nonNegativeRelationshipTypes", List.of("T"))
             .addParameter("holdoutRelationshipType", "innerTest")
@@ -244,21 +278,24 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         runQuery(innerSplitQuery);
 
         var graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore();
-        var testGraph = graphStore.getGraph(RelationshipType.of("innerTest"), Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY));
-        var trainGraph = graphStore.getGraph(RelationshipType.of("innerTrain"));
+
+        var testGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("innerTest"), Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY));
+        var trainGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("innerTrain"), Optional.empty());
         assertTrue(trainGraph.isUndirected());
         assertFalse(testGraph.isUndirected());
         TestSupport.assertGraphEquals(fromGdl(expectedTest), testGraph);
         TestSupport.assertGraphEquals(fromGdl(expectedTrain), trainGraph);
     }
 
-    @Test
-    void shouldPreserveRelationshipWeights() {
+    @ParameterizedTest
+    @ValueSource(strings = {"A", "B"})
+    void shouldPreserveRelationshipWeights(String nodeLabel) {
 
         var query = GdsCypher.call()
             .explicitCreation("graph")
             .algo("gds.alpha.ml.splitRelationships")
             .mutateMode()
+            .addParameter("nodeLabels", List.of(nodeLabel))
             .addParameter("holdoutRelationshipType", "baz")
             .addParameter("remainingRelationshipType", "remaining")
             .addParameter("relationshipWeightProperty", "foo")
@@ -268,7 +305,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .yields();
         runQuery(query);
         var graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore();
-        var remainingGraph = graphStore.getGraph(RelationshipType.of("remaining"), Optional.of("foo"));
+        var remainingGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("remaining"), Optional.of("foo"));
         remainingGraph.forEachNode(nodeId -> {
             remainingGraph.forEachRelationship(nodeId, Double.NaN, (s, t, w) -> {
                 assertThat(w).isEqualTo(Math.pow(Math.min(s, t), 2));

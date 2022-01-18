@@ -120,12 +120,12 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
                 if (sample((double) 2 * positiveSamplesRemaining.get() / edgesRemaining.get())) {
                     positiveSamplesRemaining.decrementAndGet();
                     if (sample(0.5)) {
-                        selectedRelsBuilder.addFromInternal(source, target, POSITIVE);
+                        selectedRelsBuilder.addFromInternal(graph.toRootNodeId(source), graph.toRootNodeId(target), POSITIVE);
                     } else {
-                        selectedRelsBuilder.addFromInternal(target, source, POSITIVE);
+                        selectedRelsBuilder.addFromInternal(graph.toRootNodeId(target), graph.toRootNodeId(source), POSITIVE);
                     }
                 } else {
-                    remainingRelsConsumer.accept(source, target, weight);
+                    remainingRelsConsumer.accept(graph.toRootNodeId(source), graph.toRootNodeId(target), weight);
                 }
                 // because of reverse edge
                 edgesRemaining.addAndGet(-2);

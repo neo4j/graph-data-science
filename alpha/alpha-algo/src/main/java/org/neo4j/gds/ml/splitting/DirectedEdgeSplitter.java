@@ -107,9 +107,9 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
             if (relsToSelectFromThisNode > 0 && localSelectedDouble > 0 && isSelected) {
                 positiveSamplesRemaining.decrementAndGet();
                 localSelectedRemaining.decrementAndGet();
-                selectedRelsBuilder.addFromInternal(source, target, POSITIVE);
+                selectedRelsBuilder.addFromInternal(graph.toRootNodeId(source), graph.toRootNodeId(target), POSITIVE);
             } else {
-                remainingRelsConsumer.accept(source, target, weight);
+                remainingRelsConsumer.accept(graph.toRootNodeId(source), graph.toRootNodeId(target), weight);
             }
             return true;
         });
