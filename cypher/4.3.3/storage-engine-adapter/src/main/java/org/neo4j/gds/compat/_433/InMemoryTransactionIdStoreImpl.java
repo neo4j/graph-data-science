@@ -20,10 +20,16 @@
 package org.neo4j.gds.compat._433;
 
 import org.neo4j.internal.recordstorage.AbstractTransactionIdStore;
+import org.neo4j.io.pagecache.context.CursorContext;
 
 public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
 
     public long[] getLastClosedTransaction() {
         return this.closedTransactionId.get();
+    }
+
+    @Override
+    protected CursorContext getEmtpyCursorContext() {
+        return CursorContext.NULL;
     }
 }
