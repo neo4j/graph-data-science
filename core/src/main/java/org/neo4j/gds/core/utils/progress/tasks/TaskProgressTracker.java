@@ -121,6 +121,7 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public void logWarning(String message) {
+        taskRegistry.addWarningToLog(baseTask, message);
         taskProgressLogger.logWarning(":: " + message);
     }
 
