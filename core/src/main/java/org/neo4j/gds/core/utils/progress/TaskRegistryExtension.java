@@ -21,6 +21,9 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.core.utils.warnings.EmptyWarningStore;
+import org.neo4j.gds.core.utils.warnings.GlobalWarningStore;
+import org.neo4j.gds.core.utils.warnings.WarningStore;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
@@ -43,10 +46,14 @@ public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryEx
         if (enabled) {
             var globalTaskStore = new GlobalTaskStore();
             registry.registerComponent(TaskStore.class, ctx -> globalTaskStore, true);
+            var globalWarningStore = new GlobalWarningStore();
+            registry.registerComponent(WarningStore.class, ctx -> globalWarningStore, true);
             registry.registerComponent(TaskRegistryFactory.class, globalTaskStore, true);
         } else {
             registry.registerComponent(TaskRegistryFactory.class, ctx -> EmptyTaskRegistryFactory.INSTANCE, true);
             registry.registerComponent(TaskStore.class, ctx -> EmptyTaskStore.INSTANCE, true);
+            registry.registerComponent(WarningStore.class, ctx -> EmptyWarningStore.INSTANCE, true);
+
         }
         return new LifecycleAdapter();
     }
