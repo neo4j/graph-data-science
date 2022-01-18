@@ -32,7 +32,7 @@ public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
     }
 
     @Override
-    protected CursorContext getEmtpyCursorContext() {
+    protected CursorContext getEmptyCursorContext() {
         return CursorContext.NULL_CONTEXT;
     }
 }

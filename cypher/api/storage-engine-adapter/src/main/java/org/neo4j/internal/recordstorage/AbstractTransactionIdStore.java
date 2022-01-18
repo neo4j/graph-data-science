@@ -59,14 +59,14 @@ public abstract class AbstractTransactionIdStore implements TransactionIdStore {
             previouslyCommittedTxCommitTimestamp,
             previouslyCommittedTxLogByteOffset,
             previouslyCommittedTxLogVersion,
-            getEmtpyCursorContext()
+            getEmptyCursorContext()
         );
         this.previouslyCommittedTxId = previouslyCommittedTxId;
         this.initialTransactionChecksum = checksum;
         this.previouslyCommittedTxCommitTimestamp = previouslyCommittedTxCommitTimestamp;
     }
 
-    protected abstract CursorContext getEmtpyCursorContext();
+    protected abstract CursorContext getEmptyCursorContext();
 
     public long nextCommittingTransactionId() {
         return this.committingTransactionId.incrementAndGet();
