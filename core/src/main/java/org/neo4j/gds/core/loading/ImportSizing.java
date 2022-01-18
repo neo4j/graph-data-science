@@ -87,7 +87,7 @@ public final class ImportSizing {
         );
     }
 
-    int numberOfThreads() {
+    int threadCount() {
         return totalThreads;
     }
 

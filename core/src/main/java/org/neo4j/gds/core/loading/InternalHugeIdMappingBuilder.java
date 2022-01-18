@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -48,22 +47,18 @@ public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuil
     }
 
     @Override
-    public @Nullable InternalHugeIdMappingBuilder.BulkAdder allocate(int batchLength) {
-        return this.allocate((long) batchLength);
-    }
-
-    private BulkAdder newBulkAdder() {
-        return new BulkAdder(array, array.newCursor());
-    }
-
-    public BulkAdder allocate(final long nodes) {
-        long startIndex = allocationIndex.getAndAccumulate(nodes, this::upperAllocation);
+    public @Nullable BulkAdder allocate(int batchLength) {
+        long startIndex = allocationIndex.getAndAccumulate(batchLength, this::upperAllocation);
         if (startIndex == capacity) {
             return null;
         }
         BulkAdder adder = adders.get();
-        adder.reset(startIndex, upperAllocation(startIndex, nodes));
+        adder.reset(startIndex, upperAllocation(startIndex, batchLength));
         return adder;
+    }
+
+    private BulkAdder newBulkAdder() {
+        return new BulkAdder(array, array.newCursor());
     }
 
     private long upperAllocation(long lower, long nodes) {
@@ -128,22 +123,12 @@ public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuil
         }
 
         @Override
-        public int insert(
-            long[] nodeIds,
-            int length,
-            PropertyAllocator propertyAllocator,
-            NodeImporter.PropertyReader reader,
-            PropertyReference[] properties,
-            long[][] labelIds
-        ) {
-            int importedProperties = 0;
+        public void insert(long[] nodeIds, int length) {
             int batchOffset = 0;
             while (nextBuffer()) {
                 System.arraycopy(nodeIds, batchOffset, this.buffer, this.offset, this.length);
-                importedProperties += propertyAllocator.allocateProperties(reader, nodeIds, properties, labelIds, batchOffset, this.length, this.start);
                 batchOffset += this.length;
             }
-            return importedProperties;
         }
     }
 }

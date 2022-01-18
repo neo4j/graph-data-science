@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.loading.InternalImporter.ImportResult;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -38,9 +37,9 @@ public abstract class ScanningRecordsImporter<Record, T> {
 
     static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
 
-    private final StoreScanner.Factory<Record> factory;
+    private final StoreScanner.Factory<Record> storeScannerFactory;
 
-    protected final ExecutorService threadPool;
+    protected final ExecutorService executorService;
     protected final TransactionContext transaction;
     protected final GraphDimensions dimensions;
     protected final AllocationTracker allocationTracker;
@@ -48,16 +47,16 @@ public abstract class ScanningRecordsImporter<Record, T> {
     protected final int concurrency;
 
     ScanningRecordsImporter(
-        StoreScanner.Factory<Record> factory,
+        StoreScanner.Factory<Record> storeScannerFactory,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
         int concurrency
     ) {
-        this.factory = factory;
+        this.storeScannerFactory = storeScannerFactory;
         this.transaction = loadingContext.transactionContext();
         this.dimensions = dimensions;
-        this.threadPool = loadingContext.executor();
+        this.executorService = loadingContext.executor();
         this.allocationTracker = loadingContext.allocationTracker();
         this.progressTracker = progressTracker;
         this.concurrency = concurrency;
@@ -65,25 +64,29 @@ public abstract class ScanningRecordsImporter<Record, T> {
 
     public final T call() {
         long nodeCount = dimensions.nodeCount();
-        final ImportSizing sizing = ImportSizing.of(concurrency, nodeCount);
-        int numberOfThreads = sizing.numberOfThreads();
+        var sizing = ImportSizing.of(concurrency, nodeCount);
+        int threadCount = sizing.threadCount();
 
-        try (StoreScanner<Record> scanner = factory.newScanner(StoreScanner.DEFAULT_PREFETCH_SIZE, transaction)) {
+        try (StoreScanner<Record> storeScanner = storeScannerFactory.newScanner(
+            StoreScanner.DEFAULT_PREFETCH_SIZE,
+            transaction
+        )) {
             progressTracker.beginSubTask("Store Scan");
 
-            progressTracker.logDebug(formatWithLocale("Start using %s", scanner.getClass().getSimpleName()));
+            progressTracker.logDebug(formatWithLocale("Start using %s", storeScanner.getClass().getSimpleName()));
 
-            InternalImporter.CreateScanner creator = creator(nodeCount, sizing, scanner);
-            InternalImporter importer = new InternalImporter(numberOfThreads, creator);
-            ImportResult importResult = importer.runImport(threadPool);
+            var taskFactory = recordScannerTaskFactory(nodeCount, sizing, storeScanner);
+            var taskRunner = new RecordScannerTaskRunner(threadCount, taskFactory);
 
-            long requiredBytes = scanner.storeSize(dimensions);
-            long recordsImported = importResult.recordsImported;
-            long propertiesImported = importResult.propertiesImported;
-            BigInteger bigNanos = BigInteger.valueOf(importResult.tookNanos);
+            var importResult = taskRunner.runImport(executorService);
+
+            long requiredBytes = storeScanner.storeSize(dimensions);
+            long recordsImported = importResult.importedRecords();
+            long propertiesImported = importResult.importedProperties();
+            BigInteger bigNanos = BigInteger.valueOf(importResult.durationNanos());
             double tookInSeconds = new BigDecimal(bigNanos)
-                    .divide(new BigDecimal(A_BILLION), 9, RoundingMode.CEILING)
-                    .doubleValue();
+                .divide(new BigDecimal(A_BILLION), 9, RoundingMode.CEILING)
+                .doubleValue();
             long bytesPerSecond = A_BILLION
                 .multiply(BigInteger.valueOf(requiredBytes))
                 .divide(bigNanos)
@@ -101,9 +104,9 @@ public abstract class ScanningRecordsImporter<Record, T> {
                     (double) recordsImported / tookInSeconds,
                     humanReadable(bytesPerSecond),
                     bytesPerSecond,
-                    (double) recordsImported / tookInSeconds / numberOfThreads,
-                    humanReadable(bytesPerSecond / numberOfThreads),
-                    bytesPerSecond / numberOfThreads
+                    (double) recordsImported / tookInSeconds / threadCount,
+                    humanReadable(bytesPerSecond / threadCount),
+                    bytesPerSecond / threadCount
                 )
             );
 
@@ -113,10 +116,10 @@ public abstract class ScanningRecordsImporter<Record, T> {
         return build();
     }
 
-    public abstract InternalImporter.CreateScanner creator(
+    public abstract RecordScannerTaskRunner.RecordScannerTaskFactory recordScannerTaskFactory(
         long nodeCount,
         ImportSizing sizing,
-        StoreScanner<Record> scanner
+        StoreScanner<Record> storeScanner
     );
 
     public abstract T build();

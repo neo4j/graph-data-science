@@ -69,12 +69,6 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
                 cursorReference = null;
                 cursor.close();
                 cursor = null;
-
-                var localCursor = cursors.get();
-                // sanity check, should always be called from the same thread
-                if (localCursor == this) {
-                    cursors.remove();
-                }
             }
         }
     }
@@ -83,8 +77,6 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
     private final int prefetchSize;
 
     private final TransactionContext.SecureTransaction transaction;
-    // global cursor pool to return this one to
-    private final ThreadLocal<StoreScanner.ScanCursor<Reference>> cursors;
 
     private final StoreScan<EntityCursor> entityCursorScan;
 
@@ -92,7 +84,6 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
         this.transaction = transactionContext.fork();
         this.prefetchSize = prefetchSize;
         this.entityCursorScan = entityCursorScan(this.transaction.kernelTransaction(), attachment);
-        this.cursors = new ThreadLocal<>();
     }
 
     @Override
@@ -101,22 +92,15 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
     }
 
     @Override
-    public final StoreScanner.ScanCursor<Reference> getCursor(KernelTransaction transaction) {
-        StoreScanner.ScanCursor<Reference> scanCursor = this.cursors.get();
-
-        if (scanCursor == null) {
-            EntityCursor entityCursor = entityCursor(transaction);
-            Reference reference = cursorReference(transaction, entityCursor);
-            scanCursor = new ScanCursor(
-                entityCursor,
-                reference,
-                entityCursorScan,
-                transaction
-            );
-            this.cursors.set(scanCursor);
-        }
-
-        return scanCursor;
+    public final StoreScanner.ScanCursor<Reference> createCursor(KernelTransaction transaction) {
+        EntityCursor entityCursor = entityCursor(transaction);
+        Reference reference = cursorReference(transaction, entityCursor);
+        return new ScanCursor(
+            entityCursor,
+            reference,
+            entityCursorScan,
+            transaction
+        );
     }
 
     abstract int recordsPerPage();

@@ -72,40 +72,40 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
     }
 
     @Override
-    public InternalImporter.CreateScanner creator(
-        final long nodeCount,
-        final ImportSizing sizing,
-        final StoreScanner<RelationshipReference> scanner
+    public RecordScannerTaskRunner.RecordScannerTaskFactory recordScannerTaskFactory(
+        long nodeCount,
+        ImportSizing sizing,
+        StoreScanner<RelationshipReference> storeScanner
     ) {
 
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();
 
         List<SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
-                .entrySet()
-                .stream()
-                .map(entry -> {
-                    var relationshipType = entry.getKey();
-                    var relationshipsBuilder = entry.getValue();
-                    return createImporterBuilder(
-                        pageSize,
-                        numberOfPages,
-                        relationshipType,
-                        relationshipsBuilder.projection(),
-                        relationshipsBuilder
-                    );
-                })
-                .collect(Collectors.toList());
+            .entrySet()
+            .stream()
+            .map(entry -> {
+                var relationshipType = entry.getKey();
+                var relationshipsBuilder = entry.getValue();
+                return createImporterBuilder(
+                    pageSize,
+                    numberOfPages,
+                    relationshipType,
+                    relationshipsBuilder.projection(),
+                    relationshipsBuilder
+                );
+            })
+            .collect(Collectors.toList());
 
         for (SingleTypeRelationshipImporter.Builder importerBuilder : importerBuilders) {
             allRelationshipCounters.put(importerBuilder.relationshipType(), importerBuilder.relationshipCounter());
         }
 
-        return RelationshipsScanner.of(
+        return RelationshipsScannerTask.factory(
             loadingContext,
             progressTracker,
             idMap,
-            scanner,
+            storeScanner,
             importerBuilders
         );
     }
