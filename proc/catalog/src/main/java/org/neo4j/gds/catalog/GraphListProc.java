@@ -28,6 +28,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -60,7 +61,7 @@ public class GraphListProc extends CatalogProc {
                 .outputFields()
                 .anyMatch(s -> s.equalsIgnoreCase("degreeDistribution"));
 
-            return GraphInfoWithHistogram.of(graphProjectConfig, graphStore, computeDegreeDistribution);
+            return GraphInfoWithHistogram.of(graphProjectConfig, graphStore, computeDegreeDistribution, Optional.empty());
         });
     }
 }

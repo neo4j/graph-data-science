@@ -49,11 +49,23 @@ final class GraphInfoTest {
     @ParameterizedTest(name = "{1}")
     @MethodSource("producers")
     void shouldIncludeMemoryUsageUnlessRequested(PropertyProducer<?> producer, @SuppressWarnings("unused") String displayName) {
-        assertThat(create(producer, GraphInfo::withoutMemoryUsage))
+        assertThat(
+            create(
+                producer,
+                (graphProjectConfig1, graphStore1) -> GraphInfo.withoutMemoryUsage(
+                    graphProjectConfig1,
+                    graphStore1,
+                    Optional.empty()
+                )
+            )
+        )
             .returns(-1L, gi -> gi.sizeInBytes)
             .returns("", gi -> gi.memoryUsage);
 
-        var graphInfo = create(producer, GraphInfo::withMemoryUsage);
+        var graphInfo = create(
+            producer,
+            (graphProjectConfig, graphStore) -> GraphInfo.withMemoryUsage(graphProjectConfig, graphStore, Optional.empty())
+        );
         assertThat(graphInfo)
             .extracting(gi -> gi.sizeInBytes, as(InstanceOfAssertFactories.LONG))
             .isPositive();

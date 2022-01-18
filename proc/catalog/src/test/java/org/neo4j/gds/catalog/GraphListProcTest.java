@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.assertj.core.api.AbstractBooleanAssert;
 import org.assertj.core.api.AbstractIterableAssert;
 import org.assertj.core.api.Condition;
@@ -46,6 +48,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,6 +86,16 @@ class GraphListProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    @Test
+    public void shouldOutputSomething() throws Exception {
+        String name = "name";
+        runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
+
+        runQueryWithRowConsumer("CALL gds.graph.list()", r -> System.out.println(ToStringBuilder.reflectionToString(r, ToStringStyle.JSON_STYLE)));
+
+        fail("TODO");
     }
 
     @Test

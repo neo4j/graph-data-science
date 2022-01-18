@@ -29,6 +29,9 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.catalog.GraphInfoHelper.density;
 
@@ -71,7 +74,11 @@ public class GraphInfo {
         this.configuration = configuration;
     }
 
-    static GraphInfo withMemoryUsage(GraphProjectConfig graphProjectConfig, GraphStore graphStore) {
+    static GraphInfo withMemoryUsage(
+        GraphProjectConfig graphProjectConfig,
+        GraphStore graphStore,
+        Optional<Set<String>> whiteListedKeysForOutput
+    ) {
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
         var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
 
@@ -79,16 +86,22 @@ public class GraphInfo {
             graphProjectConfig,
             graphStore,
             memoryUsage,
-            sizeInBytes
+            sizeInBytes,
+            whiteListedKeysForOutput
         );
     }
 
-    static GraphInfo withoutMemoryUsage(GraphProjectConfig graphProjectConfig, GraphStore graphStore) {
+    static GraphInfo withoutMemoryUsage(
+        GraphProjectConfig graphProjectConfig,
+        GraphStore graphStore,
+        Optional<Set<String>> whiteListedKeys
+    ) {
         return create(
             graphProjectConfig,
             graphStore,
             "",
-            -1L
+            -1L,
+            whiteListedKeys
         );
     }
 
@@ -96,9 +109,10 @@ public class GraphInfo {
         GraphProjectConfig graphProjectConfig,
         GraphStore graphStore,
         String memoryUsage,
-        long sizeInBytes
+        long sizeInBytes,
+        Optional<Set<String>> whiteListedKeys
     ) {
-        var configVisitor = new Visitor();
+        var configVisitor = new Visitor(whiteListedKeys);
         graphProjectConfig.accept(configVisitor);
 
         return new GraphInfo(
@@ -116,19 +130,24 @@ public class GraphInfo {
     }
 
     static final class Visitor implements GraphProjectConfig.Visitor {
+        private final Optional<Set<String>> whiteListedKeys;
 
         Map<String, Object> configuration = null;
 
+        public <E> Visitor(Optional<Set<String>> whiteListedKeys) {
+            this.whiteListedKeys = whiteListedKeys;
+        }
+
         @Override
         public void visit(GraphProjectFromStoreConfig storeConfig) {
-            configuration = storeConfig.toMap();
+            configuration = cleansed(storeConfig.toMap());
             configuration.put("nodeProjection", storeConfig.nodeProjections().toObject());
             configuration.put("relationshipProjection", storeConfig.relationshipProjections().toObject());
         }
 
         @Override
         public void visit(GraphProjectFromCypherConfig cypherConfig) {
-            configuration = cypherConfig.toMap();
+            configuration = cleansed(cypherConfig.toMap()/*, fields... */);
         }
 
         @Override
@@ -141,12 +160,22 @@ public class GraphInfo {
 
         @Override
         public void visit(RandomGraphGeneratorConfig randomGraphConfig) {
-            configuration = randomGraphConfig.toMap();
+            configuration = cleansed(randomGraphConfig.toMap());
             configuration.put("nodeProjections", randomGraphConfig.nodeProjections().toObject());
             configuration.put("relationshipProjections", randomGraphConfig.relationshipProjections().toObject());
             configuration.put("aggregation", randomGraphConfig.aggregation().toString());
             configuration.put("orientation", randomGraphConfig.orientation().toString());
             configuration.put("relationshipDistribution", randomGraphConfig.relationshipDistribution().toString());
+        }
+
+        private Map<String, Object> cleansed(Map<String, Object> map) {
+            if (whiteListedKeys.isEmpty()) return map;
+
+            return map
+                .entrySet()
+                .stream()
+                .filter(entry -> whiteListedKeys.get().contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
     }
 }

@@ -26,6 +26,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 public class GraphInfoWithHistogram extends GraphInfo {
@@ -42,8 +43,8 @@ public class GraphInfoWithHistogram extends GraphInfo {
             graphInfo.configuration,
             graphInfo.memoryUsage,
             graphInfo.sizeInBytes,
-            graphInfo.nodeCount,
-            graphInfo.relationshipCount,
+            /*graphInfo.nodeCount*/-42,
+            /*graphInfo.relationshipCount*/-87,
             graphInfo.creationTime,
             graphInfo.modificationTime,
             graphInfo.schema
@@ -51,8 +52,13 @@ public class GraphInfoWithHistogram extends GraphInfo {
         this.degreeDistribution = degreeDistribution;
     }
 
-    static GraphInfoWithHistogram of(GraphProjectConfig graphProjectConfig, GraphStore graphStore, boolean computeHistogram) {
-        var graphInfo = GraphInfo.withMemoryUsage(graphProjectConfig, graphStore);
+    static GraphInfoWithHistogram of(
+        GraphProjectConfig graphProjectConfig,
+        GraphStore graphStore,
+        boolean computeHistogram,
+        Optional<Set<String>> whiteListedKeysForOutput
+    ) {
+        var graphInfo = GraphInfo.withMemoryUsage(graphProjectConfig, graphStore, whiteListedKeysForOutput);
 
         Optional<Map<String, Object>> maybeDegreeDistribution = GraphStoreCatalog.getDegreeDistribution(
             graphProjectConfig.username(),
