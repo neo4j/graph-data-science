@@ -20,6 +20,7 @@
 package org.neo4j.gds.compat._44;
 
 import org.neo4j.internal.recordstorage.AbstractTransactionIdStore;
+import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.impl.transaction.log.LogPosition;
 import org.neo4j.storageengine.api.ClosedTransactionMetadata;
 
@@ -28,5 +29,10 @@ public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
     public ClosedTransactionMetadata getLastClosedTransaction() {
         long[] metaData = this.closedTransactionId.get();
         return new ClosedTransactionMetadata(metaData[0], new LogPosition(metaData[1], metaData[2]));
+    }
+
+    @Override
+    protected CursorContext getEmtpyCursorContext() {
+        return CursorContext.NULL;
     }
 }

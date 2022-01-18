@@ -40,4 +40,9 @@ final class CompatGraphDatabaseAPIImpl extends GdsGraphDatabaseAPI {
     public DbmsInfo dbmsInfo() {
         return api.dbmsInfo();
     }
+
+    @Override
+    public boolean isAvailable() {
+        return api.isAvailable();
+    }
 }
