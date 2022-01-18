@@ -129,7 +129,8 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         PageCacheTracer cacheTracer,
         boolean createStoreIfNotExists,
         DatabaseReadOnlyChecker readOnlyChecker,
-        MemoryTracker memoryTracker
+        MemoryTracker memoryTracker,
+        CursorContext cursorContext
     ) {
         StoreFactory factory = new StoreFactory(
             databaseLayout,
