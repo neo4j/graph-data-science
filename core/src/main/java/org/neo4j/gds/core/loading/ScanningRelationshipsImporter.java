@@ -83,19 +83,19 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
 
         List<SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
             .entrySet()
-                .stream()
-                .map(entry -> {
-                    var relationshipType = entry.getKey();
-                    var relationshipsBuilder = entry.getValue();
-                    return createImporterBuilder(
-                        pageSize,
-                        numberOfPages,
-                        relationshipType,
-                        relationshipsBuilder.projection(),
-                        relationshipsBuilder
-                    );
-                })
-                .collect(Collectors.toList());
+            .stream()
+            .map(entry -> {
+                var relationshipType = entry.getKey();
+                var relationshipsBuilder = entry.getValue();
+                return createImporterBuilder(
+                    pageSize,
+                    numberOfPages,
+                    relationshipType,
+                    relationshipsBuilder.projection(),
+                    relationshipsBuilder
+                );
+            })
+            .collect(Collectors.toList());
 
         for (SingleTypeRelationshipImporter.Builder importerBuilder : importerBuilders) {
             allRelationshipCounters.put(importerBuilder.relationshipType(), importerBuilder.relationshipCounter());

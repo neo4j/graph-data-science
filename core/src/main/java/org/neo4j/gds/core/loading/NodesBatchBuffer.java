@@ -68,7 +68,6 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
             return;
         }
 
-        // Why do we silently drop the node here? Should this raise an error instead?
         if (record.nodeId() >= this.highestPossibleNodeCount) {
             return;
         }

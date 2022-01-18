@@ -46,7 +46,7 @@ final class RecordScannerTaskRunner {
         long start = System.nanoTime();
         ParallelUtil.run(tasks, executorService);
         ParallelUtil.run(recordScannerTaskFactory.flushTasks(), executorService);
-        long took = System.nanoTime() - start;
+        long elapsed = System.nanoTime() - start;
 
         long importedRecords = 0L;
         long importedProperties = 0L;
@@ -59,7 +59,7 @@ final class RecordScannerTaskRunner {
             .builder()
             .importedRecords(importedRecords)
             .importedProperties(importedProperties)
-            .durationNanos(took)
+            .durationNanos(elapsed)
             .build();
     }
 

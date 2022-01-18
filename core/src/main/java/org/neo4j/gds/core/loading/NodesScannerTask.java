@@ -33,80 +33,6 @@ import java.util.Collections;
 
 public final class NodesScannerTask extends StatementAction implements RecordScannerTask {
 
-    public static RecordScannerTaskRunner.RecordScannerTaskFactory factory(
-        TransactionContext tx,
-        StoreScanner<NodeReference> scanner,
-        long highestPossibleNodeCount,
-        LongSet labels,
-        ProgressTracker progressTracker,
-        NodeImporter nodeImporter,
-        @Nullable NativeNodePropertyImporter nodePropertyImporter,
-        TerminationFlag terminationFlag
-    ) {
-        return new Factory(
-            tx,
-            scanner,
-            highestPossibleNodeCount,
-            labels,
-            progressTracker,
-            nodeImporter,
-            nodePropertyImporter,
-            terminationFlag
-        );
-    }
-
-    static final class Factory implements RecordScannerTaskRunner.RecordScannerTaskFactory {
-        private final TransactionContext tx;
-        private final StoreScanner<NodeReference> scanner;
-        private final long highestPossibleNodeCount;
-        private final LongSet labels;
-        private final ProgressTracker progressTracker;
-        private final NodeImporter nodeImporter;
-        private final NativeNodePropertyImporter nodePropertyImporter;
-        private final TerminationFlag terminationFlag;
-
-        Factory(
-            TransactionContext tx,
-            StoreScanner<NodeReference> scanner,
-            long highestPossibleNodeCount,
-            LongSet labels,
-            ProgressTracker progressTracker,
-            NodeImporter nodeImporter,
-            @Nullable NativeNodePropertyImporter nodePropertyImporter,
-            TerminationFlag terminationFlag
-        ) {
-            this.tx = tx;
-            this.scanner = scanner;
-            this.highestPossibleNodeCount = highestPossibleNodeCount;
-            this.labels = labels;
-            this.progressTracker = progressTracker;
-            this.nodeImporter = nodeImporter;
-            this.nodePropertyImporter = nodePropertyImporter;
-            this.terminationFlag = terminationFlag;
-        }
-
-        @Override
-        public RecordScannerTask create(int taskIndex) {
-            return new NodesScannerTask(
-                tx,
-                terminationFlag,
-                scanner,
-                highestPossibleNodeCount,
-                labels,
-                taskIndex,
-                progressTracker,
-                nodeImporter,
-                nodePropertyImporter
-            );
-        }
-
-        @Override
-        public Collection<Runnable> flushTasks() {
-            return Collections.emptyList();
-        }
-
-    }
-
     private final TerminationFlag terminationFlag;
     private final StoreScanner<NodeReference> scanner;
     private final long highestPossibleNodeCount;
@@ -199,5 +125,79 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
                 return 0;
             }
         });
+    }
+
+    public static RecordScannerTaskRunner.RecordScannerTaskFactory factory(
+        TransactionContext tx,
+        StoreScanner<NodeReference> scanner,
+        long highestPossibleNodeCount,
+        LongSet labels,
+        ProgressTracker progressTracker,
+        NodeImporter nodeImporter,
+        @Nullable NativeNodePropertyImporter nodePropertyImporter,
+        TerminationFlag terminationFlag
+    ) {
+        return new Factory(
+            tx,
+            scanner,
+            highestPossibleNodeCount,
+            labels,
+            progressTracker,
+            nodeImporter,
+            nodePropertyImporter,
+            terminationFlag
+        );
+    }
+
+    static final class Factory implements RecordScannerTaskRunner.RecordScannerTaskFactory {
+        private final TransactionContext tx;
+        private final StoreScanner<NodeReference> scanner;
+        private final long highestPossibleNodeCount;
+        private final LongSet labels;
+        private final ProgressTracker progressTracker;
+        private final NodeImporter nodeImporter;
+        private final NativeNodePropertyImporter nodePropertyImporter;
+        private final TerminationFlag terminationFlag;
+
+        Factory(
+            TransactionContext tx,
+            StoreScanner<NodeReference> scanner,
+            long highestPossibleNodeCount,
+            LongSet labels,
+            ProgressTracker progressTracker,
+            NodeImporter nodeImporter,
+            @Nullable NativeNodePropertyImporter nodePropertyImporter,
+            TerminationFlag terminationFlag
+        ) {
+            this.tx = tx;
+            this.scanner = scanner;
+            this.highestPossibleNodeCount = highestPossibleNodeCount;
+            this.labels = labels;
+            this.progressTracker = progressTracker;
+            this.nodeImporter = nodeImporter;
+            this.nodePropertyImporter = nodePropertyImporter;
+            this.terminationFlag = terminationFlag;
+        }
+
+        @Override
+        public RecordScannerTask create(int taskIndex) {
+            return new NodesScannerTask(
+                tx,
+                terminationFlag,
+                scanner,
+                highestPossibleNodeCount,
+                labels,
+                taskIndex,
+                progressTracker,
+                nodeImporter,
+                nodePropertyImporter
+            );
+        }
+
+        @Override
+        public Collection<Runnable> flushTasks() {
+            return Collections.emptyList();
+        }
+
     }
 }
