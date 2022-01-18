@@ -67,13 +67,21 @@ class NodeClassificationPipelineTest {
     @Test
     void canAddNodePropertySteps() {
         var pipeline = new NodeClassificationPipeline();
-        var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "pageRank", Map.of("mutateProperty", "pr"));
+        var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+            ExecutionContext.EMPTY.username(),
+            "pageRank",
+            Map.of("mutateProperty", "pr")
+        );
         pipeline.addNodePropertyStep(pageRankPropertyStep);
 
         assertThat(pipeline)
             .returns(List.of(pageRankPropertyStep), NodeClassificationPipeline::nodePropertySteps);
 
-        var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree"));
+        var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+            ExecutionContext.EMPTY.username(),
+            "degree",
+            Map.of("mutateProperty", "degree")
+        );
         pipeline.addNodePropertyStep(degreeNodePropertyStep);
 
         assertThat(pipeline)
@@ -161,7 +169,11 @@ class NodeClassificationPipelineTest {
         @Test
         void returnsCorrectMapWithFullConfiguration() {
             var pipeline = new NodeClassificationPipeline();
-            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "pageRank", Map.of("mutateProperty", "pr"));
+            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+                ExecutionContext.EMPTY.username(),
+                "pageRank",
+                Map.of("mutateProperty", "pr")
+            );
             pipeline.addNodePropertyStep(pageRankPropertyStep);
 
             var fooStep = new NodeClassificationFeatureStep("foo");
@@ -228,7 +240,11 @@ class NodeClassificationPipelineTest {
         @Test
         void deepCopiesNodePropertySteps() {
             var pipeline = new NodeClassificationPipeline();
-            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "pageRank", Map.of("mutateProperty", "pr"));
+            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+                ExecutionContext.EMPTY.username(),
+                "pageRank",
+                Map.of("mutateProperty", "pr")
+            );
             pipeline.addNodePropertyStep(pageRankPropertyStep);
 
             var copy = pipeline.copy();
@@ -238,7 +254,11 @@ class NodeClassificationPipelineTest {
                     .isNotSameAs(pipeline.nodePropertySteps())
                     .containsExactly(pageRankPropertyStep));
 
-            var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree"));
+            var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+                ExecutionContext.EMPTY.username(),
+                "degree",
+                Map.of("mutateProperty", "degree")
+            );
             pipeline.addNodePropertyStep(degreeNodePropertyStep);
 
             assertThat(copy.nodePropertySteps()).doesNotContain(degreeNodePropertyStep);

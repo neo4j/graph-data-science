@@ -54,7 +54,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         var pipeline = getLPPipeline(modelCatalog, pipelineName, username());
         validateRelationshipProperty(pipeline, procedureConfig);
 
-        pipeline.addNodePropertyStep(createNodePropertyStep(executionContext(), taskName, procedureConfig));
+        pipeline.addNodePropertyStep(createNodePropertyStep(executionContext().username(), taskName, procedureConfig));
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }

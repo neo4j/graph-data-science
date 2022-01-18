@@ -167,7 +167,11 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var pipeline = new LinkPredictionPipeline();
-            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree")));
+            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
+                ExecutionContext.EMPTY.username(),
+                "degree",
+                Map.of("mutateProperty", "degree")
+            ));
             pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 
             var modelData = ImmutableLinkLogisticRegressionData.of(
@@ -211,7 +215,11 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var pipeline = new LinkPredictionPipeline();
-            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree")));
+            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
+                ExecutionContext.EMPTY.username(),
+                "degree",
+                Map.of("mutateProperty", "degree")
+            ));
             pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 
             var modelData = ImmutableLinkLogisticRegressionData.of(

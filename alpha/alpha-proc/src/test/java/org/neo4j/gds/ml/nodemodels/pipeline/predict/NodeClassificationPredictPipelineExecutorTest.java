@@ -164,7 +164,11 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var pipeline = new NodeClassificationPipeline();
-            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree")));
+            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
+                ExecutionContext.EMPTY.username(),
+                "degree",
+                Map.of("mutateProperty", "degree")
+            ));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
@@ -204,7 +208,11 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var pipeline = new NodeClassificationPipeline();
-            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree")));
+            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
+                ExecutionContext.EMPTY.username(),
+                "degree",
+                Map.of("mutateProperty", "degree")
+            ));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));

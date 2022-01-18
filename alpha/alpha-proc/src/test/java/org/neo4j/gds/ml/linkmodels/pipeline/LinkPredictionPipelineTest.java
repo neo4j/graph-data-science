@@ -69,13 +69,21 @@ class LinkPredictionPipelineTest {
     @Test
     void canAddNodePropertySteps() {
         var pipeline = new LinkPredictionPipeline();
-        var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "pageRank", Map.of("mutateProperty", "pr"));
+        var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+            ExecutionContext.EMPTY.username(),
+            "pageRank",
+            Map.of("mutateProperty", "pr")
+        );
         pipeline.addNodePropertyStep(pageRankPropertyStep);
 
         assertThat(pipeline)
             .returns(List.of(pageRankPropertyStep), LinkPredictionPipeline::nodePropertySteps);
 
-        var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree"));
+        var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+            ExecutionContext.EMPTY.username(),
+            "degree",
+            Map.of("mutateProperty", "degree")
+        );
         pipeline.addNodePropertyStep(degreeNodePropertyStep);
 
         assertThat(pipeline)
@@ -165,7 +173,11 @@ class LinkPredictionPipelineTest {
         @Test
         void returnsCorrectMapWithFullConfiguration() {
             var pipeline = new LinkPredictionPipeline();
-            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "pageRank", Map.of("mutateProperty", "pr"));
+            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+                ExecutionContext.EMPTY.username(),
+                "pageRank",
+                Map.of("mutateProperty", "pr")
+            );
             pipeline.addNodePropertyStep(pageRankPropertyStep);
 
             var hadamardFeatureStep = new HadamardFeatureStep(List.of("a"));
@@ -231,7 +243,11 @@ class LinkPredictionPipelineTest {
         @Test
         void deepCopiesNodePropertySteps() {
             var pipeline = new LinkPredictionPipeline();
-            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "pageRank", Map.of("mutateProperty", "pr"));
+            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+                ExecutionContext.EMPTY.username(),
+                "pageRank",
+                Map.of("mutateProperty", "pr")
+            );
             pipeline.addNodePropertyStep(pageRankPropertyStep);
 
             var copy = pipeline.copy();
@@ -241,7 +257,11 @@ class LinkPredictionPipelineTest {
                     .isNotSameAs(pipeline.nodePropertySteps())
                     .containsExactly(pageRankPropertyStep));
 
-            var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree"));
+            var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+                ExecutionContext.EMPTY.username(),
+                "degree",
+                Map.of("mutateProperty", "degree")
+            );
             pipeline.addNodePropertyStep(degreeNodePropertyStep);
 
             assertThat(copy.nodePropertySteps()).doesNotContain(degreeNodePropertyStep);
