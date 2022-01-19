@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.function.Function;
 
-public final class IdMapBuilder {
+public final class HugeIdMapBuilderOps {
 
     static IdMap build(
         InternalHugeIdMappingBuilder idMapBuilder,
@@ -41,7 +41,7 @@ public final class IdMapBuilder {
         int concurrency,
         AllocationTracker allocationTracker
     ) {
-        HugeLongArray graphIds = idMapBuilder.build();
+        HugeLongArray graphIds = idMapBuilder.array();
 
         if (highestNodeId == NodesBuilder.UNKNOWN_MAX_ID) {
             highestNodeId = graphIds.asNodeProperties().getMaxLongPropertyValue().getAsLong();
@@ -75,7 +75,7 @@ public final class IdMapBuilder {
         int concurrency,
         AllocationTracker allocationTracker
     ) throws DuplicateNodeIdException {
-        HugeLongArray graphIds = idMapBuilder.build();
+        HugeLongArray graphIds = idMapBuilder.array();
         HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
             idMapBuilder.size(),
             highestNodeId,
@@ -116,7 +116,7 @@ public final class IdMapBuilder {
         return nodeMappingBuilder.build();
     }
 
-    public static Function<HugeSparseLongArray.Builder, BiLongConsumer> add(HugeLongArray graphIds) {
+    static Function<HugeSparseLongArray.Builder, BiLongConsumer> add(HugeLongArray graphIds) {
         return builder -> (start, end) -> addNodes(graphIds, builder, start, end);
     }
 
@@ -165,6 +165,6 @@ public final class IdMapBuilder {
         }
     }
 
-    private IdMapBuilder() {
+    private HugeIdMapBuilderOps() {
     }
 }

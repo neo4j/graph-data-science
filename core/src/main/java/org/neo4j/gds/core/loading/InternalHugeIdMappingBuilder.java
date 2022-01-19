@@ -76,11 +76,11 @@ public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuil
     ) {
         adders.close();
         return checkDuplicateIds
-            ? IdMapBuilder.buildChecked(this, labelInformationBuilder, highestNodeId, concurrency, allocationTracker)
-            : IdMapBuilder.build(this, labelInformationBuilder, highestNodeId, concurrency, allocationTracker);
+            ? HugeIdMapBuilderOps.buildChecked(this, labelInformationBuilder, highestNodeId, concurrency, allocationTracker)
+            : HugeIdMapBuilderOps.build(this, labelInformationBuilder, highestNodeId, concurrency, allocationTracker);
     }
 
-    public HugeLongArray build() {
+    public HugeLongArray array() {
         return array;
     }
 

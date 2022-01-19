@@ -83,7 +83,7 @@ class IdMapTest {
         );
 
 
-        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMappings = new IntObjectHashMap<List<NodeLabel>>();
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMappings = new IntObjectHashMap<>();
         labelTokenNodeLabelMappings.put(1, singletonList(NodeLabel.of("A")));
 
         dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestPossibleNodeCount(100L)
@@ -104,7 +104,7 @@ class IdMapTest {
         int highestNeoId = length - 1;
         var hugeIdMappingBuilder = InternalHugeIdMappingBuilder.of(length, AllocationTracker.empty());
         var emptyLabelInformationBuilder = LabelInformation.emptyBuilder(AllocationTracker.empty());
-        var hugeIdMap = IdMapBuilder.build(
+        var hugeIdMap = HugeIdMapBuilderOps.build(
             hugeIdMappingBuilder,
             emptyLabelInformationBuilder,
             highestNeoId,

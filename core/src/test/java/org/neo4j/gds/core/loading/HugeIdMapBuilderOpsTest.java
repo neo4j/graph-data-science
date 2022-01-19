@@ -24,12 +24,12 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class IdMapBuilderTest {
+class HugeIdMapBuilderOpsTest {
 
     @Test
     void buildSparseNodeMappingWithPageSizeEntries() {
         long nodeId = 4096; // equals the PAGE_SIZE in a HugeSparseLongArray
-        var hugeSparseLongArray = IdMapBuilder.buildSparseNodeMapping(
+        var hugeSparseLongArray = HugeIdMapBuilderOps.buildSparseNodeMapping(
             1,
             nodeId,
             1,
