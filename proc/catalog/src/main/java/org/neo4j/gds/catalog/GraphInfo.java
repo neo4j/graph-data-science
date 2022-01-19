@@ -28,10 +28,10 @@ import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.neo4j.gds.catalog.GraphInfoHelper.density;
 
@@ -112,7 +112,7 @@ public class GraphInfo {
         long sizeInBytes,
         Optional<Set<String>> whiteListedKeys
     ) {
-        var configVisitor = new Visitor(whiteListedKeys);
+        var configVisitor = new Visitor();
         graphProjectConfig.accept(configVisitor);
 
         return new GraphInfo(
@@ -130,22 +130,17 @@ public class GraphInfo {
     }
 
     static final class Visitor implements GraphProjectConfig.Visitor {
-        private final Optional<Set<String>> whiteListedKeys;
 
         Map<String, Object> configuration = null;
 
-        public <E> Visitor(Optional<Set<String>> whiteListedKeys) {
-            this.whiteListedKeys = whiteListedKeys;
-        }
-
         @Override
         public void visit(GraphProjectFromStoreConfig storeConfig) {
-            configuration = cleansed(storeConfig.toMap());
+            configuration = cleansed(storeConfig.toMap(), Set.of());
         }
 
         @Override
         public void visit(GraphProjectFromCypherConfig cypherConfig) {
-            configuration = cleansed(cypherConfig.toMap()/*, fields... */);
+            configuration = cleansed(cypherConfig.toMap(), cypherConfig.outputFieldDenylist());
         }
 
         @Override
@@ -158,20 +153,20 @@ public class GraphInfo {
 
         @Override
         public void visit(RandomGraphGeneratorConfig randomGraphConfig) {
-            configuration = cleansed(randomGraphConfig.toMap());
+            configuration = cleansed(randomGraphConfig.toMap(), Set.of());
             configuration.put("aggregation", randomGraphConfig.aggregation().toString());
             configuration.put("orientation", randomGraphConfig.orientation().toString());
             configuration.put("relationshipDistribution", randomGraphConfig.relationshipDistribution().toString());
         }
 
-        private Map<String, Object> cleansed(Map<String, Object> map) {
-            if (whiteListedKeys.isEmpty()) return map;
-
-            return map
-                .entrySet()
-                .stream()
-                .filter(entry -> whiteListedKeys.get().contains(entry.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        private Map<String, Object> cleansed(Map<String, Object> map, Set<String> keysToIgnore) {
+            Map<String, Object> result = new HashMap<>(map);
+            map.forEach((key, value) -> {
+                if (keysToIgnore.contains(key)) {
+                    result.remove(key);
+                }
+            });
+            return result;
         }
     }
 }

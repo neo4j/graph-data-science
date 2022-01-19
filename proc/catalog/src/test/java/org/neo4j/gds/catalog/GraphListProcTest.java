@@ -33,6 +33,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
 
@@ -342,7 +343,7 @@ class GraphListProcTest extends BaseProcTest {
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(10)
+                        .hasSize(8)
                         .hasEntrySatisfying(
                             "relationshipQuery",
                             stringAssertConsumer(relationshipQuery -> relationshipQuery.isEqualTo(
@@ -357,7 +358,6 @@ class GraphListProcTest extends BaseProcTest {
                             "nodeQuery",
                             stringAssertConsumer(nodeQuery -> nodeQuery.isEqualTo(ALL_NODES_QUERY))
                         )
-                        .hasEntrySatisfying("nodeCount", longAssertConsumer(nodeCount -> nodeCount.isEqualTo(-1L)))
                         .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
                         .hasEntrySatisfying(
                             "readConcurrency",
@@ -365,11 +365,11 @@ class GraphListProcTest extends BaseProcTest {
                         )
                         .hasEntrySatisfying("parameters", parameters -> assertThat(parameters).asInstanceOf(
                             stringObjectMapAssertFactory()).isEmpty())
-                        .hasEntrySatisfying(
-                            "relationshipCount",
-                            longAssertConsumer(relationshipCount -> relationshipCount.isEqualTo(-1L))
-                        )
-                        .hasEntrySatisfying("username", username -> assertThat(username).isNull());
+                        .hasEntrySatisfying("username", username -> assertThat(username).isNull())
+                        .doesNotContainKeys(
+                            GraphProjectConfig.NODE_COUNT_KEY,
+                            GraphProjectConfig.RELATIONSHIP_COUNT_KEY
+                        );
 
                     return true;
                 }, "Assert Cypher `configuration` map"),

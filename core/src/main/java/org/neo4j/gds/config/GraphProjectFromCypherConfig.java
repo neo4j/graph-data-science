@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -101,6 +102,12 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
     @Configuration.Ignore
     default <R> R accept(Cases<R> visitor) {
         return visitor.cypher(this);
+    }
+
+    @Value.Derived
+    @Configuration.Ignore
+    default Set<String> outputFieldDenylist() {
+        return Set.of(NODE_COUNT_KEY, RELATIONSHIP_COUNT_KEY);
     }
 
     static GraphProjectFromCypherConfig of(
