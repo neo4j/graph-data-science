@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
-public interface InternalIdMappingBuilder {
+public interface IdMapBuilder {
 
     @Nullable IdMappingAllocator allocate(int batchLength);
 

@@ -35,7 +35,7 @@ import java.util.function.Function;
 public final class HugeIdMapBuilderOps {
 
     static IdMap build(
-        InternalHugeIdMappingBuilder idMapBuilder,
+        HugeIdMapBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,
@@ -69,7 +69,7 @@ public final class HugeIdMapBuilderOps {
     }
 
     static IdMap buildChecked(
-        InternalHugeIdMappingBuilder idMapBuilder,
+        HugeIdMapBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,

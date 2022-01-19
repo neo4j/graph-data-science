@@ -28,19 +28,19 @@ import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuilder {
+public final class HugeIdMapBuilder implements IdMapBuilder {
 
     private final HugeLongArray array;
     private final long capacity;
     private final AtomicLong allocationIndex;
     private final CloseableThreadLocal<BulkAdder> adders;
 
-    public static InternalHugeIdMappingBuilder of(long capacity, AllocationTracker allocationTracker) {
+    public static HugeIdMapBuilder of(long capacity, AllocationTracker allocationTracker) {
         HugeLongArray array = HugeLongArray.newArray(capacity, allocationTracker);
-        return new InternalHugeIdMappingBuilder(array, capacity);
+        return new HugeIdMapBuilder(array, capacity);
     }
 
-    private InternalHugeIdMappingBuilder(HugeLongArray array, final long capacity) {
+    private HugeIdMapBuilder(HugeLongArray array, final long capacity) {
         this.array = array;
         this.capacity = capacity;
         this.allocationIndex = new AtomicLong();

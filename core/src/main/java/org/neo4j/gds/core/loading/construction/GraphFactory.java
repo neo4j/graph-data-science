@@ -45,8 +45,8 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyBuilder;
 import org.neo4j.gds.core.loading.AdjacencyListWithPropertiesBuilder;
+import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
-import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.RelationshipImporter;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
@@ -142,7 +142,7 @@ public final class GraphFactory {
 
     private static NodesBuilder fromSchema(
         long maxOriginalId,
-        InternalIdMappingBuilder idMapBuilder,
+        IdMapBuilder idMapBuilder,
         int concurrency,
         NodeSchema nodeSchema,
         boolean hasLabelInformation,

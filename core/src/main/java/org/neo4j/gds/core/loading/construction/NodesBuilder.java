@@ -31,7 +31,7 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
+import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
@@ -70,7 +70,7 @@ public final class NodesBuilder {
 
     private int nextLabelId;
     private final ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping;
-    private final InternalIdMappingBuilder idMapBuilder;
+    private final IdMapBuilder idMapBuilder;
     private final LabelInformation.Builder labelInformationBuilder;
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
@@ -89,7 +89,7 @@ public final class NodesBuilder {
         ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping,
         IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping,
         IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey,
-        InternalIdMappingBuilder idMapBuilder,
+        IdMapBuilder idMapBuilder,
         boolean hasLabelInformation,
         boolean hasProperties,
         AllocationTracker allocationTracker

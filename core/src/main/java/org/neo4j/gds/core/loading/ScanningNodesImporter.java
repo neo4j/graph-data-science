@@ -50,7 +50,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
 
     private final IndexPropertyMappings.LoadablePropertyMappings propertyMappings;
     private final TerminationFlag terminationFlag;
-    private final InternalIdMappingBuilder idMapBuilder;
+    private final IdMapBuilder idMapBuilder;
     private final LabelInformation.Builder labelInformationBuilder;
     private final @Nullable NativeNodePropertyImporter nodePropertyImporter;
 
@@ -62,7 +62,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         ProgressTracker progressTracker,
         int concurrency,
         IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
-        InternalIdMappingBuilder idMapBuilder
+        IdMapBuilder idMapBuilder
     ) {
         var allocationTracker = loadingContext.allocationTracker();
         var expectedCapacity = dimensions.highestPossibleNodeCount();
@@ -104,7 +104,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         int concurrency,
         IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
-        InternalIdMappingBuilder idMapBuilder,
+        IdMapBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder
     ) {
         super(
