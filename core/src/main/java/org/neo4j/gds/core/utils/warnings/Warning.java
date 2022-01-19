@@ -29,4 +29,12 @@ public class Warning {
         this.taskDescription = task.description();
         this.warning = warning;
     }
+
+    public String getTaskDescription() {
+        return taskDescription;
+    }
+
+    public String getWarningMessage() {
+        return warning;
+    }
 }
