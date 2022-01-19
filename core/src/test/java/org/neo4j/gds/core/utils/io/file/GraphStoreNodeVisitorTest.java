@@ -46,10 +46,10 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 @GdlExtension
 class GraphStoreNodeVisitorTest {
 
-    public static Map<String, NodeProperties> unionNodePropertiesOrThrow(NodesBuilder.IdMappingAndProperties nodeMappingAndProperties) {
+    public static Map<String, NodeProperties> unionNodePropertiesOrThrow(NodesBuilder.IdMapAndProperties nodeMappingAndProperties) {
         Optional<Map<String, NodeProperties>> result;
         var nodeProperties = nodeMappingAndProperties.nodeProperties();
-        var nodeMapping = nodeMappingAndProperties.nodeMapping();
+        var nodeMapping = nodeMappingAndProperties.idMap();
         if (nodeProperties.isEmpty()) {
             result = Optional.empty();
         } else {
@@ -109,7 +109,7 @@ class GraphStoreNodeVisitorTest {
         });
 
         var nodeMappingAndProperties = nodesBuilder.build();
-        var nodeMapping = nodeMappingAndProperties.nodeMapping();
+        var nodeMapping = nodeMappingAndProperties.idMap();
         var nodeProperties = unionNodePropertiesOrThrow(nodeMappingAndProperties);
         var relationships = GraphFactory.emptyRelationships(nodeMapping, AllocationTracker.empty());
         HugeGraph actualGraph = GraphFactory.create(

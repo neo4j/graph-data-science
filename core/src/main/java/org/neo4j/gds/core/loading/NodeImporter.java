@@ -57,8 +57,8 @@ public class NodeImporter {
             return 0;
         }
 
-        @Nullable IdMappingAllocator idMappingAllocator = idMapBuilder.allocate(batchLength);
-        if (idMappingAllocator == null) {
+        @Nullable IdMapAllocator idMapAllocator = idMapBuilder.allocate(batchLength);
+        if (idMapAllocator == null) {
             return 0;
         }
 
@@ -69,21 +69,21 @@ public class NodeImporter {
         //
         //  The node loading part only accepts nodes that are within the
         //  calculated capacity that we have available.
-        batchLength = idMappingAllocator.allocatedSize();
+        batchLength = idMapAllocator.allocatedSize();
 
         var batch = buffer.batch();
         var properties = buffer.properties();
         var labelIds = buffer.labelIds();
 
         // Import node IDs
-        idMappingAllocator.insert(batch, batchLength);
+        idMapAllocator.insert(batch, batchLength);
 
         // Import node labels
         if (buffer.hasLabelInformation()) {
             setNodeLabelInformation(
                 batch,
                 batchLength,
-                idMappingAllocator.startId(),
+                idMapAllocator.startId(),
                 labelIds,
                 (nodeIds, startIndex, pos) -> nodeIds[pos]
             );

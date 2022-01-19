@@ -30,7 +30,7 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -215,7 +215,7 @@ public final class GraphFactory {
 
     @Builder.Factory
     static RelationshipsBuilder relationshipsBuilder(
-        IdMapping nodes,
+        IdMap nodes,
         Optional<Orientation> orientation,
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
@@ -308,11 +308,11 @@ public final class GraphFactory {
         );
     }
 
-    public static Relationships emptyRelationships(IdMapping nodeMapping, AllocationTracker allocationTracker) {
+    public static Relationships emptyRelationships(IdMap nodeMapping, AllocationTracker allocationTracker) {
         return initRelationshipsBuilder().nodes(nodeMapping).allocationTracker(allocationTracker).build().build();
     }
 
-    public static HugeGraph create(IdMapping idMap, Relationships relationships, AllocationTracker allocationTracker) {
+    public static HugeGraph create(IdMap idMap, Relationships relationships, AllocationTracker allocationTracker) {
         var nodeSchemaBuilder = NodeSchema.builder();
         idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
         return create(
@@ -326,7 +326,7 @@ public final class GraphFactory {
     }
 
     public static HugeGraph create(
-        IdMapping idMap,
+        IdMap idMap,
         NodeSchema nodeSchema,
         Map<String, NodeProperties> nodeProperties,
         RelationshipType relationshipType,

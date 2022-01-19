@@ -21,7 +21,7 @@ package org.neo4j.gds.impl.spanningTrees;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipProperties;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.IntPriorityQueue;
@@ -39,7 +39,7 @@ import java.util.function.DoubleUnaryOperator;
  */
 public class KSpanningTree extends Algorithm<SpanningTree> {
 
-    private IdMapping idMapping;
+    private IdMap idMap;
     private Graph graph;
     private RelationshipProperties weights;
     private final DoubleUnaryOperator minMax;
@@ -49,7 +49,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     private SpanningTree spanningTree;
 
     public KSpanningTree(
-        IdMapping idMapping,
+        IdMap idMap,
         Graph graph,
         RelationshipProperties weights,
         DoubleUnaryOperator minMax,
@@ -58,7 +58,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         ProgressTracker progressTracker
 ) {
         super(progressTracker);
-        this.idMapping = idMapping;
+        this.idMap = idMap;
         this.graph = graph;
         this.weights = weights;
         this.minMax = minMax;
@@ -71,7 +71,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     public SpanningTree compute() {
         progressTracker.beginSubTask();
         Prim prim = new Prim(
-            idMapping,
+            idMap,
             graph,
             minMax,
             graph.toOriginalNodeId(startNodeId),
@@ -107,7 +107,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
 
     @Override
     public void release() {
-        idMapping = null;
+        idMap = null;
         graph = null;
         weights = null;
         spanningTree = null;

@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.HugeSparseArrays;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
@@ -42,7 +42,7 @@ import java.util.function.LongPredicate;
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public class HugeIdMap implements IdMapping {
+public class HugeIdMap implements IdMap {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
         .builder(HugeIdMap.class)
@@ -109,7 +109,7 @@ public class HugeIdMap implements IdMapping {
     }
 
     @Override
-    public IdMapping rootIdMapping() {
+    public IdMap rootIdMapping() {
         return this;
     }
 
@@ -220,10 +220,10 @@ public class HugeIdMap implements IdMapping {
 
     private static class FilteredIdMap extends HugeIdMap {
 
-        private final IdMapping rootIdMapping;
+        private final IdMap rootIdMap;
 
         FilteredIdMap(
-            IdMapping rootIdMapping,
+            IdMap rootIdMap,
             HugeLongArray graphIds,
             HugeSparseLongArray nodeToGraphIds,
             LabelInformation filteredLabelInformation,
@@ -232,7 +232,7 @@ public class HugeIdMap implements IdMapping {
             AllocationTracker allocationTracker
         ) {
             super(graphIds, nodeToGraphIds, filteredLabelInformation, nodeCount, highestNeoId, allocationTracker);
-            this.rootIdMapping = rootIdMapping;
+            this.rootIdMap = rootIdMap;
         }
 
         @Override
@@ -247,7 +247,7 @@ public class HugeIdMap implements IdMapping {
 
         @Override
         public long rootNodeCount() {
-            return rootIdMapping.rootNodeCount();
+            return rootIdMap.rootNodeCount();
         }
 
         @Override
@@ -256,8 +256,8 @@ public class HugeIdMap implements IdMapping {
         }
 
         @Override
-        public IdMapping rootIdMapping() {
-            return rootIdMapping.rootIdMapping();
+        public IdMap rootIdMapping() {
+            return rootIdMap.rootIdMapping();
         }
 
         @Override

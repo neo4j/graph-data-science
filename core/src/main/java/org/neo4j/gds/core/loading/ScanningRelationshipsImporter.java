@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -44,7 +44,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
     private final GraphProjectConfig graphProjectConfig;
     private final GraphLoaderContext loadingContext;
 
-    private final IdMapping idMap;
+    private final IdMap idMap;
     private final Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders;
     private final Map<RelationshipType, LongAdder> allRelationshipCounters;
 
@@ -53,7 +53,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
-        IdMapping idMap,
+        IdMap idMap,
         Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders,
         int concurrency
     ) {

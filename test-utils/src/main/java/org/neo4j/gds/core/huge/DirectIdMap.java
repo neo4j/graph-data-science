@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.huge;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
@@ -30,10 +30,10 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
-public final class DirectIdMapping implements IdMapping {
+public final class DirectIdMap implements IdMap {
     private final long nodeCount;
 
-    public DirectIdMapping(long nodeCount) {
+    public DirectIdMap(long nodeCount) {
         this.nodeCount = nodeCount;
     }
 
@@ -102,7 +102,7 @@ public final class DirectIdMapping implements IdMapping {
     }
 
     @Override
-    public IdMapping rootIdMapping() {
+    public IdMap rootIdMapping() {
         return this;
     }
 

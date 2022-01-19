@@ -31,7 +31,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.huge.DirectIdMapping;
+import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -210,7 +210,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
     private void transactionTerminationTest(ExecutorService executorService) {
         TerminationFlag terminationFlag = () -> false;
         var exporter = NativeNodePropertyExporter
-            .builder(TestSupport.fullAccessTransaction(db), new DirectIdMapping(3), terminationFlag)
+            .builder(TestSupport.fullAccessTransaction(db), new DirectIdMap(3), terminationFlag)
             .parallel(executorService, 4)
             .build();
 

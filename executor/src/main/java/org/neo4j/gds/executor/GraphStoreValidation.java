@@ -22,7 +22,7 @@ package org.neo4j.gds.executor;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConfigurableSeedConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
@@ -212,11 +212,11 @@ public final class GraphStoreValidation {
 
     private static boolean labelFilteredGraphContainsNode(
         Collection<NodeLabel> filteredNodeLabels,
-        IdMapping nodeMapping,
+        IdMap nodeMapping,
         long neoNodeId
     ) {
         var internalNodeId = nodeMapping.safeToMappedNodeId(neoNodeId);
-        return internalNodeId == IdMapping.NOT_FOUND || nodeMapping
+        return internalNodeId == IdMap.NOT_FOUND || nodeMapping
             .nodeLabels(internalNodeId)
             .stream()
             .noneMatch(filteredNodeLabels::contains);

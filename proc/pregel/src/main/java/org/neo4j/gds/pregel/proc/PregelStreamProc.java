@@ -21,7 +21,7 @@ package org.neo4j.gds.pregel.proc;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.beta.pregel.Element;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
@@ -46,7 +46,7 @@ public abstract class PregelStreamProc<
             return Stream.empty();
         }
         var result = computationResult.result().nodeValues();
-        return LongStream.range(IdMapping.START_NODE_ID, computationResult.graph().nodeCount()).mapToObj(nodeId -> {
+        return LongStream.range(IdMap.START_NODE_ID, computationResult.graph().nodeCount()).mapToObj(nodeId -> {
             Map<String, Object> values = result.schema().elements()
                 .stream()
                 .filter(element -> element.visibility() == PregelSchema.Visibility.PUBLIC)

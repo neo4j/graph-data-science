@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -205,7 +205,7 @@ class TransientCsrListTest {
             var nodes = nodesBuilder.build();
 
             var relsBuilder = GraphFactory.initRelationshipsBuilder()
-                .nodes(nodes.nodeMapping())
+                .nodes(nodes.idMap())
                 .orientation(Orientation.UNDIRECTED)
                 .allocationTracker(allocationTracker)
                 .build();
@@ -224,7 +224,7 @@ class TransientCsrListTest {
 
             var rels = relsBuilder.build();
 
-            var graph = GraphFactory.create(nodes.nodeMapping(), rels, allocationTracker);
+            var graph = GraphFactory.create(nodes.idMap(), rels, allocationTracker);
 
             assertThat(graph.nodeCount()).isEqualTo(nodeCount);
 
@@ -270,7 +270,7 @@ class TransientCsrListTest {
         for (long target : targets) {
             nodesBuilder.addNode(target);
         }
-        IdMapping idMap = nodesBuilder.build().nodeMapping();
+        IdMap idMap = nodesBuilder.build().idMap();
 
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)

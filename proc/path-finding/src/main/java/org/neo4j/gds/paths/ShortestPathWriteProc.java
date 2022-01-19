@@ -21,7 +21,7 @@ package org.neo4j.gds.paths;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.StreamOfRelationshipsWriter;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -130,18 +130,18 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<DijkstraResul
         return new String[]{TOTAL_COST_KEY};
     }
 
-    private static Value[] createValues(IdMapping idMapping, PathResult pathResult, boolean writeNodeIds, boolean writeCosts) {
+    private static Value[] createValues(IdMap idMap, PathResult pathResult, boolean writeNodeIds, boolean writeCosts) {
         if (writeNodeIds && writeCosts) {
             return new Value[]{
                 Values.doubleValue(pathResult.totalCost()),
-                Values.longArray(toOriginalIds(idMapping, pathResult.nodeIds())),
+                Values.longArray(toOriginalIds(idMap, pathResult.nodeIds())),
                 Values.doubleArray(pathResult.costs())
             };
         }
         if (writeNodeIds) {
             return new Value[]{
                 Values.doubleValue(pathResult.totalCost()),
-                Values.longArray(toOriginalIds(idMapping, pathResult.nodeIds())),
+                Values.longArray(toOriginalIds(idMap, pathResult.nodeIds())),
             };
         }
         if (writeCosts) {
@@ -156,9 +156,9 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<DijkstraResul
     }
 
     // Replaces the ids in the given array with the original ids
-    private static long[] toOriginalIds(IdMapping idMapping, long[] internalIds) {
+    private static long[] toOriginalIds(IdMap idMap, long[] internalIds) {
         for (int i = 0; i < internalIds.length; i++) {
-            internalIds[i] = idMapping.toOriginalNodeId(internalIds[i]);
+            internalIds[i] = idMap.toOriginalNodeId(internalIds[i]);
         }
         return internalIds;
     }

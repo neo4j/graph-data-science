@@ -25,7 +25,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableNodePropertyStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.NodeProperty;
@@ -148,7 +148,7 @@ public final class CsvGraphStoreImporter {
         importRelationships(fileInput, nodes, AllocationTracker.empty());
     }
 
-    private IdMapping importNodes(
+    private IdMap importNodes(
         FileInput fileInput,
         AllocationTracker allocationTracker
     ) {
@@ -176,7 +176,7 @@ public final class CsvGraphStoreImporter {
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
         var nodeMappingAndProperties = nodesBuilder.build();
-        graphStoreBuilder.nodes(nodeMappingAndProperties.nodeMapping());
+        graphStoreBuilder.nodes(nodeMappingAndProperties.idMap());
         nodeMappingAndProperties.nodeProperties().orElse(Map.of())
             .forEach((label, propertyMap) -> {
                 var nodeStoreProperties = propertyKeyToNodePropertyMapping(nodeSchema, label, propertyMap);
@@ -184,7 +184,7 @@ public final class CsvGraphStoreImporter {
             });
 
         progressTracker.endSubTask();
-        return nodeMappingAndProperties.nodeMapping();
+        return nodeMappingAndProperties.idMap();
     }
 
     private Map<String, NodeProperty> propertyKeyToNodePropertyMapping(
@@ -210,7 +210,7 @@ public final class CsvGraphStoreImporter {
         );
     }
 
-    private void importRelationships(FileInput fileInput, IdMapping nodes, AllocationTracker allocationTracker) {
+    private void importRelationships(FileInput fileInput, IdMap nodes, AllocationTracker allocationTracker) {
         progressTracker.beginSubTask();
         ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipSchema = fileInput.relationshipSchema();
@@ -328,7 +328,7 @@ public final class CsvGraphStoreImporter {
     @Builder.Factory
     static GraphStore graphStore(
         NamedDatabaseId databaseId,
-        IdMapping nodes,
+        IdMap nodes,
         Map<NodeLabel, NodePropertyStore> nodePropertyStores,
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,

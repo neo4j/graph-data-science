@@ -20,16 +20,16 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 public interface IdMapBuilder {
 
-    @Nullable IdMappingAllocator allocate(int batchLength);
+    @Nullable IdMapAllocator allocate(int batchLength);
 
     long capacity();
 
-    IdMapping build(
+    IdMap build(
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,

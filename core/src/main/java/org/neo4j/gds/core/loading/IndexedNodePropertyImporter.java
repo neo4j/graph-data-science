@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -55,7 +55,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
     private final PropertyMapping mapping;
     private final IndexDescriptor index;
     private final Optional<CompatIndexQuery> indexQuery;
-    private final IdMapping idMap;
+    private final IdMap idMap;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final @Nullable ExecutorService executorService;
@@ -70,7 +70,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         NodeLabel nodeLabel,
         PropertyMapping mapping,
         IndexDescriptor index,
-        IdMapping idMap,
+        IdMap idMap,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         @Nullable ExecutorService executorService,
@@ -120,7 +120,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         PropertyMapping mapping,
         IndexDescriptor index,
         Optional<CompatIndexQuery> indexQuery,
-        IdMapping idMap,
+        IdMap idMap,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         @Nullable ExecutorService executorService,
@@ -193,7 +193,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         return imported;
     }
 
-    NodeProperties build(IdMapping nodeMapping) {
+    NodeProperties build(IdMap nodeMapping) {
         return propertiesBuilder.build(nodeMapping);
     }
 

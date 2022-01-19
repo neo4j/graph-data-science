@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.splitting;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
@@ -255,7 +255,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         });
     }
 
-    private boolean relationshipsAreEqual(IdMapping mapping, Relationships r1, Relationships r2) {
+    private boolean relationshipsAreEqual(IdMap mapping, Relationships r1, Relationships r2) {
         var fallbackValue = -0.66;
         if (r1.topology().elementCount() != r2.topology().elementCount()) {
             return false;

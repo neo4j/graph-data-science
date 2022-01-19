@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.concurrent.atomic.LongAdder;
@@ -110,7 +110,7 @@ public final class SingleTypeRelationshipImporter {
             }
 
             public SingleTypeRelationshipImporter withBuffer(
-                IdMapping idMap,
+                IdMap idMap,
                 int bulkSize,
                 RelationshipImporter.PropertyReader propertyReader
             ) {
@@ -124,7 +124,7 @@ public final class SingleTypeRelationshipImporter {
             }
 
             SingleTypeRelationshipImporter withBuffer(
-                IdMapping idMap,
+                IdMap idMap,
                 int bulkSize,
                 KernelTransaction kernelTransaction
             ) {

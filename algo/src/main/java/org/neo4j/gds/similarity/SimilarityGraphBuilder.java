@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -70,13 +70,13 @@ public class SimilarityGraphBuilder {
         });
     }
 
-    private final IdMapping nodeMapping;
+    private final IdMap nodeMapping;
     private final int concurrency;
     private final ExecutorService executorService;
     private final AllocationTracker allocationTracker;
 
     public SimilarityGraphBuilder(
-        IdMapping nodeMapping,
+        IdMap nodeMapping,
         int concurrency,
         ExecutorService executorService,
         AllocationTracker allocationTracker

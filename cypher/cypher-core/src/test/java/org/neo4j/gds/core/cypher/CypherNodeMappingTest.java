@@ -33,7 +33,7 @@ import java.util.HashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class CypherIdMappingTest {
+class CypherIdMapTest {
 
     @GdlGraph
     static String GRAPH = "CREATE" +
@@ -47,11 +47,11 @@ class CypherIdMappingTest {
     @Inject
     IdFunction idFunction;
 
-    CypherIdMapping nodeMapping;
+    CypherIdMap nodeMapping;
 
     @BeforeEach
     void setup() {
-        this.nodeMapping = new CypherIdMapping(graphStore.nodes());
+        this.nodeMapping = new CypherIdMap(graphStore.nodes());
     }
 
     @Test

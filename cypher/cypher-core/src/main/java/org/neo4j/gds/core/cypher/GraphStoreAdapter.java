@@ -24,7 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.PropertyState;
@@ -77,7 +77,7 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
-    public IdMapping nodes() {
+    public IdMap nodes() {
         return graphStore.nodes();
     }
 

@@ -60,7 +60,7 @@ class HugeGraphCursorReuseTest {
             .build();
 
         var mockGraph = HugeGraph.create(
-            baseGraph.idMapping,
+            baseGraph.idMap,
             baseGraph.schema(),
             Map.of(),
             mockTopology,

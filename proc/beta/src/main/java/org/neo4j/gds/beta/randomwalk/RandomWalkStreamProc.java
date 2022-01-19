@@ -22,7 +22,7 @@ package org.neo4j.gds.beta.randomwalk;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionMode;
@@ -110,7 +110,7 @@ public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]
         };
     }
 
-    private List<Long> translateInternalToNeoIds(long[] nodes, IdMapping nodeMapping) {
+    private List<Long> translateInternalToNeoIds(long[] nodes, IdMap nodeMapping) {
         var translatedNodes = new ArrayList<Long>(nodes.length);
         for (int i = 0; i < nodes.length; i++) {
             translatedNodes.add(i, nodeMapping.toOriginalNodeId(nodes[i]));

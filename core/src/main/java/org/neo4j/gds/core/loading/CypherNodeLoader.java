@@ -102,7 +102,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     @Override
     LoadResult result() {
         var nodeMappingAndProperties = nodesBuilder.buildChecked(highestNodeId);
-        var nodeMapping = nodeMappingAndProperties.nodeMapping();
+        var nodeMapping = nodeMappingAndProperties.idMap();
         var nodeProperties = nodeMappingAndProperties.nodeProperties().orElseGet(Map::of);
         var nodePropertiesWithPropertyMappings = propertiesWithPropertyMappings(nodeProperties);
 

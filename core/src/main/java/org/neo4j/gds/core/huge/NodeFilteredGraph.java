@@ -24,7 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CSRGraphAdapter;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
@@ -48,11 +48,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     private static final int NO_DEGREE = -1;
 
-    private final IdMapping filteredIdMap;
+    private final IdMap filteredIdMap;
     private long relationshipCount;
     private final HugeIntArray degreeCache;
 
-    public NodeFilteredGraph(CSRGraph originalGraph, IdMapping filteredIdMap, AllocationTracker allocationTracker) {
+    public NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap, AllocationTracker allocationTracker) {
         super(originalGraph);
         this.relationshipCount = -1;
         this.filteredIdMap = filteredIdMap;
@@ -61,14 +61,14 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
         degreeCache.fill(NO_DEGREE);
     }
 
-    public NodeFilteredGraph(CSRGraph originalGraph, IdMapping filteredIdMap, HugeIntArray degreeCache) {
+    public NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap, HugeIntArray degreeCache) {
         super(originalGraph);
 
         this.degreeCache = degreeCache;
         this.filteredIdMap = filteredIdMap;
     }
 
-    public IdMapping nodeMapping() {
+    public IdMap nodeMapping() {
         return filteredIdMap;
     }
 

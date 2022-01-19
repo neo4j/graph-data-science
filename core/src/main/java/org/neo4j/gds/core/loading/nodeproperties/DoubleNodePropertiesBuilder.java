@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.collections.HugeSparseDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -93,7 +93,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    public DoubleNodeProperties build(long size, IdMapping nodeMapping) {
+    public DoubleNodeProperties build(long size, IdMap nodeMapping) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseDoubleArray.builder(
@@ -114,7 +114,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
                     var mappedId = nodeMapping.toMappedNodeId(neoId);
-                    if (mappedId == IdMapping.NOT_FOUND) {
+                    if (mappedId == IdMap.NOT_FOUND) {
                         continue;
                     }
                     var value = page[pageIndex];

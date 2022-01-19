@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.SharedIntPriorityQueue;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -57,7 +57,7 @@ public class Prim extends Algorithm<SpanningTree> {
     private SpanningTree spanningTree;
 
     public Prim(
-        IdMapping idMapping,
+        IdMap idMap,
         Graph graph,
         DoubleUnaryOperator minMax,
         long startNodeId,
@@ -65,7 +65,7 @@ public class Prim extends Algorithm<SpanningTree> {
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.nodeCount = Math.toIntExact(idMapping.nodeCount());
+        this.nodeCount = Math.toIntExact(idMap.nodeCount());
         this.minMax = minMax;
         this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
     }

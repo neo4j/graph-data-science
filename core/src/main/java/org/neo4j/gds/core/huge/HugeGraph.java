@@ -29,7 +29,7 @@ import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.RelationshipConsumer;
@@ -90,7 +90,7 @@ public class HugeGraph implements CSRGraph {
 
     static final double NO_PROPERTY_VALUE = Double.NaN;
 
-    protected final IdMapping idMapping;
+    protected final IdMap idMap;
     protected final AllocationTracker allocationTracker;
     protected final GraphSchema schema;
 
@@ -115,7 +115,7 @@ public class HugeGraph implements CSRGraph {
     protected final boolean isMultiGraph;
 
     public static HugeGraph create(
-        IdMapping nodes,
+        IdMap nodes,
         GraphSchema schema,
         Map<String, NodeProperties> nodeProperties,
         Relationships.Topology topology,
@@ -138,7 +138,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     protected HugeGraph(
-        IdMapping idMapping,
+        IdMap idMap,
         GraphSchema schema,
         Map<String, NodeProperties> nodeProperties,
         long relationshipCount,
@@ -150,7 +150,7 @@ public class HugeGraph implements CSRGraph {
         boolean isMultiGraph,
         AllocationTracker allocationTracker
     ) {
-        this.idMapping = idMapping;
+        this.idMap = idMap;
         this.schema = schema;
         this.isMultiGraph = isMultiGraph;
         this.allocationTracker = allocationTracker;
@@ -167,26 +167,26 @@ public class HugeGraph implements CSRGraph {
 
     @Override
     public long nodeCount() {
-        return idMapping.nodeCount();
+        return idMap.nodeCount();
     }
 
     @Override
     public long rootNodeCount() {
-        return idMapping.rootNodeCount();
+        return idMap.rootNodeCount();
     }
 
     @Override
     public long highestNeoId() {
-        return idMapping.highestNeoId();
+        return idMap.highestNeoId();
     }
 
-    public IdMapping idMap() {
-        return idMapping;
+    public IdMap idMap() {
+        return idMap;
     }
 
     @Override
-    public IdMapping rootIdMapping() {
-        return idMapping.rootIdMapping();
+    public IdMap rootIdMapping() {
+        return idMap.rootIdMapping();
     }
 
     @Override
@@ -203,17 +203,17 @@ public class HugeGraph implements CSRGraph {
 
     @Override
     public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
-        return idMapping.batchIterables(batchSize);
+        return idMap.batchIterables(batchSize);
     }
 
     @Override
     public void forEachNode(LongPredicate consumer) {
-        idMapping.forEachNode(consumer);
+        idMap.forEachNode(consumer);
     }
 
     @Override
     public PrimitiveLongIterator nodeIterator() {
-        return idMapping.nodeIterator();
+        return idMap.nodeIterator();
     }
 
     @Override
@@ -337,28 +337,28 @@ public class HugeGraph implements CSRGraph {
 
     @Override
     public long toMappedNodeId(long nodeId) {
-        return idMapping.toMappedNodeId(nodeId);
+        return idMap.toMappedNodeId(nodeId);
     }
 
     @Override
     public long toOriginalNodeId(long nodeId) {
-        return idMapping.toOriginalNodeId(nodeId);
+        return idMap.toOriginalNodeId(nodeId);
     }
 
     @Override
     public long toRootNodeId(long nodeId) {
-        return idMapping.toRootNodeId(nodeId);
+        return idMap.toRootNodeId(nodeId);
     }
 
     @Override
     public boolean contains(long nodeId) {
-        return idMapping.contains(nodeId);
+        return idMap.contains(nodeId);
     }
 
     @Override
     public HugeGraph concurrentCopy() {
         return new HugeGraph(
-            idMapping,
+            idMap,
             schema,
             nodeProperties,
             relationshipCount,
@@ -504,22 +504,22 @@ public class HugeGraph implements CSRGraph {
 
     @Override
     public Set<NodeLabel> nodeLabels(long nodeId) {
-        return idMapping.nodeLabels(nodeId);
+        return idMap.nodeLabels(nodeId);
     }
 
     @Override
     public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        idMapping.forEachNodeLabel(nodeId, consumer);
+        idMap.forEachNodeLabel(nodeId, consumer);
     }
 
     @Override
     public Set<NodeLabel> availableNodeLabels() {
-        return idMapping.availableNodeLabels();
+        return idMap.availableNodeLabels();
     }
 
     @Override
     public boolean hasLabel(long nodeId, NodeLabel label) {
-        return idMapping.hasLabel(nodeId, label);
+        return idMap.hasLabel(nodeId, label);
     }
 
     private static class ParallelRelationshipsDegreeCounter implements RelationshipConsumer {

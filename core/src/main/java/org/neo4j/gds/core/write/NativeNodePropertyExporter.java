@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
@@ -49,9 +49,9 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     protected final LongUnaryOperator toOriginalId;
     protected final LongAdder propertiesWritten;
 
-    public static NodePropertyExporterBuilder<NativeNodePropertyExporter> builder(TransactionContext transactionContext, IdMapping idMapping, TerminationFlag terminationFlag) {
+    public static NodePropertyExporterBuilder<NativeNodePropertyExporter> builder(TransactionContext transactionContext, IdMap idMap, TerminationFlag terminationFlag) {
         return new Builder(transactionContext)
-            .withIdMapping(idMapping)
+            .withIdMapping(idMap)
             .withTerminationFlag(terminationFlag);
     }
 

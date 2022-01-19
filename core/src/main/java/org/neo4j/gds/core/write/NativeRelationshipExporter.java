@@ -21,7 +21,7 @@ package org.neo4j.gds.core.write;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -65,13 +65,13 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
 
     public static RelationshipExporterBuilder<NativeRelationshipExporter> builder(
         TransactionContext transactionContext,
-        IdMapping idMapping,
+        IdMap idMap,
         Graph graph,
         TerminationFlag terminationFlag
     ) {
         return new Builder(transactionContext)
             .withGraph(graph)
-            .withIdMapping(idMapping)
+            .withIdMapping(idMap)
             .withTerminationFlag(terminationFlag);
     }
 

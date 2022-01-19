@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading.construction;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 
 public class RelationshipsBuilder {
 
-    private final IdMapping idMapping;
+    private final IdMap idMap;
 
     private final boolean loadRelationshipProperty;
     private final boolean isMultiGraph;
@@ -55,7 +55,7 @@ public class RelationshipsBuilder {
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilders;
 
     RelationshipsBuilder(
-        IdMapping idMapping,
+        IdMap idMap,
         Orientation orientation,
         int bufferSize,
         int[] propertyKeyIds,
@@ -67,7 +67,7 @@ public class RelationshipsBuilder {
         int concurrency,
         ExecutorService executorService
     ) {
-        this.idMapping = idMapping;
+        this.idMap = idMap;
         this.orientation = orientation;
         this.adjacencyListWithPropertiesBuilder = adjacencyListWithPropertiesBuilder;
         this.importerBuilder = importerBuilder;
@@ -78,7 +78,7 @@ public class RelationshipsBuilder {
         this.executorService = executorService;
 
         this.threadLocalBuilders = AutoCloseableThreadLocal.withInitial(() -> new ThreadLocalBuilder(
-            idMapping,
+            idMap,
             importerBuilder,
             bufferSize,
             propertyKeyIds
@@ -86,21 +86,21 @@ public class RelationshipsBuilder {
     }
 
     public void add(long source, long target) {
-        addFromInternal(idMapping.toMappedNodeId(source), idMapping.toMappedNodeId(target));
+        addFromInternal(idMap.toMappedNodeId(source), idMap.toMappedNodeId(target));
     }
 
     public void add(long source, long target, double relationshipPropertyValue) {
         addFromInternal(
-            idMapping.toMappedNodeId(source),
-            idMapping.toMappedNodeId(target),
+            idMap.toMappedNodeId(source),
+            idMap.toMappedNodeId(target),
             relationshipPropertyValue
         );
     }
 
     public void add(long source, long target, double[] relationshipPropertyValues) {
         addFromInternal(
-            idMapping.toMappedNodeId(source),
-            idMapping.toMappedNodeId(target),
+            idMap.toMappedNodeId(source),
+            idMap.toMappedNodeId(target),
             relationshipPropertyValues
         );
     }
@@ -186,7 +186,7 @@ public class RelationshipsBuilder {
         private int localRelationshipId;
 
         ThreadLocalBuilder(
-            IdMapping idMap,
+            IdMap idMap,
             SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder,
             int bufferSize,
             int[] propertyKeyIds

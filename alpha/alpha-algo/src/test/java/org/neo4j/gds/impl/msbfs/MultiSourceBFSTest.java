@@ -32,7 +32,7 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.huge.DirectIdMapping;
+import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.graphbuilder.DefaultBuilder;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
@@ -365,7 +365,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         Arrays.setAll(sources, i -> i);
         final int[][] seen = new int[nodeCount][sourceCount];
         MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
-                new DirectIdMapping(nodeCount),
+                new DirectIdMap(nodeCount),
                 iter,
                 (nodeId, depth, sourceNodeIds) -> {
                     assertEquals(1, depth);

@@ -24,7 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipCursor;
@@ -139,7 +139,7 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public IdMapping rootIdMapping() {
+    public IdMap rootIdMapping() {
         return first.rootIdMapping();
     }
 

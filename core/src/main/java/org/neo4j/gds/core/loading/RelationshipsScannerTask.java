@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.StatementAction;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -38,7 +38,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
     public static RecordScannerTaskRunner.RecordScannerTaskFactory factory(
         GraphLoaderContext loadingContext,
         ProgressTracker progressTracker,
-        IdMapping idMap,
+        IdMap idMap,
         StoreScanner<RelationshipReference> scanner,
         Collection<SingleTypeRelationshipImporter.Builder> importerBuilders
     ) {
@@ -63,7 +63,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
     static final class Factory implements RecordScannerTaskRunner.RecordScannerTaskFactory {
         private final TransactionContext tx;
         private final ProgressTracker progressTracker;
-        private final IdMapping idMap;
+        private final IdMap idMap;
         private final StoreScanner<RelationshipReference> scanner;
         private final List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders;
         private final TerminationFlag terminationFlag;
@@ -71,7 +71,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         Factory(
             TransactionContext tx,
             ProgressTracker progressTracker,
-            IdMapping idMap,
+            IdMap idMap,
             StoreScanner<RelationshipReference> scanner,
             List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders,
             TerminationFlag terminationFlag
@@ -108,7 +108,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
 
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
-    private final IdMapping idMap;
+    private final IdMap idMap;
     private final StoreScanner<RelationshipReference> scanner;
     private final int taskIndex;
     private final List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders;
@@ -120,7 +120,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         TransactionContext tx,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
-        IdMapping idMap,
+        IdMap idMap,
         StoreScanner<RelationshipReference> scanner,
         int taskIndex,
         List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders

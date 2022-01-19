@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -44,9 +44,9 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
 
     public abstract T build();
 
-    public RelationshipStreamExporterBuilder<T> withIdMapping(IdMapping idMapping) {
-        Objects.requireNonNull(idMapping);
-        this.toOriginalId = idMapping::toOriginalNodeId;
+    public RelationshipStreamExporterBuilder<T> withIdMapping(IdMap idMap) {
+        Objects.requireNonNull(idMap);
+        this.toOriginalId = idMap::toOriginalNodeId;
         return this;
     }
 

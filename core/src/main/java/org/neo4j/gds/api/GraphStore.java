@@ -50,7 +50,7 @@ public interface GraphStore {
 
     long nodeCount();
 
-    IdMapping nodes();
+    IdMap nodes();
 
     Set<NodeLabel> nodeLabels();
 

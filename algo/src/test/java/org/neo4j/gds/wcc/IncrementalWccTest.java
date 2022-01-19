@@ -22,7 +22,7 @@ package org.neo4j.gds.wcc;
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -119,7 +119,7 @@ class IncrementalWccTest {
         DisjointSetStruct result = run(graph, config);
 
         // Then
-        LongStream.range(IdMapping.START_NODE_ID, graph.nodeCount())
+        LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
             .forEach(node -> assertEquals(42, result.setIdOf(node)));
     }
 

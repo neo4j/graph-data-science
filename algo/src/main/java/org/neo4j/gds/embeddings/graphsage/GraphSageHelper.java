@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -296,7 +296,7 @@ public final class GraphSageHelper {
             ));
     }
 
-    private static NodeLabel labelOf(IdMapping nodeMapping, long nodeId) {
+    private static NodeLabel labelOf(IdMap nodeMapping, long nodeId) {
         var labelRef = new AtomicReference<NodeLabel>();
         var labelCount = new MutableInt(0);
 

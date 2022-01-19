@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
-public interface IdMappingAllocator {
+public interface IdMapAllocator {
 
     long startId();
 

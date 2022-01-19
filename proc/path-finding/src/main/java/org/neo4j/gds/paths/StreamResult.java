@@ -20,7 +20,7 @@
 package org.neo4j.gds.paths;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -71,11 +71,11 @@ public final class StreamResult {
     }
 
     public static class Builder {
-        private final IdMapping idMapping;
+        private final IdMap idMap;
         private final Transaction transaction;
 
-        public Builder(IdMapping idMapping, Transaction transaction) {
-            this.idMapping = idMapping;
+        public Builder(IdMap idMap, Transaction transaction) {
+            this.idMap = idMap;
             this.transaction = transaction;
         }
 
@@ -88,7 +88,7 @@ public final class StreamResult {
 
             // convert internal ids to Neo ids
             for (int i = 0; i < nodeIds.length; i++) {
-                nodeIds[i] = idMapping.toOriginalNodeId(nodeIds[i]);
+                nodeIds[i] = idMap.toOriginalNodeId(nodeIds[i]);
             }
 
             Path path = null;
@@ -104,8 +104,8 @@ public final class StreamResult {
 
             return new StreamResult(
                 pathIndex,
-                idMapping.toOriginalNodeId(pathResult.sourceNode()),
-                idMapping.toOriginalNodeId(pathResult.targetNode()),
+                idMap.toOriginalNodeId(pathResult.sourceNode()),
+                idMap.toOriginalNodeId(pathResult.targetNode()),
                 pathResult.totalCost(),
                 // 😿
                 Arrays.stream(nodeIds).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(nodeIds.length))),

@@ -126,7 +126,7 @@ class SimilarityGraphBuilderTest {
         nodesBuilder.addNode(2, NodeLabel.of("B"));
         nodesBuilder.addNode(3, NodeLabel.of("B"));
 
-        var inputMapping = nodesBuilder.build().nodeMapping();
+        var inputMapping = nodesBuilder.build().idMap();
         var filteredIdMapping = inputMapping.withFilteredLabels(NodeLabel.listOf("B"), 4);
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(

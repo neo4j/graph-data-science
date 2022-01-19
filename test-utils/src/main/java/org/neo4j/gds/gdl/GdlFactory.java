@@ -28,7 +28,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
@@ -200,12 +200,12 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 .toArray(NodeLabel[]::new)
         ));
 
-        var nodeMapping = nodesBuilder.build().nodeMapping();
+        var nodeMapping = nodesBuilder.build().idMap();
 
         return IdsAndProperties.of(nodeMapping, loadNodeProperties(nodeMapping));
     }
 
-    private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> loadNodeProperties(IdMapping nodeMapping) {
+    private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> loadNodeProperties(IdMap nodeMapping) {
         var propertyKeysByLabel = new HashMap<NodeLabel, Set<PropertyMapping>>();
         var propertyBuilders = new HashMap<PropertyMapping, NodePropertiesFromStoreBuilder>();
 
@@ -289,7 +289,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         Map<String, Relationships.Properties> properties();
     }
 
-    private List<RelationshipsLoadResult> loadRelationships(IdMapping nodeMapping) {
+    private List<RelationshipsLoadResult> loadRelationships(IdMap nodeMapping) {
         var propertyKeysByRelType = propertyKeysByRelType();
         var relationshipBuilders = createRelationshipBuilders(nodeMapping, propertyKeysByRelType);
 
@@ -367,7 +367,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
     @NotNull
     private Map<RelationshipType, RelationshipsBuilder> createRelationshipBuilders(
-        IdMapping nodeMapping,
+        IdMap nodeMapping,
         Map<RelationshipType, List<String>> propertyKeysByRelType
     ) {
         return propertyKeysByRelType.entrySet().stream()

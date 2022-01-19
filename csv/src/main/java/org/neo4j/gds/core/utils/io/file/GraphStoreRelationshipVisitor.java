@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.io.file;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.schema.RelationshipSchema;
@@ -81,7 +81,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
 
         Map<String, RelationshipsBuilder> relationshipBuildersByType;
         int concurrency;
-        IdMapping nodes;
+        IdMap nodes;
         AllocationTracker allocationTracker;
 
         Builder withRelationshipBuildersToTypeResultMap(Map<String, RelationshipsBuilder> relationshipBuildersByType) {
@@ -94,7 +94,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
             return this;
         }
 
-        Builder withNodes(IdMapping nodes) {
+        Builder withNodes(IdMap nodes) {
             this.nodes = nodes;
             return this;
         }

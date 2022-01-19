@@ -23,7 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,10 +37,10 @@ public final class RelationshipStore {
     private final long propertyCount;
 
     final Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators;
-    private final IdMapping nodeMapping;
+    private final IdMap nodeMapping;
 
     private RelationshipStore(
-        IdMapping nodeMapping,
+        IdMap nodeMapping,
         long relationshipCount,
         long propertyCount,
         Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators
@@ -56,7 +56,7 @@ public final class RelationshipStore {
         return propertyCount;
     }
 
-    public IdMapping nodeMapping() {
+    public IdMap nodeMapping() {
         return nodeMapping;
     }
 

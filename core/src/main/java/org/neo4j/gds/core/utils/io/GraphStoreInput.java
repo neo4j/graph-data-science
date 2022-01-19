@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.io;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompatPropertySizeCalculator;
 import org.neo4j.internal.batchimport.InputIterable;
@@ -274,13 +274,13 @@ public final class GraphStoreInput implements CompatInput {
         }
 
         private static final class RelationshipConsumer implements CompositeRelationshipIterator.RelationshipConsumer {
-            private final IdMapping nodeMapping;
+            private final IdMap nodeMapping;
             private final String relationshipType;
             private final String[] propertyKeys;
             private InputEntityVisitor visitor;
 
             private RelationshipConsumer(
-                IdMapping nodeMapping,
+                IdMap nodeMapping,
                 String relationshipType,
                 String[] propertyKeys
             ) {

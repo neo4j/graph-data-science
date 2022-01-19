@@ -24,7 +24,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
-import org.neo4j.gds.core.huge.DirectIdMapping;
+import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.HashMap;
@@ -58,7 +58,7 @@ public abstract class AdjacencyBuilderBaseTest {
             false
         );
         long nodeCount = 6;
-        DirectIdMapping idMapping = new DirectIdMapping(nodeCount);
+        DirectIdMap idMapping = new DirectIdMap(nodeCount);
 
         RelationshipsBatchBuffer relationshipsBatchBuffer = new RelationshipsBatchBuffer(idMapping, -1, 10);
         Map<Long, Long> relationships = new HashMap<>();

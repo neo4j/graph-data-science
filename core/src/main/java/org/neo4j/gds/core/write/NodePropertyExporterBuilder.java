@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -47,10 +47,10 @@ public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter
 
     public abstract T build();
 
-    public NodePropertyExporterBuilder<T> withIdMapping(IdMapping idMapping) {
-        Objects.requireNonNull(idMapping);
-        this.nodeCount = idMapping.nodeCount();
-        this.toOriginalId = idMapping::toOriginalNodeId;
+    public NodePropertyExporterBuilder<T> withIdMapping(IdMap idMap) {
+        Objects.requireNonNull(idMap);
+        this.nodeCount = idMap.nodeCount();
+        this.toOriginalId = idMap::toOriginalNodeId;
         return this;
     }
 

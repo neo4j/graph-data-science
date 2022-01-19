@@ -34,12 +34,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class UnionNodeProperties implements NodeProperties {
 
     private final ValueType valueType;
-    private final IdMapping nodeMapping;
+    private final IdMap nodeMapping;
     private final Map<NodeLabel, NodeProperties> labelToNodePropertiesMap;
     private final ValueProducer valueProducer;
     private final NodeLabel[] availableNodeLabels;
 
-    public UnionNodeProperties(IdMapping nodeMapping, Map<NodeLabel, NodeProperties> labelToNodePropertiesMap) {
+    public UnionNodeProperties(IdMap nodeMapping, Map<NodeLabel, NodeProperties> labelToNodePropertiesMap) {
         this.nodeMapping = nodeMapping;
         this.labelToNodePropertiesMap = labelToNodePropertiesMap;
         this.availableNodeLabels = nodeMapping.availableNodeLabels().toArray(NodeLabel[]::new);

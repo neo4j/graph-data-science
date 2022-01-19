@@ -20,7 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.executor.ComputationResult;
@@ -50,7 +50,7 @@ public abstract class StreamProc<
                 NodeProperties nodeProperties = nodeProperties(computationResult);
 
                 return LongStream
-                    .range(IdMapping.START_NODE_ID, graph.nodeCount())
+                    .range(IdMap.START_NODE_ID, graph.nodeCount())
                     .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, nodeProperties));
                 }
             );

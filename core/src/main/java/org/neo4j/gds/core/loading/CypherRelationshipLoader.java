@@ -32,7 +32,7 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
@@ -60,7 +60,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 @Value.Enclosing
 class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoader.LoadResult> {
 
-    private final IdMapping nodeMapping;
+    private final IdMap nodeMapping;
     private final Context loaderContext;
     private final GraphDimensions dimensionsAfterNodeLoading;
     private final ProgressTracker progressTracker;
@@ -82,7 +82,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     CypherRelationshipLoader(
         String relationshipQuery,
-        IdMapping nodeMapping,
+        IdMap nodeMapping,
         GraphProjectFromCypherConfig config,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,

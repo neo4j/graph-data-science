@@ -27,7 +27,7 @@ import java.util.Set;
 /**
  * Bi-directional mapping between two id spaces.
  */
-public interface IdMapping extends NodeIterator, BatchNodeIterable{
+public interface IdMap extends NodeIterator, BatchNodeIterable{
 
     /**
      * Defines the lower bound of mapped ids
@@ -43,7 +43,7 @@ public interface IdMapping extends NodeIterator, BatchNodeIterable{
     /**
      * Map original nodeId to inner nodeId
      *
-     * @param nodeId must be smaller or equal to the id returned by {@link IdMapping#highestNeoId}
+     * @param nodeId must be smaller or equal to the id returned by {@link IdMap#highestNeoId}
      */
     long toMappedNodeId(long nodeId);
 
@@ -90,7 +90,7 @@ public interface IdMapping extends NodeIterator, BatchNodeIterable{
 
     long highestNeoId();
 
-    default IdMapping cloneIdMapping() {
+    default IdMap cloneIdMapping() {
         return this;
     }
 
@@ -98,7 +98,7 @@ public interface IdMapping extends NodeIterator, BatchNodeIterable{
 
     Set<NodeLabel> nodeLabels(long nodeId);
 
-    void forEachNodeLabel(long nodeId, IdMapping.NodeLabelConsumer consumer);
+    void forEachNodeLabel(long nodeId, IdMap.NodeLabelConsumer consumer);
 
     Set<NodeLabel> availableNodeLabels();
 
@@ -108,9 +108,9 @@ public interface IdMapping extends NodeIterator, BatchNodeIterable{
      * Returns the original node mapping if the current node mapping is filtered, otherwise
      * it returns itself.
      */
-    IdMapping rootIdMapping();
+    IdMap rootIdMapping();
 
-    default IdMapping withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    default IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         throw new UnsupportedOperationException("This node mapping does not support label filtering");
     }
 

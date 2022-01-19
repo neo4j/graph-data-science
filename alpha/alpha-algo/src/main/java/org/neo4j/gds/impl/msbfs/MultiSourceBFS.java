@@ -21,7 +21,7 @@ package org.neo4j.gds.impl.msbfs;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -89,7 +89,7 @@ public final class MultiSourceBFS implements Runnable {
     private final CloseableThreadLocal<HugeLongArray> seensNext;
 
     private final long nodeCount;
-    private final IdMapping nodeIds;
+    private final IdMap nodeIds;
     private final RelationshipIterator relationships;
     private final ExecutionStrategy strategy;
     private final boolean allowStartNodeTraversal;
@@ -112,7 +112,7 @@ public final class MultiSourceBFS implements Runnable {
     }
 
     public static MultiSourceBFS aggregatedNeighborProcessing(
-        IdMapping nodeIds,
+        IdMap nodeIds,
         RelationshipIterator relationships,
         BfsConsumer perNodeAction,
         AllocationTracker allocationTracker,
@@ -188,7 +188,7 @@ public final class MultiSourceBFS implements Runnable {
     }
 
     public MultiSourceBFS(
-        IdMapping nodeIds,
+        IdMap nodeIds,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
         boolean initSeenNext,
@@ -212,7 +212,7 @@ public final class MultiSourceBFS implements Runnable {
     }
 
     private MultiSourceBFS(
-        IdMapping nodeIds,
+        IdMap nodeIds,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
         long nodeCount,
@@ -237,7 +237,7 @@ public final class MultiSourceBFS implements Runnable {
     }
 
     private MultiSourceBFS(
-        IdMapping nodeIds,
+        IdMap nodeIds,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
         long nodeCount,

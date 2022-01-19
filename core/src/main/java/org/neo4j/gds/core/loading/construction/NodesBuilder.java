@@ -27,7 +27,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -152,15 +152,15 @@ public final class NodesBuilder {
         this.threadLocalBuilder.get().flush();
     }
 
-    public IdMappingAndProperties build() {
+    public IdMapAndProperties build() {
         return build(maxOriginalId, false);
     }
 
-    public IdMappingAndProperties buildChecked(long highestNeoId) {
+    public IdMapAndProperties buildChecked(long highestNeoId) {
         return build(highestNeoId, true);
     }
 
-    public IdMappingAndProperties build(long highestNeoId, boolean checkDuplicateIds) {
+    public IdMapAndProperties build(long highestNeoId, boolean checkDuplicateIds) {
         this.threadLocalBuilder.close();
 
         var nodeMapping = this.idMapBuilder.build(
@@ -175,10 +175,10 @@ public final class NodesBuilder {
         if (hasProperties) {
             nodeProperties = Optional.of(buildProperties(nodeMapping));
         }
-        return ImmutableIdMappingAndProperties.of(nodeMapping, nodeProperties);
+        return ImmutableIdMapAndProperties.of(nodeMapping, nodeProperties);
     }
 
-    private Map<NodeLabel, Map<String, NodeProperties>> buildProperties(IdMapping nodeMapping) {
+    private Map<NodeLabel, Map<String, NodeProperties>> buildProperties(IdMap nodeMapping) {
         Map<NodeLabel, Map<String, NodeProperties>> nodePropertiesByLabel = new HashMap<>();
         for (IntObjectCursor<Map<String, NodePropertiesFromStoreBuilder>> propertyBuilderByLabelToken : this.buildersByLabelTokenAndPropertyToken) {
             var nodeLabels = labelTokenNodeLabelMapping.get(propertyBuilderByLabelToken.key);
@@ -239,8 +239,8 @@ public final class NodesBuilder {
     }
 
     @ValueClass
-    public interface IdMappingAndProperties {
-        IdMapping nodeMapping();
+    public interface IdMapAndProperties {
+        IdMap idMap();
 
         Optional<Map<NodeLabel, Map<String, NodeProperties>>> nodeProperties();
     }

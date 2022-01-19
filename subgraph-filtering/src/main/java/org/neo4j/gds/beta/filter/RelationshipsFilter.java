@@ -24,7 +24,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
@@ -65,8 +65,8 @@ final class RelationshipsFilter {
     static FilteredRelationships filterRelationships(
         GraphStore graphStore,
         Expression expression,
-        IdMapping inputNodes,
-        IdMapping outputNodes,
+        IdMap inputNodes,
+        IdMap outputNodes,
         int concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker,
@@ -139,8 +139,8 @@ final class RelationshipsFilter {
     private static FilteredRelationship filterRelationshipType(
         GraphStore graphStore,
         Expression relationshipExpr,
-        IdMapping inputNodes,
-        IdMapping outputNodes,
+        IdMap inputNodes,
+        IdMap outputNodes,
         RelationshipType relType,
         int concurrency,
         ExecutorService executorService,
@@ -209,8 +209,8 @@ final class RelationshipsFilter {
         private final EvaluationContext.RelationshipEvaluationContext evaluationContext;
         private final ProgressTracker progressTracker;
         private final CompositeRelationshipIterator relationshipIterator;
-        private final IdMapping inputNodes;
-        private final IdMapping outputNodes;
+        private final IdMap inputNodes;
+        private final IdMap outputNodes;
         private final RelationshipsBuilder relationshipsBuilder;
         private final RelationshipType relType;
 
@@ -218,8 +218,8 @@ final class RelationshipsFilter {
             Partition partition,
             Expression expression,
             CompositeRelationshipIterator relationshipIterator,
-            IdMapping inputNodes,
-            IdMapping outputNodes,
+            IdMap inputNodes,
+            IdMap outputNodes,
             RelationshipsBuilder relationshipsBuilder,
             RelationshipType relType,
             Map<String, Integer> propertyIndices,

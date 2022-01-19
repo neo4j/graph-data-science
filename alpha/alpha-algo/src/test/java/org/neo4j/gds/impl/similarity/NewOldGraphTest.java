@@ -21,7 +21,7 @@ package org.neo4j.gds.impl.similarity;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -38,7 +38,7 @@ import static org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm.Rela
 
 class NewOldGraphTest {
 
-    private static final IdMapping ID_MAP = idMap(5);
+    private static final IdMap ID_MAP = idMap(5);
     private static final int CONCURRENCY = 1;
     private static final AllocationTracker ALLOCATION_TRACKER = AllocationTracker.empty();
 
@@ -113,7 +113,7 @@ class NewOldGraphTest {
         assertThat(ArrayUtils.toObject(oldNeighbors), arrayContainingInAnyOrder(1L));
     }
 
-    private static IdMapping idMap(int numberOfNodes) {
+    private static IdMap idMap(int numberOfNodes) {
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(numberOfNodes - 1)
             .allocationTracker(AllocationTracker.empty())
@@ -122,6 +122,6 @@ class NewOldGraphTest {
         for (int i = 0; i < numberOfNodes; i++) {
             nodesBuilder.addNode(i);
         }
-        return nodesBuilder.build().nodeMapping();
+        return nodesBuilder.build().idMap();
     }
 }
