@@ -59,8 +59,8 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public IdMap rootIdMapping() {
-        return idMap.rootIdMapping();
+    public IdMap rootIdMap() {
+        return idMap.rootIdMap();
     }
 
     @Override

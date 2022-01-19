@@ -139,8 +139,8 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public IdMap rootIdMapping() {
-        return first.rootIdMapping();
+    public IdMap rootIdMap() {
+        return first.rootIdMap();
     }
 
     @Override

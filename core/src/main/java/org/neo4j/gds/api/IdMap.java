@@ -50,7 +50,7 @@ public interface IdMap extends NodeIterator, BatchNodeIterable{
     /**
      * Map original nodeId to inner nodeId
      *
-     * Returns org.neo4j.gds.api.IdMapping#NOT_FOUND if the nodeId is not mapped.
+     * Returns org.neo4j.gds.api.IdMap#NOT_FOUND if the nodeId is not mapped.
      */
     default long safeToMappedNodeId(long nodeId) {
         return highestNeoId() < nodeId ? NOT_FOUND : toMappedNodeId(nodeId);
@@ -90,11 +90,11 @@ public interface IdMap extends NodeIterator, BatchNodeIterable{
 
     long highestNeoId();
 
-    default IdMap cloneIdMapping() {
+    default IdMap cloneIdMap() {
         return this;
     }
 
-    // from IdMapping
+    // from IdMap
 
     Set<NodeLabel> nodeLabels(long nodeId);
 
@@ -108,7 +108,7 @@ public interface IdMap extends NodeIterator, BatchNodeIterable{
      * Returns the original node mapping if the current node mapping is filtered, otherwise
      * it returns itself.
      */
-    IdMap rootIdMapping();
+    IdMap rootIdMap();
 
     default IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         throw new UnsupportedOperationException("This node mapping does not support label filtering");

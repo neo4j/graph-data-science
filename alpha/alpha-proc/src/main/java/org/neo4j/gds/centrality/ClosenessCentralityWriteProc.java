@@ -83,7 +83,7 @@ public class ClosenessCentralityWriteProc extends ClosenessCentralityProc<Centra
                     taskRegistryFactory
                 );
                 var exporter = nodePropertyExporterBuilder
-                    .withIdMapping(graph)
+                    .withIdMap(graph)
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .withProgressTracker(progressTracker)
                     .parallel(Pools.DEFAULT, writeConcurrency)

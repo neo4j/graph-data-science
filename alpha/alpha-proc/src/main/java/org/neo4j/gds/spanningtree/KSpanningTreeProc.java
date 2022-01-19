@@ -108,7 +108,7 @@ public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTr
                     taskRegistryFactory
                 );
                 final NodePropertyExporter exporter = nodePropertyExporterBuilder
-                    .withIdMapping(graph)
+                    .withIdMap(graph)
                     .withTerminationFlag(TerminationFlag.wrap(transaction)).withProgressTracker(progressTracker)
                     .parallel(Pools.DEFAULT, config.writeConcurrency())
                     .build();

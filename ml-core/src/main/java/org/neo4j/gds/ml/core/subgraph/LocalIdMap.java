@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 
 public class LocalIdMap {
     private final LongArrayList originalIds;
-    private final LongIntHashMap originalToInternalIdMapping;
+    private final LongIntHashMap originalToInternalIdMap;
 
     public static MemoryEstimation memoryEstimation(int numberOfClasses) {
         return MemoryEstimations.builder(LocalIdMap.class)
@@ -43,16 +43,16 @@ public class LocalIdMap {
 
     public LocalIdMap() {
         this.originalIds = new LongArrayList();
-        this.originalToInternalIdMapping = new LongIntHashMap();
+        this.originalToInternalIdMap = new LongIntHashMap();
     }
 
     public int toMapped(long originalId) {
-        if (originalToInternalIdMapping.containsKey(originalId)) {
-            return originalToInternalIdMapping.get(originalId);
+        if (originalToInternalIdMap.containsKey(originalId)) {
+            return originalToInternalIdMap.get(originalId);
         }
-        originalToInternalIdMapping.put(originalId, originalToInternalIdMapping.size());
+        originalToInternalIdMap.put(originalId, originalToInternalIdMap.size());
         originalIds.add(originalId);
-        return originalToInternalIdMapping.get(originalId);
+        return originalToInternalIdMap.get(originalId);
     }
 
     public long toOriginal(int internalId) {
@@ -70,7 +70,7 @@ public class LocalIdMap {
     }
 
     public int size() {
-        assert originalIds.size() == originalToInternalIdMapping.size();
+        assert originalIds.size() == originalToInternalIdMap.size();
         return originalIds.size();
     }
 }

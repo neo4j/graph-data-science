@@ -47,7 +47,7 @@ public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter
 
     public abstract T build();
 
-    public NodePropertyExporterBuilder<T> withIdMapping(IdMap idMap) {
+    public NodePropertyExporterBuilder<T> withIdMap(IdMap idMap) {
         Objects.requireNonNull(idMap);
         this.nodeCount = idMap.nodeCount();
         this.toOriginalId = idMap::toOriginalNodeId;

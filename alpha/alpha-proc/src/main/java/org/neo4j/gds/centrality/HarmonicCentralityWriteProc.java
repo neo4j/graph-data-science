@@ -84,7 +84,7 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
                     taskRegistryFactory
                 );
                 NodePropertyExporter exporter =  nodePropertyExporterBuilder
-                    .withIdMapping(graph)
+                    .withIdMap(graph)
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .withProgressTracker(progressTracker)
                     .parallel(Pools.DEFAULT, writeConcurrency)

@@ -112,7 +112,7 @@ public abstract class WriteStreamOfRelationshipsProc<
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         return relationshipStreamExporterBuilder
-            .withIdMapping(graph)
+            .withIdMap(graph)
             .withTerminationFlag(computationResult.algorithm().terminationFlag)
             .withRelationships(computationResult.result().relationshipStream())
             .withProgressTracker(progressTracker)

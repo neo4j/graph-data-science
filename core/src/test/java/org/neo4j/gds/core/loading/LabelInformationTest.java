@@ -49,7 +49,7 @@ class LabelInformationTest {
             testLabelAssignment(idMap.keySet(), idMap::get);
     }
 
-    private void testLabelAssignment(Collection<Long> nodeIds, LongUnaryOperator nodeIdMapping) {
+    private void testLabelAssignment(Collection<Long> nodeIds, LongUnaryOperator nodeIdMap) {
         var label = NodeLabel.of("A");
         var nodeCount = nodeIds.size();
         var tokenLabelsMap = new IntObjectHashMap<List<NodeLabel>>();
@@ -62,10 +62,10 @@ class LabelInformationTest {
             builder.addNodeIdToLabel(label, nodeId);
         }
 
-        var labelInformation = builder.build(nodeCount, nodeIdMapping);
+        var labelInformation = builder.build(nodeCount, nodeIdMap);
 
         for (var nodeId : nodeIds) {
-            assertThat(labelInformation.hasLabel(nodeIdMapping.applyAsLong(nodeId), label)).isTrue();
+            assertThat(labelInformation.hasLabel(nodeIdMap.applyAsLong(nodeId), label)).isTrue();
         }
     }
 }

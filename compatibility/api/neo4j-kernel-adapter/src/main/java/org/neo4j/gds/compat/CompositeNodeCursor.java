@@ -39,7 +39,7 @@ public abstract class CompositeNodeCursor extends DefaultCloseListenable impleme
     private final List<NodeLabelIndexCursor> cursors;
     private NodeLabelIndexCursor current;
     private final LongArrayList currentLabels;
-    private final IdentityHashMap<NodeLabelIndexCursor, Integer> cursorLabelIdMapping;
+    private final IdentityHashMap<NodeLabelIndexCursor, Integer> cursorLabelIdMap;
 
     private boolean closed = false;
 
@@ -50,11 +50,11 @@ public abstract class CompositeNodeCursor extends DefaultCloseListenable impleme
             Comparator.comparingLong(NodeIndexCursor::nodeReference)
         );
         this.repopulateCursorQueue = true;
-        this.cursorLabelIdMapping = new IdentityHashMap<>();
+        this.cursorLabelIdMap = new IdentityHashMap<>();
         this.currentLabels = new LongArrayList();
 
         for (int i = 0; i < cursors.size(); i++) {
-            cursorLabelIdMapping.put(cursors.get(i), labelIds[i]);
+            cursorLabelIdMap.put(cursors.get(i), labelIds[i]);
         }
     }
 
@@ -102,12 +102,12 @@ public abstract class CompositeNodeCursor extends DefaultCloseListenable impleme
             current = cursorQueue.poll();
 
             currentLabels.clear();
-            currentLabels.add(cursorLabelIdMapping.get(current));
+            currentLabels.add(cursorLabelIdMap.get(current));
 
             NodeLabelIndexCursor next = cursorQueue.peek();
             while (next != null && next.nodeReference() == current.nodeReference()) {
                 cursorQueue.poll();
-                currentLabels.add(cursorLabelIdMapping.get(next));
+                currentLabels.add(cursorLabelIdMap.get(next));
                 if (next.next()) {
                     cursorQueue.add(next);
                 }

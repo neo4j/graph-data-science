@@ -99,15 +99,15 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
 
     abstract static class Builder<SELF extends Builder<SELF, VISITOR>, VISITOR extends NodeVisitor> {
         NodeSchema nodeSchema;
-        boolean reverseIdMapping;
+        boolean reverseIdMap;
 
         public SELF withNodeSchema(NodeSchema nodeSchema) {
             this.nodeSchema = nodeSchema;
             return me();
         }
 
-        public SELF withReverseIdMapping(boolean reverseIdMapping) {
-            this.reverseIdMapping = reverseIdMapping;
+        public SELF withReverseIdMap(boolean reverseIdMap) {
+            this.reverseIdMap = reverseIdMap;
             return me();
         }
 

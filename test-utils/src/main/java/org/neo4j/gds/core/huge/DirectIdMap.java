@@ -102,7 +102,7 @@ public final class DirectIdMap implements IdMap {
     }
 
     @Override
-    public IdMap rootIdMapping() {
+    public IdMap rootIdMap() {
         return this;
     }
 

@@ -125,7 +125,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         return nodePropertyExporterBuilder
-            .withIdMapping(graph)
+            .withIdMap(graph)
             .withTerminationFlag(computationResult.algorithm().terminationFlag)
             .withProgressTracker(progressTracker)
             .parallel(Pools.DEFAULT, computationResult.config().writeConcurrency())

@@ -26,12 +26,12 @@ import org.neo4j.token.TokenHolders;
 
 public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpdater {
 
-    private final CypherIdMap cypherIdMapping;
+    private final CypherIdMap cypherIdMap;
     private RelationshipIds relationshipIds;
 
     public CypherGraphStore(GraphStore graphStore) {
         super(graphStore);
-        this.cypherIdMapping = new CypherIdMap(super.nodes());
+        this.cypherIdMap = new CypherIdMap(super.nodes());
     }
 
     public void initialize(TokenHolders tokenHolders) {
@@ -40,17 +40,17 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
 
     @Override
     public IdMap nodes() {
-        return this.cypherIdMapping;
+        return this.cypherIdMap;
     }
 
     @Override
     public void addNodeLabel(NodeLabel nodeLabel) {
-        this.cypherIdMapping.addNodeLabel(nodeLabel);
+        this.cypherIdMap.addNodeLabel(nodeLabel);
     }
 
     @Override
     public void addLabelToNode(long nodeId, NodeLabel nodeLabel) {
-        this.cypherIdMapping.addLabelToNode(nodeId, nodeLabel);
+        this.cypherIdMap.addLabelToNode(nodeId, nodeLabel);
     }
 
     public RelationshipIds relationshipIds() {

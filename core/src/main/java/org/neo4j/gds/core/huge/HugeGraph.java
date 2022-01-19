@@ -185,8 +185,8 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public IdMap rootIdMapping() {
-        return idMap.rootIdMapping();
+    public IdMap rootIdMap() {
+        return idMap.rootIdMap();
     }
 
     @Override

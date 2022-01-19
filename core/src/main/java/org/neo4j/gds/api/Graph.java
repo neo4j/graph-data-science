@@ -38,7 +38,7 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
     long relationshipCount();
 
     /**
-     * Release all resources which are not part of the result or IdMapping
+     * Release all resources which are not part of the result or IdMap
      */
     default void release() {
         releaseTopology();

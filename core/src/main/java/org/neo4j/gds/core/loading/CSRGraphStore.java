@@ -554,7 +554,7 @@ public class CSRGraphStore implements GraphStore {
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
-        Optional<IdMap> filteredNodes = getFilteredIdMapping(nodeLabels);
+        Optional<IdMap> filteredNodes = getFilteredIdMap(nodeLabels);
         Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(nodeLabels);
         return createGraphFromRelationshipType(
             filteredNodes,
@@ -569,7 +569,7 @@ public class CSRGraphStore implements GraphStore {
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty
     ) {
-        Optional<IdMap> filteredNodes = getFilteredIdMapping(filteredLabels);
+        Optional<IdMap> filteredNodes = getFilteredIdMap(filteredLabels);
         Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);
 
         List<CSRGraph> filteredGraphs = relationships.keySet().stream()
@@ -588,7 +588,7 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @NotNull
-    private Optional<IdMap> getFilteredIdMapping(Collection<NodeLabel> filteredLabels) {
+    private Optional<IdMap> getFilteredIdMap(Collection<NodeLabel> filteredLabels) {
         boolean loadAllNodes = filteredLabels.containsAll(nodeLabels());
 
         return loadAllNodes || schema().nodeSchema().containsOnlyAllNodesLabel()

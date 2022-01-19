@@ -28,10 +28,10 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.impl.spanningTrees.Prim;
 import org.neo4j.gds.impl.spanningTrees.SpanningGraph;
 import org.neo4j.gds.impl.spanningTrees.SpanningTree;
-import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.utils.InputNodeValidator;
 import org.neo4j.procedure.Context;
 
@@ -92,7 +92,7 @@ public abstract class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, 
 
                 relationshipExporterBuilder
                     .withGraph(spanningGraph)
-                    .withIdMapping(spanningGraph)
+                    .withIdMap(spanningGraph)
                     .withTerminationFlag(prim.getTerminationFlag())
                     .withProgressTracker(progressTracker)
                     .build()

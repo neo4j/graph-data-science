@@ -89,7 +89,7 @@ public class SimilarityGraphBuilder {
 
     public Graph build(Stream<SimilarityResult> stream) {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .nodes(idMap.rootIdMapping())
+            .nodes(idMap.rootIdMap())
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(concurrency)
@@ -108,7 +108,7 @@ public class SimilarityGraphBuilder {
         );
 
         return GraphFactory.create(
-            idMap.rootIdMapping(),
+            idMap.rootIdMap(),
             relationshipsBuilder.build(),
             allocationTracker
         );

@@ -59,7 +59,7 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
         return this;
     }
 
-    public RelationshipExporterBuilder<T> withIdMapping(IdMap idMap) {
+    public RelationshipExporterBuilder<T> withIdMap(IdMap idMap) {
         Objects.requireNonNull(idMap);
         this.toOriginalId = idMap::toOriginalNodeId;
         return this;

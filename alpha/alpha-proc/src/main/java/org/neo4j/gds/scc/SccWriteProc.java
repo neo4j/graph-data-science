@@ -96,7 +96,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
                     taskRegistryFactory
                 );
                 NodePropertyExporter exporter = nodePropertyExporterBuilder
-                    .withIdMapping(graph)
+                    .withIdMap(graph)
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .withProgressTracker(progressTracker)
                     .parallel(Pools.DEFAULT, config.writeConcurrency())

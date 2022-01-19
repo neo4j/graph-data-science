@@ -44,7 +44,7 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
 
     public abstract T build();
 
-    public RelationshipStreamExporterBuilder<T> withIdMapping(IdMap idMap) {
+    public RelationshipStreamExporterBuilder<T> withIdMap(IdMap idMap) {
         Objects.requireNonNull(idMap);
         this.toOriginalId = idMap::toOriginalNodeId;
         return this;

@@ -31,7 +31,7 @@ import org.neo4j.gds.api.PropertyState;
 import java.util.HashMap;
 import java.util.Map;
 
-// TODO: rename to `IdMappingAndProperties`
+// TODO: rename to `IdMapAndProperties`
 @ValueClass
 public interface IdsAndProperties {
 

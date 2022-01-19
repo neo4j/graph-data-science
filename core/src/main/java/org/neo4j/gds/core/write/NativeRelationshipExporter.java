@@ -71,7 +71,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     ) {
         return new Builder(transactionContext)
             .withGraph(graph)
-            .withIdMapping(idMap)
+            .withIdMap(idMap)
             .withTerminationFlag(terminationFlag);
     }
 

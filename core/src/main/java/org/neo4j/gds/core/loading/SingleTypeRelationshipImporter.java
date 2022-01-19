@@ -115,7 +115,7 @@ public final class SingleTypeRelationshipImporter {
                 RelationshipImporter.PropertyReader propertyReader
             ) {
                 RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
-                    idMap.cloneIdMapping(),
+                    idMap.cloneIdMap(),
                     typeId,
                     bulkSize,
                     validateRelationships
@@ -129,7 +129,7 @@ public final class SingleTypeRelationshipImporter {
                 KernelTransaction kernelTransaction
             ) {
                 RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
-                    idMap.cloneIdMapping(),
+                    idMap.cloneIdMap(),
                     typeId,
                     bulkSize,
                     validateRelationships

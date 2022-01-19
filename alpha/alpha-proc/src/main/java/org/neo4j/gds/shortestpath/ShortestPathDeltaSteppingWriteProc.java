@@ -104,7 +104,7 @@ public class ShortestPathDeltaSteppingWriteProc extends ShortestPathDeltaSteppin
                     taskRegistryFactory
                 );
                 nodePropertyExporterBuilder
-                    .withIdMapping(graph)
+                    .withIdMap(graph)
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .withProgressTracker(progressTracker)
                     .parallel(Pools.DEFAULT, config.writeConcurrency())

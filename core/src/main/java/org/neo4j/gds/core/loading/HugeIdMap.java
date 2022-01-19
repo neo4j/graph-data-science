@@ -109,7 +109,7 @@ public class HugeIdMap implements IdMap {
     }
 
     @Override
-    public IdMap rootIdMapping() {
+    public IdMap rootIdMap() {
         return this;
     }
 
@@ -197,7 +197,7 @@ public class HugeIdMap implements IdMap {
             cursor++;
         }
 
-        HugeSparseLongArray newNodeToGraphIds = HugeIdMapBuilderOps.buildSparseIdMapping(
+        HugeSparseLongArray newNodeToGraphIds = HugeIdMapBuilderOps.buildSparseIdMap(
             newNodeCount,
             nodeToGraphIds.capacity(),
             concurrency,
@@ -256,8 +256,8 @@ public class HugeIdMap implements IdMap {
         }
 
         @Override
-        public IdMap rootIdMapping() {
-            return rootIdMap.rootIdMapping();
+        public IdMap rootIdMap() {
+            return rootIdMap.rootIdMap();
         }
 
         @Override

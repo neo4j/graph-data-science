@@ -95,11 +95,11 @@ final class NodesFilter {
         progressTracker.endSubTask();
 
         var idMapAndProperties = nodesBuilder.build();
-        var filteredIdMapping = idMapAndProperties.idMap();
+        var filteredIdMap = idMapAndProperties.idMap();
 
         progressTracker.beginSubTask();
         var filteredNodePropertyStores = filterNodeProperties(
-            filteredIdMapping,
+            filteredIdMap,
             graphStore,
             concurrency,
             progressTracker
@@ -107,7 +107,7 @@ final class NodesFilter {
         progressTracker.endSubTask();
 
         return ImmutableFilteredNodes.builder()
-            .idMap(filteredIdMapping)
+            .idMap(filteredIdMap)
             .propertyStores(filteredNodePropertyStores)
             .build();
     }

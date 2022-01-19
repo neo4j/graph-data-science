@@ -52,7 +52,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
     ) {
         return new Builder(transactionContext)
             .withRelationships(relationships)
-            .withIdMapping(idMap)
+            .withIdMap(idMap)
             .withTerminationFlag(terminationFlag);
     }
 

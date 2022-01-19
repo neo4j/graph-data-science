@@ -115,7 +115,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public IdMap rootIdMapping() {
+    public IdMap rootIdMap() {
         throw new NullGraphStore.NullGraphException();
     }
 
