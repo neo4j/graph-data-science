@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.warnings;
 
+import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -29,6 +30,7 @@ import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
 
+@ServiceProvider
 public class WarningRegistryExtension extends ExtensionFactory<WarningRegistryExtension.Dependencies> {
 
     public WarningRegistryExtension() {

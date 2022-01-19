@@ -71,8 +71,6 @@ public interface ExecutionContext {
         return api().databaseId();
     }
 
-    ;
-
     @Value.Lazy
     default boolean isGdsAdmin() {
         if (transaction() == null) {

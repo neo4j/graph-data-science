@@ -24,7 +24,7 @@ public class LocalWarningRegistryFactory implements  WarningRegistryFactory {
     private final WarningStore warningStore;
 
 
-    LocalWarningRegistryFactory(String username, WarningStore warningStore) {
+    public LocalWarningRegistryFactory(String username, WarningStore warningStore) {
         this.username = username;
         this.warningStore = warningStore;
     }

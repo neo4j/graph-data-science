@@ -32,7 +32,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.core.utils.warnings.WarningRegistryExtension;
 import org.neo4j.gds.core.utils.warnings.WarningRegistryFactory;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
@@ -78,8 +77,7 @@ class UserLogProcTest extends BaseProcTest {
         // make sure that we 1) have our extension under test and 2) have it only once
         builder.removeExtensions(ex -> ex instanceof TaskRegistryExtension);
         builder.addExtension(new TaskRegistryExtension());
-        builder.removeExtensions(ex -> ex instanceof WarningRegistryExtension);
-        builder.addExtension(new WarningRegistryExtension());
+
 
     }
 

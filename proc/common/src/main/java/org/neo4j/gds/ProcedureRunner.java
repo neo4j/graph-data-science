@@ -24,6 +24,8 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyWarningRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.WarningRegistryFactory;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -44,7 +46,7 @@ public final class ProcedureRunner {
             caller.callContext,
             caller.log,
             caller.taskRegistryFactory,
-            caller.allocationTracker,
+            EmptyWarningRegistryFactory.INSTANCE, caller.allocationTracker,
             caller.procedureTransaction,
             caller.username
         );
@@ -56,6 +58,7 @@ public final class ProcedureRunner {
         ProcedureCallContext procedureCallContext,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
+        WarningRegistryFactory warningRegistryFactory,
         AllocationTracker allocationTracker,
         Transaction tx,
         Username username
@@ -74,6 +77,7 @@ public final class ProcedureRunner {
         proc.log = log;
         proc.allocationTracker = allocationTracker;
         proc.taskRegistryFactory = taskRegistryFactory;
+        proc.warningRegistryFactory = warningRegistryFactory;
         proc.username = username;
 
         var maybeModelCatalogField = Arrays.stream(procClass.getFields())
@@ -111,7 +115,7 @@ public final class ProcedureRunner {
             procedureCallContext,
             log,
             taskRegistryFactory,
-            allocationTracker,
+            EmptyWarningRegistryFactory.INSTANCE, allocationTracker,
             tx,
             username
         );
