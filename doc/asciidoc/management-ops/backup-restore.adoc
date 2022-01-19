@@ -39,9 +39,9 @@ YIELD
 | Name          | Type           | Description
 | graphName     | String         | The name of the persisted graph or an empty string if a model was persisted instead.
 | modelName     | String         | The name of the persisted model or an empty string if a graph was persisted instead.
-| exportPath    | String         | Path to which the graph/model was persisted to.
-| backupTime    | LocalDateTime  | Point in time when the backup was performed.
-| exportMillis  | Long           | Amount of time exporting took in milliseconds.
+| exportPath | String | Path where the backups are stored at.
+| backupTime    | LocalDateTime  | Point in time when the backup was created.
+| exportMillis  | Long           | Milliseconds for creating the backup
 | status        | String         | Status of the persistence operation. Either `SUCCESSFUL` or `FAILED`.
 |===
 --
