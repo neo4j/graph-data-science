@@ -44,7 +44,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     static final Set<String> REQUIRED_COLUMNS = Set.of(SOURCE_COLUMN, TARGET_COLUMN);
     static final Set<String> RESERVED_COLUMNS = Set.of(SOURCE_COLUMN, TARGET_COLUMN, TYPE_COLUMN);
 
-    private final IdMap nodeMapping;
+    private final IdMap idMap;
     private final ObjectIntHashMap<String> propertyKeyIdsByName;
     private final ObjectDoubleHashMap<String> propertyDefaultValueByName;
     private final CypherRelationshipLoader.Context loaderContext;
@@ -68,7 +68,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private final boolean throwOnUnMappedNodeIds;
 
     RelationshipRowVisitor(
-        IdMap nodeMapping,
+        IdMap idMap,
         CypherRelationshipLoader.Context loaderContext,
         ObjectIntHashMap<String> propertyKeyIdsByName,
         ObjectDoubleHashMap<String> propertyDefaultValueByName,
@@ -77,7 +77,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         boolean throwOnUnMappedNodeIds,
         ProgressTracker progressTracker
     ) {
-        this.nodeMapping = nodeMapping;
+        this.idMap = idMap;
         this.propertyKeyIdsByName = propertyKeyIdsByName;
         this.propertyDefaultValueByName = propertyDefaultValueByName;
         this.propertyCount = propertyKeyIdsByName.size();
@@ -130,7 +130,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 propertyReader = RelationshipImporter.preLoadedPropertyReader();
             }
             // Create thread-local relationship importer
-            var importer = importerBuilder.withBuffer(nodeMapping, bufferSize, propertyReader);
+            var importer = importerBuilder.withBuffer(idMap, bufferSize, propertyReader);
 
             localImporters.put(relationshipType, importer);
             localRelationshipIds.put(relationshipType, 0);
@@ -190,7 +190,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private void readTargetId(Result.ResultRow row) {
         long neoTargetId = row.getNumber(TARGET_COLUMN).longValue();
         if (neoTargetId != lastNeoTargetId) {
-            targetId = nodeMapping.toMappedNodeId(neoTargetId);
+            targetId = idMap.toMappedNodeId(neoTargetId);
             if (throwOnUnMappedNodeIds) {
                 validateTargetNodeIsLoaded(targetId, neoTargetId);
             }
@@ -201,7 +201,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private void readSourceId(Result.ResultRow row) {
         long neoSourceId = row.getNumber(SOURCE_COLUMN).longValue();
         if (neoSourceId != lastNeoSourceId) {
-            sourceId = nodeMapping.toMappedNodeId(neoSourceId);
+            sourceId = idMap.toMappedNodeId(neoSourceId);
             if (throwOnUnMappedNodeIds) {
                 validateSourceNodeIsLoaded(sourceId, neoSourceId);
             }

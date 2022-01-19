@@ -30,86 +30,86 @@ import java.util.function.LongPredicate;
 
 public abstract class IdMapAdapter implements IdMap {
 
-    private final IdMap nodeMapping;
+    private final IdMap idMap;
 
-    public IdMapAdapter(IdMap nodeMapping) {
-        this.nodeMapping = nodeMapping;
+    public IdMapAdapter(IdMap idMap) {
+        this.idMap = idMap;
     }
 
     @Override
     public Collection<PrimitiveLongIterable> batchIterables(
         long batchSize
     ) {
-        return nodeMapping.batchIterables(batchSize);
+        return idMap.batchIterables(batchSize);
     }
 
     @Override
     public long toMappedNodeId(long nodeId) {
-        return nodeMapping.toMappedNodeId(nodeId);
+        return idMap.toMappedNodeId(nodeId);
     }
 
     @Override
     public long toOriginalNodeId(long nodeId) {
-        return nodeMapping.toOriginalNodeId(nodeId);
+        return idMap.toOriginalNodeId(nodeId);
     }
 
     @Override
     public long toRootNodeId(long nodeId) {
-        return nodeMapping.toRootNodeId(nodeId);
+        return idMap.toRootNodeId(nodeId);
     }
 
     @Override
     public IdMap rootIdMapping() {
-        return nodeMapping.rootIdMapping();
+        return idMap.rootIdMapping();
     }
 
     @Override
     public boolean contains(long nodeId) {
-        return nodeMapping.contains(nodeId);
+        return idMap.contains(nodeId);
     }
 
     @Override
     public long nodeCount() {
-        return nodeMapping.nodeCount();
+        return idMap.nodeCount();
     }
 
     @Override
     public long rootNodeCount() {
-        return nodeMapping.rootNodeCount();
+        return idMap.rootNodeCount();
     }
 
     @Override
     public long highestNeoId() {
-        return nodeMapping.highestNeoId();
+        return idMap.highestNeoId();
     }
 
     @Override
     public void forEachNode(LongPredicate consumer) {
-        nodeMapping.forEachNode(consumer);
+        idMap.forEachNode(consumer);
     }
 
     @Override
     public PrimitiveLongIterator nodeIterator() {
-        return nodeMapping.nodeIterator();
+        return idMap.nodeIterator();
     }
 
     @Override
     public Set<NodeLabel> nodeLabels(long nodeId) {
-        return nodeMapping.nodeLabels(nodeId);
+        return idMap.nodeLabels(nodeId);
     }
 
     @Override
     public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        nodeMapping.forEachNodeLabel(nodeId, consumer);
+        idMap.forEachNodeLabel(nodeId, consumer);
     }
 
     @Override
     public Set<NodeLabel> availableNodeLabels() {
-        return nodeMapping.availableNodeLabels();
+        return idMap.availableNodeLabels();
     }
 
     @Override
     public boolean hasLabel(long nodeId, NodeLabel label) {
-        return nodeMapping.hasLabel(nodeId, label);
+        return idMap.hasLabel(nodeId, label);
     }
 }

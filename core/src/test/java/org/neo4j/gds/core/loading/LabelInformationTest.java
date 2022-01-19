@@ -42,11 +42,11 @@ class LabelInformationTest {
 
     @Test
     void singleLabelAssignmentWithNonDirectMapping() {
-        var nodeMapping = LongStream
+        var idMap = LongStream
             .range(0, 10)
             .boxed()
             .collect(Collectors.toMap(nodeId -> 42 * (nodeId + 1337), nodeId -> nodeId));
-            testLabelAssignment(nodeMapping.keySet(), nodeMapping::get);
+            testLabelAssignment(idMap.keySet(), idMap::get);
     }
 
     private void testLabelAssignment(Collection<Long> nodeIds, LongUnaryOperator nodeIdMapping) {

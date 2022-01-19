@@ -39,7 +39,7 @@ public class NodeStore {
 
     final HugeIntArray labelCounts;
 
-    final IdMap nodeMapping;
+    final IdMap idMap;
 
     final Map<String, Map<String, NodeProperties>> nodeProperties;
     final Map<String, LongFunction<Object>> additionalProperties;
@@ -51,17 +51,17 @@ public class NodeStore {
     public NodeStore(
         long nodeCount,
         HugeIntArray labelCounts,
-        IdMap nodeMapping,
+        IdMap idMap,
         boolean hasLabels,
         Map<String, Map<String, NodeProperties>> nodeProperties,
         Map<String, LongFunction<Object>> additionalProperties
     ) {
         this.nodeCount = nodeCount;
         this.labelCounts = labelCounts;
-        this.nodeMapping = nodeMapping;
+        this.idMap = idMap;
         this.nodeProperties = nodeProperties;
         this.hasLabels = hasLabels;
-        this.availableNodeLabels = nodeMapping.availableNodeLabels();
+        this.availableNodeLabels = idMap.availableNodeLabels();
         this.additionalProperties = additionalProperties;
     }
 
@@ -74,7 +74,7 @@ public class NodeStore {
     }
 
     int labelCount() {
-        return !hasLabels() ? 0 : nodeMapping.availableNodeLabels().size();
+        return !hasLabels() ? 0 : idMap.availableNodeLabels().size();
     }
 
     public int propertyCount() {
@@ -94,7 +94,7 @@ public class NodeStore {
 
         int i = 0;
         for (var nodeLabel : availableNodeLabels) {
-            if (nodeMapping.hasLabel(nodeId, nodeLabel)) {
+            if (idMap.hasLabel(nodeId, nodeLabel)) {
                 labels[i++] = nodeLabel.name;
             }
         }

@@ -85,8 +85,8 @@ public final class NativeNodePropertyImporter {
         }
     }
 
-    public Map<NodeLabel, Map<PropertyMapping, NodeProperties>> result(IdMap nodeMapping) {
-        return buildersByLabel.build(nodeMapping);
+    public Map<NodeLabel, Map<PropertyMapping, NodeProperties>> result(IdMap idMap) {
+        return buildersByLabel.build(idMap);
     }
 
     private int importProperty(long neoNodeId, long[] labelIds, PropertyCursor propertyCursor) {
@@ -227,7 +227,7 @@ public final class NativeNodePropertyImporter {
             builders.forEach(action);
         }
 
-        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> build(IdMap nodeMapping) {
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> build(IdMap idMap) {
             return builders
                 .entrySet()
                 .stream()
@@ -235,7 +235,7 @@ public final class NativeNodePropertyImporter {
                     Map.Entry::getKey,
                     entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        builderEntry -> builderEntry.getValue().build(nodeMapping)
+                        builderEntry -> builderEntry.getValue().build(idMap)
                     ))
                 ));
         }

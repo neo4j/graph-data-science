@@ -439,8 +439,8 @@ public class HugeGraph implements CSRGraph {
     @Override
     public void releaseProperties() {
         if (canRelease) {
-            for (NodeProperties nodeMapping : nodeProperties.values()) {
-                allocationTracker.remove(nodeMapping.release());
+            for (NodeProperties idMap : nodeProperties.values()) {
+                allocationTracker.remove(idMap.release());
             }
         }
     }

@@ -308,8 +308,8 @@ public final class GraphFactory {
         );
     }
 
-    public static Relationships emptyRelationships(IdMap nodeMapping, AllocationTracker allocationTracker) {
-        return initRelationshipsBuilder().nodes(nodeMapping).allocationTracker(allocationTracker).build().build();
+    public static Relationships emptyRelationships(IdMap idMap, AllocationTracker allocationTracker) {
+        return initRelationshipsBuilder().nodes(idMap).allocationTracker(allocationTracker).build().build();
     }
 
     public static HugeGraph create(IdMap idMap, Relationships relationships, AllocationTracker allocationTracker) {

@@ -175,16 +175,16 @@ public final class CsvGraphStoreImporter {
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        var nodeMappingAndProperties = nodesBuilder.build();
-        graphStoreBuilder.nodes(nodeMappingAndProperties.idMap());
-        nodeMappingAndProperties.nodeProperties().orElse(Map.of())
+        var idMapAndProperties = nodesBuilder.build();
+        graphStoreBuilder.nodes(idMapAndProperties.idMap());
+        idMapAndProperties.nodeProperties().orElse(Map.of())
             .forEach((label, propertyMap) -> {
                 var nodeStoreProperties = propertyKeyToNodePropertyMapping(nodeSchema, label, propertyMap);
                 graphStoreBuilder.putNodePropertyStores(label, ImmutableNodePropertyStore.of(nodeStoreProperties));
             });
 
         progressTracker.endSubTask();
-        return nodeMappingAndProperties.idMap();
+        return idMapAndProperties.idMap();
     }
 
     private Map<String, NodeProperty> propertyKeyToNodePropertyMapping(

@@ -56,7 +56,7 @@ final class NodesFilter {
 
     @ValueClass
     interface FilteredNodes {
-        IdMap nodeMapping();
+        IdMap idMap();
 
         Map<NodeLabel, NodePropertyStore> propertyStores();
     }
@@ -94,8 +94,8 @@ final class NodesFilter {
         ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
         progressTracker.endSubTask();
 
-        var nodeMappingAndProperties = nodesBuilder.build();
-        var filteredIdMapping = nodeMappingAndProperties.idMap();
+        var idMapAndProperties = nodesBuilder.build();
+        var filteredIdMapping = idMapAndProperties.idMap();
 
         progressTracker.beginSubTask();
         var filteredNodePropertyStores = filterNodeProperties(
@@ -107,7 +107,7 @@ final class NodesFilter {
         progressTracker.endSubTask();
 
         return ImmutableFilteredNodes.builder()
-            .nodeMapping(filteredIdMapping)
+            .idMap(filteredIdMapping)
             .propertyStores(filteredNodePropertyStores)
             .build();
     }
@@ -185,7 +185,7 @@ final class NodesFilter {
     }
 
     private static NodePropertiesBuilder<?> getPropertiesBuilder(
-        IdMap nodeMapping,
+        IdMap idMap,
         AllocationTracker allocationTracker,
         NodeProperties inputNodeProperties,
         int concurrency
@@ -203,7 +203,7 @@ final class NodesFilter {
                     @Override
                     void accept(long inputNode, long filteredNode) {
 
-                        propertyBuilder.set(nodeMapping.toOriginalNodeId(inputNode), inputProperties.longValue(inputNode));
+                        propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.longValue(inputNode));
                     }
                 };
                 break;
@@ -217,7 +217,7 @@ final class NodesFilter {
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, doubleNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
-                        propertyBuilder.set(nodeMapping.toOriginalNodeId(inputNode), inputProperties.doubleValue(inputNode));
+                        propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.doubleValue(inputNode));
                     }
                 };
                 break;
@@ -231,7 +231,7 @@ final class NodesFilter {
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, doubleArrayNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
-                        propertyBuilder.set(nodeMapping.toOriginalNodeId(inputNode), inputProperties.doubleArrayValue(inputNode));
+                        propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.doubleArrayValue(inputNode));
                     }
                 };
                 break;
@@ -246,7 +246,7 @@ final class NodesFilter {
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, floatArrayNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
-                        propertyBuilder.set(nodeMapping.toOriginalNodeId(inputNode), inputProperties.floatArrayValue(inputNode));
+                        propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.floatArrayValue(inputNode));
                     }
                 };
                 break;
@@ -261,7 +261,7 @@ final class NodesFilter {
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, longArrayNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
-                        propertyBuilder.set(nodeMapping.toOriginalNodeId(inputNode), inputProperties.longArrayValue(inputNode));
+                        propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.longArrayValue(inputNode));
                     }
                 };
                 break;
@@ -324,12 +324,12 @@ final class NodesFilter {
 
         @Override
         public void run() {
-            var nodeMapping = graphStore.nodes();
+            var idMap = graphStore.nodes();
             partition.consume(node -> {
                 nodeContext.init(node);
                 if (expression.evaluate(nodeContext) == Expression.TRUE) {
-                    var originalId = nodeMapping.toOriginalNodeId(node);
-                    NodeLabel[] labels = nodeMapping.nodeLabels(node).toArray(NodeLabel[]::new);
+                    var originalId = idMap.toOriginalNodeId(node);
+                    NodeLabel[] labels = idMap.nodeLabels(node).toArray(NodeLabel[]::new);
                     nodesBuilder.addNode(originalId, labels);
                 }
                 progressTracker.logProgress();
@@ -348,8 +348,8 @@ final class NodesFilter {
 
         abstract void accept(long inputNode, long filteredNode);
 
-        NodeProperties build(long size, IdMap nodeMapping) {
-            return propertyBuilder.build(size, nodeMapping);
+        NodeProperties build(long size, IdMap idMap) {
+            return propertyBuilder.build(size, idMap);
         }
     }
 }

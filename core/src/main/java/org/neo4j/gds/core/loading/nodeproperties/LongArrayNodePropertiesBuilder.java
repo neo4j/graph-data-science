@@ -66,7 +66,7 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    public LongArrayNodeProperties build(long size, IdMap nodeMapping) {
+    public LongArrayNodeProperties build(long size, IdMap idMap) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseLongArrayArray.builder(
@@ -82,11 +82,11 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
             while (drainingIterator.next(batch)) {
                 var page = batch.page;
                 var offset = batch.offset;
-                var end = Math.min(offset + page.length, nodeMapping.highestNeoId() + 1) - offset;
+                var end = Math.min(offset + page.length, idMap.highestNeoId() + 1) - offset;
 
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
-                    var mappedId = nodeMapping.toMappedNodeId(neoId);
+                    var mappedId = idMap.toMappedNodeId(neoId);
                     if (mappedId == IdMap.NOT_FOUND) {
                         continue;
                     }

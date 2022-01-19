@@ -200,12 +200,12 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 .toArray(NodeLabel[]::new)
         ));
 
-        var nodeMapping = nodesBuilder.build().idMap();
+        var idMap = nodesBuilder.build().idMap();
 
-        return IdsAndProperties.of(nodeMapping, loadNodeProperties(nodeMapping));
+        return IdsAndProperties.of(idMap, loadNodeProperties(idMap));
     }
 
-    private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> loadNodeProperties(IdMap nodeMapping) {
+    private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> loadNodeProperties(IdMap idMap) {
         var propertyKeysByLabel = new HashMap<NodeLabel, Set<PropertyMapping>>();
         var propertyBuilders = new HashMap<PropertyMapping, NodePropertiesFromStoreBuilder>();
 
@@ -234,7 +234,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         Map<PropertyMapping, NodeProperties> nodeProperties = propertyBuilders
             .entrySet()
             .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build(nodeMapping)));
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build(idMap)));
 
         return propertyKeysByLabel.entrySet().stream()
             .collect(Collectors.toMap(
@@ -289,9 +289,9 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         Map<String, Relationships.Properties> properties();
     }
 
-    private List<RelationshipsLoadResult> loadRelationships(IdMap nodeMapping) {
+    private List<RelationshipsLoadResult> loadRelationships(IdMap idMap) {
         var propertyKeysByRelType = propertyKeysByRelType();
-        var relationshipBuilders = createRelationshipBuilders(nodeMapping, propertyKeysByRelType);
+        var relationshipBuilders = createRelationshipBuilders(idMap, propertyKeysByRelType);
 
         importRelationships(propertyKeysByRelType, relationshipBuilders);
 
@@ -367,7 +367,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
     @NotNull
     private Map<RelationshipType, RelationshipsBuilder> createRelationshipBuilders(
-        IdMap nodeMapping,
+        IdMap idMap,
         Map<RelationshipType, List<String>> propertyKeysByRelType
     ) {
         return propertyKeysByRelType.entrySet().stream()
@@ -384,7 +384,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                         .collect(Collectors.toList());
 
                     return GraphFactory.initRelationshipsBuilder()
-                        .nodes(nodeMapping)
+                        .nodes(idMap)
                         .orientation(graphProjectConfig.orientation())
                         .aggregation(graphProjectConfig.aggregation())
                         .addAllPropertyConfigs(propertyConfigs)

@@ -164,13 +164,13 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
                 .allocationTracker(allocationTracker())
                 .build();
 
-            IdMap nodeMapping = computationResult.graph();
+            IdMap idMap = computationResult.graph();
 
             if (shouldComputeHistogram(callContext)) {
                 DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
                 topKGraph.forEachNode(nodeId -> {
                     topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
-                        relationshipsBuilder.addFromInternal(nodeMapping.toRootNodeId(sourceNodeId), nodeMapping.toRootNodeId(targetNodeId), property);
+                        relationshipsBuilder.addFromInternal(idMap.toRootNodeId(sourceNodeId), idMap.toRootNodeId(targetNodeId), property);
                         histogram.recordValue(property);
                         return true;
                     });
@@ -180,7 +180,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
             } else {
                 topKGraph.forEachNode(nodeId -> {
                     topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
-                        relationshipsBuilder.addFromInternal(nodeMapping.toRootNodeId(sourceNodeId), nodeMapping.toRootNodeId(targetNodeId), property);
+                        relationshipsBuilder.addFromInternal(idMap.toRootNodeId(sourceNodeId), idMap.toRootNodeId(targetNodeId), property);
                         return true;
                     });
                     return true;

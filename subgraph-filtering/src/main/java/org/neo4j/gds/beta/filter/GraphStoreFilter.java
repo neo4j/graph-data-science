@@ -102,7 +102,7 @@ public final class GraphStoreFilter {
                 graphStore,
                 expressions.relationshipExpression(),
                 inputNodes,
-                filteredNodes.nodeMapping(),
+                filteredNodes.idMap(),
                 config.concurrency(),
                 executorService,
                 progressTracker,
@@ -111,7 +111,7 @@ public final class GraphStoreFilter {
 
             return CSRGraphStore.of(
                 graphStore.databaseId(),
-                filteredNodes.nodeMapping(),
+                filteredNodes.idMap(),
                 filteredNodes.propertyStores(),
                 filteredRelationships.topology(),
                 filteredRelationships.propertyStores(),

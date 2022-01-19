@@ -46,10 +46,10 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 @GdlExtension
 class GraphStoreNodeVisitorTest {
 
-    public static Map<String, NodeProperties> unionNodePropertiesOrThrow(NodesBuilder.IdMapAndProperties nodeMappingAndProperties) {
+    public static Map<String, NodeProperties> unionNodePropertiesOrThrow(NodesBuilder.IdMapAndProperties idMapAndProperties) {
         Optional<Map<String, NodeProperties>> result;
-        var nodeProperties = nodeMappingAndProperties.nodeProperties();
-        var nodeMapping = nodeMappingAndProperties.idMap();
+        var nodeProperties = idMapAndProperties.nodeProperties();
+        var idMap = idMapAndProperties.idMap();
         if (nodeProperties.isEmpty()) {
             result = Optional.empty();
         } else {
@@ -66,7 +66,7 @@ class GraphStoreNodeVisitorTest {
                 .stream()
                 .collect(Collectors.toMap(
                     Map.Entry::getKey,
-                    entry -> new UnionNodeProperties(nodeMapping, entry.getValue())
+                    entry -> new UnionNodeProperties(idMap, entry.getValue())
                 ));
             result = Optional.of(unionNodeProperties);
         }
@@ -108,12 +108,12 @@ class GraphStoreNodeVisitorTest {
             return true;
         });
 
-        var nodeMappingAndProperties = nodesBuilder.build();
-        var nodeMapping = nodeMappingAndProperties.idMap();
-        var nodeProperties = unionNodePropertiesOrThrow(nodeMappingAndProperties);
-        var relationships = GraphFactory.emptyRelationships(nodeMapping, AllocationTracker.empty());
+        var idMapAndProperties = nodesBuilder.build();
+        var idMap = idMapAndProperties.idMap();
+        var nodeProperties = unionNodePropertiesOrThrow(idMapAndProperties);
+        var relationships = GraphFactory.emptyRelationships(idMap, AllocationTracker.empty());
         HugeGraph actualGraph = GraphFactory.create(
-            nodeMapping,
+            idMap,
             nodeSchema,
             nodeProperties,
             RelationshipType.ALL_RELATIONSHIPS,

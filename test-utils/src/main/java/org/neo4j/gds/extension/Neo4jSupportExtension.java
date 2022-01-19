@@ -92,19 +92,19 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         List<String> columns = result.columns();
         Map<String, Object> row = result.next();
 
-        Map<String, Node> nodeMapping = new HashMap<>();
+        Map<String, Node> idMap = new HashMap<>();
         columns.forEach(column -> {
             Object value = row.get(column);
             if (value instanceof NodeEntity) {
-                nodeMapping.put(column, (NodeEntity) value);
+                idMap.put(column, (NodeEntity) value);
             }
         });
 
-        return nodeMapping;
+        return idMap;
     }
 
-    private void injectFields(ExtensionContext context, GraphDatabaseAPI db, Map<String, Node> nodeMapping) {
-        NodeFunction nodeFunction = nodeMapping::get;
+    private void injectFields(ExtensionContext context, GraphDatabaseAPI db, Map<String, Node> idMap) {
+        NodeFunction nodeFunction = idMap::get;
         IdFunction idFunction = variable -> nodeFunction.of(variable).getId();
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
             injectInstance(testInstance, nodeFunction, NodeFunction.class);

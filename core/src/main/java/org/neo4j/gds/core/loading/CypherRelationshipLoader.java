@@ -60,7 +60,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 @Value.Enclosing
 class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoader.LoadResult> {
 
-    private final IdMap nodeMapping;
+    private final IdMap idMap;
     private final Context loaderContext;
     private final GraphDimensions dimensionsAfterNodeLoading;
     private final ProgressTracker progressTracker;
@@ -82,14 +82,14 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     CypherRelationshipLoader(
         String relationshipQuery,
-        IdMap nodeMapping,
+        IdMap idMap,
         GraphProjectFromCypherConfig config,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker
     ) {
-        super(relationshipQuery, nodeMapping.nodeCount(), config, loadingContext);
-        this.nodeMapping = nodeMapping;
+        super(relationshipQuery, idMap.nodeCount(), config, loadingContext);
+        this.idMap = idMap;
         this.dimensionsAfterNodeLoading = dimensions;
         this.progressTracker = progressTracker;
         this.loaderContext = new Context();
@@ -172,7 +172,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         }
 
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
-            nodeMapping,
+            idMap,
             loaderContext,
             propertyKeyIdsByName,
             propertyDefaultValueByName,
@@ -248,7 +248,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             this.importerBuildersByType = new HashMap<>();
             this.allBuilders = new HashMap<>();
 
-            ImportSizing importSizing = ImportSizing.of(cypherConfig.readConcurrency(), nodeMapping.nodeCount());
+            ImportSizing importSizing = ImportSizing.of(cypherConfig.readConcurrency(), idMap.nodeCount());
             this.pageSize = importSizing.pageSize();
             this.numberOfPages = importSizing.numberOfPages();
         }
@@ -272,7 +272,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .toArray(Aggregation[]::new);
 
             AdjacencyListWithPropertiesBuilder builder = AdjacencyListWithPropertiesBuilder.create(
-                nodeMapping::nodeCount,
+                idMap::nodeCount,
                 AdjacencyFactory.configured(),
                 projection,
                 aggregationsWithDefault,

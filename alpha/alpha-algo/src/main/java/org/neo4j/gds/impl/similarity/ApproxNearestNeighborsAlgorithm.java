@@ -567,7 +567,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
         default GraphStore buildGraphStore(
             NamedDatabaseId databaseId,
-            IdMap nodeMapping,
+            IdMap idMap,
             int concurrency,
             AllocationTracker allocationTracker
         ) {
@@ -580,7 +580,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
             return CSRGraphStore.of(
                 databaseId,
-                nodeMapping,
+                idMap,
                 Collections.emptyMap(),
                 topology,
                 Collections.emptyMap(),
@@ -589,16 +589,16 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             );
         }
 
-        static RelationshipImporter of(IdMap nodeMapping, ExecutorService executorService, AllocationTracker allocationTracker) {
+        static RelationshipImporter of(IdMap idMap, ExecutorService executorService, AllocationTracker allocationTracker) {
             RelationshipsBuilder outImporter = GraphFactory.initRelationshipsBuilder()
-                .nodes(nodeMapping)
+                .nodes(idMap)
                 .orientation(Orientation.NATURAL)
                 .executorService(executorService)
                 .allocationTracker(allocationTracker)
                 .build();
 
             RelationshipsBuilder inImporter = GraphFactory.initRelationshipsBuilder()
-                .nodes(nodeMapping)
+                .nodes(idMap)
                 .orientation(Orientation.REVERSE)
                 .executorService(executorService)
                 .allocationTracker(allocationTracker)

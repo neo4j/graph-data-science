@@ -358,7 +358,7 @@ public final class TestSupport {
         return TransactionContext.of(api, SecurityContext.AUTH_DISABLED);
     }
 
-    public static IdMap nodeMapping(long nodeCount) {
+    public static IdMap idMap(long nodeCount) {
         var builder = GraphFactory
             .initNodesBuilder()
             .nodeCount(nodeCount)
@@ -373,7 +373,7 @@ public final class TestSupport {
         return builder.build().idMap();
     }
 
-    public static IdMap nodeMapping(long[] originalIds) {
+    public static IdMap idMap(long[] originalIds) {
         var builder = GraphFactory
             .initNodesBuilder()
             .nodeCount(originalIds.length)

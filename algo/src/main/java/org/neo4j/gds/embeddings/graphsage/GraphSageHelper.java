@@ -296,18 +296,18 @@ public final class GraphSageHelper {
             ));
     }
 
-    private static NodeLabel labelOf(IdMap nodeMapping, long nodeId) {
+    private static NodeLabel labelOf(IdMap idMap, long nodeId) {
         var labelRef = new AtomicReference<NodeLabel>();
         var labelCount = new MutableInt(0);
 
-        nodeMapping.forEachNodeLabel(nodeId, nodeLabel -> {
+        idMap.forEachNodeLabel(nodeId, nodeLabel -> {
             labelRef.set(nodeLabel);
             return labelCount.getAndIncrement() == 0;
         });
 
         if (labelCount.intValue() != 1) {
             throw new IllegalArgumentException(
-                formatWithLocale("Each node must have exactly one label: nodeId=%d, labels=%s", nodeId, nodeMapping.nodeLabels(nodeId))
+                formatWithLocale("Each node must have exactly one label: nodeId=%d, labels=%s", nodeId, idMap.nodeLabels(nodeId))
             );
         }
 

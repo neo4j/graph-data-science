@@ -34,15 +34,15 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class UnionNodeProperties implements NodeProperties {
 
     private final ValueType valueType;
-    private final IdMap nodeMapping;
+    private final IdMap idMap;
     private final Map<NodeLabel, NodeProperties> labelToNodePropertiesMap;
     private final ValueProducer valueProducer;
     private final NodeLabel[] availableNodeLabels;
 
-    public UnionNodeProperties(IdMap nodeMapping, Map<NodeLabel, NodeProperties> labelToNodePropertiesMap) {
-        this.nodeMapping = nodeMapping;
+    public UnionNodeProperties(IdMap idMap, Map<NodeLabel, NodeProperties> labelToNodePropertiesMap) {
+        this.idMap = idMap;
         this.labelToNodePropertiesMap = labelToNodePropertiesMap;
-        this.availableNodeLabels = nodeMapping.availableNodeLabels().toArray(NodeLabel[]::new);
+        this.availableNodeLabels = idMap.availableNodeLabels().toArray(NodeLabel[]::new);
 
         var valueTypes = labelToNodePropertiesMap.values()
             .stream()
@@ -168,7 +168,7 @@ public class UnionNodeProperties implements NodeProperties {
 
     private NodeProperties getPropertiesForNodeId(long nodeId) {
         for (NodeLabel label : availableNodeLabels) {
-            if (nodeMapping.hasLabel(nodeId, label)) {
+            if (idMap.hasLabel(nodeId, label)) {
                 NodeProperties nodeProperties = labelToNodePropertiesMap.get(label);
                 if (nodeProperties != null) {
                     // This returns the property value for the first label that has the property.

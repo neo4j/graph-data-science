@@ -175,7 +175,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
 
     @Override
     public IdsAndProperties build() {
-        var nodeMapping = idMapBuilder.build(
+        var idMap = idMapBuilder.build(
             labelInformationBuilder,
             Math.max(dimensions.highestPossibleNodeCount() - 1, 0),
             concurrency,
@@ -185,17 +185,17 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
 
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter == null
             ? new HashMap<>()
-            : nodePropertyImporter.result(nodeMapping);
+            : nodePropertyImporter.result(idMap);
 
         if (!propertyMappings.indexedProperties().isEmpty()) {
-            importPropertiesFromIndex(nodeMapping, nodeProperties);
+            importPropertiesFromIndex(idMap, nodeProperties);
         }
 
-        return IdsAndProperties.of(nodeMapping, nodeProperties);
+        return IdsAndProperties.of(idMap, nodeProperties);
     }
 
     private void importPropertiesFromIndex(
-        IdMap nodeMapping,
+        IdMap idMap,
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties
     ) {
         long indexStart = System.nanoTime();
@@ -225,7 +225,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
                         labelAndProperties.getKey(),
                         mappingAndIndex.property(),
                         mappingAndIndex.index(),
-                        nodeMapping,
+                        idMap,
                         progressTracker,
                         terminationFlag,
                         executorService,
@@ -246,7 +246,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
                 }
                 var nodeLabel = propertyImporter.nodeLabel();
                 var storeProperties = nodeProperties.computeIfAbsent(nodeLabel, ignore -> new HashMap<>());
-                storeProperties.put(propertyImporter.mapping(), propertyImporter.build(nodeMapping));
+                storeProperties.put(propertyImporter.mapping(), propertyImporter.build(idMap));
                 recordsImported += propertyImporter.imported();
             }
 

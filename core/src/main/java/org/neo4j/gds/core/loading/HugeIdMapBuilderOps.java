@@ -105,15 +105,15 @@ public final class HugeIdMapBuilderOps {
         Function<HugeSparseLongArray.Builder, BiLongConsumer> nodeAdder,
         AllocationTracker allocationTracker
     ) {
-        HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.builder(
+        HugeSparseLongArray.Builder idMapBuilder = HugeSparseLongArray.builder(
             IdMap.NOT_FOUND,
             // We need to allocate space for `highestNode + 1` since we
             // need to be able to store a node with `id = highestNodeId`.
             highestNodeId + 1,
             allocationTracker::add
         );
-        ParallelUtil.readParallel(concurrency, nodeCount, Pools.DEFAULT, nodeAdder.apply(nodeMappingBuilder));
-        return nodeMappingBuilder.build();
+        ParallelUtil.readParallel(concurrency, nodeCount, Pools.DEFAULT, nodeAdder.apply(idMapBuilder));
+        return idMapBuilder.build();
     }
 
     static Function<HugeSparseLongArray.Builder, BiLongConsumer> add(HugeLongArray graphIds) {

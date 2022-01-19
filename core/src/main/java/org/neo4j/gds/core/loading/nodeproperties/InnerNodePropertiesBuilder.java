@@ -28,5 +28,5 @@ public abstract class InnerNodePropertiesBuilder {
 
     public abstract void setValue(long neoNodeId, Value value);
 
-    public abstract NodeProperties build(long size, IdMap nodeMapping);
+    public abstract NodeProperties build(long size, IdMap idMap);
 }

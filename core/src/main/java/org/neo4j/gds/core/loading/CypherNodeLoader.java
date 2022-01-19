@@ -101,9 +101,9 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     @Override
     LoadResult result() {
-        var nodeMappingAndProperties = nodesBuilder.buildChecked(highestNodeId);
-        var nodeMapping = nodeMappingAndProperties.idMap();
-        var nodeProperties = nodeMappingAndProperties.nodeProperties().orElseGet(Map::of);
+        var idMapAndProperties = nodesBuilder.buildChecked(highestNodeId);
+        var idMap = idMapAndProperties.idMap();
+        var nodeProperties = idMapAndProperties.nodeProperties().orElseGet(Map::of);
         var nodePropertiesWithPropertyMappings = propertiesWithPropertyMappings(nodeProperties);
 
         Map<String, Integer> propertyIds = nodePropertiesWithPropertyMappings
@@ -120,7 +120,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
         return ImmutableCypherNodeLoader.LoadResult.builder()
             .dimensions(resultDimensions)
-            .idsAndProperties(IdsAndProperties.of(nodeMapping, nodePropertiesWithPropertyMappings))
+            .idsAndProperties(IdsAndProperties.of(idMap, nodePropertiesWithPropertyMappings))
             .build();
     }
 

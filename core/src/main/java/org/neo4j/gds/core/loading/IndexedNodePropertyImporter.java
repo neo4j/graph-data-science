@@ -193,8 +193,8 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         return imported;
     }
 
-    NodeProperties build(IdMap nodeMapping) {
-        return propertiesBuilder.build(nodeMapping);
+    NodeProperties build(IdMap idMap) {
+        return propertiesBuilder.build(idMap);
     }
 
     private @Nullable List<IndexedNodePropertyImporter> prepareParallelScan(

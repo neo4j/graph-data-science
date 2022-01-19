@@ -47,18 +47,18 @@ class CypherIdMapTest {
     @Inject
     IdFunction idFunction;
 
-    CypherIdMap nodeMapping;
+    CypherIdMap idMap;
 
     @BeforeEach
     void setup() {
-        this.nodeMapping = new CypherIdMap(graphStore.nodes());
+        this.idMap = new CypherIdMap(graphStore.nodes());
     }
 
     @Test
     void shouldAddNewNodeLabels() {
         var newNodeLabel = NodeLabel.of("new");
-        this.nodeMapping.addNodeLabel(newNodeLabel);
-        assertThat(this.nodeMapping.availableNodeLabels()).contains(newNodeLabel);
+        this.idMap.addNodeLabel(newNodeLabel);
+        assertThat(this.idMap.availableNodeLabels()).contains(newNodeLabel);
         assertThat(this.graphStore.nodes().availableNodeLabels()).doesNotContain(newNodeLabel);
     }
 
@@ -66,20 +66,20 @@ class CypherIdMapTest {
     void shouldAddNewLabelsToNode() {
         var newNodeLabel = NodeLabel.of("new");
         var nodeA = idFunction.of("a");
-        this.nodeMapping.addLabelToNode(nodeA, newNodeLabel);
-        assertThat(this.nodeMapping.nodeLabels(nodeA)).containsExactlyInAnyOrder(NodeLabel.of("A"), newNodeLabel);
-        assertThat(this.nodeMapping.hasLabel(nodeA, newNodeLabel)).isTrue();
-        assertThat(this.nodeMapping.hasLabel(nodeA, NodeLabel.of("B"))).isFalse();
+        this.idMap.addLabelToNode(nodeA, newNodeLabel);
+        assertThat(this.idMap.nodeLabels(nodeA)).containsExactlyInAnyOrder(NodeLabel.of("A"), newNodeLabel);
+        assertThat(this.idMap.hasLabel(nodeA, newNodeLabel)).isTrue();
+        assertThat(this.idMap.hasLabel(nodeA, NodeLabel.of("B"))).isFalse();
     }
 
     @Test
     void shouldAddAlreadyExistingLabelsToNode() {
         var existingLabel = NodeLabel.of("B");
         var nodeA = idFunction.of("a");
-        this.nodeMapping.addLabelToNode(nodeA, existingLabel);
-        assertThat(this.nodeMapping.nodeLabels(nodeA)).containsExactlyInAnyOrder(NodeLabel.of("A"), existingLabel);
-        assertThat(this.nodeMapping.hasLabel(nodeA, existingLabel)).isTrue();
-        assertThat(this.nodeMapping.hasLabel(nodeA, NodeLabel.of("C"))).isFalse();
+        this.idMap.addLabelToNode(nodeA, existingLabel);
+        assertThat(this.idMap.nodeLabels(nodeA)).containsExactlyInAnyOrder(NodeLabel.of("A"), existingLabel);
+        assertThat(this.idMap.hasLabel(nodeA, existingLabel)).isTrue();
+        assertThat(this.idMap.hasLabel(nodeA, NodeLabel.of("C"))).isFalse();
     }
 
     @Test
@@ -87,11 +87,11 @@ class CypherIdMapTest {
         var newNodeLabel = NodeLabel.of("new");
         var existingLabel = NodeLabel.of("B");
         var nodeA = idFunction.of("a");
-        this.nodeMapping.addLabelToNode(nodeA, newNodeLabel);
-        this.nodeMapping.addLabelToNode(nodeA, existingLabel);
+        this.idMap.addLabelToNode(nodeA, newNodeLabel);
+        this.idMap.addLabelToNode(nodeA, existingLabel);
 
         var nodeLabels = new HashSet<NodeLabel>();
-        this.nodeMapping.forEachNodeLabel(nodeA, nodeLabels::add);
+        this.idMap.forEachNodeLabel(nodeA, nodeLabels::add);
         assertThat(nodeLabels).containsExactlyInAnyOrder(NodeLabel.of("A"), newNodeLabel, existingLabel);
     }
 }

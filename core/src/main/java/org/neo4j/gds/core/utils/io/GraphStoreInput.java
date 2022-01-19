@@ -190,7 +190,7 @@ public final class GraphStoreInput implements CompatInput {
         @Override
         public boolean next(InputEntityVisitor visitor) throws IOException {
             if (id < endId) {
-                visitor.id(nodeStore.nodeMapping.toOriginalNodeId(id));
+                visitor.id(nodeStore.idMap.toOriginalNodeId(id));
 
                 if (hasLabels) {
                     String[] labels = nodeStore.labels(id);
@@ -249,7 +249,7 @@ public final class GraphStoreInput implements CompatInput {
                 .collect(Collectors.toMap(
                     Map.Entry::getKey,
                     e -> new RelationshipConsumer(
-                        relationshipStore.nodeMapping(),
+                        relationshipStore.idMap(),
                         e.getKey().name,
                         e.getValue().propertyKeys()
                     )
@@ -274,17 +274,17 @@ public final class GraphStoreInput implements CompatInput {
         }
 
         private static final class RelationshipConsumer implements CompositeRelationshipIterator.RelationshipConsumer {
-            private final IdMap nodeMapping;
+            private final IdMap idMap;
             private final String relationshipType;
             private final String[] propertyKeys;
             private InputEntityVisitor visitor;
 
             private RelationshipConsumer(
-                IdMap nodeMapping,
+                IdMap idMap,
                 String relationshipType,
                 String[] propertyKeys
             ) {
-                this.nodeMapping = nodeMapping;
+                this.idMap = idMap;
                 this.relationshipType = relationshipType;
                 this.propertyKeys = propertyKeys;
             }
@@ -295,8 +295,8 @@ public final class GraphStoreInput implements CompatInput {
 
             @Override
             public boolean consume(long source, long target, double[] properties) {
-                visitor.startId(nodeMapping.toOriginalNodeId(source));
-                visitor.endId(nodeMapping.toOriginalNodeId(target));
+                visitor.startId(idMap.toOriginalNodeId(source));
+                visitor.endId(idMap.toOriginalNodeId(target));
                 visitor.type(relationshipType);
 
                 for (int propertyIdx = 0; propertyIdx < propertyKeys.length; propertyIdx++) {

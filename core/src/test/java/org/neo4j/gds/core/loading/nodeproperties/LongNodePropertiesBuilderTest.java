@@ -25,7 +25,7 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestSupport.nodeMapping;
+import static org.neo4j.gds.TestSupport.idMap;
 
 public class LongNodePropertiesBuilderTest {
 
@@ -39,7 +39,7 @@ public class LongNodePropertiesBuilderTest {
             originalIds[i] = i * 42L;
         }
 
-        var nodeMapping = nodeMapping(originalIds);
+        var idMap = idMap(originalIds);
 
         var builder = LongNodePropertiesBuilder.of(
             defaultValue,
@@ -51,7 +51,7 @@ public class LongNodePropertiesBuilderTest {
             builder.set(originalIds[i], i * 1337L);
         }
 
-        var longNodeProperties = builder.build(10, nodeMapping);
+        var longNodeProperties = builder.build(10, idMap);
 
         for (int i = 0; i < nodeCount; i++) {
             assertThat(longNodeProperties.longValue(i)).isEqualTo(i * 1337L);

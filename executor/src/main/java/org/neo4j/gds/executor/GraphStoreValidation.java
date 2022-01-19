@@ -212,11 +212,11 @@ public final class GraphStoreValidation {
 
     private static boolean labelFilteredGraphContainsNode(
         Collection<NodeLabel> filteredNodeLabels,
-        IdMap nodeMapping,
+        IdMap idMap,
         long neoNodeId
     ) {
-        var internalNodeId = nodeMapping.safeToMappedNodeId(neoNodeId);
-        return internalNodeId == IdMap.NOT_FOUND || nodeMapping
+        var internalNodeId = idMap.safeToMappedNodeId(neoNodeId);
+        return internalNodeId == IdMap.NOT_FOUND || idMap
             .nodeLabels(internalNodeId)
             .stream()
             .noneMatch(filteredNodeLabels::contains);

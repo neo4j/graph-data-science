@@ -68,7 +68,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
         this.filteredIdMap = filteredIdMap;
     }
 
-    public IdMap nodeMapping() {
+    public IdMap idMap() {
         return filteredIdMap;
     }
 

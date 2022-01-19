@@ -93,7 +93,7 @@ public final class NodePropertiesFromStoreBuilder {
         }
     }
 
-    public NodeProperties build(IdMap nodeMapping) {
+    public NodeProperties build(IdMap idMap) {
         if (innerBuilder.get() == null) {
             if (defaultValue.getObject() != null) {
                 initializeWithType(Values.of(defaultValue.getObject()));
@@ -102,7 +102,7 @@ public final class NodePropertiesFromStoreBuilder {
             }
         }
 
-        return innerBuilder.get().build(this.size.sum(), nodeMapping);
+        return innerBuilder.get().build(this.size.sum(), idMap);
     }
 
     // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.

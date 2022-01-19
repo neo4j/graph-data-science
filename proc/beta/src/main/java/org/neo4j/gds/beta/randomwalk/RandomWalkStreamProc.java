@@ -110,10 +110,10 @@ public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]
         };
     }
 
-    private List<Long> translateInternalToNeoIds(long[] nodes, IdMap nodeMapping) {
+    private List<Long> translateInternalToNeoIds(long[] nodes, IdMap idMap) {
         var translatedNodes = new ArrayList<Long>(nodes.length);
         for (int i = 0; i < nodes.length; i++) {
-            translatedNodes.add(i, nodeMapping.toOriginalNodeId(nodes[i]));
+            translatedNodes.add(i, idMap.toOriginalNodeId(nodes[i]));
         }
 
         return translatedNodes;

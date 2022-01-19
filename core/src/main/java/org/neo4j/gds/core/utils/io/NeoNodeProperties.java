@@ -70,27 +70,27 @@ public interface NeoNodeProperties {
     final class NeoProperties implements LongFunction<Object> {
 
         private final TransactionContext transactionContext;
-        private final IdMap nodeMapping;
+        private final IdMap idMap;
         private final PropertyMapping propertyMapping;
         private final Log log;
 
         static LongFunction<Object> of(
             TransactionContext transactionContext,
-            IdMap nodeMapping,
+            IdMap idMap,
             PropertyMapping propertyMapping,
             Log log
         ) {
-            return new NeoProperties(transactionContext, nodeMapping, propertyMapping, log);
+            return new NeoProperties(transactionContext, idMap, propertyMapping, log);
         }
 
         private NeoProperties(
             TransactionContext transactionContext,
-            IdMap nodeMapping,
+            IdMap idMap,
             PropertyMapping propertyMapping,
             Log log
         ) {
             this.transactionContext = transactionContext;
-            this.nodeMapping = nodeMapping;
+            this.idMap = idMap;
             this.propertyMapping = propertyMapping;
             this.log = log;
         }
@@ -98,7 +98,7 @@ public interface NeoNodeProperties {
         @Override
         public Object apply(long nodeId) {
             return transactionContext.apply((tx, ktx) -> {
-                var neo4jNodeId = nodeMapping.toOriginalNodeId(nodeId);
+                var neo4jNodeId = idMap.toOriginalNodeId(nodeId);
                 try {
                     var node = tx.getNodeById(neo4jNodeId);
                     return node.getProperty(

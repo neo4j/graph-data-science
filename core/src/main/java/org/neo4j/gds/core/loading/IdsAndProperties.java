@@ -39,7 +39,7 @@ public interface IdsAndProperties {
 
     Map<NodeLabel, NodePropertyStore> properties();
 
-    static IdsAndProperties of(IdMap nodeMapping, Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties) {
+    static IdsAndProperties of(IdMap idMap, Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties) {
         Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(properties.size());
         properties.forEach((nodeLabel, propertyMap) -> {
             NodePropertyStore.Builder builder = NodePropertyStore.builder();
@@ -56,6 +56,6 @@ public interface IdsAndProperties {
             ));
             nodePropertyStores.put(nodeLabel, builder.build());
         });
-        return ImmutableIdsAndProperties.of(nodeMapping, nodePropertyStores);
+        return ImmutableIdsAndProperties.of(idMap, nodePropertyStores);
     }
 }

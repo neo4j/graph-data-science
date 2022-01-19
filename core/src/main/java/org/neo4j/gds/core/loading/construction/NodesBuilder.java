@@ -163,7 +163,7 @@ public final class NodesBuilder {
     public IdMapAndProperties build(long highestNeoId, boolean checkDuplicateIds) {
         this.threadLocalBuilder.close();
 
-        var nodeMapping = this.idMapBuilder.build(
+        var idMap = this.idMapBuilder.build(
             labelInformationBuilder,
             highestNeoId,
             concurrency,
@@ -173,19 +173,19 @@ public final class NodesBuilder {
 
         Optional<Map<NodeLabel, Map<String, NodeProperties>>> nodeProperties = Optional.empty();
         if (hasProperties) {
-            nodeProperties = Optional.of(buildProperties(nodeMapping));
+            nodeProperties = Optional.of(buildProperties(idMap));
         }
-        return ImmutableIdMapAndProperties.of(nodeMapping, nodeProperties);
+        return ImmutableIdMapAndProperties.of(idMap, nodeProperties);
     }
 
-    private Map<NodeLabel, Map<String, NodeProperties>> buildProperties(IdMap nodeMapping) {
+    private Map<NodeLabel, Map<String, NodeProperties>> buildProperties(IdMap idMap) {
         Map<NodeLabel, Map<String, NodeProperties>> nodePropertiesByLabel = new HashMap<>();
         for (IntObjectCursor<Map<String, NodePropertiesFromStoreBuilder>> propertyBuilderByLabelToken : this.buildersByLabelTokenAndPropertyToken) {
             var nodeLabels = labelTokenNodeLabelMapping.get(propertyBuilderByLabelToken.key);
             nodeLabels.forEach(nodeLabel ->
                 propertyBuilderByLabelToken.value.forEach((propertyKey, propertyBuilder) -> nodePropertiesByLabel
                     .computeIfAbsent(nodeLabel, __ -> new HashMap<>())
-                    .put(propertyKey, propertyBuilder.build(nodeMapping))
+                    .put(propertyKey, propertyBuilder.build(idMap))
                 )
             );
         }

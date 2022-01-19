@@ -32,8 +32,8 @@ public class CypherIdMap extends IdMapAdapter implements NodeLabelUpdater {
 
     private final Map<NodeLabel, BitSet> additionalNodeLabels;
 
-    CypherIdMap(IdMap nodeMapping) {
-        super(nodeMapping);
+    CypherIdMap(IdMap idMap) {
+        super(idMap);
         this.additionalNodeLabels = new HashMap<>();
     }
 
