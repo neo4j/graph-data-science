@@ -77,6 +77,8 @@ import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.internal.schema.SchemaDescriptors;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.io.pagecache.context.CursorContextFactory;
+import org.neo4j.io.pagecache.context.EmptyVersionContextSupplier;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.DatabaseIdRepository;
@@ -404,7 +406,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             badCollector,
             TransactionLogInitializer.getLogFilesInitializer(),
             new IndexImporterFactoryImpl(dbConfig),
-            EmptyMemoryTracker.INSTANCE
+            EmptyMemoryTracker.INSTANCE,
+            new CursorContextFactory(PageCacheTracer.NULL, EmptyVersionContextSupplier.EMPTY)
         );
     }
 
