@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.assertj.core.api.AbstractBooleanAssert;
+import org.assertj.core.api.AbstractIterableAssert;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.QueryRunner;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.time.ZonedDateTime;
@@ -37,11 +40,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.core.Is.isA;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.neo4j.gds.assertj.AssertionsHelper.booleanAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.creationTimeAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.intAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.listAssertConsumer;
+import static org.neo4j.gds.assertj.AssertionsHelper.stringObjectMapAssertFactory;
+import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphDropProcTest extends BaseProcTest {
@@ -82,7 +92,52 @@ class GraphDropProcTest extends BaseProcTest {
             List.of(
                 Map.ofEntries(
                     entry("graphName", GRAPH_NAME),
-                    entry("configuration", isA(Map.class)),
+                    entry("configuration",
+                    new Condition<>(config -> {
+                        assertThat(config)
+                            .asInstanceOf(stringObjectMapAssertFactory())
+                            .hasSize(9)
+                            .containsEntry(
+                                "nodeProjection", map(
+                                    "A", map(
+                                        "label", "A",
+                                        "properties", emptyMap()
+                                    )
+                                )
+                            )
+                            .containsEntry(
+                                "relationshipProjection", map(
+                                    "REL", map(
+                                        "type", "REL",
+                                        "orientation", "NATURAL",
+                                        "aggregation", "DEFAULT",
+                                        "properties", emptyMap()
+                                    )
+                                )
+                            )
+                            .hasEntrySatisfying(
+                                "relationshipProperties",
+                                listAssertConsumer(AbstractIterableAssert::isEmpty)
+                            )
+                            .hasEntrySatisfying("nodeProperties", listAssertConsumer(AbstractIterableAssert::isEmpty))
+                            .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
+                            .hasEntrySatisfying(
+                                "validateRelationships",
+                                booleanAssertConsumer(AbstractBooleanAssert::isFalse)
+                            )
+                            .hasEntrySatisfying(
+                                "readConcurrency",
+                                intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
+                            )
+                            .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
+                            .hasEntrySatisfying("username", username -> assertThat(username).isNull())
+                            .doesNotContainKeys(
+                                GraphProjectConfig.NODE_COUNT_KEY,
+                                GraphProjectConfig.RELATIONSHIP_COUNT_KEY
+                            );
+
+                        return true;
+                    }, "Assert native `configuration` map")),
                     entry("nodeCount", 2L),
                     entry("relationshipCount", 1L),
                     entry("creationTime", isA(ZonedDateTime.class)),
