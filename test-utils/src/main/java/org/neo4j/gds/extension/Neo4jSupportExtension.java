@@ -62,8 +62,8 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
 
         Class<?> requiredTestClass = context.getRequiredTestClass();
         Optional<String> createQuery = graphProjectQuery(requiredTestClass);
-        Map<String, Node> idMapping = neo4jGraphSetup(db, createQuery);
-        injectFields(context, db, idMapping);
+        Map<String, Node> idMap = neo4jGraphSetup(db, createQuery);
+        injectFields(context, db, idMap);
     }
 
     private Optional<DatabaseManagementService> getDbms(ExtensionContext context) {

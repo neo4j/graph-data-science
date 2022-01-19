@@ -211,13 +211,13 @@ public final class ParallelUtil {
     public static <T extends Runnable> void readParallel(
         final int concurrency,
         final int batchSize,
-        final BatchNodeIterable idMapping,
+        final BatchNodeIterable idMap,
         final ExecutorService executor,
         final HugeParallelGraphImporter<T> importer
     ) {
 
         Collection<PrimitiveLongIterable> iterators =
-            idMapping.batchIterables(batchSize);
+            idMap.batchIterables(batchSize);
 
         int threads = iterators.size();
 

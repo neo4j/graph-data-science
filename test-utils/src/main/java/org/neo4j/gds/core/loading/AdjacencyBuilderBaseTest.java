@@ -58,9 +58,9 @@ public abstract class AdjacencyBuilderBaseTest {
             false
         );
         long nodeCount = 6;
-        DirectIdMap idMapping = new DirectIdMap(nodeCount);
+        DirectIdMap idMap = new DirectIdMap(nodeCount);
 
-        RelationshipsBatchBuffer relationshipsBatchBuffer = new RelationshipsBatchBuffer(idMapping, -1, 10);
+        RelationshipsBatchBuffer relationshipsBatchBuffer = new RelationshipsBatchBuffer(idMap, -1, 10);
         Map<Long, Long> relationships = new HashMap<>();
         for (long i = 0; i < nodeCount; i++) {
             relationships.put(i, nodeCount - i);
