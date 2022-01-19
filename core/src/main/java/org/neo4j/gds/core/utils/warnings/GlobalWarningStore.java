@@ -19,14 +19,19 @@
  */
 package org.neo4j.gds.core.utils.warnings;
 
+import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
+import org.neo4j.kernel.api.procedure.Context;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class GlobalWarningStore implements WarningStore {
+public class GlobalWarningStore implements WarningStore, ThrowingFunction<Context, WarningRegistryFactory, ProcedureException> {
+
     private final Map<String, List<Warning>> registeredWarnings;
     private final int MOST_RECENT = 10;
 
@@ -45,6 +50,11 @@ public class GlobalWarningStore implements WarningStore {
             .add(new Warning(taskId, warningMessage));
     }
 
+    @Override
+    public WarningRegistryFactory apply(Context context) throws ProcedureException {
+        var username = Neo4jProxy.username(context.securityContext().subject());
+        return new LocalWarningRegistryFactory(username, this);
+    }
 }
 
 
