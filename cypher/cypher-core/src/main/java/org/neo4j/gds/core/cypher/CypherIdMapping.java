@@ -21,18 +21,18 @@ package org.neo4j.gds.core.cypher;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class CypherNodeMapping extends NodeMappingAdapter implements NodeLabelUpdater {
+public class CypherIdMapping extends IdMappingAdapter implements NodeLabelUpdater {
 
     private final Map<NodeLabel, BitSet> additionalNodeLabels;
 
-    CypherNodeMapping(NodeMapping nodeMapping) {
+    CypherIdMapping(IdMapping nodeMapping) {
         super(nodeMapping);
         this.additionalNodeLabels = new HashMap<>();
     }

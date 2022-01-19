@@ -26,7 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -290,7 +290,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             nodesBuilder.addNode(input.getId());
         }
 
-        NodeMapping idMap = nodesBuilder.build().nodeMapping();
+        IdMapping idMap = nodesBuilder.build().nodeMapping();
         return IdsAndProperties.of(idMap, Collections.emptyMap());
     }
 
@@ -567,7 +567,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
         default GraphStore buildGraphStore(
             NamedDatabaseId databaseId,
-            NodeMapping nodeMapping,
+            IdMapping nodeMapping,
             int concurrency,
             AllocationTracker allocationTracker
         ) {
@@ -589,7 +589,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             );
         }
 
-        static RelationshipImporter of(NodeMapping nodeMapping, ExecutorService executorService, AllocationTracker allocationTracker) {
+        static RelationshipImporter of(IdMapping nodeMapping, ExecutorService executorService, AllocationTracker allocationTracker) {
             RelationshipsBuilder outImporter = GraphFactory.initRelationshipsBuilder()
                 .nodes(nodeMapping)
                 .orientation(Orientation.NATURAL)

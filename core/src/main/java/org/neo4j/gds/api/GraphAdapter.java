@@ -93,8 +93,8 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public NodeMapping rootNodeMapping() {
-        return graph.rootNodeMapping();
+    public IdMapping rootIdMapping() {
+        return graph.rootIdMapping();
     }
 
     @Override

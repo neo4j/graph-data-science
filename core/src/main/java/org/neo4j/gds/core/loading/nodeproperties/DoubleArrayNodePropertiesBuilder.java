@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.collections.HugeSparseDoubleArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -70,7 +69,7 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
     }
 
     @Override
-    public DoubleArrayNodeProperties build(long size, NodeMapping nodeMapping) {
+    public DoubleArrayNodeProperties build(long size, IdMapping nodeMapping) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseDoubleArrayArray.builder(

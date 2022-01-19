@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.utils.io;
 
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 
@@ -39,7 +39,7 @@ public class NodeStore {
 
     final HugeIntArray labelCounts;
 
-    final NodeMapping nodeMapping;
+    final IdMapping nodeMapping;
 
     final Map<String, Map<String, NodeProperties>> nodeProperties;
     final Map<String, LongFunction<Object>> additionalProperties;
@@ -51,7 +51,7 @@ public class NodeStore {
     public NodeStore(
         long nodeCount,
         HugeIntArray labelCounts,
-        NodeMapping nodeMapping,
+        IdMapping nodeMapping,
         boolean hasLabels,
         Map<String, Map<String, NodeProperties>> nodeProperties,
         Map<String, LongFunction<Object>> additionalProperties

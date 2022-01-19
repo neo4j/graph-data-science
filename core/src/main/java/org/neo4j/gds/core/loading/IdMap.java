@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.collections.HugeSparseArrays;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
@@ -42,7 +42,7 @@ import java.util.function.LongPredicate;
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public class IdMap implements NodeMapping {
+public class IdMap implements IdMapping {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
         .builder(IdMap.class)
@@ -109,7 +109,7 @@ public class IdMap implements NodeMapping {
     }
 
     @Override
-    public NodeMapping rootNodeMapping() {
+    public IdMapping rootIdMapping() {
         return this;
     }
 
@@ -197,7 +197,7 @@ public class IdMap implements NodeMapping {
             cursor++;
         }
 
-        HugeSparseLongArray newNodeToGraphIds = HugeIdMapBuilderOps.buildSparseNodeMapping(
+        HugeSparseLongArray newNodeToGraphIds = HugeIdMapBuilderOps.buildSparseIdMapping(
             newNodeCount,
             nodeToGraphIds.capacity(),
             concurrency,
@@ -220,10 +220,10 @@ public class IdMap implements NodeMapping {
 
     private static class FilteredIdMap extends IdMap {
 
-        private final NodeMapping rootNodeMapping;
+        private final IdMapping rootIdMapping;
 
         FilteredIdMap(
-            NodeMapping rootNodeMapping,
+            IdMapping rootIdMapping,
             HugeLongArray graphIds,
             HugeSparseLongArray nodeToGraphIds,
             LabelInformation filteredLabelInformation,
@@ -232,7 +232,7 @@ public class IdMap implements NodeMapping {
             AllocationTracker allocationTracker
         ) {
             super(graphIds, nodeToGraphIds, filteredLabelInformation, nodeCount, highestNeoId, allocationTracker);
-            this.rootNodeMapping = rootNodeMapping;
+            this.rootIdMapping = rootIdMapping;
         }
 
         @Override
@@ -247,7 +247,7 @@ public class IdMap implements NodeMapping {
 
         @Override
         public long rootNodeCount() {
-            return rootNodeMapping.rootNodeCount();
+            return rootIdMapping.rootNodeCount();
         }
 
         @Override
@@ -256,8 +256,8 @@ public class IdMap implements NodeMapping {
         }
 
         @Override
-        public NodeMapping rootNodeMapping() {
-            return rootNodeMapping.rootNodeMapping();
+        public IdMapping rootIdMapping() {
+            return rootIdMapping.rootIdMapping();
         }
 
         @Override

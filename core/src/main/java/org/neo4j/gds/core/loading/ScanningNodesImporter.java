@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
@@ -195,7 +195,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
     }
 
     private void importPropertiesFromIndex(
-        NodeMapping nodeMapping,
+        IdMapping nodeMapping,
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties
     ) {
         long indexStart = System.nanoTime();

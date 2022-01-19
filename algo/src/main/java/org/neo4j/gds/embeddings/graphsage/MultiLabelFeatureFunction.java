@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.functions.LabelwiseFeatureProjection;
@@ -64,7 +64,7 @@ public class MultiLabelFeatureFunction implements FeatureFunction {
         return new LabelwiseFeatureProjection(nodeIds, features, weightsByLabel, projectedFeatureDimension, labels);
     }
 
-    private static class SingleNodeLabelConsumer implements NodeMapping.NodeLabelConsumer {
+    private static class SingleNodeLabelConsumer implements IdMapping.NodeLabelConsumer {
 
         NodeLabel nodeLabel;
 

@@ -25,7 +25,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.NodePropertyStore;
@@ -57,7 +56,7 @@ final class NodesFilter {
 
     @ValueClass
     interface FilteredNodes {
-        NodeMapping nodeMapping();
+        IdMapping nodeMapping();
 
         Map<NodeLabel, NodePropertyStore> propertyStores();
     }
@@ -96,11 +95,11 @@ final class NodesFilter {
         progressTracker.endSubTask();
 
         var nodeMappingAndProperties = nodesBuilder.build();
-        var filteredNodeMapping = nodeMappingAndProperties.nodeMapping();
+        var filteredIdMapping = nodeMappingAndProperties.nodeMapping();
 
         progressTracker.beginSubTask();
         var filteredNodePropertyStores = filterNodeProperties(
-            filteredNodeMapping,
+            filteredIdMapping,
             graphStore,
             concurrency,
             progressTracker
@@ -108,18 +107,18 @@ final class NodesFilter {
         progressTracker.endSubTask();
 
         return ImmutableFilteredNodes.builder()
-            .nodeMapping(filteredNodeMapping)
+            .nodeMapping(filteredIdMapping)
             .propertyStores(filteredNodePropertyStores)
             .build();
     }
 
     private static Map<NodeLabel, NodePropertyStore> filterNodeProperties(
-        NodeMapping filteredNodeMapping,
+        IdMapping filteredIdMapping,
         GraphStore inputGraphStore,
         int concurrency,
         ProgressTracker progressTracker
     ) {
-        return filteredNodeMapping
+        return filteredIdMapping
             .availableNodeLabels()
             .stream()
             .collect(Collectors.toMap(
@@ -129,7 +128,7 @@ final class NodesFilter {
 
                     return createNodePropertyStore(
                         inputGraphStore,
-                        filteredNodeMapping,
+                        filteredIdMapping,
                         nodeLabel,
                         propertyKeys,
                         concurrency,
@@ -141,16 +140,16 @@ final class NodesFilter {
 
     private static NodePropertyStore createNodePropertyStore(
         GraphStore inputGraphStore,
-        IdMapping filteredNodeMapping,
+        IdMapping filteredIdMapping,
         NodeLabel nodeLabel,
         Collection<String> propertyKeys,
         int concurrency,
         ProgressTracker progressTracker
     ) {
-        progressTracker.beginSubTask(filteredNodeMapping.nodeCount() * propertyKeys.size());
+        progressTracker.beginSubTask(filteredIdMapping.nodeCount() * propertyKeys.size());
 
         var builder = NodePropertyStore.builder();
-        var filteredNodeCount = filteredNodeMapping.nodeCount();
+        var filteredNodeCount = filteredIdMapping.nodeCount();
         var inputMapping = inputGraphStore.nodes();
 
         var allocationTracker = AllocationTracker.empty();
@@ -170,7 +169,7 @@ final class NodesFilter {
                 filteredNodeCount,
                 concurrency,
                 filteredNode -> {
-                    var inputNode = inputMapping.toMappedNodeId(filteredNodeMapping.toOriginalNodeId(filteredNode));
+                    var inputNode = inputMapping.toMappedNodeId(filteredIdMapping.toOriginalNodeId(filteredNode));
                     nodePropertiesBuilder.accept(inputNode, filteredNode);
                     progressTracker.logProgress();
                 }
@@ -349,7 +348,7 @@ final class NodesFilter {
 
         abstract void accept(long inputNode, long filteredNode);
 
-        NodeProperties build(long size, NodeMapping nodeMapping) {
+        NodeProperties build(long size, IdMapping nodeMapping) {
             return propertyBuilder.build(size, nodeMapping);
         }
     }

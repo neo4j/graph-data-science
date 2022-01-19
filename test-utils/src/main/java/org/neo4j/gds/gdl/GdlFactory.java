@@ -29,7 +29,6 @@ import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
@@ -206,7 +205,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         return IdsAndProperties.of(nodeMapping, loadNodeProperties(nodeMapping));
     }
 
-    private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> loadNodeProperties(NodeMapping nodeMapping) {
+    private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> loadNodeProperties(IdMapping nodeMapping) {
         var propertyKeysByLabel = new HashMap<NodeLabel, Set<PropertyMapping>>();
         var propertyBuilders = new HashMap<PropertyMapping, NodePropertiesFromStoreBuilder>();
 

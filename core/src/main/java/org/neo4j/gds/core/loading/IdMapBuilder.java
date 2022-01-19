@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 public interface IdMapBuilder {
@@ -29,7 +29,7 @@ public interface IdMapBuilder {
 
     long capacity();
 
-    NodeMapping build(
+    IdMapping build(
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,

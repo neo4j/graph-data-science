@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -70,13 +70,13 @@ public class SimilarityGraphBuilder {
         });
     }
 
-    private final NodeMapping nodeMapping;
+    private final IdMapping nodeMapping;
     private final int concurrency;
     private final ExecutorService executorService;
     private final AllocationTracker allocationTracker;
 
     public SimilarityGraphBuilder(
-        NodeMapping nodeMapping,
+        IdMapping nodeMapping,
         int concurrency,
         ExecutorService executorService,
         AllocationTracker allocationTracker
@@ -89,7 +89,7 @@ public class SimilarityGraphBuilder {
 
     public Graph build(Stream<SimilarityResult> stream) {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .nodes(nodeMapping.rootNodeMapping())
+            .nodes(nodeMapping.rootIdMapping())
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(concurrency)
@@ -108,7 +108,7 @@ public class SimilarityGraphBuilder {
         );
 
         return GraphFactory.create(
-            nodeMapping.rootNodeMapping(),
+            nodeMapping.rootIdMapping(),
             relationshipsBuilder.build(),
             allocationTracker
         );

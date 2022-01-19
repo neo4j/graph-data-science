@@ -25,7 +25,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.UnionNodeProperties;
 import org.neo4j.gds.api.schema.NodeSchema;
@@ -120,7 +120,7 @@ public final class RandomGraphGenerator {
             generateNodes(nodesBuilder);
         }
 
-        NodeMapping idMap = nodesBuilder.build().nodeMapping();
+        IdMapping idMap = nodesBuilder.build().nodeMapping();
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)
@@ -219,7 +219,7 @@ public final class RandomGraphGenerator {
         Map<String, NodeProperties> nodeProperties();
     }
 
-    private NodePropertiesAndSchema generateNodeProperties(NodeMapping idMap) {
+    private NodePropertiesAndSchema generateNodeProperties(IdMapping idMap) {
         var propertyNameToLabels = new HashMap<String, List<NodeLabel>>();
         var propertyNameToProducers = new HashMap<String, PropertyProducer<?>>();
 

@@ -19,10 +19,15 @@
  */
 package org.neo4j.gds.api;
 
+import org.neo4j.gds.NodeLabel;
+
+import java.util.Collection;
+import java.util.Set;
+
 /**
  * Bi-directional mapping between two id spaces.
  */
-public interface IdMapping {
+public interface IdMapping extends NodeIterator, BatchNodeIterable{
 
     /**
      * Defines the lower bound of mapped ids
@@ -87,5 +92,32 @@ public interface IdMapping {
 
     default IdMapping cloneIdMapping() {
         return this;
+    }
+
+    // from IdMapping
+
+    Set<NodeLabel> nodeLabels(long nodeId);
+
+    void forEachNodeLabel(long nodeId, IdMapping.NodeLabelConsumer consumer);
+
+    Set<NodeLabel> availableNodeLabels();
+
+    boolean hasLabel(long nodeId, NodeLabel label);
+
+    /**
+     * Returns the original node mapping if the current node mapping is filtered, otherwise
+     * it returns itself.
+     */
+    IdMapping rootIdMapping();
+
+    default IdMapping withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+        throw new UnsupportedOperationException("This node mapping does not support label filtering");
+    }
+
+    @FunctionalInterface
+    interface NodeLabelConsumer {
+
+        boolean accept(NodeLabel nodeLabel);
+
     }
 }

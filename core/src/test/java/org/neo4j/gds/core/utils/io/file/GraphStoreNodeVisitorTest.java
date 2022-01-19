@@ -46,7 +46,7 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 @GdlExtension
 class GraphStoreNodeVisitorTest {
 
-    public static Map<String, NodeProperties> unionNodePropertiesOrThrow(NodesBuilder.NodeMappingAndProperties nodeMappingAndProperties) {
+    public static Map<String, NodeProperties> unionNodePropertiesOrThrow(NodesBuilder.IdMappingAndProperties nodeMappingAndProperties) {
         Optional<Map<String, NodeProperties>> result;
         var nodeProperties = nodeMappingAndProperties.nodeProperties();
         var nodeMapping = nodeMappingAndProperties.nodeMapping();

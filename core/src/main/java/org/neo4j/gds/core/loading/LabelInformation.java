@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 
@@ -112,7 +112,7 @@ public final class LabelInformation {
         }
     }
 
-    public void forEachNodeLabel(long nodeId, NodeMapping.NodeLabelConsumer consumer) {
+    public void forEachNodeLabel(long nodeId, IdMapping.NodeLabelConsumer consumer) {
         if (isEmpty()) {
             consumer.accept(NodeLabel.ALL_NODES);
         } else {

@@ -47,7 +47,7 @@ public final class HugeIdMapBuilderOps {
             highestNodeId = graphIds.asNodeProperties().getMaxLongPropertyValue().getAsLong();
         }
 
-        HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
+        HugeSparseLongArray nodeToGraphIds = buildSparseIdMapping(
             idMapBuilder.size(),
             highestNodeId,
             concurrency,
@@ -76,7 +76,7 @@ public final class HugeIdMapBuilderOps {
         AllocationTracker allocationTracker
     ) throws DuplicateNodeIdException {
         HugeLongArray graphIds = idMapBuilder.array();
-        HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
+        HugeSparseLongArray nodeToGraphIds = buildSparseIdMapping(
             idMapBuilder.size(),
             highestNodeId,
             concurrency,
@@ -98,7 +98,7 @@ public final class HugeIdMapBuilderOps {
     }
 
     @NotNull
-    static HugeSparseLongArray buildSparseNodeMapping(
+    static HugeSparseLongArray buildSparseIdMapping(
         long nodeCount,
         long highestNodeId,
         int concurrency,

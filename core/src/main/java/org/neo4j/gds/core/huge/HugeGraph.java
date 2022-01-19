@@ -29,7 +29,7 @@ import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.RelationshipConsumer;
@@ -90,7 +90,7 @@ public class HugeGraph implements CSRGraph {
 
     static final double NO_PROPERTY_VALUE = Double.NaN;
 
-    protected final NodeMapping idMapping;
+    protected final IdMapping idMapping;
     protected final AllocationTracker allocationTracker;
     protected final GraphSchema schema;
 
@@ -115,7 +115,7 @@ public class HugeGraph implements CSRGraph {
     protected final boolean isMultiGraph;
 
     public static HugeGraph create(
-        NodeMapping nodes,
+        IdMapping nodes,
         GraphSchema schema,
         Map<String, NodeProperties> nodeProperties,
         Relationships.Topology topology,
@@ -138,7 +138,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     protected HugeGraph(
-        NodeMapping idMapping,
+        IdMapping idMapping,
         GraphSchema schema,
         Map<String, NodeProperties> nodeProperties,
         long relationshipCount,
@@ -180,13 +180,13 @@ public class HugeGraph implements CSRGraph {
         return idMapping.highestNeoId();
     }
 
-    public NodeMapping idMap() {
+    public IdMapping idMap() {
         return idMapping;
     }
 
     @Override
-    public NodeMapping rootNodeMapping() {
-        return idMapping.rootNodeMapping();
+    public IdMapping rootIdMapping() {
+        return idMapping.rootIdMapping();
     }
 
     @Override

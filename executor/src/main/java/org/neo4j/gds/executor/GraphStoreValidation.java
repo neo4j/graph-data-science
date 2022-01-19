@@ -23,7 +23,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConfigurableSeedConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
@@ -213,7 +212,7 @@ public final class GraphStoreValidation {
 
     private static boolean labelFilteredGraphContainsNode(
         Collection<NodeLabel> filteredNodeLabels,
-        NodeMapping nodeMapping,
+        IdMapping nodeMapping,
         long neoNodeId
     ) {
         var internalNodeId = nodeMapping.safeToMappedNodeId(neoNodeId);

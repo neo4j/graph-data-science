@@ -21,17 +21,17 @@ package org.neo4j.gds.core.cypher;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.token.TokenHolders;
 
 public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpdater {
 
-    private final CypherNodeMapping cypherNodeMapping;
+    private final CypherIdMapping cypherIdMapping;
     private RelationshipIds relationshipIds;
 
     public CypherGraphStore(GraphStore graphStore) {
         super(graphStore);
-        this.cypherNodeMapping = new CypherNodeMapping(super.nodes());
+        this.cypherIdMapping = new CypherIdMapping(super.nodes());
     }
 
     public void initialize(TokenHolders tokenHolders) {
@@ -39,18 +39,18 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
     }
 
     @Override
-    public NodeMapping nodes() {
-        return this.cypherNodeMapping;
+    public IdMapping nodes() {
+        return this.cypherIdMapping;
     }
 
     @Override
     public void addNodeLabel(NodeLabel nodeLabel) {
-        this.cypherNodeMapping.addNodeLabel(nodeLabel);
+        this.cypherIdMapping.addNodeLabel(nodeLabel);
     }
 
     @Override
     public void addLabelToNode(long nodeId, NodeLabel nodeLabel) {
-        this.cypherNodeMapping.addLabelToNode(nodeId, nodeLabel);
+        this.cypherIdMapping.addLabelToNode(nodeId, nodeLabel);
     }
 
     public RelationshipIds relationshipIds() {

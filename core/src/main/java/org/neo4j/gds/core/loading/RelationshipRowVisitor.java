@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -44,7 +44,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     static final Set<String> REQUIRED_COLUMNS = Set.of(SOURCE_COLUMN, TARGET_COLUMN);
     static final Set<String> RESERVED_COLUMNS = Set.of(SOURCE_COLUMN, TARGET_COLUMN, TYPE_COLUMN);
 
-    private final NodeMapping nodeMapping;
+    private final IdMapping nodeMapping;
     private final ObjectIntHashMap<String> propertyKeyIdsByName;
     private final ObjectDoubleHashMap<String> propertyDefaultValueByName;
     private final CypherRelationshipLoader.Context loaderContext;
@@ -68,7 +68,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private final boolean throwOnUnMappedNodeIds;
 
     RelationshipRowVisitor(
-        NodeMapping nodeMapping,
+        IdMapping nodeMapping,
         CypherRelationshipLoader.Context loaderContext,
         ObjectIntHashMap<String> propertyKeyIdsByName,
         ObjectDoubleHashMap<String> propertyDefaultValueByName,

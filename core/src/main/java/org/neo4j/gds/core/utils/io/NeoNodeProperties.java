@@ -23,7 +23,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.graphdb.NotFoundException;
@@ -70,13 +70,13 @@ public interface NeoNodeProperties {
     final class NeoProperties implements LongFunction<Object> {
 
         private final TransactionContext transactionContext;
-        private final NodeMapping nodeMapping;
+        private final IdMapping nodeMapping;
         private final PropertyMapping propertyMapping;
         private final Log log;
 
         static LongFunction<Object> of(
             TransactionContext transactionContext,
-            NodeMapping nodeMapping,
+            IdMapping nodeMapping,
             PropertyMapping propertyMapping,
             Log log
         ) {
@@ -85,7 +85,7 @@ public interface NeoNodeProperties {
 
         private NeoProperties(
             TransactionContext transactionContext,
-            NodeMapping nodeMapping,
+            IdMapping nodeMapping,
             PropertyMapping propertyMapping,
             Log log
         ) {

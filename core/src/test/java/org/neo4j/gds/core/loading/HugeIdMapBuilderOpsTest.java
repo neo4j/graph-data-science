@@ -27,9 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class HugeIdMapBuilderOpsTest {
 
     @Test
-    void buildSparseNodeMappingWithPageSizeEntries() {
+    void buildSparseIdMappingWithPageSizeEntries() {
         long nodeId = 4096; // equals the PAGE_SIZE in a HugeSparseLongArray
-        var hugeSparseLongArray = HugeIdMapBuilderOps.buildSparseNodeMapping(
+        var hugeSparseLongArray = HugeIdMapBuilderOps.buildSparseIdMapping(
             1,
             nodeId,
             1,

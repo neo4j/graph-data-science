@@ -19,7 +19,16 @@
  */
 package org.neo4j.gds.core.huge;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.core.utils.LazyBatchCollection;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.function.LongPredicate;
 
 public final class DirectIdMapping implements IdMapping {
     private final long nodeCount;
@@ -61,5 +70,52 @@ public final class DirectIdMapping implements IdMapping {
     @Override
     public long rootNodeCount() {
         return nodeCount;
+    }
+
+    @Override
+    public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
+        return LazyBatchCollection.of(
+            nodeCount(),
+            batchSize,
+            IdIterable::new
+        );
+    }
+
+    @Override
+    public Set<NodeLabel> nodeLabels(long nodeId) {
+        return Set.of();
+    }
+
+    @Override
+    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
+
+    }
+
+    @Override
+    public Set<NodeLabel> availableNodeLabels() {
+        return Set.of();
+    }
+
+    @Override
+    public boolean hasLabel(long nodeId, NodeLabel label) {
+        return false;
+    }
+
+    @Override
+    public IdMapping rootIdMapping() {
+        return this;
+    }
+
+    @Override
+    public void forEachNode(LongPredicate consumer) {
+        for (long i = 0; i < nodeCount; i++) {
+            var shouldContinue = consumer.test(i);
+            if (!shouldContinue) break;
+        }
+    }
+
+    @Override
+    public PrimitiveLongIterator nodeIterator() {
+        return PrimitiveLongCollections.range(0, nodeCount);
     }
 }

@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -67,7 +67,7 @@ public final class HugeIdMapBuilder implements IdMapBuilder {
     }
 
     @Override
-    public NodeMapping build(
+    public IdMapping build(
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,

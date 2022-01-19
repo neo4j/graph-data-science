@@ -30,7 +30,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
@@ -358,7 +358,7 @@ public final class TestSupport {
         return TransactionContext.of(api, SecurityContext.AUTH_DISABLED);
     }
 
-    public static NodeMapping nodeMapping(long nodeCount) {
+    public static IdMapping nodeMapping(long nodeCount) {
         var builder = GraphFactory
             .initNodesBuilder()
             .nodeCount(nodeCount)
@@ -373,7 +373,7 @@ public final class TestSupport {
         return builder.build().nodeMapping();
     }
 
-    public static NodeMapping nodeMapping(long[] originalIds) {
+    public static IdMapping nodeMapping(long[] originalIds) {
         var builder = GraphFactory
             .initNodesBuilder()
             .nodeCount(originalIds.length)

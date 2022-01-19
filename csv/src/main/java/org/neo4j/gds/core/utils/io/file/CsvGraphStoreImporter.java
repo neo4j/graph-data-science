@@ -25,8 +25,8 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.ImmutableNodePropertyStore;
-import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.NodePropertyStore;
@@ -148,7 +148,7 @@ public final class CsvGraphStoreImporter {
         importRelationships(fileInput, nodes, AllocationTracker.empty());
     }
 
-    private NodeMapping importNodes(
+    private IdMapping importNodes(
         FileInput fileInput,
         AllocationTracker allocationTracker
     ) {
@@ -210,7 +210,7 @@ public final class CsvGraphStoreImporter {
         );
     }
 
-    private void importRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker allocationTracker) {
+    private void importRelationships(FileInput fileInput, IdMapping nodes, AllocationTracker allocationTracker) {
         progressTracker.beginSubTask();
         ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipSchema = fileInput.relationshipSchema();
@@ -328,7 +328,7 @@ public final class CsvGraphStoreImporter {
     @Builder.Factory
     static GraphStore graphStore(
         NamedDatabaseId databaseId,
-        NodeMapping nodes,
+        IdMapping nodes,
         Map<NodeLabel, NodePropertyStore> nodePropertyStores,
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,

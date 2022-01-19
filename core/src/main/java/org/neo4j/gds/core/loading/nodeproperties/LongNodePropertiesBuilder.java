@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.collections.HugeSparseLongArray;
@@ -102,7 +101,7 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    public NodeProperties build(long size, NodeMapping nodeMapping) {
+    public NodeProperties build(long size, IdMapping nodeMapping) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseLongArray.builder(

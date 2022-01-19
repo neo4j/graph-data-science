@@ -25,7 +25,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.Aggregation;
@@ -164,7 +164,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
                 .allocationTracker(allocationTracker())
                 .build();
 
-            NodeMapping nodeMapping = computationResult.graph();
+            IdMapping nodeMapping = computationResult.graph();
 
             if (shouldComputeHistogram(callContext)) {
                 DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);

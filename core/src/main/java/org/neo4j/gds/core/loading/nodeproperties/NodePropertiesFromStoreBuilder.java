@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.collections.HugeSparseArrays;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -93,7 +93,7 @@ public final class NodePropertiesFromStoreBuilder {
         }
     }
 
-    public NodeProperties build(NodeMapping nodeMapping) {
+    public NodeProperties build(IdMapping nodeMapping) {
         if (innerBuilder.get() == null) {
             if (defaultValue.getObject() != null) {
                 initializeWithType(Values.of(defaultValue.getObject()));

@@ -24,7 +24,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 
 import java.util.Set;
 
-public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, RelationshipIterator, RelationshipProperties {
+public interface Graph extends IdMapping, NodePropertyContainer, Degrees, RelationshipIterator, RelationshipProperties {
 
     GraphSchema schema();
 

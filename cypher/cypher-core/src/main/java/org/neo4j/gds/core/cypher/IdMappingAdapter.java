@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.cypher;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
@@ -28,11 +28,11 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
-public abstract class NodeMappingAdapter implements NodeMapping {
+public abstract class IdMappingAdapter implements IdMapping {
 
-    private final NodeMapping nodeMapping;
+    private final IdMapping nodeMapping;
 
-    public NodeMappingAdapter(NodeMapping nodeMapping) {
+    public IdMappingAdapter(IdMapping nodeMapping) {
         this.nodeMapping = nodeMapping;
     }
 
@@ -59,8 +59,8 @@ public abstract class NodeMappingAdapter implements NodeMapping {
     }
 
     @Override
-    public NodeMapping rootNodeMapping() {
-        return nodeMapping.rootNodeMapping();
+    public IdMapping rootIdMapping() {
+        return nodeMapping.rootIdMapping();
     }
 
     @Override

@@ -69,7 +69,7 @@ public abstract class SimilarityWriteProc<
             // An exception is the topK graph where relationships refer to source/target
             // ids within the node id space of the similarity graph. Therefore it is
             // safe to use that graph for resolving original ids.
-            var rootNodeMapping = similarityGraphResult.isTopKGraph()
+            var rootIdMapping = similarityGraphResult.isTopKGraph()
                 ? similarityGraph
                 : computationResult.graphStore().nodes();
 
@@ -92,7 +92,7 @@ public abstract class SimilarityWriteProc<
                                 executionContext().taskRegistryFactory()
                             );
                             var exporter = relationshipExporterBuilder
-                                .withIdMapping(rootNodeMapping)
+                                .withIdMapping(rootIdMapping)
                                 .withGraph(similarityGraph)
                                 .withTerminationFlag(algorithm.getTerminationFlag())
                                 .withProgressTracker(progressTracker)
