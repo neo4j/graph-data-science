@@ -23,15 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.Result;
-import org.neo4j.kernel.impl.util.ValueUtils;
-import org.neo4j.values.AnyValue;
-import org.neo4j.values.storable.ArrayValue;
-import org.neo4j.values.storable.DoubleValue;
-import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.ValueGroup;
-import org.neo4j.values.storable.Values;
-import org.neo4j.values.virtual.ListValue;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -118,76 +110,12 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         for (String propertyKey : propertyColumns) {
             Object valueObject = CypherLoadingUtils.getProperty(row, propertyKey);
             if (valueObject != null) {
-                var value = ValueUtils.of(valueObject);
-                if (value.isSequenceValue()) {
-                    var array = castToNumericArrayOrFail(value);
-                    propertyValues.put(propertyKey, array);
-                } else if (value instanceof Value) {
-                    var storableValue = (Value) value;
-                    if (storableValue.valueGroup() != ValueGroup.NUMBER) {
-                        throw new IllegalArgumentException(formatWithLocale(
-                            "Unsupported GDS node property of type `%s`.",
-                            storableValue.getTypeName()
-                        ));
-                    }
-                    propertyValues.put(propertyKey, storableValue);
-                } else {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "Unsupported GDS node property of type `%s`.",
-                        value.getTypeName()
-                    ));
-                }
+                var value = ValueConverter.toValue(valueObject);
+                propertyValues.put(propertyKey, value);
             }
         }
 
         return propertyValues;
-    }
-
-    private ArrayValue castToNumericArrayOrFail(AnyValue value) {
-        ArrayValue array = null;
-        if (value instanceof ListValue) {
-            var listValue = (ListValue) value;
-            if (listValue.isEmpty()) {
-                // encode as long array
-                return Values.longArray(new long[0]);
-            }
-            // only 2 cases are valid here: list of double and list of long
-            var firstValue = listValue.head();
-            try {
-                if (firstValue instanceof LongValue) {
-                    var longArray = new long[listValue.size()];
-                    var iterator = listValue.iterator();
-                    for (int i = 0; i < listValue.size() && iterator.hasNext(); i++) {
-                        longArray[i] = ((LongValue) iterator.next()).longValue();
-                    }
-                    array = Values.longArray(longArray);
-                } else if (firstValue instanceof DoubleValue) {
-                    var doubleArray = new double[listValue.size()];
-                    var iterator = listValue.iterator();
-                    for (int i = 0; i < listValue.size() && iterator.hasNext(); i++) {
-                        doubleArray[i] = ((DoubleValue) iterator.next()).doubleValue();
-                    }
-                    array = Values.doubleArray(doubleArray);
-                } else {
-                    failOnBadList(listValue);
-                }
-            } catch (ClassCastException c) {
-                failOnBadList(listValue);
-            }
-        } else {
-             array = ((ArrayValue) value);
-             if (array.valueGroup() != ValueGroup.NUMBER_ARRAY) {
-                 failOnBadList(array);
-             }
-        }
-        return array;
-    }
-
-    private void failOnBadList(AnyValue badList) {
-        throw new IllegalArgumentException(formatWithLocale(
-            "Only lists of uniformly typed numbers are supported as GDS node properties, but found an unsupported list `%s`.",
-            badList
-        ));
     }
 
     long rows() {
