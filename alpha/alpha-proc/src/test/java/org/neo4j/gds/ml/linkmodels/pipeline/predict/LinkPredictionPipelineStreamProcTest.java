@@ -37,10 +37,16 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"1", "4"})
-    void shouldPredictWithTopN(int concurrency) {
+    @CsvSource(value = {"1, N", "4, M"})
+    void shouldPredictWithTopN(int concurrency, String nodeLabel) {
+        var nodeCount = 5L;
+        assertCypherResult("CALL gds.graph.list('g') YIELD nodeCount RETURN nodeCount",
+            List.of(Map.of("nodeCount", 2 * nodeCount))
+        );
+        var labelOffset = nodeLabel.equals("N") ? 0 : nodeCount;
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.linkPrediction.predict.stream('g', {" +
+            " nodeLabels: [$nodeLabel]," +
             " modelName: 'model'," +
             " threshold: 0," +
             " topN: $topN," +
@@ -50,11 +56,11 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             "YIELD node1, node2, probability" +
             " RETURN node1, node2, probability" +
             " ORDER BY probability DESC, node1",
-            Map.of("topN", 3, "concurrency", concurrency),
+            Map.of("topN", 3, "concurrency", concurrency, "nodeLabel", nodeLabel),
             List.of(
-                Map.of("node1", 0L, "node2", 4L, "probability", .49750002083312506),
-                Map.of("node1", 1L, "node2", 4L, "probability", .11815697780926958),
-                Map.of("node1", 0L, "node2", 1L, "probability", .11506673204554983)
+                Map.of("node1", 0L + labelOffset, "node2", 4L + labelOffset, "probability", .49750002083312506),
+                Map.of("node1", 1L + labelOffset, "node2", 4L + labelOffset, "probability", .11815697780926958),
+                Map.of("node1", 0L + labelOffset, "node2", 1L + labelOffset, "probability", .11506673204554983)
             )
         );
     }

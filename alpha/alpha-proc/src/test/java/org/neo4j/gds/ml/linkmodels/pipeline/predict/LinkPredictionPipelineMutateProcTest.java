@@ -21,9 +21,11 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
@@ -32,6 +34,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasKey;
@@ -39,7 +42,9 @@ import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTestBase {
 
@@ -49,10 +54,11 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"3, 1", "3, 4", "50, 1", "50, 4"})
-    void shouldPredictWithTopN(int topN, int concurrency) {
+    @MethodSource("topNConcurrencyLabelCombinations")
+    void shouldPredictWithTopN(int topN, int concurrency, String nodeLabel) {
         runQuery(
             "CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate('g', {" +
+            " nodeLabels: [$nodeLabel]," +
             " modelName: 'model'," +
             " mutateRelationshipType: 'PREDICTED'," +
             " threshold: 0," +
@@ -60,11 +66,11 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             " concurrency:" +
             " $concurrency" +
             "})",
-            Map.of("topN", topN, "concurrency", concurrency)
+            Map.of("topN", topN, "concurrency", concurrency, "nodeLabel", nodeLabel)
         );
 
         Graph actualGraph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "g").graphStore().getGraph(
-            RelationshipType.of("PREDICTED"), Optional.of("probability"));
+            NodeLabel.of(nodeLabel), RelationshipType.of("PREDICTED"), Optional.of("probability"));
 
         var relationshipRowsGdl = List.of(
             "(n0)-[:PREDICTED {probability: 0.49750002083312506}]->(n4)",
@@ -85,11 +91,13 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
 
         assertGraphEquals(
             fromGdl(
-                "  (n0:N {a: 1.0, b: 0.8, c: 1.0})" +
-                ", (n1:N {a: 2.0, b: 1.0, c: 1.0})" +
-                ", (n2:N {a: 3.0, b: 1.5, c: 1.0})" +
-                ", (n3:N {a: 0.0, b: 2.8, c: 1.0})" +
-                ", (n4:N {a: 1.0, b: 0.9, c: 1.0})" + relationshipGdl
+                formatWithLocale(
+                    "  (n0:%s {a: 1.0, b: 0.8, c: 1.0})" +
+                    ", (n1:%s {a: 2.0, b: 1.0, c: 1.0})" +
+                    ", (n2:%s {a: 3.0, b: 1.5, c: 1.0})" +
+                    ", (n3:%s {a: 0.0, b: 2.8, c: 1.0})" +
+                    ", (n4:%s {a: 1.0, b: 0.9, c: 1.0})" + relationshipGdl,
+                    nodeLabel, nodeLabel, nodeLabel, nodeLabel, nodeLabel)
             ), actualGraph);
     }
 
@@ -104,6 +112,7 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             .explicitCreation("g")
             .algo("gds.alpha.ml.pipeline.linkPrediction.predict")
             .mutateMode()
+            .addParameter("nodeLabels", List.of("N"))
             .addParameter("mutateRelationshipType", "PREDICTED")
             .addParameter("modelName", "model")
             .addParameter("threshold", 0.0)
@@ -159,5 +168,13 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             .yields();
 
         assertError(query, "Procedure requires relationship projections to be UNDIRECTED.");
+    }
+    
+    static Stream<Arguments> topNConcurrencyLabelCombinations() {
+        return crossArguments(
+            () -> List.of(3, 50).stream().map(Arguments::of),
+            () -> List.of(1, 4).stream().map(Arguments::of),
+            () -> List.of("N", "M").stream().map(Arguments::of)
+        );
     }
 }

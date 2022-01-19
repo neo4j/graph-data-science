@@ -26,6 +26,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.catalog.GraphListProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -58,17 +59,26 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
                         ", (n2:N {a: 3.0, b: 1.5, c: 1.0})" +
                         ", (n3:N {a: 0.0, b: 2.8, c: 1.0})" +
                         ", (n4:N {a: 1.0, b: 0.9, c: 1.0})" +
+                        ", (m0:M {a: 1.0, b: 0.8, c: 1.0})" +
+                        ", (m1:M {a: 2.0, b: 1.0, c: 1.0})" +
+                        ", (m2:M {a: 3.0, b: 1.5, c: 1.0})" +
+                        ", (m3:M {a: 0.0, b: 2.8, c: 1.0})" +
+                        ", (m4:M {a: 1.0, b: 0.9, c: 1.0})" +
                         ", (n1)-[:T]->(n2)" +
                         ", (n3)-[:T]->(n4)" +
                         ", (n1)-[:T]->(n3)" +
-                        ", (n2)-[:T]->(n4)";
+                        ", (n2)-[:T]->(n4)" +
+                        ", (m1)-[:T]->(m2)" +
+                        ", (m3)-[:T]->(m4)" +
+                        ", (m1)-[:T]->(m3)" +
+                        ", (m2)-[:T]->(m4)";
 
     @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, getProcedureClazz());
+        registerProcedures(GraphListProc.class, GraphCreateProc.class, getProcedureClazz());
 
         withModelInCatalog();
 
@@ -106,7 +116,7 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
 
     String createQuery(String graphName, Orientation orientation) {
         return GdsCypher.call()
-            .withNodeLabel("N")
+            .withNodeLabels("N", "M")
             .withRelationshipType("T", orientation)
             .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)
             .graphCreate(graphName)

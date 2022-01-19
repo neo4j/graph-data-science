@@ -91,10 +91,11 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig> computationResult
     ) {
+        var graph = computationResult.graph();
         var concurrency = computationResult.config().concurrency();
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .aggregation(Aggregation.SINGLE)
-            .nodes(computationResult.graph())
+            .nodes(graph)
             .orientation(Orientation.UNDIRECTED)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(concurrency)
@@ -108,8 +109,8 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
             concurrency,
             stream -> stream.forEach(predictedLink -> {
                 relationshipsBuilder.addFromInternal(
-                    predictedLink.sourceId(),
-                    predictedLink.targetId(),
+                    graph.toRootNodeId(predictedLink.sourceId()),
+                    graph.toRootNodeId(predictedLink.targetId()),
                     predictedLink.probability()
                 );
                 resultWithHistogramBuilder.recordHistogramValue(predictedLink.probability());
