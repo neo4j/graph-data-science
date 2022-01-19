@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core;
 
+import org.neo4j.gds.core.loading.HugeIdMap;
 import org.neo4j.gds.core.loading.HugeIdMapBuilder;
-import org.neo4j.gds.core.loading.IdMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
@@ -43,6 +43,6 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        return IdMap.memoryEstimation();
+        return HugeIdMap.memoryEstimation();
     }
 }

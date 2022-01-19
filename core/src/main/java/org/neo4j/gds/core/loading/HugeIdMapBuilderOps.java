@@ -34,7 +34,7 @@ import java.util.function.Function;
 
 public final class HugeIdMapBuilderOps {
 
-    static IdMap build(
+    static HugeIdMap build(
         HugeIdMapBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
@@ -58,7 +58,7 @@ public final class HugeIdMapBuilderOps {
         var nodeCount = idMapBuilder.size();
         var labelInformation = labelInformationBuilder.build(nodeCount, nodeToGraphIds::get);
 
-        return new IdMap(
+        return new HugeIdMap(
             graphIds,
             nodeToGraphIds,
             labelInformation,
@@ -68,7 +68,7 @@ public final class HugeIdMapBuilderOps {
         );
     }
 
-    static IdMap buildChecked(
+    static HugeIdMap buildChecked(
         HugeIdMapBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
@@ -87,7 +87,7 @@ public final class HugeIdMapBuilderOps {
         var nodeCount = idMapBuilder.size();
         var labelInformation = labelInformationBuilder.build(nodeCount, nodeToGraphIds::get);
 
-        return new IdMap(
+        return new HugeIdMap(
             graphIds,
             nodeToGraphIds,
             labelInformation,
