@@ -109,9 +109,10 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateConfig> computationResult
     ) {
-        var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+        var graph = computationResult.graph();
+                var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .aggregation(Aggregation.SINGLE)
-            .nodes(computationResult.graph())
+            .nodes(graph)
             .orientation(Orientation.UNDIRECTED)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(1)
@@ -122,8 +123,8 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
         computationResult
             .result()
             .stream()
-            .forEach(predictedLink -> relationshipsBuilder.addFromInternal(predictedLink.sourceId(),
-                predictedLink.targetId(),
+            .forEach(predictedLink -> relationshipsBuilder.addFromInternal(graph.toRootNodeId(predictedLink.sourceId()),
+                graph.toRootNodeId(predictedLink.targetId()),
                 predictedLink.probability()
             ));
         var relationships = relationshipsBuilder.build();
