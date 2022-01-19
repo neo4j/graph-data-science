@@ -19,36 +19,14 @@
  */
 package org.neo4j.gds.core;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.loading.IdMappingAllocator;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
-import org.neo4j.gds.core.loading.InternalIdMappingBuilderFactory;
-import org.neo4j.gds.core.loading.NodeMappingBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 import java.util.Optional;
 
 public interface IdMapBehavior {
-
-    @ValueClass
-    interface DefaultIdMapBehaviour {
-
-        InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?> idMappingBuilderFactory();
-
-        NodeMappingBuilder nodeMappingBuilder();
-    }
-
-    @ValueClass
-    interface CapturingIdMapBehaviour {
-        InternalIdMappingBuilder<? extends IdMappingAllocator> idMappingBuilder();
-
-        NodeMappingBuilder.Capturing nodeMappingBuilder();
-    }
-
-    DefaultIdMapBehaviour create(AllocationTracker allocationTracker);
-
-    CapturingIdMapBehaviour create(
+    InternalIdMappingBuilder create(
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount,
         AllocationTracker allocationTracker

@@ -46,33 +46,29 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilder<ALLOCATOR>, ALLOCATOR extends IdMappingAllocator> extends ScanningRecordsImporter<NodeReference, IdsAndProperties> {
+public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, IdsAndProperties> {
 
     private final IndexPropertyMappings.LoadablePropertyMappings propertyMappings;
     private final TerminationFlag terminationFlag;
-    private final NodeMappingBuilder nodeMappingBuilder;
-    private final BUILDER idMapBuilder;
+    private final InternalIdMappingBuilder idMapBuilder;
     private final LabelInformation.Builder labelInformationBuilder;
     private final @Nullable NativeNodePropertyImporter nodePropertyImporter;
 
     @Builder.Factory
-    public static <BUILDER extends InternalIdMappingBuilder<ALLOCATOR>, ALLOCATOR extends IdMappingAllocator> ScanningNodesImporter<BUILDER, ALLOCATOR> scanningNodesImporter(
+    public static ScanningNodesImporter scanningNodesImporter(
         GraphProjectFromStoreConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
         int concurrency,
         IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
-        InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR> internalIdMappingBuilderFactory,
-        NodeMappingBuilder nodeMappingBuilder
+        InternalIdMappingBuilder idMapBuilder
     ) {
         var allocationTracker = loadingContext.allocationTracker();
         var expectedCapacity = dimensions.highestPossibleNodeCount();
         var labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 
         var scannerFactory = scannerFactory(loadingContext.transactionContext(), dimensions, loadingContext.log());
-
-        var idMappingBuilder = internalIdMappingBuilderFactory.of(dimensions);
 
         var labelInformationBuilder =
             graphProjectConfig.nodeProjections().allProjections().size() == 1
@@ -87,7 +83,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             allocationTracker
         );
 
-        return new ScanningNodesImporter<>(
+        return new ScanningNodesImporter(
             scannerFactory,
             loadingContext,
             dimensions,
@@ -95,8 +91,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             concurrency,
             propertyMappings,
             nodePropertyImporter,
-            idMappingBuilder,
-            nodeMappingBuilder,
+            idMapBuilder,
             labelInformationBuilder
         );
     }
@@ -109,8 +104,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         int concurrency,
         IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
-        BUILDER idMapBuilder,
-        NodeMappingBuilder nodeMappingBuilder,
+        InternalIdMappingBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder
     ) {
         super(
@@ -124,7 +118,6 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         this.terminationFlag = loadingContext.terminationFlag();
         this.propertyMappings = propertyMappings;
         this.nodePropertyImporter = nodePropertyImporter;
-        this.nodeMappingBuilder = nodeMappingBuilder;
         this.idMapBuilder = idMapBuilder;
         this.labelInformationBuilder = labelInformationBuilder;
     }
@@ -168,8 +161,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
 
     @Override
     public IdsAndProperties build() {
-        var nodeMapping = nodeMappingBuilder.build(
-            idMapBuilder,
+        var nodeMapping = idMapBuilder.build(
             labelInformationBuilder,
             Math.max(dimensions.highestPossibleNodeCount() - 1, 0),
             concurrency,

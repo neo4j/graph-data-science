@@ -34,7 +34,7 @@ import java.util.function.Function;
 
 public final class IdMapBuilder {
 
-    public static IdMap build(
+    static IdMap build(
         InternalHugeIdMappingBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
@@ -68,7 +68,7 @@ public final class IdMapBuilder {
         );
     }
 
-    public static IdMap buildChecked(
+    static IdMap buildChecked(
         InternalHugeIdMappingBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
@@ -111,7 +111,7 @@ public final class IdMapBuilder {
             // need to be able to store a node with `id = highestNodeId`.
             highestNodeId + 1,
             allocationTracker::add
-            );
+        );
         ParallelUtil.readParallel(concurrency, nodeCount, Pools.DEFAULT, nodeAdder.apply(nodeMappingBuilder));
         return nodeMappingBuilder.build();
     }

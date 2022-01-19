@@ -20,10 +20,20 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
-public interface InternalIdMappingBuilder<A extends IdMappingAllocator> {
+public interface InternalIdMappingBuilder {
 
-    @Nullable A allocate(int batchLength);
+    @Nullable IdMappingAllocator allocate(int batchLength);
 
     long capacity();
+
+    NodeMapping build(
+        LabelInformation.Builder labelInformationBuilder,
+        long highestNodeId,
+        int concurrency,
+        boolean checkDuplicateIds,
+        AllocationTracker allocationTracker
+    );
 }

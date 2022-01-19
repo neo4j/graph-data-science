@@ -45,10 +45,8 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyBuilder;
 import org.neo4j.gds.core.loading.AdjacencyListWithPropertiesBuilder;
-import org.neo4j.gds.core.loading.IdMappingAllocator;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
-import org.neo4j.gds.core.loading.NodeMappingBuilder;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.RelationshipImporter;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
@@ -107,7 +105,7 @@ public final class GraphFactory {
             ? Optional.of(maxOriginalId)
             : Optional.<Long>empty();
 
-        var idMapBehaviour = idMapBehavior.create(
+        var idMapBuilder = idMapBehavior.create(
             maybeMaxOriginalId,
             nodeCount,
             allocationTracker
@@ -115,8 +113,7 @@ public final class GraphFactory {
 
         return nodeSchema.map(schema -> fromSchema(
             maxOriginalId,
-            idMapBehaviour.nodeMappingBuilder(),
-            idMapBehaviour.idMappingBuilder(),
+            idMapBuilder,
             threadCount,
             schema,
             labelInformation,
@@ -135,8 +132,7 @@ public final class GraphFactory {
                 new ObjectIntScatterMap<>(),
                 new IntObjectHashMap<>(),
                 new IntObjectHashMap<>(),
-                idMapBehaviour.nodeMappingBuilder(),
-                idMapBehaviour.idMappingBuilder(),
+                idMapBuilder,
                 labelInformation,
                 nodeProperties,
                 allocationTracker
@@ -146,8 +142,7 @@ public final class GraphFactory {
 
     private static NodesBuilder fromSchema(
         long maxOriginalId,
-        NodeMappingBuilder.Capturing nodeMappingBuilder,
-        InternalIdMappingBuilder<? extends IdMappingAllocator> internalIdMappingBuilder,
+        InternalIdMappingBuilder idMapBuilder,
         int concurrency,
         NodeSchema nodeSchema,
         boolean hasLabelInformation,
@@ -182,8 +177,7 @@ public final class GraphFactory {
             elementIdentifierLabelTokenMapping,
             labelTokenNodeLabelMapping,
             builderByLabelTokenAndPropertyToken,
-            nodeMappingBuilder,
-            internalIdMappingBuilder,
+            idMapBuilder,
             hasLabelInformation,
             nodeSchema.hasProperties(),
             allocationTracker

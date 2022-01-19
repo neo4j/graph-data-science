@@ -189,19 +189,21 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             loadingContext.transactionContext()
         );
 
-        var idMapBehavior = IdMapBehaviorServiceProvider
+        var idMapBuilder = IdMapBehaviorServiceProvider
             .idMapBehavior()
-            .create(loadingContext.allocationTracker());
+            .create(
+                Optional.of(dimensions.highestPossibleNodeCount()),
+                Optional.of(dimensions.nodeCount()),
+                loadingContext.allocationTracker()
+            );
 
-        @SuppressWarnings("unchecked")
-        var scanningNodesImporter = new ScanningNodesImporterBuilder<>()
+        var scanningNodesImporter = new ScanningNodesImporterBuilder()
             .concurrency(concurrency)
             .graphProjectConfig(graphProjectConfig)
             .dimensions(dimensions)
             .loadingContext(loadingContext)
             .propertyMappings(propertyMappings)
-            .internalIdMappingBuilderFactory((InternalIdMappingBuilderFactory<InternalIdMappingBuilder<IdMappingAllocator>, IdMappingAllocator>) idMapBehavior.idMappingBuilderFactory())
-            .nodeMappingBuilder(idMapBehavior.nodeMappingBuilder())
+            .idMapBuilder(idMapBuilder)
             .progressTracker(progressTracker)
             .build();
 

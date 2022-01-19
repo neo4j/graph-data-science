@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -27,7 +28,7 @@ import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuilder<InternalHugeIdMappingBuilder.BulkAdder> {
+public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuilder {
 
     private final HugeLongArray array;
     private final long capacity;
@@ -65,8 +66,21 @@ public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuil
         return Math.min(capacity, lower + nodes);
     }
 
-    public HugeLongArray build() {
+    @Override
+    public NodeMapping build(
+        LabelInformation.Builder labelInformationBuilder,
+        long highestNodeId,
+        int concurrency,
+        boolean checkDuplicateIds,
+        AllocationTracker allocationTracker
+    ) {
         adders.close();
+        return checkDuplicateIds
+            ? IdMapBuilder.buildChecked(this, labelInformationBuilder, highestNodeId, concurrency, allocationTracker)
+            : IdMapBuilder.build(this, labelInformationBuilder, highestNodeId, concurrency, allocationTracker);
+    }
+
+    public HugeLongArray build() {
         return array;
     }
 
