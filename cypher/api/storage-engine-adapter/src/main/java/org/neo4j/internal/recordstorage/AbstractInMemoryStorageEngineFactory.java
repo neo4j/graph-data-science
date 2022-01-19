@@ -28,7 +28,6 @@ import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.store.MetaDataStore;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
-import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.LogVersionRepository;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.storageengine.api.StorageFilesState;
@@ -36,7 +35,6 @@ import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.TransactionIdStore;
 import org.neo4j.storageengine.migration.RollingUpgradeCompatibility;
 import org.neo4j.storageengine.migration.SchemaRuleMigrationAccess;
-import org.neo4j.storageengine.migration.StoreMigrationParticipant;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -46,19 +44,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public abstract class AbstractInMemoryStorageEngineFactory implements StorageEngineFactory {
-
-    @Override
-    public List<StoreMigrationParticipant> migrationParticipants(
-        FileSystemAbstraction fs,
-        Config config,
-        PageCache pageCache,
-        JobScheduler jobScheduler,
-        LogService logService,
-        PageCacheTracer cacheTracer,
-        MemoryTracker memoryTracker
-    ) {
-        return List.of();
-    }
 
     @Override
     public List<Path> listStorageFiles(
