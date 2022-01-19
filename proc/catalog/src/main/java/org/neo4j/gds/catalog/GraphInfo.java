@@ -135,7 +135,7 @@ public class GraphInfo {
 
         @Override
         public void visit(GraphProjectFromStoreConfig storeConfig) {
-            configuration = cleansed(storeConfig.toMap(), Set.of());
+            configuration = cleansed(storeConfig.toMap(), storeConfig.outputFieldDenylist());
         }
 
         @Override

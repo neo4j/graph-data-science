@@ -169,6 +169,12 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
         return visitor.store(this);
     }
 
+    @Value.Derived
+    @Configuration.Ignore
+    default Set<String> outputFieldDenylist() {
+        return Set.of(NODE_COUNT_KEY, RELATIONSHIP_COUNT_KEY);
+    }
+
     static GraphProjectFromStoreConfig emptyWithName(String userName, String graphName) {
         NodeProjections nodeProjections = NodeProjections.all();
         RelationshipProjections relationshipProjections = RelationshipProjections.all();

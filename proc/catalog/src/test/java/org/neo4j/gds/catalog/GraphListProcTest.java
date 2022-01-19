@@ -90,16 +90,6 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @Test
-    public void shouldOutputSomething() throws Exception {
-        String name = "name";
-        runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
-
-        runQueryWithRowConsumer("CALL gds.graph.list()", r -> System.out.println(ToStringBuilder.reflectionToString(r, ToStringStyle.JSON_STYLE)));
-
-        fail("TODO");
-    }
-
-    @Test
     void listASingleLabelRelationshipTypeProjection() {
         String name = "name";
         runQuery("CALL gds.graph.project($name, 'A', 'REL')", map("name", name));
@@ -112,7 +102,7 @@ class GraphListProcTest extends BaseProcTest {
                 new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(11)
+                        .hasSize(9)
                         .containsEntry(
                             "nodeProjection", map(
                                 "A", map(
@@ -141,17 +131,16 @@ class GraphListProcTest extends BaseProcTest {
                             "validateRelationships",
                             booleanAssertConsumer(AbstractBooleanAssert::isFalse)
                         )
-                        .hasEntrySatisfying("nodeCount", longAssertConsumer(nodeCount -> nodeCount.isEqualTo(-1L)))
-                        .hasEntrySatisfying(
-                            "relationshipCount",
-                            longAssertConsumer(relationshipCount -> relationshipCount.isEqualTo(-1L))
-                        )
                         .hasEntrySatisfying(
                             "readConcurrency",
                             intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
                         )
                         .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
-                        .hasEntrySatisfying("username", username -> assertThat(username).isNull());
+                        .hasEntrySatisfying("username", username -> assertThat(username).isNull())
+                        .doesNotContainKeys(
+                            GraphProjectConfig.NODE_COUNT_KEY,
+                            GraphProjectConfig.RELATIONSHIP_COUNT_KEY
+                        );
 
                     return true;
                 }, "Assert native `configuration` map"),
