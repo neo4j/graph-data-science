@@ -19,15 +19,11 @@
  */
 package org.neo4j.gds.core;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.core.loading.IdMap;
 import org.neo4j.gds.core.loading.IdMapBuilder;
-import org.neo4j.gds.core.loading.IdMappingAllocator;
 import org.neo4j.gds.core.loading.InternalHugeIdMappingBuilder;
-import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilderFactory;
 import org.neo4j.gds.core.loading.NodeMappingBuilder;
-import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
@@ -38,30 +34,35 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
     public interface InternalHugeIdMappingBuilderFactory extends InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> {}
 
     @Override
-    public Pair<InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?>, NodeMappingBuilder> create(
-        boolean maxIdKnown,
-        AllocationTracker allocationTracker
-    ) {
+    public DefaultIdMapBehaviour create(AllocationTracker allocationTracker) {
         InternalHugeIdMappingBuilderFactory idMappingBuilderFactory =
             dimensions -> InternalHugeIdMappingBuilder.of(
                 dimensions.nodeCount(),
                 allocationTracker
             );
-        return Pair.of(idMappingBuilderFactory, nodeMappingBuilder());
+
+        return ImmutableDefaultIdMapBehaviour.builder()
+            .idMappingBuilderFactory(idMappingBuilderFactory)
+            .nodeMappingBuilder(nodeMappingBuilder())
+            .build();
     }
 
     @Override
-    public Pair<InternalIdMappingBuilder<? extends IdMappingAllocator>, NodeMappingBuilder.Capturing> create(
-        boolean maxIdKnown, long maxOriginalId, AllocationTracker allocationTracker, Optional<Long> nodeCount
+    public CapturingIdMapBehaviour create(
+        Optional<Long> maxOriginalId,
+        Optional<Long> nodeCount, AllocationTracker allocationTracker
     ) {
-        boolean maxOriginalIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
-        long capacity = maxOriginalIdKnown
-            ? maxOriginalId + 1
-            : nodeCount.orElseThrow(() -> new IllegalArgumentException(
-                "Either `maxOriginalId` or `nodeCount` must be set"));
+        long capacity = maxOriginalId
+            .map(maxId -> maxId + 1)
+            .orElseGet(() -> nodeCount.orElseThrow(() -> new IllegalArgumentException(
+                "Either `maxOriginalId` or `nodeCount` must be set")));
         var idMapBuilder = InternalHugeIdMappingBuilder.of(capacity, allocationTracker);
-        var capture = nodeMappingBuilder().capture(idMapBuilder);
-        return Pair.of(idMapBuilder, capture);
+        var capturing = nodeMappingBuilder().capture(idMapBuilder);
+
+        return ImmutableCapturingIdMapBehaviour.builder()
+            .idMappingBuilder(idMapBuilder)
+            .nodeMappingBuilder(capturing)
+            .build();
     }
 
     @Override

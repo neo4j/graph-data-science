@@ -103,19 +103,20 @@ public final class GraphFactory {
         int threadCount = concurrency.orElse(1);
 
         var idMapBehavior = IdMapBehaviorServiceProvider.idMapBehavior();
-        var maxIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
+        var maybeMaxOriginalId = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID
+            ? Optional.of(maxOriginalId)
+            : Optional.<Long>empty();
 
-        var internalIdMappingBuilderTuple = idMapBehavior.create(
-            maxIdKnown,
-            maxOriginalId,
-            allocationTracker,
-            nodeCount
+        var idMapBehaviour = idMapBehavior.create(
+            maybeMaxOriginalId,
+            nodeCount,
+            allocationTracker
         );
 
         return nodeSchema.map(schema -> fromSchema(
             maxOriginalId,
-            internalIdMappingBuilderTuple.getRight(),
-            internalIdMappingBuilderTuple.getLeft(),
+            idMapBehaviour.nodeMappingBuilder(),
+            idMapBehaviour.idMappingBuilder(),
             threadCount,
             schema,
             labelInformation,
@@ -134,8 +135,8 @@ public final class GraphFactory {
                 new ObjectIntScatterMap<>(),
                 new IntObjectHashMap<>(),
                 new IntObjectHashMap<>(),
-                internalIdMappingBuilderTuple.getRight(),
-                internalIdMappingBuilderTuple.getLeft(),
+                idMapBehaviour.nodeMappingBuilder(),
+                idMapBehaviour.idMappingBuilder(),
                 labelInformation,
                 nodeProperties,
                 allocationTracker
