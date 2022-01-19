@@ -23,12 +23,16 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.ImmutableNodePropertyStore;
+import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.NodePropertyStore;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
+import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -39,6 +43,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonMap;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -151,6 +156,45 @@ public final class CSRGraphStoreUtil {
             );
         }
         return relationshipProperties;
+    }
+
+    public static void extractNodeProperties(
+        GraphStoreBuilder graphStoreBuilder,
+        NodeSchema nodeSchema,
+        Map<NodeLabel, Map<String, NodeProperties>> nodeMappingProperties
+    ) {
+        nodeMappingProperties.forEach((label, propertyMap) -> {
+            var nodeStoreProperties = propertyKeyToNodePropertyMapping(nodeSchema, label, propertyMap);
+            graphStoreBuilder.putNodePropertyStores(label, ImmutableNodePropertyStore.of(nodeStoreProperties));
+        });
+    }
+
+    private static Map<String, NodeProperty> propertyKeyToNodePropertyMapping(
+        NodeSchema nodeSchema,
+        NodeLabel label,
+        Map<String, NodeProperties> propertyMap
+    ) {
+        Map<String, PropertySchema> propertySchemaForLabel = nodeSchema.properties().get(label);
+        // TODO: Maybe replace with forEach
+        return propertyMap.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> nodePropertiesFrom(entry.getKey(), entry.getValue(), propertySchemaForLabel)
+            ));
+    }
+
+    private static NodeProperty nodePropertiesFrom(
+        String propertyKey,
+        NodeProperties nodeProperties,
+        Map<String, PropertySchema> propertySchema
+    ) {
+        var propertySchemaForKey = propertySchema.get(propertyKey);
+        return NodeProperty.of(
+            propertySchemaForKey.key(),
+            propertySchemaForKey.state(),
+            nodeProperties,
+            propertySchemaForKey.defaultValue()
+        );
     }
 
     private CSRGraphStoreUtil() {}
