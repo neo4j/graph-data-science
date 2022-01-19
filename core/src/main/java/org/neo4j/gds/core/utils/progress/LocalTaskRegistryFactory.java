@@ -19,23 +19,15 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.neo4j.gds.core.utils.warnings.EmptyWarningStore;
-import org.neo4j.gds.core.utils.warnings.WarningStore;
-
 public class LocalTaskRegistryFactory implements TaskRegistryFactory {
 
     private final String username;
     private final TaskStore taskStore;
-    private final WarningStore warningStore;
+
 
     LocalTaskRegistryFactory(String username, TaskStore taskStore) {
-        this(username, taskStore, EmptyWarningStore.INSTANCE);
-    }
-
-    LocalTaskRegistryFactory(String username, TaskStore taskStore, WarningStore warningStore) {
         this.username = username;
         this.taskStore = taskStore;
-        this.warningStore = warningStore;
     }
 
     @Override

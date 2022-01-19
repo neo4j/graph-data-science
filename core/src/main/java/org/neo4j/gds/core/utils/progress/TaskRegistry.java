@@ -21,33 +21,24 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.warnings.WarningStore;
 
 public class TaskRegistry {
 
     private final String username;
     private final TaskStore taskStore;
-    private final WarningStore warningStore;
     private final JobId jobId;
 
     @TestOnly
     public TaskRegistry(TaskRegistry taskRegistry) {
-        this(taskRegistry.username, taskRegistry.taskStore, taskRegistry.warningStore);
-    }
-
-    public TaskRegistry(String username, TaskStore taskStore, WarningStore warningStore) {
-        this.username = username;
-        this.taskStore = taskStore;
-        this.jobId = new JobId();
-        this.warningStore = warningStore;
+        this(taskRegistry.username, taskRegistry.taskStore);
     }
 
     public TaskRegistry(String username, TaskStore taskStore) {
         this.username = username;
         this.taskStore = taskStore;
         this.jobId = new JobId();
-        this.warningStore = null;
     }
+
 
 
     public void registerTask(Task task) {
@@ -64,7 +55,5 @@ public class TaskRegistry {
             .orElse(false);
     }
 
-    public void addWarningToLog(Task task, String message) {
-        warningStore.addWarning(username, task, message);
-    }
+
 }
