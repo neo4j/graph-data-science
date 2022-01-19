@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.TrainingConfig;
 
@@ -28,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+@ValueClass
 @Configuration
 // This class is currently used internally in NodeClassification and is not
 // a procedure-level configuration. it is derived from a NodeClassificationTrainConfig
@@ -56,6 +58,10 @@ public interface NodeLogisticRegressionTrainCoreConfig extends TrainingConfig {
 
         cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
         return config;
+    }
+
+    static ImmutableNodeLogisticRegressionTrainCoreConfig.Builder builder() {
+        return ImmutableNodeLogisticRegressionTrainCoreConfig.builder();
     }
 
     static NodeLogisticRegressionTrainCoreConfig defaultConfig() {
