@@ -24,6 +24,9 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyWarningRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.WarningRegistry;
+import org.neo4j.gds.core.utils.warnings.WarningRegistryFactory;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -35,16 +38,25 @@ public class TaskProgressTracker implements ProgressTracker {
 
     private final Task baseTask;
     private final TaskRegistry taskRegistry;
+    private final WarningRegistry warningRegistry;
     private final TaskProgressLogger taskProgressLogger;
     private final Stack<Task> nestedTasks;
     protected Optional<Task> currentTask;
 
     public TaskProgressTracker(Task baseTask, Log log, int concurrency, TaskRegistryFactory taskRegistryFactory) {
+        this(baseTask, log, concurrency, taskRegistryFactory, EmptyWarningRegistryFactory.INSTANCE);
+    }
+
+    public TaskProgressTracker(
+        Task baseTask, Log log, int concurrency, TaskRegistryFactory taskRegistryFactory,
+        WarningRegistryFactory warningRegistryFactory
+    ) {
         this.baseTask = baseTask;
         this.taskRegistry = taskRegistryFactory.newInstance();
         this.taskProgressLogger = new TaskProgressLogger(log, baseTask, concurrency);
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();
+        this.warningRegistry = warningRegistryFactory.newInstance();
     }
 
     @Override
@@ -121,7 +133,7 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public void logWarning(String message) {
-        taskRegistry.addWarningToLog(baseTask, message);
+        warningRegistry.addWarningToLog(baseTask, message);
         taskProgressLogger.logWarning(":: " + message);
     }
 
