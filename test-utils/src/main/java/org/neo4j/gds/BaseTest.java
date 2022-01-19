@@ -33,8 +33,8 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
-import org.neo4j.test.extension.DbmsExtension;
 import org.neo4j.test.extension.ExtensionCallback;
+import org.neo4j.test.extension.ImpermanentDbmsExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,7 @@ import java.util.function.Function;
 import static java.util.Collections.emptyMap;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@DbmsExtension(configurationCallback = "configuration")
+@ImpermanentDbmsExtension(configurationCallback = "configuration")
 @Neo4jGraphExtension
 public abstract class BaseTest {
 
@@ -67,7 +67,7 @@ public abstract class BaseTest {
 
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-//        builder.impermanent();
+        builder.impermanent();
         builder.noOpSystemGraphInitializer();
         builder.addExtension(new AllocationTrackerExtensionFactory());
         // A change in 4.3.0-drop02.0 is enabling the feature to track cursor.close() events by default
