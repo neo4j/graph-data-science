@@ -63,7 +63,8 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
             progressTask,
             log,
             configuration.concurrency(),
-            taskRegistryFactory, warningRegistryFactory
+            taskRegistryFactory,
+            warningRegistryFactory
         );
         return build(graphOrGraphStore, configuration, allocationTracker, progressTracker);
     }
