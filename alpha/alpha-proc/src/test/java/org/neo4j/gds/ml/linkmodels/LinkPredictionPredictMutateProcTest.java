@@ -24,9 +24,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
@@ -40,31 +42,36 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 class LinkPredictionPredictMutateProcTest extends BaseProcTest {
 
     private static final String GRAPH =
         "CREATE " +
-        "(a:N {a: 0}), " +
-        "(b:N {a: 0}), " +
-        "(c:N {a: 0}), " +
-        "(d:N {a: 100}), " +
-        "(e:N {a: 100}), " +
-        "(f:N {a: 100}), " +
-        "(g:N {a: 200}), " +
-        "(h:N {a: 200}), " +
-        "(i:N {a: 200}), " +
-        "(j:N {a: 300}), " +
-        "(k:N {a: 300}), " +
-        "(l:N {a: 300}), " +
-        "(m:N {a: 400}), " +
-        "(n:N {a: 400}), " +
-        "(o:N {a: 400})";
+        "(foo:A {id: 42, a: -1}), " +
+        "(bar:A {id: 1337, a: -2}), " +
+        "(a:N {id: 0, a: 0}), " +
+        "(b:N {id: 1, a: 0}), " +
+        "(c:N {id: 2, a: 0}), " +
+        "(d:N {id: 3, a: 100}), " +
+        "(e:N {id: 4, a: 100}), " +
+        "(f:N {id: 5, a: 100}), " +
+        "(g:N {id: 6, a: 200}), " +
+        "(h:N {id: 7, a: 200}), " +
+        "(i:N {id: 8, a: 200}), " +
+        "(j:N {id: 9, a: 300}), " +
+        "(k:N {id: 10, a: 300}), " +
+        "(l:N {id: 11, a: 300}), " +
+        "(m:N {id: 12, a: 400}), " +
+        "(n:N {id: 13, a: 400}), " +
+        "(o:N {id: 14, a: 400})";
 
     @BeforeEach
     void setUp() throws Exception {
@@ -77,8 +84,9 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
     private String createQuery(String graphName, Orientation orientation) {
         return GdsCypher
             .call()
-            .withNodeLabel("N")
+            .withNodeLabels("A", "N")
             .withNodeProperty("a")
+            .withNodeProperty("id")
             .withRelationshipType("IGNORED", RelationshipProjection.of("*", orientation))
             .graphCreate(graphName)
             .yields();
@@ -101,9 +109,10 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
             .explicitCreation("g")
             .algo("gds.alpha.ml.linkPrediction.predict")
             .mutateMode()
+            .addParameter("nodeLabels", List.of("N"))
             .addParameter("mutateRelationshipType", "PREDICTED")
             .addParameter("modelName", "model")
-            .addParameter("threshold", 0.5)
+            .addParameter("threshold", 0.0)
             .addParameter("topN", 9)
             .yields();
 
@@ -118,8 +127,47 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
         )));
 
         assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED"), "probability"));
-    }
 
+
+        Graph actualGraph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "g").graphStore().getGraph(
+            NodeLabel.of("N"), RelationshipType.of("PREDICTED"), Optional.of("probability"));
+        assertGraphEquals(
+            fromGdl( "CREATE" +
+                     "(n0:N { a: 0, id: 0 }) " +
+                     "(n1:N { a: 0, id: 1 }) " +
+                     "(n2:N { a: 0, id: 2 }) " +
+                     "(n3:N { a: 100, id: 3 }) " +
+                     "(n4:N { a: 100, id: 4 }) " +
+                     "(n5:N { a: 100, id: 5 }) " +
+                     "(n6:N { a: 200, id: 6 }) " +
+                     "(n7:N { a: 200, id: 7 }) " +
+                     "(n8:N { a: 200, id: 8 }) " +
+                     "(n9:N { a: 300, id: 9 }) " +
+                     "(n10:N { a: 300, id: 10 }) " +
+                     "(n11:N { a: 300, id: 11 }) " +
+                     "(n12:N { a: 400, id: 12 }) " +
+                     "(n13:N { a: 400, id: 13 }) " +
+                     "(n14:N { a: 400, id: 14 }) " +
+                     "(n0)-[{ w: 0.500186 }]->(n1)" +
+                     "(n0)-[{ w: 0.500186 }]->(n2)" +
+                     "(n1)-[{ w: 0.500186 }]->(n0)" +
+                     "(n1)-[{ w: 0.500186 }]->(n2)" +
+                     "(n2)-[{ w: 0.500186 }]->(n0)" +
+                     "(n2)-[{ w: 0.500186 }]->(n1)" +
+                     "(n3)-[{ w: 0.500186 }]->(n4)" +
+                     "(n3)-[{ w: 0.500186 }]->(n5)" +
+                     "(n4)-[{ w: 0.500186 }]->(n3)" +
+                     "(n4)-[{ w: 0.500186 }]->(n5)" +
+                     "(n5)-[{ w: 0.500186 }]->(n3)" +
+                     "(n5)-[{ w: 0.500186 }]->(n4)" +
+                     "(n6)-[{ w: 0.500186 }]->(n7)" +
+                     "(n6)-[{ w: 0.500186 }]->(n8)" +
+                     "(n7)-[{ w: 0.500186 }]->(n6)" +
+                     "(n7)-[{ w: 0.500186 }]->(n8)" +
+                     "(n8)-[{ w: 0.500186 }]->(n6)" +
+                     "(n8)-[{ w: 0.500186 }]->(n7)"
+            ), actualGraph);
+    }
     @Test
     void requiresUndirectedGraph() {
         runQuery(createQuery("g2", Orientation.NATURAL));
