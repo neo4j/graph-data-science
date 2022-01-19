@@ -142,6 +142,10 @@ public enum Aggregation {
 
     }
 
+    public static String toString(Aggregation aggregation) {
+        return aggregation.toString();
+    }
+
     public static boolean equivalentToNone(Aggregation aggregation) {
         return resolve(aggregation) == NONE;
     }

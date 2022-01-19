@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.assertj.core.api.AbstractBooleanAssert;
 import org.assertj.core.api.AbstractIterableAssert;
 import org.assertj.core.api.Condition;
@@ -49,7 +47,6 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Fail.fail;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,7 +59,6 @@ import static org.neo4j.gds.assertj.AssertionsHelper.booleanAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.creationTimeAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.intAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.listAssertConsumer;
-import static org.neo4j.gds.assertj.AssertionsHelper.longAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.stringAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.stringObjectMapAssertFactory;
 import static org.neo4j.gds.compat.MapUtil.map;
@@ -212,7 +208,7 @@ class GraphListProcTest extends BaseProcTest {
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(14)
+                        .hasSize(11)
                         .containsEntry("nodeProjections", map(
                             "10_Nodes", map(
                                 "label", "10_Nodes",
@@ -239,18 +235,10 @@ class GraphListProcTest extends BaseProcTest {
                         )
                         .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
                         .hasEntrySatisfying(
-                            "validateRelationships",
-                            booleanAssertConsumer(AbstractBooleanAssert::isFalse)
-                        )
-                        .hasEntrySatisfying(
                             "aggregation",
                             stringAssertConsumer(aggregation -> aggregation.isEqualTo("NONE"))
                         )
                         .hasEntrySatisfying("allowSelfLoops", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
-                        .hasEntrySatisfying(
-                            "readConcurrency",
-                            intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
-                        )
                         .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
                         .hasEntrySatisfying(
                             "relationshipDistribution",
@@ -261,11 +249,13 @@ class GraphListProcTest extends BaseProcTest {
                             "relationshipSeed",
                             relationshipSeed -> assertThat(relationshipSeed).isNull()
                         )
-                        .hasEntrySatisfying(
+                        .hasEntrySatisfying("username", username -> assertThat(username).isNull())
+                        .doesNotContainKeys(
+                            "readConcurrency",
+                            "validateRelationships",
                             "relationshipCount",
-                            longAssertConsumer(relationshipCount -> relationshipCount.isEqualTo(-1L))
-                        )
-                        .hasEntrySatisfying("username", username -> assertThat(username).isNull());
+                            "nodeCount"
+                        );
                     return true;
                 }, "Assert generated `configuration` map"),
                 "schema", map(

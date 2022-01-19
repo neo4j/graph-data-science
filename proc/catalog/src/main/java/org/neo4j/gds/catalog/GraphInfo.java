@@ -28,6 +28,7 @@ import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -153,13 +154,10 @@ public class GraphInfo {
 
         @Override
         public void visit(RandomGraphGeneratorConfig randomGraphConfig) {
-            configuration = cleansed(randomGraphConfig.toMap(), Set.of());
-            configuration.put("aggregation", randomGraphConfig.aggregation().toString());
-            configuration.put("orientation", randomGraphConfig.orientation().toString());
-            configuration.put("relationshipDistribution", randomGraphConfig.relationshipDistribution().toString());
+            configuration = cleansed(randomGraphConfig.toMap(), randomGraphConfig.outputFieldDenylist());
         }
 
-        private Map<String, Object> cleansed(Map<String, Object> map, Set<String> keysToIgnore) {
+        private Map<String, Object> cleansed(Map<String, Object> map, Collection<String> keysToIgnore) {
             Map<String, Object> result = new HashMap<>(map);
             map.forEach((key, value) -> {
                 if (keysToIgnore.contains(key)) {

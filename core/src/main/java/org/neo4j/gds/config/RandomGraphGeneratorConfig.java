@@ -37,6 +37,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 @ValueClass
 @Configuration
@@ -60,12 +61,14 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
 
     @Value.Default
     @Configuration.ConvertWith("org.neo4j.gds.core.Aggregation#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.core.Aggregation#toString")
     default Aggregation aggregation() {
         return Aggregation.NONE;
     }
 
     @Value.Default
     @Configuration.ConvertWith("org.neo4j.gds.Orientation#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.Orientation#toString")
     default Orientation orientation() {
         return Orientation.NATURAL;
     }
@@ -77,6 +80,7 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
 
     @Value.Default
     @Configuration.ConvertWith("org.neo4j.gds.beta.generator.RelationshipDistribution#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.beta.generator.RelationshipDistribution#toString")
     default RelationshipDistribution relationshipDistribution() {
         return RelationshipDistribution.UNIFORM;
     }
@@ -129,6 +133,12 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
     @Configuration.Ignore
     default <R> R accept(Cases<R> visitor) {
         return visitor.random(this);
+    }
+
+    @Value.Derived
+    @Configuration.Ignore
+    default Set<String> outputFieldDenylist() {
+        return Set.of(READ_CONCURRENCY_KEY,  NODE_COUNT_KEY, RELATIONSHIP_COUNT_KEY, "validateRelationships");
     }
 
     static RandomGraphGeneratorConfig of(

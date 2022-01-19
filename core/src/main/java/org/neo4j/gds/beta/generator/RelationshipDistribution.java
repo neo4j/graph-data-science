@@ -97,6 +97,11 @@ public enum RelationshipDistribution {
         ));
     }
 
+    public static String toString(RelationshipDistribution distribution) {
+        return distribution.toString();
+    }
+
+
     /**
      * Produces a unary function which accepts a node id parameter and returns the number of outgoing relationships
      * that should be generated for this node.
