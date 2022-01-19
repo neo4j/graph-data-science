@@ -27,6 +27,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.utils.warnings.EmptyWarningRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.WarningRegistryFactory;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
@@ -38,12 +40,30 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         Log log,
         TaskRegistryFactory taskRegistryFactory
     ) {
+        return this.build(
+            graphOrGraphStore,
+            configuration,
+            allocationTracker,
+            log,
+            taskRegistryFactory,
+            EmptyWarningRegistryFactory.INSTANCE
+        );
+    }
+
+    default ALGO build(
+        G graphOrGraphStore,
+        CONFIG configuration,
+        AllocationTracker allocationTracker,
+        Log log,
+        TaskRegistryFactory taskRegistryFactory,
+        WarningRegistryFactory warningRegistryFactory
+    ) {
         var progressTask = progressTask(graphOrGraphStore, configuration);
         var progressTracker = new TaskProgressTracker(
             progressTask,
             log,
             configuration.concurrency(),
-            taskRegistryFactory
+            taskRegistryFactory, warningRegistryFactory
         );
         return build(graphOrGraphStore, configuration, allocationTracker, progressTracker);
     }

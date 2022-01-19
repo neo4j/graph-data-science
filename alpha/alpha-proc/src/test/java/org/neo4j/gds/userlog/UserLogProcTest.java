@@ -132,21 +132,57 @@ class UserLogProcTest extends BaseProcTest {
             List.of(
                 Map.of(
                     "taskName", "foo",
-                    "message","This is a test warning"),
+                    "message", "This is a test warning"
+                ),
                 Map.of(
                     "taskName", "foo",
-                    "message","This is another test warning"),
+                    "message", "This is another test warning"
+                ),
                 Map.of(
                     "taskName", "foo2",
-                    "message","This is a test warning"),
+                    "message", "This is a test warning"
+                ),
                 Map.of(
                     "taskName", "foo2",
-                    "message","This is another test warning")
+                    "message", "This is another test warning"
+                )
             )
 
         );
     }
 
+    @Test
+    void userLogWorksWithWCCmodified() {
+        var createQuery = GdsCypher.call(GRAPH_NAME)
+            .algo("gds.wcc")
+            .streamMode()
+            .addParameter("relationshipWeightProperty", "foo")
+            .yields();
+        runQuery(createQuery);
+
+        runQuery("CALL gds.test.fakewarnproc('foo')");
+
+        assertCypherResult(
+            "CALL gds.alpha.userLog() " +
+            "YIELD taskName, message  RETURN taskName,message ORDER BY taskName",
+            List.of(
+                Map.of(
+                    "taskName", "WCC",
+                    "message", "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set."
+                ),
+                Map.of(
+                    "taskName", "foo",
+                    "message", "This is a test warning"
+                ),
+                Map.of(
+                    "taskName", "foo",
+                    "message", "This is another test warning"
+                )
+
+
+            )
+        );
+    }
 
 
     public static class FakeTaskProc {
