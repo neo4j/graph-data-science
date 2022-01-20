@@ -31,7 +31,7 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.CSRGraphStore;
-import org.neo4j.gds.core.loading.IdsAndProperties;
+import org.neo4j.gds.core.loading.IdMapAndProperties;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -136,7 +136,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
 
-        IdsAndProperties nodes = buildNodes(inputs);
+        IdMapAndProperties nodes = buildNodes(inputs);
 
         RoaringBitmap[] visitedRelationships = ANNUtils.initializeRoaringBitmaps(inputSize);
         RoaringBitmap[] tempVisitedRelationships = ANNUtils.initializeRoaringBitmaps(inputSize);
@@ -275,7 +275,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         return computeTasks;
     }
 
-    private IdsAndProperties buildNodes(INPUT[] inputs) {
+    private IdMapAndProperties buildNodes(INPUT[] inputs) {
         long maxNeoId = Stream.of(inputs)
             .mapToLong(SimilarityInput::getId)
             .max().orElse(0L);
@@ -291,7 +291,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
 
         IdMap idMap = nodesBuilder.build().idMap();
-        return IdsAndProperties.of(idMap, Collections.emptyMap());
+        return IdMapAndProperties.of(idMap, Collections.emptyMap());
     }
 
     private int mergeConsumers(Iterable<NeighborhoodTask> neighborhoodTasks, AnnTopKConsumer[] topKConsumers) {

@@ -209,13 +209,13 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
 
     private RelationshipImportResult loadRelationships(
         String relationshipQuery,
-        IdsAndProperties idsAndProperties,
+        IdMapAndProperties idMapAndProperties,
         GraphDimensions nodeLoadDimensions,
         Transaction transaction
     ) {
         CypherRelationshipLoader relationshipLoader = new CypherRelationshipLoader(
             relationshipQuery,
-            idsAndProperties.idMap(),
+            idMapAndProperties.idMap(),
             cypherConfig,
             loadingContext,
             nodeLoadDimensions,

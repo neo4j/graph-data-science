@@ -120,7 +120,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
         return ImmutableCypherNodeLoader.LoadResult.builder()
             .dimensions(resultDimensions)
-            .idsAndProperties(IdsAndProperties.of(idMap, nodePropertiesWithPropertyMappings))
+            .idsAndProperties(IdMapAndProperties.of(idMap, nodePropertiesWithPropertyMappings))
             .build();
     }
 
@@ -156,6 +156,6 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     interface LoadResult {
         GraphDimensions dimensions();
 
-        IdsAndProperties idsAndProperties();
+        IdMapAndProperties idsAndProperties();
     }
 }

@@ -169,7 +169,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         AllocationTracker allocationTracker = loadingContext.allocationTracker();
         try {
             progressTracker.beginSubTask();
-            IdsAndProperties nodes = loadNodes(concurrency);
+            IdMapAndProperties nodes = loadNodes(concurrency);
             RelationshipImportResult relationships = loadRelationships(nodes.idMap(), concurrency);
             CSRGraphStore graphStore = createGraphStore(nodes, relationships, allocationTracker, dimensions);
 
@@ -181,7 +181,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         }
     }
 
-    private IdsAndProperties loadNodes(int concurrency) {
+    private IdMapAndProperties loadNodes(int concurrency) {
         var scanningNodesImporter = new ScanningNodesImporterBuilder()
             .concurrency(concurrency)
             .graphProjectConfig(graphProjectConfig)

@@ -31,15 +31,14 @@ import org.neo4j.gds.api.PropertyState;
 import java.util.HashMap;
 import java.util.Map;
 
-// TODO: rename to `IdMapAndProperties`
 @ValueClass
-public interface IdsAndProperties {
+public interface IdMapAndProperties {
 
     IdMap idMap();
 
     Map<NodeLabel, NodePropertyStore> properties();
 
-    static IdsAndProperties of(IdMap idMap, Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties) {
+    static IdMapAndProperties of(IdMap idMap, Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties) {
         Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(properties.size());
         properties.forEach((nodeLabel, propertyMap) -> {
             NodePropertyStore.Builder builder = NodePropertyStore.builder();
@@ -56,6 +55,6 @@ public interface IdsAndProperties {
             ));
             nodePropertyStores.put(nodeLabel, builder.build());
         });
-        return ImmutableIdsAndProperties.of(idMap, nodePropertyStores);
+        return ImmutableIdMapAndProperties.of(idMap, nodePropertyStores);
     }
 }

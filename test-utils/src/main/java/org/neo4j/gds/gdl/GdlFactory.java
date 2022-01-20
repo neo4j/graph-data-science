@@ -40,7 +40,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CSRGraphStore;
-import org.neo4j.gds.core.loading.IdsAndProperties;
+import org.neo4j.gds.core.loading.IdMapAndProperties;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -184,7 +184,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         return ImportResult.of(dimensions, graphStore);
     }
 
-    private IdsAndProperties loadNodes() {
+    private IdMapAndProperties loadNodes() {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(dimensions.highestPossibleNodeCount() - 1)
             .hasLabelInformation(true)
@@ -202,7 +202,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var idMap = nodesBuilder.build().idMap();
 
-        return IdsAndProperties.of(idMap, loadNodeProperties(idMap));
+        return IdMapAndProperties.of(idMap, loadNodeProperties(idMap));
     }
 
     private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> loadNodeProperties(IdMap idMap) {

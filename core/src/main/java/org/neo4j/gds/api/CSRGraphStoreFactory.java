@@ -25,7 +25,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
-import org.neo4j.gds.core.loading.IdsAndProperties;
+import org.neo4j.gds.core.loading.IdMapAndProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.values.storable.NumberType;
@@ -47,7 +47,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
     }
 
     protected CSRGraphStore createGraphStore(
-        IdsAndProperties idsAndProperties,
+        IdMapAndProperties idMapAndProperties,
         RelationshipImportResult relationshipImportResult,
         AllocationTracker allocationTracker,
         GraphDimensions dimensions
@@ -89,8 +89,8 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
 
         return CSRGraphStore.of(
             loadingContext.api().databaseId(),
-            idsAndProperties.idMap(),
-            idsAndProperties.properties(),
+            idMapAndProperties.idMap(),
+            idMapAndProperties.properties(),
             relationships,
             relationshipPropertyStores,
             graphProjectConfig.readConcurrency(),
