@@ -28,6 +28,7 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -41,6 +42,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
@@ -60,9 +62,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
-        int concurrency,
-        IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
-        IdMapBuilder idMapBuilder
+        int concurrency
     ) {
         var allocationTracker = loadingContext.allocationTracker();
         var expectedCapacity = dimensions.highestPossibleNodeCount();
@@ -70,11 +70,25 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
 
         var scannerFactory = scannerFactory(loadingContext.transactionContext(), dimensions, loadingContext.log());
 
+        var idMapBuilder = IdMapBehaviorServiceProvider
+            .idMapBehavior()
+            .create(
+                Optional.of(dimensions.highestPossibleNodeCount()),
+                Optional.of(dimensions.nodeCount()),
+                loadingContext.allocationTracker()
+            );
+
         var labelInformationBuilder =
             graphProjectConfig.nodeProjections().allProjections().size() == 1
             && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
                 ? LabelInformation.emptyBuilder(allocationTracker)
                 : LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping, allocationTracker);
+
+        var propertyMappings = IndexPropertyMappings.prepareProperties(
+            graphProjectConfig,
+            dimensions,
+            loadingContext.transactionContext()
+        );
 
         var nodePropertyImporter = initializeNodePropertyImporter(
             propertyMappings,
