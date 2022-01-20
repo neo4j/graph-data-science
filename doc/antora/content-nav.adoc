@@ -124,4 +124,5 @@
 *** xref:appendix-b/migration-algos-common/index.adoc[]
 *** xref:appendix-b/migration-graph-projection/index.adoc[]
 *** xref:appendix-b/migration-graph-listing/index.adoc[]
+*** xref:appendix-b/migration-graph-drop/index.adoc[]
 *** xref:appendix-b/migration-memory-estimation/index.adoc[]

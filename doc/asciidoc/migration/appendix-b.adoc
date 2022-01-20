@@ -23,6 +23,7 @@ This section is divided into the following sub-sections:
 * <<migration-algos-common, Common Changes>>
 * <<migration-graph-projection, Graph Projection>>
 * <<migration-graph-listing, Graph Listing>>
+* <<migration-graph-drop, Graph Drop>>
 * <<migration-memory-estimation, Memory Estimation>>
 
 include::migration-algos-common.adoc[leveloffset=+2]
@@ -30,6 +31,8 @@ include::migration-algos-common.adoc[leveloffset=+2]
 include::migration-graph-projection.adoc[leveloffset=+2]
 
 include::migration-graph-listing.adoc[leveloffset=+2]
+
+include::migration-graph-drop.adoc[leveloffset=+2]
 
 include::migration-memory-estimation.adoc[leveloffset=+2]
 

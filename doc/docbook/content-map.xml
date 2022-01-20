@@ -371,6 +371,9 @@
             <d:tocentry linkend="migration-graph-listing">
                 <?dbhtml filename="appendix-b/migration-graph-listing/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="migration-graph-drop">
+                <?dbhtml filename="appendix-b/migration-graph-drop/index.html"?>
+            </d:tocentry>
             <d:tocentry linkend="migration-memory-estimation">
                 <?dbhtml filename="appendix-b/migration-memory-estimation/index.html"?>
             </d:tocentry>
