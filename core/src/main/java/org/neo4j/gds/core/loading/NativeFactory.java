@@ -26,6 +26,7 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
@@ -44,10 +45,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.internal.id.IdGeneratorFactory;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.core.GraphDimensionsValidation.validate;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -171,7 +170,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         try {
             progressTracker.beginSubTask();
             IdsAndProperties nodes = loadNodes(concurrency);
-            RelationshipImportResult relationships = loadRelationships(allocationTracker, nodes, concurrency);
+            RelationshipImportResult relationships = loadRelationships(nodes.idMap(), concurrency);
             CSRGraphStore graphStore = createGraphStore(nodes, relationships, allocationTracker, dimensions);
 
             logLoadingSummary(graphStore, Optional.of(allocationTracker));
@@ -199,43 +198,26 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         }
     }
 
-    private RelationshipImportResult loadRelationships(
-        AllocationTracker allocationTracker,
-        IdsAndProperties idsAndProperties,
-        int concurrency
-    ) {
-        Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders = graphProjectConfig
-            .relationshipProjections()
-            .projections()
-            .entrySet()
-            .stream()
-            .collect(toMap(
-                Map.Entry::getKey,
-                projectionEntry -> AdjacencyListWithPropertiesBuilder.create(
-                    dimensions::nodeCount,
-                    AdjacencyFactory.configured(),
-                    projectionEntry.getValue(),
-                    dimensions.relationshipPropertyTokens(),
-                    allocationTracker
-                )
-            ));
-
-        ScanningRelationshipsImporter scanningRelationshipsImporter = new ScanningRelationshipsImporter(
-            graphProjectConfig,
-            loadingContext,
-            dimensions,
-            progressTracker,
-            idsAndProperties.idMap(),
-            allBuilders,
-            concurrency
-        );
+    private RelationshipImportResult loadRelationships(IdMap idMap, int concurrency) {
+        var scanningRelationshipsImporter = new ScanningRelationshipsImporterBuilder()
+            .idMap(idMap)
+            .graphProjectConfig(graphProjectConfig)
+            .loadingContext(loadingContext)
+            .dimensions(dimensions)
+            .progressTracker(progressTracker)
+            .concurrency(concurrency)
+            .build();
 
         try {
             progressTracker.beginSubTask();
 
             ObjectLongMap<RelationshipType> relationshipCounts = scanningRelationshipsImporter.call();
 
-            return RelationshipImportResult.of(allBuilders, relationshipCounts, dimensions);
+            return RelationshipImportResult.of(
+                scanningRelationshipsImporter.getAdjacencyListBuilders(),
+                relationshipCounts,
+                dimensions
+            );
         } finally {
             progressTracker.endSubTask();
         }
