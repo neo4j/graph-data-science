@@ -93,7 +93,7 @@ class NeighborhoodSamplerTest {
 
         @Test
         void multiGraph() {
-            var multiGraph = GdlFactory.of("(a)-->(b), (a)-->(b), (a)-->(b)").build().graphStore().getUnion();
+            var multiGraph = GdlFactory.of("(a)-->(b), (a)-->(b), (a)-->(b)").build().getUnion();
 
             NeighborhoodSampler sampler = new NeighborhoodSampler(42);
             var sample = sampler.sample(multiGraph, 0, 2).toArray();

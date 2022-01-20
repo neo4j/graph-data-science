@@ -388,8 +388,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             .gdlGraph("CREATE (a)-[:REL]->(b)")
             .nodeIdFunction(counter::getAndIncrement)
             .build()
-            .build()
-            .graphStore();
+            .build();
 
         var config = ImmutableGraphStoreToFileExporterConfig
             .builder()

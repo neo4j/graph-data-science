@@ -43,7 +43,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 
 
-public final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, ObjectLongMap<RelationshipType>> {
+public final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, RelationshipsAndProperties> {
 
     private final GraphProjectConfig graphProjectConfig;
     private final GraphLoaderContext loadingContext;
@@ -109,10 +109,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         this.idMap = idMap;
         this.adjacencyListBuilders = adjacencyListBuilders;
         this.allRelationshipCounters = new HashMap<>();
-    }
-
-    Map<RelationshipType, AdjacencyListWithPropertiesBuilder> getAdjacencyListBuilders() {
-        return adjacencyListBuilders;
     }
 
     @Override
@@ -184,12 +180,13 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
     }
 
     @Override
-    public ObjectLongMap<RelationshipType> build() {
+    public RelationshipsAndProperties build() {
         ObjectLongMap<RelationshipType> relationshipCounters = new ObjectLongHashMap<>(allRelationshipCounters.size());
         allRelationshipCounters.forEach((relationshipType, counter) -> relationshipCounters.put(
             relationshipType,
             counter.sum()
         ));
-        return relationshipCounters;
+
+        return RelationshipsAndProperties.of(relationshipCounters, adjacencyListBuilders);
     }
 }

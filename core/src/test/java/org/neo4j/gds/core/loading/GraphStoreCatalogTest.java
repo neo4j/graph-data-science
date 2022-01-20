@@ -398,15 +398,13 @@ class GraphStoreCatalogTest {
             .gdlGraph("()-->()")
             .namedDatabaseId(namedDatabaseId0)
             .build()
-            .build()
-            .graphStore();
+            .build();
         GraphStore graphStore1 = GdlFactory
             .builder()
             .gdlGraph("()-->()-->()")
             .namedDatabaseId(namedDatabaseId1)
             .build()
-            .build()
-            .graphStore();
+            .build();
 
         GraphStoreCatalog.set(config0, graphStore0);
         GraphStoreCatalog.set(config1, graphStore1);
@@ -421,7 +419,7 @@ class GraphStoreCatalogTest {
     @Test
     void shouldThrowOnMissingGraph() {
         var dummyDatabaseId = DatabaseIdFactory.from("mydatabase", UUID.fromString("0-0-0-0-0"));
-        var dummyGraphStore = GdlFactory.of("()").build().graphStore();
+        var dummyGraphStore = GdlFactory.of("()").build();
 
         // test the get code path
         assertThatExceptionOfType(NoSuchElementException.class)

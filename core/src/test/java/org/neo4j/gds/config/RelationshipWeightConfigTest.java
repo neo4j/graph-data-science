@@ -64,8 +64,7 @@ class RelationshipWeightConfigTest {
     void assertRelationshipWeightPropertyIsValid() {
         var graphStore = GdlFactory
             .of("()-[:A {rrw: 4}]->()-[:A {rw: 3}]->(), ()-[:A {rw: 2}]->(), ()-[:A {rw: 1}]->()")
-            .build()
-            .graphStore();
+            .build();
 
         var relationshipWeightConfig = CypherMapWrapper.empty().withString("relationshipWeightProperty", "rw");
         var algoConfig = TestRelationshipWeightConfig.of(relationshipWeightConfig);
@@ -76,7 +75,7 @@ class RelationshipWeightConfigTest {
 
     @Test
     void assertRelationshipWeightPropertyIsInvalid() {
-        var graphStore = GdlFactory.of("()-[:A {foo: 1}]->()").build().graphStore();
+        var graphStore = GdlFactory.of("()-[:A {foo: 1}]->()").build();
         var relationshipWeightConfig = CypherMapWrapper.empty().withString("relationshipWeightProperty", "bar");
         var algoConfig = TestRelationshipWeightConfig.of(relationshipWeightConfig);
 

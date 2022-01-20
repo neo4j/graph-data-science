@@ -28,7 +28,7 @@ import java.util.Map;
 class ModelProcBaseTest extends BaseProcTest {
 
     static final GraphSchema GRAPH_SCHEMA =
-        GdlFactory.of("(:Node {p: 1})-[:REL {r: 0}]->(:Node)").build().graphStore().schema();
+        GdlFactory.of("(:Node {p: 1})-[:REL {r: 0}]->(:Node)").build().schema();
 
     static final Map<String, Map<String, Map<String, String>>> EXPECTED_SCHEMA = Map.of(
         "nodes", Map.of(

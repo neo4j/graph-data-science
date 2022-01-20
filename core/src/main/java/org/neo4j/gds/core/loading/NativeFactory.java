@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.core.loading;
 
-import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
@@ -162,7 +160,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     }
 
     @Override
-    public ImportResult<CSRGraphStore> build() {
+    public CSRGraphStore build() {
         validate(dimensions, storeConfig);
 
         int concurrency = graphProjectConfig.readConcurrency();
@@ -170,12 +168,12 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         try {
             progressTracker.beginSubTask();
             IdMapAndProperties nodes = loadNodes(concurrency);
-            RelationshipImportResult relationships = loadRelationships(nodes.idMap(), concurrency);
-            CSRGraphStore graphStore = createGraphStore(nodes, relationships, allocationTracker, dimensions);
+            RelationshipsAndProperties relationships = loadRelationships(nodes.idMap(), concurrency);
+            CSRGraphStore graphStore = createGraphStore(nodes, relationships, allocationTracker);
 
             logLoadingSummary(graphStore, Optional.of(allocationTracker));
 
-            return ImportResult.of(dimensions, graphStore);
+            return graphStore;
         } finally {
             progressTracker.endSubTask();
         }
@@ -198,7 +196,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         }
     }
 
-    private RelationshipImportResult loadRelationships(IdMap idMap, int concurrency) {
+    private RelationshipsAndProperties loadRelationships(IdMap idMap, int concurrency) {
         var scanningRelationshipsImporter = new ScanningRelationshipsImporterBuilder()
             .idMap(idMap)
             .graphProjectConfig(graphProjectConfig)
@@ -210,14 +208,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
 
         try {
             progressTracker.beginSubTask();
-
-            ObjectLongMap<RelationshipType> relationshipCounts = scanningRelationshipsImporter.call();
-
-            return RelationshipImportResult.of(
-                scanningRelationshipsImporter.getAdjacencyListBuilders(),
-                relationshipCounts,
-                dimensions
-            );
+            return scanningRelationshipsImporter.call();
         } finally {
             progressTracker.endSubTask();
         }

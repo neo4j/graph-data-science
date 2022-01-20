@@ -186,7 +186,7 @@ class NativeRelationshipExporterTest extends BaseTest {
     void progressLogging() {
         // given a graph of 20 rels
         // this abuses id mapping
-        Graph graph = GdlFactory.of("(a)-[:T]->(b),".repeat(20)).build().graphStore().getUnion();
+        Graph graph = GdlFactory.of("(a)-[:T]->(b),".repeat(20)).build().getUnion();
 
         // with a rel exporter
         var log = new TestLog();

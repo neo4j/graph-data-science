@@ -67,7 +67,7 @@ public final class NodeWeightConfigProcTest {
         AlgoBaseProc<?, ?, C, ?> proc,
         CypherMapWrapper config
     ) {
-        var graphStore = GdlFactory.of("(:A {a: 1})").build().graphStore();
+        var graphStore = GdlFactory.of("(:A {a: 1})").build();
         return DynamicTest.dynamicTest("validateNodeWeightProperty", () -> {
             var validator = new Validator<>(proc.validationConfig());
             assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
@@ -87,10 +87,7 @@ public final class NodeWeightConfigProcTest {
         AlgoBaseProc<?, ?, C, ?> proc,
         CypherMapWrapper config
     ) {
-        var graphStore = GdlFactory
-            .of("(a:Node), (b:Ignore {foo: 42}), (a)-[:T]->(b)")
-            .build()
-            .graphStore();
+        var graphStore = GdlFactory.of("(a:Node), (b:Ignore {foo: 42}), (a)-[:T]->(b)").build();
         return DynamicTest.dynamicTest("validateNodeWeightPropertyFilteredGraph", () -> {
             var validator = new Validator<>(proc.validationConfig());
             assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
@@ -156,7 +153,7 @@ public final class NodeWeightConfigProcTest {
         AlgoBaseProc<?, ?, C, ?> proc,
         CypherMapWrapper config
     ) {
-        var graphStore = GdlFactory.of("(:A {nw: 1})").build().graphStore();
+        var graphStore = GdlFactory.of("(:A {nw: 1})").build();
         return DynamicTest.dynamicTest("validNodeWeightProperty", () -> {
             var nodeWeightConfig = config.withString("nodeWeightProperty", "nw");
             var algoConfig = proc.configParser().processInput(nodeWeightConfig.toMap());

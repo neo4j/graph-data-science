@@ -211,9 +211,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             counter.sum()
         ));
 
+        var relationshipsAndProperties = RelationshipsAndProperties.of(relationshipCounters, loaderContext.allBuilders);
+
         return ImmutableCypherRelationshipLoader.LoadResult.builder()
             .dimensions(resultDimensions)
-            .relationshipCounts(relationshipCounters)
+            .relationshipsAndProperties(relationshipsAndProperties)
             .build();
     }
 
@@ -230,10 +232,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     @Override
     QueryType queryType() {
         return QueryType.RELATIONSHIP;
-    }
-
-    Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders() {
-        return loaderContext.allBuilders;
     }
 
     class Context {
@@ -331,6 +329,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     interface LoadResult {
         GraphDimensions dimensions();
 
-        ObjectLongMap<RelationshipType> relationshipCounts();
+        RelationshipsAndProperties relationshipsAndProperties();
     }
 }

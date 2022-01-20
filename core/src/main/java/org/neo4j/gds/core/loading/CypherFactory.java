@@ -43,7 +43,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.id.IdGeneratorFactory;
 
 import java.util.ArrayList;
@@ -130,7 +129,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
     }
 
     @Override
-    public ImportResult<CSRGraphStore> build() {
+    public CSRGraphStore build() {
         // Temporarily override the security context to enforce read-only access during load
         return readOnlyTransaction().apply((tx, ktx) -> {
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(
@@ -142,7 +141,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
 
             progressTracker.beginSubTask("Loading");
 
-            CypherNodeLoader.LoadResult nodes = new CypherNodeLoader(
+            var nodes = new CypherNodeLoader(
                 nodeQuery(),
                 nodeCount.rows(),
                 cypherConfig,
@@ -151,25 +150,26 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
                 progressTracker
             ).load(tx);
 
-            RelationshipImportResult relationships = loadRelationships(
+            var relationships = new CypherRelationshipLoader(
                 relationshipQuery(),
-                nodes.idsAndProperties(),
+                nodes.idsAndProperties().idMap(),
+                cypherConfig,
+                loadingContext,
                 nodes.dimensions(),
-                tx
-            );
+                progressTracker
+            ).load(tx);
 
-            CSRGraphStore graphStore = createGraphStore(
+            var graphStore = createGraphStore(
                 nodes.idsAndProperties(),
-                relationships,
-                loadingContext.allocationTracker(),
-                relationships.dimensions()
+                relationships.relationshipsAndProperties(),
+                loadingContext.allocationTracker()
             );
 
             progressTracker.endSubTask("Loading");
 
             logLoadingSummary(graphStore, Optional.empty());
 
-            return ImportResult.of(relationships.dimensions(), graphStore);
+            return graphStore;
         });
     }
 
@@ -205,30 +205,6 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
             return Optional.of((GraphProjectFromCypherConfig) config);
         }
         return Optional.empty();
-    }
-
-    private RelationshipImportResult loadRelationships(
-        String relationshipQuery,
-        IdMapAndProperties idMapAndProperties,
-        GraphDimensions nodeLoadDimensions,
-        Transaction transaction
-    ) {
-        CypherRelationshipLoader relationshipLoader = new CypherRelationshipLoader(
-            relationshipQuery,
-            idMapAndProperties.idMap(),
-            cypherConfig,
-            loadingContext,
-            nodeLoadDimensions,
-            progressTracker
-        );
-
-        CypherRelationshipLoader.LoadResult result = relationshipLoader.load(transaction);
-
-        return RelationshipImportResult.of(
-            relationshipLoader.allBuilders(),
-            result.relationshipCounts(),
-            result.dimensions()
-        );
     }
 
     private TransactionContext readOnlyTransaction() {
@@ -272,6 +248,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
     @ValueClass
     interface EstimationResult {
         long estimatedRows();
+
         long propertyCount();
 
         @Value.Derived
@@ -284,6 +261,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
                     property -> NO_SUCH_PROPERTY_KEY
                 ));
         }
+
         @Value.Derived
         default Collection<PropertyMapping> propertyMappings() {
             return LongStream

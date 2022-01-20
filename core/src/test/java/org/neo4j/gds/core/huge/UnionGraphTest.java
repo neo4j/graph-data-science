@@ -133,7 +133,7 @@ class UnionGraphTest {
     @MethodSource("relationshipPropertyGraphs")
     void relationshipProperty(String gdlGraph, String desc) {
         var graphFactory = GdlFactory.of(gdlGraph);
-        var graph = graphFactory.build().graphStore().getUnion();
+        var graph = graphFactory.build().getUnion();
         var a = graphFactory.nodeId("a");
         var b = graphFactory.nodeId("b");
 
@@ -144,7 +144,7 @@ class UnionGraphTest {
     @MethodSource("relationshipPropertyGraphs")
     void relationshipPropertyWithFallBack(String gdlGraph, String desc) {
         var graphFactory = GdlFactory.of(gdlGraph);
-        var graph = graphFactory.build().graphStore().getUnion();
+        var graph = graphFactory.build().getUnion();
         var a = graphFactory.nodeId("a");
         var b = graphFactory.nodeId("b");
 
@@ -156,7 +156,7 @@ class UnionGraphTest {
         var graphFactory = GdlFactory.of(
             "  (a)-[:FIRST { times: 3 }]->(b)" +
             ", (a)-[:SECOND { times: 5 }]->(b)");
-        var graph = graphFactory.build().graphStore().getUnion();
+        var graph = graphFactory.build().getUnion();
         var a = graphFactory.nodeId("a");
         var b = graphFactory.nodeId("b");
 
@@ -173,7 +173,7 @@ class UnionGraphTest {
             ", (b:B)" +
             ", (a)-[:R1]->(b)" +
             ", (b)-[:R2]->(a)"
-        ).build().graphStore();
+        ).build();
 
         var unionGraph = graphStore.getGraph(
             List.of(NodeLabel.of("A")),

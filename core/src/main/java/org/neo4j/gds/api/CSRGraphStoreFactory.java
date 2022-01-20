@@ -19,19 +19,14 @@
  */
 package org.neo4j.gds.api;
 
-import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.IdMapAndProperties;
+import org.neo4j.gds.core.loading.RelationshipsAndProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.values.storable.NumberType;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -48,90 +43,18 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
 
     protected CSRGraphStore createGraphStore(
         IdMapAndProperties idMapAndProperties,
-        RelationshipImportResult relationshipImportResult,
-        AllocationTracker allocationTracker,
-        GraphDimensions dimensions
+        RelationshipsAndProperties relationshipsAndProperties,
+        AllocationTracker allocationTracker
     ) {
-        int relTypeCount = dimensions.relationshipTypeTokens().size();
-        Map<RelationshipType, Relationships.Topology> relationships = new HashMap<>(relTypeCount);
-        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
-
-        relationshipImportResult.builders().forEach((relationshipType, relationshipsBuilder) -> {
-            var adjacencyListsWithProperties = relationshipsBuilder.build();
-
-            var adjacency = adjacencyListsWithProperties.adjacency();
-            var properties = adjacencyListsWithProperties.properties();
-            long relationshipCount = relationshipImportResult.counts().getOrDefault(relationshipType, 0L);
-
-            RelationshipProjection projection = relationshipsBuilder.projection();
-
-            relationships.put(
-                relationshipType,
-                ImmutableTopology.of(
-                    adjacency,
-                    relationshipCount,
-                    projection.orientation(),
-                    projection.isMultiGraph()
-                )
-            );
-
-            if (!projection.properties().isEmpty()) {
-                relationshipPropertyStores.put(
-                    relationshipType,
-                    constructRelationshipPropertyStore(
-                        projection,
-                        properties,
-                        relationshipCount
-                    )
-                );
-            }
-        });
-
         return CSRGraphStore.of(
             loadingContext.api().databaseId(),
             idMapAndProperties.idMap(),
             idMapAndProperties.properties(),
-            relationships,
-            relationshipPropertyStores,
+            relationshipsAndProperties.relationships(),
+            relationshipsAndProperties.properties(),
             graphProjectConfig.readConcurrency(),
             allocationTracker
         );
-    }
-
-    private RelationshipPropertyStore constructRelationshipPropertyStore(
-        RelationshipProjection projection,
-        Iterable<AdjacencyProperties> properties,
-        long relationshipCount
-    ) {
-        PropertyMappings propertyMappings = projection.properties();
-        RelationshipPropertyStore.Builder propertyStoreBuilder = RelationshipPropertyStore.builder();
-
-        var propertiesIter = properties.iterator();
-        propertyMappings.mappings().forEach(propertyMapping -> {
-            var propertiesList = propertiesIter.next();
-            propertyStoreBuilder.putIfAbsent(
-                propertyMapping.propertyKey(),
-                RelationshipProperty.of(
-                    propertyMapping.propertyKey(),
-                    NumberType.FLOATING_POINT,
-                    PropertyState.PERSISTENT,
-                    ImmutableProperties.of(
-                        propertiesList,
-                        relationshipCount,
-                        projection.orientation(),
-                        projection.isMultiGraph(),
-                        // This is fine because relationships currently only support doubles
-                        propertyMapping.defaultValue().doubleValue()
-                    ),
-                    propertyMapping.defaultValue().isUserDefined()
-                        ? propertyMapping.defaultValue()
-                        : ValueTypes.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
-                    propertyMapping.aggregation()
-                )
-            );
-        });
-
-        return propertyStoreBuilder.build();
     }
 
     protected void logLoadingSummary(GraphStore graphStore, Optional<AllocationTracker> allocationTracker) {

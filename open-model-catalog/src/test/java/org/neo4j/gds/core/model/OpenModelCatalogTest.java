@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class OpenModelCatalogTest {
 
     private static final String USERNAME = "testUser";
-    private static final GraphSchema GRAPH_SCHEMA = GdlFactory.of("(:Node1)").build().graphStore().schema();
+    private static final GraphSchema GRAPH_SCHEMA = GdlFactory.of("(:Node1)").build().schema();
 
     private static final Model<String, TestTrainConfig, ToMapConvertible> TEST_MODEL = Model.of(
         USERNAME,

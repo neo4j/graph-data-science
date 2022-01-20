@@ -144,7 +144,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     }
 
     @Override
-    public ImportResult<CSRGraphStore> build() {
+    public CSRGraphStore build() {
         var nodes = loadNodes();
         var relationships = loadRelationships(nodes.idMap());
 
@@ -181,7 +181,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             1,
             loadingContext.allocationTracker()
         );
-        return ImportResult.of(dimensions, graphStore);
+        return graphStore;
     }
 
     private IdMapAndProperties loadNodes() {

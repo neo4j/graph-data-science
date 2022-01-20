@@ -160,10 +160,7 @@ class Node2VecTest extends AlgoTestBase {
 
     @Test
     void failOnNegativeWeights() {
-        var graph = GdlFactory.of("CREATE (a)-[:REL {weight: -1}]->(b)")
-            .build()
-            .graphStore()
-            .getUnion();
+        var graph = GdlFactory.of("CREATE (a)-[:REL {weight: -1}]->(b)").build().getUnion();
 
         var config = ImmutableNode2VecStreamConfig
             .builder()

@@ -134,7 +134,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             .namedDatabaseId(DATABASE_ID)
             .build();
 
-        CSRGraphStore graphStore = gdlFactory.build().graphStore();
+        CSRGraphStore graphStore = gdlFactory.build();
         CSRGraph graph = graphStore.getUnion();
         IdFunction idFunction = gdlFactory::nodeId;
         TestGraph testGraph = new TestGraph(graph, idFunction, graphName);

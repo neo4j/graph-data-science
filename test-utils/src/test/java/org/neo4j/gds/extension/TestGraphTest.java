@@ -45,7 +45,6 @@ class TestGraphTest {
             GdlFactory
                 .of("(:A)-[:T1]->(:B)-[:T2]->(:A)")
                 .build()
-                .graphStore()
                 .getGraph(NodeLabel.listOf("A", "B"), RelationshipType.listOf("T1", "T2"), Optional.empty()),
             (a) -> 0,
             "foo"
@@ -70,7 +69,6 @@ class TestGraphTest {
         CSRGraph bGraph = GdlFactory
             .of("(:A), (b:B), (:B)")
             .build()
-            .graphStore()
             .getGraph(List.of(NodeLabel.of("B")), List.of(RelationshipType.ALL_RELATIONSHIPS), Optional.empty());
         TestGraph g = new TestGraph(bGraph, (a) -> a.equals("b") ? 1 : 2, "foo");
         assertEquals(1, g.toOriginalNodeId("b"));
@@ -82,7 +80,6 @@ class TestGraphTest {
         CSRGraph bGraph = GdlFactory
             .of("(:A), (b:B), (:B)")
             .build()
-            .graphStore()
             .getGraph(List.of(NodeLabel.of("B")), List.of(RelationshipType.ALL_RELATIONSHIPS), Optional.empty());
         TestGraph g = new TestGraph(bGraph, (a) -> a.equals("b") ? 1 : 2, "foo");
         assertEquals(0, g.toMappedNodeId("b"));

@@ -19,16 +19,11 @@
  */
 package org.neo4j.gds.api;
 
-import com.carrotsearch.hppc.ObjectLongMap;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.loading.AdjacencyListWithPropertiesBuilder;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-
-import java.util.Map;
 
 /**
  * The Abstract Factory defines the construction of the graph
@@ -62,7 +57,7 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
         this.progressTracker = initProgressTracker();
     }
 
-    public abstract ImportResult<STORE> build();
+    public abstract STORE build();
 
     public abstract MemoryEstimation memoryEstimation();
 
@@ -78,32 +73,10 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
 
     @ValueClass
     public interface ImportResult<STORE extends GraphStore> {
-        GraphDimensions dimensions();
-
         STORE graphStore();
 
-        static <STORE extends GraphStore> ImportResult<STORE> of(GraphDimensions dimensions, STORE graphStore) {
-            return ImmutableImportResult.<STORE>builder()
-                .dimensions(dimensions)
-                .graphStore(graphStore)
-                .build();
-        }
-    }
-
-    @ValueClass
-    public interface RelationshipImportResult {
-        Map<RelationshipType, AdjacencyListWithPropertiesBuilder> builders();
-
-        ObjectLongMap<RelationshipType> counts();
-
-        GraphDimensions dimensions();
-
-        static RelationshipImportResult of(
-            Map<RelationshipType, AdjacencyListWithPropertiesBuilder> builders,
-            ObjectLongMap<RelationshipType> counts,
-            GraphDimensions dimensions
-        ) {
-            return ImmutableRelationshipImportResult.of(builders, counts, dimensions);
+        static <STORE extends GraphStore> ImportResult<STORE> of(STORE graphStore) {
+            return ImmutableImportResult.<STORE>builder().graphStore(graphStore).build();
         }
     }
 }

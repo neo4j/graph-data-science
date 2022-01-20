@@ -51,7 +51,6 @@ class RelationshipIntersectFactoryLocatorTest {
         var graph = GdlFactory
             .of("(:A)-[:A]->(:A)-[:B]->(:B)")
             .build()
-            .graphStore()
             .getGraph("A", "A", Optional.empty());
         assertThat(graph).isInstanceOf(NodeFilteredGraph.class);
         assertThat(RelationshipIntersectFactoryLocator.lookup(graph)).isPresent();

@@ -36,7 +36,7 @@ class GraphStoreValidationTest {
     static class SeedConfigTests {
         @Test
         void shouldFailWithInvalidSeedProperty() {
-            var graphStore = GdlFactory.of("(a {bar: 42})").build().graphStore();
+            var graphStore = GdlFactory.of("(a {bar: 42})").build();
             var config = ImmutableTestSeedConfig.builder().seedProperty("foo").build();
 
 
@@ -53,7 +53,7 @@ class GraphStoreValidationTest {
     static class MutatePropertyConfigTests {
         @Test
         void testMutateFailsOnExistingToken() {
-            var graphStore = GdlFactory.of("(a {foo: 42})").build().graphStore();
+            var graphStore = GdlFactory.of("(a {foo: 42})").build();
             var config = ImmutableTestMutatePropertyConfig.builder().mutateProperty("foo").build();
 
             assertThatThrownBy(() -> GraphStoreValidation.validate(graphStore, config))

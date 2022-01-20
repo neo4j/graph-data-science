@@ -191,7 +191,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                     .afterLoadValidations()
                     .forEach(validation ->
                         validation.validateConfigsAfterLoad(
-                            GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
+                            GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build(),
                             GraphProjectFromStoreConfig.emptyWithName(getUsername(), graphName),
                             config
                         )
@@ -223,7 +223,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                     .afterLoadValidations()
                     .forEach(validation ->
                         validation.validateConfigsAfterLoad(
-                            GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
+                            GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build(),
                             GraphProjectFromStoreConfig.emptyWithName(getUsername(), graphName),
                             config
                         )

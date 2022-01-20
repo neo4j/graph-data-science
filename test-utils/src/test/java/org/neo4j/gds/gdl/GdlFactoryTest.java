@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class GdlFactoryTest {
 
     private Graph fromGdl(String gdl) {
-        return GdlFactory.of(gdl).build().graphStore().getUnion();
+        return GdlFactory.of(gdl).build().getUnion();
     }
 
     @Test
@@ -72,7 +72,7 @@ class GdlFactoryTest {
     @Test
     void testRelationshipTypes() {
         var gdlFactory = GdlFactory.of("(a)-[:REL1]->(b)-[:REL2]->(c)");
-        var graphStore = gdlFactory.build().graphStore();
+        var graphStore = gdlFactory.build();
         var rel1Graph = graphStore.getGraph(RelationshipType.of("REL1"));
         assertThat(rel1Graph.relationshipCount()).isEqualTo(1);
         rel1Graph.forEachRelationship(gdlFactory.nodeId("a"), (sourceNodeId, targetNodeId) -> {
@@ -91,7 +91,7 @@ class GdlFactoryTest {
     @Test
     void testRelationshipProperties() {
         var gdlFactory = GdlFactory.of(("(a)-[:REL { foo: 42, bar: 1337, baz: 84 }]->(b)"));
-        var graphStore = gdlFactory.build().graphStore();
+        var graphStore = gdlFactory.build();
         var sourceNodeId = gdlFactory.nodeId("a");
 
         assertRelationshipProperty(graphStore, "REL", "foo", sourceNodeId, 42.0);
@@ -105,7 +105,7 @@ class GdlFactoryTest {
             "(a)-[:REL { foo: 42, bar: 1337, baz: 84 }]->(b)" +
             "(b)-[:REL { foo: 42 }]->(c)")
         );
-        var graphStore = gdlFactory.build().graphStore();
+        var graphStore = gdlFactory.build();
         var sourceNodeId = gdlFactory.nodeId("b");
 
         assertRelationshipProperty(graphStore, "REL", "foo", sourceNodeId, 42.0);
@@ -119,7 +119,7 @@ class GdlFactoryTest {
             "(a)-[:REL1 { foo: 42, bar: 1337, baz: 84 }]->(b)" +
             "(b)-[:REL2 { foo: 4.2D, bob: 13.37D }]->(c)")
         );
-        var graphStore = gdlFactory.build().graphStore();
+        var graphStore = gdlFactory.build();
         var idA = gdlFactory.nodeId("a");
         var idB = gdlFactory.nodeId("b");
 
@@ -229,8 +229,8 @@ class GdlFactoryTest {
 
         var importResult = factory.build();
 
-        assertThat(importResult.dimensions().highestPossibleNodeCount()).isEqualTo(45L);
-        assertThat(importResult.graphStore().nodes().highestNeoId()).isEqualTo(44L);
+        assertThat(factory.dimensions().highestPossibleNodeCount()).isEqualTo(45L);
+        assertThat(importResult.nodes().highestNeoId()).isEqualTo(44L);
     }
 
     private void assertRelationshipProperty(

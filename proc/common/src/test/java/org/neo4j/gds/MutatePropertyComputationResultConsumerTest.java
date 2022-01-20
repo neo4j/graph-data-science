@@ -111,7 +111,7 @@ class MutatePropertyComputationResultConsumerTest {
             .gdlGraph("CREATE (b: B), (a1: A), (a2: A), (a1)-[:REL]->(a2)")
             .build();
 
-        CSRGraphStore graphStore = gdlFactory.build().graphStore();
+        CSRGraphStore graphStore = gdlFactory.build();
 
         CSRGraph filteredGraph = graphStore.getGraph(
             NodeLabel.listOf("A"),

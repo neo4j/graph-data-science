@@ -79,7 +79,7 @@ class CsvGraphStoreImporterIntegrationTest {
 
     @Test
     void shouldImportGraphWithNoLabels() {
-        var graphStore = GdlFactory.of("()-[]->()").build().graphStore();
+        var graphStore = GdlFactory.of("()-[]->()").build();
 
         GraphStoreToFileExporter.csv(graphStore, exportConfig(4), graphLocation).run(AllocationTracker.empty());
 

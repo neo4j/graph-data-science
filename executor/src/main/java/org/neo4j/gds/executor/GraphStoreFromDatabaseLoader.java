@@ -52,7 +52,7 @@ public class GraphStoreFromDatabaseLoader implements GraphStoreCreator {
 
     @Override
     public GraphStore graphStore() {
-        return this.graphStoreFactory.build().graphStore();
+        return this.graphStoreFactory.build();
     }
 
     @Override

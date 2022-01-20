@@ -90,8 +90,7 @@ class WriteProcCancellationTest extends BaseTest {
                     .gdlGraph("(a)")
                     .build())
                 .build()
-                .build()
-                .graphStore();
+                .build();
 
             var computationResult = ImmutableComputationResult.<TestAlgorithm, TestAlgorithm, TestWriteConfig>builder()
                 .graphStore(graphStore)

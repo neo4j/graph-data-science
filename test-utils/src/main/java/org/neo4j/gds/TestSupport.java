@@ -135,14 +135,13 @@ public final class TestSupport {
             .namedDatabaseId(GdlSupportExtension.DATABASE_ID)
             .build();
 
-        return new TestGraph(gdlFactory.build().graphStore().getUnion(), gdlFactory::nodeId, name);
+        return new TestGraph(gdlFactory.build().getUnion(), gdlFactory::nodeId, name);
     }
 
     public static GraphStore graphStoreFromGDL(String gdl) {
         Objects.requireNonNull(gdl);
-        var gdlFactory = GdlFactory.of(gdl);
 
-        return gdlFactory.build().graphStore();
+        return GdlFactory.of(gdl).build();
     }
 
     public static long[][] ids(IdFunction idFunction, String[][] variables) {

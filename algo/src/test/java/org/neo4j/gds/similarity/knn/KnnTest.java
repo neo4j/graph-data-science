@@ -306,7 +306,7 @@ class KnnTest {
 
     @Test
     void testNegativeFloatArrays() {
-        var graph = GdlFactory.of("({weight: [1.0, 2.0]}), ({weight: [3.0, -10.0]})").build().graphStore().getUnion();
+        var graph = GdlFactory.of("({weight: [1.0, 2.0]}), ({weight: [3.0, -10.0]})").build().getUnion();
 
         var knnConfig = ImmutableKnnBaseConfig.builder()
             .nodeWeightProperty("weight")
