@@ -24,7 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.schema.NodeSchema;
@@ -45,7 +44,6 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.logging.Log;
-import org.neo4j.values.storable.NumberType;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -247,39 +245,9 @@ public final class CsvGraphStoreImporter {
         List<RelationshipPropertySchema> propertySchemas,
         Map<RelationshipType, RelationshipPropertyStore> propertyStores
     ) {
-        var propertyStoreBuilder = RelationshipPropertyStore.builder();
-
-        buildPropertyStores(
-            relationships,
-            propertyStoreBuilder,
-            propertySchemas
-        );
-
-        propertyStores.put(relationshipType, propertyStoreBuilder.build());
+        var propertyStore = CSRGraphStoreUtil.buildRelationshipPropertyStore(relationships, propertySchemas);
+        propertyStores.put(relationshipType, propertyStore);
         return relationships.get(0).topology();
-    }
-
-    private static void buildPropertyStores(
-        java.util.List<Relationships> relationships,
-        RelationshipPropertyStore.Builder propertyStoreBuilder,
-        java.util.List<RelationshipPropertySchema> relationshipPropertySchemas
-    ) {
-        for (int i = 0; i < relationshipPropertySchemas.size(); i++) {
-            var relationship = relationships.get(i);
-            var relationshipPropertySchema = relationshipPropertySchemas.get(i);
-            relationship.properties().ifPresent(properties -> {
-
-                propertyStoreBuilder.putIfAbsent(relationshipPropertySchema.key(), RelationshipProperty.of(
-                    relationshipPropertySchema.key(),
-                    NumberType.FLOATING_POINT,
-                    relationshipPropertySchema.state(),
-                    properties,
-                    relationshipPropertySchema.defaultValue(),
-                    relationshipPropertySchema.aggregation()
-                    )
-                );
-            });
-        }
     }
 
     @ValueClass
