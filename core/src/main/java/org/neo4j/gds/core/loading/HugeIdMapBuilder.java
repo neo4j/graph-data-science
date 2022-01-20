@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -27,19 +28,19 @@ import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuilder<InternalHugeIdMappingBuilder.BulkAdder> {
+public final class HugeIdMapBuilder implements IdMapBuilder {
 
     private final HugeLongArray array;
     private final long capacity;
     private final AtomicLong allocationIndex;
     private final CloseableThreadLocal<BulkAdder> adders;
 
-    public static InternalHugeIdMappingBuilder of(long capacity, AllocationTracker allocationTracker) {
+    public static HugeIdMapBuilder of(long capacity, AllocationTracker allocationTracker) {
         HugeLongArray array = HugeLongArray.newArray(capacity, allocationTracker);
-        return new InternalHugeIdMappingBuilder(array, capacity);
+        return new HugeIdMapBuilder(array, capacity);
     }
 
-    private InternalHugeIdMappingBuilder(HugeLongArray array, final long capacity) {
+    private HugeIdMapBuilder(HugeLongArray array, final long capacity) {
         this.array = array;
         this.capacity = capacity;
         this.allocationIndex = new AtomicLong();
@@ -65,8 +66,21 @@ public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuil
         return Math.min(capacity, lower + nodes);
     }
 
-    public HugeLongArray build() {
+    @Override
+    public NodeMapping build(
+        LabelInformation.Builder labelInformationBuilder,
+        long highestNodeId,
+        int concurrency,
+        boolean checkDuplicateIds,
+        AllocationTracker allocationTracker
+    ) {
         adders.close();
+        return checkDuplicateIds
+            ? HugeIdMapBuilderOps.buildChecked(this, labelInformationBuilder, highestNodeId, concurrency, allocationTracker)
+            : HugeIdMapBuilderOps.build(this, labelInformationBuilder, highestNodeId, concurrency, allocationTracker);
+    }
+
+    public HugeLongArray array() {
         return array;
     }
 

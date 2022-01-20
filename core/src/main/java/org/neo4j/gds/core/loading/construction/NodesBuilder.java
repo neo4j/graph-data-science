@@ -31,11 +31,9 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.loading.IdMappingAllocator;
-import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
+import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.NodeImporter;
-import org.neo4j.gds.core.loading.NodeMappingBuilder;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -72,11 +70,11 @@ public final class NodesBuilder {
 
     private int nextLabelId;
     private final ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping;
+    private final IdMapBuilder idMapBuilder;
     private final LabelInformation.Builder labelInformationBuilder;
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
-    private final NodeMappingBuilder.Capturing nodeMappingBuilder;
 
     private final NodeImporter nodeImporter;
 
@@ -91,8 +89,7 @@ public final class NodesBuilder {
         ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping,
         IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping,
         IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey,
-        NodeMappingBuilder.Capturing nodeMappingBuilder,
-        InternalIdMappingBuilder<? extends IdMappingAllocator> internalIdMappingBuilder,
+        IdMapBuilder idMapBuilder,
         boolean hasLabelInformation,
         boolean hasProperties,
         AllocationTracker allocationTracker
@@ -100,6 +97,7 @@ public final class NodesBuilder {
         this.maxOriginalId = maxOriginalId;
         this.concurrency = concurrency;
         this.elementIdentifierLabelTokenMapping = elementIdentifierLabelTokenMapping;
+        this.idMapBuilder = idMapBuilder;
         this.labelInformationBuilder = LabelInformation.builder(maxOriginalId + 1, allocationTracker);
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.allocationTracker = allocationTracker;
@@ -107,11 +105,8 @@ public final class NodesBuilder {
         this.lock = new ReentrantLock(true);
         this.buildersByLabelTokenAndPropertyToken = buildersByLabelTokenAndPropertyKey;
         this.hasProperties = hasProperties;
-
-        this.nodeMappingBuilder = nodeMappingBuilder;
-
         this.nodeImporter = new NodeImporter(
-            internalIdMappingBuilder,
+            idMapBuilder,
             labelInformationBuilder,
             labelTokenNodeLabelMapping,
             hasProperties
@@ -168,7 +163,7 @@ public final class NodesBuilder {
     public NodeMappingAndProperties build(long highestNeoId, boolean checkDuplicateIds) {
         this.threadLocalBuilder.close();
 
-        var nodeMapping = this.nodeMappingBuilder.build(
+        var nodeMapping = this.idMapBuilder.build(
             labelInformationBuilder,
             highestNeoId,
             concurrency,

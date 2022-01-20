@@ -197,11 +197,11 @@ public class IdMap implements NodeMapping {
             cursor++;
         }
 
-        HugeSparseLongArray newNodeToGraphIds = IdMapBuilder.buildSparseNodeMapping(
+        HugeSparseLongArray newNodeToGraphIds = HugeIdMapBuilderOps.buildSparseNodeMapping(
             newNodeCount,
             nodeToGraphIds.capacity(),
             concurrency,
-            IdMapBuilder.add(newGraphIds),
+            HugeIdMapBuilderOps.add(newGraphIds),
             allocationTracker
         );
 

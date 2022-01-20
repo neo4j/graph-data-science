@@ -19,11 +19,24 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
-public interface InternalIdMappingBuilder<A extends IdMappingAllocator> {
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    @Nullable A allocate(int batchLength);
+class HugeIdMapBuilderOpsTest {
 
-    long capacity();
+    @Test
+    void buildSparseNodeMappingWithPageSizeEntries() {
+        long nodeId = 4096; // equals the PAGE_SIZE in a HugeSparseLongArray
+        var hugeSparseLongArray = HugeIdMapBuilderOps.buildSparseNodeMapping(
+            1,
+            nodeId,
+            1,
+            builder -> (start, end) -> builder.set(nodeId, 0L),
+            AllocationTracker.empty()
+        );
+
+        assertTrue(hugeSparseLongArray.contains(nodeId));
+    }
 }
