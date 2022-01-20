@@ -202,7 +202,7 @@ public final class CSRGraphStoreUtil {
         List<Relationships> relationships,
         List<RelationshipPropertySchema> relationshipPropertySchemas
     ) {
-        assert relationships.size() == relationshipPropertySchemas.size();
+        assert relationships.size() >= relationshipPropertySchemas.size();
 
         var propertyStoreBuilder = RelationshipPropertyStore.builder();
 
