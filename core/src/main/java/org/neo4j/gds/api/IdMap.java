@@ -94,8 +94,6 @@ public interface IdMap extends NodeIterator, BatchNodeIterable{
         return this;
     }
 
-    // from IdMap
-
     Set<NodeLabel> nodeLabels(long nodeId);
 
     void forEachNodeLabel(long nodeId, IdMap.NodeLabelConsumer consumer);
