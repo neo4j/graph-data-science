@@ -161,9 +161,9 @@ public final class CSRGraphStoreUtil {
     public static void extractNodeProperties(
         GraphStoreBuilder graphStoreBuilder,
         NodeSchema nodeSchema,
-        Map<NodeLabel, Map<String, NodeProperties>> nodeMappingProperties
+        Map<NodeLabel, Map<String, NodeProperties>> nodeProperties
     ) {
-        nodeMappingProperties.forEach((label, propertyMap) -> {
+        nodeProperties.forEach((label, propertyMap) -> {
             var nodeStoreProperties = propertyKeyToNodePropertyMapping(nodeSchema, label, propertyMap);
             graphStoreBuilder.putNodePropertyStores(label, ImmutableNodePropertyStore.of(nodeStoreProperties));
         });
@@ -174,7 +174,7 @@ public final class CSRGraphStoreUtil {
         NodeLabel label,
         Map<String, NodeProperties> propertyMap
     ) {
-        Map<String, PropertySchema> propertySchemaForLabel = nodeSchema.properties().get(label);
+        var propertySchemaForLabel = nodeSchema.properties().get(label);
         // TODO: Maybe replace with forEach
         return propertyMap.entrySet().stream()
             .collect(Collectors.toMap(
