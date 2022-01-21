@@ -19,27 +19,21 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
-import org.immutables.builder.Builder;
 import org.neo4j.common.Validator;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.ImmutableNodePropertyStore;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.NodeProperty;
-import org.neo4j.gds.api.NodePropertyStore;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.loading.CSRGraphStore;
+import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
+import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -50,7 +44,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.logging.Log;
 import org.neo4j.values.storable.NumberType;
 
@@ -177,37 +170,14 @@ public final class CsvGraphStoreImporter {
 
         var idMapAndProperties = nodesBuilder.build();
         graphStoreBuilder.nodes(idMapAndProperties.idMap());
-        idMapAndProperties.nodeProperties().orElse(Map.of())
-            .forEach((label, propertyMap) -> {
-                var nodeStoreProperties = propertyKeyToNodePropertyMapping(nodeSchema, label, propertyMap);
-                graphStoreBuilder.putNodePropertyStores(label, ImmutableNodePropertyStore.of(nodeStoreProperties));
-            });
+        CSRGraphStoreUtil.extractNodeProperties(
+            graphStoreBuilder,
+            nodeSchema,
+            idMapAndProperties.nodeProperties().orElse(Map.of())
+        );
 
         progressTracker.endSubTask();
         return idMapAndProperties.idMap();
-    }
-
-    private Map<String, NodeProperty> propertyKeyToNodePropertyMapping(
-        NodeSchema nodeSchema,
-        NodeLabel label,
-        Map<String, NodeProperties> propertyMap
-    ) {
-        Map<String, PropertySchema> propertySchemaForLabel = nodeSchema.properties().get(label);
-        return propertyMap.entrySet().stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> nodePropertiesFrom(entry.getKey(), entry.getValue(), propertySchemaForLabel)
-            ));
-    }
-
-    private NodeProperty nodePropertiesFrom(String propertyKey, NodeProperties nodeProperties, Map<String, PropertySchema> propertySchema) {
-        var propertySchemaForKey = propertySchema.get(propertyKey);
-        return NodeProperty.of(
-            propertySchemaForKey.key(),
-            propertySchemaForKey.state(),
-            nodeProperties,
-            propertySchemaForKey.defaultValue()
-        );
     }
 
     private void importRelationships(FileInput fileInput, IdMap nodes, AllocationTracker allocationTracker) {
@@ -323,27 +293,6 @@ public final class CsvGraphStoreImporter {
         Map<RelationshipType, Relationships.Topology> topologies();
         Map<RelationshipType, RelationshipPropertyStore> properties();
         long importedRelationships();
-    }
-
-    @Builder.Factory
-    static GraphStore graphStore(
-        NamedDatabaseId databaseId,
-        IdMap nodes,
-        Map<NodeLabel, NodePropertyStore> nodePropertyStores,
-        Map<RelationshipType, Relationships.Topology> relationships,
-        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
-        int concurrency,
-        AllocationTracker allocationTracker
-    ) {
-        return CSRGraphStore.of(
-            databaseId,
-            nodes,
-            nodePropertyStores,
-            relationships,
-            relationshipPropertyStores,
-            concurrency,
-            allocationTracker
-        );
     }
 
     public static final Validator<Path> DIRECTORY_IS_READABLE = value -> {
