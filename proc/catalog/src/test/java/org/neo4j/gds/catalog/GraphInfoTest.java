@@ -54,8 +54,7 @@ final class GraphInfoTest {
                 producer,
                 (graphProjectConfig1, graphStore1) -> GraphInfo.withoutMemoryUsage(
                     graphProjectConfig1,
-                    graphStore1,
-                    Optional.empty()
+                    graphStore1
                 )
             )
         )
@@ -64,7 +63,7 @@ final class GraphInfoTest {
 
         var graphInfo = create(
             producer,
-            (graphProjectConfig, graphStore) -> GraphInfo.withMemoryUsage(graphProjectConfig, graphStore, Optional.empty())
+            (graphProjectConfig, graphStore) -> GraphInfo.withMemoryUsage(graphProjectConfig, graphStore)
         );
         assertThat(graphInfo)
             .extracting(gi -> gi.sizeInBytes, as(InstanceOfAssertFactories.LONG))

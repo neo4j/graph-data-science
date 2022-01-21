@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -102,8 +101,7 @@ public class GraphDropProc extends CatalogProc {
                 graphStoreWithConfig -> result.add(
                     GraphInfo.withoutMemoryUsage(
                         graphStoreWithConfig.config(),
-                        graphStoreWithConfig.graphStore(),
-                        Optional.empty()
+                        graphStoreWithConfig.graphStore()
                     )
                 ),
                 failIfMissing

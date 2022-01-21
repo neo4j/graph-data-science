@@ -26,7 +26,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @SuppressWarnings("unused")
 public class GraphInfoWithHistogram extends GraphInfo {
@@ -55,10 +54,9 @@ public class GraphInfoWithHistogram extends GraphInfo {
     static GraphInfoWithHistogram of(
         GraphProjectConfig graphProjectConfig,
         GraphStore graphStore,
-        boolean computeHistogram,
-        Optional<Set<String>> whiteListedKeysForOutput
+        boolean computeHistogram
     ) {
-        var graphInfo = GraphInfo.withMemoryUsage(graphProjectConfig, graphStore, whiteListedKeysForOutput);
+        var graphInfo = GraphInfo.withMemoryUsage(graphProjectConfig, graphStore);
 
         Optional<Map<String, Object>> maybeDegreeDistribution = GraphStoreCatalog.getDegreeDistribution(
             graphProjectConfig.username(),

@@ -77,8 +77,7 @@ public class GraphInfo {
 
     static GraphInfo withMemoryUsage(
         GraphProjectConfig graphProjectConfig,
-        GraphStore graphStore,
-        Optional<Set<String>> whiteListedKeysForOutput
+        GraphStore graphStore
     ) {
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
         var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
@@ -87,22 +86,19 @@ public class GraphInfo {
             graphProjectConfig,
             graphStore,
             memoryUsage,
-            sizeInBytes,
-            whiteListedKeysForOutput
+            sizeInBytes
         );
     }
 
     static GraphInfo withoutMemoryUsage(
         GraphProjectConfig graphProjectConfig,
-        GraphStore graphStore,
-        Optional<Set<String>> whiteListedKeys
+        GraphStore graphStore
     ) {
         return create(
             graphProjectConfig,
             graphStore,
             "",
-            -1L,
-            whiteListedKeys
+            -1L
         );
     }
 
@@ -110,8 +106,7 @@ public class GraphInfo {
         GraphProjectConfig graphProjectConfig,
         GraphStore graphStore,
         String memoryUsage,
-        long sizeInBytes,
-        Optional<Set<String>> whiteListedKeys
+        long sizeInBytes
     ) {
         var configVisitor = new Visitor();
         graphProjectConfig.accept(configVisitor);
