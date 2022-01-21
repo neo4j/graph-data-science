@@ -22,19 +22,19 @@ package org.neo4j.gds.core.utils.warnings;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 public class Warning {
-    private String taskDescription;
-    private String warning;
+    public String taskName;
+    public String message;
 
     Warning(Task task, String warning) {
-        this.taskDescription = task.description();
-        this.warning = warning;
+        this.taskName = task.description();
+        this.message = warning;
     }
 
-    public String getTaskDescription() {
-        return taskDescription;
+    public String getTaskName() {
+        return taskName;
     }
 
     public String getWarningMessage() {
-        return warning;
+        return message;
     }
 }

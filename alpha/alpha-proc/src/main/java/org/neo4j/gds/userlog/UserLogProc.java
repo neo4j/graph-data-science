@@ -38,34 +38,16 @@ public class UserLogProc extends BaseProc {
     @Procedure("gds.alpha.userLog")
     @Description("Log warnings and hints for currently running tasks.")
 
-    public Stream<UserLogResult> userLog(
+    public Stream<Warning> userLog(
         @Name(value = "jobId", defaultValue = "") String jobId
     ) {
-        return getWarningsLog();
-    }
-
-    private Stream<UserLogResult> getWarningsLog() {
-        return warningStore.query(username()).stream().map(UserLogResult::fromTaskStoreEntry);
+        return warningStore.query(username());
     }
 
 
-
-    public static class UserLogResult {
-        public String taskName;
-        public String message;
-
-        static UserLogResult fromTaskStoreEntry(Warning warning) {
-
-            return new UserLogResult(warning.getTaskDescription(),warning.getWarningMessage());
-        }
-
-
-        public UserLogResult(String taskName,String message) {
-            this.taskName = taskName;
-            this.message = message;
-        }
-    }
 
 
 }
+
+
 

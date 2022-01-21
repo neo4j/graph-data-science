@@ -21,12 +21,12 @@ package org.neo4j.gds.core.utils.warnings;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 public interface WarningStore {
     void addWarning(String username, Task taskId, String warningMessage);
 
-    List<Warning> query(String username);
+    Stream<Warning> query(String username);
 
 
 }

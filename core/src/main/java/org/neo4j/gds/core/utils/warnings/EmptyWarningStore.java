@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.warnings;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 public enum EmptyWarningStore implements WarningStore {
     INSTANCE;
@@ -35,7 +35,7 @@ public enum EmptyWarningStore implements WarningStore {
     }
 
     @Override
-    public List<Warning> query(String username) {
-        return null;
+    public Stream<Warning> query(String username) {
+        return Stream.empty();
     }
 }

@@ -29,10 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public class GlobalWarningStore implements WarningStore, ThrowingFunction<Context, WarningRegistryFactory, ProcedureException> {
 
-    private final Map<String, List<Warning>> registeredWarnings;
+    private final Map<String, Map<Task, List<String>>> registeredWarnings;
     private final int MOST_RECENT = 10;
 
     public GlobalWarningStore() {
@@ -40,14 +41,23 @@ public class GlobalWarningStore implements WarningStore, ThrowingFunction<Contex
         this.registeredWarnings = new ConcurrentHashMap<>();
     }
 
-    public List<Warning> query(String username) {
-        return registeredWarnings.getOrDefault(username, List.of());
+    public Stream<Warning> query(String username) {
+
+        var tasksFromUsername = registeredWarnings.getOrDefault(username, Map.of());
+        return tasksFromUsername.entrySet().stream().flatMap(GlobalWarningStore::fromEntryToWarningList);
+
+
+    }
+
+    private static Stream<Warning> fromEntryToWarningList(Map.Entry<Task, List<String>> entry) {
+        return entry.getValue().stream().map(message -> new Warning(entry.getKey(), message));
     }
 
     public void addWarning(String username, Task taskId, String warningMessage) {
         this.registeredWarnings
-            .computeIfAbsent(username, __ -> new ArrayList<>())
-            .add(new Warning(taskId, warningMessage));
+            .computeIfAbsent(username, __ -> new ConcurrentHashMap<>())
+            .computeIfAbsent(taskId, __ -> new ArrayList<>(MOST_RECENT))
+            .add(warningMessage);
     }
 
     @Override
