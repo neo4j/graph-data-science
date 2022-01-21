@@ -178,7 +178,7 @@ final class NodesFilter {
 
             builder.putNodeProperty(
                 propertyKey,
-                NodeProperty.of(propertyKey, propertyState, nodePropertiesBuilder.build(filteredNodeCount, inputMapping))
+                NodeProperty.of(propertyKey, propertyState, nodePropertiesBuilder.build(filteredNodeCount, filteredIdMap))
             );
         });
         progressTracker.endSubTask();
