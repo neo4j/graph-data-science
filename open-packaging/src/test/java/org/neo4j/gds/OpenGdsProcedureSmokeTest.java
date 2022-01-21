@@ -150,6 +150,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.influenceMaximization.greedy.stream",
         "gds.alpha.influenceMaximization.celf.stream",
 
+        "gds.alpha.userlog",
+
         "gds.articleRank.mutate",
         "gds.articleRank.mutate.estimate",
         "gds.articleRank.stats",
