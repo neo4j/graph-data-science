@@ -196,7 +196,7 @@ public final class GraphLoaderBuilders {
                 .allocationTracker(allocationTracker.orElse(AllocationTracker.empty()))
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                .warningRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
                 .log(log.orElse(NullLog.getInstance()))
                 .build())
             .username(userName

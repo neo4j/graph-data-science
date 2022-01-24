@@ -61,7 +61,7 @@ public interface GraphLoaderContext {
 
     TaskRegistryFactory taskRegistryFactory();
 
-    UserLogRegistryFactory warningRegistryFactory();
+    UserLogRegistryFactory userLogRegistryFactory();
 
 
     GraphLoaderContext NULL_CONTEXT = new GraphLoaderContext() {
@@ -86,7 +86,7 @@ public interface GraphLoaderContext {
         }
 
         @Override
-        public UserLogRegistryFactory warningRegistryFactory() {
+        public UserLogRegistryFactory userLogRegistryFactory() {
             return EmptyUserLogRegistryFactory.INSTANCE;
         }
     };

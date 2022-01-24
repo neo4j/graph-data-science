@@ -160,7 +160,7 @@ public class ProcedureExecutor<
                         allocationTracker,
                         executionContext.log(),
                         executionContext.taskRegistryFactory(),
-                        executionContext.warningRegistryFactory()
+                        executionContext.userLogRegistryFactory()
                     );
                 }
 
@@ -172,7 +172,7 @@ public class ProcedureExecutor<
                         allocationTracker,
                         executionContext.log(),
                         executionContext.taskRegistryFactory(),
-                        executionContext.warningRegistryFactory()
+                        executionContext.userLogRegistryFactory()
                     );
                 }
             });

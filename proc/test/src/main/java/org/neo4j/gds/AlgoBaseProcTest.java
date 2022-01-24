@@ -404,7 +404,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             .context(ImmutableGraphLoaderContext.builder()
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                .warningRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
                 .api(db)
                 .log(new TestLog())
                 .build())

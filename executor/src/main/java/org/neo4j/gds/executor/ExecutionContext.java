@@ -62,7 +62,7 @@ public interface ExecutionContext {
     TaskRegistryFactory taskRegistryFactory();
 
     @Nullable
-    UserLogRegistryFactory warningRegistryFactory();
+    UserLogRegistryFactory userLogRegistryFactory();
 
     String username();
 
@@ -120,7 +120,7 @@ public interface ExecutionContext {
 
         @Override
         public @Nullable
-        UserLogRegistryFactory warningRegistryFactory() {
+        UserLogRegistryFactory userLogRegistryFactory() {
             return EmptyUserLogRegistryFactory.INSTANCE;
         }
 

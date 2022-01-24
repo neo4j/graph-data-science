@@ -156,7 +156,7 @@ public abstract class BaseProc {
             .log(log)
             .allocationTracker(allocationTracker)
             .taskRegistryFactory(taskRegistryFactory)
-            .warningRegistryFactory(userLogRegistryFactory)
+            .userLogRegistryFactory(userLogRegistryFactory)
             .terminationFlag(TerminationFlag.wrap(transaction))
             .build();
     }
@@ -174,7 +174,7 @@ public abstract class BaseProc {
             .transaction(transaction)
             .callContext(callContext)
             .allocationTracker(allocationTracker)
-            .warningRegistryFactory(userLogRegistryFactory)
+            .userLogRegistryFactory(userLogRegistryFactory)
             .taskRegistryFactory(taskRegistryFactory)
             .username(username())
             .build();

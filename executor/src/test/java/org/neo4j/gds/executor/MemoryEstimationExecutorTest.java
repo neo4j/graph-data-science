@@ -68,7 +68,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
             .log(new TestLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .warningRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .username("")
             .procedureTransaction(procedureTransaction)
             .transaction(transaction)
