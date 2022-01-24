@@ -22,6 +22,11 @@ This chapter is divided into the following sections:
 . <<additional-config-parameters>>
 . <<System-requirements>>
 
-
-
-
+include::supported-neo4j-versions.adoc[leveloffset=+1]
+include::neo4j-desktop.adoc[leveloffset=+1]
+include::neo4j-server.adoc[leveloffset=+1]
+include::installation-enterprise-edition.adoc[leveloffset=+1]
+include::installation-docker.adoc[leveloffset=+1]
+include::installation-causal-cluster.adoc[leveloffset=+1]
+include::additional-config-parameters.adoc[leveloffset=+1]
+include::system-requirements.adoc[leveloffset=+1]
