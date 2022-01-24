@@ -27,6 +27,8 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.NameAllocator;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
@@ -56,6 +58,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -113,12 +116,8 @@ final class GenerateConfiguration {
         builder.addFields(fieldDefinitions.fields());
 
         MethodSpec constructor = defineConstructor(config, fieldDefinitions.names());
-        Optional<MethodSpec> factory = defineFactory(
-            config,
-            generatedClassName,
-            constructor,
-            fieldDefinitions.names()
-        );
+        Optional<MethodSpec> factory = defineFactory(config, generatedClassName, constructor, fieldDefinitions.names());
+
         if (factory.isPresent()) {
             MethodSpec privateConstructor = MethodSpec.constructorBuilder()
                 .addAnnotations(constructor.annotations)
@@ -131,6 +130,8 @@ final class GenerateConfiguration {
         } else {
             builder.addMethod(constructor);
         }
+
+        builder.addType(defineConfigBuilder(config, packageName, generatedClassName, constructor.parameters));
 
         return builder
             .addMethods(defineGetters(config, fieldDefinitions.names()))
@@ -159,7 +160,7 @@ final class GenerateConfiguration {
         ).ifPresent(classBuilder::addAnnotation);
     }
 
-    private FieldDefinitions defineFields(ConfigParser.Spec config) {
+    private static FieldDefinitions defineFields(ConfigParser.Spec config) {
         NameAllocator names = new NameAllocator();
         ImmutableFieldDefinitions.Builder builder = ImmutableFieldDefinitions.builder().names(names);
         config.members().stream().filter(ConfigParser.Member::isConfigValue).map(member ->
@@ -698,23 +699,16 @@ final class GenerateConfiguration {
                 } else if (isTypeOf(Number.class, targetType)) {
                     builder.methodName("Number");
                 } else if (isTypeOf(Optional.class, targetType)) {
-                    if (member.method().isDefault()) {
-                        return error(
-                            "Optional fields can not to be declared default (Optional.empty is the default).",
-                            member.method()
-                        );
+                    var maybeInnerType  = extractInnerOptionalType(member, (DeclaredType) targetType);
+
+                    if (maybeInnerType.isPresent()) {
+                        builder
+                            .methodPrefix("get")
+                            .methodName("Optional")
+                            .expectedType(CodeBlock.of("$T.class", maybeInnerType.get()));
+                    } else {
+                        return Optional.empty();
                     }
-                    List<? extends TypeMirror> typeArguments = ((DeclaredType) targetType).getTypeArguments();
-                    if (typeArguments.isEmpty()) {
-                        return error(
-                            "Optional must have a Cypher-supported type as type argument, but found none.",
-                            member.method()
-                        );
-                    }
-                    builder
-                        .methodPrefix("get")
-                        .methodName("Optional")
-                        .expectedType(CodeBlock.of("$T.class", ClassName.get(asTypeElement(typeArguments.get(0)))));
                 } else {
                     builder
                         .methodName("Checked")
@@ -743,7 +737,7 @@ final class GenerateConfiguration {
         List<ConfigParser.Member> configMembers = config
             .members()
             .stream()
-            .filter(ConfigParser.Member::isMapParameter)
+            .filter(ConfigParser.Member::isConfigMapEntry)
             .collect(Collectors.toList());
 
         switch (configMembers.size()) {
@@ -836,7 +830,7 @@ final class GenerateConfiguration {
         Collection<String> configKeys = config
             .members()
             .stream()
-            .filter(ConfigParser.Member::isMapParameter)
+            .filter(ConfigParser.Member::isConfigMapEntry)
             .map(ConfigParser.Member::lookupKey)
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -885,6 +879,23 @@ final class GenerateConfiguration {
         return Optional.of(builder.build());
     }
 
+    Optional<ClassName> extractInnerOptionalType(ConfigParser.Member member, DeclaredType declaredType) {
+        if (member.method().isDefault()) {
+            return error(
+                "Optional fields can not to be declared default (Optional.empty is the default).",
+                member.method()
+            );
+        }
+        List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
+        if (typeArguments.isEmpty()) {
+            return error(
+                "Optional must have a Cypher-supported type as type argument, but found none.",
+                member.method()
+            );
+        }
+        return Optional.of(ClassName.get(asTypeElement(typeArguments.get(0))));
+    }
+
     private <T> Optional<T> error(CharSequence message, Element element) {
         messager.printMessage(
             Diagnostic.Kind.ERROR,
@@ -903,6 +914,145 @@ final class GenerateConfiguration {
         );
         return Optional.empty();
     }
+
+    private TypeSpec defineConfigBuilder(
+        ConfigParser.Spec config,
+        String packageName,
+        String generatedClassName,
+        List<ParameterSpec> constructorParameters
+    ) {
+        NameAllocator names = new NameAllocator();
+        ClassName builderClassName = ClassName.get(packageName, generatedClassName + ".Builder");
+        TypeSpec.Builder configBuilderClass = TypeSpec.classBuilder("Builder")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
+
+        var configFieldName = names.newName("config");
+
+        // add config map to handle config keys
+        configBuilderClass.addField(
+            ParameterizedTypeName.get(Map.class, String.class, Object.class),
+            configFieldName,
+            Modifier.FINAL,
+            Modifier.PRIVATE
+        );
+        configBuilderClass.addMethod(MethodSpec
+            .constructorBuilder()
+            .addStatement("this.$N = new $T<>()", configFieldName, HashMap.class)
+            .addModifiers(Modifier.PUBLIC).build());
+
+
+        // Config Key -> put into a map
+        // config parameter -> set field on builder
+
+        // add parameter fields to builder
+        config.members().stream()
+            .filter(ConfigParser.Member::isConfigParameter)
+            .forEach(parameter -> configBuilderClass.addField(
+                TypeName.get(parameter.method().getReturnType()),
+                parameter.methodName(),
+                Modifier.PRIVATE
+            ));
+
+
+        String cypherMapName = names.newName("cypherMap");
+        String constructorParameterString = constructorParameters
+            .stream()
+            .map(i -> i.name)
+            .collect(Collectors.joining(", "));
+
+        configBuilderClass
+            .addMethods(defineBuilderSetters(config.members(), configFieldName, builderClassName))
+            .addMethod(MethodSpec.methodBuilder("build")
+                .addModifiers(Modifier.PUBLIC)
+                .addCode(CodeBlock.builder()
+                    .addStatement(
+                        "$1T $2N = $1T.create(this.$3N)",
+                        CypherMapWrapper.class,
+                        configFieldName,
+                        configFieldName
+                    )
+                    // TODO call config constructor with parameters + cypher map wrapper
+                    //  .. unless there is a factory -> use factory then (same parameters as constructor)
+                    .addStatement("return new $L($L)", generatedClassName, constructorParameterString).build())
+                .returns(ClassName.get(packageName, generatedClassName)).build())
+            .build();
+
+        return configBuilderClass.build();
+    }
+
+    private List<MethodSpec> defineBuilderSetters(
+        List<ConfigParser.Member> members,
+        String builderConfigMapFieldName,
+        ClassName builderClassName
+    ) {
+        return members.stream()
+            .filter(ConfigParser.Member::isConfigValue)
+            .flatMap(member -> {
+                var setterMethods = Stream.<MethodSpec>builder();
+
+                MethodSpec.Builder setMethodBuilder = MethodSpec.methodBuilder(member.methodName())
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(builderMemberType(member, member.isConfigMapEntry()), member.methodName())
+                    .returns(builderClassName);
+
+                CodeBlock.Builder setterCode = CodeBlock.builder();
+
+                if (member.isConfigMapEntry()) {
+                    setterCode.addStatement(
+                        "this.$N.put(\"$L\", $N)",
+                        builderConfigMapFieldName,
+                        member.lookupKey(),
+                        member.methodName()
+                    );
+                } else {
+                    setterCode.addStatement("this.$1N = $1N", member.methodName());
+                }
+
+                setMethodBuilder.addCode(setterCode.build());
+                setterMethods.add(setMethodBuilder.addStatement("return this").build());
+
+                // for map entries we provide both; for positional arguments only the raw optional version
+                if (member.isConfigMapEntry() && isTypeOf(Optional.class, member.method().getReturnType())) {
+                    var optionalSetterBuilder = MethodSpec.methodBuilder(member.methodName())
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(TypeName.get(member.method().getReturnType()), member.methodName())
+                        .returns(builderClassName);
+
+                    String lambdaVarName = "actual" + member.methodName();
+                    if (member.isConfigMapEntry()) {
+                        optionalSetterBuilder.addStatement(
+                            "$1N.ifPresent($2N -> this.$3N.put(\"$4L\", $2N))",
+                            member.methodName(),
+                            lambdaVarName,
+                            builderConfigMapFieldName,
+                            member.lookupKey()
+                            );
+                    } else {
+                        optionalSetterBuilder.addStatement("$1N.ifPresent($2N ->this.$1N = $2N)", member.methodName(), lambdaVarName);
+                    }
+
+                    setterMethods.add(optionalSetterBuilder.addStatement("return this").build());
+                }
+
+                return setterMethods.build();
+            })
+            .collect(Collectors.toList());
+    }
+
+    private TypeName builderMemberType(ConfigParser.Member member, boolean isConfigMapEntry) {
+        TypeMirror returnType = member.method().getReturnType();
+
+        // for config parameters we don't want to unwrap the Optional
+        if (isConfigMapEntry && isTypeOf(Optional.class, returnType)) {
+            Optional<ClassName> maybeType = extractInnerOptionalType(member, (DeclaredType) returnType);
+            if (maybeType.isPresent()) {
+                return maybeType.get();
+            }
+        }
+
+        return TypeName.get(returnType);
+    }
+
 
     @ValueClass
     interface FieldDefinitions {

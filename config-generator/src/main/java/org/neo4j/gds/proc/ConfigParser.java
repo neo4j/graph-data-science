@@ -337,8 +337,12 @@ final class ConfigParser {
             return !collectsKeys() && !toMap() && !validates() && !normalizes() && !graphStoreValidation() && !graphStoreValidationCheck();
         }
 
-        final boolean isMapParameter() {
+        final boolean isConfigMapEntry() {
             return isConfigValue() && !isAnnotationPresent(method(), Parameter.class);
+        }
+
+        final boolean isConfigParameter() {
+            return isConfigValue() && isAnnotationPresent(method(), Parameter.class);
         }
 
         @Value.Derived
