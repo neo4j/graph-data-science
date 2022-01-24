@@ -47,7 +47,6 @@ public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryEx
         } else {
             registry.registerComponent(TaskRegistryFactory.class, ctx -> EmptyTaskRegistryFactory.INSTANCE, true);
             registry.registerComponent(TaskStore.class, ctx -> EmptyTaskStore.INSTANCE, true);
-
         }
         return new LifecycleAdapter();
     }

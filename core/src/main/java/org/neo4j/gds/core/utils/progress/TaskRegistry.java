@@ -52,5 +52,4 @@ public class TaskRegistry {
             .map(t -> t == task)
             .orElse(false);
     }
-
 }
