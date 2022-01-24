@@ -79,6 +79,7 @@ public class MemoryEstimationExecutor<
                     .allocationTracker(executionContext.allocationTracker())
                     .log(executionContext.log())
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
+                    .userLogRegistryFactory(executionContext.userLogRegistryFactory())
                     .terminationFlag(TerminationFlag.wrap(executionContext.transaction()))
                     .transactionContext(TransactionContext.of(
                         executionContext.api(),

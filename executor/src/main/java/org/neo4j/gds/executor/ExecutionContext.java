@@ -26,6 +26,8 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.transaction.SecurityContextWrapper;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -59,12 +61,15 @@ public interface ExecutionContext {
     @Nullable
     TaskRegistryFactory taskRegistryFactory();
 
+    @Nullable
+    UserLogRegistryFactory userLogRegistryFactory();
+
     String username();
 
     @Value.Lazy
     default NamedDatabaseId databaseId() {
         return api().databaseId();
-    };
+    }
 
     @Value.Lazy
     default boolean isGdsAdmin() {
@@ -111,6 +116,12 @@ public interface ExecutionContext {
         @Override
         public @Nullable TaskRegistryFactory taskRegistryFactory() {
             return EmptyTaskRegistryFactory.INSTANCE;
+        }
+
+        @Override
+        public @Nullable
+        UserLogRegistryFactory userLogRegistryFactory() {
+            return EmptyUserLogRegistryFactory.INSTANCE;
         }
 
         @Override

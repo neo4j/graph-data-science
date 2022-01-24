@@ -17,20 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.core.utils.warnings;
 
-public class LocalTaskRegistryFactory implements TaskRegistryFactory {
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-    private final String username;
-    private final TaskStore taskStore;
-    
-    LocalTaskRegistryFactory(String username, TaskStore taskStore) {
-        this.username = username;
-        this.taskStore = taskStore;
+import java.util.stream.Stream;
+
+public enum EmptyUserLogStore implements UserLogStore {
+    INSTANCE;
+
+
+    @Override
+    public void addUserLogMessage(
+        String username, Task taskId, String message
+    ) {
+
     }
 
     @Override
-    public TaskRegistry newInstance() {
-        return new TaskRegistry(username, taskStore);
+    public Stream<UserLogEntry> query(String username) {
+        return Stream.empty();
     }
 }

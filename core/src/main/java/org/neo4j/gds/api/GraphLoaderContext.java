@@ -26,6 +26,8 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -59,6 +61,9 @@ public interface GraphLoaderContext {
 
     TaskRegistryFactory taskRegistryFactory();
 
+    UserLogRegistryFactory userLogRegistryFactory();
+
+
     GraphLoaderContext NULL_CONTEXT = new GraphLoaderContext() {
         @Override
         public TransactionContext transactionContext() {
@@ -78,6 +83,11 @@ public interface GraphLoaderContext {
         @Override
         public TaskRegistryFactory taskRegistryFactory() {
             return EmptyTaskRegistryFactory.INSTANCE;
+        }
+
+        @Override
+        public UserLogRegistryFactory userLogRegistryFactory() {
+            return EmptyUserLogRegistryFactory.INSTANCE;
         }
     };
 }

@@ -17,20 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.userlog;
 
-public class LocalTaskRegistryFactory implements TaskRegistryFactory {
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.utils.warnings.UserLogEntry;
+import org.neo4j.gds.core.utils.warnings.UserLogStore;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
-    private final String username;
-    private final TaskStore taskStore;
+import java.util.stream.Stream;
+
+public class UserLogProc extends BaseProc {
+
+    @Context
+    public UserLogStore userLogStore;
     
-    LocalTaskRegistryFactory(String username, TaskStore taskStore) {
-        this.username = username;
-        this.taskStore = taskStore;
+    @Procedure("gds.alpha.userLog")
+    @Description("Log warnings and hints for currently running tasks.")
+
+    public Stream<UserLogEntry> userLog(
+        @Name(value = "jobId", defaultValue = "") String jobId
+    ) {
+        return userLogStore.query(username());
     }
 
-    @Override
-    public TaskRegistry newInstance() {
-        return new TaskRegistry(username, taskStore);
-    }
 }
+
+
+

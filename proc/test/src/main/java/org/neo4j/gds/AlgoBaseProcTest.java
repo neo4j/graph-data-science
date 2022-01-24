@@ -38,6 +38,7 @@ import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.core.write.NativeRelationshipExporter;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporter;
@@ -403,6 +404,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             .context(ImmutableGraphLoaderContext.builder()
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
                 .api(db)
                 .log(new TestLog())
                 .build())
