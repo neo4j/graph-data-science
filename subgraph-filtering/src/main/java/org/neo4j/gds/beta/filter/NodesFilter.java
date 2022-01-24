@@ -141,7 +141,7 @@ final class NodesFilter {
 
     private static NodePropertyStore createNodePropertyStore(
         GraphStore inputGraphStore,
-        IdMapping filteredNodeMapping,
+        NodeMapping filteredNodeMapping,
         NodeLabel nodeLabel,
         Collection<String> propertyKeys,
         int concurrency,
@@ -178,7 +178,7 @@ final class NodesFilter {
 
             builder.putNodeProperty(
                 propertyKey,
-                NodeProperty.of(propertyKey, propertyState, nodePropertiesBuilder.build(filteredNodeCount, filteredIdMap))
+                NodeProperty.of(propertyKey, propertyState, nodePropertiesBuilder.build(filteredNodeCount, filteredNodeMapping))
             );
         });
         progressTracker.endSubTask();
