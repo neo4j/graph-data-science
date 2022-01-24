@@ -176,12 +176,12 @@ class LinkPredictionPipelineMutateProcTest extends BaseProcTest {
         assertGraphEquals(
             fromGdl(
                 formatWithLocale(
-                    "  (n0:%s {a: 1.0, b: 0.8, c: 1.0})" +
-                    ", (n1:%s {a: 2.0, b: 1.0, c: 1.0})" +
-                    ", (n2:%s {a: 3.0, b: 1.5, c: 1.0})" +
-                    ", (n3:%s {a: 0.0, b: 2.8, c: 1.0})" +
-                    ", (n4:%s {a: 1.0, b: 0.9, c: 1.0})" + relationshipGdl,
-                    nodeLabel, nodeLabel, nodeLabel, nodeLabel, nodeLabel)
+                    "  (n0:%1$s {a: 1.0, b: 0.8, c: 1.0})" +
+                    ", (n1:%1$s {a: 2.0, b: 1.0, c: 1.0})" +
+                    ", (n2:%1$s {a: 3.0, b: 1.5, c: 1.0})" +
+                    ", (n3:%1$s {a: 0.0, b: 2.8, c: 1.0})" +
+                    ", (n4:%1$s {a: 1.0, b: 0.9, c: 1.0})" + relationshipGdl,
+                    nodeLabel)
             ), actualGraph);
     }
 
