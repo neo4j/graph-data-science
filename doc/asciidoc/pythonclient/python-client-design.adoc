@@ -41,9 +41,10 @@ There are some general principles for how the Cypher API maps to the Python clie
 
 * Method calls corresponding to Cypher procedures (preceded by `CALL` in the docs) will return a table as a Python `List[Dict[str, Any]]`, with some notable exceptions:
 ** Procedures instantiating <<python-client-graph-object, graph objects>> and <<python-client-model-object, model objects>>.
-* Method calls corresponding to Cypher functions (preceded by `RETURN` in the docs) will simply return the value the function returns
-* The Python client also contains specific functionality for inspecting graphs from the <<graph-catalog-ops, GDS Graph Catalog>>, using a client side <<python-client-graph-object, graph object>>.
-  Similarly, models from the <<model-catalog-ops, GDS Model Catalog>> can be inspected using client side <<python-client-model-object, model object>>.
+* Method calls corresponding to Cypher functions (preceded by `RETURN` in the docs) will simply return the value the function returns.
+* The Python client also contains specific functionality for inspecting graphs from the <<graph-catalog-ops, GDS Graph Catalog>>, using a client-side <<python-client-graph-object, graph object>>.
+  Similarly, models from the <<model-catalog-ops, GDS Model Catalog>> can be inspected using a client-side <<python-client-model-object, model object>>.
+* Cypher functions and procedures of GDS that take references to graphs and/or models as strings for input typically instead take <<python-client-graph-object, graph objects>> and/or <<python-client-model-object, model objects>> as input in the Python client API.
 * To configure and use <<algorithms-ml-models, machine learning pipelines>> in GDS, specific <<python-client-pipelines, pipeline objects>> are used in the Python client.
 
 
