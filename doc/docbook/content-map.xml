@@ -342,6 +342,10 @@
         </d:tocentry>
     </d:tocentry>
 
+    <d:tocentry linkend="python-client">
+        <?dbhtml filename="python-client/index.html"?>
+    </d:tocentry>
+
     <d:tocentry linkend="appendix">
 
         <d:tocentry linkend="appendix-a">
