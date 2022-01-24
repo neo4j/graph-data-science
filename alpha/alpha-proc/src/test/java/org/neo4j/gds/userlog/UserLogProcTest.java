@@ -94,6 +94,12 @@ class UserLogProcTest extends BaseProcTest {
         runQuery(createQuery);
     }
 
+    private Map<String, Object> getMapEntry(String taskName, int i, String message) {
+        return Map.of("taskName", taskName + ((i == -1) ? "" : i),
+            "message", message
+        );
+    }
+
     @Test
     void shouldNotFailWhenThereAreNoWarnings() {
         assertDoesNotThrow(() -> runQuery("CALL gds.alpha.userLog()"));
@@ -108,13 +114,9 @@ class UserLogProcTest extends BaseProcTest {
             "CALL gds.alpha.userLog() " +
             "YIELD taskName, message RETURN taskName, message ",
             List.of(
-                Map.of(
-                    "taskName", "foo",
-                    "message","This is a test warning"),
-                Map.of(
-                    "taskName", "foo",
-                    "message","This is another test warning")
-                )
+                getMapEntry("foo", -1, "This is a test warning"),
+                getMapEntry("foo", -1, "This is another test warning")
+            )
         );
     }
 
@@ -128,22 +130,11 @@ class UserLogProcTest extends BaseProcTest {
             "CALL gds.alpha.userLog() " +
             "YIELD taskName, message RETURN taskName, message  ORDER BY taskName ",
             List.of(
-                Map.of(
-                    "taskName", "foo",
-                    "message", "This is a test warning"
-                ),
-                Map.of(
-                    "taskName", "foo",
-                    "message", "This is another test warning"
-                ),
-                Map.of(
-                    "taskName", "foo2",
-                    "message", "This is a test warning"
-                ),
-                Map.of(
-                    "taskName", "foo2",
-                    "message", "This is another test warning"
-                )
+                getMapEntry("foo", -1, "This is a test warning"),
+                getMapEntry("foo", -1, "This is another test warning"),
+                getMapEntry("foo", 2, "This is a test warning"),
+                getMapEntry("foo", 2, "This is another test warning")
+
             )
 
         );
@@ -164,21 +155,15 @@ class UserLogProcTest extends BaseProcTest {
             "CALL gds.alpha.userLog() " +
             "YIELD taskName, message  RETURN taskName,message ORDER BY taskName",
             List.of(
-                Map.of(
-                    "taskName", "WCC",
-                    "message", "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set."
+                getMapEntry(
+                    "WCC",
+                    -1,
+                    "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set."
                 ),
-                Map.of(
-                    "taskName", "foo",
-                    "message", "This is a test warning"
-                ),
-                Map.of(
-                    "taskName", "foo",
-                    "message", "This is another test warning"
-                )
-
-
+                getMapEntry("foo", -1, "This is a test warning"),
+                getMapEntry("foo", -1, "This is another test warning")
             )
+
         );
     }
 
