@@ -23,19 +23,10 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.stream.Stream;
 
-public enum EmptyWarningStore implements WarningStore {
-    INSTANCE;
+public interface UserLogStore {
+    void addUserLogMessage(String username, Task taskId, String message);
+
+    Stream<UserLogEntry> query(String username);
 
 
-    @Override
-    public void addWarning(
-        String username, Task taskId, String warningMessage
-    ) {
-
-    }
-
-    @Override
-    public Stream<Warning> query(String username) {
-        return Stream.empty();
-    }
 }

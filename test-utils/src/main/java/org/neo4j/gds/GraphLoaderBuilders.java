@@ -33,7 +33,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyWarningRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -196,7 +196,7 @@ public final class GraphLoaderBuilders {
                 .allocationTracker(allocationTracker.orElse(AllocationTracker.empty()))
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                .warningRegistryFactory(EmptyWarningRegistryFactory.INSTANCE)
+                .warningRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
                 .log(log.orElse(NullLog.getInstance()))
                 .build())
             .username(userName

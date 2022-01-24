@@ -39,8 +39,6 @@ public class TaskRegistry {
         this.jobId = new JobId();
     }
 
-
-
     public void registerTask(Task task) {
         taskStore.store(username, jobId, task);
     }
@@ -54,6 +52,5 @@ public class TaskRegistry {
             .map(t -> t == task)
             .orElse(false);
     }
-
 
 }

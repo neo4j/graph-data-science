@@ -23,7 +23,7 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyWarningRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -73,7 +73,8 @@ public final class TestProcedureRunner {
             ProcedureCallContext.EMPTY,
             new TestLog(),
             EmptyTaskRegistryFactory.INSTANCE,
-            EmptyWarningRegistryFactory.INSTANCE, AllocationTracker.empty(),
+            EmptyUserLogRegistryFactory.INSTANCE,
+            AllocationTracker.empty(),
             tx,
             Username.EMPTY_USERNAME
         );

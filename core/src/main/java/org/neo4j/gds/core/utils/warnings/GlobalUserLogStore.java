@@ -31,39 +31,39 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public class GlobalWarningStore implements WarningStore, ThrowingFunction<Context, WarningRegistryFactory, ProcedureException> {
+public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
 
     private final Map<String, Map<Task, List<String>>> registeredWarnings;
     private final int MOST_RECENT = 10;
 
-    public GlobalWarningStore() {
+    public GlobalUserLogStore() {
 
         this.registeredWarnings = new ConcurrentHashMap<>();
     }
 
-    public Stream<Warning> query(String username) {
+    public Stream<UserLogEntry> query(String username) {
 
         var tasksFromUsername = registeredWarnings.getOrDefault(username, Map.of());
-        return tasksFromUsername.entrySet().stream().flatMap(GlobalWarningStore::fromEntryToWarningList);
+        return tasksFromUsername.entrySet().stream().flatMap(GlobalUserLogStore::fromEntryToWarningList);
 
 
     }
 
-    private static Stream<Warning> fromEntryToWarningList(Map.Entry<Task, List<String>> entry) {
-        return entry.getValue().stream().map(message -> new Warning(entry.getKey(), message));
+    private static Stream<UserLogEntry> fromEntryToWarningList(Map.Entry<Task, List<String>> entry) {
+        return entry.getValue().stream().map(message -> new UserLogEntry(entry.getKey(), message));
     }
 
-    public void addWarning(String username, Task taskId, String warningMessage) {
+    public void addUserLogMessage(String username, Task taskId, String message) {
         this.registeredWarnings
             .computeIfAbsent(username, __ -> new ConcurrentHashMap<>())
             .computeIfAbsent(taskId, __ -> new ArrayList<>(MOST_RECENT))
-            .add(warningMessage);
+            .add(message);
     }
 
     @Override
-    public WarningRegistryFactory apply(Context context) throws ProcedureException {
+    public UserLogRegistryFactory apply(Context context) throws ProcedureException {
         var username = Neo4jProxy.username(context.securityContext().subject());
-        return new LocalWarningRegistryFactory(username, this);
+        return new LocalUserLogRegistryFactory(username, this);
     }
 }
 

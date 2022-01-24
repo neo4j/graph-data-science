@@ -30,7 +30,7 @@ import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.WarningRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
@@ -76,7 +76,7 @@ public abstract class BaseProc {
     public TaskRegistryFactory taskRegistryFactory;
 
     @Context
-    public WarningRegistryFactory warningRegistryFactory;
+    public UserLogRegistryFactory userLogRegistryFactory;
 
     @Context
     public Username username = Username.EMPTY_USERNAME;
@@ -156,7 +156,7 @@ public abstract class BaseProc {
             .log(log)
             .allocationTracker(allocationTracker)
             .taskRegistryFactory(taskRegistryFactory)
-            .warningRegistryFactory(warningRegistryFactory)
+            .warningRegistryFactory(userLogRegistryFactory)
             .terminationFlag(TerminationFlag.wrap(transaction))
             .build();
     }
@@ -174,7 +174,7 @@ public abstract class BaseProc {
             .transaction(transaction)
             .callContext(callContext)
             .allocationTracker(allocationTracker)
-            .warningRegistryFactory(warningRegistryFactory)
+            .warningRegistryFactory(userLogRegistryFactory)
             .taskRegistryFactory(taskRegistryFactory)
             .username(username())
             .build();

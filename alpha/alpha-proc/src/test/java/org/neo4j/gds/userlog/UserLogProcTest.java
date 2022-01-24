@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.core.utils.warnings.WarningRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -188,7 +188,7 @@ class UserLogProcTest extends BaseProcTest {
         @Context
         public TaskRegistryFactory taskRegistryFactory;
         @Context
-        public WarningRegistryFactory warningRegistryFactory;
+        public UserLogRegistryFactory userLogRegistryFactory;
 
         @Procedure("gds.test.fakewarnproc")
         public Stream<FakeResult> foo(
@@ -198,7 +198,9 @@ class UserLogProcTest extends BaseProcTest {
         ) {
             var task = Tasks.task(taskName, Tasks.leaf("leaf", 3));
 
-            var taskProgressTracker = new TaskProgressTracker(task, new TestLog(), 1, taskRegistryFactory,warningRegistryFactory);
+            var taskProgressTracker = new TaskProgressTracker(task, new TestLog(), 1, taskRegistryFactory,
+                userLogRegistryFactory
+            );
             taskProgressTracker.beginSubTask();
             taskProgressTracker.beginSubTask();
             taskProgressTracker.logProgress(1);

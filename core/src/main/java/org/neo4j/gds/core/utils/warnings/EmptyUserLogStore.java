@@ -19,12 +19,23 @@
  */
 package org.neo4j.gds.core.utils.warnings;
 
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-public enum EmptyWarningRegistryFactory implements WarningRegistryFactory {
+import java.util.stream.Stream;
+
+public enum EmptyUserLogStore implements UserLogStore {
     INSTANCE;
 
+
     @Override
-    public WarningRegistry newInstance() {
-        return new WarningRegistry("", EmptyWarningStore.INSTANCE);
+    public void addUserLogMessage(
+        String username, Task taskId, String message
+    ) {
+
+    }
+
+    @Override
+    public Stream<UserLogEntry> query(String username) {
+        return Stream.empty();
     }
 }

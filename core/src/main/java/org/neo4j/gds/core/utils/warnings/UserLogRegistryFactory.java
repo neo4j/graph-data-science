@@ -21,6 +21,6 @@ package org.neo4j.gds.core.utils.warnings;
 
 
 @FunctionalInterface
-public interface WarningRegistryFactory {
-    WarningRegistry newInstance();
+public interface UserLogRegistryFactory {
+    UserLogRegistry newInstance();
 }

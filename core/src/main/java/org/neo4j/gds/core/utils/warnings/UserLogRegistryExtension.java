@@ -31,23 +31,23 @@ import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
 
 @ServiceProvider
-public class WarningRegistryExtension extends ExtensionFactory<WarningRegistryExtension.Dependencies> {
+public class UserLogRegistryExtension extends ExtensionFactory<UserLogRegistryExtension.Dependencies> {
 
-    public WarningRegistryExtension() {
+    public UserLogRegistryExtension() {
         super(ExtensionType.DATABASE, "gds.warnings.registry");
     }
 
     @Override
-    public Lifecycle newInstance(ExtensionContext context, WarningRegistryExtension.Dependencies dependencies) {
+    public Lifecycle newInstance(ExtensionContext context, UserLogRegistryExtension.Dependencies dependencies) {
         var registry = dependencies.globalProceduresRegistry();
         var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
         if (enabled) {
-            var globalWarningStore = new GlobalWarningStore();
-            registry.registerComponent(WarningStore.class, ctx -> globalWarningStore, true);
-            registry.registerComponent(WarningRegistryFactory.class, globalWarningStore, true);
+            var globalWarningStore = new GlobalUserLogStore();
+            registry.registerComponent(UserLogStore.class, ctx -> globalWarningStore, true);
+            registry.registerComponent(UserLogRegistryFactory.class, globalWarningStore, true);
         } else {
-            registry.registerComponent(WarningRegistryFactory.class, ctx -> EmptyWarningRegistryFactory.INSTANCE, true);
-            registry.registerComponent(WarningStore.class, ctx -> EmptyWarningStore.INSTANCE, true);
+            registry.registerComponent(UserLogRegistryFactory.class, ctx -> EmptyUserLogRegistryFactory.INSTANCE, true);
+            registry.registerComponent(UserLogStore.class, ctx -> EmptyUserLogStore.INSTANCE, true);
 
         }
         return new LifecycleAdapter();

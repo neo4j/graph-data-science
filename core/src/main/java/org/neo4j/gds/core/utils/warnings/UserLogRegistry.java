@@ -21,12 +21,17 @@ package org.neo4j.gds.core.utils.warnings;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-import java.util.stream.Stream;
+public class UserLogRegistry {
+    private final String username;
+    private final UserLogStore userLogStore;
 
-public interface WarningStore {
-    void addWarning(String username, Task taskId, String warningMessage);
+    public UserLogRegistry(String username, UserLogStore userLogStore) {
+        this.username = username;
+        this.userLogStore = userLogStore;
+    }
 
-    Stream<Warning> query(String username);
-
+    public void addWarningToLog(Task task, String message) {
+        userLogStore.addUserLogMessage(username, task, message);
+    }
 
 }

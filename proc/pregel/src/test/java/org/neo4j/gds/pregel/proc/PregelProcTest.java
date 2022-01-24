@@ -51,7 +51,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.warnings.EmptyWarningRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -200,7 +200,7 @@ public class PregelProcTest extends BaseProcTest {
         try (var transactions = newKernelTransaction(db)) {
             var proc = new StreamProc();
             proc.taskRegistryFactory = taskRegistryFactory;
-            proc.warningRegistryFactory = EmptyWarningRegistryFactory.INSTANCE;
+            proc.userLogRegistryFactory = EmptyUserLogRegistryFactory.INSTANCE;
             proc.api = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
@@ -224,7 +224,7 @@ public class PregelProcTest extends BaseProcTest {
         try (var transactions = newKernelTransaction(db)) {
             var proc = new WriteProc();
             proc.taskRegistryFactory = taskRegistryFactory;
-            proc.warningRegistryFactory = EmptyWarningRegistryFactory.INSTANCE;
+            proc.userLogRegistryFactory = EmptyUserLogRegistryFactory.INSTANCE;
             proc.api = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
@@ -248,7 +248,7 @@ public class PregelProcTest extends BaseProcTest {
         try (var transactions = newKernelTransaction(db)) {
             var proc = new MutateProc();
             proc.taskRegistryFactory = taskRegistryFactory;
-            proc.warningRegistryFactory = EmptyWarningRegistryFactory.INSTANCE;
+            proc.userLogRegistryFactory = EmptyUserLogRegistryFactory.INSTANCE;
             proc.api = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();

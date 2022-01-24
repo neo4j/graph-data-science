@@ -19,22 +19,18 @@
  */
 package org.neo4j.gds.core.utils.warnings;
 
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+public class LocalUserLogRegistryFactory implements UserLogRegistryFactory {
+    private final String username;
+    private final UserLogStore userLogStore;
 
-public class Warning {
-    public String taskName;
-    public String message;
 
-    Warning(Task task, String warning) {
-        this.taskName = task.description();
-        this.message = warning;
+    public LocalUserLogRegistryFactory(String username, UserLogStore userLogStore) {
+        this.username = username;
+        this.userLogStore = userLogStore;
     }
 
-    public String getTaskName() {
-        return taskName;
-    }
-
-    public String getWarningMessage() {
-        return message;
+    @Override
+    public UserLogRegistry newInstance() {
+        return new UserLogRegistry(username, userLogStore);
     }
 }

@@ -20,8 +20,8 @@
 package org.neo4j.gds.userlog;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.utils.warnings.Warning;
-import org.neo4j.gds.core.utils.warnings.WarningStore;
+import org.neo4j.gds.core.utils.warnings.UserLogEntry;
+import org.neo4j.gds.core.utils.warnings.UserLogStore;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -32,20 +32,16 @@ import java.util.stream.Stream;
 public class UserLogProc extends BaseProc {
 
     @Context
-    public WarningStore warningStore;
-
-
+    public UserLogStore userLogStore;
+    
     @Procedure("gds.alpha.userLog")
     @Description("Log warnings and hints for currently running tasks.")
 
-    public Stream<Warning> userLog(
+    public Stream<UserLogEntry> userLog(
         @Name(value = "jobId", defaultValue = "") String jobId
     ) {
-        return warningStore.query(username());
+        return userLogStore.query(username());
     }
-
-
-
 
 }
 

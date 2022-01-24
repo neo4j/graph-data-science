@@ -19,18 +19,22 @@
  */
 package org.neo4j.gds.core.utils.warnings;
 
-public class LocalWarningRegistryFactory implements  WarningRegistryFactory {
-    private final String username;
-    private final WarningStore warningStore;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 
+public class UserLogEntry {
+    public String taskName;
+    public String message;
 
-    public LocalWarningRegistryFactory(String username, WarningStore warningStore) {
-        this.username = username;
-        this.warningStore = warningStore;
+    UserLogEntry(Task task, String message) {
+        this.taskName = task.description();
+        this.message = message;
     }
 
-    @Override
-    public WarningRegistry newInstance() {
-        return new WarningRegistry(username, warningStore);
+    public String getTaskName() {
+        return taskName;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

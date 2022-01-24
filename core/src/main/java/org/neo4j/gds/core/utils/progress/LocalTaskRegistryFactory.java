@@ -23,8 +23,7 @@ public class LocalTaskRegistryFactory implements TaskRegistryFactory {
 
     private final String username;
     private final TaskStore taskStore;
-
-
+    
     LocalTaskRegistryFactory(String username, TaskStore taskStore) {
         this.username = username;
         this.taskStore = taskStore;
