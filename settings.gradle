@@ -58,6 +58,9 @@ project(':core-test-utils').projectDir = file('core-test-utils')
 include('csv')
 project(':csv').projectDir = file('csv')
 
+include('cypher-aggregation')
+project(':cypher-aggregation').projectDir = file('cypher/cypher-aggregation')
+
 include('cypher-core')
 project(':cypher-core').projectDir = file('cypher/cypher-core')
 
