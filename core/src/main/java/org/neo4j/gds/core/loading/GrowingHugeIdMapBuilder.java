@@ -1,0 +1,83 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.gds.core.loading;
+
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayBuilder;
+import org.neo4j.gds.utils.CloseableThreadLocal;
+
+import java.util.concurrent.atomic.AtomicLong;
+
+public final class GrowingHugeIdMapBuilder implements IdMapBuilder {
+
+    private final HugeLongArrayBuilder arrayBuilder;
+    private final AtomicLong allocationIndex;
+    private final CloseableThreadLocal<HugeLongArrayBuilder.Allocator> allocators;
+
+    public static GrowingHugeIdMapBuilder of(AllocationTracker allocationTracker) {
+        HugeLongArrayBuilder array = HugeLongArrayBuilder.newBuilder(allocationTracker);
+        return new GrowingHugeIdMapBuilder(array);
+    }
+
+    private GrowingHugeIdMapBuilder(HugeLongArrayBuilder arrayBuilder) {
+        this.arrayBuilder = arrayBuilder;
+        this.allocationIndex = new AtomicLong();
+        this.allocators = CloseableThreadLocal.withInitial(HugeLongArrayBuilder.Allocator::new);
+    }
+
+    @Override
+    public @Nullable HugeLongArrayBuilder.Allocator allocate(int batchLength) {
+        long startIndex = allocationIndex.getAndAccumulate(batchLength, this::upperAllocation);
+
+        HugeLongArrayBuilder.Allocator allocator = allocators.get();
+        arrayBuilder.allocate(startIndex, batchLength, allocator);
+
+        return allocator;
+    }
+
+    @Override
+    public IdMap build(
+        LabelInformation.Builder labelInformationBuilder,
+        long highestNodeId,
+        int concurrency,
+        boolean checkDuplicateIds,
+        AllocationTracker allocationTracker
+    ) {
+        allocators.close();
+        return checkDuplicateIds
+            ? HugeIdMapBuilderOps.buildChecked(this.arrayBuilder.build(size()), size(), labelInformationBuilder, highestNodeId, concurrency, allocationTracker)
+            : HugeIdMapBuilderOps.build(this.arrayBuilder.build(size()), size(), labelInformationBuilder, highestNodeId, concurrency, allocationTracker);
+    }
+
+    public HugeLongArray array() {
+        return arrayBuilder.build(size());
+    }
+
+    public long size() {
+        return allocationIndex.get();
+    }
+
+    private long upperAllocation(long lower, long nodes) {
+        return lower + nodes;
+    }
+}

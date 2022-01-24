@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -27,6 +28,8 @@ import org.neo4j.gds.mem.MemoryUsage;
 import java.util.Arrays;
 import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * A long-indexable version of a primitive long array ({@code long[]}) that can contain more than 2 bn. elements.
@@ -245,6 +248,14 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         return new SingleHugeLongArray(values.length, values);
     }
 
+    public static HugeLongArray of(long[][] array, long size) {
+        var capacity = PageUtil.capacityFor(array.length, HugeArrays.PAGE_SHIFT);
+        if (size > capacity) {
+            throw new IllegalStateException(formatWithLocale("Size should be smaller than or equal to capacity %d, but got size %d", capacity, size));
+        }
+        return new PagedHugeLongArray(size, array, PagedHugeLongArray.memoryUsed(array, capacity));
+    }
+
     /* test-only */
     static HugeLongArray newPagedArray(long size, AllocationTracker allocationTracker) {
         return PagedHugeLongArray.of(size, allocationTracker);
@@ -397,18 +408,27 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
             int numPages = HugeArrays.numberOfPages(size);
             long[][] pages = new long[numPages][];
 
-            long memoryUsed = MemoryUsage.sizeOfObjectArray(numPages);
-            final long pageBytes = MemoryUsage.sizeOfLongArray(HugeArrays.PAGE_SIZE);
             for (int i = 0; i < numPages - 1; i++) {
-                memoryUsed += pageBytes;
                 pages[i] = new long[HugeArrays.PAGE_SIZE];
             }
-            final int lastPageSize = HugeArrays.exclusiveIndexOfPage(size);
+            int lastPageSize = HugeArrays.exclusiveIndexOfPage(size);
             pages[numPages - 1] = new long[lastPageSize];
-            memoryUsed += MemoryUsage.sizeOfLongArray(lastPageSize);
+
+            var memoryUsed = memoryUsed(pages, size);
             allocationTracker.add(memoryUsed);
 
             return new PagedHugeLongArray(size, pages, memoryUsed);
+        }
+
+        static long memoryUsed(long[][] pages, long size) {
+            var numPages = pages.length;
+            long memoryUsed = MemoryUsage.sizeOfObjectArray(numPages);
+            long pageBytes = MemoryUsage.sizeOfLongArray(HugeArrays.PAGE_SIZE);
+            memoryUsed += pageBytes * (numPages - 1);
+
+            int lastPageSize = HugeArrays.exclusiveIndexOfPage(size);
+            memoryUsed += MemoryUsage.sizeOfLongArray(lastPageSize);
+            return memoryUsed;
         }
 
         private final long size;

@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 public interface IdMapBuilder {
 
     IdMapAllocator allocate(int batchLength);
-
     IdMap build(
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,

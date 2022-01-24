@@ -35,27 +35,25 @@ import java.util.function.Function;
 public final class HugeIdMapBuilderOps {
 
     static HugeIdMap build(
-        HugeIdMapBuilder idMapBuilder,
+        HugeLongArray graphIds,
+        long nodeCount,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,
         AllocationTracker allocationTracker
     ) {
-        HugeLongArray graphIds = idMapBuilder.array();
-
         if (highestNodeId == NodesBuilder.UNKNOWN_MAX_ID) {
             highestNodeId = graphIds.asNodeProperties().getMaxLongPropertyValue().getAsLong();
         }
 
         HugeSparseLongArray nodeToGraphIds = buildSparseIdMap(
-            idMapBuilder.size(),
+            nodeCount,
             highestNodeId,
             concurrency,
             add(graphIds),
             allocationTracker
         );
 
-        var nodeCount = idMapBuilder.size();
         var labelInformation = labelInformationBuilder.build(nodeCount, nodeToGraphIds::get);
 
         return new HugeIdMap(
@@ -69,22 +67,21 @@ public final class HugeIdMapBuilderOps {
     }
 
     static HugeIdMap buildChecked(
-        HugeIdMapBuilder idMapBuilder,
+        HugeLongArray graphIds,
+        long nodeCount,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,
         AllocationTracker allocationTracker
     ) throws DuplicateNodeIdException {
-        HugeLongArray graphIds = idMapBuilder.array();
         HugeSparseLongArray nodeToGraphIds = buildSparseIdMap(
-            idMapBuilder.size(),
+            nodeCount,
             highestNodeId,
             concurrency,
             addChecked(graphIds),
             allocationTracker
         );
 
-        var nodeCount = idMapBuilder.size();
         var labelInformation = labelInformationBuilder.build(nodeCount, nodeToGraphIds::get);
 
         return new HugeIdMap(

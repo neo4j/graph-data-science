@@ -126,7 +126,7 @@ public abstract class HugeCursor<Array> implements AutoCloseable {
         }
     }
 
-    static final class PagedCursor<Array> extends HugeCursor<Array> {
+    public static final class PagedCursor<Array> extends HugeCursor<Array> {
 
         private Array[] pages;
         private int pageIndex;
@@ -135,7 +135,7 @@ public abstract class HugeCursor<Array> implements AutoCloseable {
         private long capacity;
         private long end;
 
-        PagedCursor(final long capacity, final Array[] pages) {
+        public PagedCursor(final long capacity, final Array[] pages) {
             super();
             this.capacity = capacity;
             this.pages = pages;
