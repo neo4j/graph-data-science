@@ -34,27 +34,27 @@ import java.util.stream.Stream;
 public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
     public static final int MOST_RECENT = 10;
 
-    private final Map<String, Map<Task, List<String>>> registeredWarnings;
+    private final Map<String, Map<Task, List<String>>> registeredMessages;
 
     public GlobalUserLogStore() {
 
-        this.registeredWarnings = new ConcurrentHashMap<>();
+        this.registeredMessages = new ConcurrentHashMap<>();
     }
 
     public Stream<UserLogEntry> query(String username) {
 
-        var tasksFromUsername = registeredWarnings.getOrDefault(username, Map.of());
-        return tasksFromUsername.entrySet().stream().flatMap(GlobalUserLogStore::fromEntryToWarningList);
+        var tasksFromUsername = registeredMessages.getOrDefault(username, Map.of());
+        return tasksFromUsername.entrySet().stream().flatMap(GlobalUserLogStore::formEntryToUserLog);
 
 
     }
 
-    private static Stream<UserLogEntry> fromEntryToWarningList(Map.Entry<Task, List<String>> entry) {
+    private static Stream<UserLogEntry> formEntryToUserLog(Map.Entry<Task, List<String>> entry) {
         return entry.getValue().stream().map(message -> new UserLogEntry(entry.getKey(), message));
     }
 
     public void addUserLogMessage(String username, Task taskId, String message) {
-        this.registeredWarnings
+        this.registeredMessages
             .computeIfAbsent(username, __ -> new ConcurrentHashMap<>())
             .computeIfAbsent(taskId, __ -> new ArrayList<>(MOST_RECENT))
             .add(message);
