@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
@@ -46,6 +47,8 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -164,6 +167,26 @@ class UserLogProcTest extends BaseProcTest {
                 getMapEntry("foo", -1, "This is another test warning")
             )
 
+        );
+    }
+
+    @Test
+    void userLogOutputOnlyMostRecentTasks() {
+        int numMostRecent = GlobalUserLogStore.MOST_RECENT;
+        for (int i = 0; i < 2 * numMostRecent; ++i) {
+            String currentFooId = "foo" + i;
+            runQuery("CALL gds.test.fakewarnproc('" + currentFooId + "')");
+        }
+        var expectedQueryResult = IntStream.range(numMostRecent, 2 * numMostRecent).boxed().flatMap(
+            i -> Stream.of(
+                getMapEntry("foo", i, "This is a test warning"),
+                getMapEntry("foo", i, "This is another test warning")
+            )
+        ).collect(Collectors.toList());
+        assertCypherResult(
+            "CALL gds.alpha.userLog() " +
+            "YIELD taskName, message RETURN taskName, message ",
+            expectedQueryResult
         );
     }
 

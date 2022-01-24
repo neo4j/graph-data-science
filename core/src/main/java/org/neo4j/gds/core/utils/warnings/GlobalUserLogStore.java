@@ -32,9 +32,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
+    public static final int MOST_RECENT = 10;
 
     private final Map<String, Map<Task, List<String>>> registeredWarnings;
-    private final int MOST_RECENT = 10;
 
     public GlobalUserLogStore() {
 
