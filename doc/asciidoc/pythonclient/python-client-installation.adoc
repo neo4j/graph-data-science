@@ -1,0 +1,25 @@
+[[python-client-installation]]
+= Installation
+
+To install the latest deployed version of the Python client, run:
+
+[source,bash]
+----
+pip install graphdatascience
+----
+
+== System requirements
+
+The GDS Python client depends on Python, the Neo4j Python Driver, and a server-side installation of the GDS library (see <<installation>>).
+The Python client supports the following versions of the other three components:
+
+[opts=header]
+|===
+| Python Client | GDS version  | Python version | Neo4j Python Driver version
+.3+<.^| `0.0.8`
+.3+<.^| `2.0`
+.3+<.^| `3.6+`
+| `4.1`
+| `4.2`
+| `4.3`
+|===
