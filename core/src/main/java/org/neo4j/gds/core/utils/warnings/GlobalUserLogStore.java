@@ -26,6 +26,7 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,9 +37,11 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
 
     private final Map<String, Map<Task, List<String>>> registeredMessages;
 
+
     public GlobalUserLogStore() {
 
         this.registeredMessages = new ConcurrentHashMap<>();
+
     }
 
     public Stream<UserLogEntry> query(String username) {
@@ -55,9 +58,11 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
 
     public void addUserLogMessage(String username, Task taskId, String message) {
         this.registeredMessages
-            .computeIfAbsent(username, __ -> new ConcurrentHashMap<>())
-            .computeIfAbsent(taskId, __ -> new ArrayList<>(MOST_RECENT))
+            .computeIfAbsent(username, __ -> new ConcurrentHashMap<>(MOST_RECENT))
+            .computeIfAbsent(taskId, __ -> Collections.synchronizedList(new ArrayList<>()))
             .add(message);
+
+
     }
 
     @Override
