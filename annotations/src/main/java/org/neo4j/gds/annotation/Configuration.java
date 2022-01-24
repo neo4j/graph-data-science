@@ -47,6 +47,10 @@ public @interface Configuration {
      */
     String value() default "";
 
+    /**
+     * By default, a configuration field is resolved in the {@link org.neo4j.gds.core.CypherMapWrapper} parameter with the method name as the expected key.
+     * This annotation changes the key to lookup to use {@link org.neo4j.gds.annotation.Configuration.Key#value()} instead.
+     */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
@@ -68,12 +72,18 @@ public @interface Configuration {
         String value();
     }
 
+    /**
+     * Used to specify which interface methods to ignore by the ConfigurationProcessor.
+     */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
     @interface Ignore {
     }
 
+    /**
+     * Configuration field is expected to be passed to the constructor as a parameter.
+     */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
@@ -81,12 +91,18 @@ public @interface Configuration {
         boolean acceptNull() default false;
     }
 
+    /**
+     * Annotated function will return the list of configuration keys
+     */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
     @interface CollectKeys {
     }
 
+    /**
+     * Annotated function will return the map representation of the configuration
+     */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
@@ -105,6 +121,9 @@ public @interface Configuration {
     @interface GraphStoreValidationCheck {
     }
 
+    /**
+     * Input for the annotated configuration field storing an Integer, will be validated if it is in the given range
+     */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
@@ -115,6 +134,9 @@ public @interface Configuration {
         boolean maxInclusive() default true;
     }
 
+    /**
+     * Input for the annotated configuration field storing a Long, will be validated if it is in the given range
+     */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
@@ -125,6 +147,9 @@ public @interface Configuration {
         boolean maxInclusive() default true;
     }
 
+    /**
+     * Input for the annotated configuration field storing a Double, will be validated if it is in the given range
+     */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
