@@ -11,10 +11,10 @@ It wraps and abstracts the necessary operations of the https://neo4j.com/docs/py
 This chapter is divided into the following sections:
 
 * <<python-client-installation>>
-* <<python-client-design>>
+* <<python-client-getting-started>>
 
 include::python-client-installation.adoc[leveloffset=+1]
-include::python-client-design.adoc[leveloffset=+1]
+include::python-client-getting-started.adoc[leveloffset=+1]
 
 
 //== Usage
