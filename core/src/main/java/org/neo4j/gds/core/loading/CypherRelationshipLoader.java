@@ -160,7 +160,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         boolean isAnyRelTypeQuery = !allColumns.contains(RelationshipRowVisitor.TYPE_COLUMN);
 
         if (isAnyRelTypeQuery) {
-            loaderContext.getOrCreateImporterBuilder(RelationshipType.ALL_RELATIONSHIPS);
+            loaderContext.getOrCreateImporterFactory(RelationshipType.ALL_RELATIONSHIPS);
         }
 
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
@@ -185,10 +185,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     @Override
     LoadResult result() {
-        List<Runnable> flushTasks = loaderContext.importerBuildersByType
+        List<Runnable> flushTasks = loaderContext.importerFactoriesByType
             .values()
             .stream()
-            .flatMap(SingleTypeRelationshipImporter.Builder::createFlushTasks)
+            .flatMap(SingleTypeRelationshipImporter.Factory::createFlushTasks)
             .collect(Collectors.toList());
 
         ParallelUtil.run(flushTasks, loadingContext.executor());
@@ -218,23 +218,23 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     class Context {
 
-        private final Map<RelationshipType, SingleTypeRelationshipImporter.Builder> importerBuildersByType;
+        private final Map<RelationshipType, SingleTypeRelationshipImporter.Factory> importerFactoriesByType;
         private final Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders;
 
         private final ImportSizing importSizing;
 
         Context() {
-            this.importerBuildersByType = new HashMap<>();
+            this.importerFactoriesByType = new HashMap<>();
             this.allBuilders = new HashMap<>();
 
             this.importSizing = ImportSizing.of(cypherConfig.readConcurrency(), idMap.nodeCount());
         }
 
-        synchronized SingleTypeRelationshipImporter.Builder getOrCreateImporterBuilder(RelationshipType relationshipType) {
-            return importerBuildersByType.computeIfAbsent(relationshipType, this::createImporterBuilder);
+        synchronized SingleTypeRelationshipImporter.Factory getOrCreateImporterFactory(RelationshipType relationshipType) {
+            return importerFactoriesByType.computeIfAbsent(relationshipType, this::createImporterFactory);
         }
 
-        private SingleTypeRelationshipImporter.Builder createImporterBuilder(RelationshipType relationshipType) {
+        private SingleTypeRelationshipImporter.Factory createImporterFactory(RelationshipType relationshipType) {
             RelationshipProjection projection = RelationshipProjection
                 .builder()
                 .type(relationshipType.name)
@@ -258,7 +258,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             allBuilders.put(relationshipType, builder);
 
-            return new SingleTypeRelationshipImporterBuilderBuilder()
+            return new SingleTypeRelationshipImporterFactoryBuilder()
                 .adjacencyListWithPropertiesBuilder(builder)
                 .typeToken(NO_SUCH_RELATIONSHIP_TYPE)
                 .projection(projection)

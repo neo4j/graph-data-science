@@ -45,7 +45,7 @@ public class RelationshipsBuilder {
 
     private final AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder;
     private final Orientation orientation;
-    private final SingleTypeRelationshipImporter.Builder importerBuilder;
+    private final SingleTypeRelationshipImporter.Factory importerFactory;
 
     private final int concurrency;
     private final ExecutorService executorService;
@@ -58,7 +58,7 @@ public class RelationshipsBuilder {
         int bufferSize,
         int[] propertyKeyIds,
         AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
-        SingleTypeRelationshipImporter.Builder importerBuilder,
+        SingleTypeRelationshipImporter.Factory importerFactory,
         boolean loadRelationshipProperty,
         boolean isMultiGraph,
         int concurrency,
@@ -67,7 +67,7 @@ public class RelationshipsBuilder {
         this.idMap = idMap;
         this.orientation = orientation;
         this.adjacencyListWithPropertiesBuilder = adjacencyListWithPropertiesBuilder;
-        this.importerBuilder = importerBuilder;
+        this.importerFactory = importerFactory;
         this.loadRelationshipProperty = loadRelationshipProperty;
         this.isMultiGraph = isMultiGraph;
         this.concurrency = concurrency;
@@ -75,7 +75,7 @@ public class RelationshipsBuilder {
 
         this.threadLocalBuilders = AutoCloseableThreadLocal.withInitial(() -> new ThreadLocalBuilder(
             idMap,
-            importerBuilder,
+            importerFactory,
             bufferSize,
             propertyKeyIds
         ));
@@ -144,7 +144,7 @@ public class RelationshipsBuilder {
     public List<Relationships> buildAll() {
         threadLocalBuilders.close();
 
-        var flushTasks = importerBuilder.createFlushTasks().collect(Collectors.toList());
+        var flushTasks = importerFactory.createFlushTasks().collect(Collectors.toList());
 
         ParallelUtil.runWithConcurrency(concurrency, flushTasks, executorService);
 
@@ -183,7 +183,7 @@ public class RelationshipsBuilder {
 
         ThreadLocalBuilder(
             IdMap idMap,
-            SingleTypeRelationshipImporter.Builder importerBuilder,
+            SingleTypeRelationshipImporter.Factory importerFactory,
             int bufferSize,
             int[] propertyKeyIds
         ) {
@@ -191,10 +191,10 @@ public class RelationshipsBuilder {
 
             if (propertyKeyIds.length > 1) {
                 this.propertiesBatchBuffer = new RelationshipPropertiesBatchBuffer(bufferSize, propertyKeyIds.length);
-                this.importer = importerBuilder.createImporter(idMap, bufferSize, propertiesBatchBuffer);
+                this.importer = importerFactory.createImporter(idMap, bufferSize, propertiesBatchBuffer);
             } else {
                 this.propertiesBatchBuffer = null;
-                this.importer = importerBuilder.createImporter(
+                this.importer = importerFactory.createImporter(
                     idMap,
                     bufferSize,
                     RelationshipImporter.preLoadedPropertyReader()

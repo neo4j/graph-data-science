@@ -28,7 +28,7 @@ import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.stream.Stream;
 
-@Value.Style(typeBuilder = "SingleTypeRelationshipImporterBuilderBuilder")
+@Value.Style(typeBuilder = "SingleTypeRelationshipImporterFactoryBuilder")
 public final class SingleTypeRelationshipImporter {
 
     private final RelationshipImporter.Imports imports;
@@ -54,7 +54,7 @@ public final class SingleTypeRelationshipImporter {
     }
 
     @org.immutables.builder.Builder.Factory
-    public static Builder builder(
+    public static Factory builder(
         AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
         RelationshipProjection projection,
         int typeToken,
@@ -75,7 +75,7 @@ public final class SingleTypeRelationshipImporter {
         var loadProperties = projection.properties().hasMappings();
         var imports = relationshipImporter.imports(projection.orientation(), loadProperties);
 
-        return new Builder(
+        return new Factory(
             typeToken,
             relationshipImporter,
             imports,
@@ -84,7 +84,7 @@ public final class SingleTypeRelationshipImporter {
         );
     }
 
-    public static final class Builder {
+    public static final class Factory {
 
         private final int typeId;
 
@@ -94,7 +94,7 @@ public final class SingleTypeRelationshipImporter {
         private final boolean validateRelationships;
         private final boolean loadProperties;
 
-        private Builder(
+        private Factory(
             int typeToken,
             RelationshipImporter importer,
             RelationshipImporter.Imports imports,

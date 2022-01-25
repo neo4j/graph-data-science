@@ -112,8 +112,8 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             : RelationshipType.of(row.getString(TYPE_COLUMN));
 
         if (!localImporters.containsKey(relationshipType)) {
-            // Lazily init relationship importer builder
-            var importerBuilder = loaderContext.getOrCreateImporterBuilder(relationshipType);
+            // Lazily init relationship importer factory
+            var importerFactory = loaderContext.getOrCreateImporterFactory(relationshipType);
 
             RelationshipImporter.PropertyReader propertyReader;
 
@@ -129,8 +129,8 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 // Single properties can be in-lined in the relationship batch
                 propertyReader = RelationshipImporter.preLoadedPropertyReader();
             }
-            // Create thread-local relationship importer
-            var importer = importerBuilder.createImporter(idMap, bufferSize, propertyReader);
+            // Create thread-local relationship factory
+            var importer = importerFactory.createImporter(idMap, bufferSize, propertyReader);
 
             localImporters.put(relationshipType, importer);
             localRelationshipIds.put(relationshipType, 0);

@@ -108,10 +108,10 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         ImportSizing sizing,
         StoreScanner<RelationshipReference> storeScanner
     ) {
-        var importerBuilders = adjacencyListBuilders
+        var importerFactories = adjacencyListBuilders
             .entrySet()
             .stream()
-            .map(entry -> new SingleTypeRelationshipImporterBuilderBuilder()
+            .map(entry -> new SingleTypeRelationshipImporterFactoryBuilder()
                 .adjacencyListWithPropertiesBuilder(entry.getValue())
                 .typeToken(dimensions.relationshipTypeTokenMapping().get(entry.getKey()))
                 .projection(entry.getValue().projection())
@@ -127,7 +127,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             progressTracker,
             idMap,
             storeScanner,
-            importerBuilders
+            importerFactories
         );
     }
 
