@@ -188,11 +188,9 @@ public final class AdjacencyBuilder {
         }
     }
 
-    void prepareFlushTasks() {
-        this.globalBuilder.prepareFlushTasks();
-    }
-
     Collection<Runnable> flushTasks() {
+        this.globalBuilder.prepareFlushTasks();
+
         var tasks = new ArrayList<Runnable>(localBuilders.length + 1);
         for (int i = 0; i < localBuilders.length; i++) {
             int index = i;

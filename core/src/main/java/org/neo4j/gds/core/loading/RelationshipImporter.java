@@ -169,10 +169,6 @@ public class RelationshipImporter {
         );
     }
 
-    void prepareFlushTasks() {
-        adjacencyBuilder.prepareFlushTasks();
-    }
-
     Collection<Runnable> flushTasks() {
         return adjacencyBuilder.flushTasks();
     }

@@ -100,7 +100,6 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         @Override
         public Collection<Runnable> flushTasks() {
             return importerBuilders.stream()
-                .peek(SingleTypeRelationshipImporter.Builder::prepareFlushTasks)
                 .flatMap(SingleTypeRelationshipImporter.Builder::createFlushTasks)
                 .collect(Collectors.toList());
         }

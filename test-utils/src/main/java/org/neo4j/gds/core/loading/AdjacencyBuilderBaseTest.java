@@ -71,7 +71,6 @@ public abstract class AdjacencyBuilderBaseTest {
         RelationshipImporter.Imports imports = relationshipImporter.imports(Orientation.NATURAL, false);
         imports.importRelationships(relationshipsBatchBuffer, null);
 
-        adjacencyBuilder.prepareFlushTasks();
         adjacencyBuilder.flushTasks().forEach(Runnable::run);
 
         try (var adjacencyList = globalBuilder.build().adjacency()) {

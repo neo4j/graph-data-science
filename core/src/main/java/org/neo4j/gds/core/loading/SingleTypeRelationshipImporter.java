@@ -108,10 +108,6 @@ public final class SingleTypeRelationshipImporter {
             this.loadProperties = loadProperties;
         }
 
-        public void prepareFlushTasks() {
-            importer.prepareFlushTasks();
-        }
-
         public Stream<Runnable> createFlushTasks() {
             return importer.flushTasks().stream();
         }

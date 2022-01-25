@@ -185,10 +185,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     @Override
     LoadResult result() {
-        loaderContext.importerBuildersByType
-            .values()
-            .forEach(SingleTypeRelationshipImporter.Builder::prepareFlushTasks);
-
         List<Runnable> flushTasks = loaderContext.importerBuildersByType
             .values()
             .stream()
