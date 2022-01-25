@@ -192,34 +192,19 @@ public final class AdjacencyBuilder {
         this.globalBuilder.prepareFlushTasks();
 
         var tasks = new ArrayList<Runnable>(localBuilders.length + 1);
-        for (int i = 0; i < localBuilders.length; i++) {
-            int index = i;
-            tasks.add(() -> this.flush(index));
+        for (int page = 0; page < localBuilders.length; page++) {
+            long baseNodeId = ((long) page) << pageShift;
+            tasks.add(new FlushTask(
+                baseNodeId,
+                localBuilders[page],
+                compressedAdjacencyLists[page],
+                buffers[page],
+                relationshipCounter
+            ));
         }
         tasks.add(this.globalBuilder::flush);
+
         return tasks;
-    }
-
-    private void flush(int index) {
-        long baseId = ((long) index) << pageShift;
-        try (var compressor = localBuilders[index].intoCompressor()) {
-            CompressedLongArray[] allTargets = compressedAdjacencyLists[index];
-            LongArrayBuffer buffer = buffers[index];
-            long importedRelationships = 0L;
-            for (int localId = 0; localId < allTargets.length; ++localId) {
-                CompressedLongArray compressedAdjacencyList = allTargets[localId];
-                if (compressedAdjacencyList != null) {
-                    importedRelationships += compressor.applyVariableDeltaEncoding(
-                        compressedAdjacencyList,
-                        buffer,
-                        baseId + localId
-                    );
-
-                    allTargets[localId] = null;
-                }
-            }
-            relationshipCounter.add(importedRelationships);
-        }
     }
 
     int[] getPropertyKeyIds() {
@@ -247,6 +232,51 @@ public final class AdjacencyBuilder {
         localBuilders[pageIndex] = globalBuilder.threadLocalRelationshipsBuilder();
     }
 
+    /**
+     * Responsible for writing a page of CompressedLongArrays into the adjacency list.
+     */
+    private static final class FlushTask implements Runnable {
+
+        private final long baseNodeId;
+        private final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder;
+        private final CompressedLongArray[] compressedLongArrays;
+        private final LongArrayBuffer buffer;
+        private final LongAdder relationshipCounter;
+
+        FlushTask(
+            long baseNodeId,
+            ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder,
+            CompressedLongArray[] compressedLongArrays,
+            LongArrayBuffer buffer,
+            LongAdder relationshipCounter
+        ) {
+            this.baseNodeId = baseNodeId;
+            this.threadLocalRelationshipsBuilder = threadLocalRelationshipsBuilder;
+            this.compressedLongArrays = compressedLongArrays;
+            this.buffer = buffer;
+            this.relationshipCounter = relationshipCounter;
+        }
+
+        @Override
+        public void run() {
+            try (var compressor = threadLocalRelationshipsBuilder.intoCompressor()) {
+                long importedRelationships = 0L;
+                for (int localId = 0; localId < compressedLongArrays.length; ++localId) {
+                    CompressedLongArray compressedAdjacencyList = compressedLongArrays[localId];
+                    if (compressedAdjacencyList != null) {
+                        importedRelationships += compressor.applyVariableDeltaEncoding(
+                            compressedAdjacencyList,
+                            buffer,
+                            baseNodeId + localId
+                        );
+                        compressedLongArrays[localId] = null;
+                    }
+                }
+                relationshipCounter.add(importedRelationships);
+            }
+        }
+    }
+
     static int aggregate(
         long[] targetIds,
         long[][] propertiesList,
@@ -255,7 +285,11 @@ public final class AdjacencyBuilder {
         Aggregation[] aggregations
     ) {
         // Step 1: Sort the targetIds (indirectly)
-        var order = IndirectSort.mergesort(startOffset, endOffset - startOffset, new AscendingLongComparator(targetIds));
+        var order = IndirectSort.mergesort(
+            startOffset,
+            endOffset - startOffset,
+            new AscendingLongComparator(targetIds)
+        );
 
 
         // Step 2: Aggregate the properties into the first property list of each distinct value
