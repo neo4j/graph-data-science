@@ -46,8 +46,8 @@ public final class GrowingHugeIdMapBuilder implements IdMapBuilder {
     }
 
     @Override
-    public @Nullable HugeLongArrayBuilder.Allocator allocate(int batchLength) {
-        long startIndex = allocationIndex.getAndAccumulate(batchLength, this::upperAllocation);
+    public @NotNull HugeLongArrayBuilder.Allocator allocate(int batchLength) {
+        long startIndex = allocationIndex.getAndAdd(batchLength);
 
         HugeLongArrayBuilder.Allocator allocator = allocators.get();
         arrayBuilder.allocate(startIndex, batchLength, allocator);

@@ -20,19 +20,26 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.loading.GrowingHugeIdMapBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
+import java.util.Arrays;
+import java.util.concurrent.Phaser;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.LongStream;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class HugeLongArrayBuilderTest {
 
     @Test
     void shouldInsertIdsInSinglePage() {
-        var idMapBuilder = GrowingHugeIdMapBuilder.of(AllocationTracker.empty());
-        var allocator = idMapBuilder.allocate(2);
+        var idMapBuilder =  HugeLongArrayBuilder.newBuilder(AllocationTracker.empty());
+        var allocator = new HugeLongArrayBuilder.Allocator();
+        idMapBuilder.allocate(0, 2, allocator);
         allocator.insert(new long[]{ 42, 1337 }, 2);
-        var array = idMapBuilder.array();
+
+        var array = idMapBuilder.build(2);
 
         assertThat(array.size()).isEqualTo(2);
         assertThat(array.toArray()).containsExactly(42, 1337);
@@ -40,17 +47,94 @@ class HugeLongArrayBuilderTest {
 
     @Test
     void multipleInsertsShouldAddConsecutively() {
-        var idMapBuilder = GrowingHugeIdMapBuilder.of(AllocationTracker.empty());
-        idMapBuilder.allocate(2).insert(new long[]{ 42, 1337 }, 2);
+        var idMapBuilder = HugeLongArrayBuilder.newBuilder(AllocationTracker.empty());
+        var allocator = new HugeLongArrayBuilder.Allocator();
 
-        idMapBuilder.allocate(2).insert(new long[]{ 84, 1338 }, 2);
+        idMapBuilder.allocate(0, 2, allocator);
+        allocator.insert(new long[]{ 42, 1337 }, 2);
 
-        idMapBuilder.allocate(2).insert(new long[]{ 126, 1339 }, 2);
+        idMapBuilder.allocate(2, 2, allocator);
+        allocator.insert(new long[]{ 84, 1338 }, 2);
 
-        var array = idMapBuilder.array();
+        idMapBuilder.allocate(4, 2, allocator);
+        allocator.insert(new long[]{ 126, 1339 }, 2);
+
+        var array = idMapBuilder.build(6);
 
         assertThat(array.size()).isEqualTo(6);
         assertThat(array.toArray()).containsExactly(42, 1337, 84, 1338, 126, 1339);
+    }
+
+    @Test
+    void multipleInsertsAcrossMultiplePages() {
+        var idMapBuilder = HugeLongArrayBuilder.newBuilder(AllocationTracker.empty());
+        var allocator = new HugeLongArrayBuilder.Allocator();
+
+        idMapBuilder.allocate(0, 2, allocator);
+        allocator.insert(new long[]{ 42, 1337 }, 2);
+
+        var batchLength = HugeArrays.PAGE_SIZE * 2 + 42;
+        idMapBuilder.allocate(2, batchLength, allocator);
+        var values = new long[batchLength];
+        Arrays.setAll(values, i -> i % 2 == 0 ? 42L * (i / 2) : 1337L + (i / 2));
+        allocator.insert(values, batchLength);
+
+        idMapBuilder.allocate(batchLength + 2, 2, allocator);
+        allocator.insert(new long[]{ 42, 1337 }, 2);
+
+        var array = idMapBuilder.build(batchLength + 4);
+
+        assertThat(array.size()).isEqualTo(batchLength + 4);
+
+        var expected = LongStream.concat(
+            LongStream.of(42, 1337),
+            LongStream.concat(Arrays.stream(values), LongStream.of(42, 1337))
+        ).toArray();
+        assertThat(array.toArray()).containsExactly(expected);
+    }
+
+    @Test
+    void multipleInsertsAreThreadSafe() throws InterruptedException {
+        var idMapBuilder = HugeLongArrayBuilder.newBuilder(AllocationTracker.empty());
+
+        var phaser = new Phaser(3);
+        var startIndex = new AtomicLong();
+        var values = LongStream.range(42, 42 + 42).toArray();
+
+        Runnable workload = () -> {
+            var allocator = new HugeLongArrayBuilder.Allocator();
+            phaser.arriveAndAwaitAdvance();
+
+            System.out.println("thread started" + Thread.currentThread().getId());
+
+            for (int i = 0; i < 10_000; i++) {
+                var index = startIndex.getAndAdd(42);
+                idMapBuilder.allocate(index, 42, allocator);
+                allocator.insert(values, 42);
+            }
+
+            System.out.println("thread finished" + Thread.currentThread().getId());
+        };
+
+        var thread1 = new Thread(workload);
+        var thread2 = new Thread(workload);
+
+        thread1.start();
+        thread2.start();
+
+        // kick of threads
+        phaser.arriveAndAwaitAdvance();
+
+        thread1.join();
+        thread2.join();
+
+        var array = idMapBuilder.build(840_000);
+
+        assertThat(array.size()).isEqualTo(840_000);
+
+        var expected = LongStream.range(0, 20_000).flatMap(__ -> Arrays.stream(values)).toArray();
+
+        assertArrayEquals(expected, array.toArray());
     }
 
 }

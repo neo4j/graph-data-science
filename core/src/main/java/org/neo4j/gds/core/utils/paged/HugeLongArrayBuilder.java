@@ -23,13 +23,17 @@ import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.loading.IdMapAllocator;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
+import java.lang.invoke.VarHandle;
 import java.util.Arrays;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class HugeLongArrayBuilder {
 
     private final AllocationTracker allocationTracker;
 
     private long[][] pages;
+    private final Lock lock;
 
     public static HugeLongArrayBuilder newBuilder(AllocationTracker allocationTracker) {
         return new HugeLongArrayBuilder(allocationTracker);
@@ -38,28 +42,53 @@ public class HugeLongArrayBuilder {
     HugeLongArrayBuilder(AllocationTracker allocationTracker) {
         this.allocationTracker = allocationTracker;
         this.pages = new long[0][0];
+        this.lock = new ReentrantLock();
     }
 
     public HugeLongArray build(long size) {
+        // make sure that we return the latest, correct version of pages
+        VarHandle.fullFence();
         return HugeLongArray.of(pages, size);
     }
 
     public void allocate(long start, int batchLength, Allocator allocator) {
         var endPage = HugeArrays.pageIndex(start + batchLength - 1);
         if (endPage >= this.pages.length) {
-            synchronized (this) {
+            lock.lock();
+            try {
                 if (endPage >= this.pages.length) {
-                    this.pages = Arrays.copyOf(this.pages, endPage + 1);
-                    for (int i = this.pages.length - 1; i >= 0; i--) {
-                        if (this.pages[i] != null) {
+                    var newPages = Arrays.copyOf(this.pages, endPage + 1);
+                    for (int i = newPages.length - 1; i >= 0; i--) {
+                        if (newPages[i] != null) {
                             break;
                         }
-                        this.pages[i] = new long[HugeArrays.PAGE_SIZE];
+                        newPages[i] = new long[HugeArrays.PAGE_SIZE];
                     }
+
+                    this.pages = newPages;
                 }
             }
+            finally {
+                lock.unlock();
+            }
         }
-        var cursor = new HugeCursor.PagedCursor<>(PageUtil.capacityFor(this.pages.length, HugeArrays.PAGE_SHIFT), this.pages);
+
+        // Why don't we need to declare pages as volatile?
+        // plain non-volatile access is ok since we only change the outer layer 'pages', not the actual inner
+        // pages where we write into. Take the following example, using a page size of 3:
+        // page size = 3
+        // t1 -> [ 0..1, 1..2, 5..6 ]  // wants to write at those positions
+        // t2 -> [ 2..5 ]
+        // t1 -> 0..1 -> no grow  @1[ @23[000] ] -> @1[ @23[x00] ]
+        // t2 -> 2..5 ->    grow  @1[ @23[x00] ] -> @2[ @23[x0y], @45[yy0] ]
+        // t1 -> 1..2 -> no grow  @1[ @23[xzy] ]   (plain read on "old" @1 pages) <- this is still writing to the correct page
+        //                        @1[ @23[xz0] ]   (the write to z could also not be observed, which is fine since
+        //                                          we write in a different location and Java guarantees us that those
+        //                                          will eventually all be visible)
+        // t1 -> 5..6 ->    grow  -> lock -> (memory barrier from lock refreshes pages to @2) -> unlock -> @2[ @23[xzy], @45[yya] ]
+        var pages = this.pages;
+        // TODO: allow cursor reuse by changing the pages array in PagedCursor, maybe have a new cursor type
+        var cursor = new HugeCursor.PagedCursor<>(PageUtil.capacityFor(pages.length, HugeArrays.PAGE_SHIFT), pages);
         cursor.setRange(start, start + batchLength);
         allocator.reset(start, start + batchLength, cursor);
     }
