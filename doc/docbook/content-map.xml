@@ -353,6 +353,9 @@
         <d:tocentry linkend="python-client-graph-object">
             <?dbhtml filename="python-client/graph-object/index.html"?>
         </d:tocentry>
+        <d:tocentry linkend="python-client-algorithms">
+            <?dbhtml filename="python-client/algorithms/index.html"?>
+        </d:tocentry>
         <d:tocentry linkend="python-client-model-object">
             <?dbhtml filename="python-client/model-object/index.html"?>
         </d:tocentry>

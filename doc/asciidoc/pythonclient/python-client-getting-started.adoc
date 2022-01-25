@@ -6,7 +6,7 @@ The Python client will translate the Python code written by the user to a corres
 
 The Python client attempts to be as pythonic as possible to maximize convenience for users accustomed to and experienced with Python environments.
 As such standard Python types are used as much as possible.
-However, to be consistent with the Cypher surface the general return value of calling a method corresponding to a Cypher procedure will be in the form of a table (i.e. `List[Dict[str, Any]]` in Python).
+However, to be consistent with the Cypher surface the general return value of calling a method corresponding to a Cypher procedure will be in the form of a table (i.e. `list[dict[str, any]]` in Python).
 Read more about this in <<python-client-getting-started-mapping>>.
 
 The root component of the Python client is the `GraphDataScience` object.
@@ -87,7 +87,7 @@ print(G_office.node_properties("City"))
 
 There are some general principles for how the Cypher API maps to the Python client API:
 
-* Method calls corresponding to Cypher procedures (preceded by `CALL` in the docs) will return a table as a Python `List[Dict[str, Any]]`, with some notable exceptions:
+* Method calls corresponding to Cypher procedures (preceded by `CALL` in the docs) will return a table as a Python `list[dict[str, any]]`, with some notable exceptions:
 ** Procedures instantiating <<python-client-graph-object, graph objects>> and <<python-client-model-object, model objects>>.
 * Method calls corresponding to Cypher functions (preceded by `RETURN` in the docs) will simply return the value the function returns.
 * The Python client also contains specific functionality for inspecting graphs from the <<graph-catalog-ops, GDS Graph Catalog>>, using a client-side <<python-client-graph-object, graph object>>.

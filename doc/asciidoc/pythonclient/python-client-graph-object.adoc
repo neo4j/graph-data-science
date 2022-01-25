@@ -84,23 +84,17 @@ props = G.node_properties("MyLabel")
 The primary use case for a graph object is to pass it to algorithms.
 The syntax for doing that follows the standard Cypher API, where the graph is the first parameter passed to the algorithm.
 
-.Syntax composition:
-[source]
-----
-result = gds[.<tier>].<algorithm>.<execution-mode>[.<estimate>](
-  G: Graph,
-  **configuration: dict[str, any]
-)
-----
+include::python-client-syntax.adoc[]
 
-For example, to run the WCC and FastRP algorithms on a graph `G`, do the following:
+For example, to run the WCC on a graph `G`, and then drop the graph, do the following:
 
 [source,python]
 ----
 G = gds.graph.project(...)
 
-gds.wcc.mutate(G, threshold=0.8, mutateProperty="wcc")
-gds.fastRP.write(G, featureProperties=["wcc"], propertyRatio=0.3, writeProperty="embedding")
+res = gds.wcc.stream(G)
+
+gds.graph.drop(G)          #  same as G.drop()
 ----
 
 In most Cypher operations where a graph name is required, the graph object is used in the Python client instead.

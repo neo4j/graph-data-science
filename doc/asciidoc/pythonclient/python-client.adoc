@@ -13,10 +13,12 @@ This chapter is divided into the following sections:
 * <<python-client-installation>>
 * <<python-client-getting-started>>
 * <<python-client-graph-object>>
+* <<python-client-algorithms>>
 
 include::python-client-installation.adoc[leveloffset=+1]
 include::python-client-getting-started.adoc[leveloffset=+1]
 include::python-client-graph-object.adoc[leveloffset=+1]
+include::python-client-algorithms.adoc[leveloffset=+1]
 
 
 //== Usage

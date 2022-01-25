@@ -118,6 +118,7 @@
 ** xref:python-client/installation/index.adoc[]
 ** xref:python-client/getting-started/index.adoc[]
 ** xref:python-client/graph-object/index.adoc[]
+** xref:python-client/algorithms/index.adoc[]
 ** xref:python-client/model-object/index.adoc[]
 ** xref:python-client/pipelines/index.adoc[]
 * Appendix
