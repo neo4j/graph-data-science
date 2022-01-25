@@ -1,2 +1,43 @@
 [[python-client-graph-object]]
 = The graph object
+
+In order to do anything in GDS you must first project a graph into the <<graph-catalog-ops, GDS Graph Catalog>>.
+When projecting a graph with the Python client, a client-side reference to the projected graph is returned.
+We call these references `Graph` objects.
+
+Once created, the `Graph` objects can be passed as arguments to other methods in the Python client, for example for running algorithms or training machine learning models.
+Additionally, the `Graph` objects has convenience methods allowing for inspection of the projected graph represented without explicitly involving the graph catalog.
+
+In the examples below we suppose that we have an instantiated `GraphDataScience` object called `gds`.
+Read more about this in <<python-client-getting-started>>.
+
+== Constructing a graph object
+
+There are several ways of constructing a graph object.
+The simplest way is to do a <<graph-project-native-syntax, native projection>>:
+
+[source,python]
+----
+G = gds.graph.project(
+    "my-graph",                 #  Graph name
+    ["MyLabel", "YourLabel"],   #  Node projection
+    "MY_REL_TYPE",              #  Relationship projection
+    concurrency=4               #  Configuration parameters
+)
+----
+
+Note that all projection syntax variants are supported by way of specifying a Python `dict` or `list` for the node and relationship projection arguments.
+To specify configuration parameters corresponding to the keys of the procedure's `configuration` map, we give named keyword arguments, like for `concurrency=4` above.
+Read more about this in <<graph-project-native-syntax>>.
+
+
+
+== Inspecting a graph object
+
+
+== Using a graph object
+
+//* how to create (project, get, subgraph, cypher, random, ..)
+//* how to inspect (node_count,...)
+//* where to pass it (algorithm args, ...)
+
