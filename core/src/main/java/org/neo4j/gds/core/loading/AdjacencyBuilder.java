@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.core.loading;
 
-import com.carrotsearch.hppc.sorting.IndirectSort;
+import org.immutables.builder.Builder;
+import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
-import org.neo4j.gds.core.utils.AscendingLongComparator;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.ArrayList;
@@ -32,54 +32,28 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.LongAdder;
 
+import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.preAggregate;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
+/**
+ * Exists exactly once per relationship type and has the following responsibilities:
+ *
+ * <ul>
+ *     <li>Receives raw relationship records from relationship batch buffers</li>
+ *     <li>Compresses raw records into compressed long arrays</li>
+ *     <li>Writes compressed long arrays into final adjacency list using a specific compressor</li>
+ * </ul>
+ */
+@Value.Style(typeBuilder = "AdjacencyBuilderBuilder")
 public final class AdjacencyBuilder {
-
-    public static final long IGNORE_VALUE = Long.MIN_VALUE;
-
-    public static AdjacencyBuilder compressing(
-        @NotNull AdjacencyListWithPropertiesBuilder globalBuilder,
-        int numPages,
-        int pageSize,
-        AllocationTracker allocationTracker,
-        boolean preAggregate
-    ) {
-        allocationTracker.add(sizeOfObjectArray(numPages) << 2);
-        ThreadLocalRelationshipsBuilder[] localBuilders = new ThreadLocalRelationshipsBuilder[numPages];
-        final CompressedLongArray[][] compressedAdjacencyLists = new CompressedLongArray[numPages][];
-        LongArrayBuffer[] buffers = new LongArrayBuffer[numPages];
-
-        boolean atLeastOnePropertyToLoad = Arrays
-            .stream(globalBuilder.propertyKeyIds())
-            .anyMatch(keyId -> keyId != NO_SUCH_PROPERTY_KEY);
-
-        var compressingPagedAdjacency = new AdjacencyBuilder(
-            globalBuilder,
-            localBuilders,
-            compressedAdjacencyLists,
-            buffers,
-            pageSize,
-            atLeastOnePropertyToLoad,
-            preAggregate
-        );
-        for (int idx = 0; idx < numPages; idx++) {
-            compressingPagedAdjacency.addAdjacencyImporter(allocationTracker, idx);
-        }
-        return compressingPagedAdjacency;
-    }
 
     private final AdjacencyListWithPropertiesBuilder globalBuilder;
     private final ThreadLocalRelationshipsBuilder[] localBuilders;
     private final CompressedLongArray[][] compressedAdjacencyLists;
-    private final LongArrayBuffer[] buffers;
-    private final int pageSize;
     private final int pageShift;
     private final long pageMask;
-    private final long sizeOfLongPage;
-    private final long sizeOfObjectPage;
     private final LongAdder relationshipCounter;
     private final int[] propertyKeyIds;
     private final double[] defaultValues;
@@ -87,11 +61,49 @@ public final class AdjacencyBuilder {
     private final boolean atLeastOnePropertyToLoad;
     private final boolean preAggregate;
 
+    @Builder.Factory
+    public static AdjacencyBuilder of(
+        @NotNull AdjacencyListWithPropertiesBuilder globalBuilder,
+        ImportSizing importSizing,
+        boolean preAggregate,
+        AllocationTracker allocationTracker
+    ) {
+        var numPages = importSizing.numberOfPages();
+        var pageSize = importSizing.pageSize();
+
+        var sizeOfLongPage = sizeOfLongArray(pageSize);
+        var sizeOfObjectPage = sizeOfObjectArray(pageSize);
+
+        allocationTracker.add(sizeOfObjectArray(numPages) << 2);
+        ThreadLocalRelationshipsBuilder[] localBuilders = new ThreadLocalRelationshipsBuilder[numPages];
+        CompressedLongArray[][] compressedAdjacencyLists = new CompressedLongArray[numPages][];
+
+        for (int page = 0; page < numPages; page++) {
+            allocationTracker.add(sizeOfObjectPage);
+            allocationTracker.add(sizeOfObjectPage);
+            allocationTracker.add(sizeOfLongPage);
+            compressedAdjacencyLists[page] = new CompressedLongArray[pageSize];
+            localBuilders[page] = globalBuilder.threadLocalRelationshipsBuilder();
+        }
+
+        boolean atLeastOnePropertyToLoad = Arrays
+            .stream(globalBuilder.propertyKeyIds())
+            .anyMatch(keyId -> keyId != NO_SUCH_PROPERTY_KEY);
+
+        return new AdjacencyBuilder(
+            globalBuilder,
+            localBuilders,
+            compressedAdjacencyLists,
+            pageSize,
+            atLeastOnePropertyToLoad,
+            preAggregate
+        );
+    }
+
     private AdjacencyBuilder(
         AdjacencyListWithPropertiesBuilder globalBuilder,
         ThreadLocalRelationshipsBuilder[] localBuilders,
         CompressedLongArray[][] compressedAdjacencyLists,
-        LongArrayBuffer[] buffers,
         int pageSize,
         boolean atLeastOnePropertyToLoad,
         boolean preAggregate
@@ -99,12 +111,8 @@ public final class AdjacencyBuilder {
         this.globalBuilder = globalBuilder;
         this.localBuilders = localBuilders;
         this.compressedAdjacencyLists = compressedAdjacencyLists;
-        this.buffers = buffers;
-        this.pageSize = pageSize;
         this.pageShift = Integer.numberOfTrailingZeros(pageSize);
         this.pageMask = pageSize - 1;
-        this.sizeOfLongPage = sizeOfLongArray(pageSize);
-        this.sizeOfObjectPage = sizeOfObjectArray(pageSize);
         this.relationshipCounter = globalBuilder.relationshipCounter();
         this.propertyKeyIds = globalBuilder.propertyKeyIds();
         this.defaultValues = globalBuilder.defaultValues();
@@ -114,11 +122,11 @@ public final class AdjacencyBuilder {
     }
 
     /**
-     * @param batch          four-tuple values sorted by source (source, target, rel?, property?)
-     * @param targets        slice of batch on second position; all targets in source-sorted order
-     * @param propertyValues index-synchronised with targets. the list for each index are the properties for that source-target combo. null if no props
-     * @param offsets        offsets into targets; every offset position indicates a source node group
-     * @param length         length of offsets array (how many source tuples to import)
+     * @param batch             two-tuple values sorted by source (source, target)
+     * @param targets           slice of batch on second position; all targets in source-sorted order
+     * @param propertyValues    index-synchronised with targets. the list for each index are the properties for that source-target combo. null if no props
+     * @param offsets           offsets into targets; every offset position indicates a source node group
+     * @param length            length of offsets array (how many source tuples to import)
      * @param allocationTracker
      */
     void addAll(
@@ -173,7 +181,7 @@ public final class AdjacencyBuilder {
                     compressedTargets.add(targets, startOffset, endOffset, targetsToImport);
                 } else {
                     if (preAggregate && aggregations[0] != Aggregation.NONE) {
-                        targetsToImport = aggregate(targets, propertyValues, startOffset, endOffset, aggregations);
+                        targetsToImport = preAggregate(targets, propertyValues, startOffset, endOffset, aggregations);
                     }
 
                     compressedTargets.add(targets, propertyValues, startOffset, endOffset, targetsToImport);
@@ -198,7 +206,6 @@ public final class AdjacencyBuilder {
                 baseNodeId,
                 localBuilders[page],
                 compressedAdjacencyLists[page],
-                buffers[page],
                 relationshipCounter
             ));
         }
@@ -223,15 +230,6 @@ public final class AdjacencyBuilder {
         return atLeastOnePropertyToLoad;
     }
 
-    private void addAdjacencyImporter(AllocationTracker allocationTracker, int pageIndex) {
-        allocationTracker.add(sizeOfObjectPage);
-        allocationTracker.add(sizeOfObjectPage);
-        allocationTracker.add(sizeOfLongPage);
-        compressedAdjacencyLists[pageIndex] = new CompressedLongArray[pageSize];
-        buffers[pageIndex] = new LongArrayBuffer();
-        localBuilders[pageIndex] = globalBuilder.threadLocalRelationshipsBuilder();
-    }
-
     /**
      * Responsible for writing a page of CompressedLongArrays into the adjacency list.
      */
@@ -240,6 +238,7 @@ public final class AdjacencyBuilder {
         private final long baseNodeId;
         private final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder;
         private final CompressedLongArray[] compressedLongArrays;
+        // A long array that may or may not be used during the compression.
         private final LongArrayBuffer buffer;
         private final LongAdder relationshipCounter;
 
@@ -247,13 +246,12 @@ public final class AdjacencyBuilder {
             long baseNodeId,
             ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder,
             CompressedLongArray[] compressedLongArrays,
-            LongArrayBuffer buffer,
             LongAdder relationshipCounter
         ) {
             this.baseNodeId = baseNodeId;
             this.threadLocalRelationshipsBuilder = threadLocalRelationshipsBuilder;
             this.compressedLongArrays = compressedLongArrays;
-            this.buffer = buffer;
+            this.buffer = new LongArrayBuffer();
             this.relationshipCounter = relationshipCounter;
         }
 
@@ -275,53 +273,5 @@ public final class AdjacencyBuilder {
                 relationshipCounter.add(importedRelationships);
             }
         }
-    }
-
-    static int aggregate(
-        long[] targetIds,
-        long[][] propertiesList,
-        int startOffset,
-        int endOffset,
-        Aggregation[] aggregations
-    ) {
-        // Step 1: Sort the targetIds (indirectly)
-        var order = IndirectSort.mergesort(
-            startOffset,
-            endOffset - startOffset,
-            new AscendingLongComparator(targetIds)
-        );
-
-
-        // Step 2: Aggregate the properties into the first property list of each distinct value
-        //         Every subsequent instance of any value is set to LONG.MIN_VALUE
-        int targetIndex = order[0];
-        long lastSeenTargetId = targetIds[targetIndex];
-        var distinctValues = 1;
-
-        for (int orderIndex = 1; orderIndex < order.length; orderIndex++) {
-            int currentIndex = order[orderIndex];
-
-            if (targetIds[currentIndex] != lastSeenTargetId) {
-                targetIndex = currentIndex;
-                lastSeenTargetId = targetIds[currentIndex];
-                distinctValues++;
-            } else {
-                for (int propertyId = 0; propertyId < propertiesList.length; propertyId++) {
-                    long[] properties = propertiesList[propertyId];
-                    double runningTotal = Double.longBitsToDouble(properties[targetIndex]);
-                    double value = Double.longBitsToDouble(propertiesList[propertyId][currentIndex]);
-
-                    double updatedProperty = aggregations[propertyId].merge(
-                        runningTotal,
-                        value
-                    );
-                    propertiesList[propertyId][targetIndex] = Double.doubleToLongBits(updatedProperty);
-                }
-
-                targetIds[currentIndex] = IGNORE_VALUE;
-            }
-        }
-
-        return distinctValues;
     }
 }

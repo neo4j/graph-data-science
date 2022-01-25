@@ -63,13 +63,12 @@ public final class SingleTypeRelationshipImporter {
         boolean preAggregate,
         AllocationTracker allocationTracker
     ) {
-        var adjacencyBuilder = AdjacencyBuilder.compressing(
-            adjacencyListWithPropertiesBuilder,
-            importSizing.numberOfPages(),
-            importSizing.pageSize(),
-            allocationTracker,
-            preAggregate
-        );
+        var adjacencyBuilder = new AdjacencyBuilderBuilder()
+            .globalBuilder(adjacencyListWithPropertiesBuilder)
+            .importSizing(importSizing)
+            .preAggregate(preAggregate)
+            .allocationTracker(allocationTracker)
+            .build();
 
         var relationshipImporter = new RelationshipImporter(adjacencyBuilder, allocationTracker);
         var loadProperties = projection.properties().hasMappings();
