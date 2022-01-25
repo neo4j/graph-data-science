@@ -268,7 +268,6 @@ public final class GraphFactory {
 
         var importerBuilder = new SingleTypeRelationshipImporterBuilderBuilder()
             .adjacencyListWithPropertiesBuilder(adjacencyListWithPropertiesBuilder)
-            .relationshipType(relationshipType)
             .typeToken(NO_SUCH_RELATIONSHIP_TYPE)
             .projection(projection)
             .importSizing(importSizing)

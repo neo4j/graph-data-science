@@ -42,6 +42,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         StoreScanner<RelationshipReference> scanner,
         Collection<SingleTypeRelationshipImporter.Builder> importerBuilders
     ) {
+        // TODO: why do we have this null check?
         List<SingleTypeRelationshipImporter.Builder> builders = importerBuilders
             .stream()
             .filter(Objects::nonNull)

@@ -23,7 +23,6 @@ import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressorBlueprint;
-import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.compress.ImmutableAdjacencyListsWithProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
@@ -83,7 +82,7 @@ abstract class AbstractCompressorBlueprint<TARGET_PAGE, PROPERTY_PAGE> implement
     }
 
     @Override
-    public AdjacencyListsWithProperties build() {
+    public ImmutableAdjacencyListsWithProperties.Builder build() {
         var builder = ImmutableAdjacencyListsWithProperties
             .builder()
             .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets));
@@ -93,7 +92,7 @@ abstract class AbstractCompressorBlueprint<TARGET_PAGE, PROPERTY_PAGE> implement
             builder.addProperty(properties);
         }
 
-        return builder.build();
+        return builder;
     }
 
 }

@@ -113,7 +113,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             .stream()
             .map(entry -> new SingleTypeRelationshipImporterBuilderBuilder()
                 .adjacencyListWithPropertiesBuilder(entry.getValue())
-                .relationshipType(entry.getKey())
                 .typeToken(dimensions.relationshipTypeTokenMapping().get(entry.getKey()))
                 .projection(entry.getValue().projection())
                 .importSizing(sizing)

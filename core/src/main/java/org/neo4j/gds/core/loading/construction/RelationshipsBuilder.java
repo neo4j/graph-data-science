@@ -151,7 +151,7 @@ public class RelationshipsBuilder {
 
         var adjacencyListsWithProperties = adjacencyListWithPropertiesBuilder.build();
         var adjacencyList = adjacencyListsWithProperties.adjacency();
-        var relationshipCount = adjacencyListWithPropertiesBuilder.relationshipCounter().longValue();
+        var relationshipCount = adjacencyListsWithProperties.relationshipCount();
 
         if (loadRelationshipProperty) {
             return adjacencyListsWithProperties.properties().stream().map(compressedProperties ->

@@ -22,7 +22,6 @@ package org.neo4j.gds.core.loading;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -57,7 +56,6 @@ public final class SingleTypeRelationshipImporter {
     @org.immutables.builder.Builder.Factory
     public static Builder builder(
         AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
-        RelationshipType relationshipType,
         RelationshipProjection projection,
         int typeToken,
         boolean validateRelationships,
@@ -78,7 +76,6 @@ public final class SingleTypeRelationshipImporter {
         var imports = relationshipImporter.imports(projection.orientation(), loadProperties);
 
         return new Builder(
-            relationshipType,
             typeToken,
             relationshipImporter,
             imports,
@@ -89,7 +86,6 @@ public final class SingleTypeRelationshipImporter {
 
     public static final class Builder {
 
-        private final RelationshipType relationshipType;
         private final int typeId;
 
         private final RelationshipImporter importer;
@@ -99,23 +95,17 @@ public final class SingleTypeRelationshipImporter {
         private final boolean loadProperties;
 
         private Builder(
-            RelationshipType relationshipType,
             int typeToken,
             RelationshipImporter importer,
             RelationshipImporter.Imports imports,
             boolean validateRelationships,
             boolean loadProperties
         ) {
-            this.relationshipType = relationshipType;
             this.typeId = typeToken;
             this.importer = importer;
             this.imports = imports;
             this.validateRelationships = validateRelationships;
             this.loadProperties = loadProperties;
-        }
-
-        RelationshipType relationshipType() {
-            return relationshipType;
         }
 
         public void prepareFlushTasks() {

@@ -72,7 +72,7 @@ public final class AdjacencyListWithPropertiesBuilder {
         double[] defaultValues,
         AllocationTracker allocationTracker
     ) {
-        var relationshipCount = new LongAdder();
+        var relationshipCounter = new LongAdder();
 
         var adjacencyCompressor = adjacencyFactory.create(
             nodeCountSupplier,
@@ -84,7 +84,7 @@ public final class AdjacencyListWithPropertiesBuilder {
         return new AdjacencyListWithPropertiesBuilder(
             projection,
             adjacencyCompressor,
-            relationshipCount,
+            relationshipCounter,
             aggregations,
             propertyKeyIds,
             defaultValues
@@ -148,12 +148,14 @@ public final class AdjacencyListWithPropertiesBuilder {
         this.adjacencyCompressor.prepareFlushTasks();
     }
 
-    public LongAdder relationshipCounter() {
+    LongAdder relationshipCounter() {
         return relationshipCounter;
     }
 
     public AdjacencyListsWithProperties build() {
-        return adjacencyCompressor.build();
+        return adjacencyCompressor.build()
+            .relationshipCount(relationshipCounter.longValue())
+            .build();
     }
 
     public RelationshipProjection projection() {

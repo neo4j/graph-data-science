@@ -264,7 +264,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             return new SingleTypeRelationshipImporterBuilderBuilder()
                 .adjacencyListWithPropertiesBuilder(builder)
-                .relationshipType(relationshipType)
                 .typeToken(NO_SUCH_RELATIONSHIP_TYPE)
                 .projection(projection)
                 .importSizing(importSizing)
