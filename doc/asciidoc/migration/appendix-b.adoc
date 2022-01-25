@@ -25,6 +25,7 @@ This section is divided into the following sub-sections:
 * <<migration-graph-listing, Graph Listing>>
 * <<migration-graph-drop, Graph Drop>>
 * <<migration-memory-estimation, Memory Estimation>>
+* <<migration-algorithms, Algorithms>>
 
 include::migration-algos-common.adoc[leveloffset=+2]
 
