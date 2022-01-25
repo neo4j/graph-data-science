@@ -74,7 +74,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public GraphSchema schema() {
-        return graph.schema().filterNodeLabels(filteredIdMap.availableNodeLabels());
+        return csrGraph.schema().filterNodeLabels(filteredIdMap.availableNodeLabels());
     }
 
     @Override
@@ -210,7 +210,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public CSRGraph concurrentCopy() {
-        return new NodeFilteredGraph(graph.concurrentCopy(), filteredIdMap, degreeCache);
+        return new NodeFilteredGraph(csrGraph.concurrentCopy(), filteredIdMap, degreeCache);
     }
 
     @Override
@@ -235,7 +235,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public NodeProperties nodeProperties(String propertyKey) {
-        NodeProperties properties = graph.nodeProperties(propertyKey);
+        NodeProperties properties = csrGraph.nodeProperties(propertyKey);
         if (properties == null) {
             return null;
         }

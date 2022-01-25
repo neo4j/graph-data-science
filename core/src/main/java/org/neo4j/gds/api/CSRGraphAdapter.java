@@ -25,20 +25,20 @@ import java.util.Map;
 
 public abstract class CSRGraphAdapter extends GraphAdapter implements CSRGraph {
 
-    protected final CSRGraph graph;
+    protected final CSRGraph csrGraph;
 
     public CSRGraphAdapter(CSRGraph graph) {
         super(graph);
-        this.graph = graph;
+        this.csrGraph = graph;
     }
 
     @Override
     public CSRGraph concurrentCopy() {
-        return graph.concurrentCopy();
+        return csrGraph.concurrentCopy();
     }
 
     @Override
     public Map<RelationshipType, Relationships.Topology> relationshipTopologies() {
-        return graph.relationshipTopologies();
+        return csrGraph.relationshipTopologies();
     }
 }

@@ -63,7 +63,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
     private static final RelationshipType ANN_OUT_GRAPH = RelationshipType.of("ANN_OUT");
     private static final RelationshipType ANN_IN_GRAPH = RelationshipType.of("ANN_IN");
 
-    private final ApproximateNearestNeighborsConfig config;
+    private final ApproximateNearestNeighborsConfig annConfig;
     private final SimilarityAlgorithm<?, INPUT> algorithm;
     private final Log log;
     private final AtomicLong nodeQueue;
@@ -82,7 +82,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         AllocationTracker allocationTracker
     ) {
         super(config, api, progressTracker);
-        this.config = config;
+        this.annConfig = config;
         this.algorithm = algorithm;
         this.log = log;
         this.executor = executor;
@@ -129,19 +129,19 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         double cutoff,
         int topK
     ) {
-        double sampleSize = Math.min(config.p(), 1.0) * Math.abs(config.topK());
+        double sampleSize = Math.min(annConfig.p(), 1.0) * Math.abs(annConfig.topK());
         int inputSize = inputs.length;
         AnnTopKConsumer[] topKConsumers = AnnTopKConsumer.initializeTopKConsumers(inputSize, topK);
         Collection<Runnable> tasks = createInitTasks(inputs, topKConsumers, decoderFactory, computer);
 
-        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+        ParallelUtil.runWithConcurrency(annConfig.concurrency(), tasks, executor);
 
         IdMapAndProperties nodes = buildNodes(inputs);
 
         RoaringBitmap[] visitedRelationships = ANNUtils.initializeRoaringBitmaps(inputSize);
         RoaringBitmap[] tempVisitedRelationships = ANNUtils.initializeRoaringBitmaps(inputSize);
 
-        for (int iteration = 1; iteration <= config.maxIterations(); iteration++) {
+        for (int iteration = 1; iteration <= annConfig.maxIterations(); iteration++) {
             for (int i = 0; i < inputSize; i++) {
                 visitedRelationships[i] = RoaringBitmap.or(visitedRelationships[i], tempVisitedRelationships[i]);
             }
@@ -150,7 +150,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             RelationshipImporter importer = RelationshipImporter.of(nodes.idMap(), executor, allocationTracker);
             importer.consume(topKConsumers);
             Graph graph = importer
-                .buildGraphStore(api.databaseId(), nodes.idMap(), config.concurrency(), allocationTracker)
+                .buildGraphStore(api.databaseId(), nodes.idMap(), annConfig.concurrency(), allocationTracker)
                 .getUnion();
 
             RelationshipImporter oldImporter = RelationshipImporter.of(nodes.idMap(), executor, allocationTracker);
@@ -170,13 +170,13 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             GraphStore oldGraphStore = oldImporter.buildGraphStore(
                 api.databaseId(),
                 nodes.idMap(),
-                config.concurrency(),
+                annConfig.concurrency(),
                 allocationTracker
             );
             GraphStore newGraphStore = newImporter.buildGraphStore(
                 api.databaseId(),
                 nodes.idMap(),
-                config.concurrency(),
+                annConfig.concurrency(),
                 allocationTracker
             );
 
@@ -188,14 +188,14 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 decoderFactory,
                 oldGraphStore
             );
-            ParallelUtil.runWithConcurrency(config.concurrency(), computeTasks, executor);
+            ParallelUtil.runWithConcurrency(annConfig.concurrency(), computeTasks, executor);
 
             int changes = mergeConsumers(computeTasks, topKConsumers);
 
             log.info("ANN: Changes in iteration %d: %d", iteration, changes);
             actualIterations.set(iteration);
 
-            if (shouldTerminate(changes, inputSize, config.topK())) {
+            if (shouldTerminate(changes, inputSize, annConfig.topK())) {
                 break;
             }
 
@@ -212,7 +212,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         RelationshipImporter oldImporter,
         RelationshipImporter newImporter
     ) {
-        int batchSize = ParallelUtil.adjustedBatchSize(inputSize, config.concurrency(), 100);
+        int batchSize = ParallelUtil.adjustedBatchSize(inputSize, annConfig.concurrency(), 100);
         int numberOfBatches = (inputSize / batchSize) + 1;
         Collection<Runnable> setupTasks = new ArrayList<>(numberOfBatches);
 
@@ -243,7 +243,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
     ) {
         nodeQueue.set(0);
         List<Runnable> tasks = new ArrayList<>();
-        for (int i = 0; i < config.concurrency(); i++) {
+        for (int i = 0; i < annConfig.concurrency(); i++) {
             tasks.add(new InitTask(inputs, topKConsumers, rleDecoderFactory, similarityComputer));
         }
         return tasks;
@@ -259,7 +259,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
     ) {
         nodeQueue.set(0);
         Collection<NeighborhoodTask> computeTasks = new ArrayList<>();
-        for (int i = 0; i < config.concurrency(); i++) {
+        for (int i = 0; i < annConfig.concurrency(); i++) {
             computeTasks.add(
                 new ComputeTask(
                     inputs,
@@ -282,7 +282,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(maxNeoId)
-            .concurrency(config.concurrency())
+            .concurrency(annConfig.concurrency())
             .allocationTracker(allocationTracker)
             .build();
 
@@ -303,7 +303,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
     }
 
     private boolean shouldTerminate(int changes, int inputSize, int topK) {
-        return changes == 0 || changes < inputSize * Math.abs(topK) * config.precision();
+        return changes == 0 || changes < inputSize * Math.abs(topK) * annConfig.precision();
     }
 
     private LongHashSet findNeighbors(long nodeId, RelationshipIterator graph) {
@@ -350,7 +350,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 AnnTopKConsumer consumer = topKConsumers[index];
                 INPUT me = inputs[index];
                 Set<Integer> randomNeighbors = ANNUtils.selectRandomNeighbors(
-                    Math.abs(config.topK()),
+                    Math.abs(annConfig.topK()),
                     inputs.length,
                     index,
                     random
@@ -362,7 +362,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                         rleDecoder,
                         me,
                         neighbour,
-                        config.similarityCutoff()
+                        annConfig.similarityCutoff()
                     );
                     if (result != null) {
                         consumer.applyAsInt(result);
@@ -414,7 +414,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 }
 
                 long[] potentialNewNeighbors = graph.findNewNeighbors(longNodeId).toArray();
-                long[] newOutgoingNeighbors = config.sampling() ? ANNUtils.sampleNeighbors(
+                long[] newOutgoingNeighbors = annConfig.sampling() ? ANNUtils.sampleNeighbors(
                     potentialNewNeighbors,
                     sampleSize,
                     random
@@ -458,7 +458,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             this.inputs = inputs;
             this.similarityComputer = similarityComputer;
             this.rleDecoder = rleDecoderFactory.get();
-            this.localTopKConsumers = AnnTopKConsumer.initializeTopKConsumers(length, config.topK());
+            this.localTopKConsumers = AnnTopKConsumer.initializeTopKConsumers(length, annConfig.topK());
             this.oldOutRelationships = oldGraphStore.getGraph(ANN_OUT_GRAPH).concurrentCopy();
             this.oldInRelationships = oldGraphStore.getGraph(ANN_IN_GRAPH).concurrentCopy();
             this.newOutRelationships = newGraphStore.getGraph(ANN_OUT_GRAPH).concurrentCopy();
@@ -487,7 +487,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                             rleDecoder,
                             sourceNode,
                             targetNode,
-                            config.similarityCutoff()
+                            annConfig.similarityCutoff()
                         );
                         if (result != null) {
                             localTopKConsumers[sourceNodeId].applyAsInt(result);
@@ -503,7 +503,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                                 rleDecoder,
                                 sourceNode,
                                 targetNode,
-                                config.similarityCutoff()
+                                annConfig.similarityCutoff()
                             );
                             if (result != null) {
                                 localTopKConsumers[sourceNodeId].applyAsInt(result);
@@ -517,7 +517,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
         private LongHashSet getNeighbors(long nodeId, RelationshipIterator outRelationships, RelationshipIterator inRelationships) {
             long[] potentialIncomingNeighbors = findNeighbors(nodeId, inRelationships).toArray();
-            long[] incomingNeighbors = config.sampling()
+            long[] incomingNeighbors = annConfig.sampling()
                 ? ANNUtils.sampleNeighbors(potentialIncomingNeighbors, sampleRate, random)
                 : potentialIncomingNeighbors;
 

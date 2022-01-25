@@ -36,7 +36,7 @@ public class TestGraph extends CSRGraphAdapter {
     }
 
     public Graph innerGraph() {
-        return graph;
+        return csrGraph;
     }
 
     public long toOriginalNodeId(String variable) {
@@ -44,7 +44,7 @@ public class TestGraph extends CSRGraphAdapter {
     }
 
     public long toMappedNodeId(String variable) {
-        return graph.toMappedNodeId(idFunction.of(variable));
+        return csrGraph.toMappedNodeId(idFunction.of(variable));
     }
 
     @Override
@@ -59,7 +59,7 @@ public class TestGraph extends CSRGraphAdapter {
 
     @Override
     public CSRGraph concurrentCopy() {
-        return new TestGraph(graph.concurrentCopy(), idFunction, name);
+        return new TestGraph(csrGraph.concurrentCopy(), idFunction, name);
     }
 
     @Override
