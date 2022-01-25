@@ -71,11 +71,18 @@ public interface MetricSpecification {
 
     String asString();
 
-    static List<MetricSpecification> parse(List<String> userSpecifications) {
+    static List<MetricSpecification> parse(List<?> userSpecifications) {
         if (userSpecifications.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale("No metrics specified, we require at least one"));
         }
-        var mainMetric = userSpecifications.get(0).toUpperCase(Locale.ENGLISH);
+
+        if (userSpecifications.get(0) instanceof MetricSpecification) {
+            return (List<MetricSpecification>) userSpecifications;
+        }
+
+        List<String> stringInput = (List<String>) userSpecifications;
+
+        var mainMetric = stringInput.get(0).toUpperCase(Locale.ENGLISH);
         var errors = new ArrayList<String>();
         if (mainMetric.contains("*")) {
                 errors.add(formatWithLocale(
@@ -83,7 +90,7 @@ public interface MetricSpecification {
                     String.join(", ", validPrimaryMetricExpressions())
                 ));
         }
-        List<String> badSpecifications = userSpecifications
+        List<String> badSpecifications = stringInput
             .stream()
             .filter(MetricSpecification::invalidSpecification)
             .collect(Collectors.toList());
@@ -99,41 +106,54 @@ public interface MetricSpecification {
             .collect(Collectors.toList());
     }
 
-    static MetricSpecification parse(String userSpecification) {
-        var upperCaseSpecification = toUpperCaseWithLocale(userSpecification);
-        var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
-        if (!matcher.matches()) {
-            try {
-                var metric = AllClassMetric.valueOf(upperCaseSpecification);
-                return createSpecification(
-                    ignored -> Stream.of(metric),
-                    upperCaseSpecification
-                );
-            } catch (Exception e) {
-                failSingleSpecification(userSpecification);
-            }
+    static MetricSpecification parse(Object userSpecification) {
+        if (userSpecification instanceof MetricSpecification) {
+            return (MetricSpecification) userSpecification;
         }
-        var metricType = matcher.group(1);
-        if (matcher.group(2).equals("*")) {
-            for (Map.Entry<String, Function<Long, ClassificationMetric>> entry : SINGLE_CLASS_METRIC_FACTORIES.entrySet()) {
-                String metric = entry.getKey();
-                if (metric.equals(metricType)) {
+
+        if (userSpecification instanceof String) {
+            String input = (String) userSpecification;
+
+            var upperCaseSpecification = toUpperCaseWithLocale(input);
+            var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
+            if (!matcher.matches()) {
+                try {
+                    var metric = AllClassMetric.valueOf(upperCaseSpecification);
                     return createSpecification(
-                        classes -> classes
-                            .stream()
-                            .map(classId -> entry.getValue().apply(classId)),
-                        composeSpecification(metricType, "*")
+                        ignored -> Stream.of(metric),
+                        upperCaseSpecification
                     );
+                } catch (Exception e) {
+                    failSingleSpecification(input);
                 }
             }
+            var metricType = matcher.group(1);
+            if (matcher.group(2).equals("*")) {
+                for (Map.Entry<String, Function<Long, ClassificationMetric>> entry : SINGLE_CLASS_METRIC_FACTORIES.entrySet()) {
+                    String metric = entry.getKey();
+                    if (metric.equals(metricType)) {
+                        return createSpecification(
+                            classes -> classes
+                                .stream()
+                                .map(classId -> entry.getValue().apply(classId)),
+                            composeSpecification(metricType, "*")
+                        );
+                    }
+                }
+            }
+            var classId = Long.parseLong(matcher.group(2));
+            return createSpecification(
+                ignored -> Stream.of(SINGLE_CLASS_METRIC_FACTORIES
+                    .get(metricType)
+                    .apply(classId)),
+                composeSpecification(metricType, String.valueOf(classId))
+            );
         }
-        var classId = Long.parseLong(matcher.group(2));
-        return createSpecification(
-            ignored -> Stream.of(SINGLE_CLASS_METRIC_FACTORIES
-                .get(metricType)
-                .apply(classId)),
-            composeSpecification(metricType, String.valueOf(classId))
-        );
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "Expected MetricSpecification or String. Got %s.",
+            userSpecification.getClass().getSimpleName()
+        ));
     }
 
     static MetricSpecification createSpecification(
