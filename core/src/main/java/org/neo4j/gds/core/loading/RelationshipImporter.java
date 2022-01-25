@@ -35,12 +35,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class RelationshipImporter {
 
-    private final AllocationTracker allocationTracker;
     private final AdjacencyBuilder adjacencyBuilder;
+    private final AllocationTracker allocationTracker;
 
-    public RelationshipImporter(AllocationTracker allocationTracker, AdjacencyBuilder adjacencyBuilder) {
-        this.allocationTracker = allocationTracker;
+    public RelationshipImporter(AdjacencyBuilder adjacencyBuilder, AllocationTracker allocationTracker) {
         this.adjacencyBuilder = adjacencyBuilder;
+        this.allocationTracker = allocationTracker;
     }
 
     public interface Imports {

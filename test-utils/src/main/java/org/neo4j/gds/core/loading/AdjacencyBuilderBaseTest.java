@@ -68,8 +68,7 @@ public abstract class AdjacencyBuilderBaseTest {
         }
 
         RelationshipImporter relationshipImporter = new RelationshipImporter(
-            AllocationTracker.empty(),
-            adjacencyBuilder
+            adjacencyBuilder, AllocationTracker.empty()
         );
         RelationshipImporter.Imports imports = relationshipImporter.imports(Orientation.NATURAL, false);
         imports.importRelationships(relationshipsBatchBuffer, null);

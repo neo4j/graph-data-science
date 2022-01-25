@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.IdMap;
@@ -34,24 +35,24 @@ public final class SingleTypeRelationshipImporter {
 
     private final RelationshipImporter.Imports imports;
     private final RelationshipImporter.PropertyReader propertyReader;
-    private final RelationshipsBatchBuffer buffer;
+    private final RelationshipsBatchBuffer relationshipsBatchBuffer;
 
     private SingleTypeRelationshipImporter(
         RelationshipImporter.Imports imports,
         RelationshipImporter.PropertyReader propertyReader,
-        RelationshipsBatchBuffer buffer
+        RelationshipsBatchBuffer relationshipsBatchBuffer
     ) {
         this.imports = imports;
         this.propertyReader = propertyReader;
-        this.buffer = buffer;
+        this.relationshipsBatchBuffer = relationshipsBatchBuffer;
     }
 
     public RelationshipsBatchBuffer buffer() {
-        return buffer;
+        return relationshipsBatchBuffer;
     }
 
     public long importRelationships() {
-        return imports.importRelationships(buffer, propertyReader);
+        return imports.importRelationships(relationshipsBatchBuffer, propertyReader);
     }
 
     @org.immutables.builder.Builder.Factory
@@ -65,9 +66,9 @@ public final class SingleTypeRelationshipImporter {
         boolean preAggregate,
         AllocationTracker allocationTracker
     ) {
-        LongAdder relationshipCounter = new LongAdder();
+        var relationshipCounter = new LongAdder();
 
-        AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
+        var adjacencyBuilder = AdjacencyBuilder.compressing(
             adjacencyListWithPropertiesBuilder,
             importSizing.numberOfPages(),
             importSizing.pageSize(),
@@ -76,46 +77,50 @@ public final class SingleTypeRelationshipImporter {
             preAggregate
         );
 
-        RelationshipImporter relationshipImporter = new RelationshipImporter(
-            allocationTracker,
-            adjacencyBuilder
-        );
+        var relationshipImporter = new RelationshipImporter(adjacencyBuilder, allocationTracker);
+        var loadProperties = projection.properties().hasMappings();
+        var imports = relationshipImporter.imports(projection.orientation(), loadProperties);
 
         return new Builder(
             relationshipType,
-            projection,
             typeToken,
             relationshipImporter,
+            imports,
             relationshipCounter,
-            validateRelationships
+            validateRelationships,
+            loadProperties
         );
     }
 
-    public static class Builder {
+    public static final class Builder {
 
-        private final RelationshipImporter.Imports imports;
-        private final RelationshipType relationshipType;
-        private final RelationshipImporter importer;
         private final LongAdder relationshipCounter;
+
+        private final RelationshipType relationshipType;
         private final int typeId;
+
+        private final RelationshipImporter importer;
+        private final RelationshipImporter.Imports imports;
+
         private final boolean validateRelationships;
         private final boolean loadProperties;
 
-        Builder(
+        private Builder(
             RelationshipType relationshipType,
-            RelationshipProjection projection,
             int typeToken,
             RelationshipImporter importer,
+            RelationshipImporter.Imports imports,
             LongAdder relationshipCounter,
-            boolean validateRelationships
+            boolean validateRelationships,
+            boolean loadProperties
         ) {
             this.relationshipType = relationshipType;
             this.typeId = typeToken;
             this.importer = importer;
+            this.imports = imports;
             this.relationshipCounter = relationshipCounter;
-            this.loadProperties = projection.properties().hasMappings();
             this.validateRelationships = validateRelationships;
-            this.imports = importer.imports(projection.orientation(), loadProperties);
+            this.loadProperties = loadProperties;
         }
 
         RelationshipType relationshipType() {
@@ -139,13 +144,7 @@ public final class SingleTypeRelationshipImporter {
             int bulkSize,
             RelationshipImporter.PropertyReader propertyReader
         ) {
-            RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
-                idMap.cloneIdMap(),
-                typeId,
-                bulkSize,
-                validateRelationships
-            );
-            return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
+            return new SingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
         }
 
         SingleTypeRelationshipImporter createImporter(
@@ -153,16 +152,21 @@ public final class SingleTypeRelationshipImporter {
             int bulkSize,
             KernelTransaction kernelTransaction
         ) {
-            RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
+            RelationshipImporter.PropertyReader propertyReader = loadProperties
+                ? importer.storeBackedPropertiesReader(kernelTransaction)
+                : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
+
+            return new SingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
+        }
+
+        @NotNull
+        private RelationshipsBatchBuffer createBuffer(IdMap idMap, int bulkSize) {
+            return new RelationshipsBatchBuffer(
                 idMap.cloneIdMap(),
                 typeId,
                 bulkSize,
                 validateRelationships
             );
-            RelationshipImporter.PropertyReader propertyReader = loadProperties
-                ? importer.storeBackedPropertiesReader(kernelTransaction)
-                : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
-            return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
         }
     }
 }
