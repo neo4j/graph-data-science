@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayBuilder;
-import org.neo4j.gds.utils.CloseableThreadLocal;
+import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -32,7 +32,7 @@ public final class GrowingHugeIdMapBuilder implements IdMapBuilder {
 
     private final HugeLongArrayBuilder arrayBuilder;
     private final AtomicLong allocationIndex;
-    private final CloseableThreadLocal<HugeLongArrayBuilder.Allocator> allocators;
+    private final AutoCloseableThreadLocal<HugeLongArrayBuilder.Allocator> allocators;
 
     public static GrowingHugeIdMapBuilder of(AllocationTracker allocationTracker) {
         HugeLongArrayBuilder array = HugeLongArrayBuilder.newBuilder(allocationTracker);
@@ -42,7 +42,7 @@ public final class GrowingHugeIdMapBuilder implements IdMapBuilder {
     private GrowingHugeIdMapBuilder(HugeLongArrayBuilder arrayBuilder) {
         this.arrayBuilder = arrayBuilder;
         this.allocationIndex = new AtomicLong();
-        this.allocators = CloseableThreadLocal.withInitial(HugeLongArrayBuilder.Allocator::new);
+        this.allocators = AutoCloseableThreadLocal.withInitial(HugeLongArrayBuilder.Allocator::new);
     }
 
     @Override

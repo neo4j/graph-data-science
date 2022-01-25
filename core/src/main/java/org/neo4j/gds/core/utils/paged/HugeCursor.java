@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.neo4j.gds.collections.PageUtil;
+
 import static java.lang.reflect.Array.getLength;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
@@ -135,8 +137,21 @@ public abstract class HugeCursor<Array> implements AutoCloseable {
         private long capacity;
         private long end;
 
-        public PagedCursor(final long capacity, final Array[] pages) {
+        public PagedCursor(Array[] pages) {
             super();
+            this.setPages(pages);
+        }
+
+        public PagedCursor(long capacity, Array[] pages) {
+            super();
+            this.setPages(pages, capacity);
+        }
+
+        public void setPages(Array[] pages) {
+            this.setPages(pages, PageUtil.capacityFor(pages.length, PAGE_SHIFT));
+        }
+
+        public void setPages(Array[] pages, long capacity) {
             this.capacity = capacity;
             this.pages = pages;
         }
@@ -158,7 +173,7 @@ public abstract class HugeCursor<Array> implements AutoCloseable {
         }
 
         @Override
-        public final boolean next() {
+        public boolean next() {
             int current = ++pageIndex;
             if (current > maxPage) {
                 return false;

@@ -103,16 +103,22 @@ public class HugeLongArrayBuilder {
         allocator.reset(start, start + batchLength, pages);
     }
 
-    public static final class Allocator implements IdMapAllocator {
+    public static final class Allocator implements IdMapAllocator, AutoCloseable {
         private long[] buffer;
         private int allocationSize;
         private long start;
         private int offset;
         private int length;
-        private HugeCursor<long[]> cursor;
 
-        private void reset(long start, long end, HugeCursor<long[]> cursor) {
-            this.cursor = cursor;
+        private final HugeCursor.PagedCursor<long[]> cursor;
+
+        public Allocator() {
+            this.cursor = new HugeCursor.PagedCursor<>(new long[0][]);
+        }
+
+        private void reset(long start, long end, long[][] pages) {
+            this.cursor.setPages(pages);
+            this.cursor.setRange(start, end);
             this.buffer = null;
             this.allocationSize = (int) (end - start);
             this.start = start;
@@ -142,12 +148,17 @@ public class HugeLongArrayBuilder {
         }
 
         @Override
-        public void insert(long[] nodeIds, int length) {
+        public void insert(long[] nodeIds) {
             int batchOffset = 0;
             while (nextBuffer()) {
                 System.arraycopy(nodeIds, batchOffset, this.buffer, this.offset, this.length);
                 batchOffset += this.length;
             }
+        }
+
+        @Override
+        public void close() {
+            this.cursor.close();
         }
     }
 

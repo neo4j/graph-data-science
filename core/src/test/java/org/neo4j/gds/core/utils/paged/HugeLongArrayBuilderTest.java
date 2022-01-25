@@ -37,7 +37,7 @@ class HugeLongArrayBuilderTest {
         var idMapBuilder =  HugeLongArrayBuilder.newBuilder(AllocationTracker.empty());
         var allocator = new HugeLongArrayBuilder.Allocator();
         idMapBuilder.allocate(0, 2, allocator);
-        allocator.insert(new long[]{ 42, 1337 }, 2);
+        allocator.insert(new long[]{ 42, 1337 });
 
         var array = idMapBuilder.build(2);
 
@@ -51,13 +51,13 @@ class HugeLongArrayBuilderTest {
         var allocator = new HugeLongArrayBuilder.Allocator();
 
         idMapBuilder.allocate(0, 2, allocator);
-        allocator.insert(new long[]{ 42, 1337 }, 2);
+        allocator.insert(new long[]{ 42, 1337 });
 
         idMapBuilder.allocate(2, 2, allocator);
-        allocator.insert(new long[]{ 84, 1338 }, 2);
+        allocator.insert(new long[]{ 84, 1338 });
 
         idMapBuilder.allocate(4, 2, allocator);
-        allocator.insert(new long[]{ 126, 1339 }, 2);
+        allocator.insert(new long[]{ 126, 1339 });
 
         var array = idMapBuilder.build(6);
 
@@ -71,16 +71,16 @@ class HugeLongArrayBuilderTest {
         var allocator = new HugeLongArrayBuilder.Allocator();
 
         idMapBuilder.allocate(0, 2, allocator);
-        allocator.insert(new long[]{ 42, 1337 }, 2);
+        allocator.insert(new long[]{ 42, 1337 });
 
         var batchLength = HugeArrays.PAGE_SIZE * 2 + 42;
         idMapBuilder.allocate(2, batchLength, allocator);
         var values = new long[batchLength];
         Arrays.setAll(values, i -> i % 2 == 0 ? 42L * (i / 2) : 1337L + (i / 2));
-        allocator.insert(values, batchLength);
+        allocator.insert(values);
 
         idMapBuilder.allocate(batchLength + 2, 2, allocator);
-        allocator.insert(new long[]{ 42, 1337 }, 2);
+        allocator.insert(new long[]{ 42, 1337 });
 
         var array = idMapBuilder.build(batchLength + 4);
 
@@ -91,6 +91,19 @@ class HugeLongArrayBuilderTest {
             LongStream.concat(Arrays.stream(values), LongStream.of(42, 1337))
         ).toArray();
         assertThat(array.toArray()).containsExactly(expected);
+    }
+
+    @Test
+    void shouldInsertAllocationSizeFromPartialBatch() {
+        var idMapBuilder = HugeLongArrayBuilder.newBuilder(AllocationTracker.empty());
+        var values = LongStream.range(0, 42).map(__ -> 42).toArray();
+
+        var allocator = new HugeLongArrayBuilder.Allocator();
+        idMapBuilder.allocate(0, 13, allocator);
+        allocator.insert(values);
+
+        var array = idMapBuilder.build(13);
+        assertThat(array.toArray()).containsExactly(42, 42, 42, 42, 42, 42, 42, 42, 42, 42, 42, 42, 42);
     }
 
     @Test
@@ -110,7 +123,7 @@ class HugeLongArrayBuilderTest {
             for (int i = 0; i < 10_000; i++) {
                 var index = startIndex.getAndAdd(42);
                 idMapBuilder.allocate(index, 42, allocator);
-                allocator.insert(values, 42);
+                allocator.insert(values);
             }
 
             System.out.println("thread finished" + Thread.currentThread().getId());
