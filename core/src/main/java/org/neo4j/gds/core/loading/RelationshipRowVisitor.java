@@ -130,7 +130,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 propertyReader = RelationshipImporter.preLoadedPropertyReader();
             }
             // Create thread-local relationship importer
-            var importer = importerBuilder.withBuffer(idMap, bufferSize, propertyReader);
+            var importer = importerBuilder.createImporter(idMap, bufferSize, propertyReader);
 
             localImporters.put(relationshipType, importer);
             localRelationshipIds.put(relationshipType, 0);

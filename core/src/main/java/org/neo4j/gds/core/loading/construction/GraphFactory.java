@@ -48,7 +48,7 @@ import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.RelationshipImporter;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilderBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
@@ -284,14 +284,14 @@ public final class GraphFactory {
 
         var relationshipImporter = new RelationshipImporter(allocationTracker, adjacencyBuilder);
 
-        var importerBuilder = new SingleTypeRelationshipImporter.Builder(
-            relationshipType,
-            projection,
-            NO_SUCH_RELATIONSHIP_TYPE,
-            relationshipImporter,
-            relationshipCounter,
-            false
-        ).loadImporter(loadRelationshipProperties);
+        var importerBuilder = new SingleTypeRelationshipImporterBuilderBuilder()
+            .relationshipType(relationshipType)
+            .projection(projection)
+            .typeToken(NO_SUCH_RELATIONSHIP_TYPE)
+            .importer(relationshipImporter)
+            .relationshipCounter(relationshipCounter)
+            .validateRelationships(false)
+            .build();
 
         return new RelationshipsBuilder(
             nodes,

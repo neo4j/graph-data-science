@@ -127,7 +127,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             .map(entry -> {
                 var relationshipType = entry.getKey();
                 var relationshipsBuilder = entry.getValue();
-                return createImporterBuilder(
+                return createImporterFactory(
                     pageSize,
                     numberOfPages,
                     relationshipType,
@@ -150,7 +150,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         );
     }
 
-    private SingleTypeRelationshipImporter.Builder createImporterBuilder(
+    private SingleTypeRelationshipImporter.Builder createImporterFactory(
         int pageSize,
         int numberOfPages,
         RelationshipType relationshipType,
@@ -169,14 +169,15 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
 
         RelationshipImporter importer = new RelationshipImporter(loadingContext.allocationTracker(), adjacencyBuilder);
         int typeId = dimensions.relationshipTypeTokenMapping().get(relationshipType);
-        return new SingleTypeRelationshipImporter.Builder(
-            relationshipType,
-            projection,
-            typeId,
-            importer,
-            relationshipCounter,
-            graphProjectConfig.validateRelationships()
-        );
+
+        return new SingleTypeRelationshipImporterBuilderBuilder()
+            .relationshipType(relationshipType)
+            .projection(projection)
+            .typeToken(typeId)
+            .importer(importer)
+            .relationshipCounter(relationshipCounter)
+            .validateRelationships(graphProjectConfig.validateRelationships())
+            .build();
     }
 
     @Override

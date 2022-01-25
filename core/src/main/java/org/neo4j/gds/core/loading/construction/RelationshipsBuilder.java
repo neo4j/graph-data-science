@@ -46,7 +46,7 @@ public class RelationshipsBuilder {
 
     private final AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder;
     private final Orientation orientation;
-    private final SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder;
+    private final SingleTypeRelationshipImporter.Builder importerBuilder;
     private final LongAdder relationshipCounter;
 
     private final int concurrency;
@@ -60,7 +60,7 @@ public class RelationshipsBuilder {
         int bufferSize,
         int[] propertyKeyIds,
         AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
-        SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder,
+        SingleTypeRelationshipImporter.Builder importerBuilder,
         LongAdder relationshipCounter,
         boolean loadRelationshipProperty,
         boolean isMultiGraph,
@@ -149,7 +149,7 @@ public class RelationshipsBuilder {
         threadLocalBuilders.close();
 
         importerBuilder.prepareFlushTasks();
-        var flushTasks = importerBuilder.flushTasks().collect(Collectors.toList());
+        var flushTasks = importerBuilder.createFlushTasks().collect(Collectors.toList());
 
         ParallelUtil.runWithConcurrency(concurrency, flushTasks, executorService);
 
@@ -187,7 +187,7 @@ public class RelationshipsBuilder {
 
         ThreadLocalBuilder(
             IdMap idMap,
-            SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder,
+            SingleTypeRelationshipImporter.Builder importerBuilder,
             int bufferSize,
             int[] propertyKeyIds
         ) {
@@ -195,10 +195,10 @@ public class RelationshipsBuilder {
 
             if (propertyKeyIds.length > 1) {
                 this.propertiesBatchBuffer = new RelationshipPropertiesBatchBuffer(bufferSize, propertyKeyIds.length);
-                this.importer = importerBuilder.withBuffer(idMap, bufferSize, propertiesBatchBuffer);
+                this.importer = importerBuilder.createImporter(idMap, bufferSize, propertiesBatchBuffer);
             } else {
                 this.propertiesBatchBuffer = null;
-                this.importer = importerBuilder.withBuffer(
+                this.importer = importerBuilder.createImporter(
                     idMap,
                     bufferSize,
                     RelationshipImporter.preLoadedPropertyReader()
