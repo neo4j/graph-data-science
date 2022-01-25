@@ -56,7 +56,6 @@ import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createSchedule
 public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<GraphStoreToDatabaseExporterConfig> {
 
     private final Path neo4jHome;
-    private final GraphStoreToDatabaseExporterConfig config;
     private final FileSystemAbstraction fs;
 
     public static GraphStoreToDatabaseExporter of(
@@ -84,7 +83,6 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
     ) {
         super(graphStore, config, neoNodeProperties);
         this.neo4jHome = api.databaseLayout().getNeo4jLayout().homeDirectory();
-        this.config = config;
         this.fs = api.getDependencyResolver().resolveDependency(FileSystemAbstraction.class);
     }
 

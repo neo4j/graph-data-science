@@ -23,7 +23,6 @@ import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.MLTrainResult;
@@ -32,7 +31,6 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFacto
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainResult;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -50,9 +48,6 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
     NodeClassificationPipelineTrainConfig,
     NodeClassificationPipelineTrainProc.NCTrainResult
     > {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model based on a pipeline")

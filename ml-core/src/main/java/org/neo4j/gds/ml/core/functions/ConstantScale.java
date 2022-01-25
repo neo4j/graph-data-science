@@ -26,12 +26,10 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class ConstantScale<T extends Tensor<T>> extends SingleParentVariable<T, T> {
-    private final Variable<T> parent;
     private final double constant;
 
     public ConstantScale(Variable<T> parent, double constant) {
         super(parent, parent.dimensions());
-        this.parent = parent;
         this.constant = constant;
     }
 
