@@ -204,7 +204,6 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                     actualConfig.relationshipTypes().toString()
                 )
                 .matches(innerConfig -> innerConfig.nodeLabels().equals(List.of("SOME_LABEL")) )
-                .matches(innerConfig -> innerConfig.minBatchSize() == 1 )
                 .matches(innerConfig -> {
                     List<String> metricNames = innerConfig.metrics().stream()
                         .map(MetricSpecification::asString)
