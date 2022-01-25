@@ -377,6 +377,9 @@
             <d:tocentry linkend="migration-memory-estimation">
                 <?dbhtml filename="appendix-b/migration-memory-estimation/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="migration-algorithms">
+                <?dbhtml filename="appendix-b/migration-algorithms/index.html"?>
+            </d:tocentry>
         </d:tocentry>
     </d:tocentry>
 

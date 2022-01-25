@@ -1,5 +1,5 @@
 [[migration-algorithms-node-classification-pipeline-predict]]
-== Node Classification Pipeline predict
+= Node Classification Pipeline predict
 
 .Changes in configuration
 [options=header, cols=2]

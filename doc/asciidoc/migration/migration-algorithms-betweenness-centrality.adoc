@@ -1,5 +1,5 @@
 [[migration-algorithms-betweenness-centrality]]
-== Betweenness Centrality
+= Betweenness Centrality
 
 .Changes in YIELD fields
 [options=header, cols=2]
