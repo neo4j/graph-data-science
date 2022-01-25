@@ -60,8 +60,8 @@ There are convenience methods on the graph object that let us extract informatio
 | name                    | -         | str              | The name of the projected graph.
 | node_count              | -         | int              | The node count of the projected graph.
 | relationship_count      | -         | int              | The relationship count of the projected graph.
-| node_properties         | str       | list[str]        | A list of node properties present on the nodes with the node label provided as input.
-| relationship_properties | str       | list[str]        | A list of relationship properties present on the relationships with the relationship type provided as input.
+| node_properties         | str       | list[str]        | A list of the node properties present on the nodes with the node label provided as input.
+| relationship_properties | str       | list[str]        | A list of the relationship properties present on the relationships with the relationship type provided as input.
 | degree_distribution     | -         | dict[str, float] | The average out-degree of generated nodes.
 | density                 | -         | float            | Density of the graph.
 | size_in_bytes           | -         | int              | Number of bytes used in the Java heap to store the graph.
@@ -81,9 +81,27 @@ props = G.node_properties("MyLabel")
 
 == Using a graph object
 
+The primary use case for a graph object is to pass it to algorithms.
+The syntax for doing that follows the standard Cypher API, where the graph is the first parameter passed to the algorithm.
 
+.Syntax composition:
+[source]
+----
+result = gds[.<tier>].<algorithm>.<execution-mode>[.<estimate>](
+  G: Graph,
+  **configuration: dict[str, any]
+)
+----
 
-//* how to create (project, get, subgraph, cypher, random, ..)
-//* how to inspect (node_count,...)
-//* where to pass it (algorithm args, ...)
+For example, to run the WCC and FastRP algorithms on a graph `G`, do the following:
 
+[source,python]
+----
+G = gds.graph.project(...)
+
+gds.wcc.mutate(G, threshold=0.8, mutateProperty="wcc")
+gds.fastRP.write(G, featureProperties=["wcc"], propertyRatio=0.3, writeProperty="embedding")
+----
+
+In most Cypher operations where a graph name is required, the graph object is used in the Python client instead.
+In some cases where this does not make sense, such as for `gds.graph.exist()`, where a graph name string is used instead.
