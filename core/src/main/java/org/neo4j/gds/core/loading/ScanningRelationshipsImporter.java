@@ -22,8 +22,6 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.immutables.builder.Builder;
-import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
@@ -34,7 +32,6 @@ import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
@@ -117,24 +114,19 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         ImportSizing sizing,
         StoreScanner<RelationshipReference> storeScanner
     ) {
-
-        int pageSize = sizing.pageSize();
-        int numberOfPages = sizing.numberOfPages();
-
-        List<SingleTypeRelationshipImporter.Builder> importerBuilders = adjacencyListBuilders
+        var importerBuilders = adjacencyListBuilders
             .entrySet()
             .stream()
-            .map(entry -> {
-                var relationshipType = entry.getKey();
-                var relationshipsBuilder = entry.getValue();
-                return createImporterFactory(
-                    pageSize,
-                    numberOfPages,
-                    relationshipType,
-                    relationshipsBuilder.projection(),
-                    relationshipsBuilder
-                );
-            })
+            .map(entry -> new SingleTypeRelationshipImporterBuilderBuilder()
+                .adjacencyListWithPropertiesBuilder(entry.getValue())
+                .relationshipType(entry.getKey())
+                .typeToken(dimensions.relationshipTypeTokenMapping().get(entry.getKey()))
+                .projection(entry.getValue().projection())
+                .importSizing(sizing)
+                .validateRelationships(graphProjectConfig.validateRelationships())
+                .preAggregate(USE_PRE_AGGREGATION.isEnabled())
+                .allocationTracker(allocationTracker)
+                .build())
             .collect(Collectors.toList());
 
         for (SingleTypeRelationshipImporter.Builder importerBuilder : importerBuilders) {
@@ -148,36 +140,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             storeScanner,
             importerBuilders
         );
-    }
-
-    private SingleTypeRelationshipImporter.Builder createImporterFactory(
-        int pageSize,
-        int numberOfPages,
-        RelationshipType relationshipType,
-        RelationshipProjection projection,
-        @NotNull AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder
-    ) {
-        LongAdder relationshipCounter = new LongAdder();
-        AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
-            adjacencyListWithPropertiesBuilder,
-            numberOfPages,
-            pageSize,
-            allocationTracker,
-            relationshipCounter,
-            USE_PRE_AGGREGATION.isEnabled()
-        );
-
-        RelationshipImporter importer = new RelationshipImporter(loadingContext.allocationTracker(), adjacencyBuilder);
-        int typeId = dimensions.relationshipTypeTokenMapping().get(relationshipType);
-
-        return new SingleTypeRelationshipImporterBuilderBuilder()
-            .relationshipType(relationshipType)
-            .projection(projection)
-            .typeToken(typeId)
-            .importer(importer)
-            .relationshipCounter(relationshipCounter)
-            .validateRelationships(graphProjectConfig.validateRelationships())
-            .build();
     }
 
     @Override

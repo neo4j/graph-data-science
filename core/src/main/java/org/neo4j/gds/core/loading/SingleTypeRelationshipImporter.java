@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.concurrent.atomic.LongAdder;
@@ -55,18 +56,36 @@ public final class SingleTypeRelationshipImporter {
 
     @org.immutables.builder.Builder.Factory
     public static Builder builder(
+        AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
         RelationshipType relationshipType,
         RelationshipProjection projection,
         int typeToken,
-        RelationshipImporter importer,
-        LongAdder relationshipCounter,
-        boolean validateRelationships
+        boolean validateRelationships,
+        ImportSizing importSizing,
+        boolean preAggregate,
+        AllocationTracker allocationTracker
     ) {
+        LongAdder relationshipCounter = new LongAdder();
+
+        AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
+            adjacencyListWithPropertiesBuilder,
+            importSizing.numberOfPages(),
+            importSizing.pageSize(),
+            allocationTracker,
+            relationshipCounter,
+            preAggregate
+        );
+
+        RelationshipImporter relationshipImporter = new RelationshipImporter(
+            allocationTracker,
+            adjacencyBuilder
+        );
+
         return new Builder(
             relationshipType,
             projection,
             typeToken,
-            importer,
+            relationshipImporter,
             relationshipCounter,
             validateRelationships
         );
@@ -103,7 +122,7 @@ public final class SingleTypeRelationshipImporter {
             return relationshipType;
         }
 
-        LongAdder relationshipCounter() {
+        public LongAdder relationshipCounter() {
             return relationshipCounter;
         }
 

@@ -40,7 +40,6 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Result;
@@ -237,25 +236,20 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         private final Map<RelationshipType, SingleTypeRelationshipImporter.Builder> importerBuildersByType;
         private final Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders;
 
-        private final int pageSize;
-        private final int numberOfPages;
+        private final ImportSizing importSizing;
 
         Context() {
             this.importerBuildersByType = new HashMap<>();
             this.allBuilders = new HashMap<>();
 
-            ImportSizing importSizing = ImportSizing.of(cypherConfig.readConcurrency(), idMap.nodeCount());
-            this.pageSize = importSizing.pageSize();
-            this.numberOfPages = importSizing.numberOfPages();
+            this.importSizing = ImportSizing.of(cypherConfig.readConcurrency(), idMap.nodeCount());
         }
 
-        synchronized SingleTypeRelationshipImporter.Builder getOrCreateImporterBuilder(
-            RelationshipType relationshipType
-        ) {
-            return importerBuildersByType.computeIfAbsent(relationshipType, this::createImporter);
+        synchronized SingleTypeRelationshipImporter.Builder getOrCreateImporterBuilder(RelationshipType relationshipType) {
+            return importerBuildersByType.computeIfAbsent(relationshipType, this::createImporterBuilder);
         }
 
-        private SingleTypeRelationshipImporter.Builder createImporter(RelationshipType relationshipType) {
+        private SingleTypeRelationshipImporter.Builder createImporterBuilder(RelationshipType relationshipType) {
             RelationshipProjection projection = RelationshipProjection
                 .builder()
                 .type(relationshipType.name)
@@ -279,52 +273,22 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             allBuilders.put(relationshipType, builder);
 
-            SingleTypeRelationshipImporter.Builder importerBuilder = createImporterBuilder(
-                pageSize,
-                numberOfPages,
-                relationshipType,
-                projection,
-                builder,
-                loadingContext.allocationTracker()
-            );
+            var importerBuilder = new SingleTypeRelationshipImporterBuilderBuilder()
+                .adjacencyListWithPropertiesBuilder(builder)
+                .relationshipType(relationshipType)
+                .typeToken(NO_SUCH_RELATIONSHIP_TYPE)
+                .projection(projection)
+                .importSizing(importSizing)
+                .validateRelationships(cypherConfig.validateRelationships())
+                .preAggregate(GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled())
+                .allocationTracker(loadingContext.allocationTracker())
+                .build();
 
             relationshipCounters.put(projection, importerBuilder.relationshipCounter());
 
             return importerBuilder;
         }
 
-        private SingleTypeRelationshipImporter.Builder createImporterBuilder(
-            int pageSize,
-            int numberOfPages,
-            RelationshipType relationshipType,
-            RelationshipProjection relationshipProjection,
-            AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
-            AllocationTracker allocationTracker
-        ) {
-            LongAdder relationshipCounter = new LongAdder();
-            AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
-                adjacencyListWithPropertiesBuilder,
-                numberOfPages,
-                pageSize,
-                allocationTracker,
-                relationshipCounter,
-                GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled()
-            );
-
-            RelationshipImporter relationshipImporter = new RelationshipImporter(
-                loadingContext.allocationTracker(),
-                adjacencyBuilder
-            );
-
-            return new SingleTypeRelationshipImporterBuilderBuilder()
-                .relationshipType(relationshipType)
-                .projection(relationshipProjection)
-                .typeToken(NO_SUCH_RELATIONSHIP_TYPE)
-                .importer(relationshipImporter)
-                .relationshipCounter(relationshipCounter)
-                .validateRelationships(cypherConfig.validateRelationships())
-                .build();
-        }
     }
 
     @ValueClass
