@@ -119,8 +119,8 @@
 ** xref:python-client/getting-started/index.adoc[]
 ** xref:python-client/graph-object/index.adoc[]
 ** xref:python-client/algorithms/index.adoc[]
-** xref:python-client/model-object/index.adoc[]
 ** xref:python-client/pipelines/index.adoc[]
+** xref:python-client/model-object/index.adoc[]
 * Appendix
 ** xref:operations-reference/appendix-a/index.adoc[]
 *** xref:operations-reference/graph-operation-references/index.adoc[]

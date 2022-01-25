@@ -3,7 +3,7 @@
 
 To help users of GDS who work with Python as their primary language and environment, there is an official GDS client called `graphdatascience`.
 It enables users to write pure Python code to project graphs, run algorithms, and define and use machine learning pipelines in GDS.
-To reduce naming confusion with the server-side GDS library, we will here refer to the Neo4j Graph Data Science client as the _Python client_.
+To avoid naming confusion with the server-side GDS library, we will here refer to the Neo4j Graph Data Science client as the _Python client_.
 
 The Python client API is designed to mimic the GDS Cypher procedure API in Python code.
 It wraps and abstracts the necessary operations of the https://neo4j.com/docs/python-manual/current/[Neo4j Python driver] to offer a simpler surface.
@@ -14,11 +14,13 @@ This chapter is divided into the following sections:
 * <<python-client-getting-started>>
 * <<python-client-graph-object>>
 * <<python-client-algorithms>>
+* <<python-client-pipelines>>
 
 include::python-client-installation.adoc[leveloffset=+1]
 include::python-client-getting-started.adoc[leveloffset=+1]
 include::python-client-graph-object.adoc[leveloffset=+1]
 include::python-client-algorithms.adoc[leveloffset=+1]
+include::python-client-pipelines.adoc[leveloffset=+1]
 
 
 //== Usage

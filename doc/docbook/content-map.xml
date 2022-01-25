@@ -356,11 +356,11 @@
         <d:tocentry linkend="python-client-algorithms">
             <?dbhtml filename="python-client/algorithms/index.html"?>
         </d:tocentry>
-        <d:tocentry linkend="python-client-model-object">
-            <?dbhtml filename="python-client/model-object/index.html"?>
-        </d:tocentry>
         <d:tocentry linkend="python-client-pipelines">
             <?dbhtml filename="python-client/pipelines/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="python-client-model-object">
+            <?dbhtml filename="python-client/model-object/index.html"?>
         </d:tocentry>
     </d:tocentry>
 
