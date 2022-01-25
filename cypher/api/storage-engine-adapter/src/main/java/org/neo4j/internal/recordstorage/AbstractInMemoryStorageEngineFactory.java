@@ -19,15 +19,11 @@
  */
 package org.neo4j.internal.recordstorage;
 
-import org.neo4j.configuration.Config;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContext;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.store.MetaDataStore;
-import org.neo4j.logging.internal.LogService;
-import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.LogVersionRepository;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.storageengine.api.StorageFilesState;
@@ -76,21 +72,6 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
         DatabaseLayout databaseLayout, PageCache pageCache, CursorContext cursorContext
     ) {
         return metadataProvider().logVersionRepository();
-    }
-
-    @Override
-    public SchemaRuleMigrationAccess schemaRuleMigrationAccess(
-        FileSystemAbstraction fs,
-        PageCache pageCache,
-        Config config,
-        DatabaseLayout databaseLayout,
-        LogService logService,
-        String recordFormats,
-        PageCacheTracer cacheTracer,
-        CursorContext cursorContext,
-        MemoryTracker memoryTracker
-    ) {
-        return schemaRuleMigrationAccess();
     }
 
     protected abstract SchemaRuleMigrationAccess schemaRuleMigrationAccess();

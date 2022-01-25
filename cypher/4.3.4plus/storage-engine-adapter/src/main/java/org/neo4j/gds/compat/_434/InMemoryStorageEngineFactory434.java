@@ -215,4 +215,19 @@ public class InMemoryStorageEngineFactory434 extends AbstractInMemoryStorageEngi
     public CommandReaderFactory commandReaderFactory() {
         return InMemoryStorageCommandReaderFactory434.INSTANCE;
     }
+
+    @Override
+    public SchemaRuleMigrationAccess schemaRuleMigrationAccess(
+        FileSystemAbstraction fs,
+        PageCache pageCache,
+        Config config,
+        DatabaseLayout databaseLayout,
+        LogService logService,
+        String recordFormats,
+        PageCacheTracer cacheTracer,
+        CursorContext cursorContext,
+        MemoryTracker memoryTracker
+    ) {
+        return schemaRuleMigrationAccess();
+    }
 }

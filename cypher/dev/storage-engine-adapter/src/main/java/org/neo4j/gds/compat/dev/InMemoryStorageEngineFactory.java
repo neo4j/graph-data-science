@@ -21,7 +21,6 @@ package org.neo4j.gds.compat.dev;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.consistency.checking.full.ConsistencyCheckIncompleteException;
 import org.neo4j.consistency.checking.full.ConsistencyFlags;
 import org.neo4j.consistency.report.ConsistencySummaryStatistics;
 import org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker;
@@ -119,7 +118,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         PageCache pageCache,
         TokenHolders tokenHolders,
         SchemaState schemaState,
-        ConstraintRuleAccessor constraintSemantics,
+        ConstraintRuleAccessor constraintRuleAccessor,
         IndexConfigCompleter indexConfigCompleter,
         LockService lockService,
         IdGeneratorFactory idGeneratorFactory,
@@ -128,11 +127,10 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         LogProvider internalLogProvider,
         LogProvider userLogProvider,
         RecoveryCleanupWorkCollector recoveryCleanupWorkCollector,
-        PageCacheTracer cacheTracer,
         boolean createStoreIfNotExists,
         DatabaseReadOnlyChecker readOnlyChecker,
         MemoryTracker memoryTracker,
-        CursorContext cursorContext
+        CursorContextFactory cursorContextFactory
     ) {
         StoreFactory factory = new StoreFactory(
             databaseLayout,
@@ -141,7 +139,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
             pageCache,
             fs,
             internalLogProvider,
-            cacheTracer,
+            cursorContextFactory,
             readOnlyChecker
         );
 
@@ -163,8 +161,8 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         PageCache pageCache,
         JobScheduler jobScheduler,
         LogService logService,
-        PageCacheTracer pageCacheTracer,
         MemoryTracker memoryTracker,
+        PageCacheTracer pageCacheTracer,
         CursorContextFactory cursorContextFactory
     ) {
         return List.of();
@@ -246,8 +244,8 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         boolean b,
         CursorContextFactory cursorContextFactory
     ) {
-        NeoStores neoStores = (new StoreFactory(databaseLayout, config, new ScanOnOpenReadOnlyIdGeneratorFactory(), pageCache, fileSystemAbstraction, NullLogProvider.getInstance(), pageCacheTracer, readOnly())).openAllNeoStores();
-        return new LenientStoreInput(neoStores, readBehaviour.decorateTokenHolders(this.loadReadOnlyTokens(neoStores, true, PageCacheTracer.NULL, cursorContextFactory)), true, pageCacheTracer, readBehaviour);
+        NeoStores neoStores = (new StoreFactory(databaseLayout, config, new ScanOnOpenReadOnlyIdGeneratorFactory(), pageCache, fileSystemAbstraction, NullLogProvider.getInstance(), cursorContextFactory, readOnly())).openAllNeoStores();
+        return new LenientStoreInput(neoStores, readBehaviour.decorateTokenHolders(this.loadReadOnlyTokens(neoStores, true, cursorContextFactory)), true, pageCacheTracer, readBehaviour);
     }
 
     @Override
@@ -264,8 +262,8 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         OutputStream outputStream,
         boolean b,
         ConsistencyFlags consistencyFlags,
-        PageCacheTracer pageCacheTracer
-    ) throws ConsistencyCheckIncompleteException {
+        CursorContextFactory cursorContextFactory
+    ) {
 
     }
 
@@ -276,24 +274,24 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
 
     @Override
     public MetadataProvider transactionMetaDataStore(
-        FileSystemAbstraction fs,
+        FileSystemAbstraction fileSystemAbstraction,
         DatabaseLayout databaseLayout,
         Config config,
         PageCache pageCache,
-        PageCacheTracer cacheTracer,
-        DatabaseReadOnlyChecker readOnlyChecker
+        DatabaseReadOnlyChecker databaseReadOnlyChecker,
+        CursorContextFactory cursorContextFactory
     ) {
         return metadataProvider();
     }
 
     @Override
     public StoreVersionCheck versionCheck(
-        FileSystemAbstraction fs,
+        FileSystemAbstraction fileSystemAbstraction,
         DatabaseLayout databaseLayout,
         Config config,
         PageCache pageCache,
         LogService logService,
-        PageCacheTracer pageCacheTracer
+        CursorContextFactory cursorContextFactory
     ) {
         return new InMemoryVersionCheck();
     }
@@ -351,7 +349,6 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         DatabaseLayout databaseLayout,
         boolean b,
         Function<SchemaRule, SchemaRule> function,
-        PageCacheTracer pageCacheTracer,
         CursorContextFactory cursorContextFactory
     ) {
         return List.of();
@@ -364,30 +361,27 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         Config config,
         PageCache pageCache,
         boolean lenient,
-        PageCacheTracer pageCacheTracer,
         CursorContextFactory cursorContextFactory
     ) {
         StoreFactory factory =
             new StoreFactory( layout, config, new ScanOnOpenReadOnlyIdGeneratorFactory(), pageCache, fs,
-                NullLogProvider.getInstance(), pageCacheTracer, readOnly() );
+                NullLogProvider.getInstance(), cursorContextFactory, readOnly() );
         try ( NeoStores stores = factory.openNeoStores( false,
             StoreType.PROPERTY_KEY_TOKEN, StoreType.PROPERTY_KEY_TOKEN_NAME,
             StoreType.LABEL_TOKEN, StoreType.LABEL_TOKEN_NAME,
             StoreType.RELATIONSHIP_TYPE_TOKEN, StoreType.RELATIONSHIP_TYPE_TOKEN_NAME ) )
         {
-            return loadReadOnlyTokens(stores, lenient, pageCacheTracer, cursorContextFactory);
+            return loadReadOnlyTokens(stores, lenient, cursorContextFactory);
         }
     }
 
     private TokenHolders loadReadOnlyTokens(
         NeoStores stores,
         boolean lenient,
-        PageCacheTracer pageCacheTracer,
         CursorContextFactory cursorContextFactory
     )
     {
-        try ( var cursorTracer = pageCacheTracer.createPageCursorTracer( "loadReadOnlyTokens" );
-              var cursorContext = cursorContextFactory.create(cursorTracer);
+        try ( var cursorContext = cursorContextFactory.create("loadReadOnlyTokens");
               var storeCursors = new CachedStoreCursors( stores, cursorContext ) )
         {
             stores.start( cursorContext );
@@ -436,9 +430,22 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         return tokens;
     }
 
-
     @Override
     public CommandReaderFactory commandReaderFactory() {
         return InMemoryStorageCommandReaderFactory.INSTANCE;
+    }
+
+    @Override
+    public SchemaRuleMigrationAccess schemaRuleMigrationAccess(
+        FileSystemAbstraction fileSystemAbstraction,
+        PageCache pageCache,
+        Config config,
+        DatabaseLayout databaseLayout,
+        LogService logService,
+        String s,
+        CursorContextFactory cursorContextFactory,
+        MemoryTracker memoryTracker
+    ) {
+        return schemaRuleMigrationAccess();
     }
 }

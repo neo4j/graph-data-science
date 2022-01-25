@@ -225,4 +225,19 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
     public CommandReaderFactory commandReaderFactory() {
         return InMemoryStorageCommandReaderFactory.INSTANCE;
     }
+
+    @Override
+    public SchemaRuleMigrationAccess schemaRuleMigrationAccess(
+        FileSystemAbstraction fs,
+        PageCache pageCache,
+        Config config,
+        DatabaseLayout databaseLayout,
+        LogService logService,
+        String recordFormats,
+        PageCacheTracer cacheTracer,
+        CursorContext cursorContext,
+        MemoryTracker memoryTracker
+    ) {
+        return schemaRuleMigrationAccess();
+    }
 }
