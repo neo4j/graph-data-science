@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -44,11 +43,8 @@ public interface RelationshipsAndProperties {
 
     Map<RelationshipType, RelationshipPropertyStore> properties();
 
-    static RelationshipsAndProperties of(
-        ObjectLongMap<RelationshipType> relationshipCounts,
-        Map<RelationshipType, AdjacencyListWithPropertiesBuilder> builders
-    ) {
-        var relTypeCount = relationshipCounts.size();
+    static RelationshipsAndProperties of(Map<RelationshipType, AdjacencyListWithPropertiesBuilder> builders) {
+        var relTypeCount = builders.size();
         Map<RelationshipType, Relationships.Topology> relationships = new HashMap<>(relTypeCount);
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
 
@@ -57,7 +53,7 @@ public interface RelationshipsAndProperties {
 
             var adjacency = adjacencyListsWithProperties.adjacency();
             var properties = adjacencyListsWithProperties.properties();
-            long relationshipCount = relationshipCounts.getOrDefault(relationshipType, 0L);
+            long relationshipCount = relationshipsBuilder.relationshipCounter().longValue();
 
             RelationshipProjection projection = relationshipsBuilder.projection();
 

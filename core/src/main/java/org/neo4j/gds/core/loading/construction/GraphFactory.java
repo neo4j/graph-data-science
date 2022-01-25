@@ -284,7 +284,6 @@ public final class GraphFactory {
             propertyKeyIds,
             adjacencyListWithPropertiesBuilder,
             importerBuilder,
-            importerBuilder.relationshipCounter(),
             loadRelationshipProperties,
             isMultiGraph,
             concurrency.orElse(1),

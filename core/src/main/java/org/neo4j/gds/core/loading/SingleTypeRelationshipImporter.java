@@ -27,7 +27,6 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.api.KernelTransaction;
 
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
 @Value.Style(typeBuilder = "SingleTypeRelationshipImporterBuilderBuilder")
@@ -66,14 +65,11 @@ public final class SingleTypeRelationshipImporter {
         boolean preAggregate,
         AllocationTracker allocationTracker
     ) {
-        var relationshipCounter = new LongAdder();
-
         var adjacencyBuilder = AdjacencyBuilder.compressing(
             adjacencyListWithPropertiesBuilder,
             importSizing.numberOfPages(),
             importSizing.pageSize(),
             allocationTracker,
-            relationshipCounter,
             preAggregate
         );
 
@@ -86,15 +82,12 @@ public final class SingleTypeRelationshipImporter {
             typeToken,
             relationshipImporter,
             imports,
-            relationshipCounter,
             validateRelationships,
             loadProperties
         );
     }
 
     public static final class Builder {
-
-        private final LongAdder relationshipCounter;
 
         private final RelationshipType relationshipType;
         private final int typeId;
@@ -110,7 +103,6 @@ public final class SingleTypeRelationshipImporter {
             int typeToken,
             RelationshipImporter importer,
             RelationshipImporter.Imports imports,
-            LongAdder relationshipCounter,
             boolean validateRelationships,
             boolean loadProperties
         ) {
@@ -118,17 +110,12 @@ public final class SingleTypeRelationshipImporter {
             this.typeId = typeToken;
             this.importer = importer;
             this.imports = imports;
-            this.relationshipCounter = relationshipCounter;
             this.validateRelationships = validateRelationships;
             this.loadProperties = loadProperties;
         }
 
         RelationshipType relationshipType() {
             return relationshipType;
-        }
-
-        public LongAdder relationshipCounter() {
-            return relationshipCounter;
         }
 
         public void prepareFlushTasks() {

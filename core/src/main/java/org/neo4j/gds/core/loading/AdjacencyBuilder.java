@@ -45,7 +45,6 @@ public final class AdjacencyBuilder {
         int numPages,
         int pageSize,
         AllocationTracker allocationTracker,
-        LongAdder relationshipCounter,
         boolean preAggregate
     ) {
         allocationTracker.add(sizeOfObjectArray(numPages) << 2);
@@ -63,7 +62,6 @@ public final class AdjacencyBuilder {
             compressedAdjacencyLists,
             buffers,
             pageSize,
-            relationshipCounter,
             atLeastOnePropertyToLoad,
             preAggregate
         );
@@ -95,7 +93,6 @@ public final class AdjacencyBuilder {
         CompressedLongArray[][] compressedAdjacencyLists,
         LongArrayBuffer[] buffers,
         int pageSize,
-        LongAdder relationshipCounter,
         boolean atLeastOnePropertyToLoad,
         boolean preAggregate
     ) {
@@ -108,7 +105,7 @@ public final class AdjacencyBuilder {
         this.pageMask = pageSize - 1;
         this.sizeOfLongPage = sizeOfLongArray(pageSize);
         this.sizeOfObjectPage = sizeOfObjectArray(pageSize);
-        this.relationshipCounter = relationshipCounter;
+        this.relationshipCounter = globalBuilder.relationshipCounter();
         this.propertyKeyIds = globalBuilder.propertyKeyIds();
         this.defaultValues = globalBuilder.defaultValues();
         this.aggregations = globalBuilder.aggregations();

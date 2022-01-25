@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import com.carrotsearch.hppc.ObjectLongHashMap;
-import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
@@ -51,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
@@ -63,7 +60,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     private final Context loaderContext;
     private final GraphDimensions dimensionsAfterNodeLoading;
     private final ProgressTracker progressTracker;
-    private final Map<RelationshipProjection, LongAdder> relationshipCounters;
 
     // Property mappings are either defined upfront in
     // the procedure configuration or during load time
@@ -91,7 +87,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         this.dimensionsAfterNodeLoading = dimensions;
         this.progressTracker = progressTracker;
         this.loaderContext = new Context();
-        this.relationshipCounters = new HashMap<>();
     }
 
     private void initFromPropertyMappings(PropertyMappings propertyMappings) {
@@ -202,13 +197,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
         ParallelUtil.run(flushTasks, loadingContext.executor());
 
-        ObjectLongMap<RelationshipType> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
-        this.relationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(
-            RelationshipType.of(mapping.type()),
-            counter.sum()
-        ));
-
-        var relationshipsAndProperties = RelationshipsAndProperties.of(relationshipCounters, loaderContext.allBuilders);
+        var relationshipsAndProperties = RelationshipsAndProperties.of(loaderContext.allBuilders);
 
         return ImmutableCypherRelationshipLoader.LoadResult.builder()
             .dimensions(resultDimensions)
@@ -273,7 +262,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             allBuilders.put(relationshipType, builder);
 
-            var importerBuilder = new SingleTypeRelationshipImporterBuilderBuilder()
+            return new SingleTypeRelationshipImporterBuilderBuilder()
                 .adjacencyListWithPropertiesBuilder(builder)
                 .relationshipType(relationshipType)
                 .typeToken(NO_SUCH_RELATIONSHIP_TYPE)
@@ -283,10 +272,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .preAggregate(GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled())
                 .allocationTracker(loadingContext.allocationTracker())
                 .build();
-
-            relationshipCounters.put(projection, importerBuilder.relationshipCounter());
-
-            return importerBuilder;
         }
 
     }

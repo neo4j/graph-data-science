@@ -33,7 +33,6 @@ import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,7 +46,6 @@ public class RelationshipsBuilder {
     private final AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder;
     private final Orientation orientation;
     private final SingleTypeRelationshipImporter.Builder importerBuilder;
-    private final LongAdder relationshipCounter;
 
     private final int concurrency;
     private final ExecutorService executorService;
@@ -61,7 +59,6 @@ public class RelationshipsBuilder {
         int[] propertyKeyIds,
         AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
         SingleTypeRelationshipImporter.Builder importerBuilder,
-        LongAdder relationshipCounter,
         boolean loadRelationshipProperty,
         boolean isMultiGraph,
         int concurrency,
@@ -71,7 +68,6 @@ public class RelationshipsBuilder {
         this.orientation = orientation;
         this.adjacencyListWithPropertiesBuilder = adjacencyListWithPropertiesBuilder;
         this.importerBuilder = importerBuilder;
-        this.relationshipCounter = relationshipCounter;
         this.loadRelationshipProperty = loadRelationshipProperty;
         this.isMultiGraph = isMultiGraph;
         this.concurrency = concurrency;
@@ -155,11 +151,12 @@ public class RelationshipsBuilder {
 
         var adjacencyListsWithProperties = adjacencyListWithPropertiesBuilder.build();
         var adjacencyList = adjacencyListsWithProperties.adjacency();
+        var relationshipCount = adjacencyListWithPropertiesBuilder.relationshipCounter().longValue();
 
         if (loadRelationshipProperty) {
             return adjacencyListsWithProperties.properties().stream().map(compressedProperties ->
                 Relationships.of(
-                    relationshipCounter.longValue(),
+                    relationshipCount,
                     orientation,
                     isMultiGraph,
                     adjacencyList,
@@ -169,7 +166,7 @@ public class RelationshipsBuilder {
             ).collect(Collectors.toList());
         } else {
             return List.of(Relationships.of(
-                relationshipCounter.longValue(),
+                relationshipCount,
                 orientation,
                 isMultiGraph,
                 adjacencyList

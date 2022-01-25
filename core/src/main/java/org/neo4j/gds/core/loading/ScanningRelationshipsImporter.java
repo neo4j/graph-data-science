@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import com.carrotsearch.hppc.ObjectLongHashMap;
-import com.carrotsearch.hppc.ObjectLongMap;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphLoaderContext;
@@ -31,9 +29,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
@@ -47,7 +43,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
 
     private final IdMap idMap;
     private final Map<RelationshipType, AdjacencyListWithPropertiesBuilder> adjacencyListBuilders;
-    private final Map<RelationshipType, LongAdder> allRelationshipCounters;
 
     @Builder.Factory
     public static ScanningRelationshipsImporter scanningRelationshipsImporter(
@@ -105,7 +100,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         this.loadingContext = loadingContext;
         this.idMap = idMap;
         this.adjacencyListBuilders = adjacencyListBuilders;
-        this.allRelationshipCounters = new HashMap<>();
     }
 
     @Override
@@ -129,10 +123,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
                 .build())
             .collect(Collectors.toList());
 
-        for (SingleTypeRelationshipImporter.Builder importerBuilder : importerBuilders) {
-            allRelationshipCounters.put(importerBuilder.relationshipType(), importerBuilder.relationshipCounter());
-        }
-
         return RelationshipsScannerTask.factory(
             loadingContext,
             progressTracker,
@@ -144,12 +134,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
 
     @Override
     public RelationshipsAndProperties build() {
-        ObjectLongMap<RelationshipType> relationshipCounters = new ObjectLongHashMap<>(allRelationshipCounters.size());
-        allRelationshipCounters.forEach((relationshipType, counter) -> relationshipCounters.put(
-            relationshipType,
-            counter.sum()
-        ));
-
-        return RelationshipsAndProperties.of(relationshipCounters, adjacencyListBuilders);
+        return RelationshipsAndProperties.of(adjacencyListBuilders);
     }
 }

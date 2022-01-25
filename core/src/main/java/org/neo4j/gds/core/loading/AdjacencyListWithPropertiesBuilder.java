@@ -28,6 +28,7 @@ import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongSupplier;
 
 public final class AdjacencyListWithPropertiesBuilder {
@@ -35,6 +36,7 @@ public final class AdjacencyListWithPropertiesBuilder {
     private final RelationshipProjection projection;
     private final AdjacencyCompressorBlueprint adjacencyCompressor;
 
+    private final LongAdder relationshipCounter;
     private final Aggregation[] aggregations;
     private final int[] propertyKeyIds;
     private final double[] defaultValues;
@@ -70,6 +72,8 @@ public final class AdjacencyListWithPropertiesBuilder {
         double[] defaultValues,
         AllocationTracker allocationTracker
     ) {
+        var relationshipCount = new LongAdder();
+
         var adjacencyCompressor = adjacencyFactory.create(
             nodeCountSupplier,
             projection.properties(),
@@ -80,6 +84,7 @@ public final class AdjacencyListWithPropertiesBuilder {
         return new AdjacencyListWithPropertiesBuilder(
             projection,
             adjacencyCompressor,
+            relationshipCount,
             aggregations,
             propertyKeyIds,
             defaultValues
@@ -122,12 +127,14 @@ public final class AdjacencyListWithPropertiesBuilder {
     private AdjacencyListWithPropertiesBuilder(
         RelationshipProjection projection,
         AdjacencyCompressorBlueprint adjacencyCompressor,
+        LongAdder relationshipCounter,
         Aggregation[] aggregations,
         int[] propertyKeyIds,
         double[] defaultValues
     ) {
         this.projection = projection;
         this.adjacencyCompressor = adjacencyCompressor;
+        this.relationshipCounter = relationshipCounter;
         this.aggregations = aggregations;
         this.propertyKeyIds = propertyKeyIds;
         this.defaultValues = defaultValues;
@@ -139,6 +146,10 @@ public final class AdjacencyListWithPropertiesBuilder {
 
     void prepareFlushTasks() {
         this.adjacencyCompressor.prepareFlushTasks();
+    }
+
+    public LongAdder relationshipCounter() {
+        return relationshipCounter;
     }
 
     public AdjacencyListsWithProperties build() {
