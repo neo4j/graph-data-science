@@ -22,7 +22,6 @@ To create a new node classification pipeline one would make the following call:
 [source,python]
 ----
 pipe = gds.alpha.ml.pipeline.nodeClassification.create("my-pipe")
-assert pipe.type() == "Node classification training pipeline"
 ----
 
 To then go on to build, configure and train the pipeline we would call methods directly on the node classification pipeline object.
@@ -140,7 +139,6 @@ To create a new link prediction pipeline one would make the following call:
 [source,python]
 ----
 pipe = gds.alpha.ml.pipeline.linkPrediction.create("my-pipe")
-assert pipe.type() == "Link prediction training pipeline"
 ----
 
 To then go on to build, configure and train the pipeline we would call methods directly on the link prediction pipeline object.

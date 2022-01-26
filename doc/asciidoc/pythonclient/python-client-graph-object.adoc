@@ -1,12 +1,12 @@
 [[python-client-graph-object]]
 = The graph object
 
-In order to do anything in GDS you must first project a graph into the <<graph-catalog-ops, GDS Graph Catalog>>.
+In order to utilize most the functionality in GDS, you must first project a graph into the <<graph-catalog-ops, GDS Graph Catalog>>.
 When projecting a graph with the Python client, a client-side reference to the projected graph is returned.
 We call these references `Graph` objects.
 
 Once created, the `Graph` objects can be passed as arguments to other methods in the Python client, for example for running algorithms or training machine learning models.
-Additionally, the `Graph` objects has convenience methods allowing for inspection of the projected graph represented without explicitly involving the graph catalog.
+Additionally, the `Graph` objects have convenience methods allowing for inspection of the projected graph represented without explicitly involving the graph catalog.
 
 In the examples below we suppose that we have an instantiated `GraphDataScience` object called `gds`.
 Read more about this in <<python-client-getting-started>>.
@@ -53,7 +53,7 @@ Their Cypher signatures map to Python in much the same way as `gds.graph.project
 
 There are convenience methods on the graph object that let us extract information about our projected graph.
 
-.Methods
+.Graph object methods
 [opts="header",cols="8m,4m,6m,13"]
 |===
 | Name                    | Arguments | Return type      | Description
@@ -70,7 +70,7 @@ There are convenience methods on the graph object that let us extract informatio
 | drop                    | -         | None             | Removes the graph from the GDS Graph Catalog.
 |===
 
-For example, to get the node count and node properties of a graph `G`, use the following:
+For example, to get the node count and node properties of a graph `G`, we would do the following:
 
 [source,python]
 ----
