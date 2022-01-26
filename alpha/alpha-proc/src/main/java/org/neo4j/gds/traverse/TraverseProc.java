@@ -21,15 +21,19 @@ package org.neo4j.gds.traverse;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.impl.traverse.Traverse;
 import org.neo4j.gds.impl.traverse.TraverseConfig;
-import org.neo4j.gds.impl.walking.WalkPath;
 import org.neo4j.gds.impl.walking.WalkResult;
-import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.paths.PathFactory;
+import org.neo4j.graphdb.RelationshipType;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig, WalkResult> {
+    private static final RelationshipType NEXT = RelationshipType.withName("NEXT");
 
     @Override
     public GraphAlgorithmFactory<Traverse, TraverseConfig> algorithmFactory() {
@@ -45,7 +49,10 @@ public abstract class TraverseProc extends AlgoBaseProc<Traverse, Traverse, Trav
 
             Traverse traverse = computationResult.algorithm();
             long[] nodes = traverse.resultNodes();
-            return Stream.of(new WalkResult(nodes, WalkPath.toPath(transaction, nodes)));
+            var nodeList = Arrays.stream(nodes).boxed().collect(Collectors.toList());
+            return Stream.of(new WalkResult(nodes,
+                PathFactory.create(transaction.internalTransaction(), nodeList, NEXT)
+            ));
         };
     }
 }
