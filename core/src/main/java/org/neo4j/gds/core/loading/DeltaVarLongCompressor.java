@@ -87,12 +87,13 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     public int compress(
         long nodeId,
         CompressedLongArray values,
-        LongArrayBuffer buffer
+        LongArrayBuffer buffer,
+        ZigZagLongDecoding.ValueMapper mapper
     ) {
         if (values.hasWeights()) {
-            return applyVariableDeltaEncodingWithWeights(nodeId, values, buffer);
+            return applyVariableDeltaEncodingWithWeights(nodeId, values, buffer, mapper);
         } else {
-            return applyVariableDeltaEncodingWithoutWeights(nodeId, values, buffer);
+            return applyVariableDeltaEncodingWithoutWeights(nodeId, values, buffer, mapper);
         }
     }
 
@@ -109,10 +110,11 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     private int applyVariableDeltaEncodingWithoutWeights(
         long nodeId,
         CompressedLongArray array,
-        LongArrayBuffer buffer
+        LongArrayBuffer buffer,
+        ZigZagLongDecoding.ValueMapper mapper
     ) {
         byte[] storage = array.storage();
-        AdjacencyCompression.copyFrom(buffer, array);
+        AdjacencyCompression.copyFrom(buffer, array, mapper);
         int degree = AdjacencyCompression.applyDeltaEncoding(buffer, aggregations[0]);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
 
@@ -129,14 +131,15 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     private int applyVariableDeltaEncodingWithWeights(
         long nodeId,
         CompressedLongArray array,
-        LongArrayBuffer buffer
+        LongArrayBuffer buffer,
+        ZigZagLongDecoding.ValueMapper mapper
     ) {
         byte[] semiCompressedBytesDuringLoading = array.storage();
         long[][] uncompressedWeightsPerProperty = array.weights();
 
         // decompress semiCompressed into full uncompressed long[] (in buffer)
         // ordered by whatever order they've been read
-        AdjacencyCompression.copyFrom(buffer, array);
+        AdjacencyCompression.copyFrom(buffer, array, mapper);
         // buffer contains uncompressed, unsorted target list
 
         int degree = AdjacencyCompression.applyDeltaEncoding(

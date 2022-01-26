@@ -89,12 +89,13 @@ public final class RawCompressor implements AdjacencyCompressor {
     public int compress(
         long nodeId,
         CompressedLongArray values,
-        LongArrayBuffer buffer
+        LongArrayBuffer buffer,
+        ZigZagLongDecoding.ValueMapper mapper
     ) {
         if (values.hasWeights()) {
-            return withWeights(nodeId, values, buffer);
+            return withWeights(nodeId, values, buffer, mapper);
         } else {
-            return withoutWeights(nodeId, values, buffer);
+            return withoutWeights(nodeId, values, buffer, mapper);
         }
     }
 
@@ -111,10 +112,11 @@ public final class RawCompressor implements AdjacencyCompressor {
     private int withoutWeights(
         long nodeId,
         CompressedLongArray array,
-        LongArrayBuffer buffer
+        LongArrayBuffer buffer,
+        ZigZagLongDecoding.ValueMapper mapper
     ) {
         // decompress target ids
-        AdjacencyCompression.copyFrom(buffer, array);
+        AdjacencyCompression.copyFrom(buffer, array, mapper);
 
         int degree = aggregate(buffer, aggregations[0]);
 
@@ -217,11 +219,12 @@ public final class RawCompressor implements AdjacencyCompressor {
     private int withWeights(
         long nodeId,
         CompressedLongArray array,
-        LongArrayBuffer buffer
+        LongArrayBuffer buffer,
+        ZigZagLongDecoding.ValueMapper mapper
     ) {
         long[][] uncompressedWeights = array.weights();
 
-        AdjacencyCompression.copyFrom(buffer, array);
+        AdjacencyCompression.copyFrom(buffer, array, mapper);
 
         int degree = aggregateWithWeights(buffer, uncompressedWeights, aggregations);
 

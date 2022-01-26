@@ -35,9 +35,9 @@ public final class AdjacencyCompression {
      * After this, {@link org.neo4j.gds.core.compress.LongArrayBuffer#length} will reflect the number of decompressed values
      * that are in the {@link org.neo4j.gds.core.compress.LongArrayBuffer#buffer}.
      */
-    static void copyFrom(LongArrayBuffer into, CompressedLongArray array) {
+    static void copyFrom(LongArrayBuffer into, CompressedLongArray array, ZigZagLongDecoding.ValueMapper mapper) {
         into.ensureCapacity(array.length());
-        into.length = array.uncompress(into.buffer);
+        into.length = array.uncompress(into.buffer, mapper);
     }
 
     public static int applyDeltaEncoding(LongArrayBuffer data, Aggregation aggregation) {

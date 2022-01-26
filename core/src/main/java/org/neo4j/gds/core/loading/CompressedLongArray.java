@@ -156,9 +156,9 @@ public final class CompressedLongArray {
         return length;
     }
 
-    public int uncompress(long[] into) {
+    public int uncompress(long[] into, ZigZagLongDecoding.ValueMapper mapper) {
         assert into.length >= length;
-        return zigZagUncompress(storage, pos, into);
+        return zigZagUncompress(storage, pos, into, mapper);
     }
 
     public byte[] storage() {

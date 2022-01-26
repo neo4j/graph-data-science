@@ -48,6 +48,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -197,7 +198,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             .values()
             .stream()
             .map(SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext::singleTypeRelationshipImporter)
-            .flatMap(factory -> factory.adjacencyListBuilderTasks().stream())
+            .flatMap(factory -> factory.adjacencyListBuilderTasks(Optional.empty()).stream())
             .collect(Collectors.toList());
 
         ParallelUtil.run(flushTasks, loadingContext.executor());

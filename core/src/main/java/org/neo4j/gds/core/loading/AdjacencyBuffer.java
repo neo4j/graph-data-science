@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
 
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.preAggregate;
@@ -199,7 +200,7 @@ public final class AdjacencyBuffer {
         }
     }
 
-    Collection<AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
+    Collection<AdjacencyListBuilderTask> adjacencyListBuilderTasks(Optional<ZigZagLongDecoding.ValueMapper> mapper) {
         adjacencyCompressorFactory.init();
 
         var tasks = new ArrayList<AdjacencyListBuilderTask>(localBuilders.length + 1);
@@ -209,7 +210,8 @@ public final class AdjacencyBuffer {
                 baseNodeId,
                 localBuilders[page],
                 compressedAdjacencyLists[page],
-                relationshipCounter
+                relationshipCounter,
+                mapper.orElse(ZigZagLongDecoding.Identity.INSTANCE)
             ));
         }
 
@@ -243,16 +245,19 @@ public final class AdjacencyBuffer {
         // A long array that may or may not be used during the compression.
         private final LongArrayBuffer buffer;
         private final LongAdder relationshipCounter;
+        private final ZigZagLongDecoding.ValueMapper valueMapper;
 
         AdjacencyListBuilderTask(
             long baseNodeId,
             ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder,
             CompressedLongArray[] compressedLongArrays,
-            LongAdder relationshipCounter
+            LongAdder relationshipCounter,
+            ZigZagLongDecoding.ValueMapper valueMapper
         ) {
             this.baseNodeId = baseNodeId;
             this.threadLocalRelationshipsBuilder = threadLocalRelationshipsBuilder;
             this.compressedLongArrays = compressedLongArrays;
+            this.valueMapper = valueMapper;
             this.buffer = new LongArrayBuffer();
             this.relationshipCounter = relationshipCounter;
         }
@@ -267,7 +272,8 @@ public final class AdjacencyBuffer {
                         importedRelationships += compressor.applyVariableDeltaEncoding(
                             compressedAdjacencyList,
                             buffer,
-                            baseNodeId + localId
+                            baseNodeId + localId,
+                            valueMapper
                         );
                         compressedLongArrays[localId] = null;
                     }

@@ -172,6 +172,10 @@ public final class NodesBuilder {
         return build(maxOriginalId, false);
     }
 
+    public IdMapAndProperties buildChecked() {
+        return build(maxOriginalId, true);
+    }
+
     public IdMapAndProperties buildChecked(long highestNeoId) {
         return build(highestNeoId, true);
     }
