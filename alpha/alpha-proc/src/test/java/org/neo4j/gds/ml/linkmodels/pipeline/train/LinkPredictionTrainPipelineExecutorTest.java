@@ -317,7 +317,11 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         pipeline.setTrainingParameterSpace(List.of(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))));
 
-        pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree")));
+        pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
+            ExecutionContext.EMPTY.username(),
+            "degree",
+            Map.of("mutateProperty", "degree")
+        ));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array", "degree")));
 
         var config = LinkPredictionTrainConfig

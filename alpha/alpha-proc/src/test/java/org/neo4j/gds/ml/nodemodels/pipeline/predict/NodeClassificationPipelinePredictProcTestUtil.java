@@ -50,7 +50,11 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
     public static void addPipelineModelWithFeatures(ModelCatalog modelCatalog, String graphName, String username, int dimensionOfNodeFeatures, List<String> nodeFeatures) {
         var pipeline = new NodeClassificationPipeline();
 
-        pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "degree", Map.of("mutateProperty", "degree")));
+        pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
+            ExecutionContext.EMPTY.username(),
+            "degree",
+            Map.of("mutateProperty", "degree")
+        ));
         for (String nodeFeature : nodeFeatures) {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of(nodeFeature));
         }

@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.executor.AlgoConfigParser;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.NewConfigFunction;
@@ -40,7 +39,7 @@ public class NodePropertyStepFactory {
     );
 
     public static NodePropertyStep createNodePropertyStep(
-        ExecutionContext executionContext,
+        String username,
         String taskName,
         Map<String, Object> configMap
     ) {
@@ -63,7 +62,7 @@ public class NodePropertyStepFactory {
         validateReservedConfigKeys(configMap);
 
         AlgoBaseConfig config = parseConfig(
-            executionContext.username(),
+            username,
             gdsCallableDefinition,
             configMap
         );

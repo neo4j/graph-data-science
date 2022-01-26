@@ -108,7 +108,11 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     @Test
     void trainsAModel() {
         var pipeline = insertPipelineIntoCatalog();
-        pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(ExecutionContext.EMPTY, "pageRank", Map.of("mutateProperty", "pr")));
+        pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
+            ExecutionContext.EMPTY.username(),
+            "pageRank",
+            Map.of("mutateProperty", "pr")
+        ));
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
 
         var metricSpecification = MetricSpecification.parse("F1(class=1)");
