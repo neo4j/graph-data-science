@@ -88,7 +88,7 @@ class ClosenessCentralityDirectedTest {
     private Graph graph;
 
     @Test
-    void testGetCentrality() {
+    void testCentrality() {
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
@@ -104,7 +104,7 @@ class ClosenessCentralityDirectedTest {
     }
 
     @Test
-    void testGetCentralityWithWassermanFaust() {
+    void testCentralityWithWassermanFaust() {
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
