@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
@@ -84,7 +85,8 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeatureProper
         return new LinkPredictionTrainConfigImpl(username, config);
     }
 
-    static ImmutableLinkPredictionTrainConfig.Builder builder() {
+    @TestOnly
+    static ImmutableLinkPredictionTrainConfig.Builder testBuilder() {
         return ImmutableLinkPredictionTrainConfig.builder();
     }
 }
