@@ -28,7 +28,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -39,16 +38,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isTypeOf;
-import static org.neo4j.gds.proc.TypeUtil.unwrapOptionalType;
 
-class GenerateConfigurationBuilder {
-    private final Messager messager;
+final class GenerateConfigurationBuilder {
 
-    GenerateConfigurationBuilder(Messager messager) {this.messager = messager;}
+    private GenerateConfigurationBuilder() {}
 
-    TypeSpec defineConfigBuilder(
-        ConfigParser.Spec config,
+    static TypeSpec defineConfigBuilder(
+        TypeName configInterfaceType,
+        List<GenerateConfiguration.MemberDefinition> configImplMembers,
         String packageName,
         String generatedClassName,
         List<ParameterSpec> constructorParameters,
@@ -75,17 +74,92 @@ class GenerateConfigurationBuilder {
             .filter(p -> !p.name.equals(configMapParameterName))
             .forEach(parameter -> configBuilderClass.addField(parameter.type, parameter.name, Modifier.PRIVATE));
 
-        // FIXME correct handling of ConvertWith function (use type of convertWith on the builder function instead !
-
         return configBuilderClass
-            .addMethods(defineConfigParameterSetters(config.members(), builderClassName))
-            .addMethods(defineConfigMapEntrySetters(config.members(), configMapParameterName, builderClassName))
-            .addMethod(defineBuildMethod(config, generatedClassName, constructorParameters, configMapParameterName, maybeFactoryFunction))
+            .addMethods(defineConfigParameterSetters(configImplMembers, builderClassName))
+            .addMethods(defineConfigMapEntrySetters(configImplMembers, configMapParameterName, builderClassName))
+            .addMethod(defineBuildMethod(
+                configInterfaceType,
+                generatedClassName,
+                constructorParameters,
+                configMapParameterName,
+                maybeFactoryFunction
+            ))
             .build();
     }
 
+    private static List<MethodSpec> defineConfigParameterSetters(
+        List<GenerateConfiguration.MemberDefinition> implMembers,
+        ClassName builderClassName
+    ) {
+        // if member -> get actual type by checking whatever the convert with method has
+        return implMembers.stream()
+            .filter(implMember -> implMember.member().isConfigParameter())
+            .map(implMember -> MethodSpec.methodBuilder(implMember.member().methodName())
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(TypeName.get(implMember.parameterType()), implMember.member().methodName())
+                .returns(builderClassName)
+                .addCode(CodeBlock.builder()
+                    .addStatement("this.$1N = $1N", implMember.member().methodName())
+                    .addStatement("return this")
+                    .build()
+                ).build()
+            )
+            .collect(Collectors.toList());
+    }
+
+    private static List<MethodSpec> defineConfigMapEntrySetters(
+        List<GenerateConfiguration.MemberDefinition> implMembers,
+        String builderConfigMapFieldName,
+        ClassName builderClassName
+    ) {
+        return implMembers.stream()
+            .filter(implMember -> implMember.member().isConfigMapEntry())
+            .flatMap(implMember -> {
+                var setterMethods = Stream.<MethodSpec>builder();
+                String configKeyName = implMember.member().methodName();
+
+                MethodSpec.Builder setMethodBuilder = MethodSpec.methodBuilder(configKeyName)
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(unpackedType(implMember.parameterType()), configKeyName)
+                    .returns(builderClassName)
+                    .addCode(CodeBlock.builder()
+                        .addStatement(
+                            "this.$N.put(\"$L\", $N)",
+                            builderConfigMapFieldName,
+                            implMember.member().lookupKey(),
+                            configKeyName
+                        )
+                        .addStatement("return this")
+                        .build()
+                    );
+
+                setterMethods.add(setMethodBuilder.build());
+
+                if (isTypeOf(Optional.class, implMember.parameterType())) {
+                    String lambdaVarName = "actual" + configKeyName;
+
+                    var optionalSetterBuilder = MethodSpec.methodBuilder(configKeyName)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(TypeName.get(implMember.parameterType()), configKeyName)
+                        .returns(builderClassName)
+                        .addStatement(
+                            "$1N.ifPresent($2N -> this.$3N.put(\"$4L\", $2N))",
+                            configKeyName,
+                            lambdaVarName,
+                            builderConfigMapFieldName,
+                            implMember.member().lookupKey()
+                        ).addStatement("return this");
+
+                    setterMethods.add(optionalSetterBuilder.build());
+                }
+
+                return setterMethods.build();
+            })
+            .collect(Collectors.toList());
+    }
+
     private static MethodSpec defineBuildMethod(
-        ConfigParser.Spec config,
+        TypeName configInterfaceType,
         String generatedClassName,
         List<ParameterSpec> constructorParameters,
         String configMapParameterName,
@@ -100,7 +174,7 @@ class GenerateConfigurationBuilder {
             .map(factoryFunc -> CodeBlock.of("return $L.$L($L)",
                 generatedClassName, factoryFunc.name, constructorParameterString))
             .orElse(CodeBlock.of("return new $L($L)", generatedClassName, constructorParameterString));
-        
+
         return MethodSpec.methodBuilder("build")
             .addModifiers(Modifier.PUBLIC)
             .addCode(CodeBlock.builder()
@@ -110,89 +184,18 @@ class GenerateConfigurationBuilder {
                     configMapParameterName,
                     configMapParameterName
                 ).addStatement(configCreateStatement).build())
-            .returns(TypeName.get(config.rootType())).build();
+            .returns(configInterfaceType).build();
     }
 
-    private static List<MethodSpec> defineConfigParameterSetters(
-        List<ConfigParser.Member> members,
-        ClassName builderClassName
-    ) {
-        // if member -> get actual type by checking whatever the convert with method has
-        return members.stream()
-            .filter(ConfigParser.Member::isConfigParameter)
-            .map(member -> MethodSpec.methodBuilder(member.methodName())
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(TypeName.get(member.method().getReturnType()), member.methodName())
-                .returns(builderClassName)
-                .addCode(CodeBlock.builder()
-                    .addStatement("this.$1N = $1N", member.methodName())
-                    .addStatement("return this")
-                    .build()
-                ).build()
-            )
-            .collect(Collectors.toList());
-    }
-
-    private List<MethodSpec> defineConfigMapEntrySetters(
-        List<ConfigParser.Member> members,
-        String builderConfigMapFieldName,
-        ClassName builderClassName
-    ) {
-        return members.stream()
-            .filter(ConfigParser.Member::isConfigMapEntry)
-            .flatMap(member -> {
-                // TODO if get actual type by checking whatever the convertwith method has supports
-                var setterMethods = Stream.<MethodSpec>builder();
-                MethodSpec.Builder setMethodBuilder = MethodSpec.methodBuilder(member.methodName())
-                    .addModifiers(Modifier.PUBLIC)
-                    .addParameter(configEntryValueType(member), member.methodName())
-                    .returns(builderClassName)
-                    .addCode(CodeBlock.builder()
-                        .addStatement(
-                            "this.$N.put(\"$L\", $N)",
-                            builderConfigMapFieldName,
-                            member.lookupKey(),
-                            member.methodName()
-                        )
-                        .addStatement("return this")
-                        .build()
-                    );
-
-                setterMethods.add(setMethodBuilder.build());
-                
-                if (isTypeOf(Optional.class, member.method().getReturnType())) {
-                    String lambdaVarName = "actual" + member.methodName();
-
-                    var optionalSetterBuilder = MethodSpec.methodBuilder(member.methodName())
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(TypeName.get(member.method().getReturnType()), member.methodName())
-                        .returns(builderClassName)
-                        .addStatement(
-                            "$1N.ifPresent($2N -> this.$3N.put(\"$4L\", $2N))",
-                            member.methodName(),
-                            lambdaVarName,
-                            builderConfigMapFieldName,
-                            member.lookupKey()
-                        ).addStatement("return this");
-                    
-                    setterMethods.add(optionalSetterBuilder.build());
-                }
-
-                return setterMethods.build();
-            })
-            .collect(Collectors.toList());
-    }
-
-    private TypeName configEntryValueType(ConfigParser.Member member) {
-        TypeMirror returnType = member.method().getReturnType();
-        
+    private static TypeName unpackedType(TypeMirror returnType) {
         if (isTypeOf(Optional.class, returnType)) {
-            Optional<ClassName> maybeType = unwrapOptionalType(member, (DeclaredType) returnType, messager);
-            if (maybeType.isPresent()) {
-                return maybeType.get();
+            var typeArguments = ((DeclaredType) returnType).getTypeArguments();
+            if (!typeArguments.isEmpty()) {
+                return ClassName.get(asTypeElement(typeArguments.get(0)));
             }
         }
 
         return TypeName.get(returnType);
     }
+
 }

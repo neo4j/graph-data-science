@@ -75,7 +75,6 @@ import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isTypeOf;
 import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.util.ElementFilter.methodsIn;
-import static org.neo4j.gds.proc.TypeUtil.unwrapOptionalType;
 
 final class GenerateConfiguration {
 
@@ -113,7 +112,16 @@ final class GenerateConfiguration {
         FieldDefinitions fieldDefinitions = defineFields(config);
         builder.addFields(fieldDefinitions.fields());
 
-        MethodSpec constructor = defineConstructor(config, fieldDefinitions.names());
+        String configParameterName = fieldDefinitions.names().newName(CONFIG_VAR, CONFIG_VAR);
+        List<MemberDefinition> implMembers =  config.members().stream()
+            .flatMap(parserMember -> memberDefinition(fieldDefinitions.names(), parserMember).stream())
+            .collect(Collectors.toList());
+
+        var validationMethods = config.members().stream()
+            .filter(ConfigParser.Member::validates)
+            .map(ConfigParser.Member::methodName);
+
+        MethodSpec constructor = defineConstructor(implMembers, validationMethods, fieldDefinitions.names());
         Optional<MethodSpec> factory = defineFactory(config, generatedClassName, constructor, fieldDefinitions.names());
 
         if (factory.isPresent()) {
@@ -129,12 +137,13 @@ final class GenerateConfiguration {
             builder.addMethod(constructor);
         }
 
-        TypeSpec configBuilderClass = new GenerateConfigurationBuilder(messager).defineConfigBuilder(
-            config,
+        TypeSpec configBuilderClass = GenerateConfigurationBuilder.defineConfigBuilder(
+            TypeName.get(config.rootType()),
+            implMembers,
             packageName,
             generatedClassName,
             constructor.parameters,
-            fieldDefinitions.names().get(CONFIG_VAR),
+            configParameterName,
             factory
         );
 
@@ -179,58 +188,58 @@ final class GenerateConfiguration {
         return builder.build();
     }
 
-    private MethodSpec defineConstructor(ConfigParser.Spec config, NameAllocator names) {
+    private MethodSpec defineConstructor(
+        List<MemberDefinition> implMembers,
+        Stream<String> validationMethods,
+        NameAllocator names
+    ) {
         MethodSpec.Builder configMapConstructor = MethodSpec
             .constructorBuilder()
             .addModifiers(Modifier.PUBLIC);
 
-        String configParameterName = names.newName(CONFIG_VAR, CONFIG_VAR);
         boolean requiredMapParameter = false;
 
         String errorsVarName = names.newName("errors");
-        if (!config.members().isEmpty()) {
+        if (!implMembers.isEmpty()) {
             configMapConstructor.addStatement("$1T<$2T> $3N = new $1T<>()", ArrayList.class, IllegalArgumentException.class, errorsVarName);
         }
 
-        for (ConfigParser.Member member : config.members()) {
-            Optional<MemberDefinition> memberDefinition = memberDefinition(names, member);
-            if (memberDefinition.isPresent()) {
-                ExecutableElement method = member.method();
-                MemberDefinition definition = memberDefinition.get();
+        for (MemberDefinition implMember : implMembers) {
+            var parsedMember = implMember.member();
+            ExecutableElement method = parsedMember.method();
 
-                Parameter parameter = method.getAnnotation(Parameter.class);
-                if (parameter == null) {
-                    requiredMapParameter = true;
-                    addConfigGetterToConstructor(
-                        configMapConstructor,
-                        definition,
-                        errorsVarName
-                    );
-                } else {
-                    addParameterToConstructor(
-                        configMapConstructor,
-                        definition,
-                        parameter,
-                        errorsVarName
-                    );
-                }
+            Parameter parameter = method.getAnnotation(Parameter.class);
+            if (parameter == null) {
+                requiredMapParameter = true;
+                addConfigGetterToConstructor(
+                    configMapConstructor,
+                    implMember,
+                    errorsVarName
+                );
+            } else {
+                addParameterToConstructor(
+                    configMapConstructor,
+                    implMember,
+                    parameter,
+                    errorsVarName
+                );
             }
         }
 
-        for (ConfigParser.Member member : config.members()) {
-            if (member.validates()) {
-                catchValidationError(configMapConstructor, errorsVarName, (builder) -> builder.addStatement("$N()", member.methodName()));
-            }
-        }
+        validationMethods.forEach(method -> catchValidationError(
+            configMapConstructor,
+            errorsVarName,
+            builder -> builder.addStatement("$N()", method)
+        ));
 
-        if (!config.members().isEmpty()) {
+        if (!implMembers.isEmpty()) {
             combineCollectedErrors(names, configMapConstructor, errorsVarName);
         }
 
         if (requiredMapParameter) {
             configMapConstructor.addParameter(
                 TypeName.get(CypherMapWrapper.class).annotated(NOT_NULL),
-                configParameterName
+                names.get(CONFIG_VAR)
             );
         }
 
@@ -585,7 +594,6 @@ final class GenerateConfiguration {
             if (validCandidates.size() > 1) {
                 for (ExecutableElement candidate : validCandidates) {
                     error(
-                        messager,
                         String.format(Locale.ENGLISH,"Method is ambiguous and a possible candidate for [%s]", converter),
                         candidate
                     );
@@ -620,7 +628,7 @@ final class GenerateConfiguration {
         } while (!classesToSearch.isEmpty());
 
         for (InvalidCandidate invalidCandidate : invalidCandidates) {
-            error(messager, String.format(Locale.ENGLISH,invalidCandidate.message(), invalidCandidate.args()), invalidCandidate.element());
+            error(String.format(Locale.ENGLISH,invalidCandidate.message(), invalidCandidate.args()), invalidCandidate.element());
         }
 
         return converterError(
@@ -704,7 +712,7 @@ final class GenerateConfiguration {
                 } else if (isTypeOf(Number.class, targetType)) {
                     builder.methodName("Number");
                 } else if (isTypeOf(Optional.class, targetType)) {
-                    var maybeInnerType  = unwrapOptionalType(member, (DeclaredType) targetType, messager);
+                    var maybeInnerType  = unwrapOptionalType(member, (DeclaredType) targetType);
 
                     if (maybeInnerType.isPresent()) {
                         builder
@@ -721,7 +729,7 @@ final class GenerateConfiguration {
                 }
                 break;
             default:
-                return error(messager, "Unsupported return type: " + targetType, member.method());
+                return error("Unsupported return type: " + targetType, member.method());
         }
 
         if (member.method().isDefault()) {
@@ -736,6 +744,23 @@ final class GenerateConfiguration {
         }
 
         return Optional.of(builder.build());
+    }
+
+    private Optional<ClassName> unwrapOptionalType(ConfigParser.Member member, DeclaredType declaredType) {
+        if (member.method().isDefault()) {
+            return error(
+                "Optional fields can not to be declared default (Optional.empty is the default).",
+                member.method()
+            );
+        }
+        List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
+        if (typeArguments.isEmpty()) {
+            return error(
+                "Optional must have a Cypher-supported type as type argument, but found none.",
+                member.method()
+            );
+        }
+        return Optional.of(ClassName.get(asTypeElement(typeArguments.get(0))));
     }
 
     private void injectToMapCode(ConfigParser.Spec config, MethodSpec.Builder builder) {
@@ -884,7 +909,7 @@ final class GenerateConfiguration {
         return Optional.of(builder.build());
     }
 
-    private static <T> Optional<T> error(Messager messager, CharSequence message, Element element) {
+    private <T> Optional<T> error(CharSequence message, Element element) {
         messager.printMessage(
             Diagnostic.Kind.ERROR,
             message,

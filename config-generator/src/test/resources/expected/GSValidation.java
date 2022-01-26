@@ -19,29 +19,17 @@
  */
 package positive;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
 public final class GSValidationConfig implements GSValidation {
     public GraphStoreValidationConfig() {
-        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
-        if(!errors.isEmpty()) {
-            if(errors.size() == 1) {
-                throw errors.get(0);
-            } else {
-                String combinedErrorMsg = errors.stream().map(IllegalArgumentException::getMessage).collect(Collectors.joining(System.lineSeparator() + "\t\t\t\t", "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t", ""));
-                IllegalArgumentException combinedError = new IllegalArgumentException(combinedErrorMsg);
-                errors.forEach(error -> combinedError.addSuppressed(error));
-                throw combinedError;
-            }
-        }
+
     }
 
     @Override
