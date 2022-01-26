@@ -41,15 +41,17 @@ import static org.neo4j.gds.collections.PageUtil.pageIndex;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 
-public final class TransientCompressedList implements AdjacencyList {
+public final class CompressedAdjacencyList implements AdjacencyList {
 
     public static MemoryEstimation adjacencyListEstimation(RelationshipType relationshipType, boolean undirected) {
         return MemoryEstimations.setup("", dimensions -> {
             long nodeCount = dimensions.nodeCount();
-            long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
+            long relCountForType = dimensions
+                .relationshipCounts()
+                .getOrDefault(relationshipType, dimensions.maxRelCount());
             long relCount = undirected ? relCountForType * 2 : relCountForType;
             long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
-            return TransientCompressedList.adjacencyListEstimation(avgDegree, nodeCount);
+            return CompressedAdjacencyList.adjacencyListEstimation(avgDegree, nodeCount);
         });
     }
 
@@ -77,7 +79,7 @@ public final class TransientCompressedList implements AdjacencyList {
         MemoryRange pagesMemoryRange = MemoryRange.of(minMemoryReqs, maxMemoryReqs);
 
         return MemoryEstimations
-            .builder(TransientCompressedList.class)
+            .builder(CompressedAdjacencyList.class)
             .fixed("pages", pagesMemoryRange)
             .perNode("degrees", HugeIntArray::memoryEstimation)
             .perNode("offsets", HugeLongArray::memoryEstimation)
@@ -101,7 +103,7 @@ public final class TransientCompressedList implements AdjacencyList {
     private HugeIntArray degrees;
     private HugeLongArray offsets;
 
-    public TransientCompressedList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+    public CompressedAdjacencyList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;

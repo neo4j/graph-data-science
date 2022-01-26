@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.core.loading.BumpAllocator.PAGE_MASK;
 import static org.neo4j.gds.core.loading.BumpAllocator.PAGE_SHIFT;
 
-class TransientUncompressedListTest {
+class UncompressedAdjacencyListTest {
 
     @Test
     void shouldComputeUncompressedMemoryEstimationForSinglePage() {
@@ -42,7 +42,7 @@ class TransientUncompressedListTest {
             .maxRelCount(100)
             .build();
 
-        MemoryTree memRec = TransientUncompressedList.adjacencyListEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = UncompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long uncompressedAdjacencySize = 1200;
@@ -66,7 +66,7 @@ class TransientUncompressedListTest {
             .maxRelCount(100_000_000_000L)
             .build();
 
-        MemoryTree memRec = TransientUncompressedList.adjacencyListEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = UncompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
 

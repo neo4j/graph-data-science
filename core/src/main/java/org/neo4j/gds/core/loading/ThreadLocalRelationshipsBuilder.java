@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.core.compress.AdjacencyCompressorBlueprint;
+import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
 
 import java.util.concurrent.locks.ReentrantLock;
 
 final class ThreadLocalRelationshipsBuilder {
 
     private final ReentrantLock lock;
-    private final AdjacencyCompressorBlueprint adjacencyCompressor;
+    private final AdjacencyCompressorFactory adjacencyCompressor;
 
-    ThreadLocalRelationshipsBuilder(AdjacencyCompressorBlueprint compressorBlueprint) {
+    ThreadLocalRelationshipsBuilder(AdjacencyCompressorFactory compressorBlueprint) {
         this.lock = new ReentrantLock();
         this.adjacencyCompressor = compressorBlueprint;
     }

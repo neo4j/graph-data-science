@@ -24,7 +24,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compress.AdjacencyFactory;
+import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -64,7 +64,7 @@ public class SimilarityGraphBuilder {
             return MemoryEstimations.builder(HugeGraph.class)
                 .add(
                     "adjacency list",
-                    AdjacencyFactory.adjacencyListEstimation(averageDegree, newNodeCount)
+                    AdjacencyListBehavior.adjacencyListEstimation(averageDegree, newNodeCount)
                 )
                 .build();
         });

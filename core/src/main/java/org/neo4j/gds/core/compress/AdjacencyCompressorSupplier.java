@@ -19,20 +19,23 @@
  */
 package org.neo4j.gds.core.compress;
 
-public interface AdjacencyCompressorFactory {
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.AdjacencyProperties;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.loading.AdjacencyListBuilderFactory;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
-    /**
-     * Prepares the compressor for flushing, for example by initializing data structures as they are needed.
-     */
-    void init();
+import java.util.function.LongSupplier;
 
-    /**
-     * @return a copy of this blueprint that can be used concurrently with other copies to compress data.
-     */
-    AdjacencyCompressor createCompressor();
+public interface AdjacencyCompressorSupplier<TARGET_PAGE, PROPERTY_PAGE> {
 
-    /**
-     * @return the final adjacency list, together with any number of properties, if any.
-     */
-    ImmutableAdjacencyListsWithProperties.Builder build();
+    AdjacencyCompressorFactory get(
+        LongSupplier nodeCountSupplier,
+        AdjacencyListBuilderFactory<TARGET_PAGE, ? extends AdjacencyList, PROPERTY_PAGE, ? extends AdjacencyProperties> adjacencyListBuilderFactory,
+        PropertyMappings propertyMappings,
+        Aggregation[] aggregations,
+        boolean noAggregation,
+        AllocationTracker allocationTracker
+    );
 }

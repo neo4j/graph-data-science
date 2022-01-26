@@ -24,8 +24,8 @@ import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
-import org.neo4j.gds.core.compress.AdjacencyCompressorBlueprint;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
+import org.neo4j.gds.core.compress.AdjacencyCompressorSupplier;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
@@ -36,25 +36,25 @@ import java.util.function.LongSupplier;
 
 public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
-    public enum Factory implements AdjacencyCompressorFactory<byte[], long[]> {
+    public enum Supplier implements AdjacencyCompressorSupplier<byte[], long[]> {
         INSTANCE;
 
         @Override
-        public AdjacencyCompressorBlueprint create(
+        public AdjacencyCompressorFactory get(
             LongSupplier nodeCountSupplier,
-            CsrListBuilderFactory<byte[], ? extends AdjacencyList, long[], ? extends AdjacencyProperties> csrListBuilderFactory,
+            AdjacencyListBuilderFactory<byte[], ? extends AdjacencyList, long[], ? extends AdjacencyProperties> adjacencyListBuilderFactory,
             PropertyMappings propertyMappings,
             Aggregation[] aggregations,
             boolean noAggregation,
             AllocationTracker allocationTracker
         ) {
             @SuppressWarnings("unchecked")
-            CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new CsrListBuilder[propertyMappings.numberOfMappings()];
-            Arrays.setAll(propertyBuilders, i -> csrListBuilderFactory.newAdjacencyPropertiesBuilder());
+            AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings.numberOfMappings()];
+            Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder());
 
-            return new Blueprint(
+            return new Factory(
                 nodeCountSupplier,
-                csrListBuilderFactory.newAdjacencyListBuilder(),
+                adjacencyListBuilderFactory.newAdjacencyListBuilder(),
                 propertyBuilders,
                 noAggregation,
                 aggregations,
@@ -63,12 +63,12 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         }
     }
 
-    private static final class Blueprint extends AbstractCompressorBlueprint<byte[], long[]> {
+    private static final class Factory extends AbstractAdjacencyCompressorFactory<byte[], long[]> {
 
-        Blueprint(
+        Factory(
             LongSupplier nodeCountSupplier,
-            CsrListBuilder<byte[], ? extends AdjacencyList> adjacencyBuilder,
-            CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
+            AdjacencyListBuilder<byte[], ? extends AdjacencyList> adjacencyBuilder,
+            AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
             boolean noAggregation,
             Aggregation[] aggregations,
             AllocationTracker allocationTracker
@@ -90,8 +90,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
                 adjacencyBuilder.newAllocator(),
                 Arrays
                     .stream(propertyBuilders)
-                    .map(CsrListBuilder::newAllocator)
-                    .toArray(CsrListBuilder.Allocator[]::new),
+                    .map(AdjacencyListBuilder::newAllocator)
+                    .toArray(AdjacencyListBuilder.Allocator[]::new),
                 adjacencyDegrees,
                 adjacencyOffsets,
                 propertyOffsets,
@@ -101,8 +101,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         }
     }
 
-    private final CsrListBuilder.Allocator<byte[]> adjacencyAllocator;
-    private final CsrListBuilder.Allocator<long[]>[] propertiesAllocators;
+    private final AdjacencyListBuilder.Allocator<byte[]> adjacencyAllocator;
+    private final AdjacencyListBuilder.Allocator<long[]>[] propertiesAllocators;
     private final HugeIntArray adjacencyDegrees;
     private final HugeLongArray adjacencyOffsets;
     private final HugeLongArray[] propertyOffsets;
@@ -110,8 +110,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     private final Aggregation[] aggregations;
 
     private DeltaVarLongCompressor(
-        CsrListBuilder.Allocator<byte[]> adjacencyAllocator,
-        CsrListBuilder.Allocator<long[]>[] propertiesAllocators,
+        AdjacencyListBuilder.Allocator<byte[]> adjacencyAllocator,
+        AdjacencyListBuilder.Allocator<long[]>[] propertiesAllocators,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
         HugeLongArray[] propertyOffsets,

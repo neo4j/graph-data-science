@@ -30,12 +30,12 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.BitUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.core.huge.TransientCompressedList.computeAdjacencyByteSize;
+import static org.neo4j.gds.core.huge.CompressedAdjacencyList.computeAdjacencyByteSize;
 import static org.neo4j.gds.core.loading.BumpAllocator.PAGE_MASK;
 import static org.neo4j.gds.core.loading.BumpAllocator.PAGE_SHIFT;
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 
-class TransientCompressedListTest {
+class CompressedAdjacencyListTest {
 
     @Test
     void shouldComputeCompressedMemoryEstimationForSinglePage() {
@@ -45,7 +45,7 @@ class TransientCompressedListTest {
             .maxRelCount(100)
             .build();
 
-        MemoryTree memRec = TransientCompressedList.adjacencyListEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = CompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 500;
@@ -76,7 +76,7 @@ class TransientCompressedListTest {
             .maxRelCount(100_000_000_000L)
             .build();
 
-        MemoryTree memRec = TransientCompressedList.adjacencyListEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = CompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 100_100_000_000L;

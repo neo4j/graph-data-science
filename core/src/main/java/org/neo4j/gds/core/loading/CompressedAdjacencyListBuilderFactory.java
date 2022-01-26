@@ -19,28 +19,29 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.core.huge.TransientUncompressedList;
+import org.neo4j.gds.core.huge.CompressedAdjacencyList;
+import org.neo4j.gds.core.huge.UncompressedAdjacencyList;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
-public final class TransientUncompressedCsrListBuilderFactory implements CsrListBuilderFactory<long[], TransientUncompressedList, long[], TransientUncompressedList> {
+public final class CompressedAdjacencyListBuilderFactory implements AdjacencyListBuilderFactory<byte[], CompressedAdjacencyList, long[], UncompressedAdjacencyList> {
 
-    public static TransientUncompressedCsrListBuilderFactory of(AllocationTracker allocationTracker) {
-        return new TransientUncompressedCsrListBuilderFactory(allocationTracker);
+    public static CompressedAdjacencyListBuilderFactory of(AllocationTracker allocationTracker) {
+        return new CompressedAdjacencyListBuilderFactory(allocationTracker);
     }
 
     private final AllocationTracker allocationTracker;
 
-    private TransientUncompressedCsrListBuilderFactory(AllocationTracker allocationTracker) {
+    private CompressedAdjacencyListBuilderFactory(AllocationTracker allocationTracker) {
         this.allocationTracker = allocationTracker;
     }
 
     @Override
-    public TransientUncompressedListBuilder newAdjacencyListBuilder() {
-        return new TransientUncompressedListBuilder(allocationTracker);
+    public CompressedAdjacencyListBuilder newAdjacencyListBuilder() {
+        return new CompressedAdjacencyListBuilder(allocationTracker);
     }
 
     @Override
-    public TransientUncompressedListBuilder newAdjacencyPropertiesBuilder() {
-        return new TransientUncompressedListBuilder(allocationTracker);
+    public UncompressedAdjacencyListBuilder newAdjacencyPropertiesBuilder() {
+        return new UncompressedAdjacencyListBuilder(allocationTracker);
     }
 }

@@ -22,12 +22,12 @@ package org.neo4j.gds.core.compress;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.huge.TransientCompressedList;
-import org.neo4j.gds.core.huge.TransientUncompressedList;
+import org.neo4j.gds.core.huge.CompressedAdjacencyList;
+import org.neo4j.gds.core.huge.UncompressedAdjacencyList;
+import org.neo4j.gds.core.loading.CompressedAdjacencyListBuilderFactory;
 import org.neo4j.gds.core.loading.DeltaVarLongCompressor;
 import org.neo4j.gds.core.loading.RawCompressor;
-import org.neo4j.gds.core.loading.TransientCompressedCsrListBuilderFactory;
-import org.neo4j.gds.core.loading.TransientUncompressedCsrListBuilderFactory;
+import org.neo4j.gds.core.loading.UncompressedAdjacencyListBuilderFactory;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -35,9 +35,13 @@ import org.neo4j.gds.utils.GdsFeatureToggles;
 import java.util.function.LongSupplier;
 import java.util.stream.Stream;
 
-public interface AdjacencyFactory {
+/**
+ * Manages different configurations of adjacency list building,
+ * i.e., compressed or uncompressed.
+ */
+public interface AdjacencyListBehavior {
 
-    AdjacencyCompressorBlueprint create(
+    AdjacencyCompressorFactory create(
         LongSupplier nodeCountSupplier,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
@@ -45,7 +49,7 @@ public interface AdjacencyFactory {
         AllocationTracker allocationTracker
     );
 
-    default AdjacencyCompressorBlueprint create(
+    default AdjacencyCompressorFactory create(
         LongSupplier nodeCountSupplier,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
@@ -60,17 +64,17 @@ public interface AdjacencyFactory {
         );
     }
 
-    static AdjacencyFactory configured() {
+    static AdjacencyListBehavior asConfigured() {
         return GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
-            ? transientUncompressed()
-            : transientCompressed();
+            ? uncompressed()
+            : compressed();
     }
 
-    static AdjacencyFactory transientCompressed() {
+    static AdjacencyListBehavior compressed() {
         return (nodeCount, propertyMappings, aggregations, noAggregation, allocationTracker) ->
-            DeltaVarLongCompressor.Factory.INSTANCE.create(
+            DeltaVarLongCompressor.Supplier.INSTANCE.get(
                 nodeCount,
-                TransientCompressedCsrListBuilderFactory.of(allocationTracker),
+                CompressedAdjacencyListBuilderFactory.of(allocationTracker),
                 propertyMappings,
                 aggregations,
                 noAggregation,
@@ -78,11 +82,11 @@ public interface AdjacencyFactory {
             );
     }
 
-    static AdjacencyFactory transientUncompressed() {
+    static AdjacencyListBehavior uncompressed() {
         return (nodeCount, propertyMappings, aggregations, noAggregation, allocationTracker) ->
-            RawCompressor.Factory.INSTANCE.create(
+            RawCompressor.Supplier.INSTANCE.get(
                 nodeCount,
-                TransientUncompressedCsrListBuilderFactory.of(allocationTracker),
+                UncompressedAdjacencyListBuilderFactory.of(allocationTracker),
                 propertyMappings,
                 aggregations,
                 noAggregation,
@@ -92,17 +96,17 @@ public interface AdjacencyFactory {
 
     static MemoryEstimation adjacencyListEstimation(long avgDegree, long nodeCount) {
         return GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
-            ? TransientUncompressedList.adjacencyListEstimation(avgDegree, nodeCount)
-            : TransientCompressedList.adjacencyListEstimation(avgDegree, nodeCount);
+            ? UncompressedAdjacencyList.adjacencyListEstimation(avgDegree, nodeCount)
+            : CompressedAdjacencyList.adjacencyListEstimation(avgDegree, nodeCount);
     }
 
     static MemoryEstimation adjacencyListEstimation(RelationshipType relationshipType, boolean undirected) {
         return GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
-            ? TransientUncompressedList.adjacencyListEstimation(relationshipType, undirected)
-            : TransientCompressedList.adjacencyListEstimation(relationshipType, undirected);
+            ? UncompressedAdjacencyList.adjacencyListEstimation(relationshipType, undirected)
+            : CompressedAdjacencyList.adjacencyListEstimation(relationshipType, undirected);
     }
 
     static MemoryEstimation adjacencyPropertiesEstimation(RelationshipType relationshipType, boolean undirected) {
-        return TransientUncompressedList.adjacencyPropertiesEstimation(relationshipType, undirected);
+        return UncompressedAdjacencyList.adjacencyPropertiesEstimation(relationshipType, undirected);
     }
 }

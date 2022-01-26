@@ -19,20 +19,20 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.core.huge.TransientCompressedList;
+import org.neo4j.gds.core.huge.UncompressedAdjacencyList;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfByteArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public final class TransientCompressedListBuilder implements CsrListBuilder<byte[], TransientCompressedList> {
+public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuilder<long[], UncompressedAdjacencyList> {
 
-    private final BumpAllocator<byte[]> builder;
+    private final BumpAllocator<long[]> builder;
 
-    TransientCompressedListBuilder(AllocationTracker allocationTracker) {
+    UncompressedAdjacencyListBuilder(AllocationTracker allocationTracker) {
         this.builder = new BumpAllocator<>(allocationTracker, Factory.INSTANCE);
     }
 
@@ -42,46 +42,46 @@ public final class TransientCompressedListBuilder implements CsrListBuilder<byte
     }
 
     @Override
-    public TransientCompressedList build(HugeIntArray degrees, HugeLongArray offsets) {
+    public UncompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
         var intoPages = builder.intoPages();
         reorder(intoPages, offsets, degrees);
-        return new TransientCompressedList(intoPages, degrees, offsets);
+        return new UncompressedAdjacencyList(intoPages, degrees, offsets);
     }
 
-    private enum Factory implements BumpAllocator.Factory<byte[]> {
+    private enum Factory implements BumpAllocator.Factory<long[]> {
         INSTANCE;
 
         @Override
-        public byte[][] newEmptyPages() {
-            return new byte[0][];
+        public long[][] newEmptyPages() {
+            return new long[0][];
         }
 
         @Override
-        public byte[] newPage(int length) {
-            return new byte[length];
+        public long[] newPage(int length) {
+            return new long[length];
         }
 
         @Override
-        public byte[] copyOfPage(byte[] bytes, int length) {
-            return Arrays.copyOf(bytes, length);
+        public long[] copyOfPage(long[] longs, int length) {
+            return Arrays.copyOf(longs, length);
         }
 
         @Override
-        public int lengthOfPage(byte[] bytes) {
-            return bytes.length;
+        public int lengthOfPage(long[] longs) {
+            return longs.length;
         }
 
         @Override
         public long memorySizeOfPage(int length) {
-            return sizeOfByteArray(length);
+            return sizeOfLongArray(length);
         }
     }
 
-    static final class Allocator implements CsrListBuilder.Allocator<byte[]> {
+    public static final class Allocator implements AdjacencyListBuilder.Allocator<long[]> {
 
-        private final BumpAllocator.LocalAllocator<byte[]> allocator;
+        private final BumpAllocator.LocalAllocator<long[]> allocator;
 
-        private Allocator(BumpAllocator.LocalAllocator<byte[]> allocator) {
+        private Allocator(BumpAllocator.LocalAllocator<long[]> allocator) {
             this.allocator = allocator;
         }
 
@@ -90,8 +90,8 @@ public final class TransientCompressedListBuilder implements CsrListBuilder<byte
         }
 
         @Override
-        public long write(byte[] targets, int length) {
-            return allocator.insert(targets, length);
+        public long write(long[] properties, int length) {
+            return allocator.insert(properties, length);
         }
     }
 }

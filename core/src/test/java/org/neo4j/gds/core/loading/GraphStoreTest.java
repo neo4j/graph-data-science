@@ -40,7 +40,7 @@ import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.huge.TransientCompressedList;
+import org.neo4j.gds.core.huge.CompressedAdjacencyList;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
@@ -151,7 +151,7 @@ class GraphStoreTest extends BaseTest {
             0L,
             Orientation.NATURAL,
             false,
-            new TransientCompressedList(new byte[0][0], HugeIntArray.of(), HugeLongArray.of()),
+            new CompressedAdjacencyList(new byte[0][0], HugeIntArray.of(), HugeLongArray.of()),
             null,
             42.0
         );

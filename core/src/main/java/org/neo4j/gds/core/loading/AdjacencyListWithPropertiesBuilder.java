@@ -22,8 +22,8 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compress.AdjacencyCompressorBlueprint;
-import org.neo4j.gds.core.compress.AdjacencyFactory;
+import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
+import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
@@ -34,7 +34,7 @@ import java.util.function.LongSupplier;
 public final class AdjacencyListWithPropertiesBuilder {
 
     private final RelationshipProjection projection;
-    private final AdjacencyCompressorBlueprint adjacencyCompressor;
+    private final AdjacencyCompressorFactory adjacencyCompressor;
 
     private final LongAdder relationshipCounter;
     private final Aggregation[] aggregations;
@@ -43,7 +43,7 @@ public final class AdjacencyListWithPropertiesBuilder {
 
     public static AdjacencyListWithPropertiesBuilder create(
         LongSupplier nodeCountSupplier,
-        AdjacencyFactory adjacencyFactory,
+        AdjacencyListBehavior adjacencyListBehavior,
         RelationshipProjection projection,
         Map<String, Integer> relationshipPropertyTokens,
         AllocationTracker allocationTracker
@@ -54,7 +54,7 @@ public final class AdjacencyListWithPropertiesBuilder {
 
         return create(
             nodeCountSupplier,
-            adjacencyFactory,
+            adjacencyListBehavior,
             projection,
             aggregations,
             propertyKeyIds,
@@ -65,7 +65,7 @@ public final class AdjacencyListWithPropertiesBuilder {
 
     public static AdjacencyListWithPropertiesBuilder create(
         LongSupplier nodeCountSupplier,
-        AdjacencyFactory adjacencyFactory,
+        AdjacencyListBehavior adjacencyListBehavior,
         RelationshipProjection projection,
         Aggregation[] aggregations,
         int[] propertyKeyIds,
@@ -74,7 +74,7 @@ public final class AdjacencyListWithPropertiesBuilder {
     ) {
         var relationshipCounter = new LongAdder();
 
-        var adjacencyCompressor = adjacencyFactory.create(
+        var adjacencyCompressorFactory = adjacencyListBehavior.create(
             nodeCountSupplier,
             projection.properties(),
             aggregations,
@@ -83,7 +83,7 @@ public final class AdjacencyListWithPropertiesBuilder {
 
         return new AdjacencyListWithPropertiesBuilder(
             projection,
-            adjacencyCompressor,
+            adjacencyCompressorFactory,
             relationshipCounter,
             aggregations,
             propertyKeyIds,
@@ -126,7 +126,7 @@ public final class AdjacencyListWithPropertiesBuilder {
 
     private AdjacencyListWithPropertiesBuilder(
         RelationshipProjection projection,
-        AdjacencyCompressorBlueprint adjacencyCompressor,
+        AdjacencyCompressorFactory adjacencyCompressor,
         LongAdder relationshipCounter,
         Aggregation[] aggregations,
         int[] propertyKeyIds,

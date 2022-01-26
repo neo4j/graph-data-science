@@ -17,22 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.compress;
+package org.neo4j.gds.core.loading;
 
-public interface AdjacencyCompressorBlueprint {
+public interface AdjacencyListBuilderFactory<TARGET_PAGE, TARGET_TYPE, PROPERTY_PAGE, PROPERTY_TYPE> {
 
-    /**
-     * Prepares the compressor for flushing, for example by initializing data structures as they are needed.
-     */
-    void init();
+    AdjacencyListBuilder<TARGET_PAGE, TARGET_TYPE> newAdjacencyListBuilder();
 
-    /**
-     * @return a copy of this blueprint that can be used concurrently with other copies to compress data.
-     */
-    AdjacencyCompressor createCompressor();
-
-    /**
-     * @return the final adjacency list, together with any number of properties, if any.
-     */
-    ImmutableAdjacencyListsWithProperties.Builder build();
+    AdjacencyListBuilder<PROPERTY_PAGE, PROPERTY_TYPE> newAdjacencyPropertiesBuilder();
 }

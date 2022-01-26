@@ -24,7 +24,7 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
-public interface CsrListBuilder<PAGE, T> {
+public interface AdjacencyListBuilder<PAGE, T> {
 
     Allocator<PAGE> newAllocator();
 
