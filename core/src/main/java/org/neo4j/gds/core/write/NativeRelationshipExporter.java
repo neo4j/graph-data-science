@@ -69,32 +69,13 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         Graph graph,
         TerminationFlag terminationFlag
     ) {
-        return new Builder(transactionContext)
+        return new NativeRelationshipExporterBuilder(transactionContext)
             .withGraph(graph)
-            .withIdMap(idMap)
+            .withIdMappingOperator(idMap::toOriginalNodeId)
             .withTerminationFlag(terminationFlag);
     }
 
-    public static final class Builder extends RelationshipExporterBuilder<NativeRelationshipExporter> {
-
-        public Builder(TransactionContext transactionContext) {
-            super(transactionContext);
-        }
-
-        @Override
-        public NativeRelationshipExporter build() {
-            return new NativeRelationshipExporter(
-                transactionContext,
-                graph,
-                toOriginalId,
-                propertyTranslator,
-                terminationFlag,
-                progressTracker
-            );
-        }
-    }
-
-    private NativeRelationshipExporter(
+    NativeRelationshipExporter(
         TransactionContext transactionContext,
         Graph graph,
         LongUnaryOperator toOriginalId,

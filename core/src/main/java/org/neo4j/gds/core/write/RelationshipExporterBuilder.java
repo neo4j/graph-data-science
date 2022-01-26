@@ -20,32 +20,21 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.values.storable.Values;
 
-import java.util.Objects;
 import java.util.function.LongUnaryOperator;
 
 public abstract class RelationshipExporterBuilder<T extends RelationshipExporter> {
 
     public static final int DEFAULT_WRITE_CONCURRENCY = 1;
 
-    protected final TransactionContext transactionContext;
-
     protected LongUnaryOperator toOriginalId;
     protected TerminationFlag terminationFlag;
     protected Graph graph;
-    protected ProgressTracker progressTracker;
-    protected RelationshipPropertyTranslator propertyTranslator;
-
-    protected RelationshipExporterBuilder(TransactionContext transactionContext) {
-        this.transactionContext = Objects.requireNonNull(transactionContext);
-        this.propertyTranslator = Values::doubleValue;
-        this.progressTracker = ProgressTracker.NULL_TRACKER;
-    }
+    protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
+    protected RelationshipPropertyTranslator propertyTranslator = Values::doubleValue;
 
     public abstract T build();
 
@@ -59,9 +48,8 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
         return this;
     }
 
-    public RelationshipExporterBuilder<T> withIdMap(IdMap idMap) {
-        Objects.requireNonNull(idMap);
-        this.toOriginalId = idMap::toOriginalNodeId;
+    public RelationshipExporterBuilder<T> withIdMappingOperator(LongUnaryOperator toOriginalId) {
+        this.toOriginalId = toOriginalId;
         return this;
     }
 

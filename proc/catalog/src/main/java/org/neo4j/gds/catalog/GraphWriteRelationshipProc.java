@@ -104,7 +104,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         );
 
         var builder = relationshipExporterBuilder
-            .withIdMap(graph)
+            .withIdMappingOperator(graph::toOriginalNodeId)
             .withGraph(graph)
             .withTerminationFlag(TerminationFlag.wrap(transaction))
             .withProgressTracker(progressTracker);

@@ -30,7 +30,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.write.NativeRelationshipExporter;
+import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Map;
@@ -178,7 +178,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
             GraphWriteRelationshipProc.class,
             log,
             proc -> {
-                proc.relationshipExporterBuilder = new NativeRelationshipExporter.Builder(TransactionContext.of(proc.api, proc.procedureTransaction));
+                proc.relationshipExporterBuilder = new NativeRelationshipExporterBuilder(TransactionContext.of(proc.api, proc.procedureTransaction));
                 proc.run(TEST_GRAPH_NAME, "NEW_REL1", "newRelProp1", Map.of());
             }
         );

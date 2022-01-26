@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
-import org.neo4j.gds.core.write.NativeRelationshipExporter;
+import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporter;
@@ -71,7 +71,7 @@ final class OpenGdsExportBuildersContextProvider extends LifecycleAdapter {
     }
 
     private static RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder(Context ctx) {
-        return new NativeRelationshipExporter.Builder(transactionContext(ctx));
+        return new NativeRelationshipExporterBuilder(transactionContext(ctx));
     }
 
     private static TransactionContext transactionContext(Context ctx) {

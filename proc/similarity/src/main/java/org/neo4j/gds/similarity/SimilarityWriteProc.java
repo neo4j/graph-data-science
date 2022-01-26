@@ -92,7 +92,7 @@ public abstract class SimilarityWriteProc<
                                 executionContext().taskRegistryFactory()
                             );
                             var exporter = relationshipExporterBuilder
-                                .withIdMap(rootIdMap)
+                                .withIdMappingOperator(rootIdMap::toOriginalNodeId)
                                 .withGraph(similarityGraph)
                                 .withTerminationFlag(algorithm.getTerminationFlag())
                                 .withProgressTracker(progressTracker)

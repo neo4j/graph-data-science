@@ -92,7 +92,7 @@ public abstract class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, 
 
                 relationshipExporterBuilder
                     .withGraph(spanningGraph)
-                    .withIdMap(spanningGraph)
+                    .withIdMappingOperator(spanningGraph::toOriginalNodeId)
                     .withTerminationFlag(prim.getTerminationFlag())
                     .withProgressTracker(progressTracker)
                     .build()

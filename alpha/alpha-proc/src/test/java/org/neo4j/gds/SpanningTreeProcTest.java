@@ -28,7 +28,7 @@ import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.write.NativeRelationshipExporter;
+import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.spanningtree.SpanningTreeProcMax;
 import org.neo4j.gds.spanningtree.SpanningTreeProcMin;
@@ -216,7 +216,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
-            proc.relationshipExporterBuilder = new NativeRelationshipExporter.Builder(
+            proc.relationshipExporterBuilder = new NativeRelationshipExporterBuilder(
                 TransactionContext.of(proc.api, proc.procedureTransaction)
             );
 
