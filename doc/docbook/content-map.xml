@@ -362,6 +362,9 @@
         <d:tocentry linkend="python-client-model-object">
             <?dbhtml filename="python-client/model-object/index.html"?>
         </d:tocentry>
+        <d:tocentry linkend="python-client-known-limitations">
+            <?dbhtml filename="python-client/known-limitations/index.html"?>
+        </d:tocentry>
     </d:tocentry>
 
     <d:tocentry linkend="appendix">
