@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 
-public abstract class AdjacencyBuilderBaseTest {
+public abstract class AdjacencyBufferBaseTest {
 
     protected void testAdjacencyList(AdjacencyFactory adjacencyFactory) {
         var nodeCount = 6;
@@ -50,7 +50,7 @@ public abstract class AdjacencyBuilderBaseTest {
             AllocationTracker.empty()
         );
 
-        AdjacencyBuilder adjacencyBuilder = new AdjacencyBuilderBuilder()
+        AdjacencyBuffer adjacencyBuffer = new AdjacencyBufferBuilder()
             .globalBuilder(globalBuilder)
             .importSizing(ImportSizing.of(1, nodeCount))
             .preAggregate(false)
@@ -67,12 +67,13 @@ public abstract class AdjacencyBuilderBaseTest {
         }
 
         RelationshipImporter relationshipImporter = new RelationshipImporter(
-            adjacencyBuilder, AllocationTracker.empty()
+            adjacencyBuffer,
+            AllocationTracker.empty()
         );
         RelationshipImporter.Imports imports = relationshipImporter.imports(Orientation.NATURAL, false);
         imports.importRelationships(relationshipsBatchBuffer, null);
 
-        adjacencyBuilder.flushTasks().forEach(Runnable::run);
+        adjacencyBuffer.flushTasks().forEach(Runnable::run);
 
         try (var adjacencyList = globalBuilder.build().adjacency()) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {

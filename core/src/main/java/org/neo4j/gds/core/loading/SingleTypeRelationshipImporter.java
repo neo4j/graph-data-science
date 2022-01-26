@@ -29,11 +29,11 @@ import org.neo4j.kernel.api.KernelTransaction;
 import java.util.stream.Stream;
 
 /**
- * Wraps a relationship buffer that is being filled up by the store scanners.
+ * Wraps a relationship buffer that is being filled by the store scanners.
  * Forwards the relationship buffer to the
  * {@link org.neo4j.gds.core.loading.RelationshipImporter}
  * which prepares the buffer content for consumption by the
- * {@link org.neo4j.gds.core.loading.AdjacencyBuilder}.
+ * {@link AdjacencyBuffer}.
  *
  * Each importing thread holds an instance of this class for each relationship
  * type that is being imported.
@@ -73,7 +73,7 @@ public final class SingleTypeRelationshipImporter {
         boolean preAggregate,
         AllocationTracker allocationTracker
     ) {
-        var adjacencyBuilder = new AdjacencyBuilderBuilder()
+        var adjacencyBuilder = new AdjacencyBufferBuilder()
             .globalBuilder(adjacencyListWithPropertiesBuilder)
             .importSizing(importSizing)
             .preAggregate(preAggregate)

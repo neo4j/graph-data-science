@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 
-class TransientUncompressedAdjacencyBuilderTest extends AdjacencyBuilderBaseTest {
+class TransientUncompressedAdjacencyBuilderTest extends AdjacencyBufferBaseTest {
 
     @Test
     void test() throws Exception {
