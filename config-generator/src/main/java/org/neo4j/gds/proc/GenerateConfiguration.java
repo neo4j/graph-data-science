@@ -27,8 +27,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.NameAllocator;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
@@ -58,7 +56,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -78,6 +75,7 @@ import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isTypeOf;
 import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.util.ElementFilter.methodsIn;
+import static org.neo4j.gds.proc.TypeUtil.unwrapOptionalType;
 
 final class GenerateConfiguration {
 
@@ -131,10 +129,16 @@ final class GenerateConfiguration {
             builder.addMethod(constructor);
         }
 
-        builder.addType(defineConfigBuilder(config, packageName, generatedClassName, constructor.parameters));
+        TypeSpec configBuilderClass = new GenerateConfigurationBuilder(messager).defineConfigBuilder(
+            config,
+            packageName,
+            generatedClassName,
+            constructor.parameters
+        );
 
         return builder
             .addMethods(defineGetters(config, fieldDefinitions.names()))
+            .addType(configBuilderClass)
             .build();
     }
 
@@ -581,6 +585,7 @@ final class GenerateConfiguration {
             if (validCandidates.size() > 1) {
                 for (ExecutableElement candidate : validCandidates) {
                     error(
+                        messager,
                         String.format(Locale.ENGLISH,"Method is ambiguous and a possible candidate for [%s]", converter),
                         candidate
                     );
@@ -615,7 +620,7 @@ final class GenerateConfiguration {
         } while (!classesToSearch.isEmpty());
 
         for (InvalidCandidate invalidCandidate : invalidCandidates) {
-            error(String.format(Locale.ENGLISH,invalidCandidate.message(), invalidCandidate.args()), invalidCandidate.element());
+            error(messager, String.format(Locale.ENGLISH,invalidCandidate.message(), invalidCandidate.args()), invalidCandidate.element());
         }
 
         return converterError(
@@ -699,7 +704,7 @@ final class GenerateConfiguration {
                 } else if (isTypeOf(Number.class, targetType)) {
                     builder.methodName("Number");
                 } else if (isTypeOf(Optional.class, targetType)) {
-                    var maybeInnerType  = extractInnerOptionalType(member, (DeclaredType) targetType);
+                    var maybeInnerType  = unwrapOptionalType(member, (DeclaredType) targetType, messager);
 
                     if (maybeInnerType.isPresent()) {
                         builder
@@ -716,7 +721,7 @@ final class GenerateConfiguration {
                 }
                 break;
             default:
-                return error("Unsupported return type: " + targetType, member.method());
+                return error(messager, "Unsupported return type: " + targetType, member.method());
         }
 
         if (member.method().isDefault()) {
@@ -879,24 +884,7 @@ final class GenerateConfiguration {
         return Optional.of(builder.build());
     }
 
-    Optional<ClassName> extractInnerOptionalType(ConfigParser.Member member, DeclaredType declaredType) {
-        if (member.method().isDefault()) {
-            return error(
-                "Optional fields can not to be declared default (Optional.empty is the default).",
-                member.method()
-            );
-        }
-        List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
-        if (typeArguments.isEmpty()) {
-            return error(
-                "Optional must have a Cypher-supported type as type argument, but found none.",
-                member.method()
-            );
-        }
-        return Optional.of(ClassName.get(asTypeElement(typeArguments.get(0))));
-    }
-
-    private <T> Optional<T> error(CharSequence message, Element element) {
+    private static <T> Optional<T> error(Messager messager, CharSequence message, Element element) {
         messager.printMessage(
             Diagnostic.Kind.ERROR,
             message,
@@ -914,145 +902,6 @@ final class GenerateConfiguration {
         );
         return Optional.empty();
     }
-
-    private TypeSpec defineConfigBuilder(
-        ConfigParser.Spec config,
-        String packageName,
-        String generatedClassName,
-        List<ParameterSpec> constructorParameters
-    ) {
-        NameAllocator names = new NameAllocator();
-        ClassName builderClassName = ClassName.get(packageName, generatedClassName + ".Builder");
-        TypeSpec.Builder configBuilderClass = TypeSpec.classBuilder("Builder")
-            .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
-
-        var configFieldName = names.newName("config");
-
-        // add config map to handle config keys
-        configBuilderClass.addField(
-            ParameterizedTypeName.get(Map.class, String.class, Object.class),
-            configFieldName,
-            Modifier.FINAL,
-            Modifier.PRIVATE
-        );
-        configBuilderClass.addMethod(MethodSpec
-            .constructorBuilder()
-            .addStatement("this.$N = new $T<>()", configFieldName, HashMap.class)
-            .addModifiers(Modifier.PUBLIC).build());
-
-
-        // Config Key -> put into a map
-        // config parameter -> set field on builder
-
-        // add parameter fields to builder
-        config.members().stream()
-            .filter(ConfigParser.Member::isConfigParameter)
-            .forEach(parameter -> configBuilderClass.addField(
-                TypeName.get(parameter.method().getReturnType()),
-                parameter.methodName(),
-                Modifier.PRIVATE
-            ));
-
-
-        String cypherMapName = names.newName("cypherMap");
-        String constructorParameterString = constructorParameters
-            .stream()
-            .map(i -> i.name)
-            .collect(Collectors.joining(", "));
-
-        configBuilderClass
-            .addMethods(defineBuilderSetters(config.members(), configFieldName, builderClassName))
-            .addMethod(MethodSpec.methodBuilder("build")
-                .addModifiers(Modifier.PUBLIC)
-                .addCode(CodeBlock.builder()
-                    .addStatement(
-                        "$1T $2N = $1T.create(this.$3N)",
-                        CypherMapWrapper.class,
-                        configFieldName,
-                        configFieldName
-                    )
-                    // TODO call config constructor with parameters + cypher map wrapper
-                    //  .. unless there is a factory -> use factory then (same parameters as constructor)
-                    .addStatement("return new $L($L)", generatedClassName, constructorParameterString).build())
-                .returns(ClassName.get(packageName, generatedClassName)).build())
-            .build();
-
-        return configBuilderClass.build();
-    }
-
-    private List<MethodSpec> defineBuilderSetters(
-        List<ConfigParser.Member> members,
-        String builderConfigMapFieldName,
-        ClassName builderClassName
-    ) {
-        return members.stream()
-            .filter(ConfigParser.Member::isConfigValue)
-            .flatMap(member -> {
-                var setterMethods = Stream.<MethodSpec>builder();
-
-                MethodSpec.Builder setMethodBuilder = MethodSpec.methodBuilder(member.methodName())
-                    .addModifiers(Modifier.PUBLIC)
-                    .addParameter(builderMemberType(member, member.isConfigMapEntry()), member.methodName())
-                    .returns(builderClassName);
-
-                CodeBlock.Builder setterCode = CodeBlock.builder();
-
-                if (member.isConfigMapEntry()) {
-                    setterCode.addStatement(
-                        "this.$N.put(\"$L\", $N)",
-                        builderConfigMapFieldName,
-                        member.lookupKey(),
-                        member.methodName()
-                    );
-                } else {
-                    setterCode.addStatement("this.$1N = $1N", member.methodName());
-                }
-
-                setMethodBuilder.addCode(setterCode.build());
-                setterMethods.add(setMethodBuilder.addStatement("return this").build());
-
-                // for map entries we provide both; for positional arguments only the raw optional version
-                if (member.isConfigMapEntry() && isTypeOf(Optional.class, member.method().getReturnType())) {
-                    var optionalSetterBuilder = MethodSpec.methodBuilder(member.methodName())
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(TypeName.get(member.method().getReturnType()), member.methodName())
-                        .returns(builderClassName);
-
-                    String lambdaVarName = "actual" + member.methodName();
-                    if (member.isConfigMapEntry()) {
-                        optionalSetterBuilder.addStatement(
-                            "$1N.ifPresent($2N -> this.$3N.put(\"$4L\", $2N))",
-                            member.methodName(),
-                            lambdaVarName,
-                            builderConfigMapFieldName,
-                            member.lookupKey()
-                            );
-                    } else {
-                        optionalSetterBuilder.addStatement("$1N.ifPresent($2N ->this.$1N = $2N)", member.methodName(), lambdaVarName);
-                    }
-
-                    setterMethods.add(optionalSetterBuilder.addStatement("return this").build());
-                }
-
-                return setterMethods.build();
-            })
-            .collect(Collectors.toList());
-    }
-
-    private TypeName builderMemberType(ConfigParser.Member member, boolean isConfigMapEntry) {
-        TypeMirror returnType = member.method().getReturnType();
-
-        // for config parameters we don't want to unwrap the Optional
-        if (isConfigMapEntry && isTypeOf(Optional.class, returnType)) {
-            Optional<ClassName> maybeType = extractInnerOptionalType(member, (DeclaredType) returnType);
-            if (maybeType.isPresent()) {
-                return maybeType.get();
-            }
-        }
-
-        return TypeName.get(returnType);
-    }
-
 
     @ValueClass
     interface FieldDefinitions {
