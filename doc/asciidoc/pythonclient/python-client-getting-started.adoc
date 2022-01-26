@@ -37,6 +37,12 @@ print(gds.version())
 
 Alternatively, for use cases where direct access and control of the Neo4j driver is required, one can use the method `GraphDataScience.from_neo4j_driver` for instantiating the gds object.
 
+If we don't want to use the default database of our DBMS, we can specify which one to use:
+
+[source,python]
+----
+gds.set_database("my-db")
+----
 
 == Minimal example
 
