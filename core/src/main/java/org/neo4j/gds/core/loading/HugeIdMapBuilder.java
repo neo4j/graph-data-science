@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
@@ -48,11 +47,8 @@ public final class HugeIdMapBuilder implements IdMapBuilder {
     }
 
     @Override
-    public @Nullable BulkAdder allocate(int batchLength) {
+    public BulkAdder allocate(int batchLength) {
         long startIndex = allocationIndex.getAndAccumulate(batchLength, this::upperAllocation);
-        if (startIndex == capacity) {
-            return null;
-        }
         BulkAdder adder = adders.get();
         adder.reset(startIndex, upperAllocation(startIndex, batchLength));
         return adder;
@@ -82,10 +78,6 @@ public final class HugeIdMapBuilder implements IdMapBuilder {
 
     public HugeLongArray array() {
         return array;
-    }
-
-    public long capacity() {
-        return capacity;
     }
 
     public long size() {

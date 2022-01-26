@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.IntObjectMap;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.utils.RawValues;
@@ -57,10 +56,7 @@ public class NodeImporter {
             return 0;
         }
 
-        @Nullable IdMapAllocator idMapAllocator = idMapBuilder.allocate(batchLength);
-        if (idMapAllocator == null) {
-            return 0;
-        }
+        IdMapAllocator idMapAllocator = idMapBuilder.allocate(batchLength);
 
         //  Since we read the graph size in one transaction and load in multiple
         //  different transactions, any new data that is being added during loading
@@ -70,6 +66,10 @@ public class NodeImporter {
         //  The node loading part only accepts nodes that are within the
         //  calculated capacity that we have available.
         batchLength = idMapAllocator.allocatedSize();
+
+        if (batchLength == 0) {
+            return 0;
+        }
 
         var batch = buffer.batch();
         var properties = buffer.properties();
