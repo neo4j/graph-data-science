@@ -28,15 +28,15 @@ import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 
 @ServiceProvider
-public class GdsExportBuildersExtension extends ExtensionFactory<GdsExportBuildersExtension.Dependencies> {
+public class OpenGdsExportBuildersExtension extends ExtensionFactory<OpenGdsExportBuildersExtension.Dependencies> {
 
-    public GdsExportBuildersExtension() {
+    public OpenGdsExportBuildersExtension() {
         super(ExtensionType.DATABASE, "GDS");
     }
 
     @Override
     public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
-        return new GdsExportBuildersContextProvider(dependencies.globalProcedures());
+        return new OpenGdsExportBuildersContextProvider(dependencies.globalProcedures());
     }
 
     public interface Dependencies {

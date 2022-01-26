@@ -198,5 +198,5 @@ project(':test-utils').projectDir = file('test-utils')
 include('transaction')
 project(':transaction').projectDir = file('transaction')
 
-include('write-services')
-project(':write-services').projectDir = file('write-services')
+include('open-write-services')
+project(':open-write-services').projectDir = file('open-write-services')

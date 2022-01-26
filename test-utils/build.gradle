@@ -24,7 +24,7 @@ dependencies {
     implementation project(':open-model-catalog')
     implementation project(':string-formatting')
     implementation project(':transaction')
-    implementation project(':write-services')
+    implementation project(':open-write-services')
 
     implementation(
         [group: 'org.neo4j',               name: 'neo4j-cypher-dsl',        version: ver.'cypher-dsl'],
