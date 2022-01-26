@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.core;
 
+import org.neo4j.gds.core.loading.GrowingHugeIdMapBuilder;
 import org.neo4j.gds.core.loading.HugeIdMap;
 import org.neo4j.gds.core.loading.HugeIdMapBuilder;
+import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
@@ -29,16 +31,14 @@ import java.util.Optional;
 public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
     @Override
-    public HugeIdMapBuilder create(
+    public IdMapBuilder create(
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount,
         AllocationTracker allocationTracker
     ) {
-        long capacity = nodeCount.orElseGet(() -> maxOriginalId
-            .map(maxId -> maxId + 1)
-            .orElseThrow(() -> new IllegalArgumentException("Either `maxOriginalId` or `nodeCount` must be set")));
-
-        return HugeIdMapBuilder.of(capacity, allocationTracker);
+        return nodeCount.or(() -> maxOriginalId.map(maxId -> maxId + 1))
+            .map(capacity -> (IdMapBuilder) HugeIdMapBuilder.of(capacity, allocationTracker))
+            .orElseGet(() -> GrowingHugeIdMapBuilder.of(allocationTracker));
     }
 
     @Override

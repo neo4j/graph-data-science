@@ -105,7 +105,8 @@ class HugeIdMapTest {
         var hugeIdMapBuilder = HugeIdMapBuilder.of(length, AllocationTracker.empty());
         var emptyLabelInformationBuilder = LabelInformation.emptyBuilder(AllocationTracker.empty());
         var hugeIdMap = HugeIdMapBuilderOps.build(
-            hugeIdMapBuilder,
+            hugeIdMapBuilder.array(),
+            length,
             emptyLabelInformationBuilder,
             highestNeoId,
             1,
