@@ -382,12 +382,10 @@ final class GenerateConfiguration {
         Consumer<CodeBlock> validationConsumer = fieldCodeBuilder::addStatement;
         if (isTypeOf(Optional.class, definition.fieldType())) {
             validationConsumer = validatorCode -> fieldCodeBuilder.addStatement(
-                String.format(
-                    Locale.US,
-                    "%1$s.ifPresent(%1$s -> %2$s)",
-                    definition.fieldName(),
-                    validatorCode
-                ));
+                "$1L.ifPresent($1L -> $2L)",
+                definition.fieldName(),
+                validatorCode
+            );
         } else if (isTypeOf(List.class, definition.fieldType())){
             validationConsumer = validatorCode -> fieldCodeBuilder.addStatement(
                 "this.$1N.forEach($1N -> $2L)",

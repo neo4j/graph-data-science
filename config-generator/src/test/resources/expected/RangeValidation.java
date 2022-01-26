@@ -87,7 +87,7 @@ public final class RangeValidationConfig implements RangeValidation {
                 config.getOptional("maybeDoubleWithinRange", Double.class)
             );
             maybeDoubleWithinRange.ifPresent(maybeDoubleWithinRange ->
-                org.neo4j.gds.core.CypherMapWrapper.validateDoubleRange(
+                CypherMapWrapper.validateDoubleRange(
                     "maybeDoubleWithinRange",
                     maybeDoubleWithinRange,
                     21.0,
