@@ -25,7 +25,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingStreamProc;
 import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingWriteProc;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -230,7 +230,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
             var startNode = proc.procedureTransaction.getNodeById(0);
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
-            proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
+            proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
                 TransactionContext.of(proc.api, proc.procedureTransaction)
             );
 

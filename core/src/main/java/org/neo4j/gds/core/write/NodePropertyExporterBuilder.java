@@ -23,27 +23,19 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
 
 public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter> {
-    protected final TransactionContext transactionContext;
     protected LongUnaryOperator toOriginalId;
     protected long nodeCount;
     protected TerminationFlag terminationFlag;
 
     protected ExecutorService executorService;
-    protected int writeConcurrency;
-    protected ProgressTracker progressTracker;
-
-    protected NodePropertyExporterBuilder(TransactionContext transactionContext) {
-        this.transactionContext = Objects.requireNonNull(transactionContext);
-        this.writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
-        this.progressTracker = ProgressTracker.NULL_TRACKER;
-    }
+    protected int writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
+    protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
 
     public abstract T build();
 

@@ -31,7 +31,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Map;
@@ -148,7 +148,7 @@ class SccProcTest extends BaseProcTest {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
-            proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
+            proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
                 TransactionContext.of(proc.api, proc.procedureTransaction)
             );
 

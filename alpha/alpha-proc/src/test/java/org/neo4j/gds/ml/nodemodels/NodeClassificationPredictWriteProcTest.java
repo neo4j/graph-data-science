@@ -43,7 +43,7 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
@@ -108,7 +108,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
             getProcedureClazz(),
             algoBaseProc -> {
                 var proc = (NodeClassificationPredictWriteProc) algoBaseProc;
-                proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
+                proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
                     TransactionContext.of(
                         proc.api,
                         proc.procedureTransaction

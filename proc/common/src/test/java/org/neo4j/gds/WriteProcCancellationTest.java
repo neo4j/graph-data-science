@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
-import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.executor.ImmutableComputationResult;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -69,7 +69,7 @@ class WriteProcCancellationTest extends BaseTest {
             var resultConsumer = new WriteNodePropertiesComputationResultConsumer<TestAlgorithm, TestAlgorithm, TestWriteConfig, TestResult>(
                 (computationResult, executionContext) -> new TestAlgoResultBuilder(),
                 (computationResult, allocationTracker) -> List.of(nodeProperty),
-                new NativeNodePropertyExporter.Builder(TransactionContext.of(db, tx)),
+                new NativeNodePropertiesExporterBuilder(TransactionContext.of(db, tx)),
                 "foo"
             );
 

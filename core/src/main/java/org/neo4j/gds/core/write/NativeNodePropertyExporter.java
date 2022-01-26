@@ -50,7 +50,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     protected final LongAdder propertiesWritten;
 
     public static NodePropertyExporterBuilder<NativeNodePropertyExporter> builder(TransactionContext transactionContext, IdMap idMap, TerminationFlag terminationFlag) {
-        return new Builder(transactionContext)
+        return new NativeNodePropertiesExporterBuilder(transactionContext)
             .withIdMap(idMap)
             .withTerminationFlag(terminationFlag);
     }
@@ -65,26 +65,6 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
                 nodeProperty.propertyKey(),
                 nodeProperty.properties(),
                 propertyToken
-            );
-        }
-    }
-
-    public static class Builder extends NodePropertyExporterBuilder<NativeNodePropertyExporter> {
-
-        public Builder(TransactionContext transactionContext) {
-            super(transactionContext);
-        }
-
-        @Override
-        public NativeNodePropertyExporter build() {
-            return new NativeNodePropertyExporter(
-                transactionContext,
-                nodeCount,
-                toOriginalId,
-                terminationFlag,
-                progressTracker,
-                writeConcurrency,
-                executorService
             );
         }
     }
