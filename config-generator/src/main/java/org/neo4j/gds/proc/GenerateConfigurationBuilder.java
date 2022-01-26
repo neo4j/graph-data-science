@@ -59,44 +59,49 @@ class GenerateConfigurationBuilder {
         TypeSpec.Builder configBuilderClass = TypeSpec.classBuilder("Builder")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
 
-        // add config map to handle config keys
         configBuilderClass.addField(
             ParameterizedTypeName.get(Map.class, String.class, Object.class),
             configMapParameterName,
             Modifier.FINAL,
             Modifier.PRIVATE
         );
-        configBuilderClass.addMethod(MethodSpec
-            .constructorBuilder()
+
+        configBuilderClass.addMethod(MethodSpec.constructorBuilder()
             .addStatement("this.$N = new $T<>()", configMapParameterName, HashMap.class)
-            .addModifiers(Modifier.PUBLIC).build());
+            .addModifiers(Modifier.PUBLIC).build()
+        );
 
-
-        // Config Key -> put into a map
-        // config parameter -> set field on builder
-
-        // add parameter fields to builder
-        constructorParameters
-            .stream()
+        constructorParameters.stream()
             .filter(p -> !p.name.equals(configMapParameterName))
-            .forEach(parameter -> configBuilderClass.addField(
-                parameter.type,
-                parameter.name,
-                Modifier.PRIVATE
-            ));
+            .forEach(parameter -> configBuilderClass.addField(parameter.type, parameter.name, Modifier.PRIVATE));
 
         // FIXME correct handling of ConvertWith function (use type of convertWith on the builder function instead !
 
+        return configBuilderClass
+            .addMethods(defineConfigParameterSetters(config.members(), builderClassName))
+            .addMethods(defineConfigMapEntrySetters(config.members(), configMapParameterName, builderClassName))
+            .addMethod(defineBuildMethod(config, generatedClassName, constructorParameters, configMapParameterName, maybeFactoryFunction))
+            .build();
+    }
+
+    private static MethodSpec defineBuildMethod(
+        ConfigParser.Spec config,
+        String generatedClassName,
+        List<ParameterSpec> constructorParameters,
+        String configMapParameterName,
+        Optional<MethodSpec> maybeFactoryFunction
+    ) {
         String constructorParameterString = constructorParameters
             .stream()
             .map(param -> param.name)
             .collect(Collectors.joining(", "));
 
         var configCreateStatement = maybeFactoryFunction
-            .map(factoryFunc -> CodeBlock.of("return $L.$L($L)", generatedClassName, factoryFunc.name, constructorParameterString))
+            .map(factoryFunc -> CodeBlock.of("return $L.$L($L)",
+                generatedClassName, factoryFunc.name, constructorParameterString))
             .orElse(CodeBlock.of("return new $L($L)", generatedClassName, constructorParameterString));
-
-        MethodSpec buildMethod = MethodSpec.methodBuilder("build")
+        
+        return MethodSpec.methodBuilder("build")
             .addModifiers(Modifier.PUBLIC)
             .addCode(CodeBlock.builder()
                 .addStatement(
@@ -106,65 +111,71 @@ class GenerateConfigurationBuilder {
                     configMapParameterName
                 ).addStatement(configCreateStatement).build())
             .returns(TypeName.get(config.rootType())).build();
-        
-        return configBuilderClass
-            .addMethods(defineBuilderSetters(config.members(), configMapParameterName, builderClassName))
-            .addMethod(buildMethod)
-            .build();
     }
 
-    private List<MethodSpec> defineBuilderSetters(
+    private static List<MethodSpec> defineConfigParameterSetters(
+        List<ConfigParser.Member> members,
+        ClassName builderClassName
+    ) {
+        // if member -> get actual type by checking whatever the convert with method has
+        return members.stream()
+            .filter(ConfigParser.Member::isConfigParameter)
+            .map(member -> MethodSpec.methodBuilder(member.methodName())
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(TypeName.get(member.method().getReturnType()), member.methodName())
+                .returns(builderClassName)
+                .addCode(CodeBlock.builder()
+                    .addStatement("this.$1N = $1N", member.methodName())
+                    .addStatement("return this")
+                    .build()
+                ).build()
+            )
+            .collect(Collectors.toList());
+    }
+
+    private List<MethodSpec> defineConfigMapEntrySetters(
         List<ConfigParser.Member> members,
         String builderConfigMapFieldName,
         ClassName builderClassName
     ) {
         return members.stream()
-            .filter(ConfigParser.Member::isConfigValue)
+            .filter(ConfigParser.Member::isConfigMapEntry)
             .flatMap(member -> {
+                // TODO if get actual type by checking whatever the convertwith method has supports
                 var setterMethods = Stream.<MethodSpec>builder();
-
                 MethodSpec.Builder setMethodBuilder = MethodSpec.methodBuilder(member.methodName())
                     .addModifiers(Modifier.PUBLIC)
-                    .addParameter(builderMemberType(member, member.isConfigMapEntry()), member.methodName())
-                    .returns(builderClassName);
-
-                CodeBlock.Builder setterCode = CodeBlock.builder();
-
-                if (member.isConfigMapEntry()) {
-                    setterCode.addStatement(
-                        "this.$N.put(\"$L\", $N)",
-                        builderConfigMapFieldName,
-                        member.lookupKey(),
-                        member.methodName()
+                    .addParameter(configEntryValueType(member), member.methodName())
+                    .returns(builderClassName)
+                    .addCode(CodeBlock.builder()
+                        .addStatement(
+                            "this.$N.put(\"$L\", $N)",
+                            builderConfigMapFieldName,
+                            member.lookupKey(),
+                            member.methodName()
+                        )
+                        .addStatement("return this")
+                        .build()
                     );
-                } else {
-                    setterCode.addStatement("this.$1N = $1N", member.methodName());
-                }
 
-                setMethodBuilder.addCode(setterCode.build());
-                setterMethods.add(setMethodBuilder.addStatement("return this").build());
+                setterMethods.add(setMethodBuilder.build());
+                
+                if (isTypeOf(Optional.class, member.method().getReturnType())) {
+                    String lambdaVarName = "actual" + member.methodName();
 
-                // for map entries we provide both; for positional arguments only the raw optional version
-                if (member.isConfigMapEntry() && isTypeOf(Optional.class, member.method().getReturnType())) {
                     var optionalSetterBuilder = MethodSpec.methodBuilder(member.methodName())
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(TypeName.get(member.method().getReturnType()), member.methodName())
-                        .returns(builderClassName);
-
-                    String lambdaVarName = "actual" + member.methodName();
-                    if (member.isConfigMapEntry()) {
-                        optionalSetterBuilder.addStatement(
+                        .returns(builderClassName)
+                        .addStatement(
                             "$1N.ifPresent($2N -> this.$3N.put(\"$4L\", $2N))",
                             member.methodName(),
                             lambdaVarName,
                             builderConfigMapFieldName,
                             member.lookupKey()
-                        );
-                    } else {
-                        optionalSetterBuilder.addStatement("$1N.ifPresent($2N ->this.$1N = $2N)", member.methodName(), lambdaVarName);
-                    }
-
-                    setterMethods.add(optionalSetterBuilder.addStatement("return this").build());
+                        ).addStatement("return this");
+                    
+                    setterMethods.add(optionalSetterBuilder.build());
                 }
 
                 return setterMethods.build();
@@ -172,11 +183,10 @@ class GenerateConfigurationBuilder {
             .collect(Collectors.toList());
     }
 
-    private TypeName builderMemberType(ConfigParser.Member member, boolean isConfigMapEntry) {
+    private TypeName configEntryValueType(ConfigParser.Member member) {
         TypeMirror returnType = member.method().getReturnType();
-
-        // for config parameters we don't want to unwrap the Optional
-        if (isConfigMapEntry && isTypeOf(Optional.class, returnType)) {
+        
+        if (isTypeOf(Optional.class, returnType)) {
             Optional<ClassName> maybeType = unwrapOptionalType(member, (DeclaredType) returnType, messager);
             if (maybeType.isPresent()) {
                 return maybeType.get();

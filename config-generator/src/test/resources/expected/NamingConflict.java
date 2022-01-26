@@ -94,6 +94,11 @@ public final class NamingConflictConfig implements NamingConflict {
             this.config__ = new HashMap<>();
         }
 
+        public NamingConflictConfig.Builder config_(int config_) {
+            this.config_ = config_;
+            return this;
+        }
+
         public NamingConflictConfig.Builder config(int config) {
             this.config__.put("config", config);
             return this;
@@ -101,11 +106,6 @@ public final class NamingConflictConfig implements NamingConflict {
 
         public NamingConflictConfig.Builder anotherConfig(int anotherConfig) {
             this.config__.put("config", anotherConfig);
-            return this;
-        }
-
-        public NamingConflictConfig.Builder config_(int config_) {
-            this.config_ = config_;
             return this;
         }
 

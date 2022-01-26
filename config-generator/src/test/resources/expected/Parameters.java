@@ -104,13 +104,13 @@ public final class ParametersConfig implements Parameters {
             return this;
         }
 
-        public ParametersConfig.Builder keyFromMap(long keyFromMap) {
-            this.config.put("keyFromMap", keyFromMap);
+        public ParametersConfig.Builder parametersAreAddedFirst(int parametersAreAddedFirst) {
+            this.parametersAreAddedFirst = parametersAreAddedFirst;
             return this;
         }
 
-        public ParametersConfig.Builder parametersAreAddedFirst(int parametersAreAddedFirst) {
-            this.parametersAreAddedFirst = parametersAreAddedFirst;
+        public ParametersConfig.Builder keyFromMap(long keyFromMap) {
+            this.config.put("keyFromMap", keyFromMap);
             return this;
         }
 
