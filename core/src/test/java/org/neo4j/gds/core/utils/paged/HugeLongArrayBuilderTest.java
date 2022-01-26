@@ -118,15 +118,11 @@ class HugeLongArrayBuilderTest {
             var allocator = new HugeLongArrayBuilder.Allocator();
             phaser.arriveAndAwaitAdvance();
 
-            System.out.println("thread started" + Thread.currentThread().getId());
-
             for (int i = 0; i < 10_000; i++) {
                 var index = startIndex.getAndAdd(42);
                 idMapBuilder.allocate(index, 42, allocator);
                 allocator.insert(values);
             }
-
-            System.out.println("thread finished" + Thread.currentThread().getId());
         };
 
         var thread1 = new Thread(workload);
