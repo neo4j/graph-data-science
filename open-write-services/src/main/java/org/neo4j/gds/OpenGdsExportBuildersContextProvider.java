@@ -32,11 +32,11 @@ import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
-final class GdsExportBuildersContextProvider extends LifecycleAdapter {
+final class OpenGdsExportBuildersContextProvider extends LifecycleAdapter {
 
     private final GlobalProcedures globalProcedures;
 
-    GdsExportBuildersContextProvider(GlobalProcedures globalProcedures) {
+    OpenGdsExportBuildersContextProvider(GlobalProcedures globalProcedures) {
         this.globalProcedures = globalProcedures;
     }
 
@@ -44,19 +44,19 @@ final class GdsExportBuildersContextProvider extends LifecycleAdapter {
     public void init() {
         globalProcedures.registerComponent(
             NodePropertyExporterBuilder.class,
-            GdsExportBuildersContextProvider::nativeNodePropertyExporterBuilder,
+            OpenGdsExportBuildersContextProvider::nativeNodePropertyExporterBuilder,
             true
         );
 
         globalProcedures.registerComponent(
             RelationshipStreamExporterBuilder.class,
-            GdsExportBuildersContextProvider::relationshipStreamExporterBuilder,
+            OpenGdsExportBuildersContextProvider::relationshipStreamExporterBuilder,
             true
         );
 
         globalProcedures.registerComponent(
             RelationshipExporterBuilder.class,
-            GdsExportBuildersContextProvider::relationshipExporterBuilder,
+            OpenGdsExportBuildersContextProvider::relationshipExporterBuilder,
             true
         );
     }
