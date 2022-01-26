@@ -22,15 +22,12 @@ package org.neo4j.gds.core.loading.nodeproperties;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.collections.HugeSparseArrays;
+import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.values.storable.DoubleArray;
-import org.neo4j.values.storable.FloatArray;
-import org.neo4j.values.storable.FloatingPointValue;
-import org.neo4j.values.storable.IntegralValue;
-import org.neo4j.values.storable.LongArray;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -108,26 +105,29 @@ public final class NodePropertiesFromStoreBuilder {
     // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.
     private synchronized void initializeWithType(Value value) {
         if (innerBuilder.get() == null) {
-            InnerNodePropertiesBuilder newBuilder;
-            if (value instanceof IntegralValue) {
-                newBuilder = LongNodePropertiesBuilder.of(defaultValue, allocationTracker, concurrency);
-            } else if (value instanceof FloatingPointValue) {
-                newBuilder = new DoubleNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
-            } else if (value instanceof LongArray) {
-                newBuilder = new LongArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
-            } else if (value instanceof DoubleArray) {
-                newBuilder = new DoubleArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
-            } else if (value instanceof FloatArray) {
-                newBuilder = new FloatArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
-            } else {
-                throw new UnsupportedOperationException(formatWithLocale(
-                    "Loading of values of type %s is currently not supported",
-                    value.getTypeName()
-                ));
-            }
-
+            var valueType = ValueConverter.valueType(value);
+            var newBuilder = newInnerBuilder(valueType);
             innerBuilder.compareAndSet(null, newBuilder);
         }
     }
 
+    private InnerNodePropertiesBuilder newInnerBuilder(ValueType valueType) {
+        switch (valueType) {
+            case LONG:
+                return LongNodePropertiesBuilder.of(defaultValue, allocationTracker, concurrency);
+            case DOUBLE:
+                return new DoubleNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
+            case DOUBLE_ARRAY:
+                return new DoubleArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
+            case FLOAT_ARRAY:
+                return new FloatArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
+            case LONG_ARRAY:
+                return new LongArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
+            default:
+                throw new UnsupportedOperationException(formatWithLocale(
+                    "Loading of values of type %s is currently not supported",
+                    valueType
+                ));
+        }
+    }
 }

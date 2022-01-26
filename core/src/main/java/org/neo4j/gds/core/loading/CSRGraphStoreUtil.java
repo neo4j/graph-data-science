@@ -41,6 +41,7 @@ import org.neo4j.values.storable.NumberType;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -195,6 +196,34 @@ public final class CSRGraphStoreUtil {
             nodeProperties,
             propertySchemaForKey.defaultValue()
         );
+    }
+
+    public static RelationshipPropertyStore buildRelationshipPropertyStore(
+        List<Relationships> relationships,
+        List<RelationshipPropertySchema> relationshipPropertySchemas
+    ) {
+        assert relationships.size() >= relationshipPropertySchemas.size();
+
+        var propertyStoreBuilder = RelationshipPropertyStore.builder();
+
+        for (int i = 0; i < relationshipPropertySchemas.size(); i++) {
+            var relationship = relationships.get(i);
+            var relationshipPropertySchema = relationshipPropertySchemas.get(i);
+            relationship.properties().ifPresent(properties -> {
+
+                propertyStoreBuilder.putIfAbsent(relationshipPropertySchema.key(), RelationshipProperty.of(
+                        relationshipPropertySchema.key(),
+                        NumberType.FLOATING_POINT,
+                        relationshipPropertySchema.state(),
+                        properties,
+                        relationshipPropertySchema.defaultValue(),
+                        relationshipPropertySchema.aggregation()
+                    )
+                );
+            });
+        }
+
+        return propertyStoreBuilder.build();
     }
 
     private CSRGraphStoreUtil() {}

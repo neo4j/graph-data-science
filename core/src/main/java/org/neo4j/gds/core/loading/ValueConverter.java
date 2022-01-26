@@ -20,10 +20,16 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.kernel.impl.util.ValueUtils;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.ArrayValue;
+import org.neo4j.values.storable.DoubleArray;
 import org.neo4j.values.storable.DoubleValue;
+import org.neo4j.values.storable.FloatArray;
+import org.neo4j.values.storable.FloatingPointValue;
+import org.neo4j.values.storable.IntegralValue;
+import org.neo4j.values.storable.LongArray;
 import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
@@ -33,6 +39,25 @@ import org.neo4j.values.virtual.ListValue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ValueConverter {
+
+    public static ValueType valueType(Value value) {
+        if (value instanceof IntegralValue) {
+            return ValueType.LONG;
+        } else if (value instanceof FloatingPointValue) {
+            return ValueType.DOUBLE;
+        } else if (value instanceof LongArray) {
+            return ValueType.LONG_ARRAY;
+        } else if (value instanceof DoubleArray) {
+            return ValueType.DOUBLE_ARRAY;
+        } else if (value instanceof FloatArray) {
+            return ValueType.FLOAT_ARRAY;
+        } else {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Loading of values of type %s is currently not supported",
+                value.getTypeName()
+            ));
+        }
+    }
 
     public static Value toValue(@NotNull Object valueObject) {
         var value = ValueUtils.of(valueObject);
