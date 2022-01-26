@@ -117,27 +117,18 @@ public final class GraphFactory {
             labelInformation,
             deduplicate,
             allocationTracker
-        )).orElseGet(() -> {
-            boolean nodeProperties = hasProperties.orElse(false);
-            long nodes = nodeCount.orElseGet(() -> maxOriginalId + 1);
-
-            if (nodeProperties && nodes <= 0) {
-                throw new IllegalArgumentException("NodesBuilder with properties requires a node count greater than 0");
-            }
-
-            return new NodesBuilder(
-                maxOriginalId,
-                threadCount,
-                new ObjectIntScatterMap<>(),
-                new IntObjectHashMap<>(),
-                new IntObjectHashMap<>(),
-                idMapBuilder,
-                labelInformation,
-                nodeProperties,
-                deduplicate,
-                allocationTracker
-            );
-        });
+        )).orElseGet(() -> new NodesBuilder(
+            maxOriginalId,
+            threadCount,
+            new ObjectIntScatterMap<>(),
+            new IntObjectHashMap<>(),
+            new IntObjectHashMap<>(),
+            idMapBuilder,
+            labelInformation,
+            hasProperties.orElse(false),
+            deduplicate,
+            allocationTracker
+        ));
     }
 
     private static NodesBuilder fromSchema(
