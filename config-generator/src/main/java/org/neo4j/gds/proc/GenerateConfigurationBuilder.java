@@ -52,25 +52,24 @@ class GenerateConfigurationBuilder {
         ConfigParser.Spec config,
         String packageName,
         String generatedClassName,
-        List<ParameterSpec> constructorParameters
+        List<ParameterSpec> constructorParameters,
+        String configMapParameterName
     ) {
         NameAllocator names = new NameAllocator();
         ClassName builderClassName = ClassName.get(packageName, generatedClassName + ".Builder");
         TypeSpec.Builder configBuilderClass = TypeSpec.classBuilder("Builder")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
 
-        var configFieldName = names.newName("config");
-
         // add config map to handle config keys
         configBuilderClass.addField(
             ParameterizedTypeName.get(Map.class, String.class, Object.class),
-            configFieldName,
+            configMapParameterName,
             Modifier.FINAL,
             Modifier.PRIVATE
         );
         configBuilderClass.addMethod(MethodSpec
             .constructorBuilder()
-            .addStatement("this.$N = new $T<>()", configFieldName, HashMap.class)
+            .addStatement("this.$N = new $T<>()", configMapParameterName, HashMap.class)
             .addModifiers(Modifier.PUBLIC).build());
 
 
@@ -78,31 +77,30 @@ class GenerateConfigurationBuilder {
         // config parameter -> set field on builder
 
         // add parameter fields to builder
-        config.members().stream()
-            .filter(ConfigParser.Member::isConfigParameter)
+        constructorParameters
+            .stream()
+            .filter(p -> !p.name.equals(configMapParameterName))
             .forEach(parameter -> configBuilderClass.addField(
-                TypeName.get(parameter.method().getReturnType()),
-                parameter.methodName(),
+                parameter.type,
+                parameter.name,
                 Modifier.PRIVATE
             ));
 
-
-        String cypherMapName = names.newName("cypherMap");
         String constructorParameterString = constructorParameters
             .stream()
-            .map(i -> i.name)
+            .map(param -> param.name)
             .collect(Collectors.joining(", "));
 
         configBuilderClass
-            .addMethods(defineBuilderSetters(config.members(), configFieldName, builderClassName))
+            .addMethods(defineBuilderSetters(config.members(), configMapParameterName, builderClassName))
             .addMethod(MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
                 .addCode(CodeBlock.builder()
                     .addStatement(
                         "$1T $2N = $1T.create(this.$3N)",
                         CypherMapWrapper.class,
-                        configFieldName,
-                        configFieldName
+                        configMapParameterName,
+                        configMapParameterName
                     )
                     // TODO call config constructor with parameters + cypher map wrapper
                     //  .. unless there is a factory -> use factory then (same parameters as constructor)
