@@ -72,6 +72,7 @@ class ClosenessCentralityDirectedTest {
         ", (d:Node)" +
         ", (e:Node)" +
         ", (f:Node)" +
+        
         ", (a)-[:TYPE]->(b)" +
         ", (b)-[:TYPE]->(a)" +
         ", (c)-[:TYPE]->(b)" +
