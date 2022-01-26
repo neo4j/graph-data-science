@@ -28,6 +28,16 @@ import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.stream.Stream;
 
+/**
+ * Wraps a relationship buffer that is being filled up by the store scanners.
+ * Forwards the relationship buffer to the
+ * {@link org.neo4j.gds.core.loading.RelationshipImporter}
+ * which prepares the buffer content for consumption by the
+ * {@link org.neo4j.gds.core.loading.AdjacencyBuilder}.
+ *
+ * Each importing thread holds an instance of this class for each relationship
+ * type that is being imported.
+ */
 @Value.Style(typeBuilder = "SingleTypeRelationshipImporterFactoryBuilder")
 public final class SingleTypeRelationshipImporter {
 
