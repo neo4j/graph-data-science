@@ -62,4 +62,24 @@ public final class ConvertingParametersConfig implements ConvertingParameters {
     public int parametersAreSubjectToConversion() {
         return this.parametersAreSubjectToConversion;
     }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        private @NotNull String parametersAreSubjectToConversion;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public ConvertingParametersConfig.Builder parametersAreSubjectToConversion(String parametersAreSubjectToConversion) {
+            this.parametersAreSubjectToConversion = parametersAreSubjectToConversion;
+            return this;
+        }
+
+        public ConvertingParametersConfig build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new ConvertingParametersConfig(parametersAreSubjectToConversion);
+        }
+    }
 }

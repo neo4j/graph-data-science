@@ -20,9 +20,10 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -82,5 +83,35 @@ public final class NamingConflictConfig implements NamingConflict {
     @Override
     public int config_() {
         return this.config_;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config__;
+
+        private int config_;
+
+        public Builder() {
+            this.config__ = new HashMap<>();
+        }
+
+        public NamingConflictConfig.Builder config(int config) {
+            this.config__.put("config", config);
+            return this;
+        }
+
+        public NamingConflictConfig.Builder anotherConfig(int anotherConfig) {
+            this.config__.put("config", anotherConfig);
+            return this;
+        }
+
+        public NamingConflictConfig.Builder config_(int config_) {
+            this.config_ = config_;
+            return this;
+        }
+
+        public NamingConflictConfig build() {
+            CypherMapWrapper config__ = CypherMapWrapper.create(this.config__);
+            return new NamingConflictConfig(config_, config__);
+        }
     }
 }

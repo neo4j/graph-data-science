@@ -22,9 +22,10 @@ package positive;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -89,5 +90,35 @@ public final class CollectingKeysConfig implements CollectingKeys {
     @Override
     public Collection<String> configKeys() {
         return Arrays.asList("bar", "baz");
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        private int foo;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public CollectingKeysConfig.Builder foo(int foo) {
+            this.foo = foo;
+            return this;
+        }
+
+        public CollectingKeysConfig.Builder bar(long bar) {
+            this.config.put("bar", bar);
+            return this;
+        }
+
+        public CollectingKeysConfig.Builder baz(double baz) {
+            this.config.put("baz", baz);
+            return this;
+        }
+
+        public CollectingKeysConfig build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new CollectingKeysConfig(foo, config);
+        }
     }
 }

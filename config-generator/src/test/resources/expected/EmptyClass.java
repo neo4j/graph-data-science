@@ -19,11 +19,27 @@
  */
 package positive;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.processing.Generated;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
 public final class EmptyClassConfig implements EmptyClass {
 
     public EmptyClassConfig() {
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public EmptyClassConfig build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new EmptyClassConfig();
+        }
     }
 }

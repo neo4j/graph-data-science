@@ -20,12 +20,12 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -193,5 +193,83 @@ public final class FieldTypesConfig implements FieldTypes {
     @Override
     public Optional<String> anOptional() {
         return this.anOptional;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public FieldTypesConfig.Builder aBoolean(boolean aBoolean) {
+            this.config.put("aBoolean", aBoolean);
+            return this;
+        }
+
+        public FieldTypesConfig.Builder aByte(byte aByte) {
+            this.config.put("aByte", aByte);
+            return this;
+        }
+
+        public FieldTypesConfig.Builder aShort(short aShort) {
+            this.config.put("aShort", aShort);
+            return this;
+        }
+
+        public FieldTypesConfig.Builder anInt(int anInt) {
+            this.config.put("anInt", anInt);
+            return this;
+        }
+
+        public FieldTypesConfig.Builder aLong(long aLong) {
+            this.config.put("aLong", aLong);
+            return this;
+        }
+
+        public FieldTypesConfig.Builder aFloat(float aFloat) {
+            this.config.put("aFloat", aFloat);
+            return this;
+        }
+
+        public FieldTypesConfig.Builder aDouble(double aDouble) {
+            this.config.put("aDouble", aDouble);
+            return this;
+        }
+
+        public FieldTypesConfig.Builder aNumber(Number aNumber) {
+            this.config.put("aNumber", aNumber);
+            return this;
+        }
+
+        public FieldTypesConfig.Builder aString(String aString) {
+            this.config.put("aString", aString);
+            return this;
+        }
+
+        public FieldTypesConfig.Builder aMap(Map<String, Object> aMap) {
+            this.config.put("aMap", aMap);
+            return this;
+        }
+
+        public FieldTypesConfig.Builder aList(List<Object> aList) {
+            this.config.put("aList", aList);
+            return this;
+        }
+
+        public FieldTypesConfig.Builder anOptional(String anOptional) {
+            this.config.put("anOptional", anOptional);
+            return this;
+        }
+
+        public FieldTypesConfig.Builder anOptional(Optional<String> anOptional) {
+            anOptional.ifPresent(actualanOptional -> this.config.put("anOptional", actualanOptional));
+            return this;
+        }
+
+        public FieldTypesConfig build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new FieldTypesConfig(config);
+        }
     }
 }

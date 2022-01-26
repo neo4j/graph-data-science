@@ -20,9 +20,10 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -108,5 +109,43 @@ public final class MyConfigImpl implements Inheritance.MyConfig {
     @Override
     public short inheritedDefaultValue() {
         return this.inheritedDefaultValue;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public MyConfigImpl.Builder baseValue(String baseValue) {
+            this.config.put("baseValue", baseValue);
+            return this;
+        }
+
+        public MyConfigImpl.Builder overriddenValue(int overriddenValue) {
+            this.config.put("overriddenValue", overriddenValue);
+            return this;
+        }
+
+        public MyConfigImpl.Builder overwrittenValue(long overwrittenValue) {
+            this.config.put("overwrittenValue", overwrittenValue);
+            return this;
+        }
+
+        public MyConfigImpl.Builder inheritedValue(double inheritedValue) {
+            this.config.put("inheritedValue", inheritedValue);
+            return this;
+        }
+
+        public MyConfigImpl.Builder inheritedDefaultValue(short inheritedDefaultValue) {
+            this.config.put("inheritedDefaultValue", inheritedDefaultValue);
+            return this;
+        }
+
+        public MyConfigImpl build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new MyConfigImpl(config);
+        }
     }
 }

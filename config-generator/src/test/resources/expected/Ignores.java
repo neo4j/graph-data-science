@@ -20,9 +20,10 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -58,5 +59,23 @@ public final class MyConfigImpl implements Ignores.MyConfig {
     @Override
     public long notIgnored() {
         return this.notIgnored;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public MyConfigImpl.Builder notIgnored(long notIgnored) {
+            this.config.put("notIgnored", notIgnored);
+            return this;
+        }
+
+        public MyConfigImpl build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new MyConfigImpl(config);
+        }
     }
 }

@@ -20,8 +20,11 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
 public final class ParametersOnlyConfig implements ParametersOnly {
@@ -55,5 +58,25 @@ public final class ParametersOnlyConfig implements ParametersOnly {
     @Override
     public int onlyAsParameter() {
         return this.onlyAsParameter;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        private int onlyAsParameter;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public ParametersOnlyConfig.Builder onlyAsParameter(int onlyAsParameter) {
+            this.onlyAsParameter = onlyAsParameter;
+            return this;
+        }
+
+        public ParametersOnlyConfig build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new ParametersOnlyConfig(onlyAsParameter);
+        }
     }
 }

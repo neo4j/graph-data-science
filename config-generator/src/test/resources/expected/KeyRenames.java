@@ -20,9 +20,10 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -70,5 +71,28 @@ public final class KeyRenamesConfig implements KeyRenames {
     @Override
     public int whitespaceWillBeTrimmed() {
         return this.whitespaceWillBeTrimmed;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public KeyRenamesConfig.Builder lookupUnderAnotherKey(int lookupUnderAnotherKey) {
+            this.config.put("key could also be an invalid identifier", lookupUnderAnotherKey);
+            return this;
+        }
+
+        public KeyRenamesConfig.Builder whitespaceWillBeTrimmed(int whitespaceWillBeTrimmed) {
+            this.config.put("whitespace will be trimmed", whitespaceWillBeTrimmed);
+            return this;
+        }
+
+        public KeyRenamesConfig build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new KeyRenamesConfig(config);
+        }
     }
 }

@@ -20,9 +20,10 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -73,5 +74,28 @@ public final class DefaultValuesConfig implements DefaultValues {
     @Override
     public String defaultString() {
         return this.defaultString;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public DefaultValuesConfig.Builder defaultInt(int defaultInt) {
+            this.config.put("defaultInt", defaultInt);
+            return this;
+        }
+
+        public DefaultValuesConfig.Builder defaultString(String defaultString) {
+            this.config.put("defaultString", defaultString);
+            return this;
+        }
+
+        public DefaultValuesConfig build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new DefaultValuesConfig(config);
+        }
     }
 }
