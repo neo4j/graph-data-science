@@ -64,34 +64,51 @@ public interface AdjacencyListBehavior {
         );
     }
 
-    static AdjacencyListBehavior asConfigured() {
+    static AdjacencyCompressorFactory asConfigured(
+        LongSupplier nodeCountSupplier,
+        PropertyMappings propertyMappings,
+        Aggregation[] aggregations,
+        AllocationTracker allocationTracker
+    ) {
+        var noAggregation = Stream.of(aggregations).allMatch(aggregation -> aggregation == Aggregation.NONE);
+
         return GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
-            ? uncompressed()
-            : compressed();
+            ? uncompressed(nodeCountSupplier, propertyMappings, aggregations, noAggregation, allocationTracker)
+            : compressed(nodeCountSupplier, propertyMappings, aggregations, noAggregation, allocationTracker);
     }
 
-    static AdjacencyListBehavior compressed() {
-        return (nodeCount, propertyMappings, aggregations, noAggregation, allocationTracker) ->
-            DeltaVarLongCompressor.Supplier.INSTANCE.get(
-                nodeCount,
-                CompressedAdjacencyListBuilderFactory.of(allocationTracker),
-                propertyMappings,
-                aggregations,
-                noAggregation,
-                allocationTracker
-            );
+    static AdjacencyCompressorFactory compressed(
+        LongSupplier nodeCountSupplier,
+        PropertyMappings propertyMappings,
+        Aggregation[] aggregations,
+        boolean noAggregation,
+        AllocationTracker allocationTracker
+    ) {
+        return DeltaVarLongCompressor.factory(
+            nodeCountSupplier,
+            CompressedAdjacencyListBuilderFactory.of(allocationTracker),
+            propertyMappings,
+            aggregations,
+            noAggregation,
+            allocationTracker
+        );
     }
 
-    static AdjacencyListBehavior uncompressed() {
-        return (nodeCount, propertyMappings, aggregations, noAggregation, allocationTracker) ->
-            RawCompressor.Supplier.INSTANCE.get(
-                nodeCount,
-                UncompressedAdjacencyListBuilderFactory.of(allocationTracker),
-                propertyMappings,
-                aggregations,
-                noAggregation,
-                allocationTracker
-            );
+    static AdjacencyCompressorFactory uncompressed(
+        LongSupplier nodeCountSupplier,
+        PropertyMappings propertyMappings,
+        Aggregation[] aggregations,
+        boolean noAggregation,
+        AllocationTracker allocationTracker
+    ) {
+        return RawCompressor.factory(
+            nodeCountSupplier,
+            UncompressedAdjacencyListBuilderFactory.of(allocationTracker),
+            propertyMappings,
+            aggregations,
+            noAggregation,
+            allocationTracker
+        );
     }
 
     static MemoryEstimation adjacencyListEstimation(long avgDegree, long nodeCount) {

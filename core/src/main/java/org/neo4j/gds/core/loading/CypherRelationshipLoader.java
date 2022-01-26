@@ -35,7 +35,6 @@ import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -248,7 +247,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             AdjacencyListWithPropertiesBuilder builder = AdjacencyListWithPropertiesBuilder.create(
                 idMap::nodeCount,
-                AdjacencyListBehavior.asConfigured(),
                 projection,
                 aggregationsWithDefault,
                 propertyKeyIds,

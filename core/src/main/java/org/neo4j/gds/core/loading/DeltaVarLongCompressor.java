@@ -25,7 +25,6 @@ import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
-import org.neo4j.gds.core.compress.AdjacencyCompressorSupplier;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
@@ -36,71 +35,6 @@ import java.util.function.LongSupplier;
 
 public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
-    public enum Supplier implements AdjacencyCompressorSupplier<byte[], long[]> {
-        INSTANCE;
-
-        @Override
-        public AdjacencyCompressorFactory get(
-            LongSupplier nodeCountSupplier,
-            AdjacencyListBuilderFactory<byte[], ? extends AdjacencyList, long[], ? extends AdjacencyProperties> adjacencyListBuilderFactory,
-            PropertyMappings propertyMappings,
-            Aggregation[] aggregations,
-            boolean noAggregation,
-            AllocationTracker allocationTracker
-        ) {
-            @SuppressWarnings("unchecked")
-            AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings.numberOfMappings()];
-            Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder());
-
-            return new Factory(
-                nodeCountSupplier,
-                adjacencyListBuilderFactory.newAdjacencyListBuilder(),
-                propertyBuilders,
-                noAggregation,
-                aggregations,
-                allocationTracker
-            );
-        }
-    }
-
-    private static final class Factory extends AbstractAdjacencyCompressorFactory<byte[], long[]> {
-
-        Factory(
-            LongSupplier nodeCountSupplier,
-            AdjacencyListBuilder<byte[], ? extends AdjacencyList> adjacencyBuilder,
-            AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
-            boolean noAggregation,
-            Aggregation[] aggregations,
-            AllocationTracker allocationTracker
-        ) {
-            super(
-                nodeCountSupplier,
-                adjacencyBuilder,
-                propertyBuilders,
-                noAggregation,
-                aggregations,
-                allocationTracker
-            );
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public DeltaVarLongCompressor createCompressor() {
-            return new DeltaVarLongCompressor(
-                adjacencyBuilder.newAllocator(),
-                Arrays
-                    .stream(propertyBuilders)
-                    .map(AdjacencyListBuilder::newAllocator)
-                    .toArray(AdjacencyListBuilder.Allocator[]::new),
-                adjacencyDegrees,
-                adjacencyOffsets,
-                propertyOffsets,
-                noAggregation,
-                aggregations
-            );
-        }
-    }
-
     private final AdjacencyListBuilder.Allocator<byte[]> adjacencyAllocator;
     private final AdjacencyListBuilder.Allocator<long[]>[] propertiesAllocators;
     private final HugeIntArray adjacencyDegrees;
@@ -108,6 +42,28 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     private final HugeLongArray[] propertyOffsets;
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
+
+    public static AdjacencyCompressorFactory factory(
+        LongSupplier nodeCountSupplier,
+        AdjacencyListBuilderFactory<byte[], ? extends AdjacencyList, long[], ? extends AdjacencyProperties> adjacencyListBuilderFactory,
+        PropertyMappings propertyMappings,
+        Aggregation[] aggregations,
+        boolean noAggregation,
+        AllocationTracker allocationTracker
+    ) {
+        @SuppressWarnings("unchecked")
+        AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings.numberOfMappings()];
+        Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder());
+
+        return new Factory(
+            nodeCountSupplier,
+            adjacencyListBuilderFactory.newAdjacencyListBuilder(),
+            propertyBuilders,
+            noAggregation,
+            aggregations,
+            allocationTracker
+        );
+    }
 
     private DeltaVarLongCompressor(
         AdjacencyListBuilder.Allocator<byte[]> adjacencyAllocator,
@@ -219,6 +175,44 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             var propertiesAllocator = propertiesAllocators[i];
             long address = propertiesAllocator.write(property, degree);
             offsets[i].set(nodeId, address);
+        }
+    }
+
+    private static final class Factory extends AbstractAdjacencyCompressorFactory<byte[], long[]> {
+
+        Factory(
+            LongSupplier nodeCountSupplier,
+            AdjacencyListBuilder<byte[], ? extends AdjacencyList> adjacencyBuilder,
+            AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
+            boolean noAggregation,
+            Aggregation[] aggregations,
+            AllocationTracker allocationTracker
+        ) {
+            super(
+                nodeCountSupplier,
+                adjacencyBuilder,
+                propertyBuilders,
+                noAggregation,
+                aggregations,
+                allocationTracker
+            );
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public DeltaVarLongCompressor createCompressor() {
+            return new DeltaVarLongCompressor(
+                adjacencyBuilder.newAllocator(),
+                Arrays
+                    .stream(propertyBuilders)
+                    .map(AdjacencyListBuilder::newAllocator)
+                    .toArray(AdjacencyListBuilder.Allocator[]::new),
+                adjacencyDegrees,
+                adjacencyOffsets,
+                propertyOffsets,
+                noAggregation,
+                aggregations
+            );
         }
     }
 }

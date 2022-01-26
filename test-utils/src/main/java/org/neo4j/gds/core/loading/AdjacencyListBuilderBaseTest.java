@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
@@ -35,14 +34,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 
-public abstract class AdjacencyBufferBaseTest {
+public abstract class AdjacencyListBuilderBaseTest {
 
-    protected void testAdjacencyList(AdjacencyListBehavior adjacencyListBehavior) {
+    protected void testAdjacencyList() {
         var nodeCount = 6;
 
         AdjacencyListWithPropertiesBuilder globalBuilder = AdjacencyListWithPropertiesBuilder.create(
             () -> nodeCount,
-            adjacencyListBehavior,
             RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
             new Aggregation[]{Aggregation.NONE},
             new int[0],

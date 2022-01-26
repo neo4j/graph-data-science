@@ -43,7 +43,7 @@ public final class AdjacencyListWithPropertiesBuilder {
 
     public static AdjacencyListWithPropertiesBuilder create(
         LongSupplier nodeCountSupplier,
-        AdjacencyListBehavior adjacencyListBehavior,
+//        AdjacencyListBehavior adjacencyListBehavior,
         RelationshipProjection projection,
         Map<String, Integer> relationshipPropertyTokens,
         AllocationTracker allocationTracker
@@ -54,7 +54,7 @@ public final class AdjacencyListWithPropertiesBuilder {
 
         return create(
             nodeCountSupplier,
-            adjacencyListBehavior,
+//            adjacencyListBehavior,
             projection,
             aggregations,
             propertyKeyIds,
@@ -65,7 +65,7 @@ public final class AdjacencyListWithPropertiesBuilder {
 
     public static AdjacencyListWithPropertiesBuilder create(
         LongSupplier nodeCountSupplier,
-        AdjacencyListBehavior adjacencyListBehavior,
+//        AdjacencyListBehavior adjacencyListBehavior,
         RelationshipProjection projection,
         Aggregation[] aggregations,
         int[] propertyKeyIds,
@@ -74,12 +74,19 @@ public final class AdjacencyListWithPropertiesBuilder {
     ) {
         var relationshipCounter = new LongAdder();
 
-        var adjacencyCompressorFactory = adjacencyListBehavior.create(
+        var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
             nodeCountSupplier,
             projection.properties(),
             aggregations,
             allocationTracker
         );
+
+//        var adjacencyCompressorFactory = adjacencyListBehavior.create(
+//            nodeCountSupplier,
+//            projection.properties(),
+//            aggregations,
+//            allocationTracker
+//        );
 
         return new AdjacencyListWithPropertiesBuilder(
             projection,

@@ -26,7 +26,6 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Map;
@@ -62,7 +61,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
                 Map.Entry::getKey,
                 projectionEntry -> AdjacencyListWithPropertiesBuilder.create(
                     dimensions::nodeCount,
-                    AdjacencyListBehavior.asConfigured(),
                     projectionEntry.getValue(),
                     dimensions.relationshipPropertyTokens(),
                     loadingContext.allocationTracker()

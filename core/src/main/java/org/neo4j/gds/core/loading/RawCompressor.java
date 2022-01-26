@@ -26,7 +26,6 @@ import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
-import org.neo4j.gds.core.compress.AdjacencyCompressorSupplier;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
 import org.neo4j.gds.core.utils.AscendingLongComparator;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -38,71 +37,6 @@ import java.util.function.LongSupplier;
 
 public final class RawCompressor implements AdjacencyCompressor {
 
-    public enum Supplier implements AdjacencyCompressorSupplier<long[], long[]> {
-        INSTANCE;
-
-        @Override
-        public AdjacencyCompressorFactory get(
-            LongSupplier nodeCountSupplier,
-            AdjacencyListBuilderFactory<long[], ? extends AdjacencyList, long[], ? extends AdjacencyProperties> adjacencyListBuilderFactory,
-            PropertyMappings propertyMappings,
-            Aggregation[] aggregations,
-            boolean noAggregation,
-            AllocationTracker allocationTracker
-        ) {
-            @SuppressWarnings("unchecked")
-            AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings.numberOfMappings()];
-            Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder());
-
-            return new Factory(
-                nodeCountSupplier,
-                adjacencyListBuilderFactory.newAdjacencyListBuilder(),
-                propertyBuilders,
-                noAggregation,
-                aggregations,
-                allocationTracker
-            );
-        }
-    }
-
-    private static final class Factory extends AbstractAdjacencyCompressorFactory<long[], long[]> {
-
-        Factory(
-            LongSupplier nodeCountSupplier,
-            AdjacencyListBuilder<long[], ? extends AdjacencyList> adjacencyBuilder,
-            AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
-            boolean noAggregation,
-            Aggregation[] aggregations,
-            AllocationTracker allocationTracker
-        ) {
-            super(
-                nodeCountSupplier,
-                adjacencyBuilder,
-                propertyBuilders,
-                noAggregation,
-                aggregations,
-                allocationTracker
-            );
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public RawCompressor createCompressor() {
-            return new RawCompressor(
-                adjacencyBuilder.newAllocator(),
-                Arrays
-                    .stream(propertyBuilders)
-                    .map(AdjacencyListBuilder::newAllocator)
-                    .toArray(AdjacencyListBuilder.Allocator[]::new),
-                adjacencyDegrees,
-                adjacencyOffsets,
-                propertyOffsets,
-                noAggregation,
-                aggregations
-            );
-        }
-    }
-
     private final AdjacencyListBuilder.Allocator<long[]> adjacencyAllocator;
     private final AdjacencyListBuilder.Allocator<long[]>[] propertiesAllocators;
     private final HugeIntArray adjacencyDegrees;
@@ -110,6 +44,28 @@ public final class RawCompressor implements AdjacencyCompressor {
     private final HugeLongArray[] propertyOffsets;
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
+
+    public static AdjacencyCompressorFactory factory(
+        LongSupplier nodeCountSupplier,
+        AdjacencyListBuilderFactory<long[], ? extends AdjacencyList, long[], ? extends AdjacencyProperties> adjacencyListBuilderFactory,
+        PropertyMappings propertyMappings,
+        Aggregation[] aggregations,
+        boolean noAggregation,
+        AllocationTracker allocationTracker
+    ) {
+        @SuppressWarnings("unchecked")
+        AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings.numberOfMappings()];
+        Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder());
+
+        return new Factory(
+            nodeCountSupplier,
+            adjacencyListBuilderFactory.newAdjacencyListBuilder(),
+            propertyBuilders,
+            noAggregation,
+            aggregations,
+            allocationTracker
+        );
+    }
 
     private RawCompressor(
         AdjacencyListBuilder.Allocator<long[]> adjacencyAllocator,
@@ -291,5 +247,43 @@ public final class RawCompressor implements AdjacencyCompressor {
 
     private long copy(long[] data, int degree, AdjacencyListBuilder.Allocator<long[]> allocator) {
         return allocator.write(data, degree);
+    }
+
+    private static final class Factory extends AbstractAdjacencyCompressorFactory<long[], long[]> {
+
+        Factory(
+            LongSupplier nodeCountSupplier,
+            AdjacencyListBuilder<long[], ? extends AdjacencyList> adjacencyBuilder,
+            AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
+            boolean noAggregation,
+            Aggregation[] aggregations,
+            AllocationTracker allocationTracker
+        ) {
+            super(
+                nodeCountSupplier,
+                adjacencyBuilder,
+                propertyBuilders,
+                noAggregation,
+                aggregations,
+                allocationTracker
+            );
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public RawCompressor createCompressor() {
+            return new RawCompressor(
+                adjacencyBuilder.newAllocator(),
+                Arrays
+                    .stream(propertyBuilders)
+                    .map(AdjacencyListBuilder::newAllocator)
+                    .toArray(AdjacencyListBuilder.Allocator[]::new),
+                adjacencyDegrees,
+                adjacencyOffsets,
+                propertyOffsets,
+                noAggregation,
+                aggregations
+            );
+        }
     }
 }

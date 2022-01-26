@@ -20,12 +20,12 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.compress.AdjacencyListBehavior;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
-class TransientUncompressedAdjacencyBuilderTest extends AdjacencyBufferBaseTest {
+class UncompressedAdjacencyListBuilderTest extends AdjacencyListBuilderBaseTest {
 
     @Test
     void test() throws Exception {
-        testAdjacencyList(AdjacencyListBehavior.uncompressed());
+        GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(this::testAdjacencyList);
     }
 }
