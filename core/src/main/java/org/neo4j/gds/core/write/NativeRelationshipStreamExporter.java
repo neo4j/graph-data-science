@@ -50,32 +50,13 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
         Stream<Relationship> relationships,
         TerminationFlag terminationFlag
     ) {
-        return new Builder(transactionContext)
+        return new NativeRelationshipStreamExporterBuilder(transactionContext)
             .withRelationships(relationships)
-            .withIdMap(idMap)
+            .withIdMappingOperator(idMap::toOriginalNodeId)
             .withTerminationFlag(terminationFlag);
     }
 
-    public static final class Builder extends RelationshipStreamExporterBuilder<NativeRelationshipStreamExporter> {
-
-        public Builder(TransactionContext transactionContext) {
-            super(transactionContext);
-        }
-
-        @Override
-        public NativeRelationshipStreamExporter build() {
-            return new NativeRelationshipStreamExporter(
-                transactionContext,
-                toOriginalId,
-                relationships,
-                batchSize,
-                terminationFlag,
-                progressTracker
-            );
-        }
-    }
-
-    private NativeRelationshipStreamExporter(
+    NativeRelationshipStreamExporter(
         TransactionContext tx,
         LongUnaryOperator toOriginalId,
         Stream<Relationship> relationships,

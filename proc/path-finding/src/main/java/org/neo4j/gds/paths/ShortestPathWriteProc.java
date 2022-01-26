@@ -99,7 +99,7 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<DijkstraResul
                 statement.registerCloseableResource(relationshipStream);
 
                 var exporter = relationshipStreamExporterBuilder
-                    .withIdMap(computationResult.graph())
+                    .withIdMappingOperator(computationResult.graph()::toOriginalNodeId)
                     .withRelationships(relationshipStream)
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .withProgressTracker(progressTracker)

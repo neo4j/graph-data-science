@@ -19,34 +19,26 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.api.IdMap;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.transaction.TransactionContext;
 
-import java.util.Objects;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
 public abstract class RelationshipStreamExporterBuilder<T extends RelationshipStreamExporter> {
-    protected final TransactionContext transactionContext;
     protected Stream<Relationship> relationships;
-    protected int batchSize;
+
+    // FIXME: This looks very dodgy; only being overriden in the Cypher implementation and in some tests...
+    protected int batchSize = (int) NativeNodePropertyExporter.MIN_BATCH_SIZE;
     protected LongUnaryOperator toOriginalId;
     protected TerminationFlag terminationFlag;
-    protected ProgressTracker progressTracker;
-
-    protected RelationshipStreamExporterBuilder(TransactionContext transactionContext) {
-        this.transactionContext = Objects.requireNonNull(transactionContext);
-        this.batchSize = (int) NativeNodePropertyExporter.MIN_BATCH_SIZE;
-        this.progressTracker = ProgressTracker.NULL_TRACKER;
-    }
+    protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
 
     public abstract T build();
 
-    public RelationshipStreamExporterBuilder<T> withIdMap(IdMap idMap) {
-        Objects.requireNonNull(idMap);
-        this.toOriginalId = idMap::toOriginalNodeId;
+    public RelationshipStreamExporterBuilder<T> withIdMappingOperator(LongUnaryOperator toOriginalNodeId) {
+        this.toOriginalId = toOriginalNodeId;
         return this;
     }
 
@@ -60,6 +52,7 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
         return this;
     }
 
+    @TestOnly
     public RelationshipStreamExporterBuilder<T> withBatchSize(int batchSize) {
         this.batchSize = batchSize;
         return this;
