@@ -74,7 +74,7 @@ public final class ParametersOnlyConfig implements ParametersOnly {
             return this;
         }
 
-        public ParametersOnlyConfig build() {
+        public ParametersOnly build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new ParametersOnlyConfig(onlyAsParameter);
         }

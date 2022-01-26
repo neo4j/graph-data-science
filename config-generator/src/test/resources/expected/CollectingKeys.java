@@ -116,7 +116,7 @@ public final class CollectingKeysConfig implements CollectingKeys {
             return this;
         }
 
-        public CollectingKeysConfig build() {
+        public CollectingKeys build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new CollectingKeysConfig(foo, config);
         }

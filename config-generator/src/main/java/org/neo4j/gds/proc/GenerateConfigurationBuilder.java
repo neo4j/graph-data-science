@@ -22,7 +22,6 @@ package org.neo4j.gds.proc;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.NameAllocator;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -53,9 +52,9 @@ class GenerateConfigurationBuilder {
         String packageName,
         String generatedClassName,
         List<ParameterSpec> constructorParameters,
-        String configMapParameterName
+        String configMapParameterName,
+        Optional<MethodSpec> maybeFactoryFunction
     ) {
-        NameAllocator names = new NameAllocator();
         ClassName builderClassName = ClassName.get(packageName, generatedClassName + ".Builder");
         TypeSpec.Builder configBuilderClass = TypeSpec.classBuilder("Builder")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
@@ -86,29 +85,32 @@ class GenerateConfigurationBuilder {
                 Modifier.PRIVATE
             ));
 
+        // FIXME correct handling of ConvertWith function (use type of convertWith on the builder function instead !
+
         String constructorParameterString = constructorParameters
             .stream()
             .map(param -> param.name)
             .collect(Collectors.joining(", "));
 
-        configBuilderClass
-            .addMethods(defineBuilderSetters(config.members(), configMapParameterName, builderClassName))
-            .addMethod(MethodSpec.methodBuilder("build")
-                .addModifiers(Modifier.PUBLIC)
-                .addCode(CodeBlock.builder()
-                    .addStatement(
-                        "$1T $2N = $1T.create(this.$3N)",
-                        CypherMapWrapper.class,
-                        configMapParameterName,
-                        configMapParameterName
-                    )
-                    // TODO call config constructor with parameters + cypher map wrapper
-                    //  .. unless there is a factory -> use factory then (same parameters as constructor)
-                    .addStatement("return new $L($L)", generatedClassName, constructorParameterString).build())
-                .returns(ClassName.get(packageName, generatedClassName)).build())
-            .build();
+        var configCreateStatement = maybeFactoryFunction
+            .map(factoryFunc -> CodeBlock.of("return $L.$L($L)", generatedClassName, factoryFunc.name, constructorParameterString))
+            .orElse(CodeBlock.of("return new $L($L)", generatedClassName, constructorParameterString));
 
-        return configBuilderClass.build();
+        MethodSpec buildMethod = MethodSpec.methodBuilder("build")
+            .addModifiers(Modifier.PUBLIC)
+            .addCode(CodeBlock.builder()
+                .addStatement(
+                    "$1T $2N = $1T.create(this.$3N)",
+                    CypherMapWrapper.class,
+                    configMapParameterName,
+                    configMapParameterName
+                ).addStatement(configCreateStatement).build())
+            .returns(TypeName.get(config.rootType())).build();
+        
+        return configBuilderClass
+            .addMethods(defineBuilderSetters(config.members(), configMapParameterName, builderClassName))
+            .addMethod(buildMethod)
+            .build();
     }
 
     private List<MethodSpec> defineBuilderSetters(

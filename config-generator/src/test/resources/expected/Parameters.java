@@ -114,7 +114,7 @@ public final class ParametersConfig implements Parameters {
             return this;
         }
 
-        public ParametersConfig build() {
+        public Parameters build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new ParametersConfig(keyFromParameter, parametersAreAddedFirst, config);
         }

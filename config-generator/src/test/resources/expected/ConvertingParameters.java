@@ -77,7 +77,7 @@ public final class ConvertingParametersConfig implements ConvertingParameters {
             return this;
         }
 
-        public ConvertingParametersConfig build() {
+        public ConvertingParameters build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new ConvertingParametersConfig(parametersAreSubjectToConversion);
         }

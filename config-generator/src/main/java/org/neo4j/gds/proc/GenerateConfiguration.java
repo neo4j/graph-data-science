@@ -134,7 +134,8 @@ final class GenerateConfiguration {
             packageName,
             generatedClassName,
             constructor.parameters,
-            fieldDefinitions.names().get(CONFIG_VAR)
+            fieldDefinitions.names().get(CONFIG_VAR),
+            factory
         );
 
         return builder

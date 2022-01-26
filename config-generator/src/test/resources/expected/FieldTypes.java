@@ -267,7 +267,7 @@ public final class FieldTypesConfig implements FieldTypes {
             return this;
         }
 
-        public FieldTypesConfig build() {
+        public FieldTypes build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new FieldTypesConfig(config);
         }

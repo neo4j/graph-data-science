@@ -145,7 +145,7 @@ public final class NullableParametersConfig implements NullableParameters {
             return this;
         }
 
-        public NullableParametersConfig build() {
+        public NullableParameters build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new NullableParametersConfig(referenceTypesDefaultToNotNull, referenceTypesCanBeMarkedAsNotNull, referenceTypesCanBeMarkedAsNullable, config);
         }

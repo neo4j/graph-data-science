@@ -109,7 +109,7 @@ public final class NamingConflictConfig implements NamingConflict {
             return this;
         }
 
-        public NamingConflictConfig build() {
+        public NamingConflict build() {
             CypherMapWrapper config__ = CypherMapWrapper.create(this.config__);
             return new NamingConflictConfig(config_, config__);
         }

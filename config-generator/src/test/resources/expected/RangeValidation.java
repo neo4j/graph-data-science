@@ -198,7 +198,7 @@ public final class RangeValidationConfig implements RangeValidation {
             return this;
         }
 
-        public RangeValidationConfig build() {
+        public RangeValidation build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new RangeValidationConfig(config);
         }

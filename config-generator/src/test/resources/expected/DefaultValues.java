@@ -93,7 +93,7 @@ public final class DefaultValuesConfig implements DefaultValues {
             return this;
         }
 
-        public DefaultValuesConfig build() {
+        public DefaultValues build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new DefaultValuesConfig(config);
         }

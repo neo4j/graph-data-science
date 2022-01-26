@@ -37,7 +37,7 @@ public final class EmptyClassConfig implements EmptyClass {
             this.config = new HashMap<>();
         }
 
-        public EmptyClassConfig build() {
+        public EmptyClass build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new EmptyClassConfig();
         }

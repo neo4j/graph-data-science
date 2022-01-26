@@ -165,7 +165,7 @@ public final class ToMapConfig implements ToMap {
             return this;
         }
 
-        public ToMapConfig build() {
+        public ToMap build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new ToMapConfig(foo, config);
         }

@@ -127,7 +127,7 @@ public final class ConversionsConfig implements Conversions.MyConversion {
             return this;
         }
 
-        public ConversionsConfig build() {
+        public Conversions.MyConversion build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new ConversionsConfig(config);
         }

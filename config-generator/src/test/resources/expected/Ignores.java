@@ -73,7 +73,7 @@ public final class MyConfigImpl implements Ignores.MyConfig {
             return this;
         }
 
-        public MyConfigImpl build() {
+        public Ignores.MyConfig build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new MyConfigImpl(config);
         }

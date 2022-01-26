@@ -143,7 +143,7 @@ public final class MyConfigImpl implements Inheritance.MyConfig {
             return this;
         }
 
-        public MyConfigImpl build() {
+        public Inheritance.MyConfig build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new MyConfigImpl(config);
         }

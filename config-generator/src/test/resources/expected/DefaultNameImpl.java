@@ -36,7 +36,7 @@ public final class DefaultNameImpl implements DefaultName {
             this.config = new HashMap<>();
         }
 
-        public DefaultNameImpl build() {
+        public DefaultName build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new DefaultNameImpl();
         }

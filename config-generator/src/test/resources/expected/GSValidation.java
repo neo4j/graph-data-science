@@ -60,7 +60,7 @@ public final class GSValidationConfig implements GSValidation {
             this.config = new HashMap<>();
         }
 
-        public GSValidationConfig build() {
+        public GSValidation build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new GSValidationConfig();
         }

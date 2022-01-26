@@ -115,7 +115,7 @@ public final class NullableFieldsConfig implements NullableFields {
             return this;
         }
 
-        public NullableFieldsConfig build() {
+        public NullableFields build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new NullableFieldsConfig(config);
         }

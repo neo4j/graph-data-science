@@ -85,7 +85,7 @@ public final class ValidationConfig implements Validation {
             return this;
         }
 
-        public ValidationConfig build() {
+        public Validation build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return ValidationConfig.of(config);
         }
