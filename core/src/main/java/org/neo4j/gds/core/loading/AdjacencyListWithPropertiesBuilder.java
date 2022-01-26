@@ -173,8 +173,4 @@ public final class AdjacencyListWithPropertiesBuilder {
     double[] defaultValues() {
         return defaultValues;
     }
-
-    void flush() {
-        adjacencyCompressor.flush();
-    }
 }

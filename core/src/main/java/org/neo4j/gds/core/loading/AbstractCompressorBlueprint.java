@@ -61,16 +61,6 @@ abstract class AbstractCompressorBlueprint<TARGET_PAGE, PROPERTY_PAGE> implement
     }
 
     @Override
-    public void flush() {
-        adjacencyBuilder.flush();
-        for (var propertyBuilder : propertyBuilders) {
-            if (propertyBuilder != null) {
-                propertyBuilder.flush();
-            }
-        }
-    }
-
-    @Override
     public void prepareFlushTasks() {
         var nodeCount = this.nodeCountSupplier.getAsLong();
         this.adjacencyDegrees = HugeIntArray.newArray(nodeCount, this.allocationTracker);

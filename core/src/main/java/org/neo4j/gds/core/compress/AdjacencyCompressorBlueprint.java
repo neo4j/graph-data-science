@@ -32,15 +32,6 @@ public interface AdjacencyCompressorBlueprint {
     AdjacencyCompressor createCompressor();
 
     /**
-     * Implementors may choose to buffer some internal data and only write it intermittently to its final location.
-     * This method is called at the end to ensure that all possible in-flight data can be cleaned up.
-     *
-     * This method might be called multiple times and any other method may be called after a flush.
-     * To release internal data for good, see {@link AdjacencyCompressor#close()}.
-     */
-    void flush();
-
-    /**
      * @return the final adjacency list, together with any number of properties, if any.
      */
     ImmutableAdjacencyListsWithProperties.Builder build();

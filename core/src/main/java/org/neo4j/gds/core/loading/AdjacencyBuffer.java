@@ -213,7 +213,6 @@ public final class AdjacencyBuffer {
                 relationshipCounter
             ));
         }
-        tasks.add(this.globalBuilder::flush);
 
         return tasks;
     }
