@@ -8,6 +8,8 @@ The Python method calls to _create_ the pipelines match their Cypher counterpart
 However, the rest of the pipeline functionality is deferred to methods on the pipeline objects themselves.
 And in addition to the standard GDS calls, there are several methods to query the pipelines for information about them.
 
+include::python-client-gds-object.adoc[]
+
 
 == Node classification
 

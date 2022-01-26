@@ -1,6 +1,8 @@
 [[python-client-algorithms]]
 = Running algorithms
 
+include::python-client-gds-object.adoc[]
+
 Running most algorithms with the Python client is structurally similar to using the Cypher API:
 
 include::python-client-syntax.adoc[]

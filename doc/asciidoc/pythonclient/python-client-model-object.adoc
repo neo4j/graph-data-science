@@ -7,8 +7,7 @@ Models of the <<model-catalog-ops, GDS Model Catalog>> are represented as `Model
 Once created, the `Model` objects can be passed as arguments to methods in the Python client, such as the <<model-catalog-ops, model catalog operations>>.
 Additionally, the `Model` objects have convenience methods allowing for inspection of the models represented without explicitly involving the model catalog.
 
-In the examples below we suppose that we have an instantiated `GraphDataScience` object called `gds`.
-Read more about this in <<python-client-getting-started>>.
+include::python-client-gds-object.adoc[]
 
 
 [[python-client-model-object-constructing]]

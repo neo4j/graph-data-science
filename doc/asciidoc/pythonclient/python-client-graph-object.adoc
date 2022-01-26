@@ -8,8 +8,7 @@ We call these references `Graph` objects.
 Once created, the `Graph` objects can be passed as arguments to other methods in the Python client, for example for running algorithms or training machine learning models.
 Additionally, the `Graph` objects have convenience methods allowing for inspection of the projected graph represented without explicitly involving the graph catalog.
 
-In the examples below we suppose that we have an instantiated `GraphDataScience` object called `gds`.
-Read more about this in <<python-client-getting-started>>.
+include::python-client-gds-object.adoc[]
 
 
 == Constructing a graph object
