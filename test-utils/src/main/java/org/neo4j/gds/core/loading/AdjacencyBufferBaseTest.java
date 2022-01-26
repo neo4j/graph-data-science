@@ -73,7 +73,7 @@ public abstract class AdjacencyBufferBaseTest {
         RelationshipImporter.Imports imports = relationshipImporter.imports(Orientation.NATURAL, false);
         imports.importRelationships(relationshipsBatchBuffer, null);
 
-        adjacencyBuffer.flushTasks().forEach(Runnable::run);
+        adjacencyBuffer.adjacencyListBuilderTasks().forEach(Runnable::run);
 
         try (var adjacencyList = globalBuilder.build().adjacency()) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {

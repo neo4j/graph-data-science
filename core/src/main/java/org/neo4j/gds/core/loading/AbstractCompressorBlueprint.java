@@ -61,7 +61,7 @@ abstract class AbstractCompressorBlueprint<TARGET_PAGE, PROPERTY_PAGE> implement
     }
 
     @Override
-    public void prepareFlushTasks() {
+    public void init() {
         var nodeCount = this.nodeCountSupplier.getAsLong();
         this.adjacencyDegrees = HugeIntArray.newArray(nodeCount, this.allocationTracker);
         this.adjacencyOffsets = HugeLongArray.newArray(nodeCount, this.allocationTracker);

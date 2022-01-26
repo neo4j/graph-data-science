@@ -48,10 +48,6 @@ public final class TransientUncompressedListBuilder implements CsrListBuilder<lo
         return new TransientUncompressedList(intoPages, degrees, offsets);
     }
 
-    @Override
-    public void flush() {
-    }
-
     private enum Factory implements BumpAllocator.Factory<long[]> {
         INSTANCE;
 

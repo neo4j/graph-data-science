@@ -200,13 +200,13 @@ public final class AdjacencyBuffer {
         }
     }
 
-    Collection<Runnable> flushTasks() {
-        this.globalBuilder.prepareFlushTasks();
+    Collection<AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
+        this.globalBuilder.prepareAdjacencyListBuilderTasks();
 
-        var tasks = new ArrayList<Runnable>(localBuilders.length + 1);
+        var tasks = new ArrayList<AdjacencyListBuilderTask>(localBuilders.length + 1);
         for (int page = 0; page < localBuilders.length; page++) {
             long baseNodeId = ((long) page) << pageShift;
-            tasks.add(new FlushTask(
+            tasks.add(new AdjacencyListBuilderTask(
                 baseNodeId,
                 localBuilders[page],
                 compressedAdjacencyLists[page],
@@ -236,7 +236,7 @@ public final class AdjacencyBuffer {
     /**
      * Responsible for writing a page of CompressedLongArrays into the adjacency list.
      */
-    private static final class FlushTask implements Runnable {
+    static final class AdjacencyListBuilderTask implements Runnable {
 
         private final long baseNodeId;
         private final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder;
@@ -245,7 +245,7 @@ public final class AdjacencyBuffer {
         private final LongArrayBuffer buffer;
         private final LongAdder relationshipCounter;
 
-        FlushTask(
+        AdjacencyListBuilderTask(
             long baseNodeId,
             ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder,
             CompressedLongArray[] compressedLongArrays,

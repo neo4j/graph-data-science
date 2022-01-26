@@ -169,8 +169,8 @@ public class RelationshipImporter {
         );
     }
 
-    Collection<Runnable> flushTasks() {
-        return adjacencyBuffer.flushTasks();
+    Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
+        return adjacencyBuffer.adjacencyListBuilderTasks();
     }
 
     PropertyReader storeBackedPropertiesReader(KernelTransaction kernelTransaction) {

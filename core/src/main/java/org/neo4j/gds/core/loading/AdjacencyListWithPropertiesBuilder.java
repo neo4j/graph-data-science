@@ -144,8 +144,8 @@ public final class AdjacencyListWithPropertiesBuilder {
         return new ThreadLocalRelationshipsBuilder(adjacencyCompressor);
     }
 
-    void prepareFlushTasks() {
-        this.adjacencyCompressor.prepareFlushTasks();
+    void prepareAdjacencyListBuilderTasks() {
+        this.adjacencyCompressor.init();
     }
 
     LongAdder relationshipCounter() {

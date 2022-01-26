@@ -21,16 +21,14 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.core.utils.PageReordering;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 public interface CsrListBuilder<PAGE, T> {
 
     Allocator<PAGE> newAllocator();
 
     T build(HugeIntArray degrees, HugeLongArray offsets);
-
-    void flush();
 
     interface Allocator<PAGE> extends AutoCloseable {
 

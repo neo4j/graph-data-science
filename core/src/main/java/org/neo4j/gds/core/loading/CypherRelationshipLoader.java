@@ -185,10 +185,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     @Override
     LoadResult result() {
-        List<Runnable> flushTasks = loaderContext.importerFactoriesByType
+        var flushTasks = loaderContext.importerFactoriesByType
             .values()
             .stream()
-            .flatMap(SingleTypeRelationshipImporter.Factory::createFlushTasks)
+            .flatMap(factory -> factory.adjacencyListBuilderTasks().stream())
             .collect(Collectors.toList());
 
         ParallelUtil.run(flushTasks, loadingContext.executor());

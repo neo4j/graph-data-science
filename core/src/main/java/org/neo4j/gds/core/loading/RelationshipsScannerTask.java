@@ -88,9 +88,9 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         }
 
         @Override
-        public Collection<Runnable> flushTasks() {
+        public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
             return importerFactories.stream()
-                .flatMap(SingleTypeRelationshipImporter.Factory::createFlushTasks)
+                .flatMap(factory -> factory.adjacencyListBuilderTasks().stream())
                 .collect(Collectors.toList());
         }
     }

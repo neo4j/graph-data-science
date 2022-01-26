@@ -26,7 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.api.KernelTransaction;
 
-import java.util.stream.Stream;
+import java.util.Collection;
 
 /**
  * Wraps a relationship buffer that is being filled by the store scanners.
@@ -117,8 +117,8 @@ public final class SingleTypeRelationshipImporter {
             this.loadProperties = loadProperties;
         }
 
-        public Stream<Runnable> createFlushTasks() {
-            return importer.flushTasks().stream();
+        public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
+            return importer.adjacencyListBuilderTasks();
         }
 
         public SingleTypeRelationshipImporter createImporter(
