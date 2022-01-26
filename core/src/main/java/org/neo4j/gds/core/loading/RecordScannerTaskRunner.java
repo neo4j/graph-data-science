@@ -24,7 +24,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 
 final class RecordScannerTaskRunner {
@@ -77,37 +76,5 @@ final class RecordScannerTaskRunner {
         RecordScannerTask create(int taskIndex);
 
         Collection<Runnable> flushTasks();
-    }
-
-    public static RecordScannerTaskFactory createEmptyTaskScannerFactory() {
-        return NoRecordsScannerTaskFactory.INSTANCE;
-    }
-
-    private static final class NoRecordsScannerTaskFactory implements RecordScannerTask, RecordScannerTaskFactory {
-        private static final RecordScannerTaskFactory INSTANCE = new NoRecordsScannerTaskFactory();
-
-        @Override
-        public long propertiesImported() {
-            return 0;
-        }
-
-        @Override
-        public long recordsImported() {
-            return 0L;
-        }
-
-        @Override
-        public void run() {
-        }
-
-        @Override
-        public RecordScannerTask create(final int taskIndex) {
-            return this;
-        }
-
-        @Override
-        public Collection<Runnable> flushTasks() {
-            return Collections.emptyList();
-        }
     }
 }

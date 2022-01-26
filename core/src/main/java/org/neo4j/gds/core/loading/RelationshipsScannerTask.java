@@ -29,8 +29,6 @@ import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class RelationshipsScannerTask extends StatementAction implements RecordScannerTask {
@@ -42,20 +40,12 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         StoreScanner<RelationshipReference> scanner,
         Collection<SingleTypeRelationshipImporter.Factory> importerFactories
     ) {
-        // TODO: why do we have this null check?
-        List<SingleTypeRelationshipImporter.Factory> factories = importerFactories
-            .stream()
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-        if (importerFactories.isEmpty()) {
-            return RecordScannerTaskRunner.createEmptyTaskScannerFactory();
-        }
         return new Factory(
             loadingContext.transactionContext(),
             progressTracker,
             idMap,
             scanner,
-            factories,
+            importerFactories,
             loadingContext.terminationFlag()
         );
     }
@@ -65,7 +55,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         private final ProgressTracker progressTracker;
         private final IdMap idMap;
         private final StoreScanner<RelationshipReference> scanner;
-        private final List<SingleTypeRelationshipImporter.Factory> importerFactories;
+        private final Collection<SingleTypeRelationshipImporter.Factory> importerFactories;
         private final TerminationFlag terminationFlag;
 
         Factory(
@@ -73,7 +63,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             ProgressTracker progressTracker,
             IdMap idMap,
             StoreScanner<RelationshipReference> scanner,
-            List<SingleTypeRelationshipImporter.Factory> importerFactories,
+            Collection<SingleTypeRelationshipImporter.Factory> importerFactories,
             TerminationFlag terminationFlag
         ) {
             this.tx = tx;
@@ -110,7 +100,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
     private final IdMap idMap;
     private final StoreScanner<RelationshipReference> scanner;
     private final int taskIndex;
-    private final List<SingleTypeRelationshipImporter.Factory> importerFactories;
+    private final Collection<SingleTypeRelationshipImporter.Factory> importerFactories;
 
     private long relationshipsImported;
     private long weightsImported;
@@ -122,7 +112,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         IdMap idMap,
         StoreScanner<RelationshipReference> scanner,
         int taskIndex,
-        List<SingleTypeRelationshipImporter.Factory> importerFactories
+        Collection<SingleTypeRelationshipImporter.Factory> importerFactories
     ) {
         super(tx);
         this.terminationFlag = terminationFlag;
@@ -141,20 +131,19 @@ public final class RelationshipsScannerTask extends StatementAction implements R
     @Override
     public void accept(KernelTransaction transaction) {
         try (StoreScanner.ScanCursor<RelationshipReference> cursor = scanner.createCursor(transaction)) {
-            List<SingleTypeRelationshipImporter> importers = this.importerFactories.stream()
+            // create an importer (includes a dedicated batch buffer) for each relationship type that we load
+            var importers = this.importerFactories.stream()
                 .map(imports -> imports.createImporter(idMap, scanner.bufferSize(), transaction))
                 .collect(Collectors.toList());
 
-            RelationshipsBatchBuffer[] buffers = importers
-                    .stream()
-                    .map(SingleTypeRelationshipImporter::buffer)
-                    .toArray(RelationshipsBatchBuffer[]::new);
-
-            RecordsBatchBuffer<RelationshipReference> buffer = CompositeRelationshipsBatchBuffer.of(buffers);
+            var compositeBuffer = CompositeRelationshipsBatchBuffer.of(importers
+                .stream()
+                .map(SingleTypeRelationshipImporter::buffer)
+                .toArray(RelationshipsBatchBuffer[]::new));
 
             long allImportedRels = 0L;
             long allImportedWeights = 0L;
-            while (buffer.scan(cursor)) {
+            while (compositeBuffer.scan(cursor)) {
                 terminationFlag.assertRunning();
                 long imported = 0L;
                 for (SingleTypeRelationshipImporter importer : importers) {

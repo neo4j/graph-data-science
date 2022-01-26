@@ -132,6 +132,22 @@ class CypherFactoryTest extends BaseTest {
     }
 
     @Test
+    void testLoadZeroRelationshipsCypher() {
+        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
+        String relStatement = "MATCH (n)-[r:DOES_NOT_EXIST]->(m) RETURN id(n) AS source, id(m) AS target";
+
+        CypherLoaderBuilder builder = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery(nodeStatement)
+            .relationshipQuery(relStatement);
+
+        Graph graph = applyInTransaction(db, tx -> builder.build().graph());
+
+        assertThat(graph.nodeCount()).isEqualTo(COUNT);
+        assertThat(graph.relationshipCount()).isEqualTo(0);
+    }
+
+    @Test
     void doubleListNodeProperty() {
         var nodeQuery = "RETURN 0 AS id, [1.3, 3.7] AS list";
 

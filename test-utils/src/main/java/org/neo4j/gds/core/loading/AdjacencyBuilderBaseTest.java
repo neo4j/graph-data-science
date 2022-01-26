@@ -33,13 +33,15 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.core.loading.AdjacencyBuilder.IGNORE_VALUE;
+import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 
 public abstract class AdjacencyBuilderBaseTest {
 
     protected void testAdjacencyList(AdjacencyFactory adjacencyFactory) {
+        var nodeCount = 6;
+
         AdjacencyListWithPropertiesBuilder globalBuilder = AdjacencyListWithPropertiesBuilder.create(
-            () -> 6,
+            () -> nodeCount,
             adjacencyFactory,
             RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
             new Aggregation[]{Aggregation.NONE},
@@ -48,14 +50,13 @@ public abstract class AdjacencyBuilderBaseTest {
             AllocationTracker.empty()
         );
 
-        AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
-            globalBuilder,
-            1,
-            8,
-            AllocationTracker.empty(),
-            false
-        );
-        long nodeCount = 6;
+        AdjacencyBuilder adjacencyBuilder = new AdjacencyBuilderBuilder()
+            .globalBuilder(globalBuilder)
+            .importSizing(ImportSizing.of(1, nodeCount))
+            .preAggregate(false)
+            .allocationTracker(AllocationTracker.empty())
+            .build();
+
         DirectIdMap idMap = new DirectIdMap(nodeCount);
 
         RelationshipsBatchBuffer relationshipsBatchBuffer = new RelationshipsBatchBuffer(idMap, -1, 10);
@@ -96,10 +97,9 @@ public abstract class AdjacencyBuilderBaseTest {
         properties[0] = new long[]{1, 1, 1, 1, 1, 1};
         properties[1] = new long[]{1, 2, 3, 4, 5, 6};
 
-
         var aggregations = new Aggregation[]{Aggregation.SUM, Aggregation.MAX};
 
-        AdjacencyBuilder.aggregate(values, properties, 0, values.length, aggregations);
+        AdjacencyPreAggregation.preAggregate(values, properties, 0, values.length, aggregations);
 
         assertArrayEquals(
             new long[]{3, 1, 2, IGNORE_VALUE, IGNORE_VALUE, IGNORE_VALUE},

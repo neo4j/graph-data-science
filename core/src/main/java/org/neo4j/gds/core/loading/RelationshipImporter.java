@@ -222,7 +222,7 @@ public class RelationshipImporter {
         RelationshipsBatchBuffer buffer,
         long[] batch,
         long[][] properties,
-        AdjacencyBuilder adjacency
+        AdjacencyBuilder adjacencyBuilder
     ) {
         int batchLength = buffer.length();
 
@@ -245,7 +245,7 @@ public class RelationshipImporter {
         }
         offsets[nodesLength++] = offset;
 
-        adjacency.addAll(
+        adjacencyBuilder.addAll(
             batch,
             targets,
             properties,

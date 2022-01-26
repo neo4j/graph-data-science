@@ -24,7 +24,7 @@ import org.neo4j.gds.mem.BitUtil;
 
 import java.util.Arrays;
 
-import static org.neo4j.gds.core.loading.AdjacencyBuilder.IGNORE_VALUE;
+import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.gds.core.loading.VarLongEncoding.zigZag;
