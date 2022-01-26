@@ -42,13 +42,11 @@ import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.AdjacencyBuilder;
 import org.neo4j.gds.core.loading.AdjacencyListWithPropertiesBuilder;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
-import org.neo4j.gds.core.loading.RelationshipImporter;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterFactoryBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
@@ -59,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.IntStream;
 
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
@@ -254,14 +251,10 @@ public final class GraphFactory {
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
         var importSizing = ImportSizing.of(concurrency.orElse(1), nodes.rootNodeCount());
-        int pageSize = importSizing.pageSize();
-        int numberOfPages = importSizing.numberOfPages();
         int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
         if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
             bufferSize = (int) nodes.rootNodeCount();
         }
-
-        var relationshipCounter = new LongAdder();
 
         var adjacencyListWithPropertiesBuilder = AdjacencyListWithPropertiesBuilder.create(
             nodes::rootNodeCount,
@@ -273,25 +266,15 @@ public final class GraphFactory {
             allocationTracker
         );
 
-        AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
-            adjacencyListWithPropertiesBuilder,
-            numberOfPages,
-            pageSize,
-            allocationTracker,
-            relationshipCounter,
-            preAggregate.orElse(false)
-        );
-
-        var relationshipImporter = new RelationshipImporter(allocationTracker, adjacencyBuilder);
-
-        var importerBuilder = new SingleTypeRelationshipImporter.Builder(
-            relationshipType,
-            projection,
-            NO_SUCH_RELATIONSHIP_TYPE,
-            relationshipImporter,
-            relationshipCounter,
-            false
-        ).loadImporter(loadRelationshipProperties);
+        var importerFactory = new SingleTypeRelationshipImporterFactoryBuilder()
+            .adjacencyListWithPropertiesBuilder(adjacencyListWithPropertiesBuilder)
+            .typeToken(NO_SUCH_RELATIONSHIP_TYPE)
+            .projection(projection)
+            .importSizing(importSizing)
+            .validateRelationships(false)
+            .preAggregate(preAggregate.orElse(false))
+            .allocationTracker(allocationTracker)
+            .build();
 
         return new RelationshipsBuilder(
             nodes,
@@ -299,8 +282,7 @@ public final class GraphFactory {
             bufferSize,
             propertyKeyIds,
             adjacencyListWithPropertiesBuilder,
-            importerBuilder,
-            relationshipCounter,
+            importerFactory,
             loadRelationshipProperties,
             isMultiGraph,
             concurrency.orElse(1),

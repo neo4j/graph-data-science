@@ -19,126 +19,127 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.immutables.value.Value;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.api.KernelTransaction;
 
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
+@Value.Style(typeBuilder = "SingleTypeRelationshipImporterFactoryBuilder")
 public final class SingleTypeRelationshipImporter {
 
     private final RelationshipImporter.Imports imports;
     private final RelationshipImporter.PropertyReader propertyReader;
-    private final RelationshipsBatchBuffer buffer;
+    private final RelationshipsBatchBuffer relationshipsBatchBuffer;
 
     private SingleTypeRelationshipImporter(
-            RelationshipImporter.Imports imports,
-            RelationshipImporter.PropertyReader propertyReader,
-            RelationshipsBatchBuffer buffer) {
+        RelationshipImporter.Imports imports,
+        RelationshipImporter.PropertyReader propertyReader,
+        RelationshipsBatchBuffer relationshipsBatchBuffer
+    ) {
         this.imports = imports;
         this.propertyReader = propertyReader;
-        this.buffer = buffer;
+        this.relationshipsBatchBuffer = relationshipsBatchBuffer;
     }
 
     public RelationshipsBatchBuffer buffer() {
-        return buffer;
+        return relationshipsBatchBuffer;
     }
 
     public long importRelationships() {
-        return imports.importRelationships(buffer, propertyReader);
+        return imports.importRelationships(relationshipsBatchBuffer, propertyReader);
     }
 
-    public static class Builder {
+    @org.immutables.builder.Builder.Factory
+    public static Factory builder(
+        AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
+        RelationshipProjection projection,
+        int typeToken,
+        boolean validateRelationships,
+        ImportSizing importSizing,
+        boolean preAggregate,
+        AllocationTracker allocationTracker
+    ) {
+        var adjacencyBuilder = AdjacencyBuilder.compressing(
+            adjacencyListWithPropertiesBuilder,
+            importSizing.numberOfPages(),
+            importSizing.pageSize(),
+            allocationTracker,
+            preAggregate
+        );
 
-        private final RelationshipType relationshipType;
-        private final RelationshipProjection projection;
-        private final RelationshipImporter importer;
-        private final LongAdder relationshipCounter;
+        var relationshipImporter = new RelationshipImporter(adjacencyBuilder, allocationTracker);
+        var loadProperties = projection.properties().hasMappings();
+        var imports = relationshipImporter.imports(projection.orientation(), loadProperties);
+
+        return new Factory(
+            typeToken,
+            relationshipImporter,
+            imports,
+            validateRelationships,
+            loadProperties
+        );
+    }
+
+    public static final class Factory {
+
         private final int typeId;
+
+        private final RelationshipImporter importer;
+        private final RelationshipImporter.Imports imports;
+
         private final boolean validateRelationships;
         private final boolean loadProperties;
 
-        public Builder(
-            RelationshipType relationshipType,
-            RelationshipProjection projection,
+        private Factory(
             int typeToken,
             RelationshipImporter importer,
-            LongAdder relationshipCounter,
-            boolean validateRelationships
+            RelationshipImporter.Imports imports,
+            boolean validateRelationships,
+            boolean loadProperties
         ) {
-            this.relationshipType = relationshipType;
-            this.projection = projection;
             this.typeId = typeToken;
             this.importer = importer;
-            this.relationshipCounter = relationshipCounter;
-            this.loadProperties = projection.properties().hasMappings();
+            this.imports = imports;
             this.validateRelationships = validateRelationships;
+            this.loadProperties = loadProperties;
         }
 
-        RelationshipType relationshipType() {
-            return relationshipType;
+        public Stream<Runnable> createFlushTasks() {
+            return importer.flushTasks().stream();
         }
 
-        LongAdder relationshipCounter() {
-            return relationshipCounter;
+        public SingleTypeRelationshipImporter createImporter(
+            IdMap idMap,
+            int bulkSize,
+            RelationshipImporter.PropertyReader propertyReader
+        ) {
+            return new SingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
         }
 
-        boolean loadProperties() {
-            return this.loadProperties;
+        SingleTypeRelationshipImporter createImporter(
+            IdMap idMap,
+            int bulkSize,
+            KernelTransaction kernelTransaction
+        ) {
+            RelationshipImporter.PropertyReader propertyReader = loadProperties
+                ? importer.storeBackedPropertiesReader(kernelTransaction)
+                : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
+
+            return new SingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
         }
 
-        public WithImporter loadImporter(boolean loadProperties) {
-            RelationshipImporter.Imports imports = importer.imports(projection.orientation(), loadProperties);
-            return new WithImporter(imports);
-        }
-
-        public class WithImporter {
-            private final RelationshipImporter.Imports imports;
-
-            WithImporter(RelationshipImporter.Imports imports) {
-                this.imports = imports;
-            }
-
-            public void prepareFlushTasks() {
-                importer.prepareFlushTasks();
-            }
-
-            public Stream<Runnable> flushTasks() {
-                return importer.flushTasks().stream();
-            }
-
-            public SingleTypeRelationshipImporter withBuffer(
-                IdMap idMap,
-                int bulkSize,
-                RelationshipImporter.PropertyReader propertyReader
-            ) {
-                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
-                    idMap.cloneIdMap(),
-                    typeId,
-                    bulkSize,
-                    validateRelationships
-                );
-                return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
-            }
-
-            SingleTypeRelationshipImporter withBuffer(
-                IdMap idMap,
-                int bulkSize,
-                KernelTransaction kernelTransaction
-            ) {
-                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
-                    idMap.cloneIdMap(),
-                    typeId,
-                    bulkSize,
-                    validateRelationships
-                );
-                RelationshipImporter.PropertyReader propertyReader = loadProperties
-                    ? importer.storeBackedPropertiesReader(kernelTransaction)
-                    : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
-                return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
-            }
+        @NotNull
+        private RelationshipsBatchBuffer createBuffer(IdMap idMap, int bulkSize) {
+            return new RelationshipsBatchBuffer(
+                idMap.cloneIdMap(),
+                typeId,
+                bulkSize,
+                validateRelationships
+            );
         }
     }
 }

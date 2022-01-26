@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import com.carrotsearch.hppc.ObjectLongHashMap;
-import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
@@ -40,7 +38,6 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Result;
@@ -52,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
@@ -64,14 +60,12 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     private final Context loaderContext;
     private final GraphDimensions dimensionsAfterNodeLoading;
     private final ProgressTracker progressTracker;
-    private final Map<RelationshipProjection, LongAdder> relationshipCounters;
 
     // Property mappings are either defined upfront in
     // the procedure configuration or during load time
     // by looking at the columns returned by the query.
     private ObjectIntHashMap<String> propertyKeyIdsByName;
     private ObjectDoubleHashMap<String> propertyDefaultValueByName;
-    private boolean importProperties;
     private PropertyMappings propertyMappings;
     private int[] propertyKeyIds;
     private double[] propertyDefaultValues;
@@ -93,7 +87,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         this.dimensionsAfterNodeLoading = dimensions;
         this.progressTracker = progressTracker;
         this.loaderContext = new Context();
-        this.relationshipCounters = new HashMap<>();
     }
 
     private void initFromPropertyMappings(PropertyMappings propertyMappings) {
@@ -127,7 +120,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             ));
         GraphDimensions newDimensions = dimensionsBuilder.build();
 
-        importProperties = !propertyMappings.isEmpty();
         propertyKeyIds = newDimensions.relationshipPropertyTokens().values().stream().mapToInt(i -> i).toArray();
         propertyDefaultValues = propertyMappings.mappings().stream().mapToDouble(propertyMapping -> propertyMapping.defaultValue().doubleValue()).toArray();
         aggregations = propertyMappings.mappings().stream().map(PropertyMapping::aggregation).toArray(Aggregation[]::new);
@@ -168,7 +160,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         boolean isAnyRelTypeQuery = !allColumns.contains(RelationshipRowVisitor.TYPE_COLUMN);
 
         if (isAnyRelTypeQuery) {
-            loaderContext.getOrCreateImporterBuilder(RelationshipType.ALL_RELATIONSHIPS);
+            loaderContext.getOrCreateImporterFactory(RelationshipType.ALL_RELATIONSHIPS);
         }
 
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
@@ -193,25 +185,15 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     @Override
     LoadResult result() {
-        loaderContext.importerBuildersByType
-            .values()
-            .forEach(SingleTypeRelationshipImporter.Builder.WithImporter::prepareFlushTasks);
-
-        List<Runnable> flushTasks = loaderContext.importerBuildersByType
+        List<Runnable> flushTasks = loaderContext.importerFactoriesByType
             .values()
             .stream()
-            .flatMap(SingleTypeRelationshipImporter.Builder.WithImporter::flushTasks)
+            .flatMap(SingleTypeRelationshipImporter.Factory::createFlushTasks)
             .collect(Collectors.toList());
 
         ParallelUtil.run(flushTasks, loadingContext.executor());
 
-        ObjectLongMap<RelationshipType> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
-        this.relationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(
-            RelationshipType.of(mapping.type()),
-            counter.sum()
-        ));
-
-        var relationshipsAndProperties = RelationshipsAndProperties.of(relationshipCounters, loaderContext.allBuilders);
+        var relationshipsAndProperties = RelationshipsAndProperties.of(loaderContext.allBuilders);
 
         return ImmutableCypherRelationshipLoader.LoadResult.builder()
             .dimensions(resultDimensions)
@@ -236,28 +218,23 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     class Context {
 
-        private final Map<RelationshipType, SingleTypeRelationshipImporter.Builder.WithImporter> importerBuildersByType;
+        private final Map<RelationshipType, SingleTypeRelationshipImporter.Factory> importerFactoriesByType;
         private final Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders;
 
-        private final int pageSize;
-        private final int numberOfPages;
+        private final ImportSizing importSizing;
 
         Context() {
-            this.importerBuildersByType = new HashMap<>();
+            this.importerFactoriesByType = new HashMap<>();
             this.allBuilders = new HashMap<>();
 
-            ImportSizing importSizing = ImportSizing.of(cypherConfig.readConcurrency(), idMap.nodeCount());
-            this.pageSize = importSizing.pageSize();
-            this.numberOfPages = importSizing.numberOfPages();
+            this.importSizing = ImportSizing.of(cypherConfig.readConcurrency(), idMap.nodeCount());
         }
 
-        synchronized SingleTypeRelationshipImporter.Builder.WithImporter getOrCreateImporterBuilder(
-            RelationshipType relationshipType
-        ) {
-            return importerBuildersByType.computeIfAbsent(relationshipType, this::createImporter);
+        synchronized SingleTypeRelationshipImporter.Factory getOrCreateImporterFactory(RelationshipType relationshipType) {
+            return importerFactoriesByType.computeIfAbsent(relationshipType, this::createImporterFactory);
         }
 
-        private SingleTypeRelationshipImporter.Builder.WithImporter createImporter(RelationshipType relationshipType) {
+        private SingleTypeRelationshipImporter.Factory createImporterFactory(RelationshipType relationshipType) {
             RelationshipProjection projection = RelationshipProjection
                 .builder()
                 .type(relationshipType.name)
@@ -281,48 +258,17 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             allBuilders.put(relationshipType, builder);
 
-            SingleTypeRelationshipImporter.Builder importerBuilder = createImporterBuilder(
-                pageSize,
-                numberOfPages,
-                relationshipType,
-                projection,
-                builder,
-                loadingContext.allocationTracker()
-            );
-
-            relationshipCounters.put(projection, importerBuilder.relationshipCounter());
-
-            return importerBuilder.loadImporter(importProperties);
+            return new SingleTypeRelationshipImporterFactoryBuilder()
+                .adjacencyListWithPropertiesBuilder(builder)
+                .typeToken(NO_SUCH_RELATIONSHIP_TYPE)
+                .projection(projection)
+                .importSizing(importSizing)
+                .validateRelationships(cypherConfig.validateRelationships())
+                .preAggregate(GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled())
+                .allocationTracker(loadingContext.allocationTracker())
+                .build();
         }
 
-        private SingleTypeRelationshipImporter.Builder createImporterBuilder(
-            int pageSize,
-            int numberOfPages,
-            RelationshipType relationshipType,
-            RelationshipProjection relationshipProjection,
-            AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
-            AllocationTracker allocationTracker
-        ) {
-            LongAdder relationshipCounter = new LongAdder();
-            AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
-                adjacencyListWithPropertiesBuilder,
-                numberOfPages,
-                pageSize,
-                allocationTracker,
-                relationshipCounter,
-                GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled()
-            );
-
-            RelationshipImporter relationshipImporter = new RelationshipImporter(loadingContext.allocationTracker(), adjacencyBuilder);
-            return new SingleTypeRelationshipImporter.Builder(
-                relationshipType,
-                relationshipProjection,
-                NO_SUCH_RELATIONSHIP_TYPE,
-                relationshipImporter,
-                relationshipCounter,
-                cypherConfig.validateRelationships()
-            );
-        }
     }
 
     @ValueClass

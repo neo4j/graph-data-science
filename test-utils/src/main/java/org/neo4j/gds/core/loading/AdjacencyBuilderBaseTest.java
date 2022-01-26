@@ -29,7 +29,6 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.LongAdder;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,7 +53,6 @@ public abstract class AdjacencyBuilderBaseTest {
             1,
             8,
             AllocationTracker.empty(),
-            new LongAdder(),
             false
         );
         long nodeCount = 6;
@@ -68,13 +66,11 @@ public abstract class AdjacencyBuilderBaseTest {
         }
 
         RelationshipImporter relationshipImporter = new RelationshipImporter(
-            AllocationTracker.empty(),
-            adjacencyBuilder
+            adjacencyBuilder, AllocationTracker.empty()
         );
         RelationshipImporter.Imports imports = relationshipImporter.imports(Orientation.NATURAL, false);
         imports.importRelationships(relationshipsBatchBuffer, null);
 
-        adjacencyBuilder.prepareFlushTasks();
         adjacencyBuilder.flushTasks().forEach(Runnable::run);
 
         try (var adjacencyList = globalBuilder.build().adjacency()) {

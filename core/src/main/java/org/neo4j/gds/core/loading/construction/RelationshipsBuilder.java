@@ -33,7 +33,6 @@ import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,8 +45,7 @@ public class RelationshipsBuilder {
 
     private final AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder;
     private final Orientation orientation;
-    private final SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder;
-    private final LongAdder relationshipCounter;
+    private final SingleTypeRelationshipImporter.Factory importerFactory;
 
     private final int concurrency;
     private final ExecutorService executorService;
@@ -60,8 +58,7 @@ public class RelationshipsBuilder {
         int bufferSize,
         int[] propertyKeyIds,
         AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
-        SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder,
-        LongAdder relationshipCounter,
+        SingleTypeRelationshipImporter.Factory importerFactory,
         boolean loadRelationshipProperty,
         boolean isMultiGraph,
         int concurrency,
@@ -70,8 +67,7 @@ public class RelationshipsBuilder {
         this.idMap = idMap;
         this.orientation = orientation;
         this.adjacencyListWithPropertiesBuilder = adjacencyListWithPropertiesBuilder;
-        this.importerBuilder = importerBuilder;
-        this.relationshipCounter = relationshipCounter;
+        this.importerFactory = importerFactory;
         this.loadRelationshipProperty = loadRelationshipProperty;
         this.isMultiGraph = isMultiGraph;
         this.concurrency = concurrency;
@@ -79,7 +75,7 @@ public class RelationshipsBuilder {
 
         this.threadLocalBuilders = AutoCloseableThreadLocal.withInitial(() -> new ThreadLocalBuilder(
             idMap,
-            importerBuilder,
+            importerFactory,
             bufferSize,
             propertyKeyIds
         ));
@@ -148,18 +144,18 @@ public class RelationshipsBuilder {
     public List<Relationships> buildAll() {
         threadLocalBuilders.close();
 
-        importerBuilder.prepareFlushTasks();
-        var flushTasks = importerBuilder.flushTasks().collect(Collectors.toList());
+        var flushTasks = importerFactory.createFlushTasks().collect(Collectors.toList());
 
         ParallelUtil.runWithConcurrency(concurrency, flushTasks, executorService);
 
         var adjacencyListsWithProperties = adjacencyListWithPropertiesBuilder.build();
         var adjacencyList = adjacencyListsWithProperties.adjacency();
+        var relationshipCount = adjacencyListsWithProperties.relationshipCount();
 
         if (loadRelationshipProperty) {
             return adjacencyListsWithProperties.properties().stream().map(compressedProperties ->
                 Relationships.of(
-                    relationshipCounter.longValue(),
+                    relationshipCount,
                     orientation,
                     isMultiGraph,
                     adjacencyList,
@@ -169,7 +165,7 @@ public class RelationshipsBuilder {
             ).collect(Collectors.toList());
         } else {
             return List.of(Relationships.of(
-                relationshipCounter.longValue(),
+                relationshipCount,
                 orientation,
                 isMultiGraph,
                 adjacencyList
@@ -187,7 +183,7 @@ public class RelationshipsBuilder {
 
         ThreadLocalBuilder(
             IdMap idMap,
-            SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder,
+            SingleTypeRelationshipImporter.Factory importerFactory,
             int bufferSize,
             int[] propertyKeyIds
         ) {
@@ -195,10 +191,10 @@ public class RelationshipsBuilder {
 
             if (propertyKeyIds.length > 1) {
                 this.propertiesBatchBuffer = new RelationshipPropertiesBatchBuffer(bufferSize, propertyKeyIds.length);
-                this.importer = importerBuilder.withBuffer(idMap, bufferSize, propertiesBatchBuffer);
+                this.importer = importerFactory.createImporter(idMap, bufferSize, propertiesBatchBuffer);
             } else {
                 this.propertiesBatchBuffer = null;
-                this.importer = importerBuilder.withBuffer(
+                this.importer = importerFactory.createImporter(
                     idMap,
                     bufferSize,
                     RelationshipImporter.preLoadedPropertyReader()

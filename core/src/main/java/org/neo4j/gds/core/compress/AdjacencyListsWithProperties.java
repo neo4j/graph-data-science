@@ -30,5 +30,7 @@ public interface AdjacencyListsWithProperties {
 
     AdjacencyList adjacency();
 
+    long relationshipCount();
+
     List<AdjacencyProperties> properties();
 }
