@@ -28,6 +28,7 @@ assert wcc_res[0]["componentCount"] > 0
 fastrp_res = gds.fastRP.write(
     G,                          #  Graph object
     featureProperties=["wcc"],  #  Configuration parameters
+    embeddingDimension=256,
     propertyRatio=0.3,
     writeProperty="embedding"
 )
