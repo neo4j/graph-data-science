@@ -76,7 +76,7 @@ public class NodeImporter {
         var labelIds = buffer.labelIds();
 
         // Import node IDs
-        idMapAllocator.insert(batch, batchLength);
+        idMapAllocator.insert(batch);
 
         // Import node labels
         if (buffer.hasLabelInformation()) {

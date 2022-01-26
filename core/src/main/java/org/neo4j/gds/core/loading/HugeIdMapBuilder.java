@@ -129,7 +129,7 @@ public final class HugeIdMapBuilder implements IdMapBuilder {
         }
 
         @Override
-        public void insert(long[] nodeIds, int length) {
+        public void insert(long[] nodeIds) {
             int batchOffset = 0;
             while (nextBuffer()) {
                 System.arraycopy(nodeIds, batchOffset, this.buffer, this.offset, this.length);

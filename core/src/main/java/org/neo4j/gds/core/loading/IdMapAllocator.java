@@ -25,5 +25,5 @@ public interface IdMapAllocator {
 
     int allocatedSize();
 
-    void insert(long[] nodeIds, int length);
+    void insert(long[] nodeIds);
 }
