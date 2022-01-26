@@ -36,8 +36,11 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
  * Graph:
  *
  * (A) <->  (B)  <- (C)
+ * (D) <->  (E) <- (F)
  *
  * Calculation:
+ *
+ * standard:
  *
  * d(A,B)=1
  * d(C,B)=1  farness(B)=2  component(B)=2  CC(B)=1
@@ -46,6 +49,16 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
  *
  * d(A,C)=inf
  * d(B,C)=inf farness(C)=inf, comp(C)=0  CC(C)=0
+ *
+ * D,E,F follow suit
+ *
+ * with WF:
+ *
+ * CCWF(B) = (4/5) * (1/2) =  2/5
+ * CCWF(A) =  (4/5) * (1/3) = 4/15
+ * CCWF(C) = 0
+ *
+ * D,E,F follow suit
  */
 @GdlExtension
 class ClosenessCentralityDirectedTest {
@@ -56,18 +69,26 @@ class ClosenessCentralityDirectedTest {
         "  (a:Node)" +
         ", (b:Node)" +
         ", (c:Node)" +
-
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+        
         ", (a)-[:TYPE]->(b)" +
         ", (b)-[:TYPE]->(a)" +
-        ", (c)-[:TYPE]->(b)";
+        ", (c)-[:TYPE]->(b)" +
+        ", (d)-[:TYPE]->(e)" +
+        ", (e)-[:TYPE]->(d)" +
+        ", (f)-[:TYPE]->(e)";
 
-    private static final double[] EXPECTED = new double[]{2 / 3.0, 1, 0};
+    private static final double[] EXPECTED = new double[]{2 / 3.0, 1, 0, 2 / 3.0, 1, 0};
+    private static final double[] EXPECTED_WF = new double[]{4 / 15.0, 2 / 5.0, 0, 4 / 15.0, 2 / 5.0, 0};
+
 
     @Inject
     private Graph graph;
 
     @Test
-    void testGetCentrality() {
+    void testCentrality() {
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
@@ -83,7 +104,23 @@ class ClosenessCentralityDirectedTest {
     }
 
     @Test
-    void testStream() {
+    void testCentralityWithWassermanFaust() {
+        MSClosenessCentrality algo = new MSClosenessCentrality(
+            graph,
+            ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            true,
+            AllocationTracker.empty(),
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+        algo.compute();
+        final double[] centrality = algo.exportToArray();
+
+        assertArrayEquals(EXPECTED_WF, centrality, 0.1);
+    }
+
+    @Test
+    void testStreamIfOnADirectedGraph() {
         final double[] centrality = new double[(int) graph.nodeCount()];
 
         MSClosenessCentrality algo = new MSClosenessCentrality(
