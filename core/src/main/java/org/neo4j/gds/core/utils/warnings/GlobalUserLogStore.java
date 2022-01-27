@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
@@ -59,6 +60,15 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
         return entry.getValue().stream().map(message -> new UserLogEntry(entry.getKey(), message));
     }
 
+    private synchronized void pollLeastRecentElement(String username) {
+        var usernameMap = this.registeredMessages.get(username);
+
+        //because this is synchronized, this will keep the usernameMap with exactly MOST_RECENT elements
+        if (usernameMap.size() > MOST_RECENT) {
+            usernameMap.pollFirstEntry();
+        }
+    }
+
     public void addUserLogMessage(String username, Task taskId, String message) {
 
         boolean ignored = false;
@@ -74,19 +84,26 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
                 );
             usernameMap = this.registeredMessages.get(username);
         }
-        // if the current task is older, than the oldest in the cache we can ignore it (also works if  cache changes)
+        // if the current task is older, than the oldest in the cache we can ignore it
+        // if leastRecentCachedTask is removed from the cache, it means replaced with a more recent item so still valid
         if (leastRecentCachedTask != null && leastRecentCachedTask.startTime() > taskId.startTime()) {
             ignored = true;
         }
         //otherwise, add the message
         if (!ignored) {
+            AtomicBoolean added = new AtomicBoolean();
+            // AtomicInteger sizeOfCache = new AtomicInteger(usernameMap.size());
 
             usernameMap
-                .computeIfAbsent(taskId, __ -> Collections.synchronizedList(new ArrayList<>()))
+                .computeIfAbsent(taskId, __ -> {
+                    added.set(true);
+                    return Collections.synchronizedList(new ArrayList<>());
+                })
                 .add(message);
 
-            if (usernameMap.size() > MOST_RECENT) {
-                usernameMap.pollFirstEntry();
+            //check if something needs to be returned
+            if (added.get() && usernameMap.size() > MOST_RECENT) {
+                pollLeastRecentElement(username);
             }
         }
     }
