@@ -43,7 +43,7 @@ public final class HugeIdMapBuilderOps {
         AllocationTracker allocationTracker
     ) {
         if (highestNodeId == NodesBuilder.UNKNOWN_MAX_ID) {
-            highestNodeId = graphIds.asNodeProperties().getMaxLongPropertyValue().getAsLong();
+            highestNodeId = graphIds.asNodeProperties().getMaxLongPropertyValue().orElse(NodesBuilder.UNKNOWN_MAX_ID);
         }
 
         HugeSparseLongArray nodeToGraphIds = buildSparseIdMap(
