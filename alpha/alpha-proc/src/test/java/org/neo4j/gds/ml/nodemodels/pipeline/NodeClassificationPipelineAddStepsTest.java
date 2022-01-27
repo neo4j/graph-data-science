@@ -30,8 +30,8 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
-import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
+import org.neo4j.gds.test.TestMutateProc;
 
 import java.util.List;
 import java.util.Map;
@@ -340,6 +340,6 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     }
 
     private void run(Consumer<BaseProc> procConsumer) {
-        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, procConsumer::accept);
+        TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, procConsumer::accept);
     }
 }
