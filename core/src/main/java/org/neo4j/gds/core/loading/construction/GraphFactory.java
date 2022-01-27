@@ -248,7 +248,12 @@ public final class GraphFactory {
         int[] propertyKeyIds = IntStream.range(0, propertyConfigs.size()).toArray();
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
-        var importSizing = ImportSizing.of(concurrency.orElse(1), nodes.rootNodeCount());
+        int finalConcurrency = concurrency.orElse(1);
+
+        var importSizing = nodes.rootNodeCount() > 0
+            ? ImportSizing.of(finalConcurrency, nodes.rootNodeCount())
+            : ImportSizing.ofUnknownNodeCount(finalConcurrency);
+
         int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
         if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
             bufferSize = (int) nodes.rootNodeCount();
@@ -279,7 +284,7 @@ public final class GraphFactory {
             importerFactory,
             loadRelationshipProperties,
             isMultiGraph,
-            concurrency.orElse(1),
+            finalConcurrency,
             executorService.orElse(Pools.DEFAULT)
         );
     }

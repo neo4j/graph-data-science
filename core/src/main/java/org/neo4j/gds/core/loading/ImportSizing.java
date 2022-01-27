@@ -21,6 +21,8 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.mem.BitUtil;
 
+import java.util.OptionalInt;
+
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ImportSizing {
@@ -34,26 +36,32 @@ public final class ImportSizing {
     // don't attempt to page if the page size would be less than this value
     public static final long MIN_PAGE_SIZE = 1024L;
 
+    private static final int PAGES_PER_THREAD = 4;
+
     private static final String TOO_MANY_PAGES_REQUIRED =
-            "Importing %d nodes would need %d arrays of %d-long nested arrays each, which cannot be created.";
+        "Importing %d nodes would need %d arrays of %d-long nested arrays each, which cannot be created.";
 
     private final int totalThreads;
-    private final int pageSize;
     private final int numberOfPages;
+    private final OptionalInt pageSize;
 
-    private ImportSizing(int totalThreads, int pageSize, int numberOfPages) {
+    private ImportSizing(int totalThreads, int numberOfPages, OptionalInt pageSize) {
         this.totalThreads = totalThreads;
-        this.pageSize = pageSize;
         this.numberOfPages = numberOfPages;
+        this.pageSize = pageSize;
     }
 
     public static ImportSizing of(int concurrency, long nodeCount) {
         return determineBestThreadSize(nodeCount, concurrency);
     }
 
+    public static ImportSizing ofUnknownNodeCount(int concurrency) {
+        return determineBestThreadSize(concurrency);
+    }
+
     private static ImportSizing determineBestThreadSize(long nodeCount, long targetThreads) {
         // try to get about 4 pages per importer thread
-        long pageSize = BitUtil.ceilDiv(nodeCount, targetThreads << 2);
+        long pageSize = BitUtil.ceilDiv(nodeCount, targetThreads * PAGES_PER_THREAD);
 
         // page size must be a power of two
         pageSize = BitUtil.previousPowerOfTwo(pageSize);
@@ -75,15 +83,33 @@ public final class ImportSizing {
 
         if (numberOfPages > MAX_PAGE_SIZE || pageSize > MAX_PAGE_SIZE) {
             throw new IllegalArgumentException(
-                    formatWithLocale(TOO_MANY_PAGES_REQUIRED, nodeCount, numberOfPages, pageSize)
+                formatWithLocale(TOO_MANY_PAGES_REQUIRED, nodeCount, numberOfPages, pageSize)
             );
         }
 
         // int casts are safe as all are < MAX_BATCH_SIZE
         return new ImportSizing(
-                (int) targetThreads,
-                (int) pageSize,
-                (int) numberOfPages
+            (int) targetThreads,
+            (int) numberOfPages,
+            OptionalInt.of((int) pageSize)
+        );
+    }
+
+    private static ImportSizing determineBestThreadSize(long targetThreads) {
+        // try to get 4 pages per importer thread
+        long numberOfPages = targetThreads * PAGES_PER_THREAD;
+
+        // number of pages must be a power of two
+        numberOfPages = BitUtil.nextHighestPowerOfTwo(numberOfPages);
+
+        // number of pages must fit in an integer
+        numberOfPages = Math.min(MAX_PAGE_SIZE, numberOfPages);
+
+        // int casts are safe as all are < MAX_BATCH_SIZE
+        return new ImportSizing(
+            (int) targetThreads,
+            (int) numberOfPages,
+            OptionalInt.empty()
         );
     }
 
@@ -91,11 +117,11 @@ public final class ImportSizing {
         return totalThreads;
     }
 
-    public int pageSize() {
-        return pageSize;
+    int numberOfPages() {
+        return numberOfPages;
     }
 
-    public int numberOfPages() {
-        return numberOfPages;
+    OptionalInt pageSize() {
+        return pageSize;
     }
 }

@@ -45,7 +45,7 @@ public abstract class AdjacencyListBuilderBaseTest {
 
         var importMetaData = ImmutableImportMetaData.builder()
             .projection(RelationshipProjection.of("", Orientation.NATURAL, Aggregation.NONE))
-            .aggregations(new Aggregation[]{Aggregation.NONE})
+            .aggregations(Aggregation.NONE)
             .propertyKeyIds(new int[0])
             .defaultValues(new double[0])
             .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)

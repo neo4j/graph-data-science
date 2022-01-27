@@ -492,16 +492,16 @@ class CypherFactoryTest extends BaseTest {
                 "Topology Only",
                 "MATCH (n) RETURN id(n) as id",
                 "MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target",
-                710696,
-                710696
+                710688,
+                710688
             ),
 
             Arguments.of(
                 "Node properties",
                 "MATCH (n) RETURN id(n) as id, n.id as idProp",
                 "MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target",
-                809144,
-                809144
+                809136,
+                809136
             ),
 
             Arguments.of(

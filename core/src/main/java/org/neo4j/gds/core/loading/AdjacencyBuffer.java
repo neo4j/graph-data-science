@@ -63,8 +63,7 @@ public final class AdjacencyBuffer {
     private final AdjacencyCompressorFactory adjacencyCompressorFactory;
     private final ThreadLocalRelationshipsBuilder[] localBuilders;
     private final ChunkedAdjacencyLists[] chunkedAdjacencyLists;
-    private final int pageShift;
-    private final long pageMask;
+    private final AdjacencyBufferPaging paging;
     private final LongAdder relationshipCounter;
     private final int[] propertyKeyIds;
     private final double[] defaultValues;
@@ -96,12 +95,16 @@ public final class AdjacencyBuffer {
     ) {
         var importSizing = ImportSizing.of(concurrency, nodeCount);
         var numberOfPages = importSizing.numberOfPages();
-        var pageSize = importSizing.pageSize();
+        //noinspection OptionalGetWithoutIsPresent -- pageSize is defined because we have a nodeCount
+        var pageSize = importSizing.pageSize().getAsInt();
 
         return MemoryEstimations
             .builder(AdjacencyBuffer.class)
             .fixed("ChunkedAdjacencyLists pages", sizeOfObjectArray(numberOfPages))
-            .add("ChunkedAdjacencyLists", ChunkedAdjacencyLists.memoryEstimation(avgDegree, pageSize, propertyCount).times(numberOfPages))
+            .add(
+                "ChunkedAdjacencyLists",
+                ChunkedAdjacencyLists.memoryEstimation(avgDegree, pageSize, propertyCount).times(numberOfPages)
+            )
             .build();
     }
 
@@ -115,8 +118,8 @@ public final class AdjacencyBuffer {
         var numPages = importSizing.numberOfPages();
         var pageSize = importSizing.pageSize();
 
-        var sizeOfLongPage = sizeOfLongArray(pageSize);
-        var sizeOfObjectPage = sizeOfObjectArray(pageSize);
+        var sizeOfLongPage = sizeOfLongArray(pageSize.orElse(numPages));
+        var sizeOfObjectPage = sizeOfObjectArray(pageSize.orElse(numPages));
 
         allocationTracker.add(sizeOfObjectArray(numPages) << 2);
         ThreadLocalRelationshipsBuilder[] localBuilders = new ThreadLocalRelationshipsBuilder[numPages];
@@ -126,7 +129,10 @@ public final class AdjacencyBuffer {
             allocationTracker.add(sizeOfObjectPage);
             allocationTracker.add(sizeOfObjectPage);
             allocationTracker.add(sizeOfLongPage);
-            compressedAdjacencyLists[page] = ChunkedAdjacencyLists.of(importMetaData.propertyKeyIds().length, pageSize);
+            compressedAdjacencyLists[page] = ChunkedAdjacencyLists.of(
+                importMetaData.propertyKeyIds().length,
+                pageSize.orElse(0)
+            );
             localBuilders[page] = new ThreadLocalRelationshipsBuilder(adjacencyCompressorFactory);
         }
 
@@ -134,11 +140,15 @@ public final class AdjacencyBuffer {
             .stream(importMetaData.propertyKeyIds())
             .anyMatch(keyId -> keyId != NO_SUCH_PROPERTY_KEY);
 
+        var paging = pageSize.isPresent()
+            ? new PagingWithKnownPageSize(pageSize.getAsInt())
+            : new PagingWithUnknownPageSize(numPages);
+
         return new AdjacencyBuffer(
             importMetaData,
             adjacencyCompressorFactory, localBuilders,
             compressedAdjacencyLists,
-            pageSize,
+            paging,
             atLeastOnePropertyToLoad
         );
     }
@@ -148,14 +158,13 @@ public final class AdjacencyBuffer {
         AdjacencyCompressorFactory adjacencyCompressorFactory,
         ThreadLocalRelationshipsBuilder[] localBuilders,
         ChunkedAdjacencyLists[] chunkedAdjacencyLists,
-        int pageSize,
+        AdjacencyBufferPaging paging,
         boolean atLeastOnePropertyToLoad
     ) {
         this.adjacencyCompressorFactory = adjacencyCompressorFactory;
         this.localBuilders = localBuilders;
         this.chunkedAdjacencyLists = chunkedAdjacencyLists;
-        this.pageShift = Integer.numberOfTrailingZeros(pageSize);
-        this.pageMask = pageSize - 1;
+        this.paging = paging;
         this.relationshipCounter = adjacencyCompressorFactory.relationshipCounter();
         this.propertyKeyIds = importMetaData.propertyKeyIds();
         this.defaultValues = importMetaData.defaultValues();
@@ -178,8 +187,7 @@ public final class AdjacencyBuffer {
         int[] offsets,
         int length
     ) {
-        int pageShift = this.pageShift;
-        long pageMask = this.pageMask;
+        var paging = this.paging;
 
         ThreadLocalRelationshipsBuilder builder = null;
         int lastPageIndex = -1;
@@ -194,7 +202,8 @@ public final class AdjacencyBuffer {
                 }
 
                 long source = batch[startOffset << 1];
-                int pageIndex = (int) (source >>> pageShift);
+
+                int pageIndex = paging.pageId(source);
 
                 if (pageIndex > lastPageIndex) {
                     // switch to the builder for this page
@@ -206,7 +215,7 @@ public final class AdjacencyBuffer {
                     lastPageIndex = pageIndex;
                 }
 
-                int localId = (int) (source & pageMask);
+                long localId = paging.localId(source);
 
                 ChunkedAdjacencyLists compressedTargets = this.chunkedAdjacencyLists[pageIndex];
 
@@ -235,9 +244,9 @@ public final class AdjacencyBuffer {
 
         var tasks = new ArrayList<AdjacencyListBuilderTask>(localBuilders.length + 1);
         for (int page = 0; page < localBuilders.length; page++) {
-            long baseNodeId = ((long) page) << pageShift;
             tasks.add(new AdjacencyListBuilderTask(
-                baseNodeId,
+                page,
+                paging,
                 localBuilders[page],
                 chunkedAdjacencyLists[page],
                 relationshipCounter,
@@ -269,7 +278,8 @@ public final class AdjacencyBuffer {
      */
     static final class AdjacencyListBuilderTask implements Runnable {
 
-        private final long baseNodeId;
+        private final int page;
+        private final AdjacencyBufferPaging paging;
         private final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder;
         private final ChunkedAdjacencyLists chunkedAdjacencyLists;
         // A long array that may or may not be used during the compression.
@@ -278,13 +288,15 @@ public final class AdjacencyBuffer {
         private final AdjacencyCompressor.ValueMapper valueMapper;
 
         AdjacencyListBuilderTask(
-            long baseNodeId,
+            int page,
+            AdjacencyBufferPaging paging,
             ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder,
             ChunkedAdjacencyLists chunkedAdjacencyLists,
             LongAdder relationshipCounter,
             AdjacencyCompressor.ValueMapper valueMapper
         ) {
-            this.baseNodeId = baseNodeId;
+            this.page = page;
+            this.paging = paging;
             this.threadLocalRelationshipsBuilder = threadLocalRelationshipsBuilder;
             this.chunkedAdjacencyLists = chunkedAdjacencyLists;
             this.valueMapper = valueMapper;
@@ -297,7 +309,8 @@ public final class AdjacencyBuffer {
             try (var compressor = threadLocalRelationshipsBuilder.intoCompressor()) {
                 var importedRelationships = new MutableLong(0L);
                 chunkedAdjacencyLists.consume((localId, targets, properties, compressedByteSize, numberOfCompressedTargets) -> {
-                    var nodeId = valueMapper.map(baseNodeId + localId);
+                    var sourceNodeId = this.paging.sourceNodeId(localId, this.page);
+                    var nodeId = valueMapper.map(sourceNodeId);
                     importedRelationships.add(compressor.applyVariableDeltaEncoding(
                         nodeId,
                         targets,
@@ -310,6 +323,59 @@ public final class AdjacencyBuffer {
                 });
                 relationshipCounter.add(importedRelationships.longValue());
             }
+        }
+    }
+
+    private static final class PagingWithKnownPageSize implements AdjacencyBufferPaging {
+        private final int pageShift;
+        private final int pageMask;
+
+        PagingWithKnownPageSize(int pageSize) {
+            this.pageShift = Integer.numberOfTrailingZeros(pageSize);
+            this.pageMask = pageSize - 1;
+        }
+
+        @Override
+        public int pageId(long source) {
+            return (int) (source >>> this.pageShift);
+        }
+
+        @Override
+        public long localId(long source) {
+            return (source & this.pageMask);
+        }
+
+        @Override
+        public long sourceNodeId(long localId, int pageId) {
+            return (((long) pageId) << this.pageShift) + localId;
+        }
+    }
+
+    private static final class PagingWithUnknownPageSize implements AdjacencyBufferPaging {
+        private final int pageShift;
+        private final int pageMask;
+
+        PagingWithUnknownPageSize(int numberOfPages) {
+            this.pageShift = Integer.numberOfTrailingZeros(numberOfPages);
+            this.pageMask = numberOfPages - 1;
+        }
+
+        @Override
+        public int pageId(long source) {
+            // TODO: we could not use the least-significant-bits to get the pageIndex
+            //  instead we shift the source by, say, 8 bits and apply the mask on those bits
+            //  this will give us some grouping within the lowest bits
+            return (int) (source & this.pageMask);
+        }
+
+        @Override
+        public long localId(long source) {
+            return (source >>> this.pageShift);
+        }
+
+        @Override
+        public long sourceNodeId(long localId, int pageId) {
+            return (localId << this.pageShift) + pageId;
         }
     }
 }
