@@ -266,7 +266,7 @@ public final class GraphFactory {
 
         var importerFactory = new SingleTypeRelationshipImporterBuilder()
             .importMetaData(importMetaData)
-            .nodeCountSupplier(nodes::nodeCount)
+            .nodeCountSupplier(nodes::rootNodeCount)
             .importSizing(importSizing)
             .validateRelationships(false)
             .allocationTracker(allocationTracker)
