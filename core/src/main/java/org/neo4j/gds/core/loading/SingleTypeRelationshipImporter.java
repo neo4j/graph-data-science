@@ -41,13 +41,13 @@ import java.util.function.LongSupplier;
 public final class SingleTypeRelationshipImporter {
 
     private final AdjacencyCompressorFactory adjacencyCompressorFactory;
+    private final ImportMetaData importMetaData;
     private final int typeId;
 
-    private final RelationshipImporter importer;
-    private final RelationshipImporter.Imports imports;
-
+    private final AdjacencyBuffer adjacencyBuffer;
+    // TODO: move to importmetadata
     private final boolean validateRelationships;
-    private final boolean loadProperties;
+    private final AllocationTracker allocationTracker;
 
     @org.immutables.builder.Builder.Factory
     public static SingleTypeRelationshipImporter of(
@@ -64,71 +64,75 @@ public final class SingleTypeRelationshipImporter {
             allocationTracker
         );
 
-        var adjacencyBuilder = new AdjacencyBufferBuilder()
+        var adjacencyBuffer = new AdjacencyBufferBuilder()
             .importMetaData(importMetaData)
             .importSizing(importSizing)
             .allocationTracker(allocationTracker)
             .adjacencyCompressorFactory(adjacencyCompressorFactory)
             .build();
 
-        var relationshipImporter = new RelationshipImporter(adjacencyBuilder, allocationTracker);
-
-        var projection = importMetaData.projection();
-        var loadProperties = projection.properties().hasMappings();
-        var imports = relationshipImporter.imports(projection.orientation(), loadProperties);
-
         return new SingleTypeRelationshipImporter(
             adjacencyCompressorFactory,
+            adjacencyBuffer,
+            importMetaData,
             importMetaData.typeTokenId(),
-            relationshipImporter,
-            imports,
             validateRelationships,
-            loadProperties
+            allocationTracker
         );
     }
 
     private SingleTypeRelationshipImporter(
         AdjacencyCompressorFactory adjacencyCompressorFactory,
+        AdjacencyBuffer adjacencyBuffer,
+        ImportMetaData importMetaData,
         int typeToken,
-        RelationshipImporter importer,
-        RelationshipImporter.Imports imports,
         boolean validateRelationships,
-        boolean loadProperties
+        AllocationTracker allocationTracker
     ) {
         this.adjacencyCompressorFactory = adjacencyCompressorFactory;
+        this.importMetaData = importMetaData;
         this.typeId = typeToken;
-        this.importer = importer;
-        this.imports = imports;
+        this.adjacencyBuffer = adjacencyBuffer;
         this.validateRelationships = validateRelationships;
-        this.loadProperties = loadProperties;
+        this.allocationTracker = allocationTracker;
     }
 
     public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
-        return importer.adjacencyListBuilderTasks();
+        return adjacencyBuffer.adjacencyListBuilderTasks();
     }
 
-    public ThreadLocalSingleTypeRelationshipImporter createImporter(
+    public ThreadLocalSingleTypeRelationshipImporter threadLocalImporter(
         IdMap idMap,
         int bulkSize,
-        RelationshipImporter.PropertyReader propertyReader
+        PropertyReader propertyReader
     ) {
-        return new ThreadLocalSingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
+        return new ThreadLocalSingleTypeRelationshipImporterBuilder()
+            .adjacencyBuffer(adjacencyBuffer)
+            .relationshipsBatchBuffer(createBuffer(idMap, bulkSize))
+            .importMetaData(importMetaData)
+            .propertyReader(propertyReader)
+            .allocationTracker(allocationTracker)
+            .build();
     }
 
-    public AdjacencyListsWithProperties build() {
-        return adjacencyCompressorFactory.build();
-    }
-
-    ThreadLocalSingleTypeRelationshipImporter createImporter(
+    ThreadLocalSingleTypeRelationshipImporter threadLocalImporter(
         IdMap idMap,
         int bulkSize,
         KernelTransaction kernelTransaction
     ) {
-        RelationshipImporter.PropertyReader propertyReader = loadProperties
-            ? importer.storeBackedPropertiesReader(kernelTransaction)
+        var loadProperties = importMetaData.projection().properties().hasMappings();
+
+        PropertyReader propertyReader = loadProperties
+            ? PropertyReader.storeBacked(kernelTransaction)
             : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
 
-        return new ThreadLocalSingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
+        return new ThreadLocalSingleTypeRelationshipImporterBuilder()
+            .adjacencyBuffer(adjacencyBuffer)
+            .relationshipsBatchBuffer(createBuffer(idMap, bulkSize))
+            .importMetaData(importMetaData)
+            .propertyReader(propertyReader)
+            .allocationTracker(allocationTracker)
+            .build();
     }
 
     @NotNull
@@ -141,40 +145,8 @@ public final class SingleTypeRelationshipImporter {
         );
     }
 
-    /**
-     * Wraps a relationship buffer that is being filled by the store scanners.
-     * Forwards the relationship buffer to the
-     * {@link RelationshipImporter}
-     * which prepares the buffer content for consumption by the
-     * {@link org.neo4j.gds.core.loading.AdjacencyBuffer}.
-     *
-     * Each importing thread holds an instance of this class for each relationship
-     * type that is being imported.
-     */
-    public static final class ThreadLocalSingleTypeRelationshipImporter {
-
-        private final RelationshipImporter.Imports imports;
-        private final RelationshipImporter.PropertyReader propertyReader;
-        private final RelationshipsBatchBuffer relationshipsBatchBuffer;
-
-        ThreadLocalSingleTypeRelationshipImporter(
-            RelationshipImporter.Imports imports,
-            RelationshipImporter.PropertyReader propertyReader,
-            RelationshipsBatchBuffer relationshipsBatchBuffer
-        ) {
-            this.imports = imports;
-            this.propertyReader = propertyReader;
-            this.relationshipsBatchBuffer = relationshipsBatchBuffer;
-        }
-
-        public RelationshipsBatchBuffer buffer() {
-            return relationshipsBatchBuffer;
-        }
-
-        public long importRelationships() {
-            return imports.importRelationships(relationshipsBatchBuffer, propertyReader);
-        }
-
+    public AdjacencyListsWithProperties build() {
+        return adjacencyCompressorFactory.build();
     }
 
     @ValueClass

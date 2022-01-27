@@ -43,7 +43,7 @@ public abstract class AdjacencyListBuilderBaseTest {
         var nodeCount = 6;
 
         var importMetaData = ImmutableImportMetaData.builder()
-            .projection(RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE))
+            .projection(RelationshipProjection.of("", Orientation.NATURAL, Aggregation.NONE))
             .aggregations(new Aggregation[]{Aggregation.NONE})
             .propertyKeyIds(new int[0])
             .defaultValues(new double[0])
@@ -73,12 +73,14 @@ public abstract class AdjacencyListBuilderBaseTest {
             relationshipsBatchBuffer.add(i, nodeCount - i);
         }
 
-        RelationshipImporter relationshipImporter = new RelationshipImporter(
+        var importer = ThreadLocalSingleTypeRelationshipImporter.of(
             adjacencyBuffer,
+            relationshipsBatchBuffer,
+            importMetaData,
+            null,
             AllocationTracker.empty()
         );
-        RelationshipImporter.Imports imports = relationshipImporter.imports(Orientation.NATURAL, false);
-        imports.importRelationships(relationshipsBatchBuffer, null);
+        importer.importRelationships();
 
         adjacencyBuffer.adjacencyListBuilderTasks().forEach(Runnable::run);
 

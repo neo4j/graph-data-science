@@ -133,12 +133,12 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         try (StoreScanner.ScanCursor<RelationshipReference> cursor = scanner.createCursor(transaction)) {
             // create an importer (includes a dedicated batch buffer) for each relationship type that we load
             var importers = this.singleTypeRelationshipImporters.stream()
-                .map(imports -> imports.createImporter(idMap, scanner.bufferSize(), transaction))
+                .map(imports -> imports.threadLocalImporter(idMap, scanner.bufferSize(), transaction))
                 .collect(Collectors.toList());
 
             var compositeBuffer = CompositeRelationshipsBatchBuffer.of(importers
                 .stream()
-                .map(SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter::buffer)
+                .map(ThreadLocalSingleTypeRelationshipImporter::buffer)
                 .toArray(RelationshipsBatchBuffer[]::new));
 
             long allImportedRels = 0L;
@@ -146,7 +146,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             while (compositeBuffer.scan(cursor)) {
                 terminationFlag.assertRunning();
                 long imported = 0L;
-                for (SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter importer : importers) {
+                for (ThreadLocalSingleTypeRelationshipImporter importer : importers) {
                     imported += importer.importRelationships();
                 }
                 int importedRels = RawValues.getHead(imported);

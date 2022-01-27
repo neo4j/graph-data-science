@@ -56,8 +56,8 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private final boolean multipleProperties;
     private final String singlePropertyKey;
 
-    private final Map<RelationshipType, SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter> localImporters;
-    private final Map<RelationshipType, RelationshipPropertiesBatchBuffer> localPropertiesBuffers;
+    private final Map<RelationshipType, ThreadLocalSingleTypeRelationshipImporter> localImporters;
+    private final Map<RelationshipType, PropertyReader.Buffered> localPropertiesBuffers;
     private final ObjectIntHashMap<RelationshipType> localRelationshipIds;
     private final boolean isAnyRelTypeQuery;
 
@@ -115,22 +115,19 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             // Lazily init relationship importer factory
             var importerFactory = loaderContext.getOrCreateImporterFactory(relationshipType);
 
-            RelationshipImporter.PropertyReader propertyReader;
+            PropertyReader propertyReader;
 
             if (multipleProperties) {
                 // Create thread-local buffer for relationship properties
-                var propertiesBuffer = new RelationshipPropertiesBatchBuffer(
-                    bufferSize,
-                    propertyCount
-                );
+                var propertiesBuffer = PropertyReader.buffered(bufferSize, propertyCount);
                 propertyReader = propertiesBuffer;
                 localPropertiesBuffers.put(relationshipType, propertiesBuffer);
             } else {
                 // Single properties can be in-lined in the relationship batch
-                propertyReader = RelationshipImporter.preLoadedPropertyReader();
+                propertyReader = PropertyReader.preLoaded();
             }
             // Create thread-local relationship factory
-            var importer = importerFactory.createImporter(idMap, bufferSize, propertyReader);
+            var importer = importerFactory.threadLocalImporter(idMap, bufferSize, propertyReader);
 
             localImporters.put(relationshipType, importer);
             localRelationshipIds.put(relationshipType, 0);
@@ -209,7 +206,11 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         }
     }
 
-    private void readPropertyValues(Result.ResultRow row, int relationshipId, RelationshipPropertiesBatchBuffer propertiesBuffer) {
+    private void readPropertyValues(
+        Result.ResultRow row,
+        int relationshipId,
+        PropertyReader.Buffered propertiesBuffer
+    ) {
         propertyKeyIdsByName.forEachKeyValue((propertyKey, propertyKeyId) ->
             propertiesBuffer.add(relationshipId, propertyKeyId, readPropertyValue(row, propertyKey))
         );
@@ -222,19 +223,19 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             : propertyDefaultValueByName.get(propertyKey);
     }
 
-    private void flush(SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter importer) {
+    private void flush(ThreadLocalSingleTypeRelationshipImporter importer) {
         long imported = importer.importRelationships();
         relationshipCount += RawValues.getHead(imported);
     }
 
-    private void reset(RelationshipType relationshipType, SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter importer) {
+    private void reset(RelationshipType relationshipType, ThreadLocalSingleTypeRelationshipImporter importer) {
         importer.buffer().reset();
         localRelationshipIds.put(relationshipType, 0);
     }
 
     void flushAll() {
         relationshipCount += localImporters.values().stream()
-            .mapToLong(SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter::importRelationships)
+            .mapToLong(ThreadLocalSingleTypeRelationshipImporter::importRelationships)
             .mapToInt(RawValues::getHead)
             .sum();
     }
