@@ -39,7 +39,6 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
 
     private final Map<String, ConcurrentSkipListMap<Task, List<String>>> registeredMessages;
 
-
     public GlobalUserLogStore() {
 
         this.registeredMessages = new ConcurrentHashMap<>();
@@ -62,12 +61,34 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
 
     public void addUserLogMessage(String username, Task taskId, String message) {
 
-        this.registeredMessages
-            .computeIfAbsent(
-                username,
-                __ -> new ConcurrentSkipListMap<>(Comparator.comparingLong(Task::startTime))
-            ).computeIfAbsent(taskId, __ -> Collections.synchronizedList(new ArrayList<>())).add(message);
+        boolean ignored = false;
+        var usernameMap = this.registeredMessages.getOrDefault(username, null);
+        Task leastRecentCachedTask = null;
+        if (usernameMap != null)
+            leastRecentCachedTask = usernameMap.firstKey();
+        else {
+            this.registeredMessages
+                .computeIfAbsent(
+                    username,
+                    __ -> new ConcurrentSkipListMap<>(Comparator.comparingLong(Task::startTime))
+                );
+            usernameMap = this.registeredMessages.get(username);
+        }
+        // if the current task is older, than the oldest in the cache we can ignore it (also works if  cache changes)
+        if (leastRecentCachedTask != null && leastRecentCachedTask.startTime() > taskId.startTime()) {
+            ignored = true;
+        }
+        //otherwise, add the message
+        if (!ignored) {
 
+            usernameMap
+                .computeIfAbsent(taskId, __ -> Collections.synchronizedList(new ArrayList<>()))
+                .add(message);
+
+            if (usernameMap.size() > MOST_RECENT) {
+                usernameMap.pollFirstEntry();
+            }
+        }
     }
 
     @Override
