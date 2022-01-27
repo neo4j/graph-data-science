@@ -21,71 +21,65 @@ package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
+import org.neo4j.gds.core.compress.AdjacencyListBehavior;
+import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.function.LongSupplier;
 
-/**
- * Wraps a relationship buffer that is being filled by the store scanners.
- * Forwards the relationship buffer to the
- * {@link org.neo4j.gds.core.loading.RelationshipImporter}
- * which prepares the buffer content for consumption by the
- * {@link AdjacencyBuffer}.
- *
- * Each importing thread holds an instance of this class for each relationship
- * type that is being imported.
- */
-@Value.Style(typeBuilder = "SingleTypeRelationshipImporterFactoryBuilder")
+@Value.Style(typeBuilder = "SingleTypeRelationshipImporterBuilder")
 public final class SingleTypeRelationshipImporter {
 
+    private final AdjacencyCompressorFactory adjacencyCompressorFactory;
+    private final int typeId;
+
+    private final RelationshipImporter importer;
     private final RelationshipImporter.Imports imports;
-    private final RelationshipImporter.PropertyReader propertyReader;
-    private final RelationshipsBatchBuffer relationshipsBatchBuffer;
 
-    private SingleTypeRelationshipImporter(
-        RelationshipImporter.Imports imports,
-        RelationshipImporter.PropertyReader propertyReader,
-        RelationshipsBatchBuffer relationshipsBatchBuffer
-    ) {
-        this.imports = imports;
-        this.propertyReader = propertyReader;
-        this.relationshipsBatchBuffer = relationshipsBatchBuffer;
-    }
-
-    public RelationshipsBatchBuffer buffer() {
-        return relationshipsBatchBuffer;
-    }
-
-    public long importRelationships() {
-        return imports.importRelationships(relationshipsBatchBuffer, propertyReader);
-    }
+    private final boolean validateRelationships;
+    private final boolean loadProperties;
 
     @org.immutables.builder.Builder.Factory
-    public static Factory builder(
-        AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
-        RelationshipProjection projection,
-        int typeToken,
+    public static SingleTypeRelationshipImporter of(
+        ImportMetaData importMetaData,
+        LongSupplier nodeCountSupplier,
         boolean validateRelationships,
         ImportSizing importSizing,
-        boolean preAggregate,
         AllocationTracker allocationTracker
     ) {
+        var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
+            nodeCountSupplier,
+            importMetaData.projection().properties(),
+            importMetaData.aggregations(),
+            allocationTracker
+        );
+
         var adjacencyBuilder = new AdjacencyBufferBuilder()
-            .globalBuilder(adjacencyListWithPropertiesBuilder)
+            .importMetaData(importMetaData)
             .importSizing(importSizing)
-            .preAggregate(preAggregate)
             .allocationTracker(allocationTracker)
+            .adjacencyCompressorFactory(adjacencyCompressorFactory)
             .build();
 
         var relationshipImporter = new RelationshipImporter(adjacencyBuilder, allocationTracker);
+
+        var projection = importMetaData.projection();
         var loadProperties = projection.properties().hasMappings();
         var imports = relationshipImporter.imports(projection.orientation(), loadProperties);
 
-        return new Factory(
-            typeToken,
+        return new SingleTypeRelationshipImporter(
+            adjacencyCompressorFactory,
+            importMetaData.typeTokenId(),
             relationshipImporter,
             imports,
             validateRelationships,
@@ -93,62 +87,162 @@ public final class SingleTypeRelationshipImporter {
         );
     }
 
-    public static final class Factory {
+    private SingleTypeRelationshipImporter(
+        AdjacencyCompressorFactory adjacencyCompressorFactory,
+        int typeToken,
+        RelationshipImporter importer,
+        RelationshipImporter.Imports imports,
+        boolean validateRelationships,
+        boolean loadProperties
+    ) {
+        this.adjacencyCompressorFactory = adjacencyCompressorFactory;
+        this.typeId = typeToken;
+        this.importer = importer;
+        this.imports = imports;
+        this.validateRelationships = validateRelationships;
+        this.loadProperties = loadProperties;
+    }
 
-        private final int typeId;
+    public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
+        return importer.adjacencyListBuilderTasks();
+    }
 
-        private final RelationshipImporter importer;
+    public ThreadLocalSingleTypeRelationshipImporter createImporter(
+        IdMap idMap,
+        int bulkSize,
+        RelationshipImporter.PropertyReader propertyReader
+    ) {
+        return new ThreadLocalSingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
+    }
+
+    public AdjacencyListsWithProperties build() {
+        return adjacencyCompressorFactory.build();
+    }
+
+    ThreadLocalSingleTypeRelationshipImporter createImporter(
+        IdMap idMap,
+        int bulkSize,
+        KernelTransaction kernelTransaction
+    ) {
+        RelationshipImporter.PropertyReader propertyReader = loadProperties
+            ? importer.storeBackedPropertiesReader(kernelTransaction)
+            : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
+
+        return new ThreadLocalSingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
+    }
+
+    @NotNull
+    private RelationshipsBatchBuffer createBuffer(IdMap idMap, int bulkSize) {
+        return new RelationshipsBatchBuffer(
+            idMap.cloneIdMap(),
+            typeId,
+            bulkSize,
+            validateRelationships
+        );
+    }
+
+    /**
+     * Wraps a relationship buffer that is being filled by the store scanners.
+     * Forwards the relationship buffer to the
+     * {@link RelationshipImporter}
+     * which prepares the buffer content for consumption by the
+     * {@link org.neo4j.gds.core.loading.AdjacencyBuffer}.
+     *
+     * Each importing thread holds an instance of this class for each relationship
+     * type that is being imported.
+     */
+    public static final class ThreadLocalSingleTypeRelationshipImporter {
+
         private final RelationshipImporter.Imports imports;
+        private final RelationshipImporter.PropertyReader propertyReader;
+        private final RelationshipsBatchBuffer relationshipsBatchBuffer;
 
-        private final boolean validateRelationships;
-        private final boolean loadProperties;
-
-        private Factory(
-            int typeToken,
-            RelationshipImporter importer,
+        ThreadLocalSingleTypeRelationshipImporter(
             RelationshipImporter.Imports imports,
-            boolean validateRelationships,
-            boolean loadProperties
+            RelationshipImporter.PropertyReader propertyReader,
+            RelationshipsBatchBuffer relationshipsBatchBuffer
         ) {
-            this.typeId = typeToken;
-            this.importer = importer;
             this.imports = imports;
-            this.validateRelationships = validateRelationships;
-            this.loadProperties = loadProperties;
+            this.propertyReader = propertyReader;
+            this.relationshipsBatchBuffer = relationshipsBatchBuffer;
         }
 
-        public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
-            return importer.adjacencyListBuilderTasks();
+        public RelationshipsBatchBuffer buffer() {
+            return relationshipsBatchBuffer;
         }
 
-        public SingleTypeRelationshipImporter createImporter(
-            IdMap idMap,
-            int bulkSize,
-            RelationshipImporter.PropertyReader propertyReader
+        public long importRelationships() {
+            return imports.importRelationships(relationshipsBatchBuffer, propertyReader);
+        }
+
+    }
+
+    @ValueClass
+    public interface ImportMetaData {
+        RelationshipProjection projection();
+
+        Aggregation[] aggregations();
+
+        int[] propertyKeyIds();
+
+        double[] defaultValues();
+
+        int typeTokenId();
+
+        boolean preAggregate();
+
+        static ImportMetaData of(RelationshipProjection projection, int typeTokenId, Map<String, Integer> relationshipPropertyTokens, boolean preAggregate) {
+            return ImmutableImportMetaData
+                .builder()
+                .projection(projection)
+                .aggregations(aggregations(projection))
+                .propertyKeyIds(propertyKeyIds(projection, relationshipPropertyTokens))
+                .defaultValues(defaultValues(projection))
+                .typeTokenId(typeTokenId)
+                .preAggregate(preAggregate)
+                .build();
+        }
+
+        private static double[] defaultValues(RelationshipProjection projection) {
+            return projection
+                .properties()
+                .mappings()
+                .stream()
+                .mapToDouble(propertyMapping -> propertyMapping.defaultValue().doubleValue())
+                .toArray();
+        }
+
+        private static int[] propertyKeyIds(
+            RelationshipProjection projection,
+            Map<String, Integer> relationshipPropertyTokens
         ) {
-            return new SingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
+            return projection.properties().mappings()
+                .stream()
+                .mapToInt(mapping -> relationshipPropertyTokens.get(mapping.neoPropertyKey())).toArray();
         }
 
-        SingleTypeRelationshipImporter createImporter(
-            IdMap idMap,
-            int bulkSize,
-            KernelTransaction kernelTransaction
-        ) {
-            RelationshipImporter.PropertyReader propertyReader = loadProperties
-                ? importer.storeBackedPropertiesReader(kernelTransaction)
-                : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
+        private static Aggregation[] aggregations(RelationshipProjection projection) {
+            var propertyMappings = projection.properties().mappings();
 
-            return new SingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
-        }
+            Aggregation[] aggregations = propertyMappings.stream()
+                .map(PropertyMapping::aggregation)
+                .map(Aggregation::resolve)
+                .toArray(Aggregation[]::new);
 
-        @NotNull
-        private RelationshipsBatchBuffer createBuffer(IdMap idMap, int bulkSize) {
-            return new RelationshipsBatchBuffer(
-                idMap.cloneIdMap(),
-                typeId,
-                bulkSize,
-                validateRelationships
-            );
+            if (propertyMappings.isEmpty()) {
+                aggregations = new Aggregation[]{Aggregation.resolve(projection.aggregation())};
+            }
+
+            return aggregations;
         }
+    }
+
+    @ValueClass
+    public interface SingleTypeRelationshipImportContext {
+        RelationshipType relationshipType();
+
+        RelationshipProjection relationshipProjection();
+
+        SingleTypeRelationshipImporter singleTypeRelationshipImporter();
     }
 }

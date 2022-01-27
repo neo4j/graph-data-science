@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.compress;
 
+import java.util.concurrent.atomic.LongAdder;
+
 public interface AdjacencyCompressorFactory {
 
     /**
@@ -31,8 +33,10 @@ public interface AdjacencyCompressorFactory {
      */
     AdjacencyCompressor createCompressor();
 
+    LongAdder relationshipCounter();
+
     /**
      * @return the final adjacency list, together with any number of properties, if any.
      */
-    ImmutableAdjacencyListsWithProperties.Builder build();
+    AdjacencyListsWithProperties build();
 }

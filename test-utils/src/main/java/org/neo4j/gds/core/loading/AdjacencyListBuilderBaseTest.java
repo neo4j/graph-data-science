@@ -21,8 +21,10 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
@@ -33,25 +35,32 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 public abstract class AdjacencyListBuilderBaseTest {
 
     protected void testAdjacencyList() {
         var nodeCount = 6;
 
-        AdjacencyListWithPropertiesBuilder globalBuilder = AdjacencyListWithPropertiesBuilder.create(
+        var importMetaData = ImmutableImportMetaData.builder()
+            .projection(RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE))
+            .aggregations(new Aggregation[]{Aggregation.NONE})
+            .propertyKeyIds(new int[0])
+            .defaultValues(new double[0])
+            .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
+            .preAggregate(false).build();
+
+        var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
             () -> nodeCount,
-            RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
-            new Aggregation[]{Aggregation.NONE},
-            new int[0],
-            new double[0],
+            PropertyMappings.of(),
+            importMetaData.aggregations(),
             AllocationTracker.empty()
         );
 
         AdjacencyBuffer adjacencyBuffer = new AdjacencyBufferBuilder()
-            .globalBuilder(globalBuilder)
+            .adjacencyCompressorFactory(adjacencyCompressorFactory)
+            .importMetaData(importMetaData)
             .importSizing(ImportSizing.of(1, nodeCount))
-            .preAggregate(false)
             .allocationTracker(AllocationTracker.empty())
             .build();
 
@@ -73,7 +82,7 @@ public abstract class AdjacencyListBuilderBaseTest {
 
         adjacencyBuffer.adjacencyListBuilderTasks().forEach(Runnable::run);
 
-        try (var adjacencyList = globalBuilder.build().adjacency()) {
+        try (var adjacencyList = adjacencyCompressorFactory.build().adjacency()) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
                 try (var cursor = adjacencyList.adjacencyCursor(nodeId)) {
                     while (cursor.hasNextVLong()) {

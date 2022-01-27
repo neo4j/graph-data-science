@@ -56,7 +56,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private final boolean multipleProperties;
     private final String singlePropertyKey;
 
-    private final Map<RelationshipType, SingleTypeRelationshipImporter> localImporters;
+    private final Map<RelationshipType, SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter> localImporters;
     private final Map<RelationshipType, RelationshipPropertiesBatchBuffer> localPropertiesBuffers;
     private final ObjectIntHashMap<RelationshipType> localRelationshipIds;
     private final boolean isAnyRelTypeQuery;
@@ -222,19 +222,19 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             : propertyDefaultValueByName.get(propertyKey);
     }
 
-    private void flush(SingleTypeRelationshipImporter importer) {
+    private void flush(SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter importer) {
         long imported = importer.importRelationships();
         relationshipCount += RawValues.getHead(imported);
     }
 
-    private void reset(RelationshipType relationshipType, SingleTypeRelationshipImporter importer) {
+    private void reset(RelationshipType relationshipType, SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter importer) {
         importer.buffer().reset();
         localRelationshipIds.put(relationshipType, 0);
     }
 
     void flushAll() {
         relationshipCount += localImporters.values().stream()
-            .mapToLong(SingleTypeRelationshipImporter::importRelationships)
+            .mapToLong(SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter::importRelationships)
             .mapToInt(RawValues::getHead)
             .sum();
     }
