@@ -269,10 +269,11 @@ public final class AdjacencyBuffer {
                 for (int localId = 0; localId < compressedLongArrays.length; ++localId) {
                     CompressedLongArray compressedAdjacencyList = compressedLongArrays[localId];
                     if (compressedAdjacencyList != null) {
+                        var nodeId = valueMapper.map(baseNodeId + localId);
                         importedRelationships += compressor.applyVariableDeltaEncoding(
                             compressedAdjacencyList,
                             buffer,
-                            baseNodeId + localId,
+                            nodeId,
                             valueMapper
                         );
                         compressedLongArrays[localId] = null;
