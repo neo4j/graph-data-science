@@ -31,8 +31,10 @@ import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.RelationshipTypeImportContext;
 import org.neo4j.values.storable.NumberType;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,22 +45,22 @@ public interface RelationshipsAndProperties {
 
     Map<RelationshipType, RelationshipPropertyStore> properties();
 
-    static RelationshipsAndProperties of(Map<RelationshipType, AdjacencyListWithPropertiesBuilder> builders) {
+    static RelationshipsAndProperties of(Collection<RelationshipTypeImportContext> builders) {
         var relTypeCount = builders.size();
         Map<RelationshipType, Relationships.Topology> relationships = new HashMap<>(relTypeCount);
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
 
-        builders.forEach((relationshipType, relationshipsBuilder) -> {
-            var adjacencyListsWithProperties = relationshipsBuilder.build();
+        builders.forEach((context) -> {
+            var adjacencyListsWithProperties = context.singleTypeRelationshipImporterFactory().build();
 
             var adjacency = adjacencyListsWithProperties.adjacency();
             var properties = adjacencyListsWithProperties.properties();
-            long relationshipCount = relationshipsBuilder.relationshipCounter().longValue();
+            long relationshipCount = adjacencyListsWithProperties.relationshipCount();
 
-            RelationshipProjection projection = relationshipsBuilder.projection();
+            RelationshipProjection projection = context.relationshipProjection();
 
             relationships.put(
-                relationshipType,
+                context.relationshipType(),
                 ImmutableTopology.of(
                     adjacency,
                     relationshipCount,
@@ -69,7 +71,7 @@ public interface RelationshipsAndProperties {
 
             if (!projection.properties().isEmpty()) {
                 relationshipPropertyStores.put(
-                    relationshipType,
+                    context.relationshipType(),
                     constructRelationshipPropertyStore(
                         projection,
                         properties,

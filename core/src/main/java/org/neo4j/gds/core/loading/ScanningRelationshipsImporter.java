@@ -20,28 +20,27 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.builder.Builder;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.compress.AdjacencyListBehavior;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.RelationshipTypeImportContext;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.Map;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 
 
 public final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, RelationshipsAndProperties> {
 
-    private final GraphProjectConfig graphProjectConfig;
+    private final GraphProjectFromStoreConfig graphProjectConfig;
     private final GraphLoaderContext loadingContext;
 
     private final IdMap idMap;
-    private final Map<RelationshipType, AdjacencyListWithPropertiesBuilder> adjacencyListBuilders;
+    private List<RelationshipTypeImportContext> relationshipTypeImportContexts;
 
     @Builder.Factory
     public static ScanningRelationshipsImporter scanningRelationshipsImporter(
@@ -52,39 +51,22 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         IdMap idMap,
         int concurrency
     ) {
-        Map<RelationshipType, AdjacencyListWithPropertiesBuilder> adjacencyListBuilders = graphProjectConfig
-            .relationshipProjections()
-            .projections()
-            .entrySet()
-            .stream()
-            .collect(toMap(
-                Map.Entry::getKey,
-                projectionEntry -> AdjacencyListWithPropertiesBuilder.create(
-                    dimensions::nodeCount,
-                    projectionEntry.getValue(),
-                    dimensions.relationshipPropertyTokens(),
-                    loadingContext.allocationTracker()
-                )
-            ));
-
         return new ScanningRelationshipsImporter(
             graphProjectConfig,
             loadingContext,
             dimensions,
             progressTracker,
             idMap,
-            adjacencyListBuilders,
             concurrency
         );
     }
 
     private ScanningRelationshipsImporter(
-        GraphProjectConfig graphProjectConfig,
+        GraphProjectFromStoreConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
         IdMap idMap,
-        Map<RelationshipType, AdjacencyListWithPropertiesBuilder> adjacencyListBuilders,
         int concurrency
     ) {
         super(
@@ -97,7 +79,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         this.graphProjectConfig = graphProjectConfig;
         this.loadingContext = loadingContext;
         this.idMap = idMap;
-        this.adjacencyListBuilders = adjacencyListBuilders;
     }
 
     @Override
@@ -106,31 +87,60 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         ImportSizing sizing,
         StoreScanner<RelationshipReference> storeScanner
     ) {
-        var importerFactories = adjacencyListBuilders
+        relationshipTypeImportContexts = graphProjectConfig
+            .relationshipProjections()
+            .projections()
             .entrySet()
             .stream()
-            .map(entry -> new SingleTypeRelationshipImporterFactoryBuilder()
-                .adjacencyListWithPropertiesBuilder(entry.getValue())
-                .typeToken(dimensions.relationshipTypeTokenMapping().get(entry.getKey()))
-                .projection(entry.getValue().projection())
-                .importSizing(sizing)
-                .validateRelationships(graphProjectConfig.validateRelationships())
-                .preAggregate(USE_PRE_AGGREGATION.isEnabled())
-                .allocationTracker(allocationTracker)
-                .build())
-            .collect(Collectors.toList());
+            .map(
+                entry -> {
+                    var relationshipType = entry.getKey();
+                    var projection = entry.getValue();
+
+                    var importMetaData = SingleTypeRelationshipImporter.ImportMetaData.of(
+                        projection,
+                        dimensions.relationshipTypeTokenMapping().get(relationshipType),
+                        dimensions.relationshipPropertyTokens(),
+                        USE_PRE_AGGREGATION.isEnabled()
+                    );
+
+                    var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
+                        dimensions::nodeCount,
+                        projection.properties(),
+                        importMetaData.aggregations(),
+                        allocationTracker
+                    );
+
+                    var importerFactory = new SingleTypeRelationshipImporterFactoryBuilder()
+                        .adjacencyCompressorFactory(adjacencyCompressorFactory)
+                        .importMetaData(importMetaData)
+                        .importSizing(sizing)
+                        .validateRelationships(graphProjectConfig.validateRelationships())
+                        .allocationTracker(allocationTracker)
+                        .build();
+
+                    return ImmutableRelationshipTypeImportContext.builder()
+                        .relationshipType(relationshipType)
+                        .relationshipProjection(projection)
+                        .singleTypeRelationshipImporterFactory(importerFactory)
+                        .build();
+                }
+            ).collect(Collectors.toList());
 
         return RelationshipsScannerTask.factory(
             loadingContext,
             progressTracker,
             idMap,
             storeScanner,
-            importerFactories
+            relationshipTypeImportContexts
+                .stream()
+                .map(RelationshipTypeImportContext::singleTypeRelationshipImporterFactory)
+                .collect(Collectors.toList())
         );
     }
 
     @Override
     public RelationshipsAndProperties build() {
-        return RelationshipsAndProperties.of(adjacencyListBuilders);
+        return RelationshipsAndProperties.of(relationshipTypeImportContexts);
     }
 }

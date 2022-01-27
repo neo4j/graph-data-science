@@ -23,11 +23,13 @@ import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
+import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.compress.ImmutableAdjacencyListsWithProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongSupplier;
 import java.util.stream.Stream;
 
@@ -39,6 +41,7 @@ abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> im
     final boolean noAggregation;
     final Aggregation[] aggregations;
     final AllocationTracker allocationTracker;
+    final LongAdder relationshipCounter;
 
     HugeIntArray adjacencyDegrees;
     HugeLongArray adjacencyOffsets;
@@ -57,6 +60,7 @@ abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> im
         this.nodeCountSupplier = nodeCountSupplier;
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
+        this.relationshipCounter = new LongAdder();
         this.allocationTracker = allocationTracker;
     }
 
@@ -72,7 +76,12 @@ abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> im
     }
 
     @Override
-    public ImmutableAdjacencyListsWithProperties.Builder build() {
+    public LongAdder relationshipCounter() {
+        return relationshipCounter;
+    }
+
+    @Override
+    public AdjacencyListsWithProperties build() {
         var builder = ImmutableAdjacencyListsWithProperties
             .builder()
             .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets));
@@ -82,7 +91,7 @@ abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> im
             builder.addProperty(properties);
         }
 
-        return builder;
+        return builder.relationshipCount(relationshipCounter.longValue()).build();
     }
 
 }

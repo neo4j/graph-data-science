@@ -25,7 +25,6 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.loading.AdjacencyListWithPropertiesBuilder;
 import org.neo4j.gds.core.loading.RelationshipImporter;
 import org.neo4j.gds.core.loading.RelationshipPropertiesBatchBuffer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
@@ -43,7 +42,6 @@ public class RelationshipsBuilder {
     private final boolean loadRelationshipProperty;
     private final boolean isMultiGraph;
 
-    private final AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder;
     private final Orientation orientation;
     private final SingleTypeRelationshipImporter.Factory importerFactory;
 
@@ -57,7 +55,6 @@ public class RelationshipsBuilder {
         Orientation orientation,
         int bufferSize,
         int[] propertyKeyIds,
-        AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
         SingleTypeRelationshipImporter.Factory importerFactory,
         boolean loadRelationshipProperty,
         boolean isMultiGraph,
@@ -66,7 +63,6 @@ public class RelationshipsBuilder {
     ) {
         this.idMap = idMap;
         this.orientation = orientation;
-        this.adjacencyListWithPropertiesBuilder = adjacencyListWithPropertiesBuilder;
         this.importerFactory = importerFactory;
         this.loadRelationshipProperty = loadRelationshipProperty;
         this.isMultiGraph = isMultiGraph;
@@ -148,7 +144,7 @@ public class RelationshipsBuilder {
 
         ParallelUtil.runWithConcurrency(concurrency, adjacencyListBuilderTasks, executorService);
 
-        var adjacencyListsWithProperties = adjacencyListWithPropertiesBuilder.build();
+        var adjacencyListsWithProperties = importerFactory.build();
         var adjacencyList = adjacencyListsWithProperties.adjacency();
         var relationshipCount = adjacencyListsWithProperties.relationshipCount();
 

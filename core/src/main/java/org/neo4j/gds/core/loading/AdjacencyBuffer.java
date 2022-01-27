@@ -21,9 +21,9 @@ package org.neo4j.gds.core.loading;
 
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
@@ -53,7 +53,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 @Value.Style(typeBuilder = "AdjacencyBufferBuilder")
 public final class AdjacencyBuffer {
 
-    private final AdjacencyListWithPropertiesBuilder globalBuilder;
+    private final AdjacencyCompressorFactory adjacencyCompressorFactory;
     private final ThreadLocalRelationshipsBuilder[] localBuilders;
     private final CompressedLongArray[][] compressedAdjacencyLists;
     private final int pageShift;
@@ -67,9 +67,9 @@ public final class AdjacencyBuffer {
 
     @Builder.Factory
     public static AdjacencyBuffer of(
-        @NotNull AdjacencyListWithPropertiesBuilder globalBuilder,
+        SingleTypeRelationshipImporter.ImportMetaData importMetaData,
+        AdjacencyCompressorFactory adjacencyCompressorFactory,
         ImportSizing importSizing,
-        boolean preAggregate,
         AllocationTracker allocationTracker
     ) {
         var numPages = importSizing.numberOfPages();
@@ -87,42 +87,41 @@ public final class AdjacencyBuffer {
             allocationTracker.add(sizeOfObjectPage);
             allocationTracker.add(sizeOfLongPage);
             compressedAdjacencyLists[page] = new CompressedLongArray[pageSize];
-            localBuilders[page] = globalBuilder.threadLocalRelationshipsBuilder();
+            localBuilders[page] = new ThreadLocalRelationshipsBuilder(adjacencyCompressorFactory);
         }
 
         boolean atLeastOnePropertyToLoad = Arrays
-            .stream(globalBuilder.propertyKeyIds())
+            .stream(importMetaData.propertyKeyIds())
             .anyMatch(keyId -> keyId != NO_SUCH_PROPERTY_KEY);
 
         return new AdjacencyBuffer(
-            globalBuilder,
-            localBuilders,
+            importMetaData,
+            adjacencyCompressorFactory, localBuilders,
             compressedAdjacencyLists,
             pageSize,
-            atLeastOnePropertyToLoad,
-            preAggregate
+            atLeastOnePropertyToLoad
         );
     }
 
     private AdjacencyBuffer(
-        AdjacencyListWithPropertiesBuilder globalBuilder,
+        SingleTypeRelationshipImporter.ImportMetaData importMetaData,
+        AdjacencyCompressorFactory adjacencyCompressorFactory,
         ThreadLocalRelationshipsBuilder[] localBuilders,
         CompressedLongArray[][] compressedAdjacencyLists,
         int pageSize,
-        boolean atLeastOnePropertyToLoad,
-        boolean preAggregate
+        boolean atLeastOnePropertyToLoad
     ) {
-        this.globalBuilder = globalBuilder;
+        this.adjacencyCompressorFactory = adjacencyCompressorFactory;
         this.localBuilders = localBuilders;
         this.compressedAdjacencyLists = compressedAdjacencyLists;
         this.pageShift = Integer.numberOfTrailingZeros(pageSize);
         this.pageMask = pageSize - 1;
-        this.relationshipCounter = globalBuilder.relationshipCounter();
-        this.propertyKeyIds = globalBuilder.propertyKeyIds();
-        this.defaultValues = globalBuilder.defaultValues();
-        this.aggregations = globalBuilder.aggregations();
+        this.relationshipCounter = adjacencyCompressorFactory.relationshipCounter();
+        this.propertyKeyIds = importMetaData.propertyKeyIds();
+        this.defaultValues = importMetaData.defaultValues();
+        this.aggregations = importMetaData.aggregations();
         this.atLeastOnePropertyToLoad = atLeastOnePropertyToLoad;
-        this.preAggregate = preAggregate;
+        this.preAggregate = importMetaData.preAggregate();
     }
 
     /**
@@ -201,7 +200,7 @@ public final class AdjacencyBuffer {
     }
 
     Collection<AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
-        this.globalBuilder.prepareAdjacencyListBuilderTasks();
+        adjacencyCompressorFactory.init();
 
         var tasks = new ArrayList<AdjacencyListBuilderTask>(localBuilders.length + 1);
         for (int page = 0; page < localBuilders.length; page++) {

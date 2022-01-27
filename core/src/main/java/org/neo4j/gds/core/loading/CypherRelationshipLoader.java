@@ -35,7 +35,9 @@ import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.RelationshipTypeImportContext;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -120,10 +122,18 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         GraphDimensions newDimensions = dimensionsBuilder.build();
 
         propertyKeyIds = newDimensions.relationshipPropertyTokens().values().stream().mapToInt(i -> i).toArray();
-        propertyDefaultValues = propertyMappings.mappings().stream().mapToDouble(propertyMapping -> propertyMapping.defaultValue().doubleValue()).toArray();
-        aggregations = propertyMappings.mappings().stream().map(PropertyMapping::aggregation).toArray(Aggregation[]::new);
+        propertyDefaultValues = propertyMappings
+            .mappings()
+            .stream()
+            .mapToDouble(propertyMapping -> propertyMapping.defaultValue().doubleValue())
+            .toArray();
+        aggregations = propertyMappings
+            .mappings()
+            .stream()
+            .map(PropertyMapping::aggregation)
+            .toArray(Aggregation[]::new);
         if (propertyMappings.isEmpty()) {
-            aggregations = new Aggregation[]{ Aggregation.NONE };
+            aggregations = new Aggregation[]{Aggregation.NONE};
         }
         resultDimensions = newDimensions;
     }
@@ -180,19 +190,20 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     }
 
     @Override
-    void updateCounts(BatchLoadResult result) { }
+    void updateCounts(BatchLoadResult result) {}
 
     @Override
     LoadResult result() {
         var flushTasks = loaderContext.importerFactoriesByType
             .values()
             .stream()
+            .map(RelationshipTypeImportContext::singleTypeRelationshipImporterFactory)
             .flatMap(factory -> factory.adjacencyListBuilderTasks().stream())
             .collect(Collectors.toList());
 
         ParallelUtil.run(flushTasks, loadingContext.executor());
 
-        var relationshipsAndProperties = RelationshipsAndProperties.of(loaderContext.allBuilders);
+        var relationshipsAndProperties = RelationshipsAndProperties.of(loaderContext.importerFactoriesByType.values());
 
         return ImmutableCypherRelationshipLoader.LoadResult.builder()
             .dimensions(resultDimensions)
@@ -217,23 +228,22 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     class Context {
 
-        private final Map<RelationshipType, SingleTypeRelationshipImporter.Factory> importerFactoriesByType;
-        private final Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders;
+        private final Map<RelationshipType, RelationshipTypeImportContext> importerFactoriesByType;
 
         private final ImportSizing importSizing;
 
         Context() {
             this.importerFactoriesByType = new HashMap<>();
-            this.allBuilders = new HashMap<>();
-
             this.importSizing = ImportSizing.of(cypherConfig.readConcurrency(), idMap.nodeCount());
         }
 
         synchronized SingleTypeRelationshipImporter.Factory getOrCreateImporterFactory(RelationshipType relationshipType) {
-            return importerFactoriesByType.computeIfAbsent(relationshipType, this::createImporterFactory);
+            return importerFactoriesByType
+                .computeIfAbsent(relationshipType, this::createImporterFactory)
+                .singleTypeRelationshipImporterFactory();
         }
 
-        private SingleTypeRelationshipImporter.Factory createImporterFactory(RelationshipType relationshipType) {
+        private RelationshipTypeImportContext createImporterFactory(RelationshipType relationshipType) {
             RelationshipProjection projection = RelationshipProjection
                 .builder()
                 .type(relationshipType.name)
@@ -245,25 +255,35 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .map(Aggregation::resolve)
                 .toArray(Aggregation[]::new);
 
-            AdjacencyListWithPropertiesBuilder builder = AdjacencyListWithPropertiesBuilder.create(
+            var importMetaData = ImmutableImportMetaData.builder()
+                .projection(projection)
+                .aggregations(aggregationsWithDefault)
+                .propertyKeyIds(propertyKeyIds)
+                .defaultValues(propertyDefaultValues)
+                .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
+                .preAggregate(GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled())
+                .build();
+
+            var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
                 idMap::nodeCount,
-                projection,
-                aggregationsWithDefault,
-                propertyKeyIds,
-                propertyDefaultValues,
+                projection.properties(),
+                importMetaData.aggregations(),
                 loadingContext.allocationTracker()
             );
 
-            allBuilders.put(relationshipType, builder);
-
-            return new SingleTypeRelationshipImporterFactoryBuilder()
-                .adjacencyListWithPropertiesBuilder(builder)
-                .typeToken(NO_SUCH_RELATIONSHIP_TYPE)
-                .projection(projection)
+            var importerFactory = new SingleTypeRelationshipImporterFactoryBuilder()
+                .adjacencyCompressorFactory(adjacencyCompressorFactory)
+                .importMetaData(importMetaData)
                 .importSizing(importSizing)
                 .validateRelationships(cypherConfig.validateRelationships())
-                .preAggregate(GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled())
                 .allocationTracker(loadingContext.allocationTracker())
+                .build();
+
+            return ImmutableRelationshipTypeImportContext
+                .builder()
+                .relationshipType(relationshipType)
+                .relationshipProjection(projection)
+                .singleTypeRelationshipImporterFactory(importerFactory)
                 .build();
         }
 
