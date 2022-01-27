@@ -67,7 +67,7 @@ public final class AdjacencyBuffer {
 
     @Builder.Factory
     public static AdjacencyBuffer of(
-        SingleTypeRelationshipImporter.ImportMetaData importMetaData,
+        ThreadLocalSingleTypeRelationshipImporter.ImportMetaData importMetaData,
         AdjacencyCompressorFactory adjacencyCompressorFactory,
         ImportSizing importSizing,
         AllocationTracker allocationTracker
@@ -104,7 +104,7 @@ public final class AdjacencyBuffer {
     }
 
     private AdjacencyBuffer(
-        SingleTypeRelationshipImporter.ImportMetaData importMetaData,
+        ThreadLocalSingleTypeRelationshipImporter.ImportMetaData importMetaData,
         AdjacencyCompressorFactory adjacencyCompressorFactory,
         ThreadLocalRelationshipsBuilder[] localBuilders,
         CompressedLongArray[][] compressedAdjacencyLists,

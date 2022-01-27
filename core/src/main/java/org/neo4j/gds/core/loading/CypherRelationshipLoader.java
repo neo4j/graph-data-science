@@ -36,7 +36,7 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.RelationshipTypeImportContext;
+import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter.RelationshipTypeImportContext;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -236,7 +236,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             this.importSizing = ImportSizing.of(cypherConfig.readConcurrency(), idMap.nodeCount());
         }
 
-        synchronized SingleTypeRelationshipImporter.Factory getOrCreateImporterFactory(RelationshipType relationshipType) {
+        synchronized ThreadLocalSingleTypeRelationshipImporter.Factory getOrCreateImporterFactory(RelationshipType relationshipType) {
             return importerFactoriesByType
                 .computeIfAbsent(relationshipType, this::createImporterFactory)
                 .singleTypeRelationshipImporterFactory();

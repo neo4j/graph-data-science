@@ -24,7 +24,7 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.RelationshipTypeImportContext;
+import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter.RelationshipTypeImportContext;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
@@ -96,7 +96,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
                     var relationshipType = entry.getKey();
                     var projection = entry.getValue();
 
-                    var importMetaData = SingleTypeRelationshipImporter.ImportMetaData.of(
+                    var importMetaData = ThreadLocalSingleTypeRelationshipImporter.ImportMetaData.of(
                         projection,
                         dimensions.relationshipTypeTokenMapping().get(relationshipType),
                         dimensions.relationshipPropertyTokens(),

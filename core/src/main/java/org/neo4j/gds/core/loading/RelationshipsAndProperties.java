@@ -31,7 +31,7 @@ import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.RelationshipTypeImportContext;
+import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter.RelationshipTypeImportContext;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;

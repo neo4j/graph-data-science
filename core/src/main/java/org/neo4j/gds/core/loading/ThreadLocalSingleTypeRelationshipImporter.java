@@ -48,13 +48,13 @@ import java.util.function.LongSupplier;
  * type that is being imported.
  */
 @Value.Style(typeBuilder = "SingleTypeRelationshipImporterFactoryBuilder")
-public final class SingleTypeRelationshipImporter {
+public final class ThreadLocalSingleTypeRelationshipImporter {
 
     private final RelationshipImporter.Imports imports;
     private final RelationshipImporter.PropertyReader propertyReader;
     private final RelationshipsBatchBuffer relationshipsBatchBuffer;
 
-    private SingleTypeRelationshipImporter(
+    private ThreadLocalSingleTypeRelationshipImporter(
         RelationshipImporter.Imports imports,
         RelationshipImporter.PropertyReader propertyReader,
         RelationshipsBatchBuffer relationshipsBatchBuffer
@@ -141,19 +141,19 @@ public final class SingleTypeRelationshipImporter {
             return importer.adjacencyListBuilderTasks();
         }
 
-        public SingleTypeRelationshipImporter createImporter(
+        public ThreadLocalSingleTypeRelationshipImporter createImporter(
             IdMap idMap,
             int bulkSize,
             RelationshipImporter.PropertyReader propertyReader
         ) {
-            return new SingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
+            return new ThreadLocalSingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
         }
 
         public AdjacencyListsWithProperties build() {
             return adjacencyCompressorFactory.build();
         }
 
-        SingleTypeRelationshipImporter createImporter(
+        ThreadLocalSingleTypeRelationshipImporter createImporter(
             IdMap idMap,
             int bulkSize,
             KernelTransaction kernelTransaction
@@ -162,7 +162,7 @@ public final class SingleTypeRelationshipImporter {
                 ? importer.storeBackedPropertiesReader(kernelTransaction)
                 : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
 
-            return new SingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
+            return new ThreadLocalSingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
         }
 
         @NotNull
@@ -242,6 +242,6 @@ public final class SingleTypeRelationshipImporter {
 
         RelationshipProjection relationshipProjection();
 
-        SingleTypeRelationshipImporter.Factory singleTypeRelationshipImporterFactory();
+        ThreadLocalSingleTypeRelationshipImporter.Factory singleTypeRelationshipImporterFactory();
     }
 }

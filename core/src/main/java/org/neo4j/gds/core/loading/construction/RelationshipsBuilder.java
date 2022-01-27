@@ -27,7 +27,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.RelationshipImporter;
 import org.neo4j.gds.core.loading.RelationshipPropertiesBatchBuffer;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
+import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.List;
@@ -43,7 +43,7 @@ public class RelationshipsBuilder {
     private final boolean isMultiGraph;
 
     private final Orientation orientation;
-    private final SingleTypeRelationshipImporter.Factory importerFactory;
+    private final ThreadLocalSingleTypeRelationshipImporter.Factory importerFactory;
 
     private final int concurrency;
     private final ExecutorService executorService;
@@ -55,7 +55,7 @@ public class RelationshipsBuilder {
         Orientation orientation,
         int bufferSize,
         int[] propertyKeyIds,
-        SingleTypeRelationshipImporter.Factory importerFactory,
+        ThreadLocalSingleTypeRelationshipImporter.Factory importerFactory,
         boolean loadRelationshipProperty,
         boolean isMultiGraph,
         int concurrency,
@@ -171,7 +171,7 @@ public class RelationshipsBuilder {
 
     private static class ThreadLocalBuilder implements AutoCloseable {
 
-        private final SingleTypeRelationshipImporter importer;
+        private final ThreadLocalSingleTypeRelationshipImporter importer;
         private final RelationshipPropertiesBatchBuffer propertiesBatchBuffer;
         private final int[] propertyKeyIds;
 
@@ -179,7 +179,7 @@ public class RelationshipsBuilder {
 
         ThreadLocalBuilder(
             IdMap idMap,
-            SingleTypeRelationshipImporter.Factory importerFactory,
+            ThreadLocalSingleTypeRelationshipImporter.Factory importerFactory,
             int bufferSize,
             int[] propertyKeyIds
         ) {
