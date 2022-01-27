@@ -25,9 +25,9 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.loading.RelationshipImporter;
-import org.neo4j.gds.core.loading.RelationshipPropertiesBatchBuffer;
+import org.neo4j.gds.core.loading.PropertyReader;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
+import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.List;
@@ -171,8 +171,8 @@ public class RelationshipsBuilder {
 
     private static class ThreadLocalBuilder implements AutoCloseable {
 
-        private final SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter importer;
-        private final RelationshipPropertiesBatchBuffer propertiesBatchBuffer;
+        private final ThreadLocalSingleTypeRelationshipImporter importer;
+        private final PropertyReader.Buffered bufferedPropertyReader;
         private final int[] propertyKeyIds;
 
         private int localRelationshipId;
@@ -186,14 +186,18 @@ public class RelationshipsBuilder {
             this.propertyKeyIds = propertyKeyIds;
 
             if (propertyKeyIds.length > 1) {
-                this.propertiesBatchBuffer = new RelationshipPropertiesBatchBuffer(bufferSize, propertyKeyIds.length);
-                this.importer = singleTypeRelationshipImporter.createImporter(idMap, bufferSize, propertiesBatchBuffer);
-            } else {
-                this.propertiesBatchBuffer = null;
-                this.importer = singleTypeRelationshipImporter.createImporter(
+                this.bufferedPropertyReader = PropertyReader.buffered(bufferSize, propertyKeyIds.length);
+                this.importer = singleTypeRelationshipImporter.threadLocalImporter(
                     idMap,
                     bufferSize,
-                    RelationshipImporter.preLoadedPropertyReader()
+                    bufferedPropertyReader
+                );
+            } else {
+                this.bufferedPropertyReader = null;
+                this.importer = singleTypeRelationshipImporter.threadLocalImporter(
+                    idMap,
+                    bufferSize,
+                    PropertyReader.preLoaded()
                 );
             }
         }
@@ -224,7 +228,7 @@ public class RelationshipsBuilder {
             importer.buffer().add(source, target, nextRelationshipId, Neo4jProxy.noPropertyReference());
             int[] keyIds = propertyKeyIds;
             for (int i = 0; i < keyIds.length; i++) {
-                propertiesBatchBuffer.add(nextRelationshipId, keyIds[i], relationshipPropertyValues[i]);
+                bufferedPropertyReader.add(nextRelationshipId, keyIds[i], relationshipPropertyValues[i]);
             }
             if (importer.buffer().isFull()) {
                 flushBuffer();

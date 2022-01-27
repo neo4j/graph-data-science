@@ -45,7 +45,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
  * responsibilities:
  *
  * <ul>
- *     <li>Receives raw relationship records from relationship batch buffers via {@link org.neo4j.gds.core.loading.RelationshipImporter}</li>
+ *     <li>Receives raw relationship records from relationship batch buffers via {@link org.neo4j.gds.core.loading.SingleTypeRelationshipImporter}</li>
  *     <li>Compresses raw records into compressed long arrays</li>
  *     <li>Creates tasks that write compressed long arrays into the final adjacency list using a specific compressor</li>
  * </ul>

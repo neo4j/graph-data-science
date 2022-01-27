@@ -23,6 +23,7 @@ import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
 
 import java.util.concurrent.locks.ReentrantLock;
 
+// TODO remove
 final class ThreadLocalRelationshipsBuilder {
 
     private final ReentrantLock lock;
