@@ -24,7 +24,6 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.RelationshipTypeImportContext;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -104,16 +103,9 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
                         USE_PRE_AGGREGATION.isEnabled()
                     );
 
-                    var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
-                        dimensions::nodeCount,
-                        projection.properties(),
-                        importMetaData.aggregations(),
-                        allocationTracker
-                    );
-
                     var importerFactory = new SingleTypeRelationshipImporterFactoryBuilder()
-                        .adjacencyCompressorFactory(adjacencyCompressorFactory)
                         .importMetaData(importMetaData)
+                        .nodeCountSupplier(dimensions::nodeCount)
                         .importSizing(sizing)
                         .validateRelationships(graphProjectConfig.validateRelationships())
                         .allocationTracker(allocationTracker)

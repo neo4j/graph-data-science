@@ -35,7 +35,6 @@ import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.RelationshipTypeImportContext;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -264,16 +263,9 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .preAggregate(GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled())
                 .build();
 
-            var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
-                idMap::nodeCount,
-                projection.properties(),
-                importMetaData.aggregations(),
-                loadingContext.allocationTracker()
-            );
-
             var importerFactory = new SingleTypeRelationshipImporterFactoryBuilder()
-                .adjacencyCompressorFactory(adjacencyCompressorFactory)
                 .importMetaData(importMetaData)
+                .nodeCountSupplier(idMap::nodeCount)
                 .importSizing(importSizing)
                 .validateRelationships(cypherConfig.validateRelationships())
                 .allocationTracker(loadingContext.allocationTracker())

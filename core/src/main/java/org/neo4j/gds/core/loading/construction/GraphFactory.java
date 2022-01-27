@@ -39,7 +39,6 @@ import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
-import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.IdMapBuilder;
@@ -265,16 +264,9 @@ public final class GraphFactory {
             .preAggregate(preAggregate.orElse(false))
             .build();
 
-        var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
-            nodes::nodeCount,
-            projection.properties(),
-            importMetaData.aggregations(),
-            allocationTracker
-        );
-
         var importerFactory = new SingleTypeRelationshipImporterFactoryBuilder()
-            .adjacencyCompressorFactory(adjacencyCompressorFactory)
             .importMetaData(importMetaData)
+            .nodeCountSupplier(nodes::nodeCount)
             .importSizing(importSizing)
             .validateRelationships(false)
             .allocationTracker(allocationTracker)

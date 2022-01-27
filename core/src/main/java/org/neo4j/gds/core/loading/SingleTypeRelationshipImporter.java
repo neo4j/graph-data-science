@@ -28,12 +28,14 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
+import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.LongSupplier;
 
 /**
  * Wraps a relationship buffer that is being filled by the store scanners.
@@ -72,12 +74,19 @@ public final class SingleTypeRelationshipImporter {
 
     @org.immutables.builder.Builder.Factory
     public static Factory builder(
-        AdjacencyCompressorFactory adjacencyCompressorFactory,
         ImportMetaData importMetaData,
+        LongSupplier nodeCountSupplier,
         boolean validateRelationships,
         ImportSizing importSizing,
         AllocationTracker allocationTracker
     ) {
+        var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
+            nodeCountSupplier,
+            importMetaData.projection().properties(),
+            importMetaData.aggregations(),
+            allocationTracker
+        );
+
         var adjacencyBuilder = new AdjacencyBufferBuilder()
             .importMetaData(importMetaData)
             .importSizing(importSizing)
