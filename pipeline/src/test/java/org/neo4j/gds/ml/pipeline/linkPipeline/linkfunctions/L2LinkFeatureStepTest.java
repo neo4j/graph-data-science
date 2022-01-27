@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
+package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
@@ -27,8 +27,9 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
+import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 
 import java.util.List;
 
@@ -95,5 +96,28 @@ final class L2LinkFeatureStepTest {
         assertThatThrownBy(() -> LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4, ProgressTracker.NULL_TRACKER))
             .hasMessage("Encountered NaN in the nodeProperty `invalidValue` for nodes ['1'] when computing the L2 feature vector. " +
                         "Either define a default value if its a stored property or check the nodePropertyStep");
+    }
+
+    @Test
+    void testThis() {
+        var testGraph = GdlFactory.of(        "CREATE " +
+                                              "  (n1:N {a: 2.0, b: 1.2})" +
+                                              ", (n2:N {a: 1.3, b: 0.5})" +
+                                              ", (n3:N {a: 0.0, b: 2.8})" +
+                                              ", (n4:N {a: 1.0, b: 0.9})" +
+                                              ", (n5:N {a: 1.0, b: 0.9})" +
+                                              ", (n1)-[:T {label: 1.0}]->(n2)" +
+                                              ", (n3)-[:T {label: 1.0}]->(n4)" +
+                                              ", (n1)-[:T {label: 0.0}]->(n3)" +
+                                              ", (n2)-[:T {label: 0.0}]->(n4)").build().getUnion();
+
+        var features =  LinkFeatureExtractor.extractFeatures(
+            testGraph,
+            List.of(new L2FeatureStep(List.of("a", "b"))),
+            4,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        assertThat(features.size()).isEqualTo(4);
     }
 }

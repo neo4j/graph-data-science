@@ -41,7 +41,7 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
-import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationSplitConfig.DEFAULT_CONFIG;
+import static org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig.DEFAULT_CONFIG;
 
 @Neo4jModelCatalogExtension
 class NodeClassificationPipelineAddStepsTest extends BaseProcTest {

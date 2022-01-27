@@ -17,26 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
+package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureAppender;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
+import org.neo4j.gds.ml.pipeline.FeatureStepUtil;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureAppender;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.FeatureStepUtil.throwNanError;
+import static org.neo4j.gds.ml.pipeline.FeatureStepUtil.throwNanError;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class L2FeatureStep implements LinkFeatureStep {
+public class HadamardFeatureStep implements LinkFeatureStep {
 
     private final List<String> nodeProperties;
 
-    public L2FeatureStep(List<String> nodeProperties) {
+    public HadamardFeatureStep(List<String> nodeProperties) {
         this.nodeProperties = nodeProperties;
     }
 
@@ -44,8 +45,7 @@ public class L2FeatureStep implements LinkFeatureStep {
     public LinkFeatureAppender linkFeatureAppender(Graph graph) {
         var properties = nodeProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
         return (source, target, linkFeatures, startOffset) -> {
-            var offset = startOffset;
-
+            var localOffset = startOffset;
             for (NodeProperties props : properties) {
                 var propertyType = props.valueType();
                 switch (propertyType) {
@@ -55,7 +55,7 @@ public class L2FeatureStep implements LinkFeatureStep {
                         var targetArrayPropValues = props.doubleArrayValue(target);
                         assert sourceArrayPropValues.length == targetArrayPropValues.length;
                         for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                            linkFeatures[offset++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
+                            linkFeatures[localOffset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
                         }
                         break;
                     }
@@ -64,21 +64,21 @@ public class L2FeatureStep implements LinkFeatureStep {
                         var targetArrayPropValues = props.longArrayValue(target);
                         assert sourceArrayPropValues.length == targetArrayPropValues.length;
                         for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                            linkFeatures[offset++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
+                            linkFeatures[localOffset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
                         }
                         break;
                     }
                     case LONG:
                     case DOUBLE:
-                        linkFeatures[offset++] = Math.pow(props.doubleValue(source) - props.doubleValue(target), 2);
+                        linkFeatures[localOffset++] = props.doubleValue(source) * props.doubleValue(target);
                         break;
                     case UNKNOWN:
                         throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                 }
             }
 
-            FeatureStepUtil.validateComputedFeatures(linkFeatures, startOffset, offset, () -> throwNanError(
-                "L2",
+            FeatureStepUtil.validateComputedFeatures(linkFeatures, startOffset, localOffset, () -> throwNanError(
+                "hadamard",
                 graph,
                 this.nodeProperties,
                 source,
@@ -104,6 +104,6 @@ public class L2FeatureStep implements LinkFeatureStep {
 
     @Override
     public String name() {
-        return LinkFeatureStepFactory.L2.name();
+        return LinkFeatureStepFactory.HADAMARD.name();
     }
 }

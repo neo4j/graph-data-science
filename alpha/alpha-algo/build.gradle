@@ -26,7 +26,6 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':open-model-catalog')
-    implementation project(':pipeline')
     implementation project(':string-formatting')
 
     api project(':alpha-core')

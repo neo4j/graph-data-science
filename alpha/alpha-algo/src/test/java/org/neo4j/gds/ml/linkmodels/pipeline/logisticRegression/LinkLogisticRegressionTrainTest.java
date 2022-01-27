@@ -34,10 +34,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,7 +58,6 @@ class LinkLogisticRegressionTrainTest {
     @Inject
     private Graph graph;
 
-    List<String> features = List.of("a", "b");
     private HugeObjectArray<double[]> linkFeatures;
     private HugeDoubleArray targets;
     private ReadOnlyHugeLongArray trainSet;
@@ -73,11 +69,13 @@ class LinkLogisticRegressionTrainTest {
 
         trainSet = new ReadOnlyHugeLongIdentityArray(graph.relationshipCount());
 
-        this.linkFeatures = LinkFeatureExtractor.extractFeatures(
-            graph,
-            List.of(new L2FeatureStep(features)),
-            4,
-            ProgressTracker.NULL_TRACKER
+        // L2 Norm features for node properties a,b
+        this.linkFeatures = HugeObjectArray.of(
+            new double[]{0.4900000667572044, 0.4900000667572044},
+            new double[]{4.0, 2.559999694824228},
+
+            new double[]{0.08999997138977278, 0.15999998092651424},
+            new double[]{1.0, 3.6099999094009405}
         );
     }
 

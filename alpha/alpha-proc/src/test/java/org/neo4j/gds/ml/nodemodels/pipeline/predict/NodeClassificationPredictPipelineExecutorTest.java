@@ -47,12 +47,11 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationFeatureStep;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipeline;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.ArrayList;
@@ -223,7 +222,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             modelCatalog.set(Model.of(
                 getUsername(),
                 "model",
-                NodeClassificationTrainPipelineExecutor.MODEL_TYPE,
+                NodeClassificationPipeline.MODEL_TYPE,
                 GraphSchema.empty(),
                 modelData,
                 NodeClassificationPipelineTrainConfig.builder()

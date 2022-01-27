@@ -29,12 +29,11 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationFeatureStep;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipeline;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -69,7 +68,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         modelCatalog.set(Model.of(
             username,
             "model",
-            NodeClassificationTrainPipelineExecutor.MODEL_TYPE,
+            NodeClassificationPipeline.MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
             NodeClassificationPipelineTrainConfig.builder()

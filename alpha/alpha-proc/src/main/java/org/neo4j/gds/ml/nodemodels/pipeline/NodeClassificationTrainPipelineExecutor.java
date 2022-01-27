@@ -36,6 +36,9 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrai
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -47,7 +50,6 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     NodeClassificationPipeline,
     NodeClassificationPipelineTrainResult
 > {
-    public static final String MODEL_TYPE = "Node classification pipeline";
 
     public NodeClassificationTrainPipelineExecutor(
         NodeClassificationPipeline pipeline,
@@ -96,7 +98,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
             Model.of(
                 innerModel.creator(),
                 innerModel.name(),
-                MODEL_TYPE,
+                NodeClassificationPipeline.MODEL_TYPE,
                 innerModel.graphSchema(),
                 innerModel.data(),
                 config,

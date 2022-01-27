@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.pipeline;
+package org.neo4j.gds.ml.pipeline.nodePipeline;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.FeatureStepUtil;
 import org.neo4j.gds.ml.pipeline.FeatureStep;
+import org.neo4j.gds.ml.pipeline.FeatureStepUtil;
 
 import java.util.List;
 import java.util.Map;
