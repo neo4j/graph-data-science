@@ -87,6 +87,7 @@ public final class GraphFactory {
         Optional<NodeSchema> nodeSchema,
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
+        Optional<Boolean> deduplicateIds,
         Optional<Integer> concurrency,
         AllocationTracker allocationTracker
     ) {
@@ -106,12 +107,15 @@ public final class GraphFactory {
             allocationTracker
         );
 
+        boolean deduplicate = deduplicateIds.orElse(true);
+
         return nodeSchema.map(schema -> fromSchema(
             maxOriginalId,
             idMapBuilder,
             threadCount,
             schema,
             labelInformation,
+            deduplicate,
             allocationTracker
         )).orElseGet(() -> {
             boolean nodeProperties = hasProperties.orElse(false);
@@ -130,6 +134,7 @@ public final class GraphFactory {
                 idMapBuilder,
                 labelInformation,
                 nodeProperties,
+                deduplicate,
                 allocationTracker
             );
         });
@@ -141,6 +146,7 @@ public final class GraphFactory {
         int concurrency,
         NodeSchema nodeSchema,
         boolean hasLabelInformation,
+        boolean deduplicateIds,
         AllocationTracker allocationTracker
     ) {
         var nodeLabels = nodeSchema.availableLabels();
@@ -175,6 +181,7 @@ public final class GraphFactory {
             idMapBuilder,
             hasLabelInformation,
             nodeSchema.hasProperties(),
+            deduplicateIds,
             allocationTracker
         );
     }

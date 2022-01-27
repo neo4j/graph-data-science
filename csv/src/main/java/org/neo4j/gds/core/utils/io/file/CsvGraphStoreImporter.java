@@ -153,6 +153,7 @@ public final class CsvGraphStoreImporter {
             .maxOriginalId(graphInfo.maxOriginalId())
             .concurrency(concurrency)
             .nodeCount(graphInfo.nodeCount())
+            .deduplicateIds(false)
             .allocationTracker(allocationTracker)
             .build();
         nodeVisitorBuilder.withNodeSchema(nodeSchema);

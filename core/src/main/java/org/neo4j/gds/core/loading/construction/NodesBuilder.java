@@ -39,6 +39,7 @@ import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.values.storable.Value;
 
@@ -92,6 +93,7 @@ public final class NodesBuilder {
         IdMapBuilder idMapBuilder,
         boolean hasLabelInformation,
         boolean hasProperties,
+        boolean deduplicateIds,
         AllocationTracker allocationTracker
     ) {
         this.maxOriginalId = maxOriginalId;
@@ -112,17 +114,13 @@ public final class NodesBuilder {
             hasProperties
         );
 
-        var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, allocationTracker);
-
         Function<NodeLabel, Integer> labelTokenIdFn = elementIdentifierLabelTokenMapping.isEmpty()
             ? this::getOrCreateLabelTokenId
             : this::getLabelTokenId;
         BiFunction<Integer, String, NodePropertiesFromStoreBuilder> propertyBuilderFn = buildersByLabelTokenAndPropertyKey.isEmpty()
             ? this::getOrCreatePropertyBuilder
             : this::getPropertyBuilder;
-        LongPredicate seenNodeIdPredicate = maxOriginalId == UNKNOWN_MAX_ID
-            ? nodeId -> false
-            : seenIds::getAndSet;
+        LongPredicate seenNodeIdPredicate = seenNodesPredicate(deduplicateIds, maxOriginalId, allocationTracker);
         long highestPossibleNodeCount = maxOriginalId == UNKNOWN_MAX_ID
             ? Long.MAX_VALUE
             : maxOriginalId + 1;
@@ -138,6 +136,24 @@ public final class NodesBuilder {
                 buildersByLabelTokenAndPropertyKey
             )
         );
+    }
+
+    private static LongPredicate seenNodesPredicate(
+        boolean deduplicateIds,
+        long maxOriginalId,
+        AllocationTracker allocationTracker
+    ) {
+        if (deduplicateIds) {
+            if (maxOriginalId == UNKNOWN_MAX_ID) {
+                var seenIds = HugeAtomicGrowingBitSet.create(0, allocationTracker);
+                return seenIds::getAndSet;
+            } else {
+                var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, allocationTracker);
+                return seenIds::getAndSet;
+            }
+        } else {
+            return nodeId -> false;
+        }
     }
 
     public void addNode(long originalId, NodeLabel... nodeLabels) {
