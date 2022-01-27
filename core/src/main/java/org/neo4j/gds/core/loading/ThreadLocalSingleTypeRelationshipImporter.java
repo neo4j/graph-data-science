@@ -37,11 +37,13 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * type that is being imported.
  */
 @Value.Style(typeBuilder = "ThreadLocalSingleTypeRelationshipImporterBuilder")
-public final class ThreadLocalSingleTypeRelationshipImporter {
+public abstract class ThreadLocalSingleTypeRelationshipImporter {
 
     private final AdjacencyBuffer adjacencyBuffer;
-    private final ImportStrategy importStrategy;
     private final RelationshipsBatchBuffer relationshipsBatchBuffer;
+    private final AllocationTracker allocationTracker;
+
+    final PropertyReader propertyReader;
 
     @Builder.Factory
     static ThreadLocalSingleTypeRelationshipImporter of(
@@ -51,238 +53,272 @@ public final class ThreadLocalSingleTypeRelationshipImporter {
         PropertyReader propertyReader,
         AllocationTracker allocationTracker
     ) {
-        var importStrategy = ImportStrategy.of(importMetaData, propertyReader, allocationTracker);
-        return new ThreadLocalSingleTypeRelationshipImporter(adjacencyBuffer, importStrategy, relationshipsBatchBuffer);
+        var orientation = importMetaData.projection().orientation();
+        var loadProperties = importMetaData.projection().properties().hasMappings();
+
+        if (orientation == Orientation.UNDIRECTED) {
+            return loadProperties
+                ? new UndirectedWithProperties(
+                adjacencyBuffer,
+                relationshipsBatchBuffer,
+                propertyReader,
+                allocationTracker
+            )
+                : new Undirected(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
+        } else if (orientation == Orientation.NATURAL) {
+            return loadProperties
+                ? new NaturalWithProperties(
+                adjacencyBuffer,
+                relationshipsBatchBuffer,
+                propertyReader,
+                allocationTracker
+            )
+                : new Natural(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
+        } else if (orientation == Orientation.REVERSE) {
+            return loadProperties
+                ? new ReverseWithProperties(
+                adjacencyBuffer,
+                relationshipsBatchBuffer,
+                propertyReader,
+                allocationTracker
+            )
+                : new Reverse(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
+        } else {
+            throw new IllegalArgumentException(formatWithLocale("Unexpected orientation: %s", orientation));
+        }
     }
 
     private ThreadLocalSingleTypeRelationshipImporter(
         AdjacencyBuffer adjacencyBuffer,
-        ImportStrategy importStrategy,
-        RelationshipsBatchBuffer relationshipsBatchBuffer
+        RelationshipsBatchBuffer relationshipsBatchBuffer,
+        PropertyReader propertyReader,
+        AllocationTracker allocationTracker
     ) {
         this.adjacencyBuffer = adjacencyBuffer;
-        this.importStrategy = importStrategy;
         this.relationshipsBatchBuffer = relationshipsBatchBuffer;
+        this.propertyReader = propertyReader;
+        this.allocationTracker = allocationTracker;
     }
 
+    public abstract long importRelationships();
+
+    // TODO: remove, once Cypher loading uses RelationshipsBuilder
     public RelationshipsBatchBuffer buffer() {
         return relationshipsBatchBuffer;
     }
 
-    public long importRelationships() {
-        return importStrategy.importRelationships(relationshipsBatchBuffer, adjacencyBuffer);
+    protected RelationshipsBatchBuffer sourceBuffer() {
+        return relationshipsBatchBuffer;
     }
 
-    public abstract static class ImportStrategy {
-        protected final PropertyReader propertyReader;
-        private final AllocationTracker allocationTracker;
+    protected AdjacencyBuffer targetBuffer() {
+        return adjacencyBuffer;
+    }
 
-        static ImportStrategy of(
-            SingleTypeRelationshipImporter.ImportMetaData importMetaData,
-            PropertyReader propertyReader,
-            AllocationTracker allocationTracker
-        ) {
-            var orientation = importMetaData.projection().orientation();
-            var loadProperties = importMetaData.projection().properties().hasMappings();
+    protected int importRelationships(
+        RelationshipsBatchBuffer sourceBuffer,
+        long[] batch,
+        long[][] properties,
+        AdjacencyBuffer targetBuffer
+    ) {
+        int batchLength = sourceBuffer.length();
 
-            if (orientation == Orientation.UNDIRECTED) {
-                return loadProperties
-                    ? new UndirectedWithPropertiesStrategy(propertyReader, allocationTracker)
-                    : new UndirectedStrategy(propertyReader, allocationTracker);
-            } else if (orientation == Orientation.NATURAL) {
-                return loadProperties
-                    ? new NaturalWithPropertiesStrategy(propertyReader, allocationTracker)
-                    : new NaturalStrategy(propertyReader, allocationTracker);
-            } else if (orientation == Orientation.REVERSE) {
-                return loadProperties
-                    ? new ReverseWithPropertiesStrategy(propertyReader, allocationTracker)
-                    : new ReverseStrategy(propertyReader, allocationTracker);
-            } else {
-                throw new IllegalArgumentException(formatWithLocale("Unexpected orientation: %s", orientation));
+        // TODO: to we need to pass sourceBuffer in addition?
+        int[] offsets = sourceBuffer.spareInts();
+        long[] targets = sourceBuffer.spareLongs();
+
+        long source, target, prevSource = batch[0];
+        int offset = 0, nodesLength = 0;
+
+        for (int i = 0; i < batchLength; i += 2) {
+            source = batch[i];
+            target = batch[1 + i];
+            // If rels come in chunks for same source node
+            // then we can skip adding an extra offset
+            if (source > prevSource) {
+                offsets[nodesLength++] = offset;
+                prevSource = source;
             }
+            targets[offset++] = target;
         }
+        offsets[nodesLength++] = offset;
 
-        protected ImportStrategy(
-            PropertyReader propertyReader,
-            AllocationTracker allocationTracker
-        ) {
-            this.propertyReader = propertyReader;
-            this.allocationTracker = allocationTracker;
-        }
-
-        abstract long importRelationships(
-            RelationshipsBatchBuffer sourceBuffer,
-            AdjacencyBuffer targetBuffer
+        targetBuffer.addAll(
+            batch,
+            targets,
+            properties,
+            offsets,
+            nodesLength,
+            allocationTracker
         );
 
-        int importRelationships(
-            RelationshipsBatchBuffer sourceBuffer,
-            long[] batch,
-            long[][] properties,
-            AdjacencyBuffer targetBuffer
-        ) {
-            int batchLength = sourceBuffer.length();
-
-            // TODO: to we need to pass sourceBuffer in addition?
-            int[] offsets = sourceBuffer.spareInts();
-            long[] targets = sourceBuffer.spareLongs();
-
-            long source, target, prevSource = batch[0];
-            int offset = 0, nodesLength = 0;
-
-            for (int i = 0; i < batchLength; i += 2) {
-                source = batch[i];
-                target = batch[1 + i];
-                // If rels come in chunks for same source node
-                // then we can skip adding an extra offset
-                if (source > prevSource) {
-                    offsets[nodesLength++] = offset;
-                    prevSource = source;
-                }
-                targets[offset++] = target;
-            }
-            offsets[nodesLength++] = offset;
-
-            targetBuffer.addAll(
-                batch,
-                targets,
-                properties,
-                offsets,
-                nodesLength,
-                allocationTracker
-            );
-
-            return batchLength >> 1; // divide by 2
-        }
+        return batchLength >> 1; // divide by 2
     }
 
-    private static final class UndirectedStrategy extends ImportStrategy {
+    private static final class Undirected extends ThreadLocalSingleTypeRelationshipImporter {
 
-        private UndirectedStrategy(PropertyReader propertyReader, AllocationTracker allocationTracker) {
-            super(propertyReader, allocationTracker);
+        private Undirected(
+            AdjacencyBuffer adjacencyBuffer,
+            RelationshipsBatchBuffer relationshipsBatchBuffer,
+            PropertyReader propertyReader,
+            AllocationTracker allocationTracker
+        ) {
+            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
         }
 
         @Override
-        public long importRelationships(RelationshipsBatchBuffer sourceBuffer, AdjacencyBuffer targetBuffer) {
-            long[] batch = sourceBuffer.sortBySource();
-            int importedOut = importRelationships(sourceBuffer, batch, null, targetBuffer);
-            batch = sourceBuffer.sortByTarget();
-            int importedIn = importRelationships(sourceBuffer, batch, null, targetBuffer);
+        public long importRelationships() {
+            long[] batch = sourceBuffer().sortBySource();
+            int importedOut = importRelationships(sourceBuffer(), batch, null, targetBuffer());
+            batch = sourceBuffer().sortByTarget();
+            int importedIn = importRelationships(sourceBuffer(), batch, null, targetBuffer());
             return RawValues.combineIntInt(importedOut + importedIn, 0);
         }
     }
 
-    private static final class UndirectedWithPropertiesStrategy extends ImportStrategy {
+    private static final class UndirectedWithProperties extends ThreadLocalSingleTypeRelationshipImporter {
 
-        UndirectedWithPropertiesStrategy(PropertyReader propertyReader, AllocationTracker allocationTracker) {
-            super(propertyReader, allocationTracker);
+        private UndirectedWithProperties(
+            AdjacencyBuffer adjacencyBuffer,
+            RelationshipsBatchBuffer relationshipsBatchBuffer,
+            PropertyReader propertyReader,
+            AllocationTracker allocationTracker
+        ) {
+            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
         }
 
         @Override
-        long importRelationships(RelationshipsBatchBuffer sourceBuffer, AdjacencyBuffer targetBuffer) {
-            int batchLength = sourceBuffer.length();
-            long[] batch = sourceBuffer.sortBySource();
+        public long importRelationships() {
+            int batchLength = sourceBuffer().length();
+            long[] batch = sourceBuffer().sortBySource();
             long[][] outProperties = propertyReader.readProperty(
-                sourceBuffer.relationshipReferences(),
-                sourceBuffer.propertyReferences(),
+                sourceBuffer().relationshipReferences(),
+                sourceBuffer().propertyReferences(),
                 batchLength / 2,
-                targetBuffer.getPropertyKeyIds(),
-                targetBuffer.getDefaultValues(),
-                targetBuffer.getAggregations(),
-                targetBuffer.atLeastOnePropertyToLoad()
+                targetBuffer().getPropertyKeyIds(),
+                targetBuffer().getDefaultValues(),
+                targetBuffer().getAggregations(),
+                targetBuffer().atLeastOnePropertyToLoad()
             );
-            int importedOut = importRelationships(sourceBuffer, batch, outProperties, targetBuffer);
+            int importedOut = importRelationships(sourceBuffer(), batch, outProperties, targetBuffer());
 
-            batch = sourceBuffer.sortByTarget();
+            batch = sourceBuffer().sortByTarget();
             long[][] inProperties = propertyReader.readProperty(
-                sourceBuffer.relationshipReferences(),
-                sourceBuffer.propertyReferences(),
+                sourceBuffer().relationshipReferences(),
+                sourceBuffer().propertyReferences(),
                 batchLength / 2,
-                targetBuffer.getPropertyKeyIds(),
-                targetBuffer.getDefaultValues(),
-                targetBuffer.getAggregations(),
-                targetBuffer.atLeastOnePropertyToLoad()
+                targetBuffer().getPropertyKeyIds(),
+                targetBuffer().getDefaultValues(),
+                targetBuffer().getAggregations(),
+                targetBuffer().atLeastOnePropertyToLoad()
             );
-            int importedIn = importRelationships(sourceBuffer, batch, inProperties, targetBuffer);
+            int importedIn = importRelationships(sourceBuffer(), batch, inProperties, targetBuffer());
 
             return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
-
         }
     }
 
+    private static final class Natural extends ThreadLocalSingleTypeRelationshipImporter {
 
-    static final class NaturalStrategy extends ImportStrategy {
-        NaturalStrategy(PropertyReader propertyReader, AllocationTracker allocationTracker) {
-            super(propertyReader, allocationTracker);
+        private Natural(
+            AdjacencyBuffer adjacencyBuffer,
+            RelationshipsBatchBuffer relationshipsBatchBuffer,
+            PropertyReader propertyReader,
+            AllocationTracker allocationTracker
+        ) {
+            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
         }
 
         @Override
-        long importRelationships(RelationshipsBatchBuffer sourceBuffer, AdjacencyBuffer targetBuffer) {
-            long[] batch = sourceBuffer.sortBySource();
-            return RawValues.combineIntInt(importRelationships(sourceBuffer, batch, null, targetBuffer), 0);
+        public long importRelationships() {
+            long[] batch = sourceBuffer().sortBySource();
+            return RawValues.combineIntInt(importRelationships(
+                sourceBuffer(),
+                batch,
+                null,
+                targetBuffer()
+            ), 0);
         }
     }
 
-    static final class NaturalWithPropertiesStrategy extends ImportStrategy {
+    private static final class NaturalWithProperties extends ThreadLocalSingleTypeRelationshipImporter {
 
-        NaturalWithPropertiesStrategy(PropertyReader propertyReader, AllocationTracker allocationTracker) {
-            super(propertyReader, allocationTracker);
+        private NaturalWithProperties(
+            AdjacencyBuffer adjacencyBuffer,
+            RelationshipsBatchBuffer relationshipsBatchBuffer,
+            PropertyReader propertyReader,
+            AllocationTracker allocationTracker
+        ) {
+            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
         }
 
         @Override
-        long importRelationships(RelationshipsBatchBuffer sourceBuffer, AdjacencyBuffer targetBuffer) {
-            int batchLength = sourceBuffer.length();
-            long[] batch = sourceBuffer.sortBySource();
+        public long importRelationships() {
+            int batchLength = sourceBuffer().length();
+            long[] batch = sourceBuffer().sortBySource();
             long[][] outProperties = propertyReader.readProperty(
-                sourceBuffer.relationshipReferences(),
-                sourceBuffer.propertyReferences(),
+                sourceBuffer().relationshipReferences(),
+                sourceBuffer().propertyReferences(),
                 batchLength / 2,
-                targetBuffer.getPropertyKeyIds(),
-                targetBuffer.getDefaultValues(),
-                targetBuffer.getAggregations(),
-                targetBuffer.atLeastOnePropertyToLoad()
+                targetBuffer().getPropertyKeyIds(),
+                targetBuffer().getDefaultValues(),
+                targetBuffer().getAggregations(),
+                targetBuffer().atLeastOnePropertyToLoad()
             );
-            int importedOut = importRelationships(sourceBuffer, batch, outProperties, targetBuffer);
+            int importedOut = importRelationships(sourceBuffer(), batch, outProperties, targetBuffer());
             return RawValues.combineIntInt(importedOut, importedOut);
         }
     }
 
-    static final class ReverseStrategy extends ImportStrategy {
+    private static final class Reverse extends ThreadLocalSingleTypeRelationshipImporter {
 
-        protected ReverseStrategy(PropertyReader propertyReader, AllocationTracker allocationTracker) {
-            super(propertyReader, allocationTracker);
+        private Reverse(
+            AdjacencyBuffer adjacencyBuffer,
+            RelationshipsBatchBuffer relationshipsBatchBuffer,
+            PropertyReader propertyReader,
+            AllocationTracker allocationTracker
+        ) {
+            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
         }
 
         @Override
-        long importRelationships(RelationshipsBatchBuffer sourceBuffer, AdjacencyBuffer targetBuffer) {
-            long[] batch = sourceBuffer.sortByTarget();
-            return RawValues.combineIntInt(importRelationships(sourceBuffer, batch, null, targetBuffer), 0);
+        public long importRelationships() {
+            long[] batch = sourceBuffer().sortByTarget();
+            return RawValues.combineIntInt(importRelationships(
+                sourceBuffer(),
+                batch,
+                null,
+                targetBuffer()
+            ), 0);
         }
     }
 
+    private static final class ReverseWithProperties extends ThreadLocalSingleTypeRelationshipImporter {
 
-    static final class ReverseWithPropertiesStrategy extends ImportStrategy {
-
-        ReverseWithPropertiesStrategy(PropertyReader propertyReader, AllocationTracker allocationTracker) {
-            super(propertyReader, allocationTracker);
+        private ReverseWithProperties(
+            AdjacencyBuffer adjacencyBuffer,
+            RelationshipsBatchBuffer relationshipsBatchBuffer,
+            PropertyReader propertyReader,
+            AllocationTracker allocationTracker
+        ) {
+            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
         }
 
         @Override
-        long importRelationships(RelationshipsBatchBuffer sourceBuffer, AdjacencyBuffer targetBuffer) {
-            int batchLength = sourceBuffer.length();
-            long[] batch = sourceBuffer.sortByTarget();
+        public long importRelationships() {
+            int batchLength = sourceBuffer().length();
+            long[] batch = sourceBuffer().sortByTarget();
             long[][] inProperties = propertyReader.readProperty(
-                sourceBuffer.relationshipReferences(),
-                sourceBuffer.propertyReferences(),
+                sourceBuffer().relationshipReferences(),
+                sourceBuffer().propertyReferences(),
                 batchLength / 2,
-                targetBuffer.getPropertyKeyIds(),
-                targetBuffer.getDefaultValues(),
-                targetBuffer.getAggregations(),
-                targetBuffer.atLeastOnePropertyToLoad()
+                targetBuffer().getPropertyKeyIds(),
+                targetBuffer().getDefaultValues(),
+                targetBuffer().getAggregations(),
+                targetBuffer().atLeastOnePropertyToLoad()
             );
-            int importedIn = importRelationships(sourceBuffer, batch, inProperties, targetBuffer);
+            int importedIn = importRelationships(sourceBuffer(), batch, inProperties, targetBuffer());
             return RawValues.combineIntInt(importedIn, importedIn);
-
         }
     }
 }
