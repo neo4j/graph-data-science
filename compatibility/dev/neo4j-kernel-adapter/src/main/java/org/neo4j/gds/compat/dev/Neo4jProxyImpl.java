@@ -400,7 +400,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             executionMonitor,
             additionalInitialIds,
             dbConfig,
-            recordFormats,
             Monitor.NO_MONITOR,
             jobScheduler,
             badCollector,
