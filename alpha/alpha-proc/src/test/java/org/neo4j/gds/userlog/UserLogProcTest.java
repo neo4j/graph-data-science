@@ -185,11 +185,10 @@ class UserLogProcTest extends BaseProcTest {
         ).collect(Collectors.toList());
         assertCypherResult(
             "CALL gds.alpha.userLog() " +
-            "YIELD taskName, message RETURN taskName, message ",
+            "YIELD taskName, message RETURN taskName, message  ORDER BY taskName",
             expectedQueryResult
         );
     }
-
 
     public static class FakeTaskProc {
 
@@ -201,9 +200,10 @@ class UserLogProcTest extends BaseProcTest {
         @Procedure("gds.test.fakewarnproc")
         public Stream<FakeResult> foo(
             @Name(value = "taskName") String taskName,
+            @Name(value = "withDelay", defaultValue = "0") long withDelay,
             @Name(value = "withMemoryEstimation", defaultValue = "false") boolean withMemoryEstimation,
             @Name(value = "withConcurrency", defaultValue = "false") boolean withConcurrency
-        ) {
+        ) throws InterruptedException {
             var task = Tasks.task(taskName, Tasks.leaf("leaf", 3));
 
             var taskProgressTracker = new TaskProgressTracker(task, new TestLog(), 1, taskRegistryFactory,
@@ -213,6 +213,7 @@ class UserLogProcTest extends BaseProcTest {
             taskProgressTracker.beginSubTask();
             taskProgressTracker.logProgress(1);
             taskProgressTracker.logWarning("This is a test warning");
+            Thread.sleep(withDelay);
             taskProgressTracker.logWarning("This is another test warning");
 
             return Stream.empty();
