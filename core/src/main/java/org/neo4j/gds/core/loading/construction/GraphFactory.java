@@ -133,8 +133,8 @@ public final class GraphFactory {
                 new IntObjectHashMap<>(),
                 idMapBuilder,
                 labelInformation,
-                deduplicate,
                 nodeProperties,
+                deduplicate,
                 allocationTracker
             );
         });
