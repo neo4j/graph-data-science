@@ -86,7 +86,7 @@ public abstract class RandomGraphTestCase extends BaseTest {
         buildGraph(NODE_COUNT);
     }
 
-    void buildGraph(int nodeCount) {
+    public final void buildGraph(int nodeCount) {
         var random = new SplittableRandom();
         var label1 = Label.label("Label");
         var label2 = Label.label("Label2");
