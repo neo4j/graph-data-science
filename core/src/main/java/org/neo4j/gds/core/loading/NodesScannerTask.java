@@ -195,7 +195,7 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
         }
 
         @Override
-        public Collection<Runnable> flushTasks() {
+        public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
             return Collections.emptyList();
         }
 

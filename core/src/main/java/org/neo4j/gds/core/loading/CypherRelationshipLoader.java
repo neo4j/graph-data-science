@@ -35,7 +35,6 @@ import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -185,10 +184,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     @Override
     LoadResult result() {
-        List<Runnable> flushTasks = loaderContext.importerFactoriesByType
+        var flushTasks = loaderContext.importerFactoriesByType
             .values()
             .stream()
-            .flatMap(SingleTypeRelationshipImporter.Factory::createFlushTasks)
+            .flatMap(factory -> factory.adjacencyListBuilderTasks().stream())
             .collect(Collectors.toList());
 
         ParallelUtil.run(flushTasks, loadingContext.executor());
@@ -248,7 +247,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             AdjacencyListWithPropertiesBuilder builder = AdjacencyListWithPropertiesBuilder.create(
                 idMap::nodeCount,
-                AdjacencyFactory.configured(),
                 projection,
                 aggregationsWithDefault,
                 propertyKeyIds,

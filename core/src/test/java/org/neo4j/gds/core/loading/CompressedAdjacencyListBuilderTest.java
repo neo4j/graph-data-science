@@ -19,31 +19,13 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.core.utils.PageReordering;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.utils.GdsFeatureToggles;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
-public interface CsrListBuilder<PAGE, T> {
+class CompressedAdjacencyListBuilderTest extends AdjacencyListBuilderBaseTest {
 
-    Allocator<PAGE> newAllocator();
-
-    T build(HugeIntArray degrees, HugeLongArray offsets);
-
-    void flush();
-
-    interface Allocator<PAGE> extends AutoCloseable {
-
-        long write(PAGE targets, int length);
-
-        @Override
-        void close();
+    @Test
+    void test() throws Exception {
+        GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.disableAndRun(this::testAdjacencyList);
     }
-
-    default void reorder(PAGE[] pages, HugeLongArray offsets, HugeIntArray degrees) {
-        if (GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled() && pages.length > 0) {
-            PageReordering.reorder(pages, offsets, degrees);
-        }
-    }
-
 }

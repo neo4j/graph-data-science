@@ -144,9 +144,9 @@ public class RelationshipsBuilder {
     public List<Relationships> buildAll() {
         threadLocalBuilders.close();
 
-        var flushTasks = importerFactory.createFlushTasks().collect(Collectors.toList());
+        var adjacencyListBuilderTasks = importerFactory.adjacencyListBuilderTasks();
 
-        ParallelUtil.runWithConcurrency(concurrency, flushTasks, executorService);
+        ParallelUtil.runWithConcurrency(concurrency, adjacencyListBuilderTasks, executorService);
 
         var adjacencyListsWithProperties = adjacencyListWithPropertiesBuilder.build();
         var adjacencyList = adjacencyListsWithProperties.adjacency();

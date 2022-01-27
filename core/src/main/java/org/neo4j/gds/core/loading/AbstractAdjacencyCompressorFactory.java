@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compress.AdjacencyCompressorBlueprint;
+import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.compress.ImmutableAdjacencyListsWithProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
@@ -31,11 +31,11 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import java.util.function.LongSupplier;
 import java.util.stream.Stream;
 
-abstract class AbstractCompressorBlueprint<TARGET_PAGE, PROPERTY_PAGE> implements AdjacencyCompressorBlueprint {
+abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> implements AdjacencyCompressorFactory {
 
     final LongSupplier nodeCountSupplier;
-    final CsrListBuilder<TARGET_PAGE, ? extends AdjacencyList> adjacencyBuilder;
-    final CsrListBuilder<PROPERTY_PAGE, ? extends AdjacencyProperties>[] propertyBuilders;
+    final AdjacencyListBuilder<TARGET_PAGE, ? extends AdjacencyList> adjacencyBuilder;
+    final AdjacencyListBuilder<PROPERTY_PAGE, ? extends AdjacencyProperties>[] propertyBuilders;
     final boolean noAggregation;
     final Aggregation[] aggregations;
     final AllocationTracker allocationTracker;
@@ -44,10 +44,10 @@ abstract class AbstractCompressorBlueprint<TARGET_PAGE, PROPERTY_PAGE> implement
     HugeLongArray adjacencyOffsets;
     HugeLongArray[] propertyOffsets;
 
-    AbstractCompressorBlueprint(
+    AbstractAdjacencyCompressorFactory(
         LongSupplier nodeCountSupplier,
-        CsrListBuilder<TARGET_PAGE, ? extends AdjacencyList> adjacencyBuilder,
-        CsrListBuilder<PROPERTY_PAGE, ? extends AdjacencyProperties>[] propertyBuilders,
+        AdjacencyListBuilder<TARGET_PAGE, ? extends AdjacencyList> adjacencyBuilder,
+        AdjacencyListBuilder<PROPERTY_PAGE, ? extends AdjacencyProperties>[] propertyBuilders,
         boolean noAggregation,
         Aggregation[] aggregations,
         AllocationTracker allocationTracker
@@ -61,17 +61,7 @@ abstract class AbstractCompressorBlueprint<TARGET_PAGE, PROPERTY_PAGE> implement
     }
 
     @Override
-    public void flush() {
-        adjacencyBuilder.flush();
-        for (var propertyBuilder : propertyBuilders) {
-            if (propertyBuilder != null) {
-                propertyBuilder.flush();
-            }
-        }
-    }
-
-    @Override
-    public void prepareFlushTasks() {
+    public void init() {
         var nodeCount = this.nodeCountSupplier.getAsLong();
         this.adjacencyDegrees = HugeIntArray.newArray(nodeCount, this.allocationTracker);
         this.adjacencyOffsets = HugeLongArray.newArray(nodeCount, this.allocationTracker);

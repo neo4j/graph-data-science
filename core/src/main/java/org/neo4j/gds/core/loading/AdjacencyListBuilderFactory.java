@@ -19,13 +19,9 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.compress.AdjacencyFactory;
+public interface AdjacencyListBuilderFactory<TARGET_PAGE, TARGET_TYPE, PROPERTY_PAGE, PROPERTY_TYPE> {
 
-class TransientUncompressedAdjacencyBuilderTest extends AdjacencyBuilderBaseTest {
+    AdjacencyListBuilder<TARGET_PAGE, TARGET_TYPE> newAdjacencyListBuilder();
 
-    @Test
-    void test() throws Exception {
-        testAdjacencyList(AdjacencyFactory.transientUncompressed());
-    }
+    AdjacencyListBuilder<PROPERTY_PAGE, PROPERTY_TYPE> newAdjacencyPropertiesBuilder();
 }

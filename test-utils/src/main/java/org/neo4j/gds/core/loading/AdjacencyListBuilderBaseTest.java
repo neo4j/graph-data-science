@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
@@ -35,14 +34,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 
-public abstract class AdjacencyBuilderBaseTest {
+public abstract class AdjacencyListBuilderBaseTest {
 
-    protected void testAdjacencyList(AdjacencyFactory adjacencyFactory) {
+    protected void testAdjacencyList() {
         var nodeCount = 6;
 
         AdjacencyListWithPropertiesBuilder globalBuilder = AdjacencyListWithPropertiesBuilder.create(
             () -> nodeCount,
-            adjacencyFactory,
             RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
             new Aggregation[]{Aggregation.NONE},
             new int[0],
@@ -50,7 +48,7 @@ public abstract class AdjacencyBuilderBaseTest {
             AllocationTracker.empty()
         );
 
-        AdjacencyBuilder adjacencyBuilder = new AdjacencyBuilderBuilder()
+        AdjacencyBuffer adjacencyBuffer = new AdjacencyBufferBuilder()
             .globalBuilder(globalBuilder)
             .importSizing(ImportSizing.of(1, nodeCount))
             .preAggregate(false)
@@ -67,12 +65,13 @@ public abstract class AdjacencyBuilderBaseTest {
         }
 
         RelationshipImporter relationshipImporter = new RelationshipImporter(
-            adjacencyBuilder, AllocationTracker.empty()
+            adjacencyBuffer,
+            AllocationTracker.empty()
         );
         RelationshipImporter.Imports imports = relationshipImporter.imports(Orientation.NATURAL, false);
         imports.importRelationships(relationshipsBatchBuffer, null);
 
-        adjacencyBuilder.flushTasks().forEach(Runnable::run);
+        adjacencyBuffer.adjacencyListBuilderTasks().forEach(Runnable::run);
 
         try (var adjacencyList = globalBuilder.build().adjacency()) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {

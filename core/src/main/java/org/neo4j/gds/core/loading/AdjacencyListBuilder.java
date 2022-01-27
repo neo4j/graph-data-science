@@ -19,9 +19,29 @@
  */
 package org.neo4j.gds.core.loading;
 
-public interface CsrListBuilderFactory<TARGET_PAGE, TARGET_TYPE, PROPERTY_PAGE, PROPERTY_TYPE> {
+import org.neo4j.gds.core.utils.PageReordering;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
-    CsrListBuilder<TARGET_PAGE, TARGET_TYPE> newAdjacencyListBuilder();
+public interface AdjacencyListBuilder<PAGE, T> {
 
-    CsrListBuilder<PROPERTY_PAGE, PROPERTY_TYPE> newAdjacencyPropertiesBuilder();
+    Allocator<PAGE> newAllocator();
+
+    T build(HugeIntArray degrees, HugeLongArray offsets);
+
+    interface Allocator<PAGE> extends AutoCloseable {
+
+        long write(PAGE targets, int length);
+
+        @Override
+        void close();
+    }
+
+    default void reorder(PAGE[] pages, HugeLongArray offsets, HugeIntArray degrees) {
+        if (GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled() && pages.length > 0) {
+            PageReordering.reorder(pages, offsets, degrees);
+        }
+    }
+
 }

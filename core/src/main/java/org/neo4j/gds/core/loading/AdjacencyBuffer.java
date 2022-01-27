@@ -38,16 +38,20 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 /**
- * Exists exactly once per relationship type and has the following responsibilities:
+ * Wraps a paged representation of {@link org.neo4j.gds.core.loading.CompressedLongArray}s
+ * which store the target ids for each node during import.
+ *
+ * An instance of this class exists exactly once per relationship type and has the following
+ * responsibilities:
  *
  * <ul>
- *     <li>Receives raw relationship records from relationship batch buffers</li>
+ *     <li>Receives raw relationship records from relationship batch buffers via {@link org.neo4j.gds.core.loading.RelationshipImporter}</li>
  *     <li>Compresses raw records into compressed long arrays</li>
- *     <li>Writes compressed long arrays into final adjacency list using a specific compressor</li>
+ *     <li>Creates tasks that write compressed long arrays into the final adjacency list using a specific compressor</li>
  * </ul>
  */
-@Value.Style(typeBuilder = "AdjacencyBuilderBuilder")
-public final class AdjacencyBuilder {
+@Value.Style(typeBuilder = "AdjacencyBufferBuilder")
+public final class AdjacencyBuffer {
 
     private final AdjacencyListWithPropertiesBuilder globalBuilder;
     private final ThreadLocalRelationshipsBuilder[] localBuilders;
@@ -62,7 +66,7 @@ public final class AdjacencyBuilder {
     private final boolean preAggregate;
 
     @Builder.Factory
-    public static AdjacencyBuilder of(
+    public static AdjacencyBuffer of(
         @NotNull AdjacencyListWithPropertiesBuilder globalBuilder,
         ImportSizing importSizing,
         boolean preAggregate,
@@ -90,7 +94,7 @@ public final class AdjacencyBuilder {
             .stream(globalBuilder.propertyKeyIds())
             .anyMatch(keyId -> keyId != NO_SUCH_PROPERTY_KEY);
 
-        return new AdjacencyBuilder(
+        return new AdjacencyBuffer(
             globalBuilder,
             localBuilders,
             compressedAdjacencyLists,
@@ -100,7 +104,7 @@ public final class AdjacencyBuilder {
         );
     }
 
-    private AdjacencyBuilder(
+    private AdjacencyBuffer(
         AdjacencyListWithPropertiesBuilder globalBuilder,
         ThreadLocalRelationshipsBuilder[] localBuilders,
         CompressedLongArray[][] compressedAdjacencyLists,
@@ -196,20 +200,19 @@ public final class AdjacencyBuilder {
         }
     }
 
-    Collection<Runnable> flushTasks() {
-        this.globalBuilder.prepareFlushTasks();
+    Collection<AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
+        this.globalBuilder.prepareAdjacencyListBuilderTasks();
 
-        var tasks = new ArrayList<Runnable>(localBuilders.length + 1);
+        var tasks = new ArrayList<AdjacencyListBuilderTask>(localBuilders.length + 1);
         for (int page = 0; page < localBuilders.length; page++) {
             long baseNodeId = ((long) page) << pageShift;
-            tasks.add(new FlushTask(
+            tasks.add(new AdjacencyListBuilderTask(
                 baseNodeId,
                 localBuilders[page],
                 compressedAdjacencyLists[page],
                 relationshipCounter
             ));
         }
-        tasks.add(this.globalBuilder::flush);
 
         return tasks;
     }
@@ -233,7 +236,7 @@ public final class AdjacencyBuilder {
     /**
      * Responsible for writing a page of CompressedLongArrays into the adjacency list.
      */
-    private static final class FlushTask implements Runnable {
+    static final class AdjacencyListBuilderTask implements Runnable {
 
         private final long baseNodeId;
         private final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder;
@@ -242,7 +245,7 @@ public final class AdjacencyBuilder {
         private final LongArrayBuffer buffer;
         private final LongAdder relationshipCounter;
 
-        FlushTask(
+        AdjacencyListBuilderTask(
             long baseNodeId,
             ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder,
             CompressedLongArray[] compressedLongArrays,

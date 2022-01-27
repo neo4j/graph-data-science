@@ -30,7 +30,7 @@ import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsStoreReader;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
-import org.neo4j.gds.core.compress.AdjacencyFactory;
+import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -102,13 +102,13 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             // adjacency list
             builder.add(
                 formatWithLocale("adjacency list for '%s'", relationshipType),
-                AdjacencyFactory.adjacencyListEstimation(relationshipType, undirected)
+                AdjacencyListBehavior.adjacencyListEstimation(relationshipType, undirected)
             );
             // all properties per projection
             relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> {
                 builder.add(
                     formatWithLocale("property '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
-                    AdjacencyFactory.adjacencyPropertiesEstimation(relationshipType, undirected)
+                    AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected)
                 );
             });
         });

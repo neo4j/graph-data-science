@@ -44,7 +44,7 @@ final class RecordScannerTaskRunner {
 
         long start = System.nanoTime();
         ParallelUtil.run(tasks, executorService);
-        ParallelUtil.run(recordScannerTaskFactory.flushTasks(), executorService);
+        ParallelUtil.run(recordScannerTaskFactory.adjacencyListBuilderTasks(), executorService);
         long elapsed = System.nanoTime() - start;
 
         long importedRecords = 0L;
@@ -75,6 +75,7 @@ final class RecordScannerTaskRunner {
 
         RecordScannerTask create(int taskIndex);
 
-        Collection<Runnable> flushTasks();
+        // TODO: only necessary for relationships, can we move it somewhere else?
+        Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks();
     }
 }

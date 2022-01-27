@@ -44,12 +44,12 @@ import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
 import static org.neo4j.gds.collections.PageUtil.pageIndex;
 
-public final class TransientUncompressedList implements AdjacencyList, AdjacencyProperties {
+public final class UncompressedAdjacencyList implements AdjacencyList, AdjacencyProperties {
 
     public static MemoryEstimation adjacencyListEstimation(RelationshipType relationshipType, boolean undirected) {
         return MemoryEstimations.setup(
             "",
-            dimensions -> TransientUncompressedList.adjacencyListEstimation(
+            dimensions -> UncompressedAdjacencyList.adjacencyListEstimation(
                 averageDegree(dimensions, relationshipType, undirected),
                 dimensions.nodeCount()
             )
@@ -63,7 +63,7 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
 
     public static MemoryEstimation adjacencyListEstimation(long avgDegree, long nodeCount) {
         return MemoryEstimations
-            .builder(TransientCompressedList.class)
+            .builder(CompressedAdjacencyList.class)
             .fixed("pages", listSize(avgDegree, nodeCount))
             .perNode("degrees", HugeIntArray::memoryEstimation)
             .perNode("offsets", HugeLongArray::memoryEstimation)
@@ -75,7 +75,7 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
         boolean undirected
     ) {
         return MemoryEstimations
-            .builder(TransientUncompressedList.class)
+            .builder(UncompressedAdjacencyList.class)
             .perGraphDimension("pages", (dimensions, concurrency) ->
                 listSize(averageDegree(dimensions, relationshipType, undirected), dimensions.nodeCount())
             )
@@ -113,7 +113,7 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
     private HugeIntArray degrees;
     private HugeLongArray offsets;
 
-    public TransientUncompressedList(long[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+    public UncompressedAdjacencyList(long[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;

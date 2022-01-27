@@ -35,11 +35,11 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class RelationshipImporter {
 
-    private final AdjacencyBuilder adjacencyBuilder;
+    private final AdjacencyBuffer adjacencyBuffer;
     private final AllocationTracker allocationTracker;
 
-    public RelationshipImporter(AdjacencyBuilder adjacencyBuilder, AllocationTracker allocationTracker) {
-        this.adjacencyBuilder = adjacencyBuilder;
+    public RelationshipImporter(AdjacencyBuffer adjacencyBuffer, AllocationTracker allocationTracker) {
+        this.adjacencyBuffer = adjacencyBuffer;
         this.allocationTracker = allocationTracker;
     }
 
@@ -67,9 +67,9 @@ public class RelationshipImporter {
 
     private long importUndirected(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         long[] batch = buffer.sortBySource();
-        int importedOut = importRelationships(buffer, batch, null, adjacencyBuilder);
+        int importedOut = importRelationships(buffer, batch, null, adjacencyBuffer);
         batch = buffer.sortByTarget();
-        int importedIn = importRelationships(buffer, batch, null, adjacencyBuilder);
+        int importedIn = importRelationships(buffer, batch, null, adjacencyBuffer);
         return RawValues.combineIntInt(importedOut + importedIn, 0);
     }
 
@@ -80,31 +80,31 @@ public class RelationshipImporter {
             buffer.relationshipReferences(),
             buffer.propertyReferences(),
             batchLength / 2,
-            adjacencyBuilder.getPropertyKeyIds(),
-            adjacencyBuilder.getDefaultValues(),
-            adjacencyBuilder.getAggregations(),
-            adjacencyBuilder.atLeastOnePropertyToLoad()
+            adjacencyBuffer.getPropertyKeyIds(),
+            adjacencyBuffer.getDefaultValues(),
+            adjacencyBuffer.getAggregations(),
+            adjacencyBuffer.atLeastOnePropertyToLoad()
         );
-        int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder);
+        int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuffer);
 
         batch = buffer.sortByTarget();
         long[][] inProperties = reader.readProperty(
             buffer.relationshipReferences(),
             buffer.propertyReferences(),
             batchLength / 2,
-            adjacencyBuilder.getPropertyKeyIds(),
-            adjacencyBuilder.getDefaultValues(),
-            adjacencyBuilder.getAggregations(),
-            adjacencyBuilder.atLeastOnePropertyToLoad()
+            adjacencyBuffer.getPropertyKeyIds(),
+            adjacencyBuffer.getDefaultValues(),
+            adjacencyBuffer.getAggregations(),
+            adjacencyBuffer.atLeastOnePropertyToLoad()
         );
-        int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder);
+        int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuffer);
 
         return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
 
     private long importNatural(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         long[] batch = buffer.sortBySource();
-        return RawValues.combineIntInt(importRelationships(buffer, batch, null, adjacencyBuilder), 0);
+        return RawValues.combineIntInt(importRelationships(buffer, batch, null, adjacencyBuffer), 0);
     }
 
     private long importNaturalWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
@@ -114,18 +114,18 @@ public class RelationshipImporter {
             buffer.relationshipReferences(),
             buffer.propertyReferences(),
             batchLength / 2,
-            adjacencyBuilder.getPropertyKeyIds(),
-            adjacencyBuilder.getDefaultValues(),
-            adjacencyBuilder.getAggregations(),
-            adjacencyBuilder.atLeastOnePropertyToLoad()
+            adjacencyBuffer.getPropertyKeyIds(),
+            adjacencyBuffer.getDefaultValues(),
+            adjacencyBuffer.getAggregations(),
+            adjacencyBuffer.atLeastOnePropertyToLoad()
         );
-        int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder);
+        int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuffer);
         return RawValues.combineIntInt(importedOut, importedOut);
     }
 
     private long importReverse(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         long[] batch = buffer.sortByTarget();
-        return RawValues.combineIntInt(importRelationships(buffer, batch, null, adjacencyBuilder), 0);
+        return RawValues.combineIntInt(importRelationships(buffer, batch, null, adjacencyBuffer), 0);
     }
 
     private long importReverseWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
@@ -135,12 +135,12 @@ public class RelationshipImporter {
             buffer.relationshipReferences(),
             buffer.propertyReferences(),
             batchLength / 2,
-            adjacencyBuilder.getPropertyKeyIds(),
-            adjacencyBuilder.getDefaultValues(),
-            adjacencyBuilder.getAggregations(),
-            adjacencyBuilder.atLeastOnePropertyToLoad()
+            adjacencyBuffer.getPropertyKeyIds(),
+            adjacencyBuffer.getDefaultValues(),
+            adjacencyBuffer.getAggregations(),
+            adjacencyBuffer.atLeastOnePropertyToLoad()
         );
-        int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder);
+        int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuffer);
         return RawValues.combineIntInt(importedIn, importedIn);
     }
 
@@ -169,8 +169,8 @@ public class RelationshipImporter {
         );
     }
 
-    Collection<Runnable> flushTasks() {
-        return adjacencyBuilder.flushTasks();
+    Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
+        return adjacencyBuffer.adjacencyListBuilderTasks();
     }
 
     PropertyReader storeBackedPropertiesReader(KernelTransaction kernelTransaction) {
@@ -222,7 +222,7 @@ public class RelationshipImporter {
         RelationshipsBatchBuffer buffer,
         long[] batch,
         long[][] properties,
-        AdjacencyBuilder adjacencyBuilder
+        AdjacencyBuffer adjacencyBuffer
     ) {
         int batchLength = buffer.length();
 
@@ -245,7 +245,7 @@ public class RelationshipImporter {
         }
         offsets[nodesLength++] = offset;
 
-        adjacencyBuilder.addAll(
+        adjacencyBuffer.addAll(
             batch,
             targets,
             properties,
