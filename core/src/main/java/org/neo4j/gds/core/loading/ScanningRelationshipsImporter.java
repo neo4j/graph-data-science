@@ -24,7 +24,7 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.RelationshipTypeImportContext;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
@@ -39,10 +39,10 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
     private final GraphLoaderContext loadingContext;
 
     private final IdMap idMap;
-    private List<RelationshipTypeImportContext> relationshipTypeImportContexts;
+    private List<SingleTypeRelationshipImportContext> importContexts;
 
     @Builder.Factory
-    public static ScanningRelationshipsImporter scanningRelationshipsImporter(
+    static ScanningRelationshipsImporter scanningRelationshipsImporter(
         GraphProjectFromStoreConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
@@ -86,7 +86,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         ImportSizing sizing,
         StoreScanner<RelationshipReference> storeScanner
     ) {
-        relationshipTypeImportContexts = graphProjectConfig
+        importContexts = graphProjectConfig
             .relationshipProjections()
             .projections()
             .entrySet()
@@ -111,7 +111,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
                         .allocationTracker(allocationTracker)
                         .build();
 
-                    return ImmutableRelationshipTypeImportContext.builder()
+                    return ImmutableSingleTypeRelationshipImportContext.builder()
                         .relationshipType(relationshipType)
                         .relationshipProjection(projection)
                         .singleTypeRelationshipImporter(importerFactory)
@@ -124,15 +124,15 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             progressTracker,
             idMap,
             storeScanner,
-            relationshipTypeImportContexts
+            importContexts
                 .stream()
-                .map(SingleTypeRelationshipImporter.RelationshipTypeImportContext::singleTypeRelationshipImporter)
+                .map(SingleTypeRelationshipImportContext::singleTypeRelationshipImporter)
                 .collect(Collectors.toList())
         );
     }
 
     @Override
     public RelationshipsAndProperties build() {
-        return RelationshipsAndProperties.of(relationshipTypeImportContexts);
+        return RelationshipsAndProperties.of(importContexts);
     }
 }

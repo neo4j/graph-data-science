@@ -238,7 +238,7 @@ public final class SingleTypeRelationshipImporter {
     }
 
     @ValueClass
-    public interface RelationshipTypeImportContext {
+    public interface SingleTypeRelationshipImportContext {
         RelationshipType relationshipType();
 
         RelationshipProjection relationshipProjection();

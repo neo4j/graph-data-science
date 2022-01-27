@@ -36,7 +36,7 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.RelationshipTypeImportContext;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -193,16 +193,16 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     @Override
     LoadResult result() {
-        var flushTasks = loaderContext.importerFactoriesByType
+        var flushTasks = loaderContext.importContextByType
             .values()
             .stream()
-            .map(SingleTypeRelationshipImporter.RelationshipTypeImportContext::singleTypeRelationshipImporter)
+            .map(SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext::singleTypeRelationshipImporter)
             .flatMap(factory -> factory.adjacencyListBuilderTasks().stream())
             .collect(Collectors.toList());
 
         ParallelUtil.run(flushTasks, loadingContext.executor());
 
-        var relationshipsAndProperties = RelationshipsAndProperties.of(loaderContext.importerFactoriesByType.values());
+        var relationshipsAndProperties = RelationshipsAndProperties.of(loaderContext.importContextByType.values());
 
         return ImmutableCypherRelationshipLoader.LoadResult.builder()
             .dimensions(resultDimensions)
@@ -227,22 +227,22 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     class Context {
 
-        private final Map<RelationshipType, RelationshipTypeImportContext> importerFactoriesByType;
+        private final Map<RelationshipType, SingleTypeRelationshipImportContext> importContextByType;
 
         private final ImportSizing importSizing;
 
         Context() {
-            this.importerFactoriesByType = new HashMap<>();
+            this.importContextByType = new HashMap<>();
             this.importSizing = ImportSizing.of(cypherConfig.readConcurrency(), idMap.nodeCount());
         }
 
         synchronized SingleTypeRelationshipImporter getOrCreateImporterFactory(RelationshipType relationshipType) {
-            return importerFactoriesByType
+            return importContextByType
                 .computeIfAbsent(relationshipType, this::createImporterFactory)
                 .singleTypeRelationshipImporter();
         }
 
-        private RelationshipTypeImportContext createImporterFactory(RelationshipType relationshipType) {
+        private SingleTypeRelationshipImportContext createImporterFactory(RelationshipType relationshipType) {
             RelationshipProjection projection = RelationshipProjection
                 .builder()
                 .type(relationshipType.name)
@@ -271,7 +271,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .allocationTracker(loadingContext.allocationTracker())
                 .build();
 
-            return ImmutableRelationshipTypeImportContext
+            return ImmutableSingleTypeRelationshipImportContext
                 .builder()
                 .relationshipType(relationshipType)
                 .relationshipProjection(projection)
