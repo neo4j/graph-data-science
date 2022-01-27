@@ -37,6 +37,7 @@ import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
+import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
@@ -49,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
@@ -75,6 +77,7 @@ public final class NodesBuilder {
     private final LabelInformation.Builder labelInformationBuilder;
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
+    private final LongAdder importedNodes;
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
 
     private final NodeImporter nodeImporter;
@@ -107,6 +110,7 @@ public final class NodesBuilder {
         this.lock = new ReentrantLock(true);
         this.buildersByLabelTokenAndPropertyToken = buildersByLabelTokenAndPropertyKey;
         this.hasProperties = hasProperties;
+        this.importedNodes = new LongAdder();
         this.nodeImporter = new NodeImporter(
             idMapBuilder,
             labelInformationBuilder,
@@ -126,6 +130,7 @@ public final class NodesBuilder {
             : maxOriginalId + 1;
         this.threadLocalBuilder = AutoCloseableThreadLocal.withInitial(
             () -> new NodesBuilder.ThreadLocalBuilder(
+                importedNodes,
                 nodeImporter,
                 highestPossibleNodeCount,
                 seenNodeIdPredicate,
@@ -166,6 +171,10 @@ public final class NodesBuilder {
 
     public void flush() {
         this.threadLocalBuilder.get().flush();
+    }
+
+    public long importedNodes() {
+        return this.importedNodes.sum();
     }
 
     public IdMapAndProperties build() {
@@ -269,6 +278,7 @@ public final class NodesBuilder {
 
         private static final long[] ANY_LABEL_ARRAY = { ANY_LABEL };
 
+        private final LongAdder importedNodes;
         private final LongPredicate seenNodeIdPredicate;
         private final NodesBatchBuffer buffer;
         private final Function<NodeLabel, Integer> labelTokenIdFn;
@@ -278,6 +288,7 @@ public final class NodesBuilder {
         private final List<Map<String, Value>> batchNodeProperties;
 
         ThreadLocalBuilder(
+            LongAdder importedNodes,
             NodeImporter nodeImporter,
             long highestPossibleNodeCount,
             LongPredicate seenNodeIdPredicate,
@@ -287,6 +298,7 @@ public final class NodesBuilder {
             BiFunction<Integer, String, NodePropertiesFromStoreBuilder> propertyBuilderFn,
             IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey
         ) {
+            this.importedNodes = importedNodes;
             this.seenNodeIdPredicate = seenNodeIdPredicate;
             this.labelTokenIdFn = labelTokenIdFn;
             this.propertyBuilderFn = propertyBuilderFn;
@@ -348,21 +360,26 @@ public final class NodesBuilder {
         }
 
         private void flushBuffer() {
-            this.nodeImporter.importNodes(buffer, (nodeReference, labelIds, propertiesReference) -> {
-                if (!propertiesReference.isEmpty()) {
-                    var propertyValueIndex = (int) ((LongPropertyReference) propertiesReference).id;
-                    Map<String, Value> properties = batchNodeProperties.get(propertyValueIndex);
-                    MutableInt importedProperties = new MutableInt(0);
-                    properties.forEach((propertyKey, propertyValue) -> importedProperties.add(importProperty(
-                        nodeReference,
-                        labelIds,
-                        propertyKey,
-                        propertyValue
-                    )));
-                    return importedProperties.intValue();
+            var importedNodesAndProperties = this.nodeImporter.importNodes(
+                buffer,
+                (nodeReference, labelIds, propertiesReference) -> {
+                    if (!propertiesReference.isEmpty()) {
+                        var propertyValueIndex = (int) ((LongPropertyReference) propertiesReference).id;
+                        Map<String, Value> properties = batchNodeProperties.get(propertyValueIndex);
+                        MutableInt importedProperties = new MutableInt(0);
+                        properties.forEach((propertyKey, propertyValue) -> importedProperties.add(importProperty(
+                            nodeReference,
+                            labelIds,
+                            propertyKey,
+                            propertyValue
+                        )));
+                        return importedProperties.intValue();
+                    }
+                    return 0;
                 }
-                return 0;
-            });
+            );
+            int importedNodes = RawValues.getHead(importedNodesAndProperties);
+            this.importedNodes.add(importedNodes);
         }
 
         private void reset() {
