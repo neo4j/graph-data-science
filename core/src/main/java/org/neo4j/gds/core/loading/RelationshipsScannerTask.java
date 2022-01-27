@@ -138,7 +138,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
 
             var compositeBuffer = CompositeRelationshipsBatchBuffer.of(importers
                 .stream()
-                .map(ThreadLocalSingleTypeRelationshipImporter::buffer)
+                .map(SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter::buffer)
                 .toArray(RelationshipsBatchBuffer[]::new));
 
             long allImportedRels = 0L;
@@ -146,7 +146,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             while (compositeBuffer.scan(cursor)) {
                 terminationFlag.assertRunning();
                 long imported = 0L;
-                for (ThreadLocalSingleTypeRelationshipImporter importer : importers) {
+                for (SingleTypeRelationshipImporter.ThreadLocalSingleTypeRelationshipImporter importer : importers) {
                     imported += importer.importRelationships();
                 }
                 int importedRels = RawValues.getHead(imported);
