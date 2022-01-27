@@ -27,6 +27,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.RelationshipImporter;
 import org.neo4j.gds.core.loading.RelationshipPropertiesBatchBuffer;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
@@ -43,7 +44,7 @@ public class RelationshipsBuilder {
     private final boolean isMultiGraph;
 
     private final Orientation orientation;
-    private final ThreadLocalSingleTypeRelationshipImporter.Factory importerFactory;
+    private final SingleTypeRelationshipImporter singleTypeRelationshipImporter;
 
     private final int concurrency;
     private final ExecutorService executorService;
@@ -55,7 +56,7 @@ public class RelationshipsBuilder {
         Orientation orientation,
         int bufferSize,
         int[] propertyKeyIds,
-        ThreadLocalSingleTypeRelationshipImporter.Factory importerFactory,
+        SingleTypeRelationshipImporter singleTypeRelationshipImporter,
         boolean loadRelationshipProperty,
         boolean isMultiGraph,
         int concurrency,
@@ -63,7 +64,7 @@ public class RelationshipsBuilder {
     ) {
         this.idMap = idMap;
         this.orientation = orientation;
-        this.importerFactory = importerFactory;
+        this.singleTypeRelationshipImporter = singleTypeRelationshipImporter;
         this.loadRelationshipProperty = loadRelationshipProperty;
         this.isMultiGraph = isMultiGraph;
         this.concurrency = concurrency;
@@ -71,7 +72,7 @@ public class RelationshipsBuilder {
 
         this.threadLocalBuilders = AutoCloseableThreadLocal.withInitial(() -> new ThreadLocalBuilder(
             idMap,
-            importerFactory,
+            singleTypeRelationshipImporter,
             bufferSize,
             propertyKeyIds
         ));
@@ -140,11 +141,11 @@ public class RelationshipsBuilder {
     public List<Relationships> buildAll() {
         threadLocalBuilders.close();
 
-        var adjacencyListBuilderTasks = importerFactory.adjacencyListBuilderTasks();
+        var adjacencyListBuilderTasks = singleTypeRelationshipImporter.adjacencyListBuilderTasks();
 
         ParallelUtil.runWithConcurrency(concurrency, adjacencyListBuilderTasks, executorService);
 
-        var adjacencyListsWithProperties = importerFactory.build();
+        var adjacencyListsWithProperties = singleTypeRelationshipImporter.build();
         var adjacencyList = adjacencyListsWithProperties.adjacency();
         var relationshipCount = adjacencyListsWithProperties.relationshipCount();
 
@@ -179,7 +180,7 @@ public class RelationshipsBuilder {
 
         ThreadLocalBuilder(
             IdMap idMap,
-            ThreadLocalSingleTypeRelationshipImporter.Factory importerFactory,
+            SingleTypeRelationshipImporter singleTypeRelationshipImporter,
             int bufferSize,
             int[] propertyKeyIds
         ) {
@@ -187,10 +188,10 @@ public class RelationshipsBuilder {
 
             if (propertyKeyIds.length > 1) {
                 this.propertiesBatchBuffer = new RelationshipPropertiesBatchBuffer(bufferSize, propertyKeyIds.length);
-                this.importer = importerFactory.createImporter(idMap, bufferSize, propertiesBatchBuffer);
+                this.importer = singleTypeRelationshipImporter.createImporter(idMap, bufferSize, propertiesBatchBuffer);
             } else {
                 this.propertiesBatchBuffer = null;
-                this.importer = importerFactory.createImporter(
+                this.importer = singleTypeRelationshipImporter.createImporter(
                     idMap,
                     bufferSize,
                     RelationshipImporter.preLoadedPropertyReader()

@@ -196,7 +196,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         var flushTasks = loaderContext.importerFactoriesByType
             .values()
             .stream()
-            .map(RelationshipTypeImportContext::singleTypeRelationshipImporterFactory)
+            .map(RelationshipTypeImportContext::singleTypeRelationshipImporter)
             .flatMap(factory -> factory.adjacencyListBuilderTasks().stream())
             .collect(Collectors.toList());
 
@@ -236,10 +236,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             this.importSizing = ImportSizing.of(cypherConfig.readConcurrency(), idMap.nodeCount());
         }
 
-        synchronized ThreadLocalSingleTypeRelationshipImporter.Factory getOrCreateImporterFactory(RelationshipType relationshipType) {
+        synchronized SingleTypeRelationshipImporter getOrCreateImporterFactory(RelationshipType relationshipType) {
             return importerFactoriesByType
                 .computeIfAbsent(relationshipType, this::createImporterFactory)
-                .singleTypeRelationshipImporterFactory();
+                .singleTypeRelationshipImporter();
         }
 
         private RelationshipTypeImportContext createImporterFactory(RelationshipType relationshipType) {
@@ -263,7 +263,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .preAggregate(GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled())
                 .build();
 
-            var importerFactory = new SingleTypeRelationshipImporterFactoryBuilder()
+            var importerFactory = new SingleTypeRelationshipImporterBuilder()
                 .importMetaData(importMetaData)
                 .nodeCountSupplier(idMap::nodeCount)
                 .importSizing(importSizing)
@@ -275,7 +275,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .builder()
                 .relationshipType(relationshipType)
                 .relationshipProjection(projection)
-                .singleTypeRelationshipImporterFactory(importerFactory)
+                .singleTypeRelationshipImporter(importerFactory)
                 .build();
         }
 

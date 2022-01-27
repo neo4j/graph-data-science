@@ -51,7 +51,7 @@ public interface RelationshipsAndProperties {
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
 
         builders.forEach((context) -> {
-            var adjacencyListsWithProperties = context.singleTypeRelationshipImporterFactory().build();
+            var adjacencyListsWithProperties = context.singleTypeRelationshipImporter().build();
 
             var adjacency = adjacencyListsWithProperties.adjacency();
             var properties = adjacencyListsWithProperties.properties();

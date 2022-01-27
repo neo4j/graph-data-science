@@ -103,7 +103,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
                         USE_PRE_AGGREGATION.isEnabled()
                     );
 
-                    var importerFactory = new SingleTypeRelationshipImporterFactoryBuilder()
+                    var importerFactory = new SingleTypeRelationshipImporterBuilder()
                         .importMetaData(importMetaData)
                         .nodeCountSupplier(dimensions::nodeCount)
                         .importSizing(sizing)
@@ -114,7 +114,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
                     return ImmutableRelationshipTypeImportContext.builder()
                         .relationshipType(relationshipType)
                         .relationshipProjection(projection)
-                        .singleTypeRelationshipImporterFactory(importerFactory)
+                        .singleTypeRelationshipImporter(importerFactory)
                         .build();
                 }
             ).collect(Collectors.toList());
@@ -126,7 +126,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             storeScanner,
             relationshipTypeImportContexts
                 .stream()
-                .map(RelationshipTypeImportContext::singleTypeRelationshipImporterFactory)
+                .map(RelationshipTypeImportContext::singleTypeRelationshipImporter)
                 .collect(Collectors.toList())
         );
     }

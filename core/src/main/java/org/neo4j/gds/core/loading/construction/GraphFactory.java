@@ -45,7 +45,7 @@ import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableImportMetaData;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterFactoryBuilder;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
@@ -264,7 +264,7 @@ public final class GraphFactory {
             .preAggregate(preAggregate.orElse(false))
             .build();
 
-        var importerFactory = new SingleTypeRelationshipImporterFactoryBuilder()
+        var importerFactory = new SingleTypeRelationshipImporterBuilder()
             .importMetaData(importMetaData)
             .nodeCountSupplier(nodes::nodeCount)
             .importSizing(importSizing)

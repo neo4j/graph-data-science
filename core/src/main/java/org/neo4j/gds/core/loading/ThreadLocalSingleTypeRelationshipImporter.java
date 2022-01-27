@@ -19,23 +19,13 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.immutables.value.Value;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
-import org.neo4j.gds.core.compress.AdjacencyListBehavior;
-import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.kernel.api.KernelTransaction;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.function.LongSupplier;
 
 /**
  * Wraps a relationship buffer that is being filled by the store scanners.
@@ -47,14 +37,13 @@ import java.util.function.LongSupplier;
  * Each importing thread holds an instance of this class for each relationship
  * type that is being imported.
  */
-@Value.Style(typeBuilder = "SingleTypeRelationshipImporterFactoryBuilder")
 public final class ThreadLocalSingleTypeRelationshipImporter {
 
     private final RelationshipImporter.Imports imports;
     private final RelationshipImporter.PropertyReader propertyReader;
     private final RelationshipsBatchBuffer relationshipsBatchBuffer;
 
-    private ThreadLocalSingleTypeRelationshipImporter(
+    ThreadLocalSingleTypeRelationshipImporter(
         RelationshipImporter.Imports imports,
         RelationshipImporter.PropertyReader propertyReader,
         RelationshipsBatchBuffer relationshipsBatchBuffer
@@ -70,110 +59,6 @@ public final class ThreadLocalSingleTypeRelationshipImporter {
 
     public long importRelationships() {
         return imports.importRelationships(relationshipsBatchBuffer, propertyReader);
-    }
-
-    @org.immutables.builder.Builder.Factory
-    public static Factory builder(
-        ImportMetaData importMetaData,
-        LongSupplier nodeCountSupplier,
-        boolean validateRelationships,
-        ImportSizing importSizing,
-        AllocationTracker allocationTracker
-    ) {
-        var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
-            nodeCountSupplier,
-            importMetaData.projection().properties(),
-            importMetaData.aggregations(),
-            allocationTracker
-        );
-
-        var adjacencyBuilder = new AdjacencyBufferBuilder()
-            .importMetaData(importMetaData)
-            .importSizing(importSizing)
-            .allocationTracker(allocationTracker)
-            .adjacencyCompressorFactory(adjacencyCompressorFactory)
-            .build();
-
-        var relationshipImporter = new RelationshipImporter(adjacencyBuilder, allocationTracker);
-
-        var projection = importMetaData.projection();
-        var loadProperties = projection.properties().hasMappings();
-        var imports = relationshipImporter.imports(projection.orientation(), loadProperties);
-
-        return new Factory(
-            adjacencyCompressorFactory,
-            importMetaData.typeTokenId(),
-            relationshipImporter,
-            imports,
-            validateRelationships,
-            loadProperties
-        );
-    }
-
-    public static final class Factory {
-
-        private final AdjacencyCompressorFactory adjacencyCompressorFactory;
-        private final int typeId;
-
-        private final RelationshipImporter importer;
-        private final RelationshipImporter.Imports imports;
-
-        private final boolean validateRelationships;
-        private final boolean loadProperties;
-
-        private Factory(
-            AdjacencyCompressorFactory adjacencyCompressorFactory,
-            int typeToken,
-            RelationshipImporter importer,
-            RelationshipImporter.Imports imports,
-            boolean validateRelationships,
-            boolean loadProperties
-        ) {
-            this.adjacencyCompressorFactory = adjacencyCompressorFactory;
-            this.typeId = typeToken;
-            this.importer = importer;
-            this.imports = imports;
-            this.validateRelationships = validateRelationships;
-            this.loadProperties = loadProperties;
-        }
-
-        public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
-            return importer.adjacencyListBuilderTasks();
-        }
-
-        public ThreadLocalSingleTypeRelationshipImporter createImporter(
-            IdMap idMap,
-            int bulkSize,
-            RelationshipImporter.PropertyReader propertyReader
-        ) {
-            return new ThreadLocalSingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
-        }
-
-        public AdjacencyListsWithProperties build() {
-            return adjacencyCompressorFactory.build();
-        }
-
-        ThreadLocalSingleTypeRelationshipImporter createImporter(
-            IdMap idMap,
-            int bulkSize,
-            KernelTransaction kernelTransaction
-        ) {
-            RelationshipImporter.PropertyReader propertyReader = loadProperties
-                ? importer.storeBackedPropertiesReader(kernelTransaction)
-                : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
-
-            return new ThreadLocalSingleTypeRelationshipImporter(imports, propertyReader, createBuffer(idMap, bulkSize));
-        }
-
-        @NotNull
-        private RelationshipsBatchBuffer createBuffer(IdMap idMap, int bulkSize) {
-            return new RelationshipsBatchBuffer(
-                idMap.cloneIdMap(),
-                typeId,
-                bulkSize,
-                validateRelationships
-            );
-        }
     }
 
     @ValueClass
@@ -242,6 +127,6 @@ public final class ThreadLocalSingleTypeRelationshipImporter {
 
         RelationshipProjection relationshipProjection();
 
-        ThreadLocalSingleTypeRelationshipImporter.Factory singleTypeRelationshipImporterFactory();
+        SingleTypeRelationshipImporter singleTypeRelationshipImporter();
     }
 }

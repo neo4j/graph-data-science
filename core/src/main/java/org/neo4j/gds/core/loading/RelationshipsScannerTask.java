@@ -38,14 +38,14 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         ProgressTracker progressTracker,
         IdMap idMap,
         StoreScanner<RelationshipReference> scanner,
-        Collection<ThreadLocalSingleTypeRelationshipImporter.Factory> importerFactories
+        Collection<SingleTypeRelationshipImporter> singleTypeRelationshipImporters
     ) {
         return new Factory(
             loadingContext.transactionContext(),
             progressTracker,
             idMap,
             scanner,
-            importerFactories,
+            singleTypeRelationshipImporters,
             loadingContext.terminationFlag()
         );
     }
@@ -55,7 +55,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         private final ProgressTracker progressTracker;
         private final IdMap idMap;
         private final StoreScanner<RelationshipReference> scanner;
-        private final Collection<ThreadLocalSingleTypeRelationshipImporter.Factory> importerFactories;
+        private final Collection<SingleTypeRelationshipImporter> singleTypeRelationshipImporters;
         private final TerminationFlag terminationFlag;
 
         Factory(
@@ -63,14 +63,14 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             ProgressTracker progressTracker,
             IdMap idMap,
             StoreScanner<RelationshipReference> scanner,
-            Collection<ThreadLocalSingleTypeRelationshipImporter.Factory> importerFactories,
+            Collection<SingleTypeRelationshipImporter> singleTypeRelationshipImporters,
             TerminationFlag terminationFlag
         ) {
             this.tx = tx;
             this.progressTracker = progressTracker;
             this.idMap = idMap;
             this.scanner = scanner;
-            this.importerFactories = importerFactories;
+            this.singleTypeRelationshipImporters = singleTypeRelationshipImporters;
             this.terminationFlag = terminationFlag;
         }
 
@@ -83,13 +83,13 @@ public final class RelationshipsScannerTask extends StatementAction implements R
                 idMap,
                 scanner,
                 taskIndex,
-                importerFactories
+                singleTypeRelationshipImporters
             );
         }
 
         @Override
         public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
-            return importerFactories.stream()
+            return singleTypeRelationshipImporters.stream()
                 .flatMap(factory -> factory.adjacencyListBuilderTasks().stream())
                 .collect(Collectors.toList());
         }
@@ -100,7 +100,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
     private final IdMap idMap;
     private final StoreScanner<RelationshipReference> scanner;
     private final int taskIndex;
-    private final Collection<ThreadLocalSingleTypeRelationshipImporter.Factory> importerFactories;
+    private final Collection<SingleTypeRelationshipImporter> singleTypeRelationshipImporters;
 
     private long relationshipsImported;
     private long weightsImported;
@@ -112,7 +112,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         IdMap idMap,
         StoreScanner<RelationshipReference> scanner,
         int taskIndex,
-        Collection<ThreadLocalSingleTypeRelationshipImporter.Factory> importerFactories
+        Collection<SingleTypeRelationshipImporter> singleTypeRelationshipImporters
     ) {
         super(tx);
         this.terminationFlag = terminationFlag;
@@ -120,7 +120,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         this.idMap = idMap;
         this.scanner = scanner;
         this.taskIndex = taskIndex;
-        this.importerFactories = importerFactories;
+        this.singleTypeRelationshipImporters = singleTypeRelationshipImporters;
     }
 
     @Override
@@ -132,7 +132,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
     public void accept(KernelTransaction transaction) {
         try (StoreScanner.ScanCursor<RelationshipReference> cursor = scanner.createCursor(transaction)) {
             // create an importer (includes a dedicated batch buffer) for each relationship type that we load
-            var importers = this.importerFactories.stream()
+            var importers = this.singleTypeRelationshipImporters.stream()
                 .map(imports -> imports.createImporter(idMap, scanner.bufferSize(), transaction))
                 .collect(Collectors.toList());
 
