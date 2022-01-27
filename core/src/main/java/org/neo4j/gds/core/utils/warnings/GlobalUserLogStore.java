@@ -27,15 +27,17 @@ import org.neo4j.kernel.api.procedure.Context;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.stream.Stream;
 
 public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
     public static final int MOST_RECENT = 10;
 
-    private final Map<String, Map<Task, List<String>>> registeredMessages;
+    private final Map<String, ConcurrentSkipListMap<Task, List<String>>> registeredMessages;
 
 
     public GlobalUserLogStore() {
@@ -46,7 +48,9 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
 
     public Stream<UserLogEntry> query(String username) {
 
-        var tasksFromUsername = registeredMessages.getOrDefault(username, Map.of());
+        var tasksFromUsername = registeredMessages.getOrDefault(username, null);
+        if (tasksFromUsername == null)
+            return Stream.empty();
         return tasksFromUsername.entrySet().stream().flatMap(GlobalUserLogStore::formEntryToUserLog);
 
 
@@ -57,11 +61,12 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
     }
 
     public void addUserLogMessage(String username, Task taskId, String message) {
-        this.registeredMessages
-            .computeIfAbsent(username, __ -> new ConcurrentHashMap<>(MOST_RECENT))
-            .computeIfAbsent(taskId, __ -> Collections.synchronizedList(new ArrayList<>()))
-            .add(message);
 
+        this.registeredMessages
+            .computeIfAbsent(
+                username,
+                __ -> new ConcurrentSkipListMap<>(Comparator.comparingLong(Task::startTime))
+            ).computeIfAbsent(taskId, __ -> Collections.synchronizedList(new ArrayList<>())).add(message);
 
     }
 
@@ -70,6 +75,7 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
         var username = Neo4jProxy.username(context.securityContext().subject());
         return new LocalUserLogRegistryFactory(username, this);
     }
+
 }
 
 
