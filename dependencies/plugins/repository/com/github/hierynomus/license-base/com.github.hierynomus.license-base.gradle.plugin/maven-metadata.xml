@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.github.hierynomus.license-base</groupId>
+  <artifactId>com.github.hierynomus.license-base.gradle.plugin</artifactId>
+  <versioning>
+    <latest>0.16.2-37dde1f</latest>
+    <release>0.16.2-37dde1f</release>
+    <versions>
+      <version>0.16.2-37dde1f</version>
+    </versions>
+    <lastUpdated>20220128142712</lastUpdated>
+  </versioning>
+</metadata>

@@ -1,0 +1,93 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.hierynomus.gradle.plugins",
+    "module": "license-gradle-plugin",
+    "version": "0.16.2-37dde1f",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "7.0"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "license-gradle-plugin-0.16.2-37dde1f.jar",
+          "url": "license-gradle-plugin-0.16.2-37dde1f.jar",
+          "size": 331513,
+          "sha512": "005ab992c99137474fa3899d8d82950f6c5c0f46edbf59bede9d47fd3e8da41e1431ecaf547e755c8adda44ea6ade1feabf781ca22ccd6f2b10cd8ecbfa42f0c",
+          "sha256": "aefae367b26b8834a73fc16cc6ea486524cfe5a604b41c35d28b7b456f5835cb",
+          "sha1": "5a32f9538ba8af17ef4943f19780a39f3e7c4fd0",
+          "md5": "0f81155e01909a99ec2293c2825dce28"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.codehaus.plexus",
+          "module": "plexus-utils",
+          "version": {
+            "requires": "2.0.5"
+          }
+        },
+        {
+          "group": "com.mycila.xmltool",
+          "module": "xmltool",
+          "version": {
+            "requires": "3.3"
+          }
+        },
+        {
+          "group": "com.mycila",
+          "module": "license-maven-plugin",
+          "version": {
+            "requires": "3.0"
+          },
+          "excludes": [
+            {
+              "group": "org.apache.maven",
+              "module": "maven-plugin-api"
+            },
+            {
+              "group": "org.apache.maven",
+              "module": "maven-project"
+            }
+          ]
+        }
+      ],
+      "files": [
+        {
+          "name": "license-gradle-plugin-0.16.2-37dde1f.jar",
+          "url": "license-gradle-plugin-0.16.2-37dde1f.jar",
+          "size": 331513,
+          "sha512": "005ab992c99137474fa3899d8d82950f6c5c0f46edbf59bede9d47fd3e8da41e1431ecaf547e755c8adda44ea6ade1feabf781ca22ccd6f2b10cd8ecbfa42f0c",
+          "sha256": "aefae367b26b8834a73fc16cc6ea486524cfe5a604b41c35d28b7b456f5835cb",
+          "sha1": "5a32f9538ba8af17ef4943f19780a39f3e7c4fd0",
+          "md5": "0f81155e01909a99ec2293c2825dce28"
+        }
+      ]
+    }
+  ]
+}
