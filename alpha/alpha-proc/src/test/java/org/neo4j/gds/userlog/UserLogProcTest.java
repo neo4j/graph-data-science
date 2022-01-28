@@ -47,6 +47,7 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -97,8 +98,8 @@ class UserLogProcTest extends BaseProcTest {
         runQuery(createQuery);
     }
 
-    private Map<String, Object> getMapEntry(String taskName, int i, String message) {
-        return Map.of("taskName", taskName + ((i == -1) ? "" : i),
+    private Map<String, Object> getMapOfTaskNameAndMessage(String taskName, String message) {
+        return Map.of("taskName", taskName,
             "message", message
         );
     }
@@ -117,8 +118,8 @@ class UserLogProcTest extends BaseProcTest {
             "CALL gds.alpha.userLog() " +
             "YIELD taskName, message RETURN taskName, message ",
             List.of(
-                getMapEntry("foo", -1, "This is a test warning"),
-                getMapEntry("foo", -1, "This is another test warning")
+                getMapOfTaskNameAndMessage("foo", "This is a test warning"),
+                getMapOfTaskNameAndMessage("foo", "This is another test warning")
             )
         );
     }
@@ -131,12 +132,12 @@ class UserLogProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.alpha.userLog() " +
-            "YIELD taskName, message RETURN taskName, message  ORDER BY taskName ",
+            "YIELD taskName, message RETURN taskName, message ORDER BY taskName ",
             List.of(
-                getMapEntry("foo", -1, "This is a test warning"),
-                getMapEntry("foo", -1, "This is another test warning"),
-                getMapEntry("foo", 2, "This is a test warning"),
-                getMapEntry("foo", 2, "This is another test warning")
+                getMapOfTaskNameAndMessage("foo", "This is a test warning"),
+                getMapOfTaskNameAndMessage("foo", "This is another test warning"),
+                getMapOfTaskNameAndMessage("foo2", "This is a test warning"),
+                getMapOfTaskNameAndMessage("foo2", "This is another test warning")
 
             )
 
@@ -152,19 +153,30 @@ class UserLogProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
 
+        var createQuery2 = GdsCypher.call(GRAPH_NAME)
+            .algo("gds.wcc")
+            .streamMode()
+            .addParameter("relationshipWeightProperty", "foo")
+            .yields();
+        runQuery(createQuery2);
+
+
         runQuery("CALL gds.test.fakewarnproc('foo')");
 
         assertCypherResult(
             "CALL gds.alpha.userLog() " +
             "YIELD taskName, message  RETURN taskName,message ORDER BY taskName",
             List.of(
-                getMapEntry(
+                getMapOfTaskNameAndMessage(
                     "WCC",
-                    -1,
                     "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set."
                 ),
-                getMapEntry("foo", -1, "This is a test warning"),
-                getMapEntry("foo", -1, "This is another test warning")
+                getMapOfTaskNameAndMessage(
+                    "WCC",
+                    "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set."
+                ),
+                getMapOfTaskNameAndMessage("foo", "This is a test warning"),
+                getMapOfTaskNameAndMessage("foo", "This is another test warning")
             )
 
         );
@@ -177,15 +189,15 @@ class UserLogProcTest extends BaseProcTest {
             String currentFooId = "foo" + i;
             runQuery("CALL gds.test.fakewarnproc('" + currentFooId + "')");
         }
-        var expectedQueryResult = IntStream.range(numMostRecent, 2 * numMostRecent).boxed().flatMap(
+        var expectedQueryResult = IntStream.range(numMostRecent, 2 * numMostRecent).mapToObj(
             i -> Stream.of(
-                getMapEntry("foo", i, "This is a test warning"),
-                getMapEntry("foo", i, "This is another test warning")
+                getMapOfTaskNameAndMessage("foo" + i, "This is a test warning"),
+                getMapOfTaskNameAndMessage("foo" + i, "This is another test warning")
             )
-        ).collect(Collectors.toList());
+        ).flatMap(Function.identity()).collect(Collectors.toList());
         assertCypherResult(
             "CALL gds.alpha.userLog() " +
-            "YIELD taskName, message RETURN taskName, message  ORDER BY taskName",
+            "YIELD taskName, message RETURN taskName, message ORDER BY taskName",
             expectedQueryResult
         );
     }
@@ -200,7 +212,6 @@ class UserLogProcTest extends BaseProcTest {
         @Procedure("gds.test.fakewarnproc")
         public Stream<FakeResult> foo(
             @Name(value = "taskName") String taskName,
-            @Name(value = "withDelay", defaultValue = "0") long withDelay,
             @Name(value = "withMemoryEstimation", defaultValue = "false") boolean withMemoryEstimation,
             @Name(value = "withConcurrency", defaultValue = "false") boolean withConcurrency
         ) throws InterruptedException {
@@ -213,7 +224,6 @@ class UserLogProcTest extends BaseProcTest {
             taskProgressTracker.beginSubTask();
             taskProgressTracker.logProgress(1);
             taskProgressTracker.logWarning("This is a test warning");
-            Thread.sleep(withDelay);
             taskProgressTracker.logWarning("This is another test warning");
 
             return Stream.empty();

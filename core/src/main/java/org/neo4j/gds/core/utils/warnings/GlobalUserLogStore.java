@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,20 +44,17 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
     public GlobalUserLogStore() {
 
         this.registeredMessages = new ConcurrentHashMap<>();
-
     }
 
     public Stream<UserLogEntry> query(String username) {
 
-        var tasksFromUsername = registeredMessages.getOrDefault(username, null);
-        if (tasksFromUsername == null)
-            return Stream.empty();
-        return tasksFromUsername.entrySet().stream().flatMap(GlobalUserLogStore::formEntryToUserLog);
-
-
+        if (registeredMessages.containsKey(username)) {
+            return registeredMessages.get(username).entrySet().stream().flatMap(GlobalUserLogStore::fromEntryToUserLog);
+        }
+        return Stream.empty();
     }
 
-    private static Stream<UserLogEntry> formEntryToUserLog(Map.Entry<Task, List<String>> entry) {
+    private static Stream<UserLogEntry> fromEntryToUserLog(Map.Entry<Task, List<String>> entry) {
         return entry.getValue().stream().map(message -> new UserLogEntry(entry.getKey(), message));
     }
 
@@ -69,40 +67,38 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
         }
     }
 
+    private ConcurrentSkipListMap<Task, List<String>> getUserStore(String username) {
+        return registeredMessages.computeIfAbsent(
+            username,
+            __ -> new ConcurrentSkipListMap<>(Comparator.comparingLong(Task::startTime))
+        );
+    }
+
+
+    private boolean shouldConsiderTask(SortedMap<Task, List<String>> usernameMap, Task taskId) {
+        if (usernameMap.size() < MOST_RECENT) {
+            return true;
+        } else {
+            var leastRecentCachedTask = usernameMap.firstKey();
+            return leastRecentCachedTask.startTime() <= taskId.startTime();
+        }
+    }
+
     public void addUserLogMessage(String username, Task taskId, String message) {
 
-        boolean ignored = false;
-        var usernameMap = this.registeredMessages.getOrDefault(username, null);
-        Task leastRecentCachedTask = null;
-        if (usernameMap != null)
-            leastRecentCachedTask = usernameMap.firstKey();
-        else {
-            this.registeredMessages
-                .computeIfAbsent(
-                    username,
-                    __ -> new ConcurrentSkipListMap<>(Comparator.comparingLong(Task::startTime))
-                );
-            usernameMap = this.registeredMessages.get(username);
-        }
-        // if the current task is older, than the oldest in the cache we can ignore it
-        // if leastRecentCachedTask is removed from the cache, it means replaced with a more recent item so still valid
-        if (leastRecentCachedTask != null && leastRecentCachedTask.startTime() > taskId.startTime()) {
-            ignored = true;
-        }
-        //otherwise, add the message
-        if (!ignored) {
-            AtomicBoolean added = new AtomicBoolean();
-            // AtomicInteger sizeOfCache = new AtomicInteger(usernameMap.size());
+        var usernameMap = getUserStore(username);
 
+        if (shouldConsiderTask(usernameMap, taskId)) {
+            AtomicBoolean addedInStore = new AtomicBoolean();
             usernameMap
                 .computeIfAbsent(taskId, __ -> {
-                    added.set(true);
+                    addedInStore.set(true);
                     return Collections.synchronizedList(new ArrayList<>());
                 })
                 .add(message);
 
-            //check if something needs to be returned
-            if (added.get() && usernameMap.size() > MOST_RECENT) {
+            //check if something needs to potentially  be removed
+            if (addedInStore.get() && usernameMap.size() > MOST_RECENT) {
                 pollLeastRecentElement(username);
             }
         }
