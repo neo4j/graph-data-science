@@ -58,6 +58,11 @@ public @interface Configuration {
         String value();
     }
 
+    /**
+     * This annotation can be used together with {@link org.neo4j.gds.annotation.Configuration.Key} or {@link org.neo4j.gds.annotation.Configuration.Parameter}.
+     * The value must be a method reference of format `package.class#function` to a static and public method.
+     * The input for the specific field will be transformed using the method-reference.
+     */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
@@ -65,6 +70,11 @@ public @interface Configuration {
         String value();
     }
 
+    /**
+     * This annotation can be used together with {@link org.neo4j.gds.annotation.Configuration.Key} or {@link org.neo4j.gds.annotation.Configuration.Parameter}.
+     * The value must be a method reference of format `package.class#function` to a static and public method.
+     * The value of the specific field will be transformed using the method-reference and used for the implementation of the method annotated with {@link org.neo4j.gds.annotation.Configuration.ToMap}.
+     */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
@@ -92,7 +102,8 @@ public @interface Configuration {
     }
 
     /**
-     * Annotated function will return the list of configuration keys
+     * Annotated function will return the list of configuration keys.
+     * The return type of the method must be of type Collection&lt;String&gt;.
      */
     @Documented
     @Target(ElementType.METHOD)
@@ -101,7 +112,8 @@ public @interface Configuration {
     }
 
     /**
-     * Annotated function will return the map representation of the configuration
+     * Annotated function will return the map representation of the configuration.
+     * The return type of the method must be of type Map&lt;String, Object&gt;.
      */
     @Documented
     @Target(ElementType.METHOD)
@@ -109,12 +121,22 @@ public @interface Configuration {
     @interface ToMap {
     }
 
+    /**
+     * The annotated method will be used to inside the implementation of {@link org.neo4j.gds.annotation.Configuration.GraphStoreValidation}
+     *
+     * The method cannot be abstract and have exactly three parameter matching
+     */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
     @interface GraphStoreValidation {
     }
 
+    /**
+     * The annotated method will be used to inside the implementation of {@link org.neo4j.gds.annotation.Configuration.GraphStoreValidation} to verify the configuration is valid for the given graphStore.
+     *
+     *  The method cannot be abstract and have exactly three parameter (graphStore, selectedLabels, selectedRelationshipTypes)
+     */
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
