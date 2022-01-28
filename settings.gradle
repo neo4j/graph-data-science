@@ -1,3 +1,13 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            name = 'GDS local-hosted plugins'
+            url 'dependencies/plugins/repository'
+        }
+    }
+}
+
 rootProject.name = 'open-gds'
 
 include('algo')
