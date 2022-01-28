@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -60,7 +61,8 @@ public interface NodeLogisticRegressionTrainCoreConfig extends TrainingConfig {
         return config;
     }
 
-    static ImmutableNodeLogisticRegressionTrainCoreConfig.Builder builder() {
+    @TestOnly
+    static ImmutableNodeLogisticRegressionTrainCoreConfig.Builder testBuilder() {
         return ImmutableNodeLogisticRegressionTrainCoreConfig.builder();
     }
 

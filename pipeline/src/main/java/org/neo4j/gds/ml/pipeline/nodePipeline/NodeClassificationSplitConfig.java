@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
@@ -50,7 +51,8 @@ public interface NodeClassificationSplitConfig extends ToMapConvertible {
         return new NodeClassificationSplitConfigImpl(config);
     }
 
-    static ImmutableNodeClassificationSplitConfig.Builder builder() {
+    @TestOnly
+    static ImmutableNodeClassificationSplitConfig.Builder testBuilder() {
         return ImmutableNodeClassificationSplitConfig.builder();
     }
 
