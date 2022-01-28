@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import com.carrotsearch.hppc.LongHashSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.assertj.core.data.Offset;
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -279,20 +280,20 @@ class GraphSageModelTrainerTest {
         assertThat(metricsMap).isInstanceOf(Map.class);
 
         var epochLosses = ((Map<String, Object>) metricsMap).get("epochLosses");
-        assertThat(epochLosses)
-            .isInstanceOf(List.class)
-            .asList()
-            .containsExactly(
-                91.33327272493327,
-                88.17940500579815,
-                87.68340477199385,
-                85.607977460245,
-                85.59108701774008,
-                85.59007234087558,
-                81.44403525117595,
-                81.44260858480696,
-                81.44349342539466,
-                81.45612978302191
+        assertThat(epochLosses).isInstanceOf(List.class);
+        assertThat(((List<Double>) epochLosses).stream().mapToDouble(Double::doubleValue).toArray())
+            .contains(new double[]{
+                    91.33327272,
+                    88.17940500,
+                    87.68340477,
+                    85.60797746,
+                    85.59108701,
+                    85.59007234,
+                    81.44403525,
+                    81.44260858,
+                    81.44349342,
+                    81.45612978
+                }, Offset.offset(1e-8)
             );
     }
 
@@ -326,6 +327,7 @@ class GraphSageModelTrainerTest {
         assertThat(metricsMap).isInstanceOf(Map.class);
 
         var epochLosses = ((Map<String, Object>) metricsMap).get("epochLosses");
+//        System.out.println(epochLosses);
         assertThat(epochLosses)
             .isInstanceOf(List.class)
             .asList()
