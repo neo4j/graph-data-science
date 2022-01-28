@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.auto.common.MoreTypes.isTypeOf;
 
@@ -130,28 +131,16 @@ final class GenerateAuxiliaryMethods {
         }
     }
 
-    static void injectGraphStoreValidationCode(
-        ConfigParser.Member validationMethod,
-        ConfigParser.Spec config,
-        MethodSpec.Builder builder
-    ) {
-        List<ConfigParser.Member> validationChecks = config
-            .members()
-            .stream()
-            .filter(ConfigParser.Member::graphStoreValidationCheck)
-            .collect(Collectors.toList());
-
+    static Stream<CodeBlock> graphStoreValidationCode(ConfigParser.Member validationMethod, ConfigParser.Spec config) {
         var parameters = validationMethod.method().getParameters();
-
-        validationChecks
-            .stream()
+        return config.members().stream()
+            .filter(ConfigParser.Member::graphStoreValidationCheck)
             .map(check -> CodeBlock.of(
                 "$N($N, $N, $N)",
                 check.methodName(),
                 parameters.get(0).getSimpleName(),
                 parameters.get(1).getSimpleName(),
                 parameters.get(2).getSimpleName()
-            ))
-            .forEach(builder::addStatement);
+            ));
     }
 }

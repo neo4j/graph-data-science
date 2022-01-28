@@ -772,7 +772,7 @@ final class GenerateConfiguration {
         } else if (member.toMap()) {
             GenerateAuxiliaryMethods.injectToMapCode(config, builder);
         } else if (member.graphStoreValidation()) {
-            GenerateAuxiliaryMethods.injectGraphStoreValidationCode(member, config, builder);
+            GenerateAuxiliaryMethods.graphStoreValidationCode(member, config).forEach(builder::addStatement);
         } else if (member.isConfigValue()) {
             builder.addStatement("return this.$N", names.get(member));
         } else {
