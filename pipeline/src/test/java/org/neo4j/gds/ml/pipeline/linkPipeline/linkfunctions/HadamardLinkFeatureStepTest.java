@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
+package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 
 import java.util.List;
 

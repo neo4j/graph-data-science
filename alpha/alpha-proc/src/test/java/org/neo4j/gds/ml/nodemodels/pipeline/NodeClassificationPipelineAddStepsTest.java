@@ -30,8 +30,8 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
-import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
+import org.neo4j.gds.test.TestMutateProc;
 
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,7 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
-import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationSplitConfig.DEFAULT_CONFIG;
+import static org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig.DEFAULT_CONFIG;
 
 @Neo4jModelCatalogExtension
 class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
@@ -340,6 +340,6 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     }
 
     private void run(Consumer<BaseProc> procConsumer) {
-        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, procConsumer::accept);
+        TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, procConsumer::accept);
     }
 }

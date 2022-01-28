@@ -43,6 +43,11 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrai
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.ImmutableNodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.ImmutableNodeClassificationSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
@@ -51,7 +56,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor.MODEL_TYPE;
 
 @Neo4jModelCatalogExtension
 class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
@@ -246,7 +250,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var dummyConfig = PipelineCreateConfig.of(getUsername());
         var info = new NodeClassificationPipeline();
         modelCatalog.set(
-            Model.of("", PIPELINE_NAME, MODEL_TYPE, GraphSchema.empty(), new Object(), dummyConfig, info)
+            Model.of("", PIPELINE_NAME, NodeClassificationPipeline.MODEL_TYPE, GraphSchema.empty(), new Object(), dummyConfig, info)
         );
         return info;
     }

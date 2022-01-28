@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
+package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
@@ -27,7 +27,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 
 @GdlExtension
-public class FeatureStepBaseTest {
+public abstract class FeatureStepBaseTest {
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     static String GRAPH = "(a:N {noise: 42, z: 13, array: [3.0,2.0], zeros: [.0, .0], invalidValue: NaN}), " +
                           "(b:N {noise: 1337, z: 0, array: [1.0,1.0], zeros: [.0, .0], invalidValue: 1.0}), " +

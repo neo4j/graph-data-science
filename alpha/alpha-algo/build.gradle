@@ -26,7 +26,6 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':open-model-catalog')
-    implementation project(':pipeline')
     implementation project(':string-formatting')
 
     api project(':alpha-core')
@@ -45,6 +44,7 @@ dependencies {
 
     testImplementation project(':test-utils')
     testImplementation project(':ml-test-utils')
+    testImplementation project(':proc-common')
 
     testImplementation group: 'net.jqwik', name: 'jqwik', version: ver.'jqwik'
 }

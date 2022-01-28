@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
+package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.ml.core.tensor.TensorFunctions;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -33,7 +33,7 @@ public final class FeatureStepUtil {
 
     private FeatureStepUtil() {}
 
-    static int totalPropertyDimension(Graph graph, List<String> nodeProperties) {
+    public static int totalPropertyDimension(Graph graph, List<String> nodeProperties) {
         return nodeProperties.stream().mapToInt(property -> FeatureStepUtil.propertyDimension(graph, property)).sum();
     }
 
@@ -66,7 +66,7 @@ public final class FeatureStepUtil {
                 return Double.isNaN(nodeProperty.doubleValue(nodeId));
             case DOUBLE_ARRAY:
             case FLOAT_ARRAY:
-                return TensorFunctions.anyMatch(nodeProperty.doubleArrayValue(nodeId), Double::isNaN);
+                return Arrays.stream(nodeProperty.doubleArrayValue(nodeId)).anyMatch(Double::isNaN);
             case UNKNOWN:
                 throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", nodeProperty));
             default:
@@ -74,7 +74,12 @@ public final class FeatureStepUtil {
         }
     }
 
-    static void validateComputedFeatures(double[] linkFeatures, int startOffset, int endOffset, Runnable throwError) {
+    public static void validateComputedFeatures(
+        double[] linkFeatures,
+        int startOffset,
+        int endOffset,
+        Runnable throwError
+    ) {
         for (int offset = startOffset; offset < endOffset; offset++) {
             if (Double.isNaN(linkFeatures[offset])) {
                 throwError.run();
@@ -82,7 +87,7 @@ public final class FeatureStepUtil {
         }
     }
 
-    static void throwNanError(
+    public static void throwNanError(
         String featureStep,
         Graph graph,
         List<String> nodeProperties,

@@ -28,7 +28,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -39,8 +38,6 @@ import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 
 import java.util.Arrays;
 import java.util.List;
@@ -82,12 +79,14 @@ class LinkLogisticRegressionObjectiveTest {
         var targets = HugeDoubleArray.newArray(graph.relationshipCount(), AllocationTracker.empty());
         targets.setAll(idx -> (idx < 2) ? 1 : 0);
 
-        var linkFeatures = LinkFeatureExtractor.extractFeatures(
-            graph,
-            List.of(new L2FeatureStep(features)),
-            4,
-            ProgressTracker.NULL_TRACKER
+        // L2 Norm features for node properties a,b
+        var linkFeatures = HugeObjectArray.of(
+            new double[]{Math.pow(0.7, 2), Math.pow(0.7, 2)},
+            new double[]{Math.pow(-1, 2), Math.pow(1.7, 2)},
+            new double[]{Math.pow(1, 2), Math.pow(-1.6, 2)},
+            new double[]{Math.pow(0.3, 2), Math.pow(-0.4, 2)}
         );
+
         this.objective = new LinkLogisticRegressionObjective(
             LinkLogisticRegressionData.from(features.size(), true),
             1.0,

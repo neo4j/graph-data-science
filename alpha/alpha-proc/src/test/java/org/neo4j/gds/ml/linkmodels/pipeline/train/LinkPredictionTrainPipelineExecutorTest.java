@@ -47,14 +47,14 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
-import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
@@ -246,7 +246,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .addNodeLabel(NODE_LABEL.name)
             .build();
 
-        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
+        TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, caller -> {
             var executor = new LinkPredictionTrainPipelineExecutor(
                 pipeline,
                 linkPredictionTrainConfig,
@@ -287,7 +287,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .addNodeLabel(NODE_LABEL.name)
             .build();
 
-        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
+        TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, caller -> {
             var executor = new LinkPredictionTrainPipelineExecutor(
                 pipeline,
                 linkPredictionTrainConfig,

@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 
 import java.util.List;
 import java.util.Map;

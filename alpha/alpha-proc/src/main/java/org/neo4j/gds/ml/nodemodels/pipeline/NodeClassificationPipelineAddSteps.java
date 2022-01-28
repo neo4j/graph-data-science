@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 
 import java.util.List;
 import java.util.Map;

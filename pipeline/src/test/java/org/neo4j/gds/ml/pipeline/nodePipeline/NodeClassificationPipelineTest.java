@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.pipeline;
+package org.neo4j.gds.ml.pipeline.nodePipeline;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
-import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 
 import java.util.List;
 import java.util.Map;
@@ -67,21 +67,21 @@ class NodeClassificationPipelineTest {
     @Test
     void canAddNodePropertySteps() {
         var pipeline = new NodeClassificationPipeline();
-        var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(
-            ExecutionContext.EMPTY.username(),
-            "pageRank",
-            Map.of("mutateProperty", "pr")
+        var pageRankPropertyStep = new NodePropertyStep(
+            TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
+            Map.of("mutateProperty", "prop1")
         );
+
         pipeline.addNodePropertyStep(pageRankPropertyStep);
 
         assertThat(pipeline)
             .returns(List.of(pageRankPropertyStep), NodeClassificationPipeline::nodePropertySteps);
 
-        var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(
-            ExecutionContext.EMPTY.username(),
-            "degree",
-            Map.of("mutateProperty", "degree")
+        var degreeNodePropertyStep = new NodePropertyStep(
+            TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
+            Map.of("mutateProperty", "prop2")
         );
+
         pipeline.addNodePropertyStep(degreeNodePropertyStep);
 
         assertThat(pipeline)
@@ -169,12 +169,11 @@ class NodeClassificationPipelineTest {
         @Test
         void returnsCorrectMapWithFullConfiguration() {
             var pipeline = new NodeClassificationPipeline();
-            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(
-                ExecutionContext.EMPTY.username(),
-                "pageRank",
-                Map.of("mutateProperty", "pr")
+            var nodePropertyStep = new NodePropertyStep(
+                TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
+                Map.of("mutateProperty", "prop1")
             );
-            pipeline.addNodePropertyStep(pageRankPropertyStep);
+            pipeline.addNodePropertyStep(nodePropertyStep);
 
             var fooStep = new NodeClassificationFeatureStep("foo");
             pipeline.addFeatureStep(fooStep);
@@ -194,7 +193,7 @@ class NodeClassificationPipelineTest {
                     .asInstanceOf(InstanceOfAssertFactories.MAP)
                     .containsOnlyKeys("nodePropertySteps", "featureProperties")
                     .returns(
-                        List.of(pageRankPropertyStep.toMap()),
+                        List.of(nodePropertyStep.toMap()),
                         featurePipelineMap -> featurePipelineMap.get("nodePropertySteps")
                     )
                     .returns(
@@ -240,28 +239,26 @@ class NodeClassificationPipelineTest {
         @Test
         void deepCopiesNodePropertySteps() {
             var pipeline = new NodeClassificationPipeline();
-            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(
-                ExecutionContext.EMPTY.username(),
-                "pageRank",
-                Map.of("mutateProperty", "pr")
+            var nodePropertyStep = new NodePropertyStep(
+                TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
+                Map.of("mutateProperty", "prop1")
             );
-            pipeline.addNodePropertyStep(pageRankPropertyStep);
+            pipeline.addNodePropertyStep(nodePropertyStep);
 
             var copy = pipeline.copy();
             assertThat(copy)
                 .isNotSameAs(pipeline)
                 .satisfies(copiedPipeline -> assertThat(copiedPipeline.nodePropertySteps())
                     .isNotSameAs(pipeline.nodePropertySteps())
-                    .containsExactly(pageRankPropertyStep));
+                    .containsExactly(nodePropertyStep));
 
-            var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(
-                ExecutionContext.EMPTY.username(),
-                "degree",
-                Map.of("mutateProperty", "degree")
-            );
-            pipeline.addNodePropertyStep(degreeNodePropertyStep);
+            var otherNodePropertyStep = new NodePropertyStep(
+                TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
+                Map.of("mutateProperty", "prop2")
+            );;
+            pipeline.addNodePropertyStep(otherNodePropertyStep);
 
-            assertThat(copy.nodePropertySteps()).doesNotContain(degreeNodePropertyStep);
+            assertThat(copy.nodePropertySteps()).doesNotContain(otherNodePropertyStep);
         }
 
         @Test

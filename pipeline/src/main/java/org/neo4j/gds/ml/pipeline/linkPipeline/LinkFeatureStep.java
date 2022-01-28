@@ -17,18 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
+package org.neo4j.gds.ml.pipeline.linkPipeline;
 
-/**
- * Responsible for appending features given a specific graph.
- * Instances should not be reused between different graphs.
- */
-public interface LinkFeatureAppender {
-    /**
-     * Adds additional features to linkFeatures
-     *
-     * @param linkFeatures features for the pair (source, target)
-     * @param offset the start offset in each double[] where the features should be added
-     */
-    void appendFeatures(long source, long target, double[] linkFeatures, int offset);
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.ml.pipeline.FeatureStep;
+
+import java.util.Map;
+
+public interface LinkFeatureStep extends ToMapConvertible, FeatureStep {
+    LinkFeatureAppender linkFeatureAppender(Graph graph);
+
+    @Override
+    default Map<String, Object> toMap() {
+        return Map.of("name", name(), "config", configuration());
+    }
 }

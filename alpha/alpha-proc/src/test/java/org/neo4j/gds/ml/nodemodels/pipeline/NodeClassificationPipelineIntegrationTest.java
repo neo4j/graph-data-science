@@ -23,12 +23,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineStreamProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineTrainProc;
 import org.neo4j.gds.model.catalog.ModelListProc;
+import org.neo4j.gds.wcc.WccMutateProc;
 
 import java.util.List;
 import java.util.Map;
@@ -104,7 +104,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
             NodeClassificationPipelineConfigureParamsProc.class,
             NodeClassificationPipelineTrainProc.class,
             NodeClassificationPipelineStreamProc.class,
-            DegreeCentralityMutateProc.class
+            WccMutateProc.class
         );
         registerFunctions(AsNodeFunc.class);
         runQuery(GRAPH);
@@ -117,13 +117,13 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
 
         runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.create('p')");
 
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty('p', 'degree', {" +
-                 "  mutateProperty: 'deg', " +
+        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty('p', 'wcc', {" +
+                 "  mutateProperty: 'community', " +
                  "  relationshipWeightProperty: 'w'" +
                  "})");
         // let's try both list and single string syntaxes
         runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures('p', 'a')");
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures('p', ['b', 'deg'])");
+        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures('p', ['b', 'community'])");
 
         runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('p', {" +
                  "  testFraction: 0.2, " +

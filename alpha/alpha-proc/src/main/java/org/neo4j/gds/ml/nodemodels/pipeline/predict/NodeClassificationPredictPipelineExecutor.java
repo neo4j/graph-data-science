@@ -27,9 +27,9 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationPredict;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 
 import java.util.Map;
 import java.util.Optional;

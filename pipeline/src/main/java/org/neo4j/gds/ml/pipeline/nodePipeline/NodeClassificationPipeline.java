@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.pipeline;
+package org.neo4j.gds.ml.pipeline.nodePipeline;
 
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
@@ -29,6 +29,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatureStep, NodeLogisticRegressionTrainCoreConfig> {
+    public static final String MODEL_TYPE = "Node classification pipeline";
+
+
     private NodeClassificationSplitConfig splitConfig;
 
     public NodeClassificationPipeline() {
