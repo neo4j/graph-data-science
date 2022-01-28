@@ -52,15 +52,10 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -148,7 +143,7 @@ final class GenerateConfiguration {
         );
 
         return builder
-            .addMethods(defineGetters(config, fieldDefinitions.names()))
+            .addMethods(defineMemberMethods(config, fieldDefinitions.names()))
             .addType(configBuilderClass)
             .build();
     }
@@ -763,127 +758,12 @@ final class GenerateConfiguration {
         return Optional.of(ClassName.get(asTypeElement(typeArguments.get(0))));
     }
 
-    private void injectToMapCode(ConfigParser.Spec config, MethodSpec.Builder builder) {
-        List<ConfigParser.Member> configMembers = config
-            .members()
-            .stream()
-            .filter(ConfigParser.Member::isConfigMapEntry)
-            .collect(Collectors.toList());
-
-        switch (configMembers.size()) {
-            case 0:
-                builder.addStatement("return $T.emptyMap()", Collections.class);
-                break;
-            case 1:
-                ConfigParser.Member singleConfigMember = configMembers.get(0);
-                String parameter = singleConfigMember.lookupKey();
-                builder.addStatement(
-                    "return $T.singletonMap($S, $L)",
-                    Collections.class,
-                    parameter,
-                    getMapValueCode(singleConfigMember)
-                );
-                break;
-            default:
-                builder.addStatement("$T<$T, Object> map = new $T<>()", Map.class, String.class, LinkedHashMap.class);
-                configMembers.forEach(configMember -> {
-                    if (isTypeOf(Optional.class, configMember.method().getReturnType())) {
-                        builder.addStatement(getMapPutOptionalCode(configMember));
-                    } else {
-                        builder.addStatement(
-                            "map.put($S, $L)",
-                            configMember.lookupKey(),
-                            getMapValueCode(configMember)
-                        );
-                    }
-                });
-                builder.addStatement("return map");
-                break;
-        }
-    }
-
-    private void injectGraphStoreValidationCode(
-        ConfigParser.Member validationMethod,
-        ConfigParser.Spec config,
-        MethodSpec.Builder builder
-    ) {
-        List<ConfigParser.Member> validationChecks = config
-            .members()
-            .stream()
-            .filter(ConfigParser.Member::graphStoreValidationCheck)
-            .collect(Collectors.toList());
-
-        var parameters = validationMethod.method().getParameters();
-
-        validationChecks
-            .stream()
-            .map(check -> CodeBlock.of(
-                "$N($N, $N, $N)",
-                check.methodName(),
-                parameters.get(0).getSimpleName(),
-                parameters.get(1).getSimpleName(),
-                parameters.get(2).getSimpleName()
-            ))
-            .forEach(builder::addStatement);
-    }
-
-    @NotNull
-    private CodeBlock getMapValueCode(ConfigParser.Member configMember) {
-        String getter = configMember.methodName();
-        Configuration.ToMapValue toMapValue = configMember.method().getAnnotation(Configuration.ToMapValue.class);
-        return (toMapValue == null)
-            ? CodeBlock.of("$N()", getter)
-            : CodeBlock.of("$L($N())", getReference(toMapValue), getter);
-    }
-
-    @NotNull
-    private CodeBlock getMapPutOptionalCode(ConfigParser.Member configMember) {
-        Configuration.ToMapValue toMapValue = configMember.method().getAnnotation(Configuration.ToMapValue.class);
-
-        CodeBlock mapValue = (toMapValue == null)
-            ? CodeBlock.of("$L", configMember.lookupKey())
-            : CodeBlock.of("$L($L)", getReference(toMapValue), configMember.lookupKey());
-
-        return CodeBlock.of("$L.ifPresent($L -> map.put($S, $L))",
-            CodeBlock.of("$N()", configMember.methodName()),
-            configMember.lookupKey(),
-            configMember.lookupKey(),
-            mapValue
-        );
-    }
-
-    private String getReference(Configuration.ToMapValue toMapValue) {
-        return toMapValue.value().replaceAll("#", ".");
-    }
-
-    private CodeBlock collectKeysCode(ConfigParser.Spec config) {
-        Collection<String> configKeys = config
-            .members()
-            .stream()
-            .filter(ConfigParser.Member::isConfigMapEntry)
-            .map(ConfigParser.Member::lookupKey)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-
-        switch (configKeys.size()) {
-            case 0:
-                return CodeBlock.of("return $T.emptyList()", Collections.class);
-            case 1:
-                return CodeBlock.of("return $T.singleton($S)", Collections.class, configKeys.iterator().next());
-            default:
-                CodeBlock keys = configKeys
-                    .stream()
-                    .map(name -> CodeBlock.of("$S", name))
-                    .collect(CodeBlock.joining(", "));
-                return CodeBlock.of("return $T.asList($L)", Arrays.class, keys);
-        }
-    }
-
-    private Iterable<MethodSpec> defineGetters(ConfigParser.Spec config, NameAllocator names) {
+    private Iterable<MethodSpec> defineMemberMethods(ConfigParser.Spec config, NameAllocator names) {
         return config
             .members()
             .stream()
             .map(member -> generateMethodCode(config, names, member))
-            .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
+            .flatMap(Optional::stream)
             .collect(Collectors.toList());
     }
 
@@ -896,11 +776,11 @@ final class GenerateConfiguration {
             .overriding(member.method())
             .returns(member.typeSpecWithAnnotation(Nullable.class));
         if (member.collectsKeys()) {
-            builder.addStatement(collectKeysCode(config));
+            builder.addStatement(GenerateAuxiliaryMethods.collectKeysCode(config));
         } else if (member.toMap()) {
-            injectToMapCode(config, builder);
+            GenerateAuxiliaryMethods.injectToMapCode(config, builder);
         } else if (member.graphStoreValidation()) {
-            injectGraphStoreValidationCode(member, config, builder);
+            GenerateAuxiliaryMethods.injectGraphStoreValidationCode(member, config, builder);
         } else if (member.isConfigValue()) {
             builder.addStatement("return this.$N", names.get(member));
         } else {
