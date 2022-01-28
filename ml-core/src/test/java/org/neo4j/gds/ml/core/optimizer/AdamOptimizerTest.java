@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.core.optimizer;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -78,14 +79,24 @@ class AdamOptimizerTest {
             adam.update(List.of(localCtx.gradient(weights)));
         }
 
-        var expectedWeights = new Matrix(
-            new double[]{0.10999999994868388, 0.13000000005146692, 0.23099999992211442, 0.4, 0.3, 0.9, 0.01, 0.6, 0.1500882018843512},
-            3,
-            3
-        );
-
         assertThat(oldLoss).isLessThan(1e-4);
-        assertThat(weights.data()).isEqualTo(expectedWeights);
+        assertThat(weights.data().cols()).isEqualTo(3);
+        assertThat(weights.data().rows()).isEqualTo(3);
+        assertThat(weights.data().data())
+            .contains(
+                new double[]{
+                    0.109999999,
+                    0.130000000,
+                    0.230999999,
+                    0.4,
+                    0.3,
+                    0.9,
+                    0.01,
+                    0.6,
+                    0.150088201
+                },
+                Offset.offset(1e-9)
+            );
     }
 
     @Test
