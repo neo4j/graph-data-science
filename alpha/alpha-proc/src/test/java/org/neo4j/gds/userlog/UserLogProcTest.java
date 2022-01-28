@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
@@ -46,6 +47,9 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -94,6 +98,12 @@ class UserLogProcTest extends BaseProcTest {
         runQuery(createQuery);
     }
 
+    private Map<String, Object> getMapOfTaskNameAndMessage(String taskName, String message) {
+        return Map.of("taskName", taskName,
+            "message", message
+        );
+    }
+
     @Test
     void shouldNotFailWhenThereAreNoWarnings() {
         assertDoesNotThrow(() -> runQuery("CALL gds.alpha.userLog()"));
@@ -108,13 +118,9 @@ class UserLogProcTest extends BaseProcTest {
             "CALL gds.alpha.userLog() " +
             "YIELD taskName, message RETURN taskName, message ",
             List.of(
-                Map.of(
-                    "taskName", "foo",
-                    "message","This is a test warning"),
-                Map.of(
-                    "taskName", "foo",
-                    "message","This is another test warning")
-                )
+                getMapOfTaskNameAndMessage("foo", "This is a test warning"),
+                getMapOfTaskNameAndMessage("foo", "This is another test warning")
+            )
         );
     }
 
@@ -126,24 +132,13 @@ class UserLogProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.alpha.userLog() " +
-            "YIELD taskName, message RETURN taskName, message  ORDER BY taskName ",
+            "YIELD taskName, message RETURN taskName, message ORDER BY taskName ",
             List.of(
-                Map.of(
-                    "taskName", "foo",
-                    "message", "This is a test warning"
-                ),
-                Map.of(
-                    "taskName", "foo",
-                    "message", "This is another test warning"
-                ),
-                Map.of(
-                    "taskName", "foo2",
-                    "message", "This is a test warning"
-                ),
-                Map.of(
-                    "taskName", "foo2",
-                    "message", "This is another test warning"
-                )
+                getMapOfTaskNameAndMessage("foo", "This is a test warning"),
+                getMapOfTaskNameAndMessage("foo", "This is another test warning"),
+                getMapOfTaskNameAndMessage("foo2", "This is a test warning"),
+                getMapOfTaskNameAndMessage("foo2", "This is another test warning")
+
             )
 
         );
@@ -158,30 +153,54 @@ class UserLogProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
 
+        var createQuery2 = GdsCypher.call(GRAPH_NAME)
+            .algo("gds.wcc")
+            .streamMode()
+            .addParameter("relationshipWeightProperty", "foo")
+            .yields();
+        runQuery(createQuery2);
+
+
         runQuery("CALL gds.test.fakewarnproc('foo')");
 
         assertCypherResult(
             "CALL gds.alpha.userLog() " +
             "YIELD taskName, message  RETURN taskName,message ORDER BY taskName",
             List.of(
-                Map.of(
-                    "taskName", "WCC",
-                    "message", "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set."
+                getMapOfTaskNameAndMessage(
+                    "WCC",
+                    "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set."
                 ),
-                Map.of(
-                    "taskName", "foo",
-                    "message", "This is a test warning"
+                getMapOfTaskNameAndMessage(
+                    "WCC",
+                    "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set."
                 ),
-                Map.of(
-                    "taskName", "foo",
-                    "message", "This is another test warning"
-                )
-
-
+                getMapOfTaskNameAndMessage("foo", "This is a test warning"),
+                getMapOfTaskNameAndMessage("foo", "This is another test warning")
             )
+
         );
     }
 
+    @Test
+    void userLogOutputOnlyMostRecentTasks() {
+        int numMostRecent = GlobalUserLogStore.MOST_RECENT;
+        for (int i = 0; i < 2 * numMostRecent; ++i) {
+            String currentFooId = "foo" + i;
+            runQuery("CALL gds.test.fakewarnproc('" + currentFooId + "')");
+        }
+        var expectedQueryResult = IntStream.range(numMostRecent, 2 * numMostRecent).mapToObj(
+            i -> Stream.of(
+                getMapOfTaskNameAndMessage("foo" + i, "This is a test warning"),
+                getMapOfTaskNameAndMessage("foo" + i, "This is another test warning")
+            )
+        ).flatMap(Function.identity()).collect(Collectors.toList());
+        assertCypherResult(
+            "CALL gds.alpha.userLog() " +
+            "YIELD taskName, message RETURN taskName, message ORDER BY taskName",
+            expectedQueryResult
+        );
+    }
 
     public static class FakeTaskProc {
 
@@ -195,7 +214,7 @@ class UserLogProcTest extends BaseProcTest {
             @Name(value = "taskName") String taskName,
             @Name(value = "withMemoryEstimation", defaultValue = "false") boolean withMemoryEstimation,
             @Name(value = "withConcurrency", defaultValue = "false") boolean withConcurrency
-        ) {
+        ) throws InterruptedException {
             var task = Tasks.task(taskName, Tasks.leaf("leaf", 3));
 
             var taskProgressTracker = new TaskProgressTracker(task, new TestLog(), 1, taskRegistryFactory,

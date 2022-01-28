@@ -26,38 +26,79 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
+    public static final int MOST_RECENT = 10;
 
-    private final Map<String, Map<Task, List<String>>> registeredWarnings;
-    private final int MOST_RECENT = 10;
+    private final Map<String, ConcurrentSkipListMap<Task, List<String>>> registeredMessages;
 
-    public GlobalUserLogStore() {
-
-        this.registeredWarnings = new ConcurrentHashMap<>();
+    GlobalUserLogStore() {
+        this.registeredMessages = new ConcurrentHashMap<>();
     }
 
     public Stream<UserLogEntry> query(String username) {
-
-        var tasksFromUsername = registeredWarnings.getOrDefault(username, Map.of());
-        return tasksFromUsername.entrySet().stream().flatMap(GlobalUserLogStore::fromEntryToWarningList);
-
-
+        if (registeredMessages.containsKey(username)) {
+            return registeredMessages.get(username).entrySet().stream().flatMap(GlobalUserLogStore::fromEntryToUserLog);
+        }
+        return Stream.empty();
     }
 
-    private static Stream<UserLogEntry> fromEntryToWarningList(Map.Entry<Task, List<String>> entry) {
+    private static Stream<UserLogEntry> fromEntryToUserLog(Map.Entry<Task, List<String>> entry) {
         return entry.getValue().stream().map(message -> new UserLogEntry(entry.getKey(), message));
     }
 
+    private synchronized void pollLeastRecentElement(String username) {
+        var usernameMap = this.registeredMessages.get(username);
+
+        //because this is synchronized, this will keep the usernameMap with exactly MOST_RECENT elements
+        if (usernameMap.size() > MOST_RECENT) {
+            usernameMap.pollFirstEntry();
+        }
+    }
+
+    private ConcurrentSkipListMap<Task, List<String>> getUserStore(String username) {
+        return registeredMessages.computeIfAbsent(
+            username,
+            __ -> new ConcurrentSkipListMap<>(Comparator.comparingLong(Task::startTime))
+        );
+    }
+
+
+    private boolean shouldConsiderTask(SortedMap<Task, List<String>> usernameMap, Task taskId) {
+        if (usernameMap.size() < MOST_RECENT) {
+            return true;
+        } else {
+            var leastRecentCachedTask = usernameMap.firstKey();
+            return leastRecentCachedTask.startTime() <= taskId.startTime();
+        }
+    }
+
     public void addUserLogMessage(String username, Task taskId, String message) {
-        this.registeredWarnings
-            .computeIfAbsent(username, __ -> new ConcurrentHashMap<>())
-            .computeIfAbsent(taskId, __ -> new ArrayList<>(MOST_RECENT))
-            .add(message);
+        var usernameMap = getUserStore(username);
+
+        if (shouldConsiderTask(usernameMap, taskId)) {
+            AtomicBoolean addedInStore = new AtomicBoolean();
+            usernameMap
+                .computeIfAbsent(taskId, __ -> {
+                    addedInStore.set(true);
+                    return Collections.synchronizedList(new ArrayList<>());
+                })
+                .add(message);
+
+            //check if something needs to potentially  be removed
+            if (addedInStore.get() && usernameMap.size() > MOST_RECENT) {
+                pollLeastRecentElement(username);
+            }
+        }
     }
 
     @Override
@@ -65,6 +106,7 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
         var username = Neo4jProxy.username(context.securityContext().subject());
         return new LocalUserLogRegistryFactory(username, this);
     }
+
 }
 
 
