@@ -34,7 +34,7 @@ dependencies {
     implementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 
     implementation project(':algo-common')
-    implementation project(':alpha-algo') // NC / LP specific references inside the configs
+    implementation project(':alpha-algo')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
