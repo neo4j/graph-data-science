@@ -20,12 +20,12 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -119,5 +119,55 @@ public final class ToMapConfig implements ToMap {
         maybeBar().ifPresent(maybeBar -> map.put("maybeBar", maybeBar));
         maybeBaz().ifPresent(maybeBaz -> map.put("maybeBaz", positive.ToMap.add42(maybeBaz)));
         return map;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        private int foo;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public ToMapConfig.Builder foo(int foo) {
+            this.foo = foo;
+            return this;
+        }
+
+        public ToMapConfig.Builder bar(long bar) {
+            this.config.put("bar", bar);
+            return this;
+        }
+
+        public ToMapConfig.Builder baz(double baz) {
+            this.config.put("baz", baz);
+            return this;
+        }
+
+        public ToMapConfig.Builder maybeBar(Long maybeBar) {
+            this.config.put("maybeBar", maybeBar);
+            return this;
+        }
+
+        public ToMapConfig.Builder maybeBar(Optional<Long> maybeBar) {
+            maybeBar.ifPresent(actualmaybeBar -> this.config.put("maybeBar", actualmaybeBar));
+            return this;
+        }
+
+        public ToMapConfig.Builder maybeBaz(Double maybeBaz) {
+            this.config.put("maybeBaz", maybeBaz);
+            return this;
+        }
+
+        public ToMapConfig.Builder maybeBaz(Optional<Double> maybeBaz) {
+            maybeBaz.ifPresent(actualmaybeBaz -> this.config.put("maybeBaz", actualmaybeBaz));
+            return this;
+        }
+
+        public ToMap build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new ToMapConfig(foo, config);
+        }
     }
 }

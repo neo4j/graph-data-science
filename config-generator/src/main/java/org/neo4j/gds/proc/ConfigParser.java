@@ -132,6 +132,7 @@ final class ConfigParser {
             return Optional.empty();
         }
         if (!seen.add(method.getSimpleName().toString()) || method.getModifiers().contains(Modifier.STATIC)) {
+            // static method cannot be config fields
             return Optional.empty();
         }
 
@@ -174,7 +175,12 @@ final class ConfigParser {
             if (isAnnotationPresent(method, Parameter.class)) {
                 messager.printMessage(
                     Diagnostic.Kind.ERROR,
-                    String.format(Locale.ENGLISH,"The `@%s` annotation cannot be used together with the `@%s` annotation", Parameter.class.getSimpleName(), Key.class.getSimpleName()),
+                    String.format(
+                        Locale.ENGLISH,
+                        "The `@%s` annotation cannot be used together with the `@%s` annotation",
+                        Parameter.class.getSimpleName(),
+                        Key.class.getSimpleName()
+                    ),
                     method
                 );
                 return Optional.empty();
@@ -331,8 +337,12 @@ final class ConfigParser {
             return !collectsKeys() && !toMap() && !validates() && !normalizes() && !graphStoreValidation() && !graphStoreValidationCheck();
         }
 
-        final boolean isMapParameter() {
+        final boolean isConfigMapEntry() {
             return isConfigValue() && !isAnnotationPresent(method(), Parameter.class);
+        }
+
+        final boolean isConfigParameter() {
+            return isConfigValue() && isAnnotationPresent(method(), Parameter.class);
         }
 
         @Value.Derived

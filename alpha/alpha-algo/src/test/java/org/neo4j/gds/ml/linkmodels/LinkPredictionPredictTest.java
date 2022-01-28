@@ -125,7 +125,7 @@ class LinkPredictionPredictTest {
             LinkPredictionTrain.MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
-            LinkPredictionTrainConfig.builder()
+            LinkPredictionTrainConfig.testBuilder()
                 .modelName(modelName)
                 .validationFolds(1)
                 .negativeClassWeight(1)

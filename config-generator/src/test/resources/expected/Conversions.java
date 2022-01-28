@@ -20,9 +20,10 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -97,5 +98,38 @@ public final class ConversionsConfig implements Conversions.MyConversion {
     @Override
     public String referenceTypeAsResult() {
         return this.referenceTypeAsResult;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public ConversionsConfig.Builder directMethod(String directMethod) {
+            this.config.put("directMethod", directMethod);
+            return this;
+        }
+
+        public ConversionsConfig.Builder inheritedMethod(String inheritedMethod) {
+            this.config.put("inheritedMethod", inheritedMethod);
+            return this;
+        }
+
+        public ConversionsConfig.Builder qualifiedMethod(String qualifiedMethod) {
+            this.config.put("qualifiedMethod", qualifiedMethod);
+            return this;
+        }
+
+        public ConversionsConfig.Builder referenceTypeAsResult(String referenceTypeAsResult) {
+            this.config.put("referenceTypeAsResult", referenceTypeAsResult);
+            return this;
+        }
+
+        public Conversions.MyConversion build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new ConversionsConfig(config);
+        }
     }
 }

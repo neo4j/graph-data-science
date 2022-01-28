@@ -112,13 +112,18 @@ final class GenerateConfiguration {
         FieldDefinitions fieldDefinitions = defineFields(config);
         builder.addFields(fieldDefinitions.fields());
 
-        MethodSpec constructor = defineConstructor(config, fieldDefinitions.names());
-        Optional<MethodSpec> factory = defineFactory(
-            config,
-            generatedClassName,
-            constructor,
-            fieldDefinitions.names()
-        );
+        String configParameterName = fieldDefinitions.names().newName(CONFIG_VAR, CONFIG_VAR);
+        List<MemberDefinition> implMembers =  config.members().stream()
+            .flatMap(parserMember -> memberDefinition(fieldDefinitions.names(), parserMember).stream())
+            .collect(Collectors.toList());
+
+        var validationMethods = config.members().stream()
+            .filter(ConfigParser.Member::validates)
+            .map(ConfigParser.Member::methodName);
+
+        MethodSpec constructor = defineConstructor(implMembers, validationMethods, fieldDefinitions.names());
+        Optional<MethodSpec> factory = defineFactory(config, generatedClassName, constructor, fieldDefinitions.names());
+
         if (factory.isPresent()) {
             MethodSpec privateConstructor = MethodSpec.constructorBuilder()
                 .addAnnotations(constructor.annotations)
@@ -132,8 +137,19 @@ final class GenerateConfiguration {
             builder.addMethod(constructor);
         }
 
+        TypeSpec configBuilderClass = GenerateConfigurationBuilder.defineConfigBuilder(
+            TypeName.get(config.rootType()),
+            implMembers,
+            packageName,
+            generatedClassName,
+            constructor.parameters,
+            configParameterName,
+            factory
+        );
+
         return builder
             .addMethods(defineGetters(config, fieldDefinitions.names()))
+            .addType(configBuilderClass)
             .build();
     }
 
@@ -159,7 +175,7 @@ final class GenerateConfiguration {
         ).ifPresent(classBuilder::addAnnotation);
     }
 
-    private FieldDefinitions defineFields(ConfigParser.Spec config) {
+    private static FieldDefinitions defineFields(ConfigParser.Spec config) {
         NameAllocator names = new NameAllocator();
         ImmutableFieldDefinitions.Builder builder = ImmutableFieldDefinitions.builder().names(names);
         config.members().stream().filter(ConfigParser.Member::isConfigValue).map(member ->
@@ -172,58 +188,58 @@ final class GenerateConfiguration {
         return builder.build();
     }
 
-    private MethodSpec defineConstructor(ConfigParser.Spec config, NameAllocator names) {
+    private MethodSpec defineConstructor(
+        List<MemberDefinition> implMembers,
+        Stream<String> validationMethods,
+        NameAllocator names
+    ) {
         MethodSpec.Builder configMapConstructor = MethodSpec
             .constructorBuilder()
             .addModifiers(Modifier.PUBLIC);
 
-        String configParameterName = names.newName(CONFIG_VAR, CONFIG_VAR);
         boolean requiredMapParameter = false;
 
         String errorsVarName = names.newName("errors");
-        if (!config.members().isEmpty()) {
+        if (!implMembers.isEmpty()) {
             configMapConstructor.addStatement("$1T<$2T> $3N = new $1T<>()", ArrayList.class, IllegalArgumentException.class, errorsVarName);
         }
 
-        for (ConfigParser.Member member : config.members()) {
-            Optional<MemberDefinition> memberDefinition = memberDefinition(names, member);
-            if (memberDefinition.isPresent()) {
-                ExecutableElement method = member.method();
-                MemberDefinition definition = memberDefinition.get();
+        for (MemberDefinition implMember : implMembers) {
+            var parsedMember = implMember.member();
+            ExecutableElement method = parsedMember.method();
 
-                Parameter parameter = method.getAnnotation(Parameter.class);
-                if (parameter == null) {
-                    requiredMapParameter = true;
-                    addConfigGetterToConstructor(
-                        configMapConstructor,
-                        definition,
-                        errorsVarName
-                    );
-                } else {
-                    addParameterToConstructor(
-                        configMapConstructor,
-                        definition,
-                        parameter,
-                        errorsVarName
-                    );
-                }
+            Parameter parameter = method.getAnnotation(Parameter.class);
+            if (parameter == null) {
+                requiredMapParameter = true;
+                addConfigGetterToConstructor(
+                    configMapConstructor,
+                    implMember,
+                    errorsVarName
+                );
+            } else {
+                addParameterToConstructor(
+                    configMapConstructor,
+                    implMember,
+                    parameter,
+                    errorsVarName
+                );
             }
         }
 
-        for (ConfigParser.Member member : config.members()) {
-            if (member.validates()) {
-                catchValidationError(configMapConstructor, errorsVarName, (builder) -> builder.addStatement("$N()", member.methodName()));
-            }
-        }
+        validationMethods.forEach(method -> catchValidationError(
+            configMapConstructor,
+            errorsVarName,
+            builder -> builder.addStatement("$N()", method)
+        ));
 
-        if (!config.members().isEmpty()) {
+        if (!implMembers.isEmpty()) {
             combineCollectedErrors(names, configMapConstructor, errorsVarName);
         }
 
         if (requiredMapParameter) {
             configMapConstructor.addParameter(
                 TypeName.get(CypherMapWrapper.class).annotated(NOT_NULL),
-                configParameterName
+                names.get(CONFIG_VAR)
             );
         }
 
@@ -375,12 +391,10 @@ final class GenerateConfiguration {
         Consumer<CodeBlock> validationConsumer = fieldCodeBuilder::addStatement;
         if (isTypeOf(Optional.class, definition.fieldType())) {
             validationConsumer = validatorCode -> fieldCodeBuilder.addStatement(
-                String.format(
-                    Locale.US,
-                    "%1$s.ifPresent(%1$s -> %2$s)",
-                    definition.fieldName(),
-                    validatorCode
-                ));
+                "$1L.ifPresent($1L -> $2L)",
+                definition.fieldName(),
+                validatorCode
+            );
         } else if (isTypeOf(List.class, definition.fieldType())){
             validationConsumer = validatorCode -> fieldCodeBuilder.addStatement(
                 "this.$1N.forEach($1N -> $2L)",
@@ -698,23 +712,16 @@ final class GenerateConfiguration {
                 } else if (isTypeOf(Number.class, targetType)) {
                     builder.methodName("Number");
                 } else if (isTypeOf(Optional.class, targetType)) {
-                    if (member.method().isDefault()) {
-                        return error(
-                            "Optional fields can not to be declared default (Optional.empty is the default).",
-                            member.method()
-                        );
+                    var maybeInnerType  = unwrapOptionalType(member, (DeclaredType) targetType);
+
+                    if (maybeInnerType.isPresent()) {
+                        builder
+                            .methodPrefix("get")
+                            .methodName("Optional")
+                            .expectedType(CodeBlock.of("$T.class", maybeInnerType.get()));
+                    } else {
+                        return Optional.empty();
                     }
-                    List<? extends TypeMirror> typeArguments = ((DeclaredType) targetType).getTypeArguments();
-                    if (typeArguments.isEmpty()) {
-                        return error(
-                            "Optional must have a Cypher-supported type as type argument, but found none.",
-                            member.method()
-                        );
-                    }
-                    builder
-                        .methodPrefix("get")
-                        .methodName("Optional")
-                        .expectedType(CodeBlock.of("$T.class", ClassName.get(asTypeElement(typeArguments.get(0)))));
                 } else {
                     builder
                         .methodName("Checked")
@@ -739,11 +746,28 @@ final class GenerateConfiguration {
         return Optional.of(builder.build());
     }
 
+    private Optional<ClassName> unwrapOptionalType(ConfigParser.Member member, DeclaredType declaredType) {
+        if (member.method().isDefault()) {
+            return error(
+                "Optional fields can not to be declared default (Optional.empty is the default).",
+                member.method()
+            );
+        }
+        List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
+        if (typeArguments.isEmpty()) {
+            return error(
+                "Optional must have a Cypher-supported type as type argument, but found none.",
+                member.method()
+            );
+        }
+        return Optional.of(ClassName.get(asTypeElement(typeArguments.get(0))));
+    }
+
     private void injectToMapCode(ConfigParser.Spec config, MethodSpec.Builder builder) {
         List<ConfigParser.Member> configMembers = config
             .members()
             .stream()
-            .filter(ConfigParser.Member::isMapParameter)
+            .filter(ConfigParser.Member::isConfigMapEntry)
             .collect(Collectors.toList());
 
         switch (configMembers.size()) {
@@ -836,7 +860,7 @@ final class GenerateConfiguration {
         Collection<String> configKeys = config
             .members()
             .stream()
-            .filter(ConfigParser.Member::isMapParameter)
+            .filter(ConfigParser.Member::isConfigMapEntry)
             .map(ConfigParser.Member::lookupKey)
             .collect(Collectors.toCollection(LinkedHashSet::new));
 

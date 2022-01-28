@@ -10,6 +10,9 @@
         <Class name="~.*\.*ConfigImpl" />
     </Match>
     <Match>
+        <Class name="~.*\.*ConfigImpl.Builder" />
+    </Match>
+    <Match>
         <!-- Exclude the generated Protobuf classes -->
         <Package name="~.*.proto" />
     </Match>

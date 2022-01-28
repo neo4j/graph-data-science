@@ -20,9 +20,10 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -106,5 +107,47 @@ public final class NullableParametersConfig implements NullableParameters {
     @Override
     public int extraValue() {
         return this.extraValue;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        private @NotNull String referenceTypesDefaultToNotNull;
+
+        private @NotNull String referenceTypesCanBeMarkedAsNotNull;
+
+        private @Nullable String referenceTypesCanBeMarkedAsNullable;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public NullableParametersConfig.Builder referenceTypesDefaultToNotNull(
+            String referenceTypesDefaultToNotNull) {
+            this.referenceTypesDefaultToNotNull = referenceTypesDefaultToNotNull;
+            return this;
+        }
+
+        public NullableParametersConfig.Builder referenceTypesCanBeMarkedAsNotNull(
+            String referenceTypesCanBeMarkedAsNotNull) {
+            this.referenceTypesCanBeMarkedAsNotNull = referenceTypesCanBeMarkedAsNotNull;
+            return this;
+        }
+
+        public NullableParametersConfig.Builder referenceTypesCanBeMarkedAsNullable(
+            String referenceTypesCanBeMarkedAsNullable) {
+            this.referenceTypesCanBeMarkedAsNullable = referenceTypesCanBeMarkedAsNullable;
+            return this;
+        }
+
+        public NullableParametersConfig.Builder extraValue(int extraValue) {
+            this.config.put("extraValue", extraValue);
+            return this;
+        }
+
+        public NullableParameters build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new NullableParametersConfig(referenceTypesDefaultToNotNull, referenceTypesCanBeMarkedAsNotNull, referenceTypesCanBeMarkedAsNullable, config);
+        }
     }
 }

@@ -232,7 +232,7 @@ class GraphSageModelTrainerTest {
         LongStream
             .range(0, arrayGraph.nodeCount())
             .forEach(n -> arrayFeatures.set(n, arrayGraph.nodeProperties("features").doubleArrayValue(n)));
-        var config = GraphSageTrainConfig.builder()
+        var config = GraphSageTrainConfig.testBuilder()
             .embeddingDimension(12)
             .aggregator(AggregatorType.MEAN)
             .activationFunction(ActivationFunction.SIGMOID)

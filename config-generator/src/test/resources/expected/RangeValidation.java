@@ -20,11 +20,12 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -86,7 +87,7 @@ public final class RangeValidationConfig implements RangeValidation {
                 config.getOptional("maybeDoubleWithinRange", Double.class)
             );
             maybeDoubleWithinRange.ifPresent(maybeDoubleWithinRange ->
-                org.neo4j.gds.core.CypherMapWrapper.validateDoubleRange(
+                CypherMapWrapper.validateDoubleRange(
                     "maybeDoubleWithinRange",
                     maybeDoubleWithinRange,
                     21.0,
@@ -156,5 +157,50 @@ public final class RangeValidationConfig implements RangeValidation {
     @Override
     public List<Double> listDoubleWithinRange() {
         return this.listDoubleWithinRange;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public RangeValidationConfig.Builder integerWithinRange(int integerWithinRange) {
+            this.config.put("integerWithinRange", integerWithinRange);
+            return this;
+        }
+
+        public RangeValidationConfig.Builder longWithinRange(long longWithinRange) {
+            this.config.put("longWithinRange", longWithinRange);
+            return this;
+        }
+
+        public RangeValidationConfig.Builder doubleWithinRange(double doubleWithinRange) {
+            this.config.put("doubleWithinRange", doubleWithinRange);
+            return this;
+        }
+
+        public RangeValidationConfig.Builder maybeDoubleWithinRange(Double maybeDoubleWithinRange) {
+            this.config.put("maybeDoubleWithinRange", maybeDoubleWithinRange);
+            return this;
+        }
+
+        public RangeValidationConfig.Builder maybeDoubleWithinRange(
+            Optional<Double> maybeDoubleWithinRange) {
+            maybeDoubleWithinRange.ifPresent(actualmaybeDoubleWithinRange -> this.config.put("maybeDoubleWithinRange", actualmaybeDoubleWithinRange));
+            return this;
+        }
+
+        public RangeValidationConfig.Builder listDoubleWithinRange(
+            List<Double> listDoubleWithinRange) {
+            this.config.put("listDoubleWithinRange", listDoubleWithinRange);
+            return this;
+        }
+
+        public RangeValidation build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new RangeValidationConfig(config);
+        }
     }
 }

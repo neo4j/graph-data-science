@@ -20,9 +20,10 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -89,5 +90,34 @@ public final class NullableFieldsConfig implements NullableFields {
     @Override
     public @Nullable String conversionCanReturnNull() {
         return this.conversionCanReturnNull;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public NullableFieldsConfig.Builder nullableRequiredField(String nullableRequiredField) {
+            this.config.put("nullableRequiredField", nullableRequiredField);
+            return this;
+        }
+
+        public NullableFieldsConfig.Builder nullableDefaultField(String nullableDefaultField) {
+            this.config.put("nullableDefaultField", nullableDefaultField);
+            return this;
+        }
+
+        public NullableFieldsConfig.Builder conversionCanReturnNull(
+            String conversionCanReturnNull) {
+            this.config.put("conversionCanReturnNull", conversionCanReturnNull);
+            return this;
+        }
+
+        public NullableFields build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new NullableFieldsConfig(config);
+        }
     }
 }

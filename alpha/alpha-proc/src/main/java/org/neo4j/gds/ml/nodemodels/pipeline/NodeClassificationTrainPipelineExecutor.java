@@ -32,6 +32,7 @@ import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
@@ -143,7 +144,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     NodeClassificationTrainConfig innerConfig() {
         var params = pipeline.trainingParameterSpace().stream()
             .map(NodeLogisticRegressionTrainCoreConfig::toMap).collect(Collectors.toList());
-        return NodeClassificationTrainConfig.builder()
+        return new NodeClassificationTrainConfigImpl.Builder()
             .modelName(config.modelName())
             .concurrency(config.concurrency())
             .username(config.username())
@@ -156,7 +157,6 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
             .validationFolds(pipeline.splitConfig().validationFolds())
             .nodeLabels(config.nodeLabels())
             .relationshipTypes(config.relationshipTypes())
-            .minBatchSize(config.minBatchSize())
             .build();
     }
 

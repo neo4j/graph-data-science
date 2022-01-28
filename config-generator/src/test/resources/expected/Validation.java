@@ -20,9 +20,10 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -70,5 +71,23 @@ public final class ValidationConfig implements Validation {
     @Override
     public int foo() {
         return this.foo;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public ValidationConfig.Builder foo(int foo) {
+            this.config.put("foo", foo);
+            return this;
+        }
+
+        public Validation build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return ValidationConfig.of(config);
+        }
     }
 }

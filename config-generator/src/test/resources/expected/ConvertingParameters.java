@@ -20,9 +20,10 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -61,5 +62,25 @@ public final class ConvertingParametersConfig implements ConvertingParameters {
     @Override
     public int parametersAreSubjectToConversion() {
         return this.parametersAreSubjectToConversion;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        private @NotNull String parametersAreSubjectToConversion;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public ConvertingParametersConfig.Builder parametersAreSubjectToConversion(String parametersAreSubjectToConversion) {
+            this.parametersAreSubjectToConversion = parametersAreSubjectToConversion;
+            return this;
+        }
+
+        public ConvertingParameters build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new ConvertingParametersConfig(parametersAreSubjectToConversion);
+        }
     }
 }

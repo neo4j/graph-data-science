@@ -20,9 +20,10 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
-
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -85,5 +86,37 @@ public final class ParametersConfig implements Parameters {
     @Override
     public int parametersAreAddedFirst() {
         return this.parametersAreAddedFirst;
+    }
+
+    public static final class Builder {
+        private final Map<String, Object> config;
+
+        private int keyFromParameter;
+
+        private int parametersAreAddedFirst;
+
+        public Builder() {
+            this.config = new HashMap<>();
+        }
+
+        public ParametersConfig.Builder keyFromParameter(int keyFromParameter) {
+            this.keyFromParameter = keyFromParameter;
+            return this;
+        }
+
+        public ParametersConfig.Builder parametersAreAddedFirst(int parametersAreAddedFirst) {
+            this.parametersAreAddedFirst = parametersAreAddedFirst;
+            return this;
+        }
+
+        public ParametersConfig.Builder keyFromMap(long keyFromMap) {
+            this.config.put("keyFromMap", keyFromMap);
+            return this;
+        }
+
+        public Parameters build() {
+            CypherMapWrapper config = CypherMapWrapper.create(this.config);
+            return new ParametersConfig(keyFromParameter, parametersAreAddedFirst, config);
+        }
     }
 }

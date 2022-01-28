@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -89,7 +90,8 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
         return new NodeClassificationTrainConfigImpl(username, config);
     }
 
-    static ImmutableNodeClassificationTrainConfig.Builder builder() {
+    @TestOnly
+    static ImmutableNodeClassificationTrainConfig.Builder testBuilder() {
         return ImmutableNodeClassificationTrainConfig.builder();
     }
 }
