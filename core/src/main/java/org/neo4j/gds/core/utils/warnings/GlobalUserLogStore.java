@@ -41,13 +41,11 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
 
     private final Map<String, ConcurrentSkipListMap<Task, List<String>>> registeredMessages;
 
-    public GlobalUserLogStore() {
-
+    GlobalUserLogStore() {
         this.registeredMessages = new ConcurrentHashMap<>();
     }
 
     public Stream<UserLogEntry> query(String username) {
-
         if (registeredMessages.containsKey(username)) {
             return registeredMessages.get(username).entrySet().stream().flatMap(GlobalUserLogStore::fromEntryToUserLog);
         }
@@ -85,7 +83,6 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
     }
 
     public void addUserLogMessage(String username, Task taskId, String message) {
-
         var usernameMap = getUserStore(username);
 
         if (shouldConsiderTask(usernameMap, taskId)) {
