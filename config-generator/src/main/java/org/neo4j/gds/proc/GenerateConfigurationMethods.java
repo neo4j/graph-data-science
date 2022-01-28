@@ -21,7 +21,9 @@ package org.neo4j.gds.proc;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.NameAllocator;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 
 import java.util.Arrays;
@@ -37,11 +39,42 @@ import java.util.stream.Stream;
 
 import static com.google.auto.common.MoreTypes.isTypeOf;
 
-final class GenerateAuxiliaryMethods {
+final class GenerateConfigurationMethods {
 
-    private GenerateAuxiliaryMethods() {}
+    private GenerateConfigurationMethods() {}
 
-    static void injectToMapCode(ConfigParser.Spec config, MethodSpec.Builder builder) {
+    static Iterable<MethodSpec> defineMemberMethods(ConfigParser.Spec config, NameAllocator names) {
+        return config
+            .members()
+            .stream()
+            .map(member -> generateMethodCode(config, names, member))
+            .flatMap(Optional::stream)
+            .collect(Collectors.toList());
+    }
+
+    private static Optional<MethodSpec> generateMethodCode(
+        ConfigParser.Spec config,
+        NameAllocator names,
+        ConfigParser.Member member
+    ) {
+        MethodSpec.Builder builder = MethodSpec
+            .overriding(member.method())
+            .returns(member.typeSpecWithAnnotation(Nullable.class));
+        if (member.collectsKeys()) {
+            builder.addStatement(GenerateConfigurationMethods.collectKeysCode(config));
+        } else if (member.toMap()) {
+            GenerateConfigurationMethods.injectToMapCode(config, builder);
+        } else if (member.graphStoreValidation()) {
+            GenerateConfigurationMethods.graphStoreValidationCode(member, config).forEach(builder::addStatement);
+        } else if (member.isConfigValue()) {
+            builder.addStatement("return this.$N", names.get(member));
+        } else {
+            return Optional.empty();
+        }
+        return Optional.of(builder.build());
+    }
+
+    private static void injectToMapCode(ConfigParser.Spec config, MethodSpec.Builder builder) {
         List<ConfigParser.Member> configMembers = config
             .members()
             .stream()
@@ -86,7 +119,7 @@ final class GenerateAuxiliaryMethods {
         Configuration.ToMapValue toMapValue = configMember.method().getAnnotation(Configuration.ToMapValue.class);
         return (toMapValue == null)
             ? CodeBlock.of("$N()", getter)
-            : CodeBlock.of("$L($N())", GenerateAuxiliaryMethods.getReference(toMapValue), getter);
+            : CodeBlock.of("$L($N())", GenerateConfigurationMethods.getReference(toMapValue), getter);
     }
 
     @NotNull
@@ -95,7 +128,7 @@ final class GenerateAuxiliaryMethods {
 
         CodeBlock mapValue = (toMapValue == null)
             ? CodeBlock.of("$L", configMember.lookupKey())
-            : CodeBlock.of("$L($L)", GenerateAuxiliaryMethods.getReference(toMapValue), configMember.lookupKey());
+            : CodeBlock.of("$L($L)", GenerateConfigurationMethods.getReference(toMapValue), configMember.lookupKey());
 
         return CodeBlock.of("$L.ifPresent($L -> map.put($S, $L))",
             CodeBlock.of("$N()", configMember.methodName()),
@@ -106,10 +139,10 @@ final class GenerateAuxiliaryMethods {
     }
 
     private static String getReference(Configuration.ToMapValue toMapValue) {
-        return toMapValue.value().replace("#", ".");
+        return toMapValue.value().replace('#', '.');
     }
 
-    static CodeBlock collectKeysCode(ConfigParser.Spec config) {
+    private static CodeBlock collectKeysCode(ConfigParser.Spec config) {
         Collection<String> configKeys = config
             .members()
             .stream()
@@ -131,7 +164,10 @@ final class GenerateAuxiliaryMethods {
         }
     }
 
-    static Stream<CodeBlock> graphStoreValidationCode(ConfigParser.Member validationMethod, ConfigParser.Spec config) {
+    private static Stream<CodeBlock> graphStoreValidationCode(
+        ConfigParser.Member validationMethod,
+        ConfigParser.Spec config
+    ) {
         var parameters = validationMethod.method().getParameters();
         return config.members().stream()
             .filter(ConfigParser.Member::graphStoreValidationCheck)

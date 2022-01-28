@@ -70,6 +70,7 @@ import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isTypeOf;
 import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.util.ElementFilter.methodsIn;
+import static org.neo4j.gds.proc.GenerateConfigurationMethods.defineMemberMethods;
 
 final class GenerateConfiguration {
 
@@ -747,37 +748,6 @@ final class GenerateConfiguration {
                 );
         }
 
-        return Optional.of(builder.build());
-    }
-
-    private Iterable<MethodSpec> defineMemberMethods(ConfigParser.Spec config, NameAllocator names) {
-        return config
-            .members()
-            .stream()
-            .map(member -> generateMethodCode(config, names, member))
-            .flatMap(Optional::stream)
-            .collect(Collectors.toList());
-    }
-
-    private Optional<MethodSpec> generateMethodCode(
-        ConfigParser.Spec config,
-        NameAllocator names,
-        ConfigParser.Member member
-    ) {
-        MethodSpec.Builder builder = MethodSpec
-            .overriding(member.method())
-            .returns(member.typeSpecWithAnnotation(Nullable.class));
-        if (member.collectsKeys()) {
-            builder.addStatement(GenerateAuxiliaryMethods.collectKeysCode(config));
-        } else if (member.toMap()) {
-            GenerateAuxiliaryMethods.injectToMapCode(config, builder);
-        } else if (member.graphStoreValidation()) {
-            GenerateAuxiliaryMethods.graphStoreValidationCode(member, config).forEach(builder::addStatement);
-        } else if (member.isConfigValue()) {
-            builder.addStatement("return this.$N", names.get(member));
-        } else {
-            return Optional.empty();
-        }
         return Optional.of(builder.build());
     }
 
