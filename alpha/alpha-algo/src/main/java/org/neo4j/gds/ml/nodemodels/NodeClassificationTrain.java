@@ -79,7 +79,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
     private final StatsMap validationStats;
     private final MetricComputer metricComputer;
 
-    static MemoryEstimation estimate(NodeClassificationTrainConfig config) {
+    public static MemoryEstimation estimate(NodeClassificationTrainConfig config) {
         var maxBatchSize = config.paramsConfig()
             .stream()
             .mapToInt(TrainingConfig::batchSize)

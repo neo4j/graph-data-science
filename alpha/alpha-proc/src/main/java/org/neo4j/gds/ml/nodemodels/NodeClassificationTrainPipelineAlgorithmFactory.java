@@ -24,10 +24,10 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
@@ -71,7 +71,15 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
 
     @Override
     public MemoryEstimation memoryEstimation(NodeClassificationPipelineTrainConfig configuration) {
-        throw new MemoryEstimationNotImplementedException();
+        var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(
+            this.modelCatalog,
+            configuration.pipeline(),
+            configuration.username()
+        );
+
+        return MemoryEstimations.builder(NodeClassificationTrainPipelineExecutor.class)
+            .add("algorithm", NodeClassificationTrainPipelineExecutor.estimate(pipeline, configuration))
+            .build();
     }
 
     @Override

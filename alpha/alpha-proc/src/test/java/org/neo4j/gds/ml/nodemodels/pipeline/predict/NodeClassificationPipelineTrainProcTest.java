@@ -215,4 +215,33 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         Assertions.assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).doesNotContain("pr");
         Assertions.assertThat(graphStore.nodePropertyKeys(NodeLabel.of("Ignore"))).doesNotContain("pr");
     }
+
+    @Test
+    void shouldEstimateMemory() {
+        var pipe = Map.<String, Object>of("pipeline", PIPELINE_NAME);
+
+        var params = new HashMap<>(pipe);
+        params.put("graphName", GRAPH_NAME);
+        params.put("modelName", MODEL_NAME);
+
+        runQuery(
+            "CALL gds.alpha.ml.pipeline.nodeClassification.create($pipeline)",
+            pipe
+        );
+
+        assertCypherResult(
+            "CALL gds.alpha.ml.pipeline.nodeClassification.train.estimate(" +
+            "   $graphName, {" +
+            "       pipeline: $pipeline," +
+            "       modelName: $modelName," +
+            "       targetProperty: 't'," +
+            "       metrics: ['F1(class=1)']," +
+            "       randomSeed: 1" +
+            "})" +
+            "YIELD bytesMin, bytesMax",
+            params,
+            List.of(Map.of("bytesMin", 66585912L, "bytesMax", 66617872L)
+            )
+        );
+    }
 }

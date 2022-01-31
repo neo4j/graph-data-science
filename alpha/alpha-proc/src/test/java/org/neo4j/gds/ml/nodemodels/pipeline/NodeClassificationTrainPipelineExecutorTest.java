@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 
 @Neo4jModelCatalogExtension
 class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
@@ -186,8 +187,9 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             .build();
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var pipeline = new NodeClassificationPipeline();
             NodeClassificationTrainPipelineExecutor executor = new NodeClassificationTrainPipelineExecutor(
-                new NodeClassificationPipeline(),
+                pipeline,
                 config,
                 caller.executionContext(),
                 graphStore,
@@ -195,7 +197,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                 ProgressTracker.NULL_TRACKER
             );
 
-            NodeClassificationTrainConfig actualConfig = executor.innerConfig();
+            NodeClassificationTrainConfig actualConfig = executor.innerConfig(pipeline, config);
 
             assertThat(actualConfig)
                 .matches(innerConfig -> innerConfig.username().equals(config.username()))
@@ -245,6 +247,46 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         });
     }
 
+    @Test
+    void shouldEstimateMemory() {
+        var pipeline = insertPipelineIntoCatalog();
+        pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
+            ExecutionContext.EMPTY.username(),
+            "pageRank",
+            Map.of("mutateProperty", "pr")
+        ));
+        pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
+            "bestUser",
+            "wcc",
+            Map.of("mutateProperty", "myNewProp", "threshold", 0.42F, "relationshipWeightProperty", "weight")
+        ));
+        pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
+
+        var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
+            .pipeline(PIPELINE_NAME)
+            .username("myUser")
+            .graphName(GRAPH_NAME)
+            .modelName("myModel")
+            .concurrency(1)
+            .randomSeed(42L)
+            .targetProperty("t")
+            .addRelationshipType("SOME_REL")
+            .addNodeLabel("SOME_LABEL")
+            .minBatchSize(1)
+            .metrics(List.of(MetricSpecification.parse("F1_WEIGHTED")))
+            .build();
+
+        var memoryEstimation = NodeClassificationTrainPipelineExecutor.estimate(pipeline, config);
+        assertMemoryEstimation(
+            () -> memoryEstimation,
+            graphStore.nodeCount(),
+            graphStore.relationshipCount(),
+            config.concurrency(),
+            31735216,
+            31767176
+        );
+
+    }
     private NodeClassificationPipeline insertPipelineIntoCatalog() {
         var dummyConfig = PipelineCreateConfig.of(getUsername());
         var info = new NodeClassificationPipeline();
