@@ -138,10 +138,6 @@ public class RelationshipsBuilder {
         );
     }
 
-    public Relationships build() {
-        return buildAll().get(0);
-    }
-
     public SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext build(
         RelationshipType relationshipType,
         RelationshipProjection relationshipProjection
@@ -157,6 +153,10 @@ public class RelationshipsBuilder {
             .relationshipType(relationshipType)
             .relationshipProjection(relationshipProjection)
             .build();
+    }
+
+    public Relationships build() {
+        return buildAll().get(0);
     }
 
     public List<Relationships> buildAll() {

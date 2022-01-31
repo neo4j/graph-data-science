@@ -23,18 +23,16 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.immutables.value.Value;
+import org.neo4j.gds.AbstractRelationshipProjection;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -53,11 +51,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Value.Enclosing
-class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoader.LoadResult> {
+class CypherRelationshipLoader extends CypherRecordLoader<RelationshipsAndProperties> {
 
     private final IdMap idMap;
     private final Context loaderContext;
-    private final GraphDimensions dimensionsAfterNodeLoading;
     private final ProgressTracker progressTracker;
 
     // Property mappings are either defined upfront in
@@ -65,32 +62,27 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     // by looking at the columns returned by the query.
     private ObjectIntHashMap<String> propertyKeyIdsByName;
     private ObjectDoubleHashMap<String> propertyDefaultValueByName;
-    private PropertyMappings propertyMappings;
     private boolean initializedFromResult;
-
-    private GraphDimensions resultDimensions;
+    private List<GraphFactory.PropertyConfig> propertyConfigs;
+    private AbstractRelationshipProjection.Builder projectionBuilder;
 
     CypherRelationshipLoader(
         String relationshipQuery,
         IdMap idMap,
         GraphProjectFromCypherConfig config,
         GraphLoaderContext loadingContext,
-        GraphDimensions dimensions,
         ProgressTracker progressTracker
     ) {
         super(relationshipQuery, idMap.nodeCount(), config, loadingContext);
         this.idMap = idMap;
-        this.dimensionsAfterNodeLoading = dimensions;
         this.progressTracker = progressTracker;
         this.loaderContext = new Context();
     }
 
     private void initFromPropertyMappings(PropertyMappings propertyMappings) {
-        this.propertyMappings = propertyMappings;
-
-        MutableInt propertyKeyId = new MutableInt(0);
-
+        var propertyKeyId = new MutableInt(0);
         int numberOfMappings = propertyMappings.numberOfMappings();
+
         propertyKeyIdsByName = new ObjectIntHashMap<>(numberOfMappings);
         propertyMappings
             .stream()
@@ -104,17 +96,15 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 mapping.defaultValue().doubleValue()
             ));
 
-        // We can not rely on what the token store gives us.
-        // We need to resolve the given property mappings
-        // using our newly created property key identifiers.
-        var dimensionsBuilder = ImmutableGraphDimensions.builder().from(dimensionsAfterNodeLoading);
-        propertyMappings
-            .forEach(propertyMapping -> dimensionsBuilder.putRelationshipPropertyToken(
-                propertyMapping.neoPropertyKey(),
-                propertyKeyIdsByName.get(propertyMapping.neoPropertyKey())
-            ));
+        propertyConfigs = propertyMappings
+            .stream()
+            .map(mapping -> GraphFactory.PropertyConfig.of(mapping.aggregation(), mapping.defaultValue()))
+            .collect(Collectors.toList());
 
-        resultDimensions = dimensionsBuilder.build();
+        projectionBuilder = RelationshipProjection
+            .builder()
+            .orientation(Orientation.NATURAL)
+            .properties(propertyMappings);
     }
 
     @Override
@@ -171,25 +161,15 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     void updateCounts(BatchLoadResult result) {}
 
     @Override
-    LoadResult result() {
+    RelationshipsAndProperties result() {
         var contexts = new ArrayList<SingleTypeRelationshipImportContext>();
         loaderContext.relationshipBuildersByType.forEach(((relationshipType, relationshipsBuilder) -> {
-            var projection = RelationshipProjection
-                .builder()
-                .type(relationshipType.name)
-                .orientation(Orientation.NATURAL)
-                .properties(propertyMappings)
-                .build();
+            var projection = projectionBuilder.type(relationshipType.name).build();
             var context = relationshipsBuilder.build(relationshipType, projection);
             contexts.add(context);
         }));
 
-        var relationshipsAndProperties = RelationshipsAndProperties.of(contexts);
-
-        return ImmutableCypherRelationshipLoader.LoadResult.builder()
-            .dimensions(resultDimensions)
-            .relationshipsAndProperties(relationshipsAndProperties)
-            .build();
+        return RelationshipsAndProperties.of(contexts);
     }
 
     @Override
@@ -220,11 +200,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         }
 
         private RelationshipsBuilder createRelationshipsBuilder(RelationshipType relationshipType) {
-            var propertyConfigs = propertyMappings
-                .stream()
-                .map(mapping -> GraphFactory.PropertyConfig.of(mapping.aggregation(), mapping.defaultValue()))
-                .collect(Collectors.toList());
-
             return GraphFactory.initRelationshipsBuilder()
                 .nodes(idMap)
                 .concurrency(cypherConfig.readConcurrency())
@@ -234,12 +209,5 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .allocationTracker(loadingContext.allocationTracker())
                 .build();
         }
-    }
-
-    @ValueClass
-    interface LoadResult {
-        GraphDimensions dimensions();
-
-        RelationshipsAndProperties relationshipsAndProperties();
     }
 }

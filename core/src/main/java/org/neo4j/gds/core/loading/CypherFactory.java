@@ -141,27 +141,25 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
 
             progressTracker.beginSubTask("Loading");
 
-            var nodes = new CypherNodeLoader(
+            var idMapAndProperties = new CypherNodeLoader(
                 nodeQuery(),
                 nodeCount.rows(),
                 cypherConfig,
                 loadingContext,
-                dimensions,
                 progressTracker
             ).load(tx);
 
-            var relationships = new CypherRelationshipLoader(
+            var relationshipsAndProperties = new CypherRelationshipLoader(
                 relationshipQuery(),
-                nodes.idsAndProperties().idMap(),
+                idMapAndProperties.idMap(),
                 cypherConfig,
                 loadingContext,
-                nodes.dimensions(),
                 progressTracker
             ).load(tx);
 
             var graphStore = createGraphStore(
-                nodes.idsAndProperties(),
-                relationships.relationshipsAndProperties(),
+                idMapAndProperties,
+                relationshipsAndProperties,
                 loadingContext.allocationTracker()
             );
 

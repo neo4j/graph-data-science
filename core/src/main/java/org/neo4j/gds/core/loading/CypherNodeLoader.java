@@ -22,12 +22,9 @@ package org.neo4j.gds.core.loading;
 import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,13 +34,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
-
 @Value.Enclosing
-class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
+class CypherNodeLoader extends CypherRecordLoader<IdMapAndProperties> {
 
     private final long nodeCount;
-    private final GraphDimensions outerDimensions;
     private final ProgressTracker progressTracker;
 
     private long highestNodeId;
@@ -54,12 +48,10 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         long nodeCount,
         GraphProjectFromCypherConfig config,
         GraphLoaderContext loadingContext,
-        GraphDimensions outerDimensions,
         ProgressTracker progressTracker
     ) {
         super(nodeQuery, nodeCount, config, loadingContext);
         this.nodeCount = nodeCount;
-        this.outerDimensions = outerDimensions;
         this.progressTracker = progressTracker;
         this.highestNodeId = 0L;
     }
@@ -100,28 +92,13 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     }
 
     @Override
-    LoadResult result() {
+    IdMapAndProperties result() {
         var idMapAndProperties = nodesBuilder.build(highestNodeId, false);
         var idMap = idMapAndProperties.idMap();
         var nodeProperties = idMapAndProperties.nodeProperties().orElseGet(Map::of);
         var nodePropertiesWithPropertyMappings = propertiesWithPropertyMappings(nodeProperties);
 
-        Map<String, Integer> propertyIds = nodePropertiesWithPropertyMappings
-            .values()
-            .stream()
-            .flatMap(properties -> properties.keySet().stream())
-            .distinct()
-            .collect(Collectors.toMap(PropertyMapping::propertyKey, (ignore) -> NO_SUCH_PROPERTY_KEY));
-
-        GraphDimensions resultDimensions = ImmutableGraphDimensions.builder()
-            .from(outerDimensions)
-            .nodePropertyTokens(propertyIds)
-            .build();
-
-        return ImmutableCypherNodeLoader.LoadResult.builder()
-            .dimensions(resultDimensions)
-            .idsAndProperties(IdMapAndProperties.of(idMap, nodePropertiesWithPropertyMappings))
-            .build();
+        return IdMapAndProperties.of(idMap, nodePropertiesWithPropertyMappings);
     }
 
     @Override
@@ -150,12 +127,5 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
                     Map.Entry::getValue
                 ))
             ));
-    }
-
-    @ValueClass
-    interface LoadResult {
-        GraphDimensions dimensions();
-
-        IdMapAndProperties idsAndProperties();
     }
 }
