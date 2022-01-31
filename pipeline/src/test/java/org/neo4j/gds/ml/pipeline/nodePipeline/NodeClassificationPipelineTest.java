@@ -122,7 +122,7 @@ class NodeClassificationPipelineTest {
     @Test
     void canSetSplitConfig() {
         var pipeline = new NodeClassificationPipeline();
-        var splitConfig = NodeClassificationSplitConfig.builder().testFraction(0.555).build();
+        var splitConfig = NodeClassificationSplitConfig.testBuilder().testFraction(0.555).build();
         pipeline.setSplitConfig(splitConfig);
 
         assertThat(pipeline)
@@ -132,10 +132,10 @@ class NodeClassificationPipelineTest {
     @Test
     void overridesTheSplitConfig() {
         var pipeline = new NodeClassificationPipeline();
-        var splitConfig = NodeClassificationSplitConfig.builder().testFraction(0.5).build();
+        var splitConfig = NodeClassificationSplitConfig.testBuilder().testFraction(0.5).build();
         pipeline.setSplitConfig(splitConfig);
 
-        var splitConfigOverride = NodeClassificationSplitConfig.builder().testFraction(0.7).build();
+        var splitConfigOverride = NodeClassificationSplitConfig.testBuilder().testFraction(0.7).build();
         pipeline.setSplitConfig(splitConfigOverride);
 
         assertThat(pipeline)
@@ -183,7 +183,7 @@ class NodeClassificationPipelineTest {
                 NodeLogisticRegressionTrainCoreConfig.of(Map.of("penalty", 1))
             ));
 
-            var splitConfig = NodeClassificationSplitConfig.builder().testFraction(0.5).build();
+            var splitConfig = NodeClassificationSplitConfig.testBuilder().testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
 
             assertThat(pipeline.toMap())
@@ -255,7 +255,7 @@ class NodeClassificationPipelineTest {
             var otherNodePropertyStep = new NodePropertyStep(
                 TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
                 Map.of("mutateProperty", "prop2")
-            );;
+            );
             pipeline.addNodePropertyStep(otherNodePropertyStep);
 
             assertThat(copy.nodePropertySteps()).doesNotContain(otherNodePropertyStep);
@@ -286,7 +286,7 @@ class NodeClassificationPipelineTest {
         @Test
         void doesntDeepCopySplitConfig() {
             var pipeline = new NodeClassificationPipeline();
-            var splitConfig = NodeClassificationSplitConfig.builder().testFraction(0.5).build();
+            var splitConfig = NodeClassificationSplitConfig.testBuilder().testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
 
             var copy = pipeline.copy();
