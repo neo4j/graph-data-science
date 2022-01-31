@@ -33,7 +33,6 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -41,7 +40,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -162,14 +160,15 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipsAndProper
 
     @Override
     RelationshipsAndProperties result() {
-        var contexts = new ArrayList<SingleTypeRelationshipImportContext>();
-        loaderContext.relationshipBuildersByType.forEach(((relationshipType, relationshipsBuilder) -> {
-            var projection = projectionBuilder.type(relationshipType.name).build();
-            var context = relationshipsBuilder.build(relationshipType, projection);
-            contexts.add(context);
-        }));
+        var relationshipsByType = loaderContext.relationshipBuildersByType.entrySet().stream().collect(Collectors.toMap(
+            entry -> {
+                var projection = projectionBuilder.type(entry.getKey().name).build();
+                return RelationshipsAndProperties.RelationshipTypeAndProjection.of(entry.getKey(), projection);
+            },
+            entry -> entry.getValue().buildAll()
+        ));
 
-        return RelationshipsAndProperties.of(contexts);
+        return RelationshipsAndProperties.of(relationshipsByType);
     }
 
     @Override

@@ -35,7 +35,10 @@ import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ValueClass
 public interface RelationshipsAndProperties {
@@ -43,6 +46,40 @@ public interface RelationshipsAndProperties {
     Map<RelationshipType, Relationships.Topology> relationships();
 
     Map<RelationshipType, RelationshipPropertyStore> properties();
+
+    static RelationshipsAndProperties of(Map<RelationshipTypeAndProjection, List<Relationships>> relationshipsByType) {
+        var relTypeCount = relationshipsByType.size();
+        Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>(relTypeCount);
+        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
+
+        relationshipsByType.forEach((relationshipTypeAndProjection, relationships) -> {
+            assert !relationships.isEmpty();
+
+            var topology = relationships.get(0).topology();
+
+            var properties = relationships
+                .stream()
+                .map(Relationships::properties)
+                .map(props -> props.map(Relationships.Properties::propertiesList))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+
+            var propertyStore = constructRelationshipPropertyStore(
+                relationshipTypeAndProjection.relationshipProjection(),
+                properties,
+                topology.elementCount()
+            );
+
+            topologies.put(relationshipTypeAndProjection.relationshipType(), topology);
+            relationshipPropertyStores.put(relationshipTypeAndProjection.relationshipType(), propertyStore);
+        });
+
+        return ImmutableRelationshipsAndProperties.builder()
+            .relationships(topologies)
+            .properties(relationshipPropertyStores)
+            .build();
+    }
 
     static RelationshipsAndProperties of(Collection<SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext> builders) {
         var relTypeCount = builders.size();
@@ -122,5 +159,18 @@ public interface RelationshipsAndProperties {
         return propertyStoreBuilder.build();
     }
 
+    @ValueClass
+    interface RelationshipTypeAndProjection {
+        RelationshipType relationshipType();
+
+        RelationshipProjection relationshipProjection();
+
+        static RelationshipTypeAndProjection of(
+            RelationshipType relationshipType,
+            RelationshipProjection relationshipProjection
+        ) {
+            return ImmutableRelationshipTypeAndProjection.of(relationshipType, relationshipProjection);
+        }
+    }
 
 }
