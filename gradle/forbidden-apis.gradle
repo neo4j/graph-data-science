@@ -17,6 +17,8 @@ if (shouldForbiddenApis) {
                 signaturesFiles = files("$publicDir/etc/forbidden-apis-main")
                 bundledSignatures += 'jdk-unsafe'
                 bundledSignatures += 'jdk-system-out'
+                exclude '**/*Immutable*.class'
+                exclude '**/RelationshipsBuilderBuilder.class'
             }
         }
     }

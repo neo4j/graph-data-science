@@ -33,7 +33,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.degree.DegreeCentrality;
-import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
+import org.neo4j.gds.degree.DegreeCentralityConfigImpl;
 
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongToDoubleFunction;
@@ -134,7 +134,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
         Graph graph,
         CONFIG configuration
     ) {
-        var config = ImmutableDegreeCentralityConfig.builder()
+        var config = new DegreeCentralityConfigImpl.Builder()
             .concurrency(configuration.concurrency())
             .relationshipWeightProperty(configuration.relationshipWeightProperty())
             .build();
