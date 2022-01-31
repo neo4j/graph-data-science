@@ -39,7 +39,7 @@ To get a graph object that represents a graph that has already been projected in
 G = gds.graph.get("my-graph")
 ----
 
-In addition to those aforementioned there are three more methods that constructs graph objects, namely:
+In addition to those aforementioned there are three more methods that construct graph objects:
 
 * `gds.graph.project.cypher`
 * `gds.beta.graph.subgraph`
