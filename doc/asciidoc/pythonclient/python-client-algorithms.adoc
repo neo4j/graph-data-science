@@ -25,7 +25,7 @@ wcc_res = gds.wcc.mutate(
     threshold=0.8,              #  Configuration parameters
     mutateProperty="wcc"
 )
-assert wcc_res[0]["componentCount"] > 0
+assert wcc_res["componentCount"] > 0
 
 fastrp_res = gds.fastRP.write(
     G,                          #  Graph object
@@ -34,11 +34,36 @@ fastrp_res = gds.fastRP.write(
     propertyRatio=0.3,
     writeProperty="embedding"
 )
-assert fastrp_res[0]["nodePropertiesWritten"] == G.node_count()
+assert fastrp_res["nodePropertiesWritten"] == G.node_count()
 ----
 
 Some algorithms deviate from the standard syntactic structure.
 We describe how to use them in the Python client in the sections below.
+
+
+== Execution modes
+
+Algorithms return results in a format that is controlled by its execution mode.
+These modes are explained in some detail in <<running-algos>>.
+In the Python Client, the `stats`, `mutate` and `write` modes have a similar behaviour as described there.
+In particular, these modes with return a `dict[str, any]` containing the summary result of running the algorithm.
+The same applies to `estimate` procedures.
+
+
+=== Stream
+
+The `stream` mode is a bit different as this mode does not retain the result in any form on the server side.
+Instead, the result is streamed back to the Python Client, as a `list[dict[str, any]]`.
+The result is materialized on the client side immediately once the computation is finished.
+Streaming results back in this way can be resource-intensive, as the result can be large.
+Typically, the result size will be in the same order of magnitude as the graph.
+Some algorithms produce particularly sizeable results, for example node embeddings.
+
+
+=== Train
+
+The `train` mode is used for algorithms that produce a machine learning model into the <<model-catalog-ops, GDS Model Catalog>>.
+The Python Client has special support for working with such models, which we describe in <<python-client-model-object>>.
 
 
 == Algorithms that require node matching
