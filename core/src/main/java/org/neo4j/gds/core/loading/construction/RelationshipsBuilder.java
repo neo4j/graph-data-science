@@ -20,12 +20,15 @@
 package org.neo4j.gds.core.loading.construction;
 
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.loading.ImmutableSingleTypeRelationshipImportContext;
 import org.neo4j.gds.core.loading.PropertyReader;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
@@ -137,6 +140,23 @@ public class RelationshipsBuilder {
 
     public Relationships build() {
         return buildAll().get(0);
+    }
+
+    public SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext build(
+        RelationshipType relationshipType,
+        RelationshipProjection relationshipProjection
+    ) {
+        threadLocalBuilders.close();
+
+        var adjacencyListBuilderTasks = singleTypeRelationshipImporter.adjacencyListBuilderTasks();
+
+        ParallelUtil.runWithConcurrency(concurrency, adjacencyListBuilderTasks, executorService);
+
+        return ImmutableSingleTypeRelationshipImportContext.builder()
+            .singleTypeRelationshipImporter(singleTypeRelationshipImporter)
+            .relationshipType(relationshipType)
+            .relationshipProjection(relationshipProjection)
+            .build();
     }
 
     public List<Relationships> buildAll() {

@@ -214,6 +214,7 @@ public final class GraphFactory {
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
         Optional<Boolean> preAggregate,
+        Optional<Boolean> validateRelationships,
         Optional<Integer> concurrency,
         Optional<ExecutorService> executorService,
         AllocationTracker allocationTracker
@@ -266,7 +267,7 @@ public final class GraphFactory {
             .importMetaData(importMetaData)
             .nodeCountSupplier(nodes::rootNodeCount)
             .importSizing(importSizing)
-            .validateRelationships(false)
+            .validateRelationships(validateRelationships.orElse(false))
             .allocationTracker(allocationTracker)
             .build();
 

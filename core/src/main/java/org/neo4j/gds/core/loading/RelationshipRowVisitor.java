@@ -23,7 +23,6 @@ import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.Result;
@@ -66,6 +65,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private long rows = 0;
     private long relationshipCount;
     private final boolean throwOnUnMappedNodeIds;
+    private double[] propertyValueBuffer;
 
     RelationshipRowVisitor(
         IdMap idMap,
@@ -81,6 +81,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         this.propertyKeyIdsByName = propertyKeyIdsByName;
         this.propertyDefaultValueByName = propertyDefaultValueByName;
         this.propertyCount = propertyKeyIdsByName.size();
+        this.propertyValueBuffer = new double[propertyCount];
         this.progressTracker = progressTracker;
         this.noProperties = propertyCount == 0;
         this.singleProperty = propertyCount == 1;
@@ -111,27 +112,29 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             ? ALL_RELATIONSHIPS
             : RelationshipType.of(row.getString(TYPE_COLUMN));
 
-        if (!localImporters.containsKey(relationshipType)) {
-            // Lazily init relationship importer factory
-            var importerFactory = loaderContext.getOrCreateImporterFactory(relationshipType);
-
-            PropertyReader propertyReader;
-
-            if (multipleProperties) {
-                // Create thread-local buffer for relationship properties
-                var propertiesBuffer = PropertyReader.buffered(bufferSize, propertyCount);
-                propertyReader = propertiesBuffer;
-                localPropertiesBuffers.put(relationshipType, propertiesBuffer);
-            } else {
-                // Single properties can be in-lined in the relationship batch
-                propertyReader = PropertyReader.preLoaded();
-            }
-            // Create thread-local relationship factory
-            var importer = importerFactory.threadLocalImporter(idMap, bufferSize, propertyReader);
-
-            localImporters.put(relationshipType, importer);
-            localRelationshipIds.put(relationshipType, 0);
-        }
+//        if (!localImporters.containsKey(relationshipType)) {
+//
+//
+//            // Lazily init relationship importer factory
+//            var importerFactory = loaderContext.getOrCreateImporterFactory(relationshipType);
+//
+//            PropertyReader propertyReader;
+//
+//            if (multipleProperties) {
+//                // Create thread-local buffer for relationship properties
+//                var propertiesBuffer = PropertyReader.buffered(bufferSize, propertyCount);
+//                propertyReader = propertiesBuffer;
+//                localPropertiesBuffers.put(relationshipType, propertiesBuffer);
+//            } else {
+//                // Single properties can be in-lined in the relationship batch
+//                propertyReader = PropertyReader.preLoaded();
+//            }
+//            // Create thread-local relationship factory
+//            var importer = importerFactory.threadLocalImporter(idMap, bufferSize, propertyReader);
+//
+//            localImporters.put(relationshipType, importer);
+//            localRelationshipIds.put(relationshipType, 0);
+//        }
 
         return visit(row, relationshipType);
     }
@@ -145,39 +148,49 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             return true;
         }
 
-        var importer = localImporters.get(relationshipType);
+        var relationshipsBuilder = loaderContext.getOrCreateRelationshipsBuilder(relationshipType);
 
         if (noProperties) {
-            importer.buffer().add(
-                sourceId,
-                targetId
-            );
+            relationshipsBuilder.addFromInternal(sourceId, targetId);
         } else if (singleProperty) {
-            importer.buffer().add(
-                sourceId,
-                targetId,
-                Double.doubleToLongBits(readPropertyValue(row, singlePropertyKey)),
-                Neo4jProxy.noPropertyReference()
-            );
+            relationshipsBuilder.addFromInternal(sourceId, targetId, readPropertyValue(row, singlePropertyKey));
         } else {
-            // Instead of inlining the property
-            // value, we write a reference into
-            // the properties batch buffer.
-            int nextRelationshipId = localRelationshipIds.get(relationshipType);
-            importer.buffer().add(
-                sourceId,
-                targetId,
-                nextRelationshipId,
-                Neo4jProxy.noPropertyReference()
-            );
-            readPropertyValues(row, nextRelationshipId, localPropertiesBuffers.get(relationshipType));
-            localRelationshipIds.put(relationshipType, nextRelationshipId + 1);
+            relationshipsBuilder.addFromInternal(sourceId, targetId, readPropertyValues(row));
         }
 
-        if (importer.buffer().isFull()) {
-            flush(importer);
-            reset(relationshipType, importer);
-        }
+//        var importer = localImporters.get(relationshipType);
+//
+//        if (noProperties) {
+//            importer.buffer().add(
+//                sourceId,
+//                targetId
+//            );
+//        } else if (singleProperty) {
+//            importer.buffer().add(
+//                sourceId,
+//                targetId,
+//                Double.doubleToLongBits(readPropertyValue(row, singlePropertyKey)),
+//                Neo4jProxy.noPropertyReference()
+//            );
+//        } else {
+//            // Instead of inlining the property
+//            // value, we write a reference into
+//            // the properties batch buffer.
+//            int nextRelationshipId = localRelationshipIds.get(relationshipType);
+//            importer.buffer().add(
+//                sourceId,
+//                targetId,
+//                nextRelationshipId,
+//                Neo4jProxy.noPropertyReference()
+//            );
+//            readPropertyValues(row, nextRelationshipId, localPropertiesBuffers.get(relationshipType));
+//            localRelationshipIds.put(relationshipType, nextRelationshipId + 1);
+//        }
+//
+//        if (importer.buffer().isFull()) {
+//            flush(importer);
+//            reset(relationshipType, importer);
+//        }
 
         progressTracker.logProgress();
 
@@ -214,6 +227,13 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         propertyKeyIdsByName.forEachKeyValue((propertyKey, propertyKeyId) ->
             propertiesBuffer.add(relationshipId, propertyKeyId, readPropertyValue(row, propertyKey))
         );
+    }
+
+    private double[] readPropertyValues(Result.ResultRow row) {
+        propertyKeyIdsByName.forEachKeyValue((propertyKey, propertyKeyId) ->
+            propertyValueBuffer[propertyKeyId] = readPropertyValue(row, propertyKey)
+        );
+        return propertyValueBuffer;
     }
 
     private double readPropertyValue(Result.ResultRow row, String propertyKey) {
