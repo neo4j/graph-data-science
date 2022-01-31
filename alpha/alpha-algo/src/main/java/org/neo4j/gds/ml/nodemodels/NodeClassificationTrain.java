@@ -110,7 +110,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         // Training memory is independent of node set size so we can skip that last estimation.
         return MemoryEstimations.builder()
             .perNode("global targets", HugeLongArray::memoryEstimation)
-            .rangePerNode("global class counts", __ -> MemoryRange.of(2 * 8, fudgedClassCount * 8))
+            .rangePerNode("global class counts", __ -> MemoryRange.of(2 * Long.BYTES, fudgedClassCount * Long.BYTES))
             .add("metrics", MetricSpecification.memoryEstimation(fudgedClassCount))
             .perNode("node IDs", HugeLongArray::memoryEstimation)
             .add("outer split", FractionSplitter.estimate(1 - holdoutFraction))
