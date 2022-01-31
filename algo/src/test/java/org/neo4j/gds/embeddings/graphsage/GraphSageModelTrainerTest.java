@@ -186,7 +186,7 @@ class GraphSageModelTrainerTest {
             .modelName("model")
             .epochs(2)
             .maxIterations(2)
-            .tolerance(1e-100)
+            .tolerance(1e-10)
             .learningRate(0.001)
             .randomSeed(42L)
             .build();
