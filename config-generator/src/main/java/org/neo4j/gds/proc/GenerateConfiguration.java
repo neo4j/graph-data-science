@@ -207,7 +207,6 @@ final class GenerateConfiguration {
                 addParameterToConstructor(
                     constructorMethodBuilder,
                     implMember,
-                    parsedMember.method().getAnnotation(Parameter.class).acceptNull(),
                     errorsVarName
                 );
             }
@@ -455,14 +454,13 @@ final class GenerateConfiguration {
     private void addParameterToConstructor(
         MethodSpec.Builder constructor,
         MemberDefinition definition,
-        boolean acceptNull,
         String errorsVarName
     ) {
         TypeName paramType = TypeName.get(definition.parameterType());
 
         CodeBlock valueProducer;
         if (definition.parameterType().getKind() == DECLARED) {
-            if (acceptNull) {
+            if (definition.member().method().getAnnotation(Parameter.class).acceptNull()) {
                 paramType = paramType.annotated(NULLABLE);
                 valueProducer = CodeBlock.of("$N", definition.fieldName());
             } else {
