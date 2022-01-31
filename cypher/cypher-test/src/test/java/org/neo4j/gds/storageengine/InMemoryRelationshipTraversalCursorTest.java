@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxy;
@@ -48,7 +49,10 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
     @Neo4jGraph
     static final String DB_CYPHER = "CREATE" +
-                                    "  (a:A)" +
+                                    // This node property is there on purpose to add an entry
+                                    // to the token holders that is not a relationship property
+                                    // in order to check that the property cursor filters these out.
+                                    "  (a:A { nodeProp: 42 })" +
                                     ", (b:B)" +
                                     ", (c:A)" +
                                     ", (a)-[:REL { prop1: 42.0, prop2: 12.0 }]->(b)" +
@@ -65,6 +69,7 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
             .api(db)
             .addNodeLabel("A")
             .addNodeLabel("B")
+            .addNodeProperty(PropertyMapping.of("nodeProp", ValueType.LONG.fallbackValue()))
             .addRelationshipType("REL")
             .addRelationshipProperty(PropertyMapping.of("prop1"))
             .addRelationshipProperty(PropertyMapping.of("prop2"))

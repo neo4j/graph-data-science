@@ -97,6 +97,10 @@ public final class RelationshipIds {
         }));
     }
 
+    public RelationshipType relationshipTypeForId(long relationshipId) {
+        return resolveRelationshipId(relationshipId, ((nodeId, offsetInAdjacency, relationshipIdContext) -> relationshipIdContext.relationshipType()));
+    }
+
     public Iterator<CypherRelationshipCursor> relationshipCursors(long nodeId, RelationshipSelection relationshipSelection) {
         Predicate<RelationshipType> relationshipSelectionPredicate = relationshipType -> {
             var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName(relationshipType.name());

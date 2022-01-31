@@ -24,11 +24,9 @@ import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
-import org.neo4j.token.api.TokenNotFoundException;
 import org.neo4j.values.storable.Value;
 
 import java.util.Map;
-import java.util.function.Predicate;
 
 public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor<NodeLabel, PropertySchema> {
 
@@ -52,23 +50,10 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
     }
 
     @Override
-    protected void setPropertySelection(Predicate<Integer> propertySelection) {
-        super.setPropertySelection(
-            propertyToken -> {
-                try {
-                    var namedPropertyToken = tokenHolders.propertyKeyTokens().getTokenById(propertyToken);
-                    return propertySelection.test(propertyToken) && propertyPresentOnNode(namedPropertyToken);
-                } catch (TokenNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        );
-    }
-
-    private boolean propertyPresentOnNode(NamedToken tokenHolder) {
+    protected boolean graphStoreContainsPropertyForElementType(NamedToken namedPropertyToken) {
         return graphStore.hasNodeProperty(
             graphStore.nodes().nodeLabels(getId()),
-            tokenHolder.name()
+            namedPropertyToken.name()
         );
     }
 }

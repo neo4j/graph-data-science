@@ -29,6 +29,7 @@ import org.neo4j.kernel.impl.store.record.PropertyRecord;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
+import org.neo4j.token.api.TokenNotFoundException;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
 
@@ -122,8 +123,17 @@ public abstract class AbstractInMemoryPropertyCursor
 
         protected abstract Map<IDENTIFIER, Map<String, PROP_SCHEMA>> propertySchema();
 
+        protected abstract boolean graphStoreContainsPropertyForElementType(NamedToken namedPropertyToken);
+
         protected void setPropertySelection(Predicate<Integer> propertySelection) {
-            this.propertySelection = propertySelection;
+            this.propertySelection = propertyToken -> {
+                try {
+                    var namedPropertyToken = tokenHolders.propertyKeyTokens().getTokenById(propertyToken);
+                    return propertySelection.test(propertyToken) && graphStoreContainsPropertyForElementType(namedPropertyToken);
+                } catch (TokenNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            };
         }
 
         @Override

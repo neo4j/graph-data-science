@@ -23,6 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
+import org.neo4j.token.api.NamedToken;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -45,11 +46,20 @@ public abstract class AbstractInMemoryRelationshipPropertyCursor extends Abstrac
     @Override
     public Value propertyValue() {
         if (currentPropertyKey != null) {
-            return Values.doubleValue(graphStore.relationshipIds().propertyValueForId(getId(),
+            return Values.doubleValue(graphStore.relationshipIds().propertyValueForId(
+                getId(),
                 currentPropertyKey
             ));
         }
         throw new IllegalStateException(
             "Property cursor is initialized as node and relationship cursor, maybe you forgot to `reset()`?");
+    }
+
+    @Override
+    protected boolean graphStoreContainsPropertyForElementType(NamedToken namedPropertyToken) {
+        return graphStore.hasRelationshipProperty(
+            graphStore.relationshipIds().relationshipTypeForId(getId()),
+            namedPropertyToken.name()
+        );
     }
 }
