@@ -3,6 +3,9 @@
 
 include::python-client-gds-object.adoc[]
 
+
+== Introduction
+
 Running most algorithms with the Python client is structurally similar to using the Cypher API:
 
 include::python-client-syntax.adoc[]
@@ -45,15 +48,14 @@ We describe how to use them in the Python client in the sections below.
 
 Algorithms return results in a format that is controlled by its execution mode.
 These modes are explained in some detail in <<running-algos>>.
-In the Python Client, the `stats`, `mutate` and `write` modes have a similar behaviour as described there.
-In particular, these modes with return a `dict[str, any]` containing the summary result of running the algorithm.
+In the Python client, the `stats`, `mutate` and `write` modes return a `dict[str, any]` containing the summary result of running the algorithm.
 The same applies to `estimate` procedures.
 
 
 === Stream
 
 The `stream` mode is a bit different as this mode does not retain the result in any form on the server side.
-Instead, the result is streamed back to the Python Client, as a `list[dict[str, any]]`.
+Instead, the result is streamed back to the Python client, as a `list[dict[str, any]]`.
 The result is materialized on the client side immediately once the computation is finished.
 Streaming results back in this way can be resource-intensive, as the result can be large.
 Typically, the result size will be in the same order of magnitude as the graph.
@@ -63,7 +65,7 @@ Some algorithms produce particularly sizeable results, for example node embeddin
 === Train
 
 The `train` mode is used for algorithms that produce a machine learning model into the <<model-catalog-ops, GDS Model Catalog>>.
-The Python Client has special support for working with such models, which we describe in <<python-client-model-object>>.
+The Python client has special support for working with such models, which we describe in <<python-client-model-object>>.
 
 
 == Algorithms that require node matching
