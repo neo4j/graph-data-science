@@ -53,8 +53,6 @@ public interface RelationshipsAndProperties {
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
 
         relationshipsByType.forEach((relationshipTypeAndProjection, relationships) -> {
-            assert !relationships.isEmpty();
-
             var topology = relationships.get(0).topology();
 
             var properties = relationships
