@@ -144,7 +144,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     NodeClassificationTrainConfig innerConfig() {
         var params = pipeline.trainingParameterSpace().stream()
             .map(NodeLogisticRegressionTrainCoreConfig::toMap).collect(Collectors.toList());
-        return new NodeClassificationTrainConfigImpl.Builder()
+        return NodeClassificationTrainConfigImpl.builder()
             .modelName(config.modelName())
             .concurrency(config.concurrency())
             .username(config.username())
