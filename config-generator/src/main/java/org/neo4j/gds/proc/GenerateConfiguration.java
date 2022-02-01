@@ -503,7 +503,7 @@ final class GenerateConfiguration {
 
         String converter = convertWith.value().trim();
         if (converter.isEmpty()) {
-            return converterError(method, "Empty conversion method is not allowed");
+            return converterError(method, "Empty conversion method is not allowed.");
         }
 
         if (!converter.contains("#")) {
@@ -524,7 +524,7 @@ final class GenerateConfiguration {
                 method,
                 "[%s] is not a valid fully qualified method name: " +
                 "it must start with a fully qualified class name followed by a '#' " +
-                "and then the method name",
+                "and then the method name.",
                 converter
             );
         }
@@ -535,7 +535,7 @@ final class GenerateConfiguration {
             return converterError(
                 method,
                 "[%s] is not a valid fully qualified method name: " +
-                "The class [%s] cannot be found",
+                "The class [%s] cannot be found.",
                 converter,
                 className
             );
@@ -583,11 +583,11 @@ final class GenerateConfiguration {
             if (validCandidates.size() > 1) {
                 for (ExecutableElement candidate : validCandidates) {
                     error(
-                        String.format(Locale.ENGLISH,"Method is ambiguous and a possible candidate for [%s]", converter),
+                        String.format(Locale.ENGLISH,"Method is ambiguous and a possible candidate for [%s].", converter),
                         candidate
                     );
                 }
-                return converterError(member.method(), "Multiple possible candidates found: %s", validCandidates);
+                return converterError(member.method(), "Multiple possible candidates found: %s.", validCandidates);
             }
 
             if (validCandidates.size() == 1) {
@@ -622,7 +622,7 @@ final class GenerateConfiguration {
             member.method(),
             "No suitable method found that matches [%s]. " +
             "Make sure that the method is static, public, unary, not generic, " +
-            "does not declare any exception and returns [%s]",
+            "does not declare any exception and returns [%s].",
             converter,
             targetType
         );
