@@ -32,16 +32,20 @@ Below is a description of the methods on such objects:
 .Node classification pipeline methods
 [opts="header",cols="2m,2m,2m,3"]
 |===
-| Name                    | Arguments             | Return type          | Description
-| addNodeProperty         | str, **kwargs         | None                 | <<algorithms-ml-nodeclassification-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
-| selectFeatures          | Union[str, list[str]] | None                 | <<algorithms-ml-nodeclassification-adding-features, Select node properties to be used as features>>.
-| configureSplit          | **kwargs              | None                 | <<algorithms-ml-nodeclassification-configure-splits, Configure the train-test dataset split>>.
-| configureParams         | list[dict[str, any]]  | None                 | <<algorithms-ml-nodeclassification-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
-| train                   | Graph, **kwargs       | NCPredictionPipeline | <<algorithms-ml-nodeclassification-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
-| node_property_steps     | -                     | list[dict[str, any]] | Returns the node property steps of the pipeline.
-| feature_properties      | -                     | list[dict[str, any]] | Returns a list of the selected feature properties for the pipeline.
-| split_config            | -                     | dict[str, any]       | Returns the configuration set up for train-test splitting of the dataset.
-| parameter_space         | -                     | list[dict[str, any]] | Returns the model parameter space set up for model selection when training.
+| Name                    | Arguments              | Return type          | Description
+| addNodeProperty         | procedure_name: str, +
+                            config: **kwargs       | None                 | <<algorithms-ml-nodeclassification-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+| selectFeatures          | node_properties: +
+                            Union[str, list[str]]  | None                 | <<algorithms-ml-nodeclassification-adding-features, Select node properties to be used as features>>.
+| configureSplit          | config: **kwargs       | None                 | <<algorithms-ml-nodeclassification-configure-splits, Configure the train-test dataset split>>.
+| configureParams         | parameter_space: +
+                            list[dict[str, any]]   | None                 | <<algorithms-ml-nodeclassification-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
+| train                   | G: Graph, +
+                            config: **kwargs       | NCPredictionPipeline | <<algorithms-ml-nodeclassification-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
+| node_property_steps     | -                      | list[dict[str, any]] | Returns the node property steps of the pipeline.
+| feature_properties      | -                      | list[dict[str, any]] | Returns a list of the selected feature properties for the pipeline.
+| split_config            | -                      | dict[str, any]       | Returns the configuration set up for train-test splitting of the dataset.
+| parameter_space         | -                      | list[dict[str, any]] | Returns the model parameter space set up for model selection when training.
 |===
 
 There are two main differences when comparing the methods above that map to procedures of the Cypher API:
@@ -95,11 +99,14 @@ In addition to inheriting the methods common to all <<python-client-model-object
 .Node classification model methods
 [opts="header",cols="1m,1m,1m,3"]
 |===
-| Name           | Arguments       | Return type    | Description
-| predict_mutate | Graph, **kwargs | None           | <<algorithms-ml-nodeclassification-pipeline-examples-mutate, Predict classes for nodes of the input graph and mutate graph with predictions>>.
-| predict_stream | Graph, **kwargs | None           | <<algorithms-node-classification-pipelines-predict-examples-stream, Predict classes for nodes of the input graph and stream the results>>.
-| predict_write | Graph, **kwargs | None           | <<algorithms-ml-nodeclassification-pipeline-examples-write, Predict classes for nodes of the input graph and write results back to the database>>.
-| metrics        | -               | dict[str, any] | Returns values for the metrics specified when training, for this particular model.
+| Name           | Arguments        | Return type    | Description
+| predict_mutate | G: Graph, +
+                   config: **kwargs | None           | <<algorithms-ml-nodeclassification-pipeline-examples-mutate, Predict classes for nodes of the input graph and mutate graph with predictions>>.
+| predict_stream | G: Graph, +
+                   config: **kwargs | None           | <<algorithms-node-classification-pipelines-predict-examples-stream, Predict classes for nodes of the input graph and stream the results>>.
+| predict_write | G: Graph, +
+                   config: **kwargs | None           | <<algorithms-ml-nodeclassification-pipeline-examples-write, Predict classes for nodes of the input graph and write results back to the database>>.
+| metrics        | -                | dict[str, any] | Returns values for the metrics specified when training, for this particular model.
 |===
 
 One can note that the predict methods are indeed very similar to <<algorithms-node-classification-pipelines-predict, their Cypher counterparts>>.
@@ -149,16 +156,20 @@ Below is a description of the methods on such objects:
 .Link prediction pipeline methods
 [opts="header",cols="2m,2m,2m,3"]
 |===
-| Name                | Arguments             | Return type          | Description
-| addNodeProperty     | str, **kwargs         | None                 | <<algorithms-ml-linkprediction-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
-| addFeature          | str, **kwargs         | None                 | <<algorithms-ml-linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
-| configureSplit      | **kwargs              | None                 | <<algorithms-ml-linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
-| configureParams     | list[dict[str, any]]  | None                 | <<algorithms-ml-linkprediction-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
-| train               | Graph, **kwargs       | LPPredictionPipeline | <<algorithms-ml-linkprediction-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
-| node_property_steps | -                     | list[dict[str, any]] | Returns the node property steps of the pipeline.
-| feature_steps       | -                     | list[dict[str, any]] | Returns a list of the selected feature steps for the pipeline.
-| split_config        | -                     | dict[str, any]       | Returns the configuration set up for feature-train-test splitting of the dataset.
-| parameter_space     | -                     | list[dict[str, any]] | Returns the model parameter space set up for model selection when training.
+| Name                | Arguments              | Return type          | Description
+| addNodeProperty     | procedure_name: str, +
+                        config: **kwargs       | None                 | <<algorithms-ml-linkprediction-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+| addFeature          | feature_type: str, +
+                        config: **kwargs       | None                 | <<algorithms-ml-linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
+| configureSplit      | config: **kwargs       | None                 | <<algorithms-ml-linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
+| configureParams     | parameter_space: +
+                        list[dict[str, any]]   | None                 | <<algorithms-ml-linkprediction-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
+| train               | G: Graph, +
+                        config: **kwargs       | LPPredictionPipeline | <<algorithms-ml-linkprediction-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
+| node_property_steps | -                      | list[dict[str, any]] | Returns the node property steps of the pipeline.
+| feature_steps       | -                      | list[dict[str, any]] | Returns a list of the selected feature steps for the pipeline.
+| split_config        | -                      | dict[str, any]       | Returns the configuration set up for feature-train-test splitting of the dataset.
+| parameter_space     | -                      | list[dict[str, any]] | Returns the model parameter space set up for model selection when training.
 |===
 
 There are two main differences when comparing the methods above that map to procedures of the Cypher API:
@@ -211,10 +222,12 @@ In addition to inheriting the methods common to all <<python-client-model-object
 .Link prediction model methods
 [opts="header",cols="1m,1m,1m,3"]
 |===
-| Name           | Arguments       | Return type    | Description
-| predict_mutate | Graph, **kwargs | None           | <<algorithms-ml-linkprediction-examples-mutate, Predict links between non-neighboring nodes of the input graph and mutate graph with predictions>>.
-| predict_stream | Graph, **kwargs | None           | <<algorithms-ml-linkprediction-examples-stream, Predict links between non-neighboring nodes of the input graph and stream the results>>.
-| metrics        | -               | dict[str, any] | Returns values for the metrics used when training, for this particular model.
+| Name           | Arguments        | Return type    | Description
+| predict_mutate | G: Graph, +
+                   config: **kwargs | None           | <<algorithms-ml-linkprediction-examples-mutate, Predict links between non-neighboring nodes of the input graph and mutate graph with predictions>>.
+| predict_stream | G: Graph, +
+                   config: **kwargs | None           | <<algorithms-ml-linkprediction-examples-stream, Predict links between non-neighboring nodes of the input graph and stream the results>>.
+| metrics        | -                | dict[str, any] | Returns values for the metrics used when training, for this particular model.
 |===
 
 One can note that the predict methods are indeed very similar to <<algorithms-link-prediction-pipelines-predict, their Cypher counterparts>>.

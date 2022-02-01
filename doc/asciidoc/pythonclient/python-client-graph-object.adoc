@@ -55,18 +55,18 @@ There are convenience methods on the graph object that let us extract informatio
 .Graph object methods
 [opts="header",cols="8m,4m,6m,13"]
 |===
-| Name                    | Arguments | Return type      | Description
-| name                    | -         | str              | The name of the projected graph.
-| node_count              | -         | int              | The node count of the projected graph.
-| relationship_count      | -         | int              | The relationship count of the projected graph.
-| node_properties         | str       | list[str]        | A list of the node properties present on the nodes with the node label provided as input.
-| relationship_properties | str       | list[str]        | A list of the relationship properties present on the relationships with the relationship type provided as input.
-| degree_distribution     | -         | dict[str, float] | The average out-degree of generated nodes.
-| density                 | -         | float            | Density of the graph.
-| size_in_bytes           | -         | int              | Number of bytes used in the Java heap to store the graph.
-| memory_usage            | -         | str              | Human-readable description of `size_in_bytes`.
-| exists                  | -         | bool             | Returns `True` if the graph exists in the GDS Graph Catalog, otherwise `False`.
-| drop                    | -         | None             | Removes the graph from the GDS Graph Catalog.
+| Name                    | Arguments  | Return type      | Description
+| name                    | -          | str              | The name of the projected graph.
+| node_count              | -          | int              | The node count of the projected graph.
+| relationship_count      | -          | int              | The relationship count of the projected graph.
+| node_properties         | label: str | list[str]        | A list of the node properties present on the nodes with the node label provided as input.
+| relationship_properties | type: str  | list[str]        | A list of the relationship properties present on the relationships with the relationship type provided as input.
+| degree_distribution     | -          | dict[str, float] | The average out-degree of generated nodes.
+| density                 | -          | float            | Density of the graph.
+| size_in_bytes           | -          | int              | Number of bytes used in the Java heap to store the graph.
+| memory_usage            | -          | str              | Human-readable description of `size_in_bytes`.
+| exists                  | -          | bool             | Returns `True` if the graph exists in the GDS Graph Catalog, otherwise `False`.
+| drop                    | -          | None             | Removes the graph from the GDS Graph Catalog.
 |===
 
 For example, to get the node count and node properties of a graph `G`, we would do the following:

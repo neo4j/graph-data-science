@@ -88,11 +88,14 @@ Once trained, in addition to the <<python-client-model-object-inspecting, method
 .GraphSAGE model methods
 [opts="header",cols="1m,1m,1m,3"]
 |===
-| Name           | Arguments       | Return type    | Description
-| predict_mutate | Graph, **kwargs | None           | <<graph-sage-trained-model-example-mutate, Predict embeddings for nodes of the input graph and mutate graph with predictions>>.
-| predict_stream | Graph, **kwargs | None           | <<graph-sage-trained-model-example, Predict embeddings for nodes of the input graph and stream the results>>.
-| predict_write  | Graph, **kwargs | None           | <<graph-sage-trained-model-example-write, Predict embeddings for nodes of the input graph and write the results back to the database>>.
-| metrics        | -               | dict[str, any] | Returns values for the metrics computed when training.
+| Name           | Arguments        | Return type    | Description
+| predict_mutate | G: Graph, +
+                   config: **kwargs | None           | <<graph-sage-trained-model-example-mutate, Predict embeddings for nodes of the input graph and mutate graph with predictions>>.
+| predict_stream | G: Graph, +
+                   config: **kwargs | None           | <<graph-sage-trained-model-example, Predict embeddings for nodes of the input graph and stream the results>>.
+| predict_write  | G: Graph, +
+                   config: **kwargs | None           | <<graph-sage-trained-model-example-write, Predict embeddings for nodes of the input graph and write the results back to the database>>.
+| metrics        | -                | dict[str, any] | Returns values for the metrics computed when training.
 |===
 
 Suppose then that we have a trained GraphSAGE model `gs_model` and a graph `H` for which we would like to derive node embeddings. Then we could do the following:
