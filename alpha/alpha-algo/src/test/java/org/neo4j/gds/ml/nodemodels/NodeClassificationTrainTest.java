@@ -210,6 +210,9 @@ class NodeClassificationTrainTest {
 
         assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
+            .anyMatch(msg -> msg.matches("NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: 0\\.5922156656203\\d\\d\\d"))
+            .anyMatch(msg -> msg.matches("NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: 0\\.5922158322870\\d\\d\\d"))
+            .extracting(msg -> msg.replaceAll("NCTrain :: SelectBestModel :: Model Candidate [1-2] of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: .*", "softerassertionabove"))
             .containsExactly(
                 "NCTrain :: Start",
                 "NCTrain :: ShuffleAndSplit :: Start",
@@ -224,7 +227,7 @@ class NodeClassificationTrainTest {
                 "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 1 100%",
                 "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 1 :: Finished",
                 "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: 0.5922156656203446",
+                "softerassertionabove",
                 "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 100%",
                 "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Finished",
                 "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 3 :: Start",
@@ -290,7 +293,7 @@ class NodeClassificationTrainTest {
                 "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 1 100%",
                 "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 1 :: Finished",
                 "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: 0.5922158322870106",
+                "softerassertionabove",
                 "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 100%",
                 "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Finished",
                 "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 3 :: Start",

@@ -186,7 +186,7 @@ class GraphSageModelTrainerTest {
             .modelName("model")
             .epochs(2)
             .maxIterations(2)
-            .tolerance(1e-100)
+            .tolerance(1e-10)
             .learningRate(0.001)
             .randomSeed(42L)
             .build();
@@ -327,21 +327,20 @@ class GraphSageModelTrainerTest {
         assertThat(metricsMap).isInstanceOf(Map.class);
 
         var epochLosses = ((Map<String, Object>) metricsMap).get("epochLosses");
-//        System.out.println(epochLosses);
-        assertThat(epochLosses)
-            .isInstanceOf(List.class)
-            .asList()
-            .containsExactly(
-                90.53361989137981,
-                83.29795301874563,
-                74.75620220935929,
-                74.61031578960346,
-                74.68091082872694,
-                74.54970955093637,
-                74.46081171572466,
-                74.47827421525395,
-                74.4115578642775,
-                74.41138199618251
+        assertThat(epochLosses).isInstanceOf(List.class);
+        assertThat(((List<Double>) epochLosses).stream().mapToDouble(Double::doubleValue).toArray())
+            .contains(new double[]{
+                    90.53,
+                    83.29,
+                    74.75,
+                    74.61,
+                    74.68,
+                    74.54,
+                    74.46,
+                    74.47,
+                    74.41,
+                    74.41
+                }, Offset.offset(0.05)
             );
     }
 
