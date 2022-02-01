@@ -135,6 +135,35 @@ In addition to the predicted class, we will also produce the probability for eac
 In order to do this, we must first have an already trained model registered in the Model Catalog.
 We will use the model which we trained in the <<algorithms-ml-nodeclassification-pipelines-train, train example>> which we gave the name `'nc-pipeline-model'`.
 
+[[algorithms-ml-nodeclassification-examples-predict-memory-estimation]]
+==== Memory Estimation
+:mode: stream
+
+include::../../shared/examples-estimate-intro.adoc[]
+
+[role=query-example, group=nc]
+--
+.The following will estimate the memory requirements for running the algorithm in stream mode:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.nodeClassification.predict.stream.estimate('myGraph', {
+  modelName: 'nc-pipeline-model',
+  includePredictedProbabilities: true,
+  nodeLabels: ['UnknownHouse']
+})
+YIELD bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| bytesMin | bytesMax  | requiredMemory
+| 22696    | 22696     | +"22 KiB"+
+|===
+--
+
+NOTE: If a node property step does not have an estimation implemented, the step will be ignored in the estimation.
+
 [[algorithms-node-classification-pipelines-predict-examples-stream]]
 ==== Stream
 [role=query-example, group=nc]

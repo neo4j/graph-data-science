@@ -198,11 +198,46 @@ CALL gds.graph.project('myGraph', {
 )
 ----
 
+[[algorithms-ml-nodeclassification-examples-train-memory-estimation]]
+==== Memory Estimation
+:mode: train
+
+include::../../shared/examples-estimate-intro.adoc[]
+
+[role=query-example, group=nc]
+--
+.The following will estimate the memory requirements for running the algorithm in train mode:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.nodeClassification.train.estimate('myGraph', {
+  pipeline: 'pipe',
+  nodeLabels: ['House'],
+  modelName: 'nc-model',
+  targetProperty: 'class',
+  randomSeed: 2,
+  metrics: [ 'F1_WEIGHTED' ]
+})
+YIELD bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| bytesMin  | bytesMax  | requiredMemory
+| 66778360  | 66810320  | +"[63 MiB ... 63 MiB]"+
+|===
+--
+
+NOTE: If a node property step does not have an estimation implemented, the step will be ignored in the estimation.
+
+
+==== Train
+
 In the following examples we will demonstrate running the Node Classification training pipeline on this graph.
 We will train a model to predict the class in which a house belongs, based on its `sizePerStory` property.
 
 [[algorithms-ml-nodeclassification-pipeline-examples-train-query]]
-[role=query-example,group=nc]
+[role=query-example, group=nc]
 --
 .The following will train a model using a pipeline:
 [source, cypher, role=noplay]
