@@ -26,6 +26,7 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -56,6 +57,19 @@ public final class NodeClassificationPipelineCompanion {
                 );
             }
         };
+    }
+
+    static void prepareTrainConfig(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        // TODO: this will go away once node property steps do not modify the graph store with the given graphName
+        //  In the future it might operate on a shallow copy instead.
+        if (graphNameOrConfiguration instanceof String) {
+            algoConfiguration.put("graphName", graphNameOrConfiguration);
+        } else {
+            algoConfiguration.put("graphName", "__ANONYMOUS_GRAPH__");
+        }
     }
 
     private static void validatePredictedProbabilityPropertyDoesNotExist(

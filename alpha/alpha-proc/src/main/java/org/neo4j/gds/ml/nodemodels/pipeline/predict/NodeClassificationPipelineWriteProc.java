@@ -48,6 +48,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineCompanion.prepareTrainConfig;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdsCallable(name = "gds.alpha.ml.pipeline.nodeClassification.predict.write", description = PREDICT_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
@@ -67,19 +68,18 @@ public class NodeClassificationPipelineWriteProc
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        // TODO: this will go away once node property steps do not rely on this method
-        configuration.put("graphName", graphName);
+        prepareTrainConfig(graphName, configuration);
         return write(compute(graphName, configuration));
     }
 
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.write.estimate", mode = Mode.READ)
     @Description(ESTIMATE_PREDICT_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphName") String graphName,
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        algoConfiguration.put("graphName", graphName);
-        return computeEstimate(graphName, algoConfiguration);
+        prepareTrainConfig(graphNameOrConfiguration, algoConfiguration);
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

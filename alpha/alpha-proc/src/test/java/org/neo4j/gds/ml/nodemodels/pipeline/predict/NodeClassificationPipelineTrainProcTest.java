@@ -27,6 +27,9 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
@@ -34,6 +37,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineAddStepProcs;
@@ -45,6 +49,7 @@ import org.neo4j.gds.model.catalog.ModelDropProc;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
@@ -75,6 +80,18 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         ", (a4)-[:R]->(a9)" +
         ", (a2)-[:R]->(a8)";
     public static final String PIPELINE_NAME = "pipe";
+
+    static Stream<Arguments> graphNameOrConfigurations() {
+        MemoryRange pipelineExecutorEstimation = MemoryRange.of(66585912L, 66617872L);
+
+        return Stream.of(
+            Arguments.of(GRAPH_NAME, pipelineExecutorEstimation),
+            Arguments.of(
+                Map.of("nodeProjection", "*", "relationshipProjection", "*"),
+                pipelineExecutorEstimation.add(MemoryRange.of(295472L))
+            )
+        );
+    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -216,12 +233,13 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         Assertions.assertThat(graphStore.nodePropertyKeys(NodeLabel.of("Ignore"))).doesNotContain("pr");
     }
 
-    @Test
-    void shouldEstimateMemory() {
+    @ParameterizedTest
+    @MethodSource("graphNameOrConfigurations")
+    void shouldEstimateMemory(Object graphNameOrConfiguration, MemoryRange expected) {
         var pipe = Map.<String, Object>of("pipeline", PIPELINE_NAME);
 
         var params = new HashMap<>(pipe);
-        params.put("graphName", GRAPH_NAME);
+        params.put("graphDefinition", graphNameOrConfiguration);
         params.put("modelName", MODEL_NAME);
 
         runQuery(
@@ -231,7 +249,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.nodeClassification.train.estimate(" +
-            "   $graphName, {" +
+            "   $graphDefinition, {" +
             "       pipeline: $pipeline," +
             "       modelName: $modelName," +
             "       targetProperty: 't'," +
@@ -240,7 +258,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             "})" +
             "YIELD bytesMin, bytesMax",
             params,
-            List.of(Map.of("bytesMin", 66585912L, "bytesMax", 66617872L)
+            List.of(Map.of("bytesMin", expected.min, "bytesMax", expected.max)
             )
         );
     }

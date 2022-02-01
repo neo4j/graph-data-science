@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
+import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineCompanion.prepareTrainConfig;
 
 @GdsCallable(name = "gds.alpha.ml.pipeline.nodeClassification.train", description = "Trains a node classification model based on a pipeline", executionMode = TRAIN)
 public class NodeClassificationPipelineTrainProc extends TrainProc<
@@ -56,20 +57,18 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        // TODO: this will go away once node property steps do not modify the graph store with the given graphName
-        // In the future it might operate on a shallow copy instead.
-        configuration.put("graphName", graphName);
+        prepareTrainConfig(graphName, configuration);
         return trainAndStoreModelWithResult(compute(graphName, configuration));
     }
 
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.train.estimate", mode = Mode.READ)
     @Description("Estimates memory for training a node classification model based on a pipeline")
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphName") String graphName,
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        algoConfiguration.put("graphName", graphName);
-        return computeEstimate(graphName, algoConfiguration);
+        prepareTrainConfig(graphNameOrConfiguration, algoConfiguration);
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

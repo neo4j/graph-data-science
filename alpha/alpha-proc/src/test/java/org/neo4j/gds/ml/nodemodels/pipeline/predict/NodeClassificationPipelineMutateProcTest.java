@@ -23,6 +23,8 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
@@ -30,7 +32,9 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.util.List;
@@ -41,21 +45,17 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.neo4j.gds.AlgoBaseProcTest.TEST_USERNAME;
+import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelinePredictProcTestUtil.GRAPH_NAME;
+import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelinePredictProcTestUtil.TEST_GRAPH_QUERY;
 import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelinePredictProcTestUtil.addPipelineModelWithFeatures;
 
 @Neo4jModelCatalogExtension
 class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
-    private static final String GRAPH_NAME = "g";
     private static final String MODEL_NAME = "model";
 
-    private  static final String DB_CYPHER =
-        "CREATE " +
-        "  (n1:N {a: -1.36753705, b:  1.46853155})" +
-        ", (n2:N {a: -1.45431768, b: -1.67820474})" +
-        ", (n3:N {a: -0.34216825, b: -1.31498086})" +
-        ", (n4:N {a: -0.60765016, b:  1.0186564})" +
-        ", (n5:N {a: -0.48403364, b: -0.49152604})";
+    @Neo4jGraph
+    private static final String DB_CYPHER = TEST_GRAPH_QUERY;
 
     @Inject
     private ModelCatalog modelCatalog;
@@ -63,8 +63,6 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphProjectProc.class, NodeClassificationPipelineMutateProc.class);
-
-        runQuery(DB_CYPHER);
 
         String loadQuery = GdsCypher.call(GRAPH_NAME)
             .graphProject()
@@ -180,19 +178,23 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
         assertError(secondQuery, "Node property `foo` already exists in the in-memory graph.");
     }
 
-    @Test
-    void shouldEstimateMemory() {
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelinePredictProcTestUtil#graphNameOrConfigurations")
+    void shouldEstimateMemory(Object graphNameOrConfiguration, MemoryRange expected) {
         addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2);
 
-        var query = GdsCypher
-            .call(GRAPH_NAME)
-            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
-            .estimationMode(GdsCypher.ExecutionModes.MUTATE)
-            .addParameter("mutateProperty", "foo")
-            .addParameter("predictedProbabilityProperty", "foo")
-            .addParameter("modelName", MODEL_NAME)
-            .yields("bytesMin", "bytesMax");
+        var query = "CALL gds.alpha.ml.pipeline.nodeClassification.predict.mutate.estimate(" +
+                    "   $graphDefinition, {" +
+                    "       modelName: $modelName," +
+                    "       mutateProperty: 'foo'," +
+                    "       predictedProbabilityProperty: 'bar'" +
+                    "})" +
+                    "YIELD bytesMin, bytesMax";
 
-        assertCypherResult(query, List.of(Map.of("bytesMin", 10344L, "bytesMax", 10344L)));
+        assertCypherResult(
+            query,
+            Map.of("graphDefinition", graphNameOrConfiguration, "modelName", MODEL_NAME),
+            List.of(Map.of("bytesMin", expected.min, "bytesMax", expected.max))
+        );
     }
 }
