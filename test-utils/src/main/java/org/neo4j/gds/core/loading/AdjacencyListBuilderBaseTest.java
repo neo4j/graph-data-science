@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,7 +83,7 @@ public abstract class AdjacencyListBuilderBaseTest {
         );
         importer.importRelationships();
 
-        adjacencyBuffer.adjacencyListBuilderTasks().forEach(Runnable::run);
+        adjacencyBuffer.adjacencyListBuilderTasks(Optional.empty()).forEach(Runnable::run);
 
         try (var adjacencyList = adjacencyCompressorFactory.build().adjacency()) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {

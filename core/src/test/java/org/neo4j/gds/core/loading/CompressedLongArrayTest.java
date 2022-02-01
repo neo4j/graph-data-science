@@ -45,7 +45,7 @@ class CompressedLongArrayTest {
         assertTrue(compressedLongArray.storage().length >= inValues.length);
 
         long[] outValues = new long[4];
-        int uncompressedValueCount = compressedLongArray.uncompress(outValues);
+        int uncompressedValueCount = compressedLongArray.uncompress(outValues, ZigZagLongDecoding.Identity.INSTANCE);
 
         assertEquals(4, uncompressedValueCount);
         assertArrayEquals(inValues, outValues);
@@ -68,8 +68,8 @@ class CompressedLongArrayTest {
 
         long[] outValues1 = new long[count];
         long[] outValues2 = new long[count];
-        int uncompressedValueCount1 = compressedLongArray1.uncompress(outValues1);
-        int uncompressedValueCount2 = compressedLongArray2.uncompress(outValues2);
+        int uncompressedValueCount1 = compressedLongArray1.uncompress(outValues1, ZigZagLongDecoding.Identity.INSTANCE);
+        int uncompressedValueCount2 = compressedLongArray2.uncompress(outValues2, ZigZagLongDecoding.Identity.INSTANCE);
 
         assertEquals(uncompressedValueCount1, uncompressedValueCount2);
         assertArrayEquals(outValues1, outValues2);
@@ -87,7 +87,7 @@ class CompressedLongArrayTest {
         assertTrue(compressedLongArray.storage().length >= 10);
 
         long[] outValues = new long[count];
-        int uncompressedValueCount = compressedLongArray.uncompress(outValues);
+        int uncompressedValueCount = compressedLongArray.uncompress(outValues, ZigZagLongDecoding.Identity.INSTANCE);
 
         assertEquals(count, uncompressedValueCount);
         assertArrayEquals(inValues, outValues);
@@ -104,7 +104,7 @@ class CompressedLongArrayTest {
         assertTrue(compressedLongArray.storage().length >= valuesToAdd);
 
         long[] outValues = new long[3];
-        int uncompressedValueCount = compressedLongArray.uncompress(outValues);
+        int uncompressedValueCount = compressedLongArray.uncompress(outValues, ZigZagLongDecoding.Identity.INSTANCE);
 
         assertEquals(3, uncompressedValueCount);
         assertArrayEquals(new long[]{1, 2, 3}, outValues);
@@ -122,7 +122,7 @@ class CompressedLongArrayTest {
         assertTrue(compressedLongArray.storage().length >= inValues.length);
 
         long[] outValues = new long[4];
-        int uncompressedValueCount = compressedLongArray.uncompress(outValues);
+        int uncompressedValueCount = compressedLongArray.uncompress(outValues, ZigZagLongDecoding.Identity.INSTANCE);
         assertEquals(4, uncompressedValueCount);
         assertArrayEquals(inValues, outValues);
 
@@ -144,12 +144,25 @@ class CompressedLongArrayTest {
         assertTrue(compressedLongArray.storage().length >= inValues.length);
 
         long[] outValues = new long[3];
-        int uncompressedValueCount = compressedLongArray.uncompress(outValues);
+        int uncompressedValueCount = compressedLongArray.uncompress(outValues, ZigZagLongDecoding.Identity.INSTANCE);
         assertEquals(3, uncompressedValueCount);
 
         assertArrayEquals(expectedValues, outValues);
 
         assertArrayEquals(expectedWeights, Arrays.copyOf(compressedLongArray.weights()[0], expectedWeights.length));
+    }
+
+    @Test
+    void uncompressWithValueMapping() {
+        var compressedLongArray = new CompressedLongArray(AllocationTracker.empty(), 0);
+
+        compressedLongArray.add(new long[]{13, 37, 42}, 0, 3, 3);
+
+        var expectedValues = new long[]{130L, 370L, 420L};
+        var actualValues = new long[3];
+        compressedLongArray.uncompress(actualValues, value -> value * 10);
+
+        assertArrayEquals(expectedValues, actualValues);
     }
 
     @Test

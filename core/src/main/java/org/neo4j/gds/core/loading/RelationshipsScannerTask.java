@@ -29,6 +29,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class RelationshipsScannerTask extends StatementAction implements RecordScannerTask {
@@ -90,7 +91,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         @Override
         public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks() {
             return singleTypeRelationshipImporters.stream()
-                .flatMap(factory -> factory.adjacencyListBuilderTasks().stream())
+                .flatMap(factory -> factory.adjacencyListBuilderTasks(Optional.empty()).stream())
                 .collect(Collectors.toList());
         }
     }

@@ -19,13 +19,28 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.core.compress.AdjacencyCompressor;
+
 public final class ZigZagLongDecoding {
 
-    public static int zigZagUncompress(byte[] array, int limit, long[] out) {
-        return zigZagUncompress(array, 0, limit, out);
+    public enum Identity implements AdjacencyCompressor.ValueMapper {
+        INSTANCE {
+            @Override
+            public long map(long value) {
+                return value;
+            }
+        }
     }
 
-    static int zigZagUncompress(byte[] array, int offset, int length, long[] out) {
+    public static int zigZagUncompress(byte[] array, int limit, long[] out) {
+        return zigZagUncompress(array, 0, limit, out, Identity.INSTANCE);
+    }
+
+    public static int zigZagUncompress(byte[] array, int limit, long[] out, AdjacencyCompressor.ValueMapper mapper) {
+        return zigZagUncompress(array, 0, limit, out, mapper);
+    }
+
+    static int zigZagUncompress(byte[] array, int offset, int length, long[] out, AdjacencyCompressor.ValueMapper mapper) {
         long input, startValue = 0L, value = 0L;
         int into = 0, shift = 0, limit = offset + length;
         while (offset < limit) {
@@ -33,7 +48,7 @@ public final class ZigZagLongDecoding {
             value += (input & 127L) << shift;
             if ((input & 128L) == 128L) {
                 startValue += ((value >>> 1L) ^ -(value & 1L));
-                out[into++] = startValue;
+                out[into++] = mapper.map(startValue);
                 value = 0L;
                 shift = 0;
             } else {

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.BitUtil;
 
@@ -156,9 +157,9 @@ public final class CompressedLongArray {
         return length;
     }
 
-    public int uncompress(long[] into) {
+    public int uncompress(long[] into, AdjacencyCompressor.ValueMapper mapper) {
         assert into.length >= length;
-        return zigZagUncompress(storage, pos, into);
+        return zigZagUncompress(storage, pos, into, mapper);
     }
 
     public byte[] storage() {

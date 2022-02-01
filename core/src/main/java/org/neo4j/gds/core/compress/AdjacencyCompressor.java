@@ -26,7 +26,7 @@ public interface AdjacencyCompressor extends AutoCloseable {
     /**
      * Compress a list of target ids into an adjacency list.
      * The input {@code values} are an unsorted and separately compressed list of target ids.
-     * Those ids can be unpacked into a {@code long[]} using {@link org.neo4j.gds.core.loading.CompressedLongArray#uncompress(long[])}.
+     * Those ids can be unpacked into a {@code long[]} using {@link org.neo4j.gds.core.loading.CompressedLongArray#uncompress(long[], org.neo4j.gds.core.compress.AdjacencyCompressor.ValueMapper)}.
      * The provided {@code long[]} must be able to hold at least {@link org.neo4j.gds.core.loading.CompressedLongArray#length()} elements.
      *
      * The input {@code values} might also store properties (called 'weights').
@@ -57,12 +57,14 @@ public interface AdjacencyCompressor extends AutoCloseable {
      *              The id is from the GDS internal scope, it is *not* the Neo4j ID.
      * @param values A list of target ids, unsorted and compressed.
      * @param buffer A long array that may or may not be used during the compression.
+     * @param mapper A mapper to transform values before compressing them.
      * @return the degree of the compressed adjacency list
      */
     int compress(
         long nodeId,
         CompressedLongArray values,
-        LongArrayBuffer buffer
+        LongArrayBuffer buffer,
+        ValueMapper mapper
     );
 
     /**
@@ -71,4 +73,12 @@ public interface AdjacencyCompressor extends AutoCloseable {
      */
     @Override
     void close();
+
+    interface ValueMapper {
+        /**
+         * A mapper to transform values before compressing them.
+         * Implementations must be thread-safe
+         */
+        long map(long value);
+    }
 }
