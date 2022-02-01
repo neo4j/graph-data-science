@@ -512,6 +512,7 @@ YIELD nodeId, embedding
 
 NOTE: Due to the random initialisation of the weight variables the results may vary slightly between the runs.
 
+[[graph-sage-trained-model-example-mutate]]
 === Mutate
 
 The <<graph-sage-trained-model-example, model trained as part of the stream example>> can be reused to write the results to the in-memory graph using the `mutate` mode of the procedure.
@@ -539,6 +540,7 @@ CALL gds.beta.graphSage.mutate(
 |===
 --
 
+[[graph-sage-trained-model-example-write]]
 === Write
 
 The <<graph-sage-trained-model-example, model trained as part of the stream example>> can be reused to write the results to Neo4j.

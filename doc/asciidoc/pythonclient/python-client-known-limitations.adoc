@@ -1,0 +1,7 @@
+[[python-client-known-limitations]]
+= Known limitations
+
+Operations known to not work with the Python client are:
+
+* <<utility-functions-numeric, Numeric utility functions>> (will never be supported)
+* <<create-cypher-db, Cypher on GDS>> (might be supported in the future)

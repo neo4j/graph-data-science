@@ -34,6 +34,7 @@ The manual covers the following areas:
 * <<model-catalog-ops>> -- A detailed guide to the model catalog and utility procedures included in the Neo4j Graph Data Science library.
 * <<algorithms>> -- A detailed guide to each of the algorithms in their respective categories, including use-cases and examples.
 * <<production-deployment>> -- This chapter explains advanced details with regards to common Neo4j components.
+* <<python-client>> -- Documentation of the Graph Data Science client for Python users.
 * <<appendix-a>> -- Reference of all procedures contained in the Neo4j Graph Data Science library.
 * <<appendix-b>> -- Additional resources - migration guide, books, etc - to help using the Neo4j Graph Data Science library.
 
@@ -63,6 +64,8 @@ include::model-catalog/model-catalog.adoc[]
 include::algorithms/algorithms-intro.adoc[]
 
 include::production-deployment/production-deployment.adoc[]
+
+include::pythonclient/python-client.adoc[]
 
 include::operations-reference/appendix-a.adoc[]
 

@@ -342,6 +342,31 @@
         </d:tocentry>
     </d:tocentry>
 
+    <d:tocentry linkend="python-client">
+        <?dbhtml filename="python-client/index.html"?>
+        <d:tocentry linkend="python-client-installation">
+            <?dbhtml filename="python-client/installation/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="python-client-getting-started">
+            <?dbhtml filename="python-client/getting-started/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="python-client-graph-object">
+            <?dbhtml filename="python-client/graph-object/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="python-client-algorithms">
+            <?dbhtml filename="python-client/algorithms/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="python-client-pipelines">
+            <?dbhtml filename="python-client/pipelines/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="python-client-model-object">
+            <?dbhtml filename="python-client/model-object/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="python-client-known-limitations">
+            <?dbhtml filename="python-client/known-limitations/index.html"?>
+        </d:tocentry>
+    </d:tocentry>
+
     <d:tocentry linkend="appendix">
 
         <d:tocentry linkend="appendix-a">
