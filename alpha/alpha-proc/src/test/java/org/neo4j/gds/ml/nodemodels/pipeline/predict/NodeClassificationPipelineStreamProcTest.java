@@ -154,4 +154,19 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
             )
         ));
     }
+
+    @Test
+    void shouldEstimateMemory() {
+        addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2);
+
+        var query = GdsCypher
+            .call(GRAPH_NAME)
+            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .estimationMode(GdsCypher.ExecutionModes.STREAM)
+            .addParameter("modelName", MODEL_NAME)
+            .addParameter("includePredictedProbabilities", true)
+            .yields("bytesMin", "bytesMax");
+
+        assertCypherResult(query, List.of(Map.of("bytesMin", 10344L, "bytesMax", 10344L)));
+    }
 }

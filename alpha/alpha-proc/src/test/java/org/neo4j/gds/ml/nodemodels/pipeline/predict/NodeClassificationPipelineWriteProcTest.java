@@ -166,4 +166,20 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
             .yields();
         assertError(query, "`writeProperty` and `predictedProbabilityProperty` must be different (both were `foo`)");
     }
+
+    @Test
+    void shouldEstimateMemory() {
+        addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2);
+
+        var query = GdsCypher
+            .call(GRAPH_NAME)
+            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .estimationMode(GdsCypher.ExecutionModes.WRITE)
+            .addParameter("writeProperty", "foo")
+            .addParameter("predictedProbabilityProperty", "foo")
+            .addParameter("modelName", MODEL_NAME)
+            .yields("bytesMin", "bytesMax");
+
+        assertCypherResult(query, List.of(Map.of("bytesMin", 10344L, "bytesMax", 10344L)));
+    }
 }

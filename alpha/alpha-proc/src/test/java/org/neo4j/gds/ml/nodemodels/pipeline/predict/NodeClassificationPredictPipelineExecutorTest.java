@@ -61,9 +61,11 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestLog.INFO;
+import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelinePredictProcTestUtil.addPipelineModelWithFeatures;
+import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelinePredictProcTestUtil.createModel;
 
 @Neo4jModelCatalogExtension
 class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
@@ -303,4 +305,28 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 );
         });
     }
+
+    @Test
+    void shouldEstimateMemory() {
+        var model = createModel(GRAPH_NAME, getUsername(), 3, List.of("a", "b", "d"));
+        var config = new NodeClassificationPredictPipelineBaseConfigImpl.Builder()
+            .concurrency(1)
+            .graphName(GRAPH_NAME)
+            .modelName(model.name())
+            .includePredictedProbabilities(true)
+            .username("user")
+            .build();
+
+        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config);
+        assertMemoryEstimation(
+            () -> memoryEstimation,
+            graphStore.nodeCount(),
+            graphStore.relationshipCount(),
+            config.concurrency(),
+            11960L,
+            11960L
+        );
+
+    }
+
 }

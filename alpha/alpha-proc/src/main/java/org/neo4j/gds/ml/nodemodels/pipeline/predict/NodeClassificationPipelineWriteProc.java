@@ -32,6 +32,7 @@ import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,6 +46,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
+import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -68,6 +70,16 @@ public class NodeClassificationPipelineWriteProc
         // TODO: this will go away once node property steps do not rely on this method
         configuration.put("graphName", graphName);
         return write(compute(graphName, configuration));
+    }
+
+    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.write.estimate", mode = Mode.READ)
+    @Description(ESTIMATE_PREDICT_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        algoConfiguration.put("graphName", graphName);
+        return computeEstimate(graphName, algoConfiguration);
     }
 
     @Override

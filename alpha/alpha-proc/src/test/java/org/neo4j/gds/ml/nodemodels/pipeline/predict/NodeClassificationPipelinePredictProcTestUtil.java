@@ -42,11 +42,21 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
 
     private NodeClassificationPipelinePredictProcTestUtil() {}
 
-    public static void addPipelineModelWithFeatures(ModelCatalog modelCatalog, String graphName,  String username, int dimensionOfNodeFeatures) {
+    static void addPipelineModelWithFeatures(
+        ModelCatalog modelCatalog,
+        String graphName,
+        String username,
+        int dimensionOfNodeFeatures
+    ) {
         addPipelineModelWithFeatures(modelCatalog, graphName, username, dimensionOfNodeFeatures, List.of("a","b"));
     }
 
-    public static void addPipelineModelWithFeatures(ModelCatalog modelCatalog, String graphName, String username, int dimensionOfNodeFeatures, List<String> nodeFeatures) {
+    static Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
+        String graphName,
+        String username,
+        int dimensionOfNodeFeatures,
+        List<String> nodeFeatures
+    ){
         var pipeline = new NodeClassificationPipeline();
 
         pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
@@ -65,7 +75,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         }
 
         NodeLogisticRegressionData modelData = createModeldata(weights);
-        modelCatalog.set(Model.of(
+        return Model.of(
             username,
             "model",
             NodeClassificationPipeline.MODEL_TYPE,
@@ -83,7 +93,17 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 .metrics(Map.of())
                 .trainingPipeline(pipeline.copy())
                 .build()
-        ));
+        );
+    }
+
+    static void addPipelineModelWithFeatures(
+        ModelCatalog modelCatalog,
+        String graphName,
+        String username,
+        int dimensionOfNodeFeatures,
+        List<String> nodeFeatures
+    ) {
+        modelCatalog.set(createModel(graphName, username, dimensionOfNodeFeatures, nodeFeatures));
     }
 
     static NodeLogisticRegressionData createModeldata(double[] weights) {
@@ -95,7 +115,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 new Matrix(
                     weights,
                     2,
-                    weights.length/2
+                    weights.length / 2
                 )),
             idMap
         );

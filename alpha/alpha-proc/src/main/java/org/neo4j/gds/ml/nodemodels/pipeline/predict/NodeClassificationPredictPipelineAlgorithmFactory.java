@@ -25,10 +25,10 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictAlgorithmFactory;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConfig;
@@ -114,6 +114,14 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        throw new MemoryEstimationNotImplementedException();
+        var model = getTrainedNCPipelineModel(
+            this.modelCatalog,
+            configuration.modelName(),
+            configuration.username()
+        );
+
+        return MemoryEstimations.builder(NodeClassificationPredictPipelineExecutor.class)
+            .add("Pipeline executor", NodeClassificationPredictPipelineExecutor.estimate(model, configuration))
+            .build();
     }
 }

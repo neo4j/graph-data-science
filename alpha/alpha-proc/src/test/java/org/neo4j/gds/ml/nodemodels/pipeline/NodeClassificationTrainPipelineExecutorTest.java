@@ -197,7 +197,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                 ProgressTracker.NULL_TRACKER
             );
 
-            NodeClassificationTrainConfig actualConfig = executor.innerConfig(pipeline, config);
+            NodeClassificationTrainConfig actualConfig = NodeClassificationTrainPipelineExecutor.innerConfig(pipeline, config);
 
             assertThat(actualConfig)
                 .matches(innerConfig -> innerConfig.username().equals(config.username()))
@@ -282,8 +282,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),
-            31735216,
-            31767176
+            31734464L,
+            31766424L
         );
 
     }

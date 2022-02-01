@@ -37,6 +37,7 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
@@ -69,14 +70,23 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         NodeClassificationPipeline pipeline,
         NodeClassificationPipelineTrainConfig configuration
     ) {
-        var builder = MemoryEstimations.builder();
-        pipeline.nodePropertySteps().forEach(
-            np -> builder.add(np.estimate())
-        );
+        var nodePropertyStepEstimations = pipeline
+            .nodePropertySteps()
+            .stream()
+            .map(ExecutableNodePropertyStep::estimate)
+            .collect(Collectors.toList());
+
+        var trainingEstimation = MemoryEstimations
+            .builder()
+            .add("Pipeline Train", NodeClassificationTrain.estimate(innerConfig(pipeline, configuration)))
+            .build();
 
         return MemoryEstimations.builder()
-            .add("Node Property Steps", builder.build())
-            .add("Pipeline Train", NodeClassificationTrain.estimate(innerConfig(pipeline, configuration)))
+            .max("Pipeline executor", List.of(
+                    MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations),
+                    trainingEstimation
+                )
+            )
             .build();
     }
 

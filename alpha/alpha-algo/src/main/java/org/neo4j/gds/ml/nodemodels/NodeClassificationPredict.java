@@ -25,12 +25,12 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 
 import java.util.List;
@@ -39,16 +39,6 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.batch.BatchTransformer.IDENTITY;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationResult> {
-
-    static MemoryEstimation memoryEstimation(boolean produceProbabilities, int batchSize, int featureCount, int classCount) {
-        var builder = MemoryEstimations.builder(NodeClassificationPredict.class);
-        if (produceProbabilities) {
-            builder.perNode("predicted probabilities", (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfDoubleArray(classCount)));
-        }
-        builder.perNode("predicted classes", HugeLongArray::memoryEstimation);
-        builder.fixed("computation graph", NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount));
-        return builder.build();
-    }
 
     private final NodeLogisticRegressionPredictor predictor;
     private final Graph graph;
@@ -78,6 +68,41 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
         this.allocationTracker = allocationTracker;
     }
 
+    public static MemoryEstimation memoryEstimation(boolean produceProbabilities, int batchSize, int featureCount, int classCount) {
+        var builder = MemoryEstimations.builder(NodeClassificationPredict.class);
+        if (produceProbabilities) {
+            builder.perNode("predicted probabilities", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfDoubleArray(classCount)));
+        }
+        builder.perNode("predicted classes", HugeLongArray::memoryEstimation);
+        builder.fixed("computation graph", NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount));
+        return builder.build();
+    }
+
+    public static MemoryEstimation memoryEstimationWithDerivedBatchSize(
+        boolean produceProbabilities,
+        int minBatchSize,
+        int featureCount,
+        int classCount
+    ) {
+        var builder = MemoryEstimations.builder(NodeClassificationPredict.class);
+        if (produceProbabilities) {
+            builder.perNode(
+                "predicted probabilities",
+                nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfDoubleArray(classCount))
+            );
+        }
+        builder.perNode("predicted classes", HugeLongArray::memoryEstimation);
+        builder.perGraphDimension(
+            "computation graph",
+            (dim, threads) -> MemoryRange.of(NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(BatchQueue.computeBatchSize(
+                dim.nodeCount(),
+                minBatchSize,
+                threads
+            ), featureCount, classCount))
+        );
+        return builder.build();
+    }
+
     @Override
     public NodeClassificationResult compute() {
         progressTracker.beginSubTask();
@@ -105,7 +130,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
 
     private @Nullable HugeObjectArray<double[]> initProbabilities() {
         if (produceProbabilities) {
-            var data = (NodeLogisticRegressionData) predictor.modelData();
+            var data = predictor.modelData();
             var numberOfClasses = data.classIdMap().originalIds().length;
             var predictions = HugeObjectArray.newArray(
                 double[].class,
