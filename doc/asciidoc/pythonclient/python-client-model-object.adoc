@@ -108,5 +108,5 @@ assert metrics["didConverge"]
 
 # Predict on `H` and write embedding node properties back to the database
 results = gs_model.predict_write(H, writeProperty="embedding")
-assert result[0]["nodePropertiesWritten"] == H.node_count()
+assert result["nodePropertiesWritten"] == H.node_count()
 ----
