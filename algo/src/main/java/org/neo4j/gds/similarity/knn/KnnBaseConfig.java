@@ -27,6 +27,8 @@ import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.config.NodeWeightConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 
+import java.util.List;
+
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -35,6 +37,11 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWei
     @Override
     @Configuration.ConvertWith("org.neo4j.gds.config.NodeWeightConfig#validatePropertyName")
     String nodeWeightProperty();
+
+    @Value.Default
+    default List<String> extraProperties() {
+        return List.of();
+    }
 
     @Value.Default
     @Configuration.IntegerRange(min = 1)

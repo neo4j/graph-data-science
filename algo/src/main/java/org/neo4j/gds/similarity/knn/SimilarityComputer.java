@@ -26,6 +26,7 @@ import org.neo4j.gds.core.utils.Intersections;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -46,6 +47,12 @@ public interface SimilarityComputer {
             () -> formatWithLocale("The property `%s` has not been loaded", propertyName)
         );
         return ofProperty(nodeProperties, propertyName);
+    }
+
+    static SimilarityComputer ofProperties(NodePropertyContainer graph, String[] propertyNames) {
+        if (propertyNames.length == 1)
+            return ofProperty((graph), propertyNames[0]);
+        return new CombinedSimilarityComputer(graph, propertyNames);
     }
 
     static SimilarityComputer ofProperty(NodeProperties nodeProperties, String propertyName) {
@@ -212,5 +219,31 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
     @Override
     public NeighborFilter createNeighborFilter() {
         return new KnnNeighborFilter(nodeProperties.size());
+    }
+}
+
+final class CombinedSimilarityComputer implements SimilarityComputer {
+    private SimilarityComputer[] similarityComputers;
+    private double[] weights;
+    private int numOfProperties;
+
+    public CombinedSimilarityComputer(NodePropertyContainer graph, String[] propertyNames) {
+        this.numOfProperties = propertyNames.length;
+        this.similarityComputers = new SimilarityComputer[numOfProperties];
+        for (int i = 0; i < numOfProperties; ++i) {
+            this.similarityComputers[i] = SimilarityComputer.ofProperty(graph, propertyNames[i]);
+        }
+    }
+
+    public double similarity(long firstNodeId, long secondNodeId) {
+        return IntStream
+            .range(0, numOfProperties)
+            .mapToObj(i -> weights[i] * similarityComputers[i].similarity(firstNodeId, secondNodeId))
+            .reduce(Double::sum).get();
+    }
+
+    @Override
+    public NeighborFilter createNeighborFilter() {
+        return null;
     }
 }
