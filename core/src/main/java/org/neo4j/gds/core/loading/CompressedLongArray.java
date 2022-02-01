@@ -73,7 +73,7 @@ public final class CompressedLongArray {
         long firstAdjacencyIdAvgByteSize = (avgDegree > 0) ? ceilDiv(encodedVLongSize(nodeCount), 2) : 0L;
         int relationshipByteSize = encodedVLongSize(delta);
         long compressedAdjacencyByteSize = relationshipByteSize * Math.max(0, (avgDegree - 1));
-        return (firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize);
+        return MemoryUsage.sizeOfByteArray(firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize);
     }
 
     public CompressedLongArray() {
