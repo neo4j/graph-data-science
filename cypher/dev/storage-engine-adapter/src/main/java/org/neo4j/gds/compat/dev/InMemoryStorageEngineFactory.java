@@ -244,8 +244,33 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         boolean b,
         CursorContextFactory cursorContextFactory
     ) {
-        NeoStores neoStores = (new StoreFactory(databaseLayout, config, new ScanOnOpenReadOnlyIdGeneratorFactory(), pageCache, fileSystemAbstraction, NullLogProvider.getInstance(), cursorContextFactory, readOnly())).openAllNeoStores();
-        return new LenientStoreInput(neoStores, readBehaviour.decorateTokenHolders(this.loadReadOnlyTokens(neoStores, true, cursorContextFactory)), true, pageCacheTracer, readBehaviour);
+        NeoStores neoStores = (new StoreFactory(
+            databaseLayout,
+            config,
+            new ScanOnOpenReadOnlyIdGeneratorFactory(),
+            pageCache,
+            fileSystemAbstraction,
+            NullLogProvider.getInstance(),
+            cursorContextFactory,
+            readOnly()
+        )).openAllNeoStores();
+        return new LenientStoreInput(
+            neoStores,
+            readBehaviour.decorateTokenHolders(this.loadReadOnlyTokens(neoStores, true, cursorContextFactory)),
+            true,
+            pageCacheTracer,
+            readBehaviour
+        );
+    }
+
+    @Override
+    public long optimalAvailableConsistencyCheckerMemory(
+        FileSystemAbstraction fileSystemAbstraction,
+        DatabaseLayout databaseLayout,
+        Config config,
+        PageCache pageCache
+    ) {
+        return 0;
     }
 
     @Override
