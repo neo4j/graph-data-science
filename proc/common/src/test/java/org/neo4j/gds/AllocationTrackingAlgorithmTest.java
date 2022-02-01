@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -38,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
-@Disabled
 public class AllocationTrackingAlgorithmTest extends AlgoTestBase {
 
     private static final String EXCEPTION_NAME = "MemoryLimitExceededException";
