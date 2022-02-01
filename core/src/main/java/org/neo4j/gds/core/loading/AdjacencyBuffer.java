@@ -22,11 +22,14 @@ package org.neo4j.gds.core.loading;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +38,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
 
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.preAggregate;
+import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
@@ -66,6 +70,40 @@ public final class AdjacencyBuffer {
     private final Aggregation[] aggregations;
     private final boolean atLeastOnePropertyToLoad;
     private final boolean preAggregate;
+
+    public static MemoryEstimation memoryEstimation(
+        RelationshipType relationshipType,
+        int propertyCount,
+        boolean undirected
+    ) {
+        return MemoryEstimations.setup("", (dimensions, concurrency) -> {
+            long nodeCount = dimensions.nodeCount();
+            long relCountForType = dimensions
+                .relationshipCounts()
+                .getOrDefault(relationshipType, dimensions.maxRelCount());
+            long relCount = undirected ? relCountForType * 2 : relCountForType;
+            long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
+            return memoryEstimation(avgDegree, nodeCount, propertyCount, concurrency);
+        });
+    }
+
+    public static MemoryEstimation memoryEstimation(
+        long avgDegree,
+        long nodeCount,
+        int propertyCount,
+        int concurrency
+    ) {
+        var importSizing = ImportSizing.of(concurrency, nodeCount);
+        var numberOfPages = importSizing.numberOfPages();
+        var pageSize = importSizing.pageSize();
+
+        var compressedLongArrayPages = sizeOfObjectArray(numberOfPages) + numberOfPages * sizeOfObjectArray(pageSize);
+        return MemoryEstimations
+            .builder(AdjacencyBuffer.class)
+            .fixed("compressed long array pages", compressedLongArrayPages)
+            .perNode("CompressedLongArray", CompressedLongArray.memoryEstimation(avgDegree, nodeCount, propertyCount))
+            .build();
+    }
 
     @Builder.Factory
     public static AdjacencyBuffer of(
@@ -127,11 +165,11 @@ public final class AdjacencyBuffer {
     }
 
     /**
-     * @param batch             two-tuple values sorted by source (source, target)
-     * @param targets           slice of batch on second position; all targets in source-sorted order
-     * @param propertyValues    index-synchronised with targets. the list for each index are the properties for that source-target combo. null if no props
-     * @param offsets           offsets into targets; every offset position indicates a source node group
-     * @param length            length of offsets array (how many source tuples to import)
+     * @param batch          two-tuple values sorted by source (source, target)
+     * @param targets        slice of batch on second position; all targets in source-sorted order
+     * @param propertyValues index-synchronised with targets. the list for each index are the properties for that source-target combo. null if no props
+     * @param offsets        offsets into targets; every offset position indicates a source node group
+     * @param length         length of offsets array (how many source tuples to import)
      */
     void addAll(
         long[] batch,

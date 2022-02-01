@@ -20,7 +20,11 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
 
@@ -29,6 +33,7 @@ import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.gds.core.loading.VarLongEncoding.zigZag;
 import static org.neo4j.gds.core.loading.ZigZagLongDecoding.zigZagUncompress;
+import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CompressedLongArray {
@@ -40,6 +45,36 @@ public final class CompressedLongArray {
     private int pos;
     private long lastValue;
     private int length;
+
+    public static MemoryEstimation memoryEstimation(long avgDegree, long nodeCount, int propertyCount) {
+        // Best case scenario:
+        // Difference between node identifiers in each adjacency list is 1.
+        // This leads to ideal compression through delta encoding.
+        int deltaBestCase = 1;
+        long bestCaseAdjacencySize = compressedTargetSize(avgDegree, nodeCount, deltaBestCase);
+
+        // Worst case scenario:
+        // Relationships are equally distributed across nodes, i.e. each node has the same number of rels.
+        // Within each adjacency list, all identifiers have the highest possible difference between each other.
+        // Highest possible difference is the number of nodes divided by the average degree.
+        long deltaWorstCase = (avgDegree > 0) ? ceilDiv(nodeCount, avgDegree) : 0L;
+        long worstCaseAdjacencySize = compressedTargetSize(avgDegree, nodeCount, deltaWorstCase);
+
+        return MemoryEstimations.builder(CompressedLongArray.class)
+            .fixed(
+                "compressed targets",
+                MemoryRange.of(bestCaseAdjacencySize, worstCaseAdjacencySize)
+            )
+            .fixed("properties", MemoryUsage.sizeOfObjectArray(propertyCount) + propertyCount * MemoryUsage.sizeOfLongArray(avgDegree))
+            .build();
+    }
+
+    private static long compressedTargetSize(long avgDegree, long nodeCount, long delta) {
+        long firstAdjacencyIdAvgByteSize = (avgDegree > 0) ? ceilDiv(encodedVLongSize(nodeCount), 2) : 0L;
+        int relationshipByteSize = encodedVLongSize(delta);
+        long compressedAdjacencyByteSize = relationshipByteSize * Math.max(0, (avgDegree - 1));
+        return (firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize);
+    }
 
     public CompressedLongArray() {
         this(0);
