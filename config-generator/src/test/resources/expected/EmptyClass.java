@@ -30,6 +30,10 @@ public final class EmptyClassConfig implements EmptyClass {
     public EmptyClassConfig() {
     }
 
+    public static EmptyClassConfig.Builder builder() {
+        return new EmptyClassConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

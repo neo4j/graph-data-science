@@ -76,6 +76,11 @@ public final class DefaultValuesConfig implements DefaultValues {
         return this.defaultString;
     }
 
+    public static DefaultValuesConfig.Builder builder() {
+        return new DefaultValuesConfig.Builder();
+    }
+
+
     public static final class Builder {
         private final Map<String, Object> config;
 

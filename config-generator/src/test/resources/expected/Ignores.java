@@ -61,6 +61,10 @@ public final class MyConfigImpl implements Ignores.MyConfig {
         return this.notIgnored;
     }
 
+    public static MyConfigImpl.Builder builder() {
+        return new MyConfigImpl.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

@@ -133,18 +133,26 @@ final class GenerateConfiguration {
             builder.addMethod(constructor);
         }
 
+        ClassName builderClassName = ClassName.get(packageName, generatedClassName + ".Builder");
         TypeSpec configBuilderClass = GenerateConfigurationBuilder.defineConfigBuilder(
             TypeName.get(config.rootType()),
             implMembers,
-            packageName,
+            builderClassName,
             generatedClassName,
             constructor.parameters,
             configParameterName,
             factory
         );
 
+        MethodSpec builderFactoryMethod = MethodSpec.methodBuilder("builder")
+            .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+            .addStatement("return new $T()", builderClassName)
+            .returns(builderClassName)
+            .build();
+
         return builder
             .addMethods(defineMemberMethods(config, fieldDefinitions.names()))
+            .addMethod(builderFactoryMethod)
             .addType(configBuilderClass)
             .build();
     }

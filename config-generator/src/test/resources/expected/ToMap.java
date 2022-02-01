@@ -121,6 +121,10 @@ public final class ToMapConfig implements ToMap {
         return map;
     }
 
+    public static ToMapConfig.Builder builder() {
+        return new ToMapConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

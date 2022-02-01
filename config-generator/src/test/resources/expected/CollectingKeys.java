@@ -92,6 +92,10 @@ public final class CollectingKeysConfig implements CollectingKeys {
         return Arrays.asList("bar", "baz");
     }
 
+    public static CollectingKeysConfig.Builder builder() {
+        return new CollectingKeysConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

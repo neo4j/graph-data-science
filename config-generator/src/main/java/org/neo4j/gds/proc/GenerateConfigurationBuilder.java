@@ -48,13 +48,12 @@ final class GenerateConfigurationBuilder {
     static TypeSpec defineConfigBuilder(
         TypeName configInterfaceType,
         List<GenerateConfiguration.MemberDefinition> configImplMembers,
-        String packageName,
+        ClassName builderClassName,
         String generatedClassName,
         List<ParameterSpec> constructorParameters,
         String configMapParameterName,
         Optional<MethodSpec> maybeFactoryFunction
     ) {
-        ClassName builderClassName = ClassName.get(packageName, generatedClassName + ".Builder");
         TypeSpec.Builder configBuilderClass = TypeSpec.classBuilder("Builder")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
 

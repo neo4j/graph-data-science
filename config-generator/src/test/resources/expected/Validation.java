@@ -73,6 +73,10 @@ public final class ValidationConfig implements Validation {
         return this.foo;
     }
 
+    public static ValidationConfig.Builder builder() {
+        return new ValidationConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

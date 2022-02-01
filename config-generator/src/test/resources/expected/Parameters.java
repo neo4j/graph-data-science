@@ -88,6 +88,10 @@ public final class ParametersConfig implements Parameters {
         return this.parametersAreAddedFirst;
     }
 
+    public static ParametersConfig.Builder builder() {
+        return new ParametersConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

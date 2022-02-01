@@ -85,6 +85,10 @@ public final class NamingConflictConfig implements NamingConflict {
         return this.config_;
     }
 
+    public static NamingConflictConfig.Builder builder() {
+        return new NamingConflictConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config__;
 

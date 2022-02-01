@@ -109,6 +109,10 @@ public final class NullableParametersConfig implements NullableParameters {
         return this.extraValue;
     }
 
+    public static NullableParametersConfig.Builder builder() {
+        return new NullableParametersConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

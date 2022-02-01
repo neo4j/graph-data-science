@@ -100,6 +100,10 @@ public final class ConversionsConfig implements Conversions.MyConversion {
         return this.referenceTypeAsResult;
     }
 
+    public static ConversionsConfig.Builder builder() {
+        return new ConversionsConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

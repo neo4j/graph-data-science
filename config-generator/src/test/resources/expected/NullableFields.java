@@ -92,6 +92,10 @@ public final class NullableFieldsConfig implements NullableFields {
         return this.conversionCanReturnNull;
     }
 
+    public static NullableFieldsConfig.Builder builder() {
+        return new NullableFieldsConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

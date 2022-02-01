@@ -41,6 +41,10 @@ public final class GSValidationConfig implements GSValidation {
         classSpecificName(graphStore, selectedLabels, selectedRelationshipTypes);
     }
 
+    public static GSValidationConfig.Builder builder() {
+        return new GSValidationConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

@@ -29,6 +29,10 @@ public final class DefaultNameImpl implements DefaultName {
     public DefaultNameImpl() {
     }
 
+    public static DefaultNameImpl.Builder builder() {
+        return new DefaultNameImpl.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

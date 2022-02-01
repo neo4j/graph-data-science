@@ -111,6 +111,10 @@ public final class MyConfigImpl implements Inheritance.MyConfig {
         return this.inheritedDefaultValue;
     }
 
+    public static MyConfigImpl.Builder builder() {
+        return new MyConfigImpl.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

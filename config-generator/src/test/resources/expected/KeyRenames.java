@@ -73,6 +73,10 @@ public final class KeyRenamesConfig implements KeyRenames {
         return this.whitespaceWillBeTrimmed;
     }
 
+    public static KeyRenamesConfig.Builder builder() {
+        return new KeyRenamesConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

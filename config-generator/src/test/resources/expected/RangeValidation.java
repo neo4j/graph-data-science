@@ -159,6 +159,10 @@ public final class RangeValidationConfig implements RangeValidation {
         return this.listDoubleWithinRange;
     }
 
+    public static RangeValidationConfig.Builder builder() {
+        return new RangeValidationConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

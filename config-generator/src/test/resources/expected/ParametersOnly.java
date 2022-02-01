@@ -60,6 +60,10 @@ public final class ParametersOnlyConfig implements ParametersOnly {
         return this.onlyAsParameter;
     }
 
+    public static ParametersOnlyConfig.Builder builder() {
+        return new ParametersOnlyConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

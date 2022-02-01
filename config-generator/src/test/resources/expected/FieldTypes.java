@@ -195,6 +195,10 @@ public final class FieldTypesConfig implements FieldTypes {
         return this.anOptional;
     }
 
+    public static FieldTypesConfig.Builder builder() {
+        return new FieldTypesConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 

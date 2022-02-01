@@ -64,6 +64,10 @@ public final class ConvertingParametersConfig implements ConvertingParameters {
         return this.parametersAreSubjectToConversion;
     }
 
+    public static ConvertingParametersConfig.Builder builder() {
+        return new ConvertingParametersConfig.Builder();
+    }
+
     public static final class Builder {
         private final Map<String, Object> config;
 
