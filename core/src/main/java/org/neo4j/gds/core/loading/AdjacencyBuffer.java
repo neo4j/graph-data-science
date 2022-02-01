@@ -132,15 +132,13 @@ public final class AdjacencyBuffer {
      * @param propertyValues    index-synchronised with targets. the list for each index are the properties for that source-target combo. null if no props
      * @param offsets           offsets into targets; every offset position indicates a source node group
      * @param length            length of offsets array (how many source tuples to import)
-     * @param allocationTracker
      */
     void addAll(
         long[] batch,
         long[] targets,
         @Nullable long[][] propertyValues,
         int[] offsets,
-        int length,
-        AllocationTracker allocationTracker
+        int length
     ) {
         int pageShift = this.pageShift;
         long pageMask = this.pageMask;
@@ -175,7 +173,6 @@ public final class AdjacencyBuffer {
                 CompressedLongArray compressedTargets = this.compressedAdjacencyLists[pageIndex][localId];
                 if (compressedTargets == null) {
                     compressedTargets = new CompressedLongArray(
-                        allocationTracker,
                         propertyValues == null ? 0 : propertyValues.length
                     );
                     this.compressedAdjacencyLists[pageIndex][localId] = compressedTargets;

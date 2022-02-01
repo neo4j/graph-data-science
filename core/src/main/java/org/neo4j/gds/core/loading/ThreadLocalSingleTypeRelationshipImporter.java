@@ -148,8 +148,7 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
             targets,
             properties,
             offsets,
-            nodesLength,
-            allocationTracker
+            nodesLength
         );
 
         return batchLength >> 1; // divide by 2

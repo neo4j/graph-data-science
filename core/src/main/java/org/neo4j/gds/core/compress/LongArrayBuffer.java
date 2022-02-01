@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.compress;
 
+import org.jetbrains.annotations.TestOnly;
+
 public final class LongArrayBuffer {
 
     private static final long[] EMPTY_BUFFER = new long[0];
@@ -31,6 +33,7 @@ public final class LongArrayBuffer {
         this.length = 0;
     }
 
+    @TestOnly
     public LongArrayBuffer(long[] buffer, int length) {
         this.buffer = buffer;
         this.length = length;

@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -37,7 +36,7 @@ class CompressedLongArrayTest {
 
     @Test
     void add() {
-        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.empty());
+        CompressedLongArray compressedLongArray = new CompressedLongArray();
 
         final long[] inValues = {1, 2, 3, 4};
         compressedLongArray.add(inValues.clone(), 0, inValues.length, inValues.length);
@@ -53,8 +52,8 @@ class CompressedLongArrayTest {
 
     @Test
     void addSameValues() {
-        CompressedLongArray compressedLongArray1 = new CompressedLongArray(AllocationTracker.empty());
-        CompressedLongArray compressedLongArray2 = new CompressedLongArray(AllocationTracker.empty());
+        CompressedLongArray compressedLongArray1 = new CompressedLongArray();
+        CompressedLongArray compressedLongArray2 = new CompressedLongArray();
 
         int count = 10;
 
@@ -77,7 +76,7 @@ class CompressedLongArrayTest {
 
     @Test
     void addReverseOrder() {
-        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.empty());
+        CompressedLongArray compressedLongArray = new CompressedLongArray();
 
         int count = 10;
 
@@ -96,7 +95,7 @@ class CompressedLongArrayTest {
     @Test
     void addWithPreAggregation() {
         var valuesToAdd = 3;
-        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.empty());
+        CompressedLongArray compressedLongArray = new CompressedLongArray();
 
         final long[] inValues = {1, IGNORE_VALUE, IGNORE_VALUE, 2, 3};
         compressedLongArray.add(inValues.clone(), 0, inValues.length, valuesToAdd);
@@ -112,7 +111,7 @@ class CompressedLongArrayTest {
 
     @Test
     void addWithWeights() {
-        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.empty(), 1);
+        CompressedLongArray compressedLongArray = new CompressedLongArray(1);
 
         final long[] inValues = {1, 2, 3, 4};
         final long[] inWeights = DoubleStream.of(1.0, 2.0, 3.0, 4.0).mapToLong(Double::doubleToLongBits).toArray();
@@ -131,7 +130,7 @@ class CompressedLongArrayTest {
 
     @Test
     void addWithPreAggregatedWeights() {
-        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.empty(), 1);
+        CompressedLongArray compressedLongArray = new CompressedLongArray(1);
 
         var inValues = new long[]{1, IGNORE_VALUE, 2, 3};
         var expectedValues = new long[]{1, 2, 3};
@@ -154,7 +153,7 @@ class CompressedLongArrayTest {
 
     @Test
     void uncompressWithValueMapping() {
-        var compressedLongArray = new CompressedLongArray(AllocationTracker.empty(), 0);
+        var compressedLongArray = new CompressedLongArray(0);
 
         compressedLongArray.add(new long[]{13, 37, 42}, 0, 3, 3);
 
@@ -167,7 +166,7 @@ class CompressedLongArrayTest {
 
     @Test
     void throwsOnOverflowInEnsureCapacity() {
-        CompressedLongArray longArray = new CompressedLongArray(AllocationTracker.empty());
+        CompressedLongArray longArray = new CompressedLongArray();
         var e = assertThrows(
             IllegalArgumentException.class,
             () -> {
