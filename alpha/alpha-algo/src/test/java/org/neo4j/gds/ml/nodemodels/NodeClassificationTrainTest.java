@@ -212,7 +212,7 @@ class NodeClassificationTrainTest {
 
         assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
-            .extracting(removeLastThreeDigitsOfPrecision())
+            .extracting(removingLastThreeDigitsOfPrecision())
             .containsExactly(
                 "NCTrain :: Start",
                 "NCTrain :: ShuffleAndSplit :: Start",
@@ -405,7 +405,7 @@ class NodeClassificationTrainTest {
     }
 
     @NotNull
-    private ThrowingExtractor<String, String, RuntimeException> removeLastThreeDigitsOfPrecision() {
+    private static ThrowingExtractor<String, String, RuntimeException> removingLastThreeDigitsOfPrecision() {
         return msg -> msg.replaceAll(
             "(NCTrain :: SelectBestModel :: Model Candidate [1-2] of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: 0\\.\\d+)\\d\\d\\d",
             "$1"
