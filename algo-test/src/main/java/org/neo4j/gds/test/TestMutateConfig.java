@@ -29,6 +29,10 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @SuppressWarnings("immutables:subtype")
 public interface TestMutateConfig extends TestConfig, MutatePropertyConfig {
 
+    default boolean throwOnEstimate() {
+        return false;
+    };
+
     static TestMutateConfig of(CypherMapWrapper config) {
         return new TestMutateConfigImpl(config);
     }
