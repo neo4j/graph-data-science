@@ -251,5 +251,5 @@ assert metrics["AUCPR"]["test"] >= 0.85
 
 # Predict on `H` and mutate it with the relationship predictions
 results = trained_pipe_model.predict_mutate(H, topN=5, mutateRelationshipType="PRED_REL")
-assert result[0]["relationshipsWritten"] == 5 * 2  #  Undirected relationships written
+assert result["relationshipsWritten"] == 5 * 2  #  Undirected relationships written
 ----
