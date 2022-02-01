@@ -97,7 +97,7 @@ As we saw in the previous section, node classification models are created when t
 In addition to inheriting the methods common to all <<python-client-model-object, model objects>>, node classification models have the following methods:
 
 .Node classification model methods
-[opts="header",cols="1m,1m,1m,3"]
+[opts="header",cols="4m,5m,4m,11"]
 |===
 | Name           | Arguments        | Return type    | Description
 | predict_mutate | G: Graph, +
@@ -220,7 +220,7 @@ As we saw in the previous section, link prediction models are created when train
 In addition to inheriting the methods common to all <<python-client-model-object, model objects>>, link prediction models have the following methods:
 
 .Link prediction model methods
-[opts="header",cols="1m,1m,1m,3"]
+[opts="header",cols="4m,5m,4m,11"]
 |===
 | Name           | Arguments        | Return type    | Description
 | predict_mutate | G: Graph, +

@@ -86,7 +86,7 @@ As exemplified above in <<python-client-model-object-constructing>>, training a 
 Once trained, in addition to the <<python-client-model-object-inspecting, methods above>>, the GraphSAGE model object will have the following methods.
 
 .GraphSAGE model methods
-[opts="header",cols="1m,1m,1m,3"]
+[opts="header",cols="4m,5m,4m,11"]
 |===
 | Name           | Arguments        | Return type    | Description
 | predict_mutate | G: Graph, +
