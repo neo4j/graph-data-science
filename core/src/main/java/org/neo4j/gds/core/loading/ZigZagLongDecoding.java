@@ -19,17 +19,11 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.core.compress.AdjacencyCompressor;
+
 public final class ZigZagLongDecoding {
 
-    public interface ValueMapper {
-        /**
-         * A mapper to transform values before compressing them.
-         * Implementations must be thread-safe
-         */
-        long map(long value);
-    }
-
-    public enum Identity implements ValueMapper {
+    public enum Identity implements AdjacencyCompressor.ValueMapper {
         INSTANCE {
             @Override
             public long map(long value) {
@@ -42,11 +36,11 @@ public final class ZigZagLongDecoding {
         return zigZagUncompress(array, 0, limit, out, Identity.INSTANCE);
     }
 
-    public static int zigZagUncompress(byte[] array, int limit, long[] out, ValueMapper mapper) {
+    public static int zigZagUncompress(byte[] array, int limit, long[] out, AdjacencyCompressor.ValueMapper mapper) {
         return zigZagUncompress(array, 0, limit, out, mapper);
     }
 
-    static int zigZagUncompress(byte[] array, int offset, int length, long[] out, ValueMapper mapper) {
+    static int zigZagUncompress(byte[] array, int offset, int length, long[] out, AdjacencyCompressor.ValueMapper mapper) {
         long input, startValue = 0L, value = 0L;
         int into = 0, shift = 0, limit = offset + length;
         while (offset < limit) {

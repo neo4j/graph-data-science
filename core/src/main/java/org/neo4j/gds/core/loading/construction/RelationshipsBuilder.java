@@ -24,11 +24,11 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.PropertyReader;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
-import org.neo4j.gds.core.loading.ZigZagLongDecoding;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.List;
@@ -143,7 +143,7 @@ public class RelationshipsBuilder {
         return buildAll(Optional.empty());
     }
 
-    public List<Relationships> buildAll(Optional<ZigZagLongDecoding.ValueMapper> mapper) {
+    public List<Relationships> buildAll(Optional<AdjacencyCompressor.ValueMapper> mapper) {
         threadLocalBuilders.close();
 
         var adjacencyListBuilderTasks = singleTypeRelationshipImporter.adjacencyListBuilderTasks(mapper);

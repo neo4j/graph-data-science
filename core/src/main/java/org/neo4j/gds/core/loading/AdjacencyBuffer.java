@@ -23,6 +23,7 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -200,7 +201,7 @@ public final class AdjacencyBuffer {
         }
     }
 
-    Collection<AdjacencyListBuilderTask> adjacencyListBuilderTasks(Optional<ZigZagLongDecoding.ValueMapper> mapper) {
+    Collection<AdjacencyListBuilderTask> adjacencyListBuilderTasks(Optional<AdjacencyCompressor.ValueMapper> mapper) {
         adjacencyCompressorFactory.init();
 
         var tasks = new ArrayList<AdjacencyListBuilderTask>(localBuilders.length + 1);
@@ -245,14 +246,14 @@ public final class AdjacencyBuffer {
         // A long array that may or may not be used during the compression.
         private final LongArrayBuffer buffer;
         private final LongAdder relationshipCounter;
-        private final ZigZagLongDecoding.ValueMapper valueMapper;
+        private final AdjacencyCompressor.ValueMapper valueMapper;
 
         AdjacencyListBuilderTask(
             long baseNodeId,
             ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder,
             CompressedLongArray[] compressedLongArrays,
             LongAdder relationshipCounter,
-            ZigZagLongDecoding.ValueMapper valueMapper
+            AdjacencyCompressor.ValueMapper valueMapper
         ) {
             this.baseNodeId = baseNodeId;
             this.threadLocalRelationshipsBuilder = threadLocalRelationshipsBuilder;

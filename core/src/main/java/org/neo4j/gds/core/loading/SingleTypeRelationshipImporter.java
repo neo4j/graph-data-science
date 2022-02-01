@@ -27,6 +27,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
@@ -98,7 +99,7 @@ public final class SingleTypeRelationshipImporter {
         this.allocationTracker = allocationTracker;
     }
 
-    public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks(Optional<ZigZagLongDecoding.ValueMapper> mapper) {
+    public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks(Optional<AdjacencyCompressor.ValueMapper> mapper) {
         return adjacencyBuffer.adjacencyListBuilderTasks(mapper);
     }
 

@@ -90,7 +90,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         long nodeId,
         CompressedLongArray values,
         LongArrayBuffer buffer,
-        ZigZagLongDecoding.ValueMapper mapper
+        ValueMapper mapper
     ) {
         if (values.hasWeights()) {
             return withWeights(nodeId, values, buffer, mapper);
@@ -113,7 +113,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         long nodeId,
         CompressedLongArray array,
         LongArrayBuffer buffer,
-        ZigZagLongDecoding.ValueMapper mapper
+        ValueMapper mapper
     ) {
         // decompress target ids
         AdjacencyCompression.copyFrom(buffer, array, mapper);
@@ -220,7 +220,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         long nodeId,
         CompressedLongArray array,
         LongArrayBuffer buffer,
-        ZigZagLongDecoding.ValueMapper mapper
+        ValueMapper mapper
     ) {
         long[][] uncompressedWeights = array.weights();
 

@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
 import org.neo4j.gds.core.utils.AscendingLongComparator;
 
@@ -35,7 +36,7 @@ public final class AdjacencyCompression {
      * After this, {@link org.neo4j.gds.core.compress.LongArrayBuffer#length} will reflect the number of decompressed values
      * that are in the {@link org.neo4j.gds.core.compress.LongArrayBuffer#buffer}.
      */
-    static void copyFrom(LongArrayBuffer into, CompressedLongArray array, ZigZagLongDecoding.ValueMapper mapper) {
+    static void copyFrom(LongArrayBuffer into, CompressedLongArray array, AdjacencyCompressor.ValueMapper mapper) {
         into.ensureCapacity(array.length());
         into.length = array.uncompress(into.buffer, mapper);
     }

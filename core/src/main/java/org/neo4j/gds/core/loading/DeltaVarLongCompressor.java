@@ -88,7 +88,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         long nodeId,
         CompressedLongArray values,
         LongArrayBuffer buffer,
-        ZigZagLongDecoding.ValueMapper mapper
+        ValueMapper mapper
     ) {
         if (values.hasWeights()) {
             return applyVariableDeltaEncodingWithWeights(nodeId, values, buffer, mapper);
@@ -111,7 +111,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         long nodeId,
         CompressedLongArray array,
         LongArrayBuffer buffer,
-        ZigZagLongDecoding.ValueMapper mapper
+        ValueMapper mapper
     ) {
         byte[] storage = array.storage();
         AdjacencyCompression.copyFrom(buffer, array, mapper);
@@ -132,7 +132,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         long nodeId,
         CompressedLongArray array,
         LongArrayBuffer buffer,
-        ZigZagLongDecoding.ValueMapper mapper
+        ValueMapper mapper
     ) {
         byte[] semiCompressedBytesDuringLoading = array.storage();
         long[][] uncompressedWeightsPerProperty = array.weights();

@@ -34,7 +34,7 @@ final class ThreadLocalRelationshipsCompressor implements AutoCloseable {
         CompressedLongArray array,
         LongArrayBuffer buffer,
         long nodeId,
-        ZigZagLongDecoding.ValueMapper mapper
+        AdjacencyCompressor.ValueMapper mapper
     ) {
         return adjacencyCompressor.compress(nodeId, array, buffer, mapper);
     }
