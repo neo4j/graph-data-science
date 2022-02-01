@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.assertj.core.api.iterable.ThrowingExtractor;
 import org.assertj.core.data.Percentage;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -210,9 +212,7 @@ class NodeClassificationTrainTest {
 
         assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
-            .anyMatch(msg -> msg.matches("NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: 0\\.5922156656203\\d\\d\\d"))
-            .anyMatch(msg -> msg.matches("NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: 0\\.5922158322870\\d\\d\\d"))
-            .extracting(msg -> msg.replaceAll("NCTrain :: SelectBestModel :: Model Candidate [1-2] of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: .*", "softerassertionabove"))
+            .extracting(removeLastThreeDigitsOfPrecision())
             .containsExactly(
                 "NCTrain :: Start",
                 "NCTrain :: ShuffleAndSplit :: Start",
@@ -227,7 +227,7 @@ class NodeClassificationTrainTest {
                 "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 1 100%",
                 "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 1 :: Finished",
                 "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Start",
-                "softerassertionabove",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: 0.5922156656203",
                 "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 100%",
                 "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Finished",
                 "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 3 :: Start",
@@ -293,7 +293,7 @@ class NodeClassificationTrainTest {
                 "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 1 100%",
                 "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 1 :: Finished",
                 "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Start",
-                "softerassertionabove",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: 0.5922158322870",
                 "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 100%",
                 "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Finished",
                 "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 3 :: Start",
@@ -402,6 +402,14 @@ class NodeClassificationTrainTest {
                 "NCTrain :: RetrainSelectedModel :: Finished",
                 "NCTrain :: Finished"
             );
+    }
+
+    @NotNull
+    private ThrowingExtractor<String, String, RuntimeException> removeLastThreeDigitsOfPrecision() {
+        return msg -> msg.replaceAll(
+            "(NCTrain :: SelectBestModel :: Model Candidate [1-2] of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: 0\\.\\d+)\\d\\d\\d",
+            "$1"
+        );
     }
 
     @ParameterizedTest
