@@ -87,35 +87,14 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
             "Expected GraphProjectConfig to be a cypher config."));
     }
 
-    public final MemoryEstimation memoryEstimation() {
-        if (cypherConfig.isFictitiousLoading()) {
-            nodeEstimation = ImmutableEstimationResult.of(cypherConfig.nodeCount(), 0);
-            relationshipEstimation = ImmutableEstimationResult.of(cypherConfig.relationshipCount(), 0);
-        }
+    @Override
+    public final MemoryEstimation estimateMemoryUsageDuringLoading() {
+        return NativeFactory.getMemoryEstimation(buildEstimateNodeProjections(), buildEstimateRelationshipProjections(), true);
+    }
 
-        var nodeProjection = NodeProjection
-            .builder()
-            .label(ElementProjection.PROJECT_ALL)
-            .addAllProperties(getNodeEstimation().propertyMappings())
-            .build();
-
-        var nodeProjections = NodeProjections.single(
-            NodeLabel.ALL_NODES,
-            nodeProjection
-        );
-
-        var relationshipProjection = RelationshipProjection
-            .builder()
-            .type(ElementProjection.PROJECT_ALL)
-            .addAllProperties(getRelationshipEstimation().propertyMappings())
-            .build();
-
-        var relationshipProjections = RelationshipProjections.single(
-            RelationshipType.ALL_RELATIONSHIPS,
-            relationshipProjection
-        );
-
-        return NativeFactory.getMemoryEstimation(nodeProjections, relationshipProjections);
+    @Override
+    public MemoryEstimation estimateMemoryUsageAfterLoading() {
+        return NativeFactory.getMemoryEstimation(buildEstimateNodeProjections(), buildEstimateRelationshipProjections(), false);
     }
 
     @Override
@@ -241,6 +220,40 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
                 return ImmutableEstimationResult.of(estimatedRows.longValue(), propertyColumns.size());
             }
         });
+    }
+
+    private NodeProjections buildEstimateNodeProjections() {
+        if (cypherConfig.isFictitiousLoading()) {
+            nodeEstimation = ImmutableEstimationResult.of(cypherConfig.nodeCount(), 0);
+        }
+
+        var nodeProjection = NodeProjection
+            .builder()
+            .label(ElementProjection.PROJECT_ALL)
+            .addAllProperties(getNodeEstimation().propertyMappings())
+            .build();
+
+        return NodeProjections.single(
+            NodeLabel.ALL_NODES,
+            nodeProjection
+        );
+    }
+
+    private RelationshipProjections buildEstimateRelationshipProjections() {
+        if (cypherConfig.isFictitiousLoading()) {
+            relationshipEstimation = ImmutableEstimationResult.of(cypherConfig.relationshipCount(), 0);
+        }
+
+        var relationshipProjection = RelationshipProjection
+            .builder()
+            .type(ElementProjection.PROJECT_ALL)
+            .addAllProperties(getRelationshipEstimation().propertyMappings())
+            .build();
+
+        return RelationshipProjections.single(
+            RelationshipType.ALL_RELATIONSHIPS,
+            relationshipProjection
+        );
     }
 
     @ValueClass

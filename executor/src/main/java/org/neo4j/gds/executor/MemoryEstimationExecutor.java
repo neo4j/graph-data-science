@@ -93,7 +93,7 @@ public class MemoryEstimationExecutor<
                 : new GraphStoreFromDatabaseLoader(graphProjectConfig, executionContext.username(), graphLoaderContext);
 
             graphDimensions = graphStoreCreator.graphDimensions();
-            memoryEstimation = Optional.of(graphStoreCreator.memoryEstimation());
+            memoryEstimation = Optional.of(graphStoreCreator.estimateMemoryUsageAfterLoading());
         } else if (graphNameOrConfiguration instanceof String) {
             graphDimensions = new GraphStoreFromCatalogLoader(
                 (String) graphNameOrConfiguration,

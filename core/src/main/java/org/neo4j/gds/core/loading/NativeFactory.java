@@ -77,13 +77,19 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     }
 
     @Override
-    public MemoryEstimation memoryEstimation() {
-        return getMemoryEstimation(storeConfig.nodeProjections(), storeConfig.relationshipProjections());
+    public MemoryEstimation estimateMemoryUsageDuringLoading() {
+        return getMemoryEstimation(storeConfig.nodeProjections(), storeConfig.relationshipProjections(), true);
+    }
+
+    @Override
+    public MemoryEstimation estimateMemoryUsageAfterLoading() {
+        return getMemoryEstimation(storeConfig.nodeProjections(), storeConfig.relationshipProjections(), false);
     }
 
     public static MemoryEstimation getMemoryEstimation(
         NodeProjections nodeProjections,
-        RelationshipProjections relationshipProjections
+        RelationshipProjections relationshipProjections,
+        boolean isLoading
     ) {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(HugeGraph.class);
 
@@ -96,21 +102,27 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
 
         // relationships
         relationshipProjections.projections().forEach((relationshipType, relationshipProjection) -> {
-
             boolean undirected = relationshipProjection.orientation() == Orientation.UNDIRECTED;
 
-            // adjacency list
-            builder.add(
-                formatWithLocale("adjacency list for '%s'", relationshipType),
-                AdjacencyListBehavior.adjacencyListEstimation(relationshipType, undirected)
-            );
-            // all properties per projection
-            relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> {
+            if (isLoading) {
                 builder.add(
-                    formatWithLocale("property '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
-                    AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected)
+                    formatWithLocale("adjacency loading buffer for '%s'", relationshipType),
+                    AdjacencyBuffer.memoryEstimation(relationshipType, (int) relationshipProjection.properties().stream().count(), undirected)
                 );
-            });
+            } else {
+                // adjacency list
+                builder.add(
+                    formatWithLocale("adjacency list for '%s'", relationshipType),
+                    AdjacencyListBehavior.adjacencyListEstimation(relationshipType, undirected)
+                );
+                // all properties per projection
+                relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> {
+                    builder.add(
+                        formatWithLocale("property '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
+                        AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected)
+                    );
+                });
+            }
         });
 
         return builder.build();

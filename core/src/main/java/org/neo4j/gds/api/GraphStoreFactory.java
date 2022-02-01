@@ -59,7 +59,9 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
 
     public abstract STORE build();
 
-    public abstract MemoryEstimation memoryEstimation();
+    public abstract MemoryEstimation estimateMemoryUsageDuringLoading();
+
+    public abstract MemoryEstimation estimateMemoryUsageAfterLoading();
 
     public GraphDimensions dimensions() {
         return this.dimensions;

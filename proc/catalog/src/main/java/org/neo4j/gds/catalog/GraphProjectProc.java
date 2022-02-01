@@ -363,7 +363,7 @@ public class GraphProjectProc extends CatalogProc {
         var graphDimensions = graphStoreCreator.graphDimensions();
 
         MemoryTree memoryTree = graphStoreCreator
-            .memoryEstimation()
+            .estimateMemoryUsageDuringLoading()
             .estimate(graphDimensions, config.readConcurrency());
 
         return new MemoryTreeWithDimensions(memoryTree, graphDimensions);

@@ -67,11 +67,19 @@ public class FictitiousGraphStoreLoader implements GraphStoreCreator {
     }
 
     @Override
-    public MemoryEstimation memoryEstimation() {
+    public MemoryEstimation estimateMemoryUsageDuringLoading() {
         return graphProjectConfig
             .graphStoreFactory()
             .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions())
-            .memoryEstimation();
+            .estimateMemoryUsageDuringLoading();
+    }
+
+    @Override
+    public MemoryEstimation estimateMemoryUsageAfterLoading() {
+        return graphProjectConfig
+            .graphStoreFactory()
+            .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions())
+            .estimateMemoryUsageAfterLoading();
     }
 
     @Override

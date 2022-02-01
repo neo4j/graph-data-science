@@ -61,8 +61,13 @@ public class GraphStoreFromDatabaseLoader implements GraphStoreCreator {
     }
 
     @Override
-    public MemoryEstimation memoryEstimation() {
-        return this.graphStoreFactory.memoryEstimation();
+    public MemoryEstimation estimateMemoryUsageDuringLoading() {
+        return this.graphStoreFactory.estimateMemoryUsageDuringLoading();
+    }
+
+    @Override
+    public MemoryEstimation estimateMemoryUsageAfterLoading() {
+        return this.graphStoreFactory.estimateMemoryUsageDuringLoading();
     }
 
     private GraphStoreFactory<?, ?> graphStoreFactory() {

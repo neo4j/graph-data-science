@@ -48,7 +48,8 @@ class NativeFactoryTest {
         var memoryEstimation = new AtomicReference<MemoryEstimation>();
         memoryEstimation.set(NativeFactory.getMemoryEstimation(
             NodeProjections.all(),
-            RelationshipProjections.single(RelationshipType.ALL_RELATIONSHIPS, RelationshipProjection.ALL)
+            RelationshipProjections.single(RelationshipType.ALL_RELATIONSHIPS, RelationshipProjection.ALL),
+            false
         ));
 
 
@@ -73,7 +74,7 @@ class NativeFactoryTest {
             .build();
 
         MemoryTree estimate = NativeFactory
-            .getMemoryEstimation(nodeProjections, relationshipProjections)
+            .getMemoryEstimation(nodeProjections, relationshipProjections, true)
             .estimate(dimensions, 1);
         long idMapMemoryUsage = HugeIdMap.memoryEstimation().estimate(dimensions, 1).memoryUsage().min;
         int instanceSize = 80;

@@ -479,7 +479,7 @@ class CypherFactoryTest extends BaseTest {
             .build();
 
         CypherFactory factory = (CypherFactory) loader.graphStoreFactory();
-        MemoryEstimation memoryEstimation = factory.memoryEstimation();
+        MemoryEstimation memoryEstimation = factory.estimateMemoryUsageDuringLoading();
         MemoryTree estimate = memoryEstimation.estimate(factory.estimationDimensions(), 4);
 
         assertEquals(min, estimate.memoryUsage().min);

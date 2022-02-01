@@ -134,7 +134,12 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     }
 
     @Override
-    public MemoryEstimation memoryEstimation() {
+    public MemoryEstimation estimateMemoryUsageDuringLoading() {
+        return MemoryEstimations.empty();
+    }
+
+    @Override
+    public MemoryEstimation estimateMemoryUsageAfterLoading() {
         return MemoryEstimations.empty();
     }
 

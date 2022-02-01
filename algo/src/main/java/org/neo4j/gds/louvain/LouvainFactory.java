@@ -90,7 +90,7 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgor
                     .build();
 
                 long maxGraphSize = NativeFactory
-                    .getMemoryEstimation(NodeProjections.all(), relationshipProjections)
+                    .getMemoryEstimation(NodeProjections.all(), relationshipProjections, false)
                     .estimate(sparseDimensions, concurrency)
                     .memoryUsage()
                     .max;
