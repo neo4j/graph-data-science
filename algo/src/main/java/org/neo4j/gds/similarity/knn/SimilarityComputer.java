@@ -229,14 +229,23 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
     private final SimilarityComputer[] similarityComputers;
     private double[] weights;
     private int numOfProperties;
-
+    private long minimumNodesWithProperty;
     public CombinedSimilarityComputer(NodePropertyContainer graph, List<String> propertyNames) {
         this.numOfProperties = propertyNames.size();
         this.similarityComputers = new SimilarityComputer[numOfProperties];
+        minimumNodesWithProperty = Long.MAX_VALUE;
         weights = new double[this.numOfProperties];
         for (int i = 0; i < numOfProperties; ++i) {
             weights[i] = 1.0 / numOfProperties;
-            this.similarityComputers[i] = SimilarityComputer.ofProperty(graph, propertyNames.get(i));
+            String propertyName = propertyNames.get(i);
+            var nodeProperties = Objects.requireNonNull(
+                graph.nodeProperties(propertyName),
+                () -> formatWithLocale("The property `%s` has not been loaded", propertyName)
+            );
+            if (nodeProperties.size() < minimumNodesWithProperty) {
+                minimumNodesWithProperty = nodeProperties.size();
+            }
+            this.similarityComputers[i] = SimilarityComputer.ofProperty(nodeProperties, propertyName);
         }
 
     }
@@ -250,7 +259,7 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
 
     @Override
     public NeighborFilter createNeighborFilter() {
-        return null;
+        return new KnnNeighborFilter(minimumNodesWithProperty);
     }
     
 }
