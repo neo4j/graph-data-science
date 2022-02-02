@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43drop050;
+package org.neo4j.gds.compat._44drop010;
 
 import org.neo4j.common.EntityType;
 import org.neo4j.internal.kernel.api.InternalIndexState;
@@ -26,6 +26,7 @@ import org.neo4j.internal.kernel.api.exceptions.schema.IndexNotFoundKernelExcept
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexType;
 import org.neo4j.internal.schema.SchemaDescriptor;
+import org.neo4j.internal.schema.SchemaDescriptors;
 import org.neo4j.kernel.api.KernelTransaction;
 
 final class NodeLabelIndexLookupImpl {
@@ -33,7 +34,7 @@ final class NodeLabelIndexLookupImpl {
     static boolean hasNodeLabelIndex(KernelTransaction transaction) {
         return NodeLabelIndexLookupImpl.findUsableMatchingIndex(
             transaction,
-            SchemaDescriptor.forAnyEntityTokens(EntityType.NODE)
+            SchemaDescriptors.forAnyEntityTokens(EntityType.NODE)
         ) != IndexDescriptor.NO_INDEX;
     }
 
@@ -43,10 +44,9 @@ final class NodeLabelIndexLookupImpl {
     ) {
         var schemaRead = transaction.schemaRead();
         var iterator = schemaRead.index(schemaDescriptor);
-
         while (iterator.hasNext()) {
             var index = iterator.next();
-            if (index.getIndexType() != IndexType.FULLTEXT && indexIsOnline(schemaRead, index)) {
+            if (index.getIndexType() == IndexType.LOOKUP && indexIsOnline(schemaRead, index)) {
                 return index;
             }
         }

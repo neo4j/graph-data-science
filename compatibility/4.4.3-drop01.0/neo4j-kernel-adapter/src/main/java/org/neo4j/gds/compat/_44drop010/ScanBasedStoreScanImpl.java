@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43drop050;
+package org.neo4j.gds.compat._44drop010;
 
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.internal.kernel.api.Cursor;
@@ -35,6 +35,6 @@ public final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan
 
     @Override
     public boolean scanBatch(C cursor, KernelTransaction ktx) {
-        return scan.reserveBatch(cursor, batchSize);
+        return scan.reserveBatch(cursor, batchSize, ktx.cursorContext(), ktx.securityContext().mode());
     }
 }

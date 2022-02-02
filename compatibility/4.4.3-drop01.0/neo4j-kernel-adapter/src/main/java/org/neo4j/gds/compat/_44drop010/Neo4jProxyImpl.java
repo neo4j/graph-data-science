@@ -17,20 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43drop050;
+package org.neo4j.gds.compat._44drop010;
 
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
-import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
-import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.compat.MemoryTrackerProxy;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
@@ -41,6 +39,7 @@ import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.ImportLogic;
+import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.IdType;
@@ -57,6 +56,7 @@ import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.PropertyIndexQuery;
+import org.neo4j.internal.kernel.api.QueryContext;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
@@ -67,6 +67,7 @@ import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.internal.recordstorage.RecordIdType;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -74,6 +75,7 @@ import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.DatabaseIdRepository;
 import org.neo4j.kernel.database.NamedDatabaseId;
+import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.store.MetaDataStore;
 import org.neo4j.kernel.impl.store.RecordStore;
@@ -86,6 +88,7 @@ import org.neo4j.memory.LocalMemoryTracker;
 import org.neo4j.memory.MemoryPools;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.values.storable.ValueGroup;
 
 import java.io.IOException;
@@ -112,7 +115,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public void cacheDatabaseId(DatabaseIdRepository.Caching databaseIdRepository, NamedDatabaseId namedDatabaseId) {
-        databaseIdRepository.cache(namedDatabaseId);
+        databaseIdRepository.getById(namedDatabaseId.databaseId());
     }
 
     @Override
@@ -122,7 +125,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public String username(AuthSubject subject) {
-        return subject.username();
+        return subject.executingUser();
     }
 
     @Override
@@ -172,17 +175,17 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public PropertyReference propertyReference(NodeCursor nodeCursor) {
-        return LongPropertyReference.of(nodeCursor.propertiesReference());
+        return ReferencePropertyReference.of(nodeCursor.propertiesReference());
     }
 
     @Override
     public PropertyReference propertyReference(RelationshipScanCursor relationshipScanCursor) {
-        return LongPropertyReference.of(relationshipScanCursor.propertiesReference());
+        return ReferencePropertyReference.of(relationshipScanCursor.propertiesReference());
     }
 
     @Override
     public PropertyReference noPropertyReference() {
-        return LongPropertyReference.empty();
+        return ReferencePropertyReference.empty();
     }
 
     @Override
@@ -192,11 +195,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         PropertyReference reference,
         PropertyCursor cursor
     ) {
-        kernelTransaction.dataRead().nodeProperties(
-            nodeReference,
-            ((LongPropertyReference) reference).id,
-            cursor
-        );
+        var neoReference = ((ReferencePropertyReference) reference).reference;
+        kernelTransaction
+            .dataRead()
+            .nodeProperties(nodeReference, neoReference, PropertySelection.ALL_PROPERTIES, cursor);
     }
 
     @Override
@@ -206,11 +208,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         PropertyReference reference,
         PropertyCursor cursor
     ) {
-        kernelTransaction.dataRead().relationshipProperties(
-            relationshipReference,
-            ((LongPropertyReference) reference).id,
-            cursor
-        );
+        var neoReference = ((ReferencePropertyReference) reference).reference;
+        kernelTransaction
+            .dataRead()
+            .relationshipProperties(relationshipReference, neoReference, PropertySelection.ALL_PROPERTIES, cursor);
     }
 
     @Override
@@ -284,7 +285,13 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             ? IndexQueryConstraints.unordered(needsValues)
             : IndexQueryConstraints.constrained(indexOrder, needsValues);
 
-        dataRead.nodeIndexSeek(index, cursor, indexQueryConstraints, ((CompatIndexQueryImpl) query).indexQuery);
+        dataRead.nodeIndexSeek(
+            (QueryContext) dataRead,
+            index,
+            cursor,
+            indexQueryConstraints,
+            ((CompatIndexQueryImpl) query).indexQuery
+        );
     }
 
     @Override
@@ -342,6 +349,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             @Override
             public boolean highIO() {
                 return false;
+            }
+
+            @Override
+            public IndexConfig indexConfig() {
+                return IndexConfig.DEFAULT.withLabelIndex();
             }
         };
         return factory.instantiate(
@@ -427,17 +439,14 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public long getHighestPossibleNodeCount(
         Read read, IdGeneratorFactory idGeneratorFactory
     ) {
-        return countByIdGenerator(idGeneratorFactory, org.neo4j.internal.id.IdType.NODE).orElseGet(read::nodesGetCount);
+        return countByIdGenerator(idGeneratorFactory, RecordIdType.NODE).orElseGet(read::nodesGetCount);
     }
 
     @Override
     public long getHighestPossibleRelationshipCount(
         Read read, IdGeneratorFactory idGeneratorFactory
     ) {
-        return countByIdGenerator(
-            idGeneratorFactory,
-            org.neo4j.internal.id.IdType.RELATIONSHIP
-        ).orElseGet(read::relationshipsGetCount);
+        return countByIdGenerator(idGeneratorFactory, RecordIdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
     }
 
     @Override

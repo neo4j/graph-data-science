@@ -17,28 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43drop050;
+package org.neo4j.gds.compat._44drop010;
 
-import org.neo4j.gds.compat.CompatAccessMode;
-import org.neo4j.gds.compat.CustomAccessMode;
-import org.neo4j.internal.kernel.api.RelTypeSupplier;
-import org.neo4j.internal.kernel.api.TokenSet;
+import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.gds.compat.Neo4jProxyApi;
+import org.neo4j.gds.compat.Neo4jProxyFactory;
+import org.neo4j.gds.compat.Neo4jVersion;
 
-import java.util.function.Supplier;
+@ServiceProvider
+public final class Neo4jProxyFactoryImpl implements Neo4jProxyFactory {
 
-public final class CompatAccessModeImpl extends CompatAccessMode {
-
-    CompatAccessModeImpl(CustomAccessMode custom) {
-        super(custom);
+    @Override
+    public boolean canLoad(Neo4jVersion version) {
+        return version == Neo4jVersion.V_4_4_drop10;
     }
 
     @Override
-    public boolean allowsReadNodeProperty(Supplier<TokenSet> labels, int propertyKey) {
-        return custom.allowsReadNodeProperty(propertyKey);
-    }
-
-    @Override
-    public boolean allowsReadRelationshipProperty(RelTypeSupplier relType, int propertyKey) {
-        return custom.allowsReadRelationshipProperty(propertyKey);
+    public Neo4jProxyApi load() {
+        return new Neo4jProxyImpl();
     }
 }

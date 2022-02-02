@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43drop050;
+package org.neo4j.gds.compat._44drop010;
 
 import org.neo4j.gds.compat.CompatUsernameAuthSubject;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -28,4 +28,8 @@ final class CompatUsernameAuthSubjectImpl extends CompatUsernameAuthSubject {
         super(username, authSubject);
     }
 
+    @Override
+    public String executingUser() {
+        return username;
+    }
 }
