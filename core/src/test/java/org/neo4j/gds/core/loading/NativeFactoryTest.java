@@ -76,10 +76,8 @@ class NativeFactoryTest {
         MemoryTree estimate = NativeFactory
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
             .estimate(dimensions, 1);
-        long idMapMemoryUsage = HugeIdMap.memoryEstimation().estimate(dimensions, 1).memoryUsage().min;
-        int instanceSize = 80;
 
-        assertEquals(3_200_581_620L * 2 - idMapMemoryUsage - instanceSize, estimate.memoryUsage().min);
-        assertEquals(6_000_830_800L, estimate.memoryUsage().max);
+        assertEquals(20_805_826_072L, estimate.memoryUsage().min);
+        assertEquals(22_405_826_072L, estimate.memoryUsage().max);
     }
 }
