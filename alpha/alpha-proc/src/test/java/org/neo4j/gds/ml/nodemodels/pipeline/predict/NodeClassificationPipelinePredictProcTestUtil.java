@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
+import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -37,16 +39,37 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainCon
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public final class NodeClassificationPipelinePredictProcTestUtil {
 
+    static final String GRAPH_NAME = "g";
+
+    public static final String TEST_GRAPH_QUERY =
+        "CREATE " +
+        " (n1:N {a: -1.36753705, b:  1.46853155})" +
+        ", (n2:N {a: -1.45431768, b: -1.67820474})" +
+        ", (n3:N {a: -0.34216825, b: -1.31498086})" +
+        ", (n4:N {a: -0.60765016, b:  1.0186564})" +
+        ", (n5:N {a: -0.48403364, b: -0.49152604})";
+
     private NodeClassificationPipelinePredictProcTestUtil() {}
 
-    public static void addPipelineModelWithFeatures(ModelCatalog modelCatalog, String graphName,  String username, int dimensionOfNodeFeatures) {
+    static void addPipelineModelWithFeatures(
+        ModelCatalog modelCatalog,
+        String graphName,
+        String username,
+        int dimensionOfNodeFeatures
+    ) {
         addPipelineModelWithFeatures(modelCatalog, graphName, username, dimensionOfNodeFeatures, List.of("a","b"));
     }
 
-    public static void addPipelineModelWithFeatures(ModelCatalog modelCatalog, String graphName, String username, int dimensionOfNodeFeatures, List<String> nodeFeatures) {
+    static Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
+        String graphName,
+        String username,
+        int dimensionOfNodeFeatures,
+        List<String> nodeFeatures
+    ){
         var pipeline = new NodeClassificationPipeline();
 
         pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
@@ -65,7 +88,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         }
 
         NodeLogisticRegressionData modelData = createModeldata(weights);
-        modelCatalog.set(Model.of(
+        return Model.of(
             username,
             "model",
             NodeClassificationPipeline.MODEL_TYPE,
@@ -83,7 +106,17 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 .metrics(Map.of())
                 .trainingPipeline(pipeline.copy())
                 .build()
-        ));
+        );
+    }
+
+    static void addPipelineModelWithFeatures(
+        ModelCatalog modelCatalog,
+        String graphName,
+        String username,
+        int dimensionOfNodeFeatures,
+        List<String> nodeFeatures
+    ) {
+        modelCatalog.set(createModel(graphName, username, dimensionOfNodeFeatures, nodeFeatures));
     }
 
     static NodeLogisticRegressionData createModeldata(double[] weights) {
@@ -95,9 +128,21 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 new Matrix(
                     weights,
                     2,
-                    weights.length/2
+                    weights.length / 2
                 )),
             idMap
+        );
+    }
+
+    static Stream<Arguments> graphNameOrConfigurations() {
+        MemoryRange pipelineExecutorEstimation = MemoryRange.of(10344L, 10344L);
+
+        return Stream.of(
+            Arguments.of("g", pipelineExecutorEstimation),
+            Arguments.of(
+                Map.of("nodeProjection", "*", "relationshipProjection", "*"),
+                pipelineExecutorEstimation.add(MemoryRange.of(295392L))
+            )
         );
     }
 }

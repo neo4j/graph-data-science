@@ -249,8 +249,12 @@ public final class TestSupport {
     ) {
         var actual = actualMemoryEstimation.get().estimate(dimensions, concurrency).memoryUsage();
 
-        assertEquals(expectedMinBytes, actual.min);
-        assertEquals(expectedMaxBytes, actual.max);
+        SoftAssertions softly = new SoftAssertions();
+
+        softly.assertThat(actual.min).isEqualTo(expectedMinBytes);
+        softly.assertThat(actual.max).isEqualTo(expectedMaxBytes);
+
+        softly.assertAll();
     }
 
     public static void assertTransactionTermination(Executable executable) {

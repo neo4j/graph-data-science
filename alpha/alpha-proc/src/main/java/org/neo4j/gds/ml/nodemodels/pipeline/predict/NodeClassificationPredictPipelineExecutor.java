@@ -21,25 +21,33 @@ package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
 
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredict;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     NodeClassificationPredictPipelineBaseConfig,
     NodeClassificationPipeline,
     NodeClassificationResult
 > {
-    private static final int BATCH_SIZE = 100;
+    private static final int MIN_BATCH_SIZE = 100;
     private final NodeLogisticRegressionData modelData;
 
     NodeClassificationPredictPipelineExecutor(
@@ -53,6 +61,38 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     ) {
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
         this.modelData = modelData;
+    }
+
+    public static MemoryEstimation estimate(
+        Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
+        NodeClassificationPredictPipelineBaseConfig configuration
+    ) {
+        var pipeline = model.customInfo().trainingPipeline();
+        var classCount = model.customInfo().classes().size();
+        var featureCount = model.data().weights().data().totalSize();
+
+        var nodePropertyStepEstimations = pipeline
+            .nodePropertySteps()
+            .stream()
+            .map(ExecutableNodePropertyStep::estimate)
+            .collect(Collectors.toList());
+
+        var predictionEstimation = MemoryEstimations.builder().add(
+            "Pipeline Predict",
+            NodeClassificationPredict.memoryEstimationWithDerivedBatchSize(
+                configuration.includePredictedProbabilities(),
+                MIN_BATCH_SIZE,
+                featureCount,
+                classCount
+            )
+        ).build();
+
+        return MemoryEstimations.builder()
+            .max(List.of(
+                MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations),
+                predictionEstimation
+            ))
+            .build();
     }
 
     @Override
@@ -76,7 +116,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         var innerAlgo = new NodeClassificationPredict(
             new NodeLogisticRegressionPredictor(modelData, pipeline.featureProperties()),
             graph,
-            BATCH_SIZE,
+            MIN_BATCH_SIZE,
             config.concurrency(),
             config.includePredictedProbabilities(),
             pipeline.featureProperties(),

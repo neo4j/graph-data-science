@@ -27,10 +27,12 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -218,6 +220,11 @@ class PipelineExecutorTest {
         }
 
         @Override
+        public MemoryEstimation estimate() {
+            throw new MemoryEstimationNotImplementedException();
+        }
+
+        @Override
         public void execute(
             ExecutionContext executionContext,
             String graphName,
@@ -247,6 +254,11 @@ class PipelineExecutorTest {
         @Override
         public String procName() {
             return "FailingNodePropertyStep";
+        }
+
+        @Override
+        public MemoryEstimation estimate() {
+            throw new MemoryEstimationNotImplementedException();
         }
 
         @Override

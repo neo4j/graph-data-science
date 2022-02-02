@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.nodemodels.BestMetricData;
@@ -35,6 +37,7 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
@@ -63,6 +66,30 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
     }
 
+    public static MemoryEstimation estimate(
+        NodeClassificationPipeline pipeline,
+        NodeClassificationPipelineTrainConfig configuration
+    ) {
+        var nodePropertyStepEstimations = pipeline
+            .nodePropertySteps()
+            .stream()
+            .map(ExecutableNodePropertyStep::estimate)
+            .collect(Collectors.toList());
+
+        var trainingEstimation = MemoryEstimations
+            .builder()
+            .add("Pipeline Train", NodeClassificationTrain.estimate(innerConfig(pipeline, configuration)))
+            .build();
+
+        return MemoryEstimations.builder()
+            .max("Pipeline executor", List.of(
+                    MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations),
+                    trainingEstimation
+                )
+            )
+            .build();
+    }
+
     @Override
     public Map<DatasetSplits, GraphFilter> splitDataset() {
         return Map.of(
@@ -80,7 +107,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         var relationshipTypes = config.internalRelationshipTypes(graphStore);
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.empty());
         var innerModel = NodeClassificationTrain
-            .create(graph, innerConfig(), executionContext.allocationTracker(), progressTracker)
+            .create(graph, innerConfig(pipeline, config), executionContext.allocationTracker(), progressTracker)
             .compute();
         var innerInfo = innerModel.customInfo();
 
@@ -141,7 +168,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
 
     }
 
-    NodeClassificationTrainConfig innerConfig() {
+    static NodeClassificationTrainConfig innerConfig(NodeClassificationPipeline pipeline, NodeClassificationPipelineTrainConfig config) {
         var params = pipeline.trainingParameterSpace().stream()
             .map(NodeLogisticRegressionTrainCoreConfig::toMap).collect(Collectors.toList());
         return NodeClassificationTrainConfigImpl.builder()

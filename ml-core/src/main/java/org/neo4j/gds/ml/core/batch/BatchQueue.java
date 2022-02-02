@@ -48,11 +48,15 @@ public class BatchQueue {
 
     public BatchQueue(long nodeCount, int minBatchSize, int concurrency) {
         this(nodeCount,
-            Math.toIntExact(Math.min(
-                Integer.MAX_VALUE,
-                ParallelUtil.adjustedBatchSize(nodeCount, concurrency, minBatchSize)
-            ))
+            computeBatchSize(nodeCount, minBatchSize, concurrency)
         );
+    }
+
+    public static int computeBatchSize(long nodeCount, int minBatchSize, int concurrency) {
+        return Math.toIntExact(Math.min(
+            Integer.MAX_VALUE,
+            ParallelUtil.adjustedBatchSize(nodeCount, concurrency, minBatchSize)
+        ));
     }
 
     synchronized Optional<Batch> pop() {

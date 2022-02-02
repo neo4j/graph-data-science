@@ -34,6 +34,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeClassificationPipelineCompanion {
     public static final String PREDICT_DESCRIPTION = "Predicts classes for all nodes based on a previously trained pipeline model";
+    public static final String ESTIMATE_PREDICT_DESCRIPTION = "Estimates memory for predicting classes for all nodes based on a previously trained pipeline model";
     public static final String PIPELINE_MODEL_TYPE = "Node classification training pipeline";
     static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("testFraction", 0.3, "validationFolds", 3);
     static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(
@@ -61,12 +62,12 @@ public final class NodeClassificationPipelineCompanion {
 
     public static Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> getTrainedNCPipelineModel(
         ModelCatalog modelCatalog,
-        String pipelineName,
+        String modelName,
         String username
     ) {
         return modelCatalog.get(
             username,
-            pipelineName,
+            modelName,
             NodeLogisticRegressionData.class,
             NodeClassificationPipelineTrainConfig.class,
             NodeClassificationPipelineModelInfo.class

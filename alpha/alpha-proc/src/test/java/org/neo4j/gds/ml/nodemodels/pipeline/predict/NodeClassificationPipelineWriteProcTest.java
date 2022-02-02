@@ -23,12 +23,15 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -40,6 +43,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
+import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelinePredictProcTestUtil.TEST_GRAPH_QUERY;
 import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelinePredictProcTestUtil.addPipelineModelWithFeatures;
 
 @Neo4jModelCatalogExtension
@@ -49,13 +53,7 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
     private static final String MODEL_NAME = "model";
 
     @Neo4jGraph
-    private  static final String DB_CYPHER =
-        "CREATE " +
-        "  (n1:N {a: -1.36753705, b:  1.46853155})" +
-        ", (n2:N {a: -1.45431768, b: -1.67820474})" +
-        ", (n3:N {a: -0.34216825, b: -1.31498086})" +
-        ", (n4:N {a: -0.60765016, b:  1.0186564})" +
-        ", (n5:N {a: -0.48403364, b: -0.49152604})";
+    private  static final String DB_CYPHER = TEST_GRAPH_QUERY;
 
     @Inject
     private ModelCatalog modelCatalog;
@@ -165,5 +163,25 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
             .addParameter("modelName", MODEL_NAME)
             .yields();
         assertError(query, "`writeProperty` and `predictedProbabilityProperty` must be different (both were `foo`)");
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelinePredictProcTestUtil#graphNameOrConfigurations")
+    void shouldEstimateMemory(Object graphNameOrConfiguration, MemoryRange expected) {
+        addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2);
+
+        var query = "CALL gds.alpha.ml.pipeline.nodeClassification.predict.write.estimate(" +
+                    "   $graphDefinition, {" +
+                    "       modelName: $modelName," +
+                    "       writeProperty: 'foo'," +
+                    "       predictedProbabilityProperty: 'bar'" +
+                    "})" +
+                    "YIELD bytesMin, bytesMax";
+
+        assertCypherResult(
+            query,
+            Map.of("graphDefinition", graphNameOrConfiguration, "modelName", MODEL_NAME),
+            List.of(Map.of("bytesMin", expected.min, "bytesMax", expected.max))
+        );
     }
 }

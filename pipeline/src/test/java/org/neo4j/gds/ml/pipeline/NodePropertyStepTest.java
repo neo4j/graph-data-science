@@ -29,6 +29,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -88,5 +89,17 @@ class NodePropertyStepTest extends BaseProcTest {
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), GRAPH_NAME).graphStore();
 
         graphStore.nodeLabels().forEach(label -> assertThat(graphStore.nodePropertyKeys(label)).containsExactly(PROPERTY_NAME));
+    }
+
+    @Test
+    void testEstimate() {
+        var gdsCallableDefinition = GdsCallableFinder
+            .findByName("gds.testProc.mutate", List.of())
+            .orElseThrow();
+
+        var step = new NodePropertyStep(gdsCallableDefinition, Map.of("mutateProperty", PROPERTY_NAME, "throwOnEstimate", true));
+
+        // verify exception is caught
+        assertThat(step.estimate().estimate(GraphDimensions.of(1), 4).memoryUsage().max).isZero();
     }
 }

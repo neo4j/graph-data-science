@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationStreamResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -45,7 +46,9 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineCompanion.prepareTrainConfig;
 
 @GdsCallable(name = "gds.alpha.ml.pipeline.nodeClassification.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
 public class NodeClassificationPipelineStreamProc
@@ -65,9 +68,18 @@ public class NodeClassificationPipelineStreamProc
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        // TODO: this will go away once node property steps do not rely on this method
-        configuration.put("graphName", graphName);
+        prepareTrainConfig(graphName, configuration);
         return stream(compute(graphName, configuration));
+    }
+
+    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.stream.estimate", mode = Mode.READ)
+    @Description(ESTIMATE_PREDICT_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        prepareTrainConfig(graphNameOrConfiguration, algoConfiguration);
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

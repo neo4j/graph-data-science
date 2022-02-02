@@ -22,6 +22,11 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.executor.AlgoConfigParser;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -52,6 +57,21 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     @Override
     public String procName() {
         return callableDefinition.name();
+    }
+
+    @Override
+    public MemoryEstimation estimate() {
+        var algoSpec = callableDefinition.algorithmSpec();
+        var algoConfig = new AlgoConfigParser<>("", algoSpec.newConfigFunction()).processInput(config);
+
+        try {
+            algoSpec.algorithmFactory().memoryEstimation(algoConfig);
+        } catch (MemoryEstimationNotImplementedException exception) {
+            // If a single node property step cannot be estimated, we ignore this step in the estimation
+            return MemoryEstimations.of(callableDefinition.name(), MemoryRange.of(0));
+        }
+
+        return algoSpec.algorithmFactory().memoryEstimation(algoConfig);
     }
 
     @Override

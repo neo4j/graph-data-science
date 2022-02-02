@@ -103,9 +103,13 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.ml.pipeline.nodeClassification.configureSplit",
         "gds.alpha.ml.pipeline.nodeClassification.create",
         "gds.alpha.ml.pipeline.nodeClassification.predict.mutate",
+        "gds.alpha.ml.pipeline.nodeClassification.predict.mutate.estimate",
         "gds.alpha.ml.pipeline.nodeClassification.predict.stream",
+        "gds.alpha.ml.pipeline.nodeClassification.predict.stream.estimate",
         "gds.alpha.ml.pipeline.nodeClassification.predict.write",
+        "gds.alpha.ml.pipeline.nodeClassification.predict.write.estimate",
         "gds.alpha.ml.pipeline.nodeClassification.train",
+        "gds.alpha.ml.pipeline.nodeClassification.train.estimate",
 
         "gds.alpha.scc.write",
         "gds.alpha.scc.stream",

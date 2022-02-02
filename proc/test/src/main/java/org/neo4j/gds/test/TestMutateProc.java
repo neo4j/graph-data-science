@@ -26,7 +26,11 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
@@ -109,6 +113,15 @@ public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgori
                     progressTracker,
                     configuration.throwInCompute()
                 );
+            }
+
+            @Override
+            public MemoryEstimation memoryEstimation(TestMutateConfig configuration) {
+                if (configuration.throwOnEstimate()) {
+                    throw new MemoryEstimationNotImplementedException();
+                } else {
+                    return MemoryEstimations.of("Accurate estimation", MemoryRange.of(42));
+                }
             }
         };
     }
