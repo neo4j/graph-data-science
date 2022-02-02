@@ -356,7 +356,7 @@ include::../shared/examples-estimate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.knn.write.estimate('myGraph', {
-  nodeWeightProperty: 'age',
+  nodeProperties: ['age'],
   writeRelationshipType: 'SIMILAR',
   writeProperty: 'score',
   topK: 1
@@ -385,7 +385,7 @@ include::../shared/examples-stream-intro.adoc[]
 ----
 CALL gds.beta.knn.stream('myGraph', {
     topK: 1,
-    nodeWeightProperty: 'age',
+    nodeProperties: ['age'],
     // The following parameters are set to produce a deterministic result
     randomSeed: 1337,
     concurrency: 1,
@@ -426,7 +426,7 @@ include::../shared/examples-stats-intro.adoc[]
 .The following will run the algorithm and return the result in form of statistical and measurement values:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.knn.stats('myGraph', {topK: 1, concurrency: 1, randomSeed: 42, nodeWeightProperty: 'age'})
+CALL gds.beta.knn.stats('myGraph', {topK: 1, concurrency: 1, randomSeed: 42, nodeProperties: ['age']})
 YIELD nodesCompared, similarityPairs
 ----
 
@@ -455,7 +455,7 @@ CALL gds.beta.knn.mutate('myGraph', {
     topK: 1,
     randomSeed: 42,
     concurrency: 1,
-    nodeWeightProperty: 'age'
+    nodeProperties: ['age']
 })
 YIELD nodesCompared, relationshipsWritten
 ----
@@ -501,7 +501,7 @@ CALL gds.beta.knn.write('myGraph', {
     topK: 1,
     randomSeed: 42,
     concurrency: 1,
-    nodeWeightProperty: 'age'
+    nodeProperties: ['age']
 })
 YIELD nodesCompared, relationshipsWritten
 ----
