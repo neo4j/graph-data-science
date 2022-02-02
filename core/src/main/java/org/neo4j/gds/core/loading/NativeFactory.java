@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
@@ -36,6 +39,8 @@ import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -103,29 +108,65 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         // relationships
         relationshipProjections.projections().forEach((relationshipType, relationshipProjection) -> {
             boolean undirected = relationshipProjection.orientation() == Orientation.UNDIRECTED;
-
             if (isLoading) {
-                builder.add(
-                    formatWithLocale("adjacency loading buffer for '%s'", relationshipType),
-                    AdjacencyBuffer.memoryEstimation(relationshipType, (int) relationshipProjection.properties().stream().count(), undirected)
-                );
+                builder.max(List.of(
+                    relationshipEstimationDuringLoading(relationshipType, relationshipProjection, undirected),
+                    relationshipEstimationAfterLoading(relationshipType, relationshipProjection, undirected)));
             } else {
-                // adjacency list
-                builder.add(
-                    formatWithLocale("adjacency list for '%s'", relationshipType),
-                    AdjacencyListBehavior.adjacencyListEstimation(relationshipType, undirected)
-                );
-                // all properties per projection
-                relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> {
-                    builder.add(
-                        formatWithLocale("property '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
-                        AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected)
-                    );
-                });
+                builder.add(relationshipEstimationAfterLoading(relationshipType, relationshipProjection, undirected));
             }
         });
 
         return builder.build();
+    }
+
+    @NotNull
+    private static MemoryEstimation relationshipEstimationDuringLoading(
+        RelationshipType relationshipType,
+        RelationshipProjection relationshipProjection,
+        boolean undirected
+    ) {
+        var duringLoadingEstimation = MemoryEstimations.builder("Size duringLoading");
+
+        duringLoadingEstimation.add(
+            formatWithLocale("adjacency loading buffer for '%s'", relationshipType),
+            AdjacencyBuffer.memoryEstimation(
+                relationshipType, (int) relationshipProjection.properties().stream().count(),
+                undirected
+            )
+        );
+
+        // Offsets and degrees are eagerly initialized and exist next to the fully populated AdjacencyBuffer
+        duringLoadingEstimation.perNode(formatWithLocale("offsets for '%s'", relationshipType), HugeLongArray::memoryEstimation);
+        duringLoadingEstimation.perNode(formatWithLocale("degrees for '%s'", relationshipType), HugeIntArray::memoryEstimation);
+        relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> duringLoadingEstimation.perNode(
+            formatWithLocale("property '%s.%s'", relationshipType, resolvedPropertyMapping.propertyKey()),
+            HugeLongArray::memoryEstimation
+        ));
+
+        return duringLoadingEstimation.build();
+    }
+
+    private static MemoryEstimation relationshipEstimationAfterLoading(
+        RelationshipType relationshipType,
+        RelationshipProjection relationshipProjection,
+        boolean undirected
+    ) {
+        var afterLoadingEstimation = MemoryEstimations.builder("Size duringLoading");
+        // adjacency list
+        afterLoadingEstimation.add(
+            formatWithLocale("adjacency list for '%s'", relationshipType),
+            AdjacencyListBehavior.adjacencyListEstimation(relationshipType, undirected)
+        );
+        // all properties per projection
+        relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> {
+            afterLoadingEstimation.add(
+                formatWithLocale("property '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
+                AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected)
+            );
+        });
+
+        return afterLoadingEstimation.build();
     }
 
     @Override
