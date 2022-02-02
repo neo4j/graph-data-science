@@ -65,9 +65,9 @@ class KnnTest {
     @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a { knn: 1.2 } )" +
-        ", (b { knn: 1.1 } )" +
-        ", (c { knn: 42.0 } )";
+        "  (a { knn: 1.2, prop: 1.0 } )" +
+        ", (b { knn: 1.1, prop: 5.0 } )" +
+        ", (c { knn: 42.0, prop:10.0 } )";
     @Inject
     private Graph graph;
 
@@ -137,7 +137,7 @@ class KnnTest {
         long nodeId,
         long... expectedNeighbors
     ) {
-        var actualSimilarityPairs=result.neighborList().get(nodeId).similarityStream(nodeId);
+        var actualSimilarityPairs = result.neighborList().get(nodeId).similarityStream(nodeId);
         var actualNeighbors = result.neighborsOf(nodeId).toArray();
         assertThat(actualNeighbors)
             .doesNotContain(nodeId)
@@ -145,7 +145,28 @@ class KnnTest {
             .doesNotHaveDuplicates()
             .hasSizeLessThanOrEqualTo(expectedNeighbors.length);
         assertThat(actualSimilarityPairs)
-            .isSortedAccordingTo(Comparator.comparingDouble((s)->-s.similarity));
+            .isSortedAccordingTo(Comparator.comparingDouble((s) -> -s.similarity));
+    }
+
+    @Test
+    void shouldWorkWithMultipleProperties() {
+
+        var knnConfig = ImmutableKnnBaseConfig.builder()
+            .nodeProperties(List.of("knn", "prop"))
+            .concurrency(1)
+            .randomSeed(19L)
+            .similarityThreshold(0.14)
+            .topK(1)
+            .build();
+        var knnContext = ImmutableKnnContext.builder().build();
+
+        var knn = new Knn(graph, knnConfig, knnContext);
+        var result = knn.compute();
+
+        assertThat(result).isNotNull();
+        assertThat(result.size()).isEqualTo(3);
+
+
     }
 
     @Test
