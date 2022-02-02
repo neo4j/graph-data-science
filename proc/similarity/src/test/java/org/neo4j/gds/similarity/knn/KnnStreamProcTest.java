@@ -51,7 +51,7 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
 
     @Test
     void shouldStreamResults() {
-        String query = "CALL gds.beta.knn.stream($graph, {nodeWeightProperty: 'knn', topK: 1})" +
+        String query = "CALL gds.beta.knn.stream($graph, {nodeProperties: ['knn'], topK: 1})" +
                        " YIELD node1, node2, similarity" +
                        " RETURN node1, node2, similarity" +
                        " ORDER BY node1";
@@ -88,7 +88,7 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
             .algo("gds.beta.knn")
             .streamMode()
             .addParameter("nodeLabels", List.of("Foo"))
-            .addParameter("nodeWeightProperty", "age")
+            .addParameter("nodeProperties", List.of("age"))
             .yields("node1", "node2", "similarity");
         assertCypherResult(algoQuery, List.of(
             Map.of("node1", 6L, "node2", 7L, "similarity", 1.0),

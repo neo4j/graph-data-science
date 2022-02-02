@@ -100,7 +100,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             .algo("gds", "beta", "knn")
             .mutateMode()
             .addParameter("sudo", true)
-            .addParameter("nodeWeightProperty", "knn")
+            .addParameter("nodeProperties", List.of("knn"))
             .addParameter("topK", 1)
             .addParameter("randomSeed", 42)
             .addParameter("concurrency", 1)
@@ -168,7 +168,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             .algo("gds", "beta", "knn")
             .mutateMode()
             .addParameter("sudo", true)
-            .addParameter("nodeWeightProperty", "knn")
+            .addParameter("nodeProperties", List.of("knn"))
             .addParameter("topK", 1)
             .addParameter("concurrency", 1)
             .addParameter("randomSeed", 42)
@@ -181,20 +181,22 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
 
     @Override
     public void setupStoreLoader(StoreLoaderBuilder storeLoaderBuilder, Map<String, Object> config) {
-        var nodeWeightProperty = config.get("nodeWeightProperty");
-        if (nodeWeightProperty != null) {
-            var nodeProperty = String.valueOf(nodeWeightProperty);
-            runQuery(
-                graphDb(),
-                "CALL db.createProperty($prop)",
-                Map.of("prop", nodeWeightProperty)
-            );
-            storeLoaderBuilder.addNodeProperty(
-                ImmutablePropertyMapping.builder()
-                    .propertyKey(nodeProperty)
-                    .defaultValue(DefaultValue.forDouble())
-                    .build()
-            );
+        var nodeProperties = config.get("nodeProperties");
+        if (nodeProperties != null) {
+            Iterable<String> properties = (List<String>) nodeProperties;
+            for (String property : properties) {
+                runQuery(
+                    graphDb(),
+                    "CALL db.createProperty($prop)",
+                    Map.of("prop", property)
+                );
+                storeLoaderBuilder.addNodeProperty(
+                    ImmutablePropertyMapping.builder()
+                        .propertyKey(property)
+                        .defaultValue(DefaultValue.forDouble())
+                        .build()
+                );
+            }
         }
     }
 
@@ -226,7 +228,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             .algo("gds.beta.knn")
             .mutateMode()
             .addParameter("nodeLabels", List.of("Foo"))
-            .addParameter("nodeWeightProperty", "age")
+            .addParameter("nodeProperties", List.of("age"))
             .addParameter("mutateRelationshipType", relationshipType)
             .addParameter("mutateProperty", relationshipProperty).yields();
         runQuery(algoQuery);
@@ -268,7 +270,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         String algoQuery = GdsCypher.call("graph")
             .algo("gds.beta.knn")
             .mutateMode()
-            .addParameter("nodeWeightProperty", "age")
+            .addParameter("nodeProperties", List.of("age"))
             .addParameter("similarityThreshold", 0.14)
             .addParameter("mutateRelationshipType", relationshipType)
             .addParameter("mutateProperty", relationshipProperty).yields();

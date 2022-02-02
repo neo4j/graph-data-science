@@ -252,6 +252,5 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
     public NeighborFilter createNeighborFilter() {
         return null;
     }
-
-
+    
 }

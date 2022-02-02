@@ -111,7 +111,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 .sampleRate(0.9)
                 .deltaThreshold(0)
                 .topK(topK)
-                .nodeWeightProperty("DUMMY")
+                .nodeProperties(List.of("DUMMY"))
                 .build(),
             ProgressTracker.NULL_TRACKER
         );
@@ -185,7 +185,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                     .sampleRate(0.9)
                     .deltaThreshold(0)
                     .topK(1)
-                    .nodeWeightProperty("DUMMY")
+                    .nodeProperties(List.of("DUMMY"))
                     .build(),
                 ProgressTracker.NULL_TRACKER
             );
@@ -226,7 +226,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 .sampleRate(0.9)
                 .deltaThreshold(0)
                 .topK(topK)
-                .nodeWeightProperty("DUMMY")
+                .nodeProperties(List.of("DUMMY"))
                 .build(),
             ProgressTracker.NULL_TRACKER
         );

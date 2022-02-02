@@ -77,7 +77,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             .algo("gds", "beta", "knn")
             .writeMode()
             .addParameter("sudo", true)
-            .addParameter("nodeWeightProperty", "knn")
+            .addParameter("nodeProperties", List.of("knn"))
             .addParameter("topK", 1)
             .addParameter("concurrency", 1)
             .addParameter("randomSeed", 42)
@@ -155,7 +155,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             .algo("gds", "beta", "knn")
             .writeMode()
             .addParameter("sudo", true)
-            .addParameter("nodeWeightProperty", "knn")
+            .addParameter("nodeProperties", List.of("knn"))
             .addParameter("topK", 1)
             .addParameter("concurrency", 1)
             .addParameter("randomSeed", 42)
@@ -222,7 +222,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             .algo("gds.beta.knn")
             .writeMode()
             .addParameter("nodeLabels", List.of("Foo"))
-            .addParameter("nodeWeightProperty", "age")
+            .addParameter("nodeProperties", List.of("age"))
             .addParameter("writeRelationshipType", relationshipType)
             .addParameter("writeProperty", relationshipProperty).yields();
         runQuery(algoQuery);
@@ -261,20 +261,22 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
 
     @Override
     public void setupStoreLoader(StoreLoaderBuilder storeLoaderBuilder, Map<String, Object> config) {
-        var nodeWeightProperty = config.get("nodeWeightProperty");
-        if (nodeWeightProperty != null) {
-            var nodeProperty = String.valueOf(nodeWeightProperty);
-            runQuery(
-                graphDb(),
-                "CALL db.createProperty($prop)",
-                Map.of("prop", nodeWeightProperty)
-            );
-            storeLoaderBuilder.addNodeProperty(
-                ImmutablePropertyMapping.builder()
-                    .propertyKey(nodeProperty)
-                    .defaultValue(DefaultValue.forDouble())
-                    .build()
-            );
+        var nodeProperties = config.get("nodeProperties");
+        if (nodeProperties != null) {
+            Iterable<String> properties = (List<String>) nodeProperties;
+            for (String property : properties) {
+                runQuery(
+                    graphDb(),
+                    "CALL db.createProperty($prop)",
+                    Map.of("prop", property)
+                );
+                storeLoaderBuilder.addNodeProperty(
+                    ImmutablePropertyMapping.builder()
+                        .propertyKey(property)
+                        .defaultValue(DefaultValue.forDouble())
+                        .build()
+                );
+            }
         }
     }
 }

@@ -44,10 +44,10 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
-import org.neo4j.gds.test.config.NodeWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -72,8 +72,7 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
         return Stream.concat(
             modeSpecificConfigTests(),
             Stream.of(
-                IterationsConfigProcTest.test(proc(), minimalConfig),
-                NodeWeightConfigProcTest.mandatoryParameterTest(proc(), minimalConfig)
+                IterationsConfigProcTest.test(proc(), minimalConfig)
             ).flatMap(Collection::stream)
         );
     }
@@ -174,7 +173,7 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
             .withNumber("deltaThreshold", 0.0)
             .withNumber("randomJoins", 42)
             .withNumber("topK", 1)
-            .withEntry("nodeWeightProperty", "knn");
+            .withEntry("nodeProperties", List.of("knn"));
     }
 
     @Test

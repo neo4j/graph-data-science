@@ -30,6 +30,7 @@ import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -119,7 +120,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
         }
         var knnBuilder = ImmutableKnnBaseConfig.builder()
             .sampleRate(sampleRate())
-            .nodeWeightProperty("NotUsedInLP")
+            .nodeProperties(List.of("NotUsedInLP"))
             .concurrency(concurrency());
 
         topK().ifPresent(knnBuilder::topK);

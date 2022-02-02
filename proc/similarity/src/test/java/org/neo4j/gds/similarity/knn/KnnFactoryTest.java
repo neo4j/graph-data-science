@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -130,7 +131,7 @@ class KnnFactoryTest {
 
     private KnnBaseConfig knnConfig(KnnSampler.SamplerType initialSampler) {
         return ImmutableKnnBaseConfig.builder()
-            .nodeWeightProperty("knn")
+            .nodeProperties(List.of("knn"))
             .initialSampler(initialSampler)
             .similarityThreshold(0.8)
             .build();

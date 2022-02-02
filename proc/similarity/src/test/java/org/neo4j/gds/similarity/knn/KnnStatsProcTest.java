@@ -62,7 +62,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
             .algo("gds", "beta", "knn")
             .statsMode()
             .addParameter("sudo", true)
-            .addParameter("nodeWeightProperty", "knn")
+            .addParameter("nodeProperties", List.of("knn"))
             .addParameter("randomSeed", 42)
             .addParameter("concurrency", 1)
             .addParameter("topK", 1)
@@ -113,7 +113,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds", "beta", "knn")
             .statsMode()
-            .addParameter("nodeWeightProperty", "knn")
+            .addParameter("nodeProperties", List.of("knn"))
             .yields();
 
         List<String> forbiddenResultColumns = List.of(
@@ -153,7 +153,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
             .call("graph")
             .algo("gds.beta.knn")
             .statsMode()
-            .addParameter("nodeWeightProperty", "weight")
+            .addParameter("nodeProperties", List.of("weight"))
             .addParameter("concurrency", 1)
             .addParameter("randomSeed", 42)
             .yields("similarityPairs");
