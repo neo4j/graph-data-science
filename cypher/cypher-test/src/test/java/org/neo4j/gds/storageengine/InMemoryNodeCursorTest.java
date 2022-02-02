@@ -65,7 +65,6 @@ class InMemoryNodeCursorTest extends CypherTest {
     @Test
     @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop50)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_4_drop10)
     void shouldScanSingle() {
         nodeCursor.single(0);
@@ -76,7 +75,6 @@ class InMemoryNodeCursorTest extends CypherTest {
     @Test
     @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop50)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_4_drop10)
     void shouldScanRange() {
         nodeCursor.scanRange(1, 2);
@@ -90,7 +88,6 @@ class InMemoryNodeCursorTest extends CypherTest {
     @Test
     @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop50)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_4_drop10)
     void shouldScanAll() {
         nodeCursor.scan();
@@ -105,7 +102,6 @@ class InMemoryNodeCursorTest extends CypherTest {
     @Test
     @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop50)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_4_drop10)
     void testLabels() {
         graphStore.nodes().forEachNode(nodeId -> {
@@ -131,7 +127,6 @@ class InMemoryNodeCursorTest extends CypherTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop50)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_4_drop10)
     void shouldHaveProperties() {
         nodeCursor.next();
@@ -142,7 +137,6 @@ class InMemoryNodeCursorTest extends CypherTest {
     @Test
     @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop50)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_4_drop10)
     void shouldTraverseProperties() throws TokenNotFoundException {
         nodeCursor.next();
