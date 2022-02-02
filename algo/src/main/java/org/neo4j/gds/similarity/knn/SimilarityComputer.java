@@ -227,16 +227,13 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
 
 final class CombinedSimilarityComputer implements SimilarityComputer {
     private final SimilarityComputer[] similarityComputers;
-    private double[] weights;
     private int numOfProperties;
     private long minimumNodesWithProperty;
     public CombinedSimilarityComputer(NodePropertyContainer graph, List<String> propertyNames) {
         this.numOfProperties = propertyNames.size();
         this.similarityComputers = new SimilarityComputer[numOfProperties];
         minimumNodesWithProperty = Long.MAX_VALUE;
-        weights = new double[this.numOfProperties];
         for (int i = 0; i < numOfProperties; ++i) {
-            weights[i] = 1.0 / numOfProperties;
             String propertyName = propertyNames.get(i);
             var nodeProperties = Objects.requireNonNull(
                 graph.nodeProperties(propertyName),
@@ -253,7 +250,7 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
     public double similarity(long firstNodeId, long secondNodeId) {
         return IntStream
             .range(0, numOfProperties)
-            .mapToObj(i -> weights[i] * similarityComputers[i].similarity(firstNodeId, secondNodeId))
+            .mapToObj(i -> (1.0 / numOfProperties) * similarityComputers[i].similarity(firstNodeId, secondNodeId))
             .reduce(Double::sum).get();
     }
 
