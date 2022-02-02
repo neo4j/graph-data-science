@@ -281,4 +281,52 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         assertEquals(6, mutatedGraph.relationshipCount());
 
     }
+
+    @Test
+    void shouldMutateWithFilteredNodesAndMultipleProperties() {
+        String nodeCreateQuery =
+            "CREATE " +
+            "  (alice:Person {age: 24, knn: 24})" +
+            " ,(carol:Person {age: 24, knn: 24})" +
+            " ,(eve:Person {age: 67, knn: 67})" +
+            " ,(dave:Foo {age: 48, knn: 24})" +
+            " ,(bob:Foo {age: 48, knn: 48} )";
+
+        runQuery(nodeCreateQuery);
+
+        String createQuery = GdsCypher.call("graph")
+            .graphProject()
+            .withNodeLabel("Person")
+            .withNodeLabel("Foo")
+            .withNodeProperty("age")
+            .withNodeProperty("knn")
+
+            .withAnyRelationshipType()
+            .yields();
+        runQuery(createQuery);
+
+        String relationshipType = "SIMILAR";
+        String relationshipProperty = "score";
+
+        String algoQuery = GdsCypher.call("graph")
+            .algo("gds.beta.knn")
+            .mutateMode()
+            .addParameter("nodeLabels", List.of("Foo"))
+            .addParameter("nodeProperties", List.of("age", "knn"))
+            .addParameter("mutateRelationshipType", relationshipType)
+            .addParameter("mutateProperty", relationshipProperty).yields();
+        runQuery(algoQuery);
+
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore().getUnion();
+
+        assertGraphEquals(
+            fromGdl(
+                nodeCreateQuery +
+                "(dave)-[{score: 0.52}]->(bob)" +
+                "(bob)-[{score: 0.52}]->(dave)"
+            ),
+            mutatedGraph
+        );//  0.5 * (1/(1+(48-48)) + 0.5 *(1/(1+(48-24)) = 0.52
+    }
+
 }
