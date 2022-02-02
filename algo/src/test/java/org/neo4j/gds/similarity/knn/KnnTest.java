@@ -51,6 +51,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.withPrecision;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -67,7 +68,7 @@ class KnnTest {
         "CREATE" +
         "  (a { knn: 1.2, prop: 1.0 } )" +
         ", (b { knn: 1.1, prop: 5.0 } )" +
-        ", (c { knn: 42.0, prop:10.0 } )";
+        ", (c { knn: 42.0, prop: 10.0 } )";
     @Inject
     private Graph graph;
 
@@ -155,7 +156,6 @@ class KnnTest {
             .nodeProperties(List.of("knn", "prop"))
             .concurrency(1)
             .randomSeed(19L)
-            .similarityThreshold(0.14)
             .topK(1)
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
@@ -165,6 +165,23 @@ class KnnTest {
 
         assertThat(result).isNotNull();
         assertThat(result.size()).isEqualTo(3);
+        long nodeAId = idFunction.of("a");
+        long nodeBId = idFunction.of("b");
+        long nodeCId = idFunction.of("c");
+
+        double EXP_A = 0.5 * (1 / 1.1) + 0.5 * (1 / 5.0);
+        double EXP_B = 0.5 * (1 / 1.1) + 0.5 * (1 / 5.0);
+        double EXP_C = 0.5 * (1 / 41.8) + 0.5 * (1 / 6.0);
+
+        assertCorrectNeighborList(result, nodeAId, nodeBId);
+        assertCorrectNeighborList(result, nodeBId, nodeAId);
+        assertCorrectNeighborList(result, nodeCId, nodeBId);
+        assertThat(result.neighborList().get(nodeAId).similarityStream(nodeAId).findFirst().get().similarity).isEqualTo(
+            EXP_A, withPrecision(0.001));
+        assertThat(result.neighborList().get(nodeBId).similarityStream(nodeBId).findFirst().get().similarity).isEqualTo(
+            EXP_B, withPrecision(0.001));
+        assertThat(result.neighborList().get(nodeCId).similarityStream(nodeCId).findFirst().get().similarity).isEqualTo(
+            EXP_C, withPrecision(0.001));
 
 
     }
