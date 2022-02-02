@@ -34,7 +34,6 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsStoreReader;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.compress.AdjacencyListBehavior;
-import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -96,7 +95,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         RelationshipProjections relationshipProjections,
         boolean isLoading
     ) {
-        MemoryEstimations.Builder builder = MemoryEstimations.builder(HugeGraph.class);
+        MemoryEstimations.Builder builder = MemoryEstimations.builder("graph projection");
 
         // node information
         builder.add("nodeIdMap", IdMapBehaviorServiceProvider.idMapBehavior().memoryEstimation());
@@ -126,7 +125,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         RelationshipProjection relationshipProjection,
         boolean undirected
     ) {
-        var duringLoadingEstimation = MemoryEstimations.builder("Size duringLoading");
+        var duringLoadingEstimation = MemoryEstimations.builder("size during loading");
 
         duringLoadingEstimation.add(
             formatWithLocale("adjacency loading buffer for '%s'", relationshipType),
@@ -152,7 +151,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         RelationshipProjection relationshipProjection,
         boolean undirected
     ) {
-        var afterLoadingEstimation = MemoryEstimations.builder("Size duringLoading");
+        var afterLoadingEstimation = MemoryEstimations.builder("size after loading");
         // adjacency list
         afterLoadingEstimation.add(
             formatWithLocale("adjacency list for '%s'", relationshipType),
