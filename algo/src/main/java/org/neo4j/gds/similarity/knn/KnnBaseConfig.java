@@ -20,28 +20,30 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
-import org.neo4j.gds.config.NodeWeightConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
+import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWeightConfig, SingleThreadedRandomSeedConfig {
-
-    @Override
-    @Configuration.ConvertWith("org.neo4j.gds.config.NodeWeightConfig#validatePropertyName")
-    String nodeWeightProperty();
+public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleThreadedRandomSeedConfig {
 
     @Value.Default
-    default List<String> extraProperties() {
+    @Configuration.ConvertWith("org.neo4j.gds.similarity.knn.KnnBaseConfig#validatePropertyNames")
+    default List<String> nodeProperties() {
         return List.of();
     }
+
 
     @Value.Default
     @Configuration.IntegerRange(min = 1)
@@ -111,5 +113,11 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWei
     @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#toString")
     default KnnSampler.SamplerType initialSampler() {
         return KnnSampler.SamplerType.UNIFORM;
+    }
+
+    static @Nullable List<String> validatePropertyNames(List<String> input) {
+        return input.stream()
+            .map(str -> validateNoWhiteCharacter(emptyToNull(str), "nodeProperties"))
+            .collect(Collectors.toList());
     }
 }

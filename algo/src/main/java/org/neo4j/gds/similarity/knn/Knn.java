@@ -56,7 +56,7 @@ public class Knn extends Algorithm<Knn.Result> {
         this(
             graph,
             config,
-            SimilarityComputer.ofProperty(graph, config.nodeWeightProperty()),
+            SimilarityComputer.ofProperties(graph, config.nodeProperties()),
             context
         );
     }

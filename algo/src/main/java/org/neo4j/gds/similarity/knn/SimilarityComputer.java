@@ -25,6 +25,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.utils.Intersections;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
@@ -41,17 +42,10 @@ public interface SimilarityComputer {
 
     NeighborFilter createNeighborFilter();
 
-    static SimilarityComputer ofProperty(NodePropertyContainer graph, String propertyName) {
-        var nodeProperties = Objects.requireNonNull(
-            graph.nodeProperties(propertyName),
-            () -> formatWithLocale("The property `%s` has not been loaded", propertyName)
-        );
-        return ofProperty(nodeProperties, propertyName);
-    }
-
-    static SimilarityComputer ofProperties(NodePropertyContainer graph, String[] propertyNames) {
-        if (propertyNames.length == 1)
-            return ofProperty((graph), propertyNames[0]);
+    static SimilarityComputer ofProperties(NodePropertyContainer graph, List<String> propertyNames) {
+        if (propertyNames.size() == 1) {
+            return ofProperty((graph), propertyNames.get(0));
+        }
         return new CombinedSimilarityComputer(graph, propertyNames);
     }
 
@@ -94,6 +88,15 @@ public interface SimilarityComputer {
 
     static SimilarityComputer ofLongArrayProperty(NodeProperties nodeProperties) {
         return new LongArrayPropertySimilarityComputer(nodeProperties);
+    }
+
+    //TODO: make it private again
+    static SimilarityComputer ofProperty(NodePropertyContainer graph, String propertyName) {
+        var nodeProperties = Objects.requireNonNull(
+            graph.nodeProperties(propertyName),
+            () -> formatWithLocale("The property `%s` has not been loaded", propertyName)
+        );
+        return ofProperty(nodeProperties, propertyName);
     }
 }
 
@@ -223,16 +226,19 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
 }
 
 final class CombinedSimilarityComputer implements SimilarityComputer {
-    private SimilarityComputer[] similarityComputers;
+    private final SimilarityComputer[] similarityComputers;
     private double[] weights;
     private int numOfProperties;
 
-    public CombinedSimilarityComputer(NodePropertyContainer graph, String[] propertyNames) {
-        this.numOfProperties = propertyNames.length;
+    public CombinedSimilarityComputer(NodePropertyContainer graph, List<String> propertyNames) {
+        this.numOfProperties = propertyNames.size();
         this.similarityComputers = new SimilarityComputer[numOfProperties];
+        weights = new double[this.numOfProperties];
         for (int i = 0; i < numOfProperties; ++i) {
-            this.similarityComputers[i] = SimilarityComputer.ofProperty(graph, propertyNames[i]);
+            weights[i] = 1.0 / numOfProperties;
+            this.similarityComputers[i] = SimilarityComputer.ofProperty(graph, propertyNames.get(i));
         }
+
     }
 
     public double similarity(long firstNodeId, long secondNodeId) {
@@ -246,4 +252,6 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
     public NeighborFilter createNeighborFilter() {
         return null;
     }
+
+
 }
