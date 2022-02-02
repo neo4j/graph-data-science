@@ -64,10 +64,12 @@ import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
 
     public static final String MODEL_TYPE = "nodeLogisticRegression";
+    private static final int RECOMMENDED_MIN_NUM_NODES_PER_SET = 5;
 
     private final Graph graph;
     private final NodeClassificationTrainConfig config;
@@ -276,6 +278,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
             ReadOnlyHugeLongArray.of(targets),
             config.randomSeed()
         ).splits();
+        warnIfSetSizesAreTooSmall(outerSplit,innerSplits);
         progressTracker.endSubTask();
 
         var modelSelectResult = selectBestModel(innerSplits);
@@ -286,6 +289,32 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         progressTracker.endSubTask();
 
         return createModel(bestParameters, metricResults, retrainedModelData);
+    }
+
+    private void warnIfSetSizesAreTooSmall(TrainingExamplesSplit outerSplit, List<TrainingExamplesSplit> innerSplits) {
+        var numberNodesInTestSet = outerSplit.testSet().size();
+        var numberNodesInValidationSet = innerSplits.stream().mapToLong(e -> e.testSet().size()).min().orElseThrow();
+
+        if (numberNodesInTestSet < RECOMMENDED_MIN_NUM_NODES_PER_SET) {
+            progressTracker.logWarning(
+                formatWithLocale(
+                    "The specified `testFraction` leads to a very small test set " +
+                    "with only %d nodes. Proceeding with such a small set might lead to unreliable results.",
+                    numberNodesInTestSet
+                )
+            );
+        }
+
+        //No need to check train set as it is always larger or equal to validation set.
+        if (numberNodesInValidationSet < RECOMMENDED_MIN_NUM_NODES_PER_SET) {
+            progressTracker.logWarning(
+                formatWithLocale(
+                    "The specified `validationFolds` leads to very small validation sets " +
+                    "with only %d nodes. Proceeding with such small sets might lead to unreliable results.",
+                    numberNodesInValidationSet
+                )
+            );
+        }
     }
 
     private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
