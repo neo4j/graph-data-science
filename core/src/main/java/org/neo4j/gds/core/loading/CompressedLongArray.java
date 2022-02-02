@@ -40,8 +40,8 @@ public final class CompressedLongArray {
 
     private static final byte[] EMPTY_BYTES = new byte[0];
 
-    private byte[] storage;
-    private long[][] weights;
+    private byte[] compressedTargets;
+    private long[][] properties;
     private int pos;
     private long lastValue;
     private int length;
@@ -51,19 +51,19 @@ public final class CompressedLongArray {
         // Difference between node identifiers in each adjacency list is 1.
         // This leads to ideal compression through delta encoding.
         int deltaBestCase = 1;
-        long bestCaseAdjacencySize = compressedTargetSize(avgDegree, nodeCount, deltaBestCase);
+        long bestCaseCompressedTargetsSize = compressedTargetSize(avgDegree, nodeCount, deltaBestCase);
 
         // Worst case scenario:
         // Relationships are equally distributed across nodes, i.e. each node has the same number of rels.
         // Within each adjacency list, all identifiers have the highest possible difference between each other.
         // Highest possible difference is the number of nodes divided by the average degree.
         long deltaWorstCase = (avgDegree > 0) ? ceilDiv(nodeCount, avgDegree) : 0L;
-        long worstCaseAdjacencySize = compressedTargetSize(avgDegree, nodeCount, deltaWorstCase);
+        long worstCaseCompressedTargetsSize = compressedTargetSize(avgDegree, nodeCount, deltaWorstCase);
 
         return MemoryEstimations.builder(CompressedLongArray.class)
             .fixed(
                 "compressed targets",
-                MemoryRange.of(bestCaseAdjacencySize, worstCaseAdjacencySize)
+                MemoryRange.of(bestCaseCompressedTargetsSize, worstCaseCompressedTargetsSize)
             )
             .fixed("properties", MemoryUsage.sizeOfObjectArray(propertyCount) + propertyCount * MemoryUsage.sizeOfLongArray(avgDegree))
             .build();
@@ -81,9 +81,9 @@ public final class CompressedLongArray {
     }
 
     public CompressedLongArray(int numberOfProperties) {
-        storage = EMPTY_BYTES;
+        compressedTargets = EMPTY_BYTES;
         if (numberOfProperties > 0) {
-            weights = new long[numberOfProperties][0];
+            properties = new long[numberOfProperties][0];
         }
     }
 
@@ -111,8 +111,8 @@ public final class CompressedLongArray {
             values[i] = compressedValue;
             requiredBytes += encodedVLongSize(compressedValue);
         }
-        ensureCapacity(this.pos, requiredBytes, this.storage);
-        this.pos = encodeVLongs(values, start, end, this.storage, this.pos);
+        ensureCapacity(this.pos, requiredBytes, this.compressedTargets);
+        this.pos = encodeVLongs(values, start, end, this.compressedTargets, this.pos);
 
         this.lastValue = currentLastValue;
         this.length += valuesToAdd;
@@ -122,32 +122,32 @@ public final class CompressedLongArray {
      * For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
      *
      * @param values        values to write
-     * @param allWeights    weights to write
-     * @param start         start index in values and weights
-     * @param end           end index in values and weights
-     * @param valuesToAdd  the actual number of targets to import from this range
+     * @param allProperties properties to write
+     * @param start         start index in values and properties
+     * @param end           end index in values and properties
+     * @param valuesToAdd   the actual number of targets to import from this range
      */
-    public void add(long[] values, long[][] allWeights, int start, int end, int valuesToAdd) {
-        // write weights
-        for (int i = 0; i < allWeights.length; i++) {
-            long[] weights = allWeights[i];
-            addWeights(values, weights, start, end, i, valuesToAdd);
+    public void add(long[] values, long[][] allProperties, int start, int end, int valuesToAdd) {
+        // write properties
+        for (int i = 0; i < allProperties.length; i++) {
+            long[] properties = allProperties[i];
+            addProperties(values, properties, start, end, i, valuesToAdd);
         }
 
         // write values
         add(values, start, end, valuesToAdd);
     }
 
-    private void addWeights(long[] values, long[] weights, int start, int end, int weightIndex, int weightsToAdd) {
-        ensureCapacity(length, weightsToAdd, weightIndex);
+    private void addProperties(long[] values, long[] properties, int start, int end, int propertyIndex, int propertiesToAdd) {
+        ensureCapacity(length, propertiesToAdd, propertyIndex);
 
-        if (weightsToAdd == end - start) {
-            System.arraycopy(weights, start, this.weights[weightIndex], this.length, weightsToAdd);
+        if (propertiesToAdd == end - start) {
+            System.arraycopy(properties, start, this.properties[propertyIndex], this.length, propertiesToAdd);
         } else {
             var writePos = length;
             for (int i = 0; i < (end - start); i++) {
                 if (values[start + i] != IGNORE_VALUE) {
-                    this.weights[weightIndex][writePos++] = weights[start + i];
+                    this.properties[propertyIndex][writePos++] = properties[start + i];
                 }
             }
         }
@@ -163,11 +163,11 @@ public final class CompressedLongArray {
             ));
         } else if (storage.length <= targetLength) {
             int newLength = BitUtil.nextHighestPowerOfTwo(targetLength);
-            this.storage = Arrays.copyOf(storage, newLength);
+            this.compressedTargets = Arrays.copyOf(storage, newLength);
         }
     }
 
-    private void ensureCapacity(int pos, int required, int weightIndex) {
+    private void ensureCapacity(int pos, int required, int propertyIndex) {
         int targetLength = pos + required;
         if (targetLength < 0) {
             throw new IllegalArgumentException(formatWithLocale(
@@ -175,9 +175,9 @@ public final class CompressedLongArray {
                 pos,
                 required
             ));
-        } else if (weights[weightIndex].length <= pos + required) {
+        } else if (properties[propertyIndex].length <= pos + required) {
             int newLength = BitUtil.nextHighestPowerOfTwo(pos + required);
-            weights[weightIndex] = Arrays.copyOf(weights[weightIndex], newLength);
+            properties[propertyIndex] = Arrays.copyOf(properties[propertyIndex], newLength);
         }
     }
 
@@ -187,24 +187,24 @@ public final class CompressedLongArray {
 
     public int uncompress(long[] into, AdjacencyCompressor.ValueMapper mapper) {
         assert into.length >= length;
-        return zigZagUncompress(storage, pos, into, mapper);
+        return zigZagUncompress(compressedTargets, pos, into, mapper);
     }
 
     public byte[] storage() {
-        return storage;
+        return compressedTargets;
     }
 
-    public long[][] weights() {
-        return weights;
+    public long[][] properties() {
+        return properties;
     }
 
-    public boolean hasWeights() {
-        return weights != null && !(weights.length == 0);
+    public boolean hasProperties() {
+        return properties != null && !(properties.length == 0);
     }
 
     public void release() {
-        storage = null;
-        weights = null;
+        compressedTargets = null;
+        properties = null;
         pos = 0;
         length = 0;
     }

@@ -125,7 +125,7 @@ class CompressedLongArrayTest {
         assertEquals(4, uncompressedValueCount);
         assertArrayEquals(inValues, outValues);
 
-        assertArrayEquals(inWeights, Arrays.copyOf(compressedLongArray.weights()[0], inWeights.length));
+        assertArrayEquals(inWeights, Arrays.copyOf(compressedLongArray.properties()[0], inWeights.length));
     }
 
     @Test
@@ -148,7 +148,7 @@ class CompressedLongArrayTest {
 
         assertArrayEquals(expectedValues, outValues);
 
-        assertArrayEquals(expectedWeights, Arrays.copyOf(compressedLongArray.weights()[0], expectedWeights.length));
+        assertArrayEquals(expectedWeights, Arrays.copyOf(compressedLongArray.properties()[0], expectedWeights.length));
     }
 
     @Test

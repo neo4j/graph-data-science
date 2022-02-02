@@ -92,7 +92,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
-        if (values.hasWeights()) {
+        if (values.hasProperties()) {
             return withWeights(nodeId, values, buffer, mapper);
         } else {
             return withoutWeights(nodeId, values, buffer, mapper);
@@ -222,7 +222,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
-        long[][] uncompressedWeights = array.weights();
+        long[][] uncompressedWeights = array.properties();
 
         AdjacencyCompression.copyFrom(buffer, array, mapper);
 

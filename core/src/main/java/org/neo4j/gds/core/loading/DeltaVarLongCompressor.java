@@ -90,7 +90,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
-        if (values.hasWeights()) {
+        if (values.hasProperties()) {
             return applyVariableDeltaEncodingWithWeights(nodeId, values, buffer, mapper);
         } else {
             return applyVariableDeltaEncodingWithoutWeights(nodeId, values, buffer, mapper);
@@ -135,7 +135,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         ValueMapper mapper
     ) {
         byte[] semiCompressedBytesDuringLoading = array.storage();
-        long[][] uncompressedWeightsPerProperty = array.weights();
+        long[][] uncompressedWeightsPerProperty = array.properties();
 
         // decompress semiCompressed into full uncompressed long[] (in buffer)
         // ordered by whatever order they've been read

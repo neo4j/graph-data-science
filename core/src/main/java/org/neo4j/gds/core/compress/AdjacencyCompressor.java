@@ -30,8 +30,8 @@ public interface AdjacencyCompressor extends AutoCloseable {
      * The provided {@code long[]} must be able to hold at least {@link org.neo4j.gds.core.loading.CompressedLongArray#length()} elements.
      *
      * The input {@code values} might also store properties (called 'weights').
-     * This can be checked with {@link org.neo4j.gds.core.loading.CompressedLongArray#hasWeights()}
-     * and read with {@link org.neo4j.gds.core.loading.CompressedLongArray#weights()}.
+     * This can be checked with {@link org.neo4j.gds.core.loading.CompressedLongArray#hasProperties()}
+     * and read with {@link org.neo4j.gds.core.loading.CompressedLongArray#properties()}.
      * The returned {@code long[][]} has the number of properties in the first dimension, followed by an
      * uncompressed {@code long[]} for each property. Those values belong to the target id that is stored at
      * the same array index in the uncompressed target list. Implementors need to make sure to maintain that order
