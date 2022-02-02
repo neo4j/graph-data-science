@@ -29,6 +29,7 @@ import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_CONFIG;
 
 @Neo4jModelCatalogExtension
@@ -75,11 +76,11 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
     }
 
     @Test
-    void failOnInvalidFractions() {
-        assertError(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('myPipeline', {testFraction: 0.5, trainFraction: 0.51})",
-            "Sum of fractions for test and train set must be smaller than or equal to 1.0. But got 1.01."
-        );
+    void shouldNotThrowOnFractionsAddingToMoreThanOne() {
+        assertThatCode(() ->
+            runQuery(
+                "CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('myPipeline', {testFraction: 0.5, trainFraction: 0.51})")
+        ).doesNotThrowAnyException();
     }
 
     @Test

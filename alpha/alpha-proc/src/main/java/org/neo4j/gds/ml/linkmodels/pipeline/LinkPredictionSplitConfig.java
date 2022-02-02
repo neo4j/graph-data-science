@@ -138,17 +138,6 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
         return ImmutableLinkPredictionSplitConfig.builder();
     }
 
-    @Value.Check
-    default void validFractionSum() {
-        var fractionSum = testFraction() + trainFraction();
-        if (fractionSum > 1.0) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Sum of fractions for test and train set must be smaller than or equal to 1.0. But got %s.",
-                fractionSum
-            ));
-        }
-    }
-
     @Configuration.Ignore
     default void validateAgainstGraphStore(GraphStore graphStore) {
         var reservedTypes = Stream.of(

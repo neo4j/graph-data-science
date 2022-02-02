@@ -272,15 +272,14 @@ The splitting configuration of a pipeline can be inspected by using `gds.beta.mo
 The splitting of relationships proceeds internally in the following steps:
 
 1. The graph is filtered according to specified `nodeLabels` and `relationshipTypes`, which are configured at train time.
-2. The relationships remaining after filtering we call _positive_, and they are split into a `test` set and remaining relationships.
+2. The relationships remaining after filtering we call _positive_, and they are split into a `test` set and remaining relationships which we refer to as `test-complement` set.[[def-test-complement]]
 * The `test` set contains a `testFraction` fraction of the positive relationships.
 * Random negative relationships are added to the `test` set.
 The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships.
-3. The remaining positive relationships are split into a `train` set and a `feature input` set.
-* The `train` set contains a `trainFraction` fraction of _all_ the positive relationships.
-** Therefore we require `trainFraction + testFraction < 1.0`.
-** The `feature input` set contains the remaining `1.0 - (trainFraction + testFraction)` fraction of the positive relationships.
+3. The relationships in the `test-complement` set are split into a `train` set and a `feature input` set.
+* The `train` set contains a `trainFraction` fraction of the `test-complement` set.
+* The `feature input` set contains `(1-trainFraction)`  fraction of the `test-complement` set.
 * Random negative relationships are added to the `train` set.
 The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships, nor with test relationships.
@@ -330,7 +329,7 @@ YIELD
 | Name                  | Type    | Default | Description
 | validationFolds       | Integer | 3       | Number of divisions of the training graph used during <<algorithms-ml-linkprediction-pipelines-train,model selection>>.
 | testFraction          | Double  | 0.1     | Fraction of the graph reserved for testing. Must be in the range (0, 1).
-| trainFraction         | Double  | 0.1     | Fraction of the graph reserved for training. Must be in the range (0, 1).
+| trainFraction         | Double  | 0.1     | Fraction of the <<def-test-complement,test-complement set>> reserved for training. Must be in the range (0, 1).
 | negativeSamplingRatio | Double  | 1.0     | The desired ratio of negative to positive samples in the test and train set.
 |===
 
