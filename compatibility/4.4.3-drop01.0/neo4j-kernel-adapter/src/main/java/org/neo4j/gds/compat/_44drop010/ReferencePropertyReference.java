@@ -17,31 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.unsupported;
+package org.neo4j.gds.compat._44drop010;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.gds.compat.StorageEngineProxyApi;
-import org.neo4j.gds.compat.StorageEngineProxyFactory;
+import org.neo4j.gds.compat.PropertyReference;
+import org.neo4j.storageengine.api.Reference;
 
-import java.util.List;
+import java.util.Objects;
 
-@ServiceProvider
-public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory {
+public final class ReferencePropertyReference implements PropertyReference {
 
-    @Override
-    public boolean canLoad(Neo4jVersion version) {
-        var incompatibleVersions = List.of(
-            Neo4jVersion.V_4_1,
-            Neo4jVersion.V_4_2,
-            Neo4jVersion.V_4_3_drop50,
-            Neo4jVersion.V_4_4_drop10
-        );
-        return incompatibleVersions.contains(version);
+    private static final PropertyReference EMPTY = new ReferencePropertyReference(null);
+
+    public final Reference reference;
+
+    private ReferencePropertyReference(Reference reference) {
+        this.reference = reference;
+    }
+
+    public static PropertyReference of(Reference reference) {
+        return new ReferencePropertyReference(Objects.requireNonNull(reference));
+    }
+
+    public static PropertyReference empty() {
+        return EMPTY;
     }
 
     @Override
-    public StorageEngineProxyApi load() {
-        return new StorageEngineProxyImpl();
+    public boolean isEmpty() {
+        return reference == null;
     }
 }

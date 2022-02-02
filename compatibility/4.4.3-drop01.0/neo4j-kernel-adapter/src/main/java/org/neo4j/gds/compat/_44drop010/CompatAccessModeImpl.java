@@ -17,31 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.unsupported;
+package org.neo4j.gds.compat._44drop010;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.gds.compat.StorageEngineProxyApi;
-import org.neo4j.gds.compat.StorageEngineProxyFactory;
+import org.neo4j.gds.compat.CompatAccessMode;
+import org.neo4j.gds.compat.CustomAccessMode;
+import org.neo4j.internal.kernel.api.RelTypeSupplier;
+import org.neo4j.internal.kernel.api.TokenSet;
 
-import java.util.List;
+import java.util.function.Supplier;
 
-@ServiceProvider
-public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory {
+public final class CompatAccessModeImpl extends CompatAccessMode {
 
-    @Override
-    public boolean canLoad(Neo4jVersion version) {
-        var incompatibleVersions = List.of(
-            Neo4jVersion.V_4_1,
-            Neo4jVersion.V_4_2,
-            Neo4jVersion.V_4_3_drop50,
-            Neo4jVersion.V_4_4_drop10
-        );
-        return incompatibleVersions.contains(version);
+    CompatAccessModeImpl(CustomAccessMode custom) {
+        super(custom);
     }
 
     @Override
-    public StorageEngineProxyApi load() {
-        return new StorageEngineProxyImpl();
+    public boolean allowsReadNodeProperty(Supplier<TokenSet> labels, int propertyKey) {
+        return custom.allowsReadNodeProperty(propertyKey);
+    }
+
+    @Override
+    public boolean allowsReadRelationshipProperty(RelTypeSupplier relType, int propertyKey) {
+        return custom.allowsReadRelationshipProperty(propertyKey);
     }
 }

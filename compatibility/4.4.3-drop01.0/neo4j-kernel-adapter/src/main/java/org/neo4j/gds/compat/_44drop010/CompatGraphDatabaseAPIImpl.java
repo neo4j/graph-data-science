@@ -17,31 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.unsupported;
+package org.neo4j.gds.compat._44drop010;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.gds.compat.StorageEngineProxyApi;
-import org.neo4j.gds.compat.StorageEngineProxyFactory;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
+import org.neo4j.kernel.impl.factory.DbmsInfo;
 
-import java.util.List;
+import java.nio.file.Path;
 
-@ServiceProvider
-public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory {
+final class CompatGraphDatabaseAPIImpl extends GdsGraphDatabaseAPI {
 
-    @Override
-    public boolean canLoad(Neo4jVersion version) {
-        var incompatibleVersions = List.of(
-            Neo4jVersion.V_4_1,
-            Neo4jVersion.V_4_2,
-            Neo4jVersion.V_4_3_drop50,
-            Neo4jVersion.V_4_4_drop10
-        );
-        return incompatibleVersions.contains(version);
+    CompatGraphDatabaseAPIImpl(DatabaseManagementService dbms) {
+        super(dbms);
     }
 
     @Override
-    public StorageEngineProxyApi load() {
-        return new StorageEngineProxyImpl();
+    public Path dbHome(Path workingDir) {
+        return api.databaseLayout().getNeo4jLayout().homeDirectory();
+    }
+
+    @Override
+    public DbmsInfo dbmsInfo() {
+        return api.dbmsInfo();
     }
 }

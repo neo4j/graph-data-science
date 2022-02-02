@@ -17,31 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.unsupported;
+package org.neo4j.gds.compat._44drop010;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.gds.compat.StorageEngineProxyApi;
-import org.neo4j.gds.compat.StorageEngineProxyFactory;
+import org.neo4j.gds.compat.AllocationTrackerAdapter;
+import org.neo4j.memory.MemoryTracker;
 
-import java.util.List;
+final class AllocationTrackerAdapterImpl implements AllocationTrackerAdapter {
 
-@ServiceProvider
-public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory {
+    private final MemoryTracker memoryTracker;
 
-    @Override
-    public boolean canLoad(Neo4jVersion version) {
-        var incompatibleVersions = List.of(
-            Neo4jVersion.V_4_1,
-            Neo4jVersion.V_4_2,
-            Neo4jVersion.V_4_3_drop50,
-            Neo4jVersion.V_4_4_drop10
-        );
-        return incompatibleVersions.contains(version);
+    AllocationTrackerAdapterImpl(MemoryTracker memoryTracker) {
+        this.memoryTracker = memoryTracker;
     }
 
     @Override
-    public StorageEngineProxyApi load() {
-        return new StorageEngineProxyImpl();
+    public void add(long bytes) {
+        memoryTracker.allocateHeap(bytes);
+    }
+
+    @Override
+    public void remove(long bytes) {
+        memoryTracker.releaseHeap(bytes);
+    }
+
+    @Override
+    public long trackedBytes() {
+        return memoryTracker.estimatedHeapMemory();
     }
 }

@@ -17,31 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.unsupported;
+package org.neo4j.gds.compat._44drop010;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.gds.compat.StorageEngineProxyApi;
-import org.neo4j.gds.compat.StorageEngineProxyFactory;
+import org.neo4j.gds.compat.StoreScan;
+import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.Scan;
+import org.neo4j.kernel.api.KernelTransaction;
 
-import java.util.List;
+public final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan<C> {
+    private final Scan<C> scan;
+    private final int batchSize;
 
-@ServiceProvider
-public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory {
-
-    @Override
-    public boolean canLoad(Neo4jVersion version) {
-        var incompatibleVersions = List.of(
-            Neo4jVersion.V_4_1,
-            Neo4jVersion.V_4_2,
-            Neo4jVersion.V_4_3_drop50,
-            Neo4jVersion.V_4_4_drop10
-        );
-        return incompatibleVersions.contains(version);
+    public ScanBasedStoreScanImpl(Scan<C> scan, int batchSize) {
+        this.scan = scan;
+        this.batchSize = batchSize;
     }
 
     @Override
-    public StorageEngineProxyApi load() {
-        return new StorageEngineProxyImpl();
+    public boolean scanBatch(C cursor, KernelTransaction ktx) {
+        return scan.reserveBatch(cursor, batchSize, ktx.cursorContext(), ktx.securityContext().mode());
     }
 }
