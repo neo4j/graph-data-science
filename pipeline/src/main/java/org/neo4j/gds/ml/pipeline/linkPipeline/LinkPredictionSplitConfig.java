@@ -38,6 +38,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_SET_SIZE;
+import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TEST_COMPLEMENT_SET_SIZE;
+import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TRAIN_SET_SIZE;
+import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.validateNumberOfRelationshipsInSet;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
@@ -157,5 +161,17 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
                 StringJoining.join(invalidTypes)
             ));
         }
+
+        long testSetSize = (long) (graphStore.relationshipCount() * testFraction());
+        long testComplementSize = graphStore.relationshipCount() - testSetSize;
+        long trainSetSize = (long) (testComplementSize * trainFraction());
+        long featureInputSize = (long) (testComplementSize * (1 - trainFraction()));
+        long foldSize = trainSetSize / validationFolds();
+
+        validateNumberOfRelationshipsInSet(testSetSize, MIN_SET_SIZE, "test", "testFraction");
+        validateNumberOfRelationshipsInSet(testComplementSize, MIN_TEST_COMPLEMENT_SET_SIZE, "test-complement", "testFraction");
+        validateNumberOfRelationshipsInSet(trainSetSize, MIN_TRAIN_SET_SIZE, "train", "trainFraction");
+        validateNumberOfRelationshipsInSet(featureInputSize, MIN_SET_SIZE, "feature-input", "trainFraction");
+        validateNumberOfRelationshipsInSet(foldSize, MIN_SET_SIZE, "validation", "validationFolds");
     }
 }
