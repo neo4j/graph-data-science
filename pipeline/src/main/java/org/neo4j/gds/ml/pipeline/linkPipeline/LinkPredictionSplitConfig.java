@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_SET_SIZE;
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TEST_COMPLEMENT_SET_SIZE;
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TRAIN_SET_SIZE;
-import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.validateNumberOfRelationshipsInSet;
+import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.validateRelSetSize;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
@@ -93,13 +93,13 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
     @Value.Default
     @Configuration.Ignore
     default String trainRelationshipType() {
-        return  "_TRAIN_";
+        return "_TRAIN_";
     }
 
     @Value.Default
     @Configuration.Ignore
     default String featureInputRelationshipType() {
-        return  "_FEATURE_INPUT_";
+        return "_FEATURE_INPUT_";
     }
 
     @Override
@@ -168,10 +168,20 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
         long featureInputSize = (long) (testComplementSize * (1 - trainFraction()));
         long foldSize = trainSetSize / validationFolds();
 
-        validateNumberOfRelationshipsInSet(testSetSize, MIN_SET_SIZE, "test", "testFraction");
-        validateNumberOfRelationshipsInSet(testComplementSize, MIN_TEST_COMPLEMENT_SET_SIZE, "test-complement", "testFraction");
-        validateNumberOfRelationshipsInSet(trainSetSize, MIN_TRAIN_SET_SIZE, "train", "trainFraction");
-        validateNumberOfRelationshipsInSet(featureInputSize, MIN_SET_SIZE, "feature-input", "trainFraction");
-        validateNumberOfRelationshipsInSet(foldSize, MIN_SET_SIZE, "validation", "validationFolds");
+        validateRelSetSize(testSetSize, MIN_SET_SIZE, "test", "`testFraction` is too low");
+        validateRelSetSize(
+            testComplementSize,
+            MIN_TEST_COMPLEMENT_SET_SIZE,
+            "test-complement",
+            "`testFraction` is too high"
+        );
+        validateRelSetSize(trainSetSize, MIN_TRAIN_SET_SIZE, "train", "`trainFraction` is too low");
+        validateRelSetSize(featureInputSize, MIN_SET_SIZE, "feature-input", "`trainFraction` is too high");
+        validateRelSetSize(
+            foldSize,
+            MIN_SET_SIZE,
+            "validation",
+            "`validationFolds` is too high or the `trainFraction` too low"
+        );
     }
 }

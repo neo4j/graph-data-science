@@ -31,8 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class NodeClassificationSplitConfigTest {
 
     @GdlGraph
-    static String GDL = "CREATE" +
-                        "  (a:Node)" +
+    static String GDL = "  (a:Node)" +
                         ", (b:Node)" +
                         ", (c:Node)" +
                         ", (d:Node)" +
@@ -52,8 +51,8 @@ class NodeClassificationSplitConfigTest {
             .validationFolds(2)
             .build();
         assertThatThrownBy(() -> splitConfig.validateMinNumNodesInSplitSets(graph)).hasMessageContaining(
-            "The specified `testFraction` is not compatible with the current graph. " +
-            "The test set would have 0 node(s) but it should have at least 1."
+            "The specified `testFraction` is too small for the current graph. " +
+            "The test set would have 0 node(s) but it must have at least 1."
         );
     }
 
@@ -64,8 +63,8 @@ class NodeClassificationSplitConfigTest {
             .validationFolds(2)
             .build();
         assertThatThrownBy(() -> splitConfig.validateMinNumNodesInSplitSets(graph)).hasMessageContaining(
-            "The specified `testFraction` is not compatible with the current graph. " +
-            "The train set would have 1 node(s) but it should have at least 2."
+            "The specified `testFraction` is too high for the current graph. " +
+            "The train set would have 1 node(s) but it must have at least 2."
         );
     }
 
@@ -76,8 +75,8 @@ class NodeClassificationSplitConfigTest {
             .validationFolds(6)
             .build();
         assertThatThrownBy(() -> splitConfig.validateMinNumNodesInSplitSets(graph)).hasMessageContaining(
-            "The specified `validationFolds` is not compatible with the current graph. " +
-            "The validation set would have 0 node(s) but it should have at least 1."
+            "The specified `validationFolds` or `testFraction` is too high for the current graph. " +
+            "The validation set would have 0 node(s) but it must have at least 1."
         );
     }
 }

@@ -30,7 +30,7 @@ public final class NonEmptySetValidation {
 
     private NonEmptySetValidation() {}
 
-    public static void validateNumberOfNodesInSet(
+    public static void validateNodeSetSize(
         long numberNodesInSet,
         long minNumberNodes,
         String setName,
@@ -39,28 +39,28 @@ public final class NonEmptySetValidation {
         validateElementSetIsNotEmpty(numberNodesInSet, minNumberNodes, setName, parameterName, "node(s)");
     }
 
-    public static void validateNumberOfRelationshipsInSet(
+    public static void validateRelSetSize(
         long numberNodesInSet,
         long minNumberNodes,
-        String setName,
+        String errorDesc,
         String parameterName
     ) {
-        validateElementSetIsNotEmpty(numberNodesInSet, minNumberNodes, setName, parameterName, "relationship(s)");
+        validateElementSetIsNotEmpty(numberNodesInSet, minNumberNodes, errorDesc, parameterName, "relationship(s)");
     }
 
     private static void validateElementSetIsNotEmpty(
         long elementsInSet,
         long expectedMinNumberOfElements,
-        String setName,
+        String errorDesc,
         String parameterName,
         String elementType
     ) {
         if (elementsInSet < expectedMinNumberOfElements) {
             throw new IllegalArgumentException(formatWithLocale(
-                "The specified `%s` is not compatible with the current graph. " +
+                "The specified %s for the current graph. " +
                 "The %s set would have %d %s " +
-                "but it should have at least %d. ",
-                parameterName, setName, elementsInSet, elementType, expectedMinNumberOfElements
+                "but it must have at least %d. ",
+                parameterName, errorDesc, elementsInSet, elementType, expectedMinNumberOfElements
             ));
         }
     }

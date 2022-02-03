@@ -47,8 +47,8 @@ class LinkPredictionSplitConfigTest {
             .build();
 
         assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
-            .hasMessageContaining("The specified `testFraction` is not compatible with the current graph. " +
-                                  "The test-complement set would have 1 relationship(s) but it should have at least 3.");
+            .hasMessageContaining("The specified `testFraction` is too high for the current graph. " +
+                                  "The test-complement set would have 1 relationship(s) but it must have at least 3.");
     }
 
     @Test
@@ -59,8 +59,8 @@ class LinkPredictionSplitConfigTest {
             .build();
 
         assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
-            .hasMessageContaining("The specified `trainFraction` is not compatible with the current graph. " +
-                                  "The train set would have 0 relationship(s) but it should have at least 2.");
+            .hasMessageContaining("The specified `trainFraction` is too low for the current graph. " +
+                                  "The train set would have 0 relationship(s) but it must have at least 2.");
     }
 
     @Test
@@ -71,8 +71,8 @@ class LinkPredictionSplitConfigTest {
             .build();
 
         assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
-            .hasMessageContaining("The specified `testFraction` is not compatible with the current graph. " +
-                                  "The test set would have 0 relationship(s) but it should have at least 1.");
+            .hasMessageContaining("The specified `testFraction` is too low for the current graph. " +
+                                  "The test set would have 0 relationship(s) but it must have at least 1.");
     }
 
     @Test
@@ -83,8 +83,8 @@ class LinkPredictionSplitConfigTest {
             .build();
 
         assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
-            .hasMessageContaining("The specified `trainFraction` is not compatible with the current graph. " +
-                                  "The feature-input set would have 0 relationship(s) but it should have at least 1.");
+            .hasMessageContaining("The specified `trainFraction` is too high for the current graph. " +
+                                  "The feature-input set would have 0 relationship(s) but it must have at least 1.");
     }
 
     @Test
@@ -96,7 +96,7 @@ class LinkPredictionSplitConfigTest {
             .build();
 
         assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
-            .hasMessageContaining("The specified `validationFolds` is not compatible with the current graph. " +
-                                  "The validation set would have 0 relationship(s) but it should have at least 1.");
+            .hasMessageContaining("The specified `validationFolds` is too high or the `trainFraction` too low for the current graph. " +
+                                  "The validation set would have 0 relationship(s) but it must have at least 1.");
     }
 }

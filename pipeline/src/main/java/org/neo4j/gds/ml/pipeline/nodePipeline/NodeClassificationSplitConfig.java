@@ -33,7 +33,7 @@ import java.util.Map;
 
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_SET_SIZE;
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TRAIN_SET_SIZE;
-import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.validateNumberOfNodesInSet;
+import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.validateNodeSetSize;
 
 @ValueClass
 @Configuration
@@ -79,8 +79,8 @@ public interface NodeClassificationSplitConfig extends ToMapConvertible {
         long numberNodesInTrainSet = graph.nodeCount() - numberNodesInTestSet;
         long numberNodesInValidationSet = numberNodesInTrainSet / validationFolds();
 
-        validateNumberOfNodesInSet(numberNodesInTestSet, MIN_SET_SIZE, "test", "testFraction");
-        validateNumberOfNodesInSet(numberNodesInTrainSet, MIN_TRAIN_SET_SIZE, "train", "testFraction");
-        validateNumberOfNodesInSet(numberNodesInValidationSet, MIN_SET_SIZE, "validation", "validationFolds");
+        validateNodeSetSize(numberNodesInTestSet, MIN_SET_SIZE, "test", "`testFraction` is too low");
+        validateNodeSetSize(numberNodesInTrainSet, MIN_TRAIN_SET_SIZE, "train", "`testFraction` is too high");
+        validateNodeSetSize(numberNodesInValidationSet, MIN_SET_SIZE, "validation", "`validationFolds` or `testFraction` is too high");
     }
 }
