@@ -6,7 +6,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
 
-final class HugeSparseIntArrayList {
+public final class HugeSparseIntArrayList {
 
     interface LongIntConsumer {
         void consume(long index, int value);

@@ -7,7 +7,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-final class HugeSparseObjectArrayList<T> {
+public final class HugeSparseObjectArrayList<T> {
 
     private final Class<T> clazz;
 
