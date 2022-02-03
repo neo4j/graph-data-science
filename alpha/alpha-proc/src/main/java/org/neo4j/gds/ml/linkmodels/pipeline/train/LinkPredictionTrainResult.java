@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 
 @ValueClass
 public interface LinkPredictionTrainResult {

@@ -17,12 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline;
+package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.Pipeline;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -17,13 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline;
+package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
@@ -69,25 +71,21 @@ class LinkPredictionPipelineTest {
     @Test
     void canAddNodePropertySteps() {
         var pipeline = new LinkPredictionPipeline();
-        var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(
-            ExecutionContext.EMPTY.username(),
-            "pageRank",
-            Map.of("mutateProperty", "pr")
-        );
-        pipeline.addNodePropertyStep(pageRankPropertyStep);
+
+        GdsCallableFinder.GdsCallableDefinition callableDefinition = GdsCallableFinder
+            .findByName("gds.testProc.mutate", List.of())
+            .orElseThrow();
+        var step = new NodePropertyStep(callableDefinition, Map.of("mutateProperty", "pr"));
+        pipeline.addNodePropertyStep(step);
 
         assertThat(pipeline)
-            .returns(List.of(pageRankPropertyStep), LinkPredictionPipeline::nodePropertySteps);
+            .returns(List.of(step), LinkPredictionPipeline::nodePropertySteps);
 
-        var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(
-            ExecutionContext.EMPTY.username(),
-            "degree",
-            Map.of("mutateProperty", "degree")
-        );
-        pipeline.addNodePropertyStep(degreeNodePropertyStep);
+        var otherStep = new NodePropertyStep(callableDefinition, Map.of("mutateProperty", "pr2"));
+        pipeline.addNodePropertyStep(otherStep);
 
         assertThat(pipeline)
-            .returns(List.of(pageRankPropertyStep, degreeNodePropertyStep), LinkPredictionPipeline::nodePropertySteps);
+            .returns(List.of(step, otherStep), LinkPredictionPipeline::nodePropertySteps);
     }
 
     @Test

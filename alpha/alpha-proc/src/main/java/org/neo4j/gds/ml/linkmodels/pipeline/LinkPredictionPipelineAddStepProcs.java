@@ -23,6 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfigurationImpl;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
