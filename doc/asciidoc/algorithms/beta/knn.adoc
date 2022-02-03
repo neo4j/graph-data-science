@@ -44,6 +44,9 @@ This can be controlled with the configuration parameter `sampleRate`:
 * A lower sample rate will increase the runtime-performance.
 ** Some potential nodes may be missed in the comparison and may not be included in the result.
 
+When encountered neighbors have equal similarity to the least similar already known neighbor, randomly selecting which node to keep can reduce the risk of some neighborhoods not being explored.
+This behavior is controlled by the configuration parameter `perturbationRate`.
+
 The output of the algorithm are new relationships between nodes and their k-nearest neighbors.
 Similarity scores are expressed via relationship properties.
 
