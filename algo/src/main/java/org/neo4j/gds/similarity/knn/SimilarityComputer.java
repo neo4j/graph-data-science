@@ -250,7 +250,7 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
     public double similarity(long firstNodeId, long secondNodeId) {
         return IntStream
             .range(0, numOfProperties)
-            .mapToObj(i -> (1.0 / numOfProperties) * similarityComputers[i].similarity(firstNodeId, secondNodeId))
+            .mapToObj(i -> (1.0 / numOfProperties) * similarityComputers[i].safeSimilarity(firstNodeId, secondNodeId))
             .reduce(Double::sum).get();
     }
 

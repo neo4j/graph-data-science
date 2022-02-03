@@ -82,6 +82,16 @@ class KnnTest {
     @Inject
     private TestGraph simThresholdGraph;
 
+    @GdlGraph(graphNamePrefix = "multPropMissing")
+    private static final String nodeCreateMultipleQuery =
+        "CREATE " +
+        "  (a: P1 {prop1: 1.0, prop2: 5.0})" +
+        " ,(b: P1 {prop2 : 5.0})" +
+        " ,(c: P1 {prop2 : 10.0})" +
+        " ,(d: P1 {prop3 : 10.0})";
+    @Inject
+    private TestGraph multPropMissingGraph;
+
 
     @Inject
     private IdFunction idFunction;
@@ -183,6 +193,40 @@ class KnnTest {
         assertThat(result.neighborList().get(nodeCId).similarityStream(nodeCId).findFirst().get().similarity).isEqualTo(
             EXP_C, withPrecision(0.001));
 
+
+    }
+
+    @Test
+    void shouldWorkWithMultiplePropertiesEvenIfSomeAreMissing() {
+
+        var knnConfig = ImmutableKnnBaseConfig.builder()
+            .nodeProperties(List.of("prop1", "prop2"))
+            .concurrency(1)
+            .randomSeed(19L)
+            .topK(2)
+            .build();
+        var knnContext = ImmutableKnnContext.builder().build();
+
+        var knn = new Knn(multPropMissingGraph, knnConfig, knnContext);
+        var result = knn.compute();
+
+        assertThat(result).isNotNull();
+        assertThat(result.size()).isEqualTo(4);
+
+        long nodeAId = multPropMissingGraph.toMappedNodeId("a");
+        long nodeBId = multPropMissingGraph.toMappedNodeId("b");
+        long nodeCId = multPropMissingGraph.toMappedNodeId("c");
+        long nodeDId = multPropMissingGraph.toMappedNodeId("d");
+
+
+        assertCorrectNeighborList(result, nodeAId, nodeBId, nodeCId);
+        assertCorrectNeighborList(result, nodeBId, nodeAId, nodeCId);
+        assertThat(result.neighborList().get(nodeAId).similarityStream(nodeAId).findFirst().get().similarity).isEqualTo(
+            0.5, withPrecision(0.1));
+        assertThat(result.neighborList().get(nodeCId).similarityStream(nodeCId).findFirst().get().similarity).isEqualTo(
+            0.083, withPrecision(0.01));
+        assertThat(result.neighborList().get(nodeDId).similarityStream(nodeDId).findFirst().get().similarity).isEqualTo(
+            0.0, withPrecision(0.001));
 
     }
 
