@@ -23,7 +23,7 @@ import org.neo4j.gds.api.Relationships;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class EdgeSplitterBaseTest {
+abstract class EdgeSplitterBaseTest {
     void assertRelExists(Relationships.Topology topology, long source, long... targets) {
         var cursor = topology.adjacencyList().adjacencyCursor(source);
         for (long target : targets) {
