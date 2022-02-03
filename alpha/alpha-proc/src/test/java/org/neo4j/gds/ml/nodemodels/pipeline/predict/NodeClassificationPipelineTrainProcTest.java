@@ -82,13 +82,14 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
     public static final String PIPELINE_NAME = "pipe";
 
     static Stream<Arguments> graphNameOrConfigurations() {
-        MemoryRange pipelineExecutorEstimation = MemoryRange.of(66585912L, 66617872L);
-
         return Stream.of(
-            Arguments.of(GRAPH_NAME, pipelineExecutorEstimation),
+            Arguments.of(
+                GRAPH_NAME,
+                MemoryRange.of(66585912, 66617872)
+            ),
             Arguments.of(
                 Map.of("nodeProjection", "*", "relationshipProjection", "*"),
-                pipelineExecutorEstimation.add(MemoryRange.of(295472L))
+                MemoryRange.of(66881312, 66913272)
             )
         );
     }
