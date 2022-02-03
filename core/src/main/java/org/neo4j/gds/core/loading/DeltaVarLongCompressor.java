@@ -98,6 +98,17 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     }
 
     @Override
+    public int compress(
+        long nodeId, CompressedLongArrayStruct targets, long localIndex, LongArrayBuffer buffer, ValueMapper mapper
+    ) {
+        if (targets.hasWeights()) {
+            return applyVariableDeltaEncodingWithWeights(nodeId, targets, localIndex, buffer, mapper);
+        } else {
+            return applyVariableDeltaEncodingWithoutWeights(nodeId, targets, localIndex, buffer, mapper);
+        }
+    }
+
+    @Override
     public void close() {
         adjacencyAllocator.close();
         for (var propertiesAllocator : propertiesAllocators) {
@@ -131,6 +142,26 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         return degree;
     }
 
+    private int applyVariableDeltaEncodingWithoutWeights(
+        long nodeId,
+        CompressedLongArrayStruct targets,
+        long localIndex,
+        LongArrayBuffer buffer,
+        ValueMapper mapper
+    ) {
+        byte[] storage = targets.storage(localIndex);
+        AdjacencyCompression.copyFrom(buffer, targets, localIndex, mapper);
+        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, aggregations[0]);
+        int requiredBytes = AdjacencyCompression.compress(buffer, storage);
+
+        long address = copyIds(storage, requiredBytes);
+
+        this.adjacencyDegrees.set(nodeId, degree);
+        this.adjacencyOffsets.set(nodeId, address);
+
+        return degree;
+    }
+
     private int applyVariableDeltaEncodingWithWeights(
         long nodeId,
         CompressedLongArray array,
@@ -143,6 +174,47 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         // decompress semiCompressed into full uncompressed long[] (in buffer)
         // ordered by whatever order they've been read
         AdjacencyCompression.copyFrom(buffer, array, mapper);
+        // buffer contains uncompressed, unsorted target list
+
+        int degree = AdjacencyCompression.applyDeltaEncoding(
+            buffer,
+            uncompressedWeightsPerProperty,
+            aggregations,
+            noAggregation
+        );
+        // targets are sorted and delta encoded
+        // buffer contains sorted target list
+        // values are delta encoded except for the first one
+        // values are still uncompressed
+
+        int requiredBytes = AdjacencyCompression.compress(buffer, semiCompressedBytesDuringLoading);
+        // values are now vlong encoded in the array storage (semiCompressed)
+
+        var address = copyIds(semiCompressedBytesDuringLoading, requiredBytes);
+        // values are in the final adjacency list
+
+        copyProperties(uncompressedWeightsPerProperty, degree, nodeId, propertyOffsets);
+
+        this.adjacencyDegrees.set(nodeId, degree);
+        this.adjacencyOffsets.set(nodeId, address);
+        array.release();
+
+        return degree;
+    }
+
+    private int applyVariableDeltaEncodingWithWeights(
+        long nodeId,
+        CompressedLongArrayStruct array,
+        long localIndex,
+        LongArrayBuffer buffer,
+        ValueMapper mapper
+    ) {
+        byte[] semiCompressedBytesDuringLoading = array.storage(localIndex);
+        long[][] uncompressedWeightsPerProperty = array.weights(localIndex);
+
+        // decompress semiCompressed into full uncompressed long[] (in buffer)
+        // ordered by whatever order they've been read
+        AdjacencyCompression.copyFrom(buffer, array, localIndex, mapper);
         // buffer contains uncompressed, unsorted target list
 
         int degree = AdjacencyCompression.applyDeltaEncoding(

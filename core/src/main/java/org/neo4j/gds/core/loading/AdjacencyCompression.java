@@ -42,6 +42,11 @@ public final class AdjacencyCompression {
         into.length = array.uncompress(into.buffer, mapper);
     }
 
+    static void copyFrom(LongArrayBuffer into, CompressedLongArrayStruct array, long localIndex, AdjacencyCompressor.ValueMapper mapper) {
+        into.ensureCapacity(array.length(localIndex));
+        into.length = array.uncompress(localIndex, into.buffer, mapper);
+    }
+
     public static int applyDeltaEncoding(LongArrayBuffer data, Aggregation aggregation) {
         return data.length = applyDeltaEncoding(data.buffer, data.length, aggregation);
     }

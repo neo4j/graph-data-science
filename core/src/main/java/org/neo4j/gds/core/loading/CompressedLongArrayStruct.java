@@ -28,6 +28,7 @@ import org.neo4j.gds.mem.BitUtil;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.LongConsumer;
 
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
@@ -202,8 +203,23 @@ public final class CompressedLongArrayStruct {
         return weightsBuffer;
     }
 
+    public long capacity() {
+        return targetLists.capacity();
+    }
+
+    public boolean contains(long index) {
+        return targetLists.contains(index);
+    }
+
     public boolean hasWeights() {
         return weights != null && !(weights.isEmpty());
+    }
+
+    public void consume(LongConsumer consumer) {
+        targetLists.forAll((index, __) -> {
+            consumer.accept(index);
+            targetLists.set(index, null);
+        });
     }
 
     public void release() {

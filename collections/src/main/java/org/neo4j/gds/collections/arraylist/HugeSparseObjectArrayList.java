@@ -9,11 +9,11 @@ import java.util.Arrays;
 
 public final class HugeSparseObjectArrayList<T> {
 
-    private final Class<T> clazz;
-
-    interface LongObjectConsumer<T> {
+    public interface LongObjectConsumer<T> {
         void consume(long index, T value);
     }
+
+    private final Class<T> clazz;
 
     private static final int PAGE_SHIFT = 12;
 
@@ -52,7 +52,7 @@ public final class HugeSparseObjectArrayList<T> {
             }
             for (int indexInPage = 0; indexInPage < page.length; indexInPage++) {
                 T value = page[indexInPage];
-                if (value == defaultValue) {
+                if (value.equals(defaultValue)) {
                     continue;
                 }
 
@@ -86,7 +86,7 @@ public final class HugeSparseObjectArrayList<T> {
             T[] page = pages[pageIndex];
             if (page != null) {
                 int indexInPage = PageUtil.indexInPage(index, PAGE_MASK);
-                return page[indexInPage] != defaultValue;
+                return !page[indexInPage].equals(defaultValue);
             }
         }
         return false;

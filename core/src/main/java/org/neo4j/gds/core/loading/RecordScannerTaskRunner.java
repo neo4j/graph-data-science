@@ -44,6 +44,7 @@ final class RecordScannerTaskRunner {
 
         long start = System.nanoTime();
         ParallelUtil.run(tasks, executorService);
+
         ParallelUtil.run(recordScannerTaskFactory.adjacencyListBuilderTasks(), executorService);
         long elapsed = System.nanoTime() - start;
 
