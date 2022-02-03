@@ -20,10 +20,12 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -50,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(SoftAssertionsExtension.class)
 class Node2VecTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
@@ -178,7 +181,7 @@ class Node2VecTest extends AlgoTestBase {
 
     @Disabled("The order of the randomWalks + its usage in the training is not deterministic yet.")
     @Test
-    void randomSeed() {
+    void randomSeed(SoftAssertions softly) {
         Graph graph = new StoreLoaderBuilder().api(db).build().graph();
 
         int embeddingDimension = 2;
@@ -209,13 +212,9 @@ class Node2VecTest extends AlgoTestBase {
             AllocationTracker.empty()
         ).compute();
 
-        SoftAssertions softly = new SoftAssertions();
-
         for (long node = 0; node < graph.nodeCount(); node++) {
             softly.assertThat(otherEmbeddings.get(node)).isEqualTo(embeddings.get(node));
         }
-
-        softly.assertAll();
     }
 
     static Stream<Arguments> graphs() {

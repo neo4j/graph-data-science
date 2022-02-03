@@ -36,6 +36,7 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(SoftAssertionsExtension.class)
 class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
@@ -445,8 +446,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
     }
 
     @Test
-    void allProcsHaveDescriptions() {
-        SoftAssertions softly = new SoftAssertions();
+    void allProcsHaveDescriptions(SoftAssertions softly) {
         runQueryWithRowConsumer(
             "CALL gds.list()",
             resultRow -> softly
@@ -454,8 +454,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
                     .withFailMessage(resultRow.get("name") + " has no description")
                     .isNotEmpty()
         );
-
-        softly.assertAll();
     }
 
     @Test
