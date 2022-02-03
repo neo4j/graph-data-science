@@ -310,7 +310,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
         ))
             .isExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
-                "Steps can only be added to a model of type `Node classification training pipeline`. But model `testModel1` is of type `testAlgo1`."
+                "Expected a model of type `Node classification training pipeline`. But model `testModel1` is of type `testAlgo1`."
             ));
     }
 
@@ -335,7 +335,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
         ))
             .isExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
-                "Steps can only be added to a model of type `Node classification training pipeline`. But model `testModel1` is of type `testAlgo1`."
+                "Expected a model of type `Node classification training pipeline`. But model `testModel1` is of type `testAlgo1`."
             ));
     }
 

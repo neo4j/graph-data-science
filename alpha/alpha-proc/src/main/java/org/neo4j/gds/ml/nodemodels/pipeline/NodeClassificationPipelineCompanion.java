@@ -49,7 +49,7 @@ public final class NodeClassificationPipelineCompanion {
         assert model != null;
         if (!model.algoType().equals(PIPELINE_MODEL_TYPE)) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Steps can only be added to a model of type `%s`. But model `%s` is of type `%s`.",
+                "Expected a model of type `%s`. But model `%s` is of type `%s`.",
                 PIPELINE_MODEL_TYPE,
                 pipelineName,
                 model.algoType()

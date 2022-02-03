@@ -25,7 +25,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -33,12 +35,14 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFactory;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
@@ -57,6 +61,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @Neo4jModelCatalogExtension
 class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
@@ -220,6 +225,62 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     }
 
     @Test
+    void shouldLogProgress() {
+        var pipeline = insertPipelineIntoCatalog();
+
+        pipeline.featureProperties().addAll(List.of("array", "scalar"));
+
+        var metricSpecification = MetricSpecification.parse("F1(class=1)");
+
+        pipeline.setSplitConfig(ImmutableNodeClassificationSplitConfig.builder()
+            .testFraction(0.3)
+            .validationFolds(2)
+            .build()
+        );
+
+        var config = createConfig(
+            "model",
+            metricSpecification,
+            1L
+        );
+
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var log = new TestLog();
+            var progressTracker = new TestProgressTracker(
+                new NodeClassificationTrainPipelineAlgorithmFactory(
+                    caller.executionContext(),
+                    modelCatalog
+                ).progressTask(graphStore, config),
+                log,
+                1,
+                EmptyTaskRegistryFactory.INSTANCE
+            );
+
+            NodeClassificationTrainPipelineExecutor executor = new NodeClassificationTrainPipelineExecutor(
+                pipeline,
+                config,
+                caller.executionContext(),
+                graphStore,
+                "g",
+                progressTracker
+            );
+
+            executor.compute();
+
+            assertThat(log.getMessages(TestLog.WARN))
+                .extracting(removingThreadId())
+                .containsExactly(
+                    "Node Classification Train Pipeline :: NCTrain :: ShuffleAndSplit :: The specified `testFraction` leads to a very small test set with only 3 node(s). " +
+                    "Proceeding with such a small set might lead to unreliable results.",
+                    "Node Classification Train Pipeline :: NCTrain :: ShuffleAndSplit :: The specified `validationFolds` leads to very small validation sets with only 3 node(s). " +
+                    "Proceeding with such small sets might lead to unreliable results."
+                );
+
+            // TODO port INFO logs when removing the non-pipeline test for NC Train
+        });
+    }
+
+    @Test
     void failsOnInvalidTargetProperty() {
         var pipeline = insertPipelineIntoCatalog();
         pipeline.featureProperties().addAll(List.of("array"));
@@ -291,7 +352,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var dummyConfig = PipelineCreateConfig.of(getUsername());
         var info = new NodeClassificationPipeline();
         modelCatalog.set(
-            Model.of("", PIPELINE_NAME, NodeClassificationPipeline.MODEL_TYPE, GraphSchema.empty(), new Object(), dummyConfig, info)
+            Model.of("", PIPELINE_NAME, NodeClassificationPipelineCompanion.PIPELINE_MODEL_TYPE, GraphSchema.empty(), new Object(), dummyConfig, info)
         );
         return info;
     }

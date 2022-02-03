@@ -299,7 +299,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
             progressTracker.logWarning(
                 formatWithLocale(
                     "The specified `testFraction` leads to a very small test set " +
-                    "with only %d nodes. Proceeding with such a small set might lead to unreliable results.",
+                    "with only %d node(s). Proceeding with such a small set might lead to unreliable results.",
                     numberNodesInTestSet
                 )
             );
@@ -310,7 +310,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
             progressTracker.logWarning(
                 formatWithLocale(
                     "The specified `validationFolds` leads to very small validation sets " +
-                    "with only %d nodes. Proceeding with such small sets might lead to unreliable results.",
+                    "with only %d node(s). Proceeding with such small sets might lead to unreliable results.",
                     numberNodesInValidationSet
                 )
             );
