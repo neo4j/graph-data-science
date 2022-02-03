@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.compress;
 
 import org.neo4j.gds.core.loading.CompressedLongArray;
+import org.neo4j.gds.core.loading.CompressedLongArrayStruct;
 
 public interface AdjacencyCompressor extends AutoCloseable {
 
@@ -63,6 +64,14 @@ public interface AdjacencyCompressor extends AutoCloseable {
     int compress(
         long nodeId,
         CompressedLongArray values,
+        LongArrayBuffer buffer,
+        ValueMapper mapper
+    );
+
+    int compress(
+        long nodeId,
+        CompressedLongArrayStruct targets,
+        long localIndex,
         LongArrayBuffer buffer,
         ValueMapper mapper
     );

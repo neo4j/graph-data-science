@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
@@ -61,7 +62,7 @@ public final class AdjacencyBuffer {
 
     private final AdjacencyCompressorFactory adjacencyCompressorFactory;
     private final ThreadLocalRelationshipsBuilder[] localBuilders;
-    private final CompressedLongArray[][] compressedAdjacencyLists;
+    private final CompressedLongArrayStruct[] compressedAdjacencyLists;
     private final int pageShift;
     private final long pageMask;
     private final LongAdder relationshipCounter;
@@ -120,13 +121,13 @@ public final class AdjacencyBuffer {
 
         allocationTracker.add(sizeOfObjectArray(numPages) << 2);
         ThreadLocalRelationshipsBuilder[] localBuilders = new ThreadLocalRelationshipsBuilder[numPages];
-        CompressedLongArray[][] compressedAdjacencyLists = new CompressedLongArray[numPages][];
+        CompressedLongArrayStruct[] compressedAdjacencyLists = new CompressedLongArrayStruct[numPages];
 
         for (int page = 0; page < numPages; page++) {
             allocationTracker.add(sizeOfObjectPage);
             allocationTracker.add(sizeOfObjectPage);
             allocationTracker.add(sizeOfLongPage);
-            compressedAdjacencyLists[page] = new CompressedLongArray[pageSize];
+            compressedAdjacencyLists[page] = new CompressedLongArrayStruct(importMetaData.propertyKeyIds().length);
             localBuilders[page] = new ThreadLocalRelationshipsBuilder(adjacencyCompressorFactory);
         }
 
@@ -147,7 +148,7 @@ public final class AdjacencyBuffer {
         SingleTypeRelationshipImporter.ImportMetaData importMetaData,
         AdjacencyCompressorFactory adjacencyCompressorFactory,
         ThreadLocalRelationshipsBuilder[] localBuilders,
-        CompressedLongArray[][] compressedAdjacencyLists,
+        CompressedLongArrayStruct[] compressedAdjacencyLists,
         int pageSize,
         boolean atLeastOnePropertyToLoad
     ) {
@@ -208,23 +209,23 @@ public final class AdjacencyBuffer {
 
                 int localId = (int) (source & pageMask);
 
-                CompressedLongArray compressedTargets = this.compressedAdjacencyLists[pageIndex][localId];
-                if (compressedTargets == null) {
-                    compressedTargets = new CompressedLongArray(
-                        propertyValues == null ? 0 : propertyValues.length
-                    );
-                    this.compressedAdjacencyLists[pageIndex][localId] = compressedTargets;
-                }
+                CompressedLongArrayStruct compressedTargets = this.compressedAdjacencyLists[pageIndex];
+//                if (compressedTargets == null) {
+//                    compressedTargets = new CompressedLongArray(
+//                        propertyValues == null ? 0 : propertyValues.length
+//                    );
+//                    this.compressedAdjacencyLists[pageIndex][localId] = compressedTargets;
+//                }
 
                 var targetsToImport = endOffset - startOffset;
                 if (propertyValues == null) {
-                    compressedTargets.add(targets, startOffset, endOffset, targetsToImport);
+                    compressedTargets.add(localId, targets, startOffset, endOffset, targetsToImport);
                 } else {
                     if (preAggregate && aggregations[0] != Aggregation.NONE) {
                         targetsToImport = preAggregate(targets, propertyValues, startOffset, endOffset, aggregations);
                     }
 
-                    compressedTargets.add(targets, propertyValues, startOffset, endOffset, targetsToImport);
+                    compressedTargets.add(localId, targets, propertyValues, startOffset, endOffset, targetsToImport);
                 }
 
                 startOffset = endOffset;
@@ -277,7 +278,7 @@ public final class AdjacencyBuffer {
 
         private final long baseNodeId;
         private final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder;
-        private final CompressedLongArray[] compressedLongArrays;
+        private final CompressedLongArrayStruct compressedLongArrays;
         // A long array that may or may not be used during the compression.
         private final LongArrayBuffer buffer;
         private final LongAdder relationshipCounter;
@@ -286,7 +287,7 @@ public final class AdjacencyBuffer {
         AdjacencyListBuilderTask(
             long baseNodeId,
             ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder,
-            CompressedLongArray[] compressedLongArrays,
+            CompressedLongArrayStruct compressedLongArrays,
             LongAdder relationshipCounter,
             AdjacencyCompressor.ValueMapper valueMapper
         ) {
@@ -301,21 +302,18 @@ public final class AdjacencyBuffer {
         @Override
         public void run() {
             try (var compressor = threadLocalRelationshipsBuilder.intoCompressor()) {
-                long importedRelationships = 0L;
-                for (int localId = 0; localId < compressedLongArrays.length; ++localId) {
-                    CompressedLongArray compressedAdjacencyList = compressedLongArrays[localId];
-                    if (compressedAdjacencyList != null) {
-                        var nodeId = valueMapper.map(baseNodeId + localId);
-                        importedRelationships += compressor.applyVariableDeltaEncoding(
-                            compressedAdjacencyList,
-                            buffer,
-                            nodeId,
-                            valueMapper
-                        );
-                        compressedLongArrays[localId] = null;
-                    }
-                }
-                relationshipCounter.add(importedRelationships);
+                var importedRelationships = new MutableLong(0L);
+                compressedLongArrays.consume(localId -> {
+                    var nodeId = valueMapper.map(baseNodeId + localId);
+                    importedRelationships.add(compressor.applyVariableDeltaEncoding(
+                        compressedLongArrays,
+                        localId,
+                        buffer,
+                        nodeId,
+                        valueMapper
+                    ));
+                });
+                relationshipCounter.add(importedRelationships.longValue());
             }
         }
     }

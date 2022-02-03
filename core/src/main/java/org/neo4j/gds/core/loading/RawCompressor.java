@@ -100,6 +100,13 @@ public final class RawCompressor implements AdjacencyCompressor {
     }
 
     @Override
+    public int compress(
+        long nodeId, CompressedLongArrayStruct targets, long localIndex, LongArrayBuffer buffer, ValueMapper mapper
+    ) {
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
     public void close() {
         adjacencyAllocator.close();
         for (var propertiesAllocator : propertiesAllocators) {
