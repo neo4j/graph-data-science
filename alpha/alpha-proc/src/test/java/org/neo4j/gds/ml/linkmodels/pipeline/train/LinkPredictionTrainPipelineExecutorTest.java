@@ -310,9 +310,9 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
             .validationFolds(2)
-            .negativeSamplingRatio(1)
-            .trainFraction(0.5)
-            .testFraction(0.5)
+            .negativeSamplingRatio(0.01)
+            .trainFraction(0.7)
+            .testFraction(0.2)
             .build());
 
         pipeline.setTrainingParameterSpace(List.of(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))));
@@ -361,6 +361,15 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                 GRAPH_NAME,
                 progressTracker
             ).compute();
+
+            assertThat(log.getMessages(TestLog.WARN))
+                .extracting(removingThreadId())
+                .containsExactly(
+                    "Link Prediction Train Pipeline :: The specified `testFraction` leads to a very small test set with only 3 relationship(s). " +
+                    "Proceeding with such a small set might lead to unreliable results.",
+                    "Link Prediction Train Pipeline :: The specified `validationFolds` leads to very small validation sets with only 4 relationship(s). " +
+                    "Proceeding with such small sets might lead to unreliable results."
+                );
 
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())

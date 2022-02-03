@@ -106,6 +106,7 @@ public abstract class PipelineExecutor<
     }
 
     private void executeNodePropertySteps(GraphFilter graphFilter) {
+        // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships
         for (ExecutableNodePropertyStep step : pipeline.nodePropertySteps()) {
             progressTracker.beginSubTask();
             step.execute(executionContext, graphName, graphFilter.nodeLabels(), graphFilter.relationshipTypes());

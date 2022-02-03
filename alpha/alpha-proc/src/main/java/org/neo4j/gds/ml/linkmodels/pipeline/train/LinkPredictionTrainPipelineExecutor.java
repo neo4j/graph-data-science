@@ -31,7 +31,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPredictionTrainConfig, LinkPredictionPipeline, LinkPredictionTrainResult> {
+
+    private static final int RECOMMENDED_MIN_RELS_PER_SET = 5;
 
     private final RelationshipSplitter relationshipSplitter;
 
@@ -99,6 +103,9 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
             testDataSplit.relationshipTypes(),
             Optional.of("label")
         );
+
+        warnIfRelationshipSplitsAreTooSmall(trainGraph.relationshipCount(), testGraph.relationshipCount());
+
         return new LinkPredictionTrain(
             trainGraph,
             testGraph,
@@ -106,6 +113,26 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
             config,
             progressTracker
         ).compute();
+    }
+
+    private void warnIfRelationshipSplitsAreTooSmall(long trainSetSize, long testSetSize) {
+        if (testSetSize < RECOMMENDED_MIN_RELS_PER_SET) {
+            progressTracker.logWarning(formatWithLocale(
+                "The specified `testFraction` leads to a very small test set " +
+                "with only %d relationship(s). Proceeding with such a small set might lead to unreliable results.",
+                testSetSize
+            ));
+        }
+
+        long validationSetSize = trainSetSize / pipeline.splitConfig().validationFolds();
+        //No need to check train set as it is always larger or equal to validation set.
+        if (validationSetSize < RECOMMENDED_MIN_RELS_PER_SET) {
+            progressTracker.logWarning(formatWithLocale(
+                "The specified `validationFolds` leads to very small validation sets " +
+                "with only %d relationship(s). Proceeding with such small sets might lead to unreliable results.",
+                validationSetSize
+            ));
+        }
     }
 
     private void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets) {
