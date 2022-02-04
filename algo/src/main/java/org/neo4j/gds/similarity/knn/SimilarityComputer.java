@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.Intersections;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.IntStream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -229,12 +228,14 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
     private final SimilarityComputer[] similarityComputers;
     private int numOfProperties;
     private long minimumNodesWithProperty;
-    public CombinedSimilarityComputer(NodePropertyContainer graph, List<String> propertyNames) {
+
+    CombinedSimilarityComputer(NodePropertyContainer graph, List<String> propertyNames) {
         this.numOfProperties = propertyNames.size();
         this.similarityComputers = new SimilarityComputer[numOfProperties];
         minimumNodesWithProperty = Long.MAX_VALUE;
+
         for (int i = 0; i < numOfProperties; ++i) {
-            String propertyName = propertyNames.get(i);
+            var propertyName = propertyNames.get(i);
             var nodeProperties = Objects.requireNonNull(
                 graph.nodeProperties(propertyName),
                 () -> formatWithLocale("The property `%s` has not been loaded", propertyName)
@@ -247,14 +248,13 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
 
     }
 
+    @Override
     public double similarity(long firstNodeId, long secondNodeId) {
-        return IntStream
-            .range(0, numOfProperties)
-            .mapToDouble(i -> (1.0 / numOfProperties) * similarityComputers[i].safeSimilarity(
-                firstNodeId,
-                secondNodeId
-            ))
-            .sum();
+        var sum = 0D;
+        for (var similarityComputer : similarityComputers) {
+            sum += similarityComputer.safeSimilarity(firstNodeId, secondNodeId);
+        }
+        return sum / numOfProperties;
     }
 
     @Override
