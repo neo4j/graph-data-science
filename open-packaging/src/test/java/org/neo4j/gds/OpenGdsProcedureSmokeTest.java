@@ -20,7 +20,9 @@
 package org.neo4j.gds;
 
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.utils.TestProcedureAndFunctionScanner;
@@ -428,9 +430,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-       registerProcedures(TestProcedureAndFunctionScanner.procedures());
-       registerFunctions(TestProcedureAndFunctionScanner.functions());
-       registerAggregationFunctions(TestProcedureAndFunctionScanner.aggregationFunctions());
+        registerProcedures(TestProcedureAndFunctionScanner.procedures());
+        registerFunctions(TestProcedureAndFunctionScanner.functions());
+        registerAggregationFunctions(TestProcedureAndFunctionScanner.aggregationFunctions());
     }
 
     @Test
@@ -450,9 +452,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         runQueryWithRowConsumer(
             "CALL gds.list()",
             resultRow -> softly
-                    .assertThat(resultRow.getString("description"))
-                    .withFailMessage(resultRow.get("name") + " has no description")
-                    .isNotEmpty()
+                .assertThat(resultRow.getString("description"))
+                .withFailMessage(resultRow.get("name") + " has no description")
+                .isNotEmpty()
         );
     }
 
