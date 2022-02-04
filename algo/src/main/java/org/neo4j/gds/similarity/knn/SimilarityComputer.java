@@ -87,7 +87,6 @@ public interface SimilarityComputer {
         return new LongArrayPropertySimilarityComputer(nodeProperties);
     }
 
-    //TODO: make it private again
     static SimilarityComputer ofProperty(NodePropertyContainer graph, String propertyName) {
         var nodeProperties = Objects.requireNonNull(
             graph.nodeProperties(propertyName),
@@ -200,25 +199,14 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
 final class CombinedSimilarityComputer implements SimilarityComputer {
     private final SimilarityComputer[] similarityComputers;
     private int numOfProperties;
-    private long minimumNodesWithProperty;
 
     CombinedSimilarityComputer(NodePropertyContainer graph, List<String> propertyNames) {
         this.numOfProperties = propertyNames.size();
         this.similarityComputers = new SimilarityComputer[numOfProperties];
-        minimumNodesWithProperty = Long.MAX_VALUE;
 
         for (int i = 0; i < numOfProperties; ++i) {
-            var propertyName = propertyNames.get(i);
-            var nodeProperties = Objects.requireNonNull(
-                graph.nodeProperties(propertyName),
-                () -> formatWithLocale("The property `%s` has not been loaded", propertyName)
-            );
-            if (nodeProperties.size() < minimumNodesWithProperty) {
-                minimumNodesWithProperty = nodeProperties.size();
-            }
-            this.similarityComputers[i] = SimilarityComputer.ofProperty(nodeProperties, propertyName);
+            this.similarityComputers[i] = SimilarityComputer.ofProperty(graph, propertyNames.get(i));
         }
-
     }
 
     @Override
