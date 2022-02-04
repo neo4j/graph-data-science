@@ -18,5 +18,5 @@ Value must be between 0 (exclusive) and 1 (inclusive).
 | randomSeed                                                       | Integer | n/a       | yes      | The seed value to control the randomness of the algorithm.
 Note that `concurrency` must be set to 1 when setting this parameter.
 | similarityThreshold                                              | Float   | 0         | yes      | Filter out from the list of K-nearest neighbors nodes with similarity below this threshold.
-| perturbationRate                                                 | Float   | 0         | yes      | The probability of replacing the least similar known neighbor with an encountered neighbor with equal similarity.
+| perturbationRate                                                 | Float   | 0         | yes      | The probability of replacing the least similar known neighbor with an encountered neighbor of equal similarity.
 |===
