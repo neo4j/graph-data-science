@@ -43,7 +43,7 @@ import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
 class ProcedureSyntaxAutoCheckerTest {
 
     @TempDir
-    File outputDirectory;
+    private File outputDirectory;
     private OptionsBuilder options;
 
     @BeforeEach
@@ -57,165 +57,169 @@ class ProcedureSyntaxAutoCheckerTest {
 
     @Test
     void correctSyntaxSectionTest(SoftAssertions softAssertions) throws URISyntaxException {
-        var asciidoctor = createAsciidoctor(softAssertions);
-        var file = Paths.get(getClass().getClassLoader().getResource("include-with-syntax.adoc").toURI()).toFile();
-        assertTrue(file.exists() && file.canRead());
+        try (var asciidoctor = createAsciidoctor(softAssertions)) {
+            var file = Paths.get(getClass().getClassLoader().getResource("include-with-syntax.adoc").toURI()).toFile();
+            assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.convertFile(file, options);
-
-        softAssertions.assertAll();
+            asciidoctor.convertFile(file, options);
+        }
     }
 
     @Test
-    void shouldFailOnMissingResultsTable() throws URISyntaxException {
-        var syntaxAssertions = new SoftAssertions();
-        var asciidoctor = createAsciidoctor(syntaxAssertions);
-        var file = Paths
-            .get(getClass().getClassLoader().getResource("invalid-include-with-syntax-no-results-table.adoc").toURI())
-            .toFile();
-        assertTrue(file.exists() && file.canRead());
+    void shouldFailOnMissingResultsTable(SoftAssertions softAssertions) throws URISyntaxException {
+        try (var asciidoctor = createAsciidoctor(softAssertions)) {
+            var file = Paths
+                .get(getClass()
+                    .getClassLoader()
+                    .getResource("invalid-include-with-syntax-no-results-table.adoc")
+                    .toURI())
+                .toFile();
+            assertTrue(file.exists() && file.canRead());
 
-        assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
-            .hasMessageContaining("There is an issue finding the `Results` table for `include-with-stream`")
-            .hasMessageContaining("Expected size: 1 but was: 0");
+            assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
+                .hasMessageContaining("There is an issue finding the `Results` table for `include-with-stream`")
+                .hasMessageContaining("Expected size: 1 but was: 0");
+        }
     }
 
     @Test
-    void shouldFailOnMoreThanOneResultsTable() throws URISyntaxException {
-        var syntaxAssertions = new SoftAssertions();
-        var asciidoctor = createAsciidoctor(syntaxAssertions);
-        var file = Paths
-            .get(getClass().getClassLoader().getResource("invalid-include-with-syntax-two-results-tables.adoc").toURI())
-            .toFile();
-        assertTrue(file.exists() && file.canRead());
+    void shouldFailOnMoreThanOneResultsTable(SoftAssertions softAssertions) throws URISyntaxException {
+        try (var asciidoctor = createAsciidoctor(softAssertions)) {
+            var file = Paths
+                .get(getClass()
+                    .getClassLoader()
+                    .getResource("invalid-include-with-syntax-two-results-tables.adoc")
+                    .toURI())
+                .toFile();
+            assertTrue(file.exists() && file.canRead());
 
-        assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
-            .hasMessageContaining("There is an issue finding the `Results` table for `include-with-stream`")
-            .hasMessageContaining("Expected size: 1 but was: 2");
+            assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
+                .hasMessageContaining("There is an issue finding the `Results` table for `include-with-stream`")
+                .hasMessageContaining("Expected size: 1 but was: 2");
+        }
     }
 
     @Test
-    void shouldFailOnMissingCodeBlock() throws URISyntaxException {
-        var syntaxAssertions = new SoftAssertions();
-        var asciidoctor = createAsciidoctor(syntaxAssertions);
-        var file = Paths
-            .get(getClass().getClassLoader().getResource("invalid-include-with-syntax-no-code-block.adoc").toURI())
-            .toFile();
-        assertTrue(file.exists() && file.canRead());
+    void shouldFailOnMissingCodeBlock(SoftAssertions softAssertions) throws URISyntaxException {
+        try (var asciidoctor = createAsciidoctor(softAssertions)) {
+            var file = Paths
+                .get(getClass().getClassLoader().getResource("invalid-include-with-syntax-no-code-block.adoc").toURI())
+                .toFile();
+            assertTrue(file.exists() && file.canRead());
 
-        assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
-            .hasMessageContaining("There is an issue finding the code block for `include-with-stream`")
-            .hasMessageContaining("Expected size: 1 but was: 0");
+            assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
+                .hasMessageContaining("There is an issue finding the code block for `include-with-stream`")
+                .hasMessageContaining("Expected size: 1 but was: 0");
+        }
     }
 
     @Test
-    void shouldFailOnMoreThanOneCodeBlock() throws URISyntaxException {
-        var syntaxAssertions = new SoftAssertions();
-        var asciidoctor = createAsciidoctor(syntaxAssertions);
-        var file = Paths
-            .get(getClass().getClassLoader().getResource("invalid-include-with-syntax-two-code-blocks.adoc").toURI())
-            .toFile();
-        assertTrue(file.exists() && file.canRead());
+    void shouldFailOnMoreThanOneCodeBlock(SoftAssertions softAssertions) throws URISyntaxException {
+        try (var asciidoctor = createAsciidoctor(softAssertions)) {
+            var file = Paths
+                .get(getClass()
+                    .getClassLoader()
+                    .getResource("invalid-include-with-syntax-two-code-blocks.adoc")
+                    .toURI())
+                .toFile();
+            assertTrue(file.exists() && file.canRead());
 
-        assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
-            .hasMessageContaining("There is an issue finding the code block for `include-with-stream`")
-            .hasMessageContaining("Expected size: 1 but was: 2");
+            assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
+                .hasMessageContaining("There is an issue finding the code block for `include-with-stream`")
+                .hasMessageContaining("Expected size: 1 but was: 2");
+        }
     }
 
     @Test
     void shouldFailOnMissingYieldResultColumns() throws URISyntaxException {
-        var syntaxAssertions = new SoftAssertions();
-        var asciidoctor = createAsciidoctor(syntaxAssertions);
-        var file = Paths
-            .get(getClass()
-                .getClassLoader()
-                .getResource("invalid-include-with-syntax-missing-yield-columns.adoc")
-                .toURI())
-            .toFile();
-        assertTrue(file.exists() && file.canRead());
+        var softAssertions = new SoftAssertions();
+        try (var asciidoctor = createAsciidoctor(softAssertions)) {
+            var file = Paths
+                .get(getClass()
+                    .getClassLoader()
+                    .getResource("invalid-include-with-syntax-missing-yield-columns.adoc")
+                    .toURI())
+                .toFile();
+            assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.convertFile(file, options);
+            asciidoctor.convertFile(file, options);
+        }
 
-        assertThat(syntaxAssertions.assertionErrorsCollected())
+        assertThat(softAssertions.assertionErrorsCollected())
             .hasSize(1)
-            .allSatisfy(assertionError -> {
-                assertThat(assertionError)
-                    .hasMessageContaining("Asserting YIELD result columns for `include-with-stream`")
-                    .hasMessageContaining("could not find the following elements:\n" +
-                                          "  [\"communityId\", \"intermediateCommunityIds\"]");
-            });
+            .allSatisfy(assertionError -> assertThat(assertionError)
+                .hasMessageContaining("Asserting YIELD result columns for `include-with-stream`")
+                .hasMessageContaining("could not find the following elements:\n" +
+                                      "  [\"communityId\", \"intermediateCommunityIds\"]"));
     }
 
     @Test
     void shouldFailOnExtraYieldResultColumns() throws URISyntaxException {
         var syntaxAssertions = new SoftAssertions();
-        var asciidoctor = createAsciidoctor(syntaxAssertions);
-        var file = Paths
-            .get(getClass()
-                .getClassLoader()
-                .getResource("invalid-include-with-syntax-extra-yield-columns.adoc")
-                .toURI())
-            .toFile();
-        assertTrue(file.exists() && file.canRead());
+        try (var asciidoctor = createAsciidoctor(syntaxAssertions)) {
+            var file = Paths
+                .get(getClass()
+                    .getClassLoader()
+                    .getResource("invalid-include-with-syntax-extra-yield-columns.adoc")
+                    .toURI())
+                .toFile();
+            assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.convertFile(file, options);
+            asciidoctor.convertFile(file, options);
+        }
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
-            .allSatisfy(assertionError -> {
-                assertThat(assertionError)
-                    .hasMessageContaining("Asserting YIELD result columns for `include-with-stream`")
-                    .hasMessageContaining("the following elements were unexpected:\n" +
-                                          "  [\"bogusResultColumn\"]");
-            });
+            .allSatisfy(assertionError -> assertThat(assertionError)
+                .hasMessageContaining("Asserting YIELD result columns for `include-with-stream`")
+                .hasMessageContaining("the following elements were unexpected:\n" +
+                                      "  [\"bogusResultColumn\"]"));
     }
 
     @Test
     void shouldFailOnMissingResultTableRows() throws URISyntaxException {
-        var syntaxAssertions = new SoftAssertions();
-        var asciidoctor = createAsciidoctor(syntaxAssertions);
-        var file = Paths
-            .get(getClass()
-                .getClassLoader()
-                .getResource("invalid-include-with-syntax-missing-result-table-rows.adoc")
-                .toURI())
-            .toFile();
-        assertTrue(file.exists() && file.canRead());
+        var softAssertions = new SoftAssertions();
+        try (var asciidoctor = createAsciidoctor(softAssertions)) {
+            var file = Paths
+                .get(getClass()
+                    .getClassLoader()
+                    .getResource("invalid-include-with-syntax-missing-result-table-rows.adoc")
+                    .toURI())
+                .toFile();
+            assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.convertFile(file, options);
+            asciidoctor.convertFile(file, options);
+        }
 
-        assertThat(syntaxAssertions.assertionErrorsCollected())
+        assertThat(softAssertions.assertionErrorsCollected())
             .hasSize(1)
-            .allSatisfy(assertionError -> {
-                assertThat(assertionError)
-                    .hasMessageContaining("Asserting `Results` table for `include-with-stream`")
-                    .hasMessageContaining("could not find the following elements:\n" +
-                                          "  [\"intermediateCommunityIds\"]");
-            });
+            .allSatisfy(assertionError -> assertThat(assertionError)
+                .hasMessageContaining("Asserting `Results` table for `include-with-stream`")
+                .hasMessageContaining("could not find the following elements:\n" +
+                                      "  [\"intermediateCommunityIds\"]"));
     }
 
     @Test
     void shouldFailOnExtraResultTableRows() throws URISyntaxException {
-        var syntaxAssertions = new SoftAssertions();
-        var asciidoctor = createAsciidoctor(syntaxAssertions);
-        var file = Paths
-            .get(getClass()
-                .getClassLoader()
-                .getResource("invalid-include-with-syntax-extra-result-table-rows.adoc")
-                .toURI())
-            .toFile();
-        assertTrue(file.exists() && file.canRead());
+        var softAssertions = new SoftAssertions();
+        try (var asciidoctor = createAsciidoctor(softAssertions)) {
+            var file = Paths
+                .get(getClass()
+                    .getClassLoader()
+                    .getResource("invalid-include-with-syntax-extra-result-table-rows.adoc")
+                    .toURI())
+                .toFile();
+            assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.convertFile(file, options);
+            asciidoctor.convertFile(file, options);
+        }
 
-        assertThat(syntaxAssertions.assertionErrorsCollected())
+        assertThat(softAssertions.assertionErrorsCollected())
             .hasSize(1)
-            .allSatisfy(assertionError -> {
-                assertThat(assertionError)
-                    .hasMessageContaining("Asserting `Results` table for `include-with-stream`")
-                    .hasMessageContaining("the following elements were unexpected:\n" +
-                                          "  [\"bogusResultColumn\"]");
-            });
+            .allSatisfy(assertionError -> assertThat(assertionError)
+                .hasMessageContaining("Asserting `Results` table for `include-with-stream`")
+                .hasMessageContaining("the following elements were unexpected:\n" +
+                                      "  [\"bogusResultColumn\"]"));
     }
 
     private Asciidoctor createAsciidoctor(SoftAssertions softAssertions) {
