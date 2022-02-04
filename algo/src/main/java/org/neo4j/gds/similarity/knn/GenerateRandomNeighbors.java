@@ -78,7 +78,7 @@ final class GenerateRandomNeighbors implements Runnable {
 
             var neighbors = new NeighborList(k);
             for (long candidate : chosen) {
-                neighbors.add(candidate, computer.safeSimilarity(nodeId, candidate), rng);
+                neighbors.add(candidate, computer.safeSimilarity(nodeId, candidate), rng, 0.0);
             };
 
             assert neighbors.size() >= Math.min(neighborFilter.lowerBoundOfPotentialNeighbours(nodeId), boundedK);

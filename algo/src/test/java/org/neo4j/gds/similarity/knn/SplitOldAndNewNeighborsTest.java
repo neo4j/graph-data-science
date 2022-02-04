@@ -62,7 +62,7 @@ class SplitOldAndNewNeighborsTest extends RandomNodeCountAndKValues {
                     if (neighbor % 2 != 0) {
                         neighbor |= Long.MIN_VALUE;
                     }
-                    neighbors.add(neighbor, 1.0, rng);
+                    neighbors.add(neighbor, 1.0, rng, 0.0);
                 });
 
             return neighbors;

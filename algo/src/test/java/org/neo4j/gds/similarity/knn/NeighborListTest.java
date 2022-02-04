@@ -39,13 +39,13 @@ class NeighborListTest {
         NeighborList queue = new NeighborList(3);
         SplittableRandom splittableRandom = new SplittableRandom();
 
-        assertEquals(1, queue.add(0, Double.MIN_VALUE, splittableRandom));
-        assertEquals(1, queue.add(2, 4.0, splittableRandom));
-        assertEquals(1, queue.add(1, 1.0, splittableRandom));
-        assertEquals(1, queue.add(5, 5.0, splittableRandom));
-        assertEquals(1, queue.add(4, 2.0, splittableRandom));
-        assertEquals(1, queue.add(6, 6.0, splittableRandom));
-        assertEquals(0, queue.add(3, 3.0, splittableRandom));
+        assertEquals(1, queue.add(0, Double.MIN_VALUE, splittableRandom, 0.0));
+        assertEquals(1, queue.add(2, 4.0, splittableRandom, 0.0));
+        assertEquals(1, queue.add(1, 1.0, splittableRandom, 0.0));
+        assertEquals(1, queue.add(5, 5.0, splittableRandom, 0.0));
+        assertEquals(1, queue.add(4, 2.0, splittableRandom, 0.0));
+        assertEquals(1, queue.add(6, 6.0, splittableRandom, 0.0));
+        assertEquals(0, queue.add(3, 3.0, splittableRandom, 0.0));
 
         long[] actual = queue.elements().toArray();
         assertArrayEquals(expected, actual);
@@ -58,9 +58,9 @@ class NeighborListTest {
         NeighborList queue = new NeighborList(10);
         SplittableRandom splittableRandom = new SplittableRandom();
 
-        assertEquals(1, queue.add(6, 6.0, splittableRandom));
-        assertEquals(1, queue.add(5, 5.0, splittableRandom));
-        assertEquals(1, queue.add(4, 4.0, splittableRandom));
+        assertEquals(1, queue.add(6, 6.0, splittableRandom, 0.0));
+        assertEquals(1, queue.add(5, 5.0, splittableRandom, 0.0));
+        assertEquals(1, queue.add(4, 4.0, splittableRandom, 0.0));
 
         long[] actual = queue.elements().toArray();
         assertArrayEquals(expected, actual);
@@ -74,7 +74,7 @@ class NeighborListTest {
 
         var queue = new NeighborList(nodeCount);
 
-        elements.forEach(candidate -> queue.add(candidate, 1.0 / (1.0 + Math.abs(candidate - 2)), rng));
+        elements.forEach(candidate -> queue.add(candidate, 1.0 / (1.0 + Math.abs(candidate - 2)), rng, 0.0));
 
         assertThat(queue.elements()).containsExactlyInAnyOrderElementsOf(elements);
     }
@@ -85,7 +85,7 @@ class NeighborListTest {
         var queue = new NeighborList(2);
         var rng = new SplittableRandom(1337L);
 
-        elements.forEach(candidate -> queue.add(candidate, 1.0 / (1.0 + Math.abs(candidate - 1)), rng));
+        elements.forEach(candidate -> queue.add(candidate, 1.0 / (1.0 + Math.abs(candidate - 1)), rng, 0.0));
 
         assertThat(queue.elements()).containsExactlyInAnyOrderElementsOf(elements);
     }

@@ -75,7 +75,7 @@ class NeighborList {
     }
 
     /**
-     * see {@link #add(long, double, java.util.SplittableRandom)} for an explanation on
+     * see {@link #add(long, double, java.util.SplittableRandom, double)} for an explanation on
      * why we use these constants and not booleans.
      */
     static final int NOT_INSERTED = 0;
@@ -124,10 +124,6 @@ class NeighborList {
      * of insertions per round. To simplify that logic, we return 1 or 0 instead of true or false.
      * This allows KNN to just add the return values together without having the check on each of them.
      */
-    public long add(long element, double priority, SplittableRandom random) {
-        return add(element, priority, random, 0);
-    }
-
     public long add(long element, double priority, SplittableRandom random, double perturbationRate) {
         int insertIdx = 0;
         int currNumElementsWithPriority = elementCount * 2;
