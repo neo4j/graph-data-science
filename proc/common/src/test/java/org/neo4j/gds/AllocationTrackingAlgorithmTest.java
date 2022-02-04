@@ -58,6 +58,7 @@ public class AllocationTrackingAlgorithmTest extends AlgoTestBase {
             () -> {
                 TestAlgorithm algorithm;
                 AllocationTracker allocationTracker;
+                Throwable exception;
                 try (Transaction tx = db.beginTx()) {
                     var ktx = ((InternalTransaction) tx).kernelTransaction();
                     var memoryTrackerProxy = Neo4jProxy.memoryTrackerProxy(ktx);
@@ -69,9 +70,9 @@ public class AllocationTrackingAlgorithmTest extends AlgoTestBase {
                         ProgressTracker.NULL_TRACKER,
                         false
                     );
+                    exception = rootCause(assertThrows(Exception.class, algorithm::compute));
                     tx.commit();
                 }
-                var exception = rootCause(assertThrows(Exception.class, algorithm::compute));
                 assertThat(exception.getClass().getSimpleName()).isEqualTo(EXCEPTION_NAME);
                 assertThat(exception).hasMessageStartingWith("The allocation of an extra");
             }
