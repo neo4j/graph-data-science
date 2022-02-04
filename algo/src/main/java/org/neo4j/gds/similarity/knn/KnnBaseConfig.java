@@ -38,12 +38,8 @@ import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteChar
 @SuppressWarnings("immutables:subtype")
 public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleThreadedRandomSeedConfig {
 
-    @Value.Default
     @Configuration.ConvertWith("org.neo4j.gds.similarity.knn.KnnBaseConfig#validatePropertyNames")
-    default List<String> nodeProperties() {
-        return List.of();
-    }
-
+    List<String> nodeProperties();
 
     @Value.Default
     @Configuration.IntegerRange(min = 1)
@@ -116,6 +112,9 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
     }
 
     static @Nullable List<String> validatePropertyNames(List<String> input) {
+        if (input.isEmpty()) {
+            throw new IllegalArgumentException("The 'nodeProperties' list must not be empty.");
+        }
         return input.stream()
             .map(str -> validateNoWhiteCharacter(emptyToNull(str), "nodeProperties"))
             .collect(Collectors.toList());
