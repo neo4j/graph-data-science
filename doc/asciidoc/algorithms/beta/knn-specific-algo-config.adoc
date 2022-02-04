@@ -17,5 +17,6 @@ Value must be between 0 (exclusive) and 1 (inclusive).
 | <<algorithms-knn-introduction-sampling, initialSampler>>         | String  | "uniform" | yes      | The method used to sample the first `k` random neighbors for each node. "uniform" and "randomWalk", both case-insensitive, are valid inputs.
 | randomSeed                                                       | Integer | n/a       | yes      | The seed value to control the randomness of the algorithm.
 Note that `concurrency` must be set to 1 when setting this parameter.
-| similarityThreshold                                                   | Float   | 0     | yes      | Filter out from the list of K-nearest neighbors nodes with similarity below this threshold.
+| similarityThreshold                                              | Float   | 0         | yes      | Filter out from the list of K-nearest neighbors nodes with similarity below this threshold.
+| perturbationRate                                                 | Float   | 0         | yes      | The probability of replacing the least similar known neighbor with an encountered neighbor of equal similarity.
 |===

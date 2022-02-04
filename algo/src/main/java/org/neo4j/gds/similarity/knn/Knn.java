@@ -253,6 +253,7 @@ public class Knn extends Algorithm<Knn.Result> {
                 nodeCount,
                 this.config.topK(),
                 sampledK,
+                this.config.perturbationRate(),
                 this.config.randomJoins(),
                 partition,
                 progressTracker
@@ -327,6 +328,7 @@ public class Knn extends Algorithm<Knn.Result> {
         private long updateCount;
         private final Partition partition;
         private long nodePairsConsidered;
+        private double perturbationRate;
 
         private JoinNeighbors(
             SplittableRandom random,
@@ -339,6 +341,7 @@ public class Knn extends Algorithm<Knn.Result> {
             long n,
             int k,
             int sampledK,
+            double perturbationRate,
             int randomJoins,
             Partition partition,
             ProgressTracker progressTracker
@@ -357,6 +360,7 @@ public class Knn extends Algorithm<Knn.Result> {
             this.randomJoins = randomJoins;
             this.partition = partition;
             this.progressTracker = progressTracker;
+            this.perturbationRate = perturbationRate;
             this.updateCount = 0;
             this.nodePairsConsidered = 0;
         }
@@ -527,7 +531,7 @@ public class Knn extends Algorithm<Knn.Result> {
                 assert k2 <= k;
                 assert k2 <= n - 1;
 
-                return neighbors.add(joiner, similarity, splittableRandom);
+                return neighbors.add(joiner, similarity, splittableRandom, perturbationRate);
             }
         }
 
