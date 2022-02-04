@@ -160,7 +160,7 @@ class NeighborList {
 
             int elementsWithPriorityCapacity = elementCapacity * 2;
             if (upperBoundIdxExclusive == elementsWithPriorityCapacity && Double.compare(lowestPriority, priority) == 0) {
-                if (random.nextDouble() < perturbationRate) {
+                if (perturbationRate > 0.0 && Double.compare(random.nextDouble(), perturbationRate) < 0) {
                     insertIdx = random.nextInt(lowerBoundIdxInclusive / 2, upperBoundIdxExclusive / 2) * 2;
                     priorityElementPairs[insertIdx] = Double.doubleToRawLongBits(priority);
                     priorityElementPairs[insertIdx + 1] = element;
