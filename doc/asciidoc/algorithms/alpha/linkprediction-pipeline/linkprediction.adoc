@@ -21,7 +21,7 @@ The GDS library provides Link prediction, see <<algorithms-ml-linkprediction,her
 Here we describe an additional method that provides an end-to-end Link prediction experience.
 In addition to managing a predictive model, it also manages:
 
-* splitting relationships into subsets for `test`, `train` and `feature input`
+* splitting relationships into subsets for `test`, `train` and `feature-input`
 * a pipeline of processing steps that supply custom features for the model
 
 The motivation for using pipelines are:
@@ -277,16 +277,16 @@ The splitting of relationships proceeds internally in the following steps:
 * Random negative relationships are added to the `test` set.
 The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships.
-3. The relationships in the `test-complement` set are split into a `train` set and a `feature input` set.
+3. The relationships in the `test-complement` set are split into a `train` set and a `feature-input` set.
 * The `train` set contains a `trainFraction` fraction of the `test-complement` set.
-* The `feature input` set contains `(1-trainFraction)`  fraction of the `test-complement` set.
+* The `feature-input` set contains `(1-trainFraction)` fraction of the `test-complement` set.
 * Random negative relationships are added to the `train` set.
 The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships, nor with test relationships.
 
 The sampled positive and negative relationships are given relationship weights of `1.0` and `0.0` respectively so that they can be distinguished.
 
-The `feature input` graph is used, both in training and testing, for computing node properties and therefore also features which depend on node properties.
+The `feature-input` graph is used, both in training and testing, for computing node properties and therefore also features which depend on node properties.
 
 The `train` and `test` relationship sets are used for:
 
