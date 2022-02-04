@@ -39,8 +39,6 @@ public interface SimilarityComputer {
 
     double similarity(long firstNodeId, long secondNodeId);
 
-    NeighborFilter createNeighborFilter();
-
     static SimilarityComputer ofProperties(NodePropertyContainer graph, List<String> propertyNames) {
         if (propertyNames.size() == 1) {
             return ofProperty((graph), propertyNames.get(0));
@@ -115,11 +113,6 @@ final class DoublePropertySimilarityComputer implements SimilarityComputer {
         var right = nodeProperties.doubleValue(secondNodeId);
         return 1.0 / (1.0 + Math.abs(left - right));
     }
-
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new KnnNeighborFilter(nodeProperties.size());
-    }
 }
 
 final class LongPropertySimilarityComputer implements SimilarityComputer {
@@ -142,11 +135,6 @@ final class LongPropertySimilarityComputer implements SimilarityComputer {
         }
         return 1.0 / (1.0 + abs);
     }
-
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new KnnNeighborFilter(nodeProperties.size());
-    }
 }
 
 final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
@@ -166,11 +154,6 @@ final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
         int len = Math.min(left.length, right.length);
         return Math.max(Intersections.cosine(left, right, len), 0);
     }
-
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new KnnNeighborFilter(nodeProperties.size());
-    }
 }
 
 final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer {
@@ -189,11 +172,6 @@ final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer 
         var right = nodeProperties.doubleArrayValue(secondNodeId);
         int len = Math.min(left.length, right.length);
         return Math.max(Intersections.cosine(left, right, len), 0);
-    }
-
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new KnnNeighborFilter(nodeProperties.size());
     }
 }
 
@@ -216,11 +194,6 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
         long sameElements = Intersections.intersection3(left, right);
         long differentElements = left.length - sameElements;
         return 1.0 / (1.0 + differentElements);
-    }
-
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new KnnNeighborFilter(nodeProperties.size());
     }
 }
 
@@ -256,10 +229,4 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
         }
         return sum / numOfProperties;
     }
-
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new KnnNeighborFilter(minimumNodesWithProperty);
-    }
-    
 }

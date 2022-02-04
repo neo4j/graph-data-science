@@ -276,6 +276,7 @@ class KnnTest {
             graph,
             knnConfig,
             SimilarityComputer.ofProperty(nodeProperties, "knn"),
+            new KnnNeighborFilter(graph.nodeCount()),
             knnContext
         );
         var result = knn.compute();
@@ -299,9 +300,15 @@ class KnnTest {
         var nodeProperties = new DoubleTestProperties(nodeId -> nodeId == 0 ? Double.NaN : 42.1337);
         var knn = new Knn(
             graph,
-            ImmutableKnnBaseConfig.builder().nodeProperties(List.of(
-                "knn")).topK(1).concurrency(1).randomSeed(42L).build(),
+            ImmutableKnnBaseConfig
+                .builder()
+                .nodeProperties(List.of("knn"))
+                .topK(1)
+                .concurrency(1)
+                .randomSeed(42L)
+                .build(),
             SimilarityComputer.ofProperty(nodeProperties, "{knn}"),
+            new KnnNeighborFilter(graph.nodeCount()),
             ImmutableKnnContext.builder().build()
         );
 
