@@ -20,7 +20,9 @@
 package org.neo4j.gds;
 
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.utils.TestProcedureAndFunctionScanner;
@@ -36,6 +38,7 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(SoftAssertionsExtension.class)
 class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
@@ -427,9 +430,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-       registerProcedures(TestProcedureAndFunctionScanner.procedures());
-       registerFunctions(TestProcedureAndFunctionScanner.functions());
-       registerAggregationFunctions(TestProcedureAndFunctionScanner.aggregationFunctions());
+        registerProcedures(TestProcedureAndFunctionScanner.procedures());
+        registerFunctions(TestProcedureAndFunctionScanner.functions());
+        registerAggregationFunctions(TestProcedureAndFunctionScanner.aggregationFunctions());
     }
 
     @Test
@@ -445,17 +448,14 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
     }
 
     @Test
-    void allProcsHaveDescriptions() {
-        SoftAssertions softly = new SoftAssertions();
+    void allProcsHaveDescriptions(SoftAssertions softly) {
         runQueryWithRowConsumer(
             "CALL gds.list()",
             resultRow -> softly
-                    .assertThat(resultRow.getString("description"))
-                    .withFailMessage(resultRow.get("name") + " has no description")
-                    .isNotEmpty()
+                .assertThat(resultRow.getString("description"))
+                .withFailMessage(resultRow.get("name") + " has no description")
+                .isNotEmpty()
         );
-
-        softly.assertAll();
     }
 
     @Test

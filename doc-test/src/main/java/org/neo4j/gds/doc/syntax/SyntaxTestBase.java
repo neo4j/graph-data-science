@@ -70,8 +70,6 @@ public abstract class SyntaxTestBase {
             .safe(SafeMode.UNSAFE); // By default we are forced to use relative path which we don't want.
 
         asciidoctor.convertFile(docFile, options);
-
-        softAssertions.assertAll();
     }
 
     protected Iterable<SyntaxModeMeta> syntaxModes() {
