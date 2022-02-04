@@ -22,8 +22,8 @@ The input of this algorithm is a monopartite graph.
 The graph does not need to be connected, in fact, existing relationships between nodes will be ignored - apart from random walk sampling if that that initial sampling option is used.
 New relationships are created between each node and its k nearest neighbors.
 
-The K-Nearest Neighbors algorithm compares a given property of each node.
-The `k` nodes where this property is most similar are the k-nearest neighbors.
+The K-Nearest Neighbors algorithm compares given properties of each node.
+The `k` nodes where these properties are most similar are the k-nearest neighbors.
 
 The initial set of neighbors is picked at random and verified and refined in multiple iterations.
 The number of iterations is limited by the configuration parameter `maxIterations`.
@@ -65,26 +65,30 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-knn-introduction-similarity]]
 === Similarity measures
 
-The similarity measure used in the KNN algorithm depends on the type of the configured node property.
-KNN supports both scalar numeric values as well as lists of numbers.
+The similarity measure used in the KNN algorithm depends on the type of the configured node properties.
+KNN supports both scalar numeric values and lists of numbers.
 
 Scalar numeric property::
 
-When the property is a scalar number, the similarity is computed as one divided by one plus the absolute difference between the values:
+When a property is a scalar number, the similarity is computed as one divided by one plus the absolute difference between the values:
 
 image::equations/knn-scalar-similarity.svg[one divided by one plus the absolute difference of ps and pt,align="center"]
 
 List of integers::
 
-When the property is a list of integers, the similarity is computed as one divided by  one plus the number of unequal numbers in the list:
+When a property is a list of integers, the similarity is computed as one divided by  one plus the number of unequal numbers in the list:
 
 image::equations/knn-integer-list-similarity.svg[one divided by one plus delta of ps and pt,align="center"]
 
 List of floating-point numbers::
 
-When the property is a list of floating-point numbers, the similarity is computed using the cosine similarity metric.
+When a property is a list of floating-point numbers, the similarity is computed using the cosine similarity metric.
 See the <<algorithms-similarity-cosine-context, Cosine Similarity>> algorithm for more details.
 If the cosine similarity is negative, we clip the value to `0`, i.e., `max(cosine(a, b), 0))`.
+
+Multiple properties::
+
+Finally, when multiple properties are specified, the similarity of the two neighbors is the mean of the similarities of the individual properties.
 
 
 [[algorithms-knn-introduction-sampling]]
