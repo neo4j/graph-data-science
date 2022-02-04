@@ -8,9 +8,9 @@ The trained pipeline can be <<algorithms-link-prediction-pipelines-predict, appl
 More precisely, the procedure will in order:
 
 . Apply `nodeLabels` and `relationshipType` filters to the graph. All subsequent graphs have the same node set.
-. Create a relationship split of the graph into `test`, `train` and `feature input` sets as described in <<algorithms-ml-linkprediction-configure-splits, Configuring the relationship splits>>.
+. Create a relationship split of the graph into `test`, `train` and `feature-input` sets as described in <<algorithms-ml-linkprediction-configure-splits, Configuring the relationship splits>>.
 These graphs are internally managed and exist only for the duration of the training.
-. Apply the node property steps, added according to <<algorithms-ml-linkprediction-adding-node-properties, Adding node properties>>, on the `feature input` graph.
+. Apply the node property steps, added according to <<algorithms-ml-linkprediction-adding-node-properties, Adding node properties>>, on the `feature-input` graph.
 . Apply the feature steps, added according to <<algorithms-ml-linkprediction-adding-features, Adding link features>>, to the `train` graph, which yields for each `train` relationship an _instance_, that is, a feature vector and a binary label.
 . Split the training instances using stratified k-fold cross-validation.
 The number of folds `k` can be configured using `validationFolds` in `gds.alpha.ml.pipeline.linkPrediction.configureSplit`.
