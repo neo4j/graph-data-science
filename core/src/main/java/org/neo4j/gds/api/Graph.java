@@ -21,7 +21,9 @@ package org.neo4j.gds.api;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.huge.NodeFilteredGraph;
 
+import java.util.Optional;
 import java.util.Set;
 
 public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, RelationshipIterator, RelationshipProperties, RelationshipAccess {
@@ -72,4 +74,6 @@ public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, Rela
 
     @Override
     Graph concurrentCopy();
+
+    Optional<NodeFilteredGraph> asNodeFilteredGraph();
 }

@@ -30,10 +30,12 @@ import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
@@ -82,6 +84,11 @@ public class NullGraph implements Graph {
     @Override
     public Graph concurrentCopy() {
         return this;
+    }
+
+    @Override
+    public Optional<NodeFilteredGraph> asNodeFilteredGraph() {
+        return Optional.empty();
     }
 
     @Override

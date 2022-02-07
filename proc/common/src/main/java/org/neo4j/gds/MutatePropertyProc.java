@@ -19,16 +19,15 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.write.NodeProperty;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodeProperties;
-import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Collection;
 import java.util.List;
@@ -60,20 +59,20 @@ public abstract class MutatePropertyProc<
     ) {
         Graph graph = computationResult.graph();
 
-        var nodeProperties = nodePropertyList(computationResult);
+        final var nodeProperties = nodePropertyList(computationResult);
 
-        if (graph instanceof NodeFilteredGraph) {
-            nodeProperties = nodeProperties.stream().map(nodeProperty ->
-                ImmutableNodeProperty.of(
-                    nodeProperty.propertyKey(),
-                    new FilteredNodeProperties.OriginalToFilteredNodeProperties(
-                        nodeProperty.properties(),
-                        (NodeFilteredGraph) graph
+        var maybeTranslatedProperties = graph.asNodeFilteredGraph()
+            .map(filteredGraph -> nodeProperties.stream()
+                .map(nodeProperty ->
+                    ImmutableNodeProperty.of(
+                        nodeProperty.propertyKey(),
+                        new FilteredNodeProperties.OriginalToFilteredNodeProperties(
+                            nodeProperty.properties(),
+                            filteredGraph
+                        )
                     )
-                )
-            )
-                .collect(Collectors.toList());
-        }
+                ).collect(Collectors.toList())
+            ).orElse(nodeProperties);
 
         MutatePropertyConfig mutatePropertyConfig = computationResult.config();
 
@@ -82,7 +81,7 @@ public abstract class MutatePropertyProc<
             GraphStore graphStore = computationResult.graphStore();
             Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
 
-            nodeProperties.forEach(nodeProperty -> {
+            maybeTranslatedProperties.forEach(nodeProperty -> {
                 for (NodeLabel label : labelsToUpdate) {
                     graphStore.addNodeProperty(
                         label,
@@ -92,7 +91,7 @@ public abstract class MutatePropertyProc<
                 }
             });
 
-            resultBuilder.withNodePropertiesWritten(nodeProperties.size() * computationResult.graph().nodeCount());
+            resultBuilder.withNodePropertiesWritten(maybeTranslatedProperties.size() * computationResult.graph().nodeCount());
         }
     }
 }

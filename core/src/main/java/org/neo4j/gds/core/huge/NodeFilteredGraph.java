@@ -211,6 +211,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
+    public Optional<NodeFilteredGraph> asNodeFilteredGraph() {
+        return Optional.of(this);
+    }
+
+    @Override
     public boolean exists(long sourceNodeId, long targetNodeId) {
         return super.exists(filteredIdMap.toOriginalNodeId(sourceNodeId), filteredIdMap.toOriginalNodeId(targetNodeId));
     }
