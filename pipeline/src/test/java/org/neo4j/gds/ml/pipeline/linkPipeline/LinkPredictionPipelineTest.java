@@ -22,11 +22,10 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
-import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 
@@ -171,12 +170,11 @@ class LinkPredictionPipelineTest {
         @Test
         void returnsCorrectMapWithFullConfiguration() {
             var pipeline = new LinkPredictionPipeline();
-            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(
-                ExecutionContext.EMPTY.username(),
-                "pageRank",
-                Map.of("mutateProperty", "pr")
+            var step = new NodePropertyStep(
+                TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
+                Map.of("mutateProperty", "prop1")
             );
-            pipeline.addNodePropertyStep(pageRankPropertyStep);
+            pipeline.addNodePropertyStep(step);
 
             var hadamardFeatureStep = new HadamardFeatureStep(List.of("a"));
             pipeline.addFeatureStep(hadamardFeatureStep);
@@ -197,7 +195,7 @@ class LinkPredictionPipelineTest {
                         .asInstanceOf(InstanceOfAssertFactories.MAP)
                         .containsOnlyKeys("nodePropertySteps", "featureSteps")
                         .returns(
-                            List.of(pageRankPropertyStep.toMap()),
+                            List.of(step.toMap()),
                             featurePipelineMap -> featurePipelineMap.get("nodePropertySteps")
                         )
                         .returns(
@@ -241,28 +239,26 @@ class LinkPredictionPipelineTest {
         @Test
         void deepCopiesNodePropertySteps() {
             var pipeline = new LinkPredictionPipeline();
-            var pageRankPropertyStep = NodePropertyStepFactory.createNodePropertyStep(
-                ExecutionContext.EMPTY.username(),
-                "pageRank",
-                Map.of("mutateProperty", "pr")
+            var step = new NodePropertyStep(
+                TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
+                Map.of("mutateProperty", "prop1")
             );
-            pipeline.addNodePropertyStep(pageRankPropertyStep);
+            pipeline.addNodePropertyStep(step);
 
             var copy = pipeline.copy();
             assertThat(copy)
                 .isNotSameAs(pipeline)
                 .satisfies(copiedPipeline -> assertThat(copiedPipeline.nodePropertySteps())
                     .isNotSameAs(pipeline.nodePropertySteps())
-                    .containsExactly(pageRankPropertyStep));
+                    .containsExactly(step));
 
-            var degreeNodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(
-                ExecutionContext.EMPTY.username(),
-                "degree",
-                Map.of("mutateProperty", "degree")
+            var otherStep = new NodePropertyStep(
+                TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
+                Map.of("mutateProperty", "prop2")
             );
-            pipeline.addNodePropertyStep(degreeNodePropertyStep);
+            pipeline.addNodePropertyStep(otherStep);
 
-            assertThat(copy.nodePropertySteps()).doesNotContain(degreeNodePropertyStep);
+            assertThat(copy.nodePropertySteps()).doesNotContain(otherStep);
         }
 
         @Test

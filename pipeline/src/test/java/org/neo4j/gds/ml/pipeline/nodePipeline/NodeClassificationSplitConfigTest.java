@@ -51,7 +51,7 @@ class NodeClassificationSplitConfigTest {
             .validationFolds(2)
             .build();
         assertThatThrownBy(() -> splitConfig.validateMinNumNodesInSplitSets(graph)).hasMessageContaining(
-            "The specified `testFraction` is too small for the current graph. " +
+            "The specified `testFraction` is too low for the current graph. " +
             "The test set would have 0 node(s) but it must have at least 1."
         );
     }

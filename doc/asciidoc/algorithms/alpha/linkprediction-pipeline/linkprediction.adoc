@@ -344,9 +344,9 @@ include::pipelineInfoResult.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe', {
-  testFraction: 0.3,
-  trainFraction: 0.3,
-  validationFolds: 7
+  testFraction: 0.25,
+  trainFraction: 0.6,
+  validationFolds: 3
 })
 YIELD splitConfig
 ----
@@ -355,7 +355,7 @@ YIELD splitConfig
 [opts="header",cols="1"]
 |===
 | splitConfig
-| {negativeSamplingRatio=1.0, testFraction=0.3, validationFolds=7, trainFraction=0.3}
+| {negativeSamplingRatio=1.0, testFraction=0.25, validationFolds=3, trainFraction=0.6}
 |===
 
 We now reconfigured the splitting of the pipeline, which will be applied during <<algorithms-ml-linkprediction-pipelines-train, training>>.
