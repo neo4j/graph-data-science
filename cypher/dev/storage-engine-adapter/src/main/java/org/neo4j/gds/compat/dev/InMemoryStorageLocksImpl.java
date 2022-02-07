@@ -57,7 +57,8 @@ public class InMemoryStorageLocksImpl implements StorageLocks {
         ReadableTransactionState readableTransactionState,
         LockTracer lockTracer,
         long sourceNode,
-        long targetNode
+        long targetNode,
+        long relationship
     ) {}
 
     @Override
