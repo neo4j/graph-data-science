@@ -101,9 +101,9 @@ YIELD
 [.alpha]
 === User Log
 
-Hints and warnings are also trackable by the GDS library.
-For this, the GDS library keeps track of the 100 most recent tasks that have generated hints or warnings per user and stores them in memory.
-When a user calls procedure `gds.alpha.userLog`, their respective list of hints and warnings is returned.
+Hints and warnings can also be tracked through the GDS library and be accessed via Cypher queries.
+The GDS library keeps track for each user their 100 most recent tasks that have generated hints or warnings and stores them in memory.
+When a user calls procedure `gds.alpha.userLog`, their respective list of generated hints and warnings is returned.
 
 [[userlog-syntax]]
 === Syntax
@@ -123,13 +123,14 @@ YIELD
 | Name          | Type      | Description
 | taskName      | String    | The name of the task that generated a warning or hint, i.e. `WCC`.
 |timeStarted      | LocalTime      | The local wall clock time when the task has been started.
-| Message      | String    | A hint or warning associated with the task.
+| message      | String    | A hint or warning associated with the task.
 |===
 
 [[userlog-examples]]
 === Examples
 
-Suppose that we called the  `gds.wcc.stream` procedure and defined `relationshipWeightProperty` without specifying a `threshold` value.
+Suppose that we have called the  `gds.wcc.stream` procedure and set a `relationshipWeightProperty` without specifying a `threshold` value.
+This generates a warning which can be accessed via the user log as seen below.
 
 [source,cypher,role=noplay]
 ----
