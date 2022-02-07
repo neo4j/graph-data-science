@@ -1,5 +1,6 @@
 package org.neo4j.gds.collections.arraylist;
 
+import org.neo4j.gds.collections.DrainingIterator;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.mem.HugeArrays;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -108,6 +109,10 @@ public final class HugeSparseIntArrayList {
         int indexInPage = PageUtil.indexInPage(index, PAGE_MASK);
         int[] page = getPage(pageIndex);
         page[indexInPage] += value;
+    }
+
+    public DrainingIterator<int[]> drainingIterator() {
+        return new DrainingIterator<>(pages, PAGE_SIZE);
     }
 
     private void grow(int minNewSize) {

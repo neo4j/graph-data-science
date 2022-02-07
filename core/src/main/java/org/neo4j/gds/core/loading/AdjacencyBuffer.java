@@ -303,13 +303,15 @@ public final class AdjacencyBuffer {
         public void run() {
             try (var compressor = threadLocalRelationshipsBuilder.intoCompressor()) {
                 var importedRelationships = new MutableLong(0L);
-                compressedLongArrays.consume(localId -> {
+                compressedLongArrays.consume((localId, targets, properties, compressedByteSize, numberOfCompressedTargets) -> {
                     var nodeId = valueMapper.map(baseNodeId + localId);
                     importedRelationships.add(compressor.applyVariableDeltaEncoding(
-                        compressedLongArrays,
-                        localId,
-                        buffer,
                         nodeId,
+                        targets,
+                        properties,
+                        numberOfCompressedTargets,
+                        compressedByteSize,
+                        buffer,
                         valueMapper
                     ));
                 });
