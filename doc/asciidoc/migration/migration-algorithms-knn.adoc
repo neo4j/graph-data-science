@@ -1,0 +1,11 @@
+[[migration-algorithms-knn]]
+= Node Classification Pipeline predict
+
+.Changes in configuration
+[options=header, cols=2]
+|===
+| 1.x
+| 2.x
+| String `nodeWeightProperty`
+| List of String `nodeProperties`
+|===
