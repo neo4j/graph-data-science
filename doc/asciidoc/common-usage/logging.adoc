@@ -6,7 +6,7 @@
 This section describes logging features in the Neo4j Graph Data Science library.
 --
 
-In the GDS library there are two types of logging: debug logging and progress logging.
+In the GDS library there are three types of logging: debug logging, progress logging and hints or warnings logging.
 
 *Debug logging* provides information about events in the system.
 For example, when an algorithm computation completes, the amount of memory used and the total runtime may be logged.
@@ -15,6 +15,8 @@ The debug log information is useful for understanding events in the system, espe
 
 *Progress logging* is performed to track the progress of operations that are expected to take a long time.
 This includes graph projections, algorithm computation, and result writing.
+
+*Hints or warnings logging* provides the user with useful hints or warnings related to their queries.
 
 All log entries are written to the log files configured for the Neo4j database.
 For more information on configuring Neo4j logs, please refer to the https://neo4j.com/docs/operations-manual/current/monitoring/logging/#logging[Neo4j Operations Manual].
@@ -79,7 +81,7 @@ YIELD
 
 Assuming we just started `gds.beta.node2vec.stream` procedure.
 
-[source, cypher, role=noplay]
+[source,cypher,role=noplay]
 ----
 CALL gds.beta.listProgress()
 YIELD
@@ -93,4 +95,52 @@ YIELD
 |===
 | jobId                                  | taskName   | progress
 | "d21bb4ca-e1e9-4a31-a487-42ac8c9c1a0d" | "Node2Vec" | "42%"
+|===
+
+[[logging-user-warnings]]
+[.alpha]
+=== User Log
+
+Hints and warnings are also trackable by the GDS library.
+For this, the GDS library keeps track of the 100 most recent tasks that have generated hints or warnings per user and stores them in memory.
+When a user calls procedure `gds.alpha.userLog`, their respective list of hints and warnings is returned.
+
+[[logging-progress-logging-syntax]]
+=== Syntax
+
+.Getting the hints and warnings for a user:
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.userlog()
+YIELD
+  taskName,
+  message
+----
+
+.Results
+[opts="header",cols="1m,1,2"]
+|===
+| Name          | Type      | Description
+| taskName      | String    | The name of the task that generated a warning or hint, i.e. `WCC`.
+|timeStarted      | LocalTime      | The local wall clock time when the task has been started.
+| Message      | String    | A hint or warning associated with the task.
+|===
+
+=== Examples
+
+Suppose that we called the  `gds.wcc.stream` procedure and defined `relationshipWeightProperty` without specifying a `threshold` value.
+
+[source,cypher,role=noplay]
+----
+CALL gds.beta.listProgress()
+YIELD
+  taskName,
+  message
+----
+
+.Results
+[opts="header"]
+|===
+taskName   | message
+| "WCC"     |"Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set"
 |===
