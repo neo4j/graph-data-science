@@ -34,7 +34,7 @@ class LinkPredictionSplitConfigTest {
     @GdlGraph
     static String GRAPH =
         " ()-->()" +
-        StringUtils.repeat(" ,()-->()" , 9);
+        StringUtils.repeat(" ,()-->()", 9);
 
     @Inject
     GraphStore graphStore;
@@ -96,7 +96,8 @@ class LinkPredictionSplitConfigTest {
             .build();
 
         assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
-            .hasMessageContaining("The specified `validationFolds` is too high or the `trainFraction` too low for the current graph. " +
-                                  "The validation set would have 0 relationship(s) but it must have at least 1.");
+            .hasMessageContaining(
+                "The specified `validationFolds` is too high or the `trainFraction` too low for the current graph. " +
+                "The validation set would have 0 relationship(s) but it must have at least 1.");
     }
 }
