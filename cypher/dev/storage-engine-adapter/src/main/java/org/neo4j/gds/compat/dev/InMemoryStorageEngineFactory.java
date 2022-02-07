@@ -76,6 +76,7 @@ import org.neo4j.storageengine.api.CommandReaderFactory;
 import org.neo4j.storageengine.api.ConstraintRuleAccessor;
 import org.neo4j.storageengine.api.LogFilesInitializer;
 import org.neo4j.storageengine.api.MetadataProvider;
+import org.neo4j.storageengine.api.SchemaRule44;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.StoreVersion;
@@ -374,6 +375,18 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         DatabaseLayout databaseLayout,
         boolean b,
         Function<SchemaRule, SchemaRule> function,
+        CursorContextFactory cursorContextFactory
+    ) {
+        return List.of();
+    }
+
+    @Override
+    public List<SchemaRule44> load44SchemaRules(
+        FileSystemAbstraction fileSystemAbstraction,
+        PageCache pageCache,
+        Config config,
+        DatabaseLayout databaseLayout,
+        PageCacheTracer pageCacheTracer,
         CursorContextFactory cursorContextFactory
     ) {
         return List.of();
