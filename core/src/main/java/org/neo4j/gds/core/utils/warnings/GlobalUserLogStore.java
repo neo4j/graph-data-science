@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
-    public static final int MOST_RECENT = 10;
+    public static final int MOST_RECENT = 100;
 
     private final Map<String, ConcurrentSkipListMap<Task, List<String>>> registeredMessages;
 
