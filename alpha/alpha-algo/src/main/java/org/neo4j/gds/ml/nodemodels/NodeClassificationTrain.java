@@ -272,6 +272,9 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         progressTracker.beginSubTask();
         ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
         var outerSplit = new FractionSplitter(allocationTracker).split(nodeIds, 1 - config.holdoutFraction());
+        progressTracker.logMessage("Size of the train-set: " + outerSplit.testSet().size());
+        progressTracker.logMessage("Size of the test-set: " + outerSplit.trainSet().size());
+
         var innerSplits = new StratifiedKFoldSplitter(
             config.validationFolds(),
             ReadOnlyHugeLongArray.of(outerSplit.trainSet()),

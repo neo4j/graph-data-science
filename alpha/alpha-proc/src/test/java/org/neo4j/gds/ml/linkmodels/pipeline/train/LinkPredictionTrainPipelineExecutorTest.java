@@ -383,6 +383,8 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                     "Link Prediction Train Pipeline :: execute node property steps :: step 1 of 1 100%",
                     "Link Prediction Train Pipeline :: execute node property steps :: step 1 of 1 :: Finished",
                     "Link Prediction Train Pipeline :: execute node property steps :: Finished",
+                    "Link Prediction Train Pipeline :: Size of the train-set: 8",
+                    "Link Prediction Train Pipeline :: Size of the test-set: 16",
                     "Link Prediction Train Pipeline :: LinkPredictionTrain :: extract train features :: Start",
                     "Link Prediction Train Pipeline :: LinkPredictionTrain :: extract train features 100%",
                     "Link Prediction Train Pipeline :: LinkPredictionTrain :: extract train features :: Finished",

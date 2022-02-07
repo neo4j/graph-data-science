@@ -276,7 +276,12 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                     "Proceeding with such small sets might lead to unreliable results."
                 );
 
-            // TODO port INFO logs when removing the non-pipeline test for NC Train
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .contains(
+                    "Node Classification Train Pipeline :: NCTrain :: ShuffleAndSplit :: Size of the train-set: 3",
+                    "Node Classification Train Pipeline :: NCTrain :: ShuffleAndSplit :: Size of the test-set: 6"
+                );
         });
     }
 

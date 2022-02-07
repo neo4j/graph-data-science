@@ -104,6 +104,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
             Optional.of("label")
         );
 
+        progressTracker.logMessage("Size of the train-set: " + trainGraph.relationshipCount());
+        progressTracker.logMessage("Size of the test-set: " + testGraph.relationshipCount());
         warnIfRelationshipSplitsAreTooSmall(trainGraph.relationshipCount(), testGraph.relationshipCount());
 
         return new LinkPredictionTrain(
