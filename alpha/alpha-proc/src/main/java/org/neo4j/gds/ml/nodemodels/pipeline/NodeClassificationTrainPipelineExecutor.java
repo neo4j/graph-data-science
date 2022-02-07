@@ -106,6 +106,9 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
         var relationshipTypes = config.internalRelationshipTypes(graphStore);
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.empty());
+
+        this.pipeline.splitConfig().validateMinNumNodesInSplitSets(graph);
+
         var innerModel = NodeClassificationTrain
             .create(graph, innerConfig(pipeline, config), executionContext.allocationTracker(), progressTracker)
             .compute();

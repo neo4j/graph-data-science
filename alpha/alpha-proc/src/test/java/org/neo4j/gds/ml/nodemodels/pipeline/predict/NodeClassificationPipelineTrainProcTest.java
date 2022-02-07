@@ -142,7 +142,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             pipe
         );
         runQuery(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit($pipeline, {testFraction: 0.01, validationFolds: 2})",
+            "CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit($pipeline, {testFraction: 0.3, validationFolds: 2})",
             pipe
         );
 
@@ -169,10 +169,10 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
                 .usingRecursiveComparison()
                 .withComparatorForType(new DoubleComparator(1e-6), Double.class)
                 .isEqualTo(Map.of(
-                    "validation", Map.of("avg", 0.666666, "max", 0.666666, "min", 0.666666),
-                    "train", Map.of("avg", 0.666666, "max", 0.666666, "min", 0.666666),
+                    "validation", Map.of("avg", 0.24999999, "max", 0.49999999, "min", 0.0),
+                    "train", Map.of("avg", 0.399999996, "max", 0.799999992, "min", 0.0),
                     "outerTrain",0.666666,
-                    "test",0.999999
+                    "test",0.799999992
                 ));
 
             var featurePipeline = modelInfo.extractingByKey("trainingPipeline", soMap)

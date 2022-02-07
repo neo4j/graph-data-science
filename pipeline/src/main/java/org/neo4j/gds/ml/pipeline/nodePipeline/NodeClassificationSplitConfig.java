@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -30,10 +31,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 @ValueClass
 @Configuration
 public interface NodeClassificationSplitConfig extends ToMapConvertible {
     NodeClassificationSplitConfig DEFAULT_CONFIG = NodeClassificationSplitConfig.of(CypherMapWrapper.empty());
+    int MIN_NUM_NODES_PER_SET = 1;
+    int MIN_NUM_NODES_PER_TRAIN_SET = 2;//At least 2 since this will be further split during cross validation
 
     @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
@@ -63,5 +68,37 @@ public interface NodeClassificationSplitConfig extends ToMapConvertible {
     @Configuration.CollectKeys
     default Collection<String> configKeys() {
         return Collections.emptyList();
+    }
+
+    @Value.Derived
+    @Configuration.Ignore
+    default void validateMinNumNodesInSplitSets(
+        Graph graph
+    ) {
+        long numberNodesInTestSet = (long) (graph.nodeCount() * testFraction());
+        long numberNodesInTrainSet = graph.nodeCount() - numberNodesInTestSet;
+        long numberNodesInValidationSet = numberNodesInTrainSet / validationFolds();
+
+        validateNumberOfNodesInSplitSet(numberNodesInTestSet, MIN_NUM_NODES_PER_SET, "test", "testFraction");
+        validateNumberOfNodesInSplitSet(numberNodesInTrainSet, MIN_NUM_NODES_PER_TRAIN_SET, "train", "testFraction");
+        validateNumberOfNodesInSplitSet(numberNodesInValidationSet, MIN_NUM_NODES_PER_SET, "validation", "validationFolds");
+    }
+
+    @Configuration.Ignore
+    @Value.Derived
+    private static void validateNumberOfNodesInSplitSet(
+        long numberNodesInSet,
+        long minNumberNodes,
+        String setName,
+        String parameterName
+    ) {
+        if (numberNodesInSet < minNumberNodes) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The specified `%s` is not compatible with the current graph. " +
+                "The %s set would have %d node(s) " +
+                "but it should have at least %d. ",
+                parameterName, setName, numberNodesInSet, minNumberNodes
+            ));
+        }
     }
 }
