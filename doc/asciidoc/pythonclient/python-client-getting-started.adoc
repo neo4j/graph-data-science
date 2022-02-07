@@ -44,6 +44,25 @@ If we don't want to use the default database of our DBMS, we can specify which o
 gds.set_database("my-db")
 ----
 
+
+=== AuraDS
+
+If you are connecting the client to an https://neo4j.com/cloud/graph-data-science/[AuraDS instance], you can get recommended non-default configuration settings of the Python Driver applied automatically.
+To achieve this, set the constructor argument `aura_ds=True`:
+
+[source, python]
+----
+from graphdatascience import GraphDataScience
+
+# Configures the driver with AuraDS-recommended settings
+gds = GraphDataScience(
+    "neo4j+s://my-aura-ds.databases.neo4j.io:7687",
+    auth=("neo4j", "my-password"),
+    aura_ds=True
+)
+----
+
+
 == Minimal example
 
 In the following example we illustrate the Python client to run a Cypher query, project a graph into GDS, run an algorithm and inspect the result via the client-side graph object.
