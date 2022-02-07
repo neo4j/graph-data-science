@@ -186,16 +186,15 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
     }
 
     @Test
-    void computeMemoryEstimationForVirtualGraphWithProperties() throws Exception {
+    void computeMemoryEstimationForVirtualGraphWithProperties() {
         String query = "CALL gds.graph.project.estimate('*', {`FOO`: {type: '*', properties: 'weight'}}, {nodeCount: 42, relationshipCount: 1337})";
-        runQueryWithResultConsumer(query, result -> System.out.println(result.resultAsString()));
-//        runQueryWithRowConsumer(query,
-//            row -> {
-//                System.out.println(row.);
-//                assertEquals(558712, row.getNumber("bytesMin").longValue());
-//                assertEquals(558712, row.getNumber("bytesMax").longValue());
-//            }
-//        );
+        runQueryWithRowConsumer(
+            query,
+            row -> {
+                assertEquals(558_640, row.getNumber("bytesMin").longValue());
+                assertEquals(558_640, row.getNumber("bytesMax").longValue());
+            }
+        );
     }
 
     @Test
