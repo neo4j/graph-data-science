@@ -25,7 +25,7 @@ The Node Similarity algorithm compares a set of nodes based on the nodes they ar
 Two nodes are considered similar if they share many of the same neighbors.
 Node Similarity computes pair-wise similarities based on the Jaccard metric, also known as the Jaccard Similarity Score.
 
-Jaccard Similarity is computed using the following formula:
+Given two sets `A` and `B`, the Jaccard Similarity is computed using the following formula:
 
 image::jaccard.png[role="middle"]
 // This is the raw information for this image:
