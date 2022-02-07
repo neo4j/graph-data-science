@@ -162,11 +162,14 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             ));
         }
 
-        long testSetSize = (long) (graphStore.relationshipCount() * testFraction());
-        long testComplementSize = graphStore.relationshipCount() - testSetSize;
-        long trainSetSize = (long) (testComplementSize * trainFraction());
+        long positiveTestSetSize = (long) (graphStore.relationshipCount() * testFraction());
+        long testSetSize = (long) (positiveTestSetSize * (1 + negativeSamplingRatio()));
+        long testComplementSize = graphStore.relationshipCount() - positiveTestSetSize;
+
+        long positiveTrainSetSize = (long) (testComplementSize * trainFraction() * (1 + negativeSamplingRatio()));
+        long trainSetSize = (long) (positiveTrainSetSize * (1 + negativeSamplingRatio()));
         long featureInputSize = (long) (testComplementSize * (1 - trainFraction()));
-        long foldSize = trainSetSize / validationFolds();
+        long foldSize = positiveTrainSetSize / validationFolds();
 
         validateRelSetSize(testSetSize, MIN_SET_SIZE, "test", "`testFraction` is too low");
         validateRelSetSize(

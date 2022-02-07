@@ -55,7 +55,7 @@ class LinkPredictionSplitConfigTest {
     void shouldThrowOnEmptyTrainSet() {
         var config = LinkPredictionSplitConfigImpl.builder()
             .testFraction(0.7)
-            .trainFraction(0.2)
+            .trainFraction(0.1)
             .build();
 
         assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
