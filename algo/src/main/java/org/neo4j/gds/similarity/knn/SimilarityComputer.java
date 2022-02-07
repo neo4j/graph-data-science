@@ -39,8 +39,6 @@ public interface SimilarityComputer {
 
     double similarity(long firstNodeId, long secondNodeId);
 
-    NeighborFilter createNeighborFilter();
-
     static SimilarityComputer ofProperties(NodePropertyContainer graph, List<String> propertyNames) {
         if (propertyNames.size() == 1) {
             return ofProperty((graph), propertyNames.get(0));
@@ -89,7 +87,6 @@ public interface SimilarityComputer {
         return new LongArrayPropertySimilarityComputer(nodeProperties);
     }
 
-    //TODO: make it private again
     static SimilarityComputer ofProperty(NodePropertyContainer graph, String propertyName) {
         var nodeProperties = Objects.requireNonNull(
             graph.nodeProperties(propertyName),
@@ -115,11 +112,6 @@ final class DoublePropertySimilarityComputer implements SimilarityComputer {
         var right = nodeProperties.doubleValue(secondNodeId);
         return 1.0 / (1.0 + Math.abs(left - right));
     }
-
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new KnnNeighborFilter(nodeProperties.size());
-    }
 }
 
 final class LongPropertySimilarityComputer implements SimilarityComputer {
@@ -142,11 +134,6 @@ final class LongPropertySimilarityComputer implements SimilarityComputer {
         }
         return 1.0 / (1.0 + abs);
     }
-
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new KnnNeighborFilter(nodeProperties.size());
-    }
 }
 
 final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
@@ -166,11 +153,6 @@ final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
         int len = Math.min(left.length, right.length);
         return Math.max(Intersections.cosine(left, right, len), 0);
     }
-
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new KnnNeighborFilter(nodeProperties.size());
-    }
 }
 
 final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer {
@@ -189,11 +171,6 @@ final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer 
         var right = nodeProperties.doubleArrayValue(secondNodeId);
         int len = Math.min(left.length, right.length);
         return Math.max(Intersections.cosine(left, right, len), 0);
-    }
-
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new KnnNeighborFilter(nodeProperties.size());
     }
 }
 
@@ -217,35 +194,19 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
         long differentElements = left.length - sameElements;
         return 1.0 / (1.0 + differentElements);
     }
-
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new KnnNeighborFilter(nodeProperties.size());
-    }
 }
 
 final class CombinedSimilarityComputer implements SimilarityComputer {
     private final SimilarityComputer[] similarityComputers;
     private int numOfProperties;
-    private long minimumNodesWithProperty;
 
     CombinedSimilarityComputer(NodePropertyContainer graph, List<String> propertyNames) {
         this.numOfProperties = propertyNames.size();
         this.similarityComputers = new SimilarityComputer[numOfProperties];
-        minimumNodesWithProperty = Long.MAX_VALUE;
 
         for (int i = 0; i < numOfProperties; ++i) {
-            var propertyName = propertyNames.get(i);
-            var nodeProperties = Objects.requireNonNull(
-                graph.nodeProperties(propertyName),
-                () -> formatWithLocale("The property `%s` has not been loaded", propertyName)
-            );
-            if (nodeProperties.size() < minimumNodesWithProperty) {
-                minimumNodesWithProperty = nodeProperties.size();
-            }
-            this.similarityComputers[i] = SimilarityComputer.ofProperty(nodeProperties, propertyName);
+            this.similarityComputers[i] = SimilarityComputer.ofProperty(graph, propertyNames.get(i));
         }
-
     }
 
     @Override
@@ -256,10 +217,4 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
         }
         return sum / numOfProperties;
     }
-
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new KnnNeighborFilter(minimumNodesWithProperty);
-    }
-    
 }

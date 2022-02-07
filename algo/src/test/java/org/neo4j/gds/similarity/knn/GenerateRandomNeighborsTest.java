@@ -68,6 +68,7 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             new UniformKnnSampler(random, nodeCount),
             random,
             similarityComputer,
+            new KnnNeighborFilter(nodeCount),
             allNeighbors,
             k,
             k,

@@ -47,12 +47,7 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
         return predictor.predictedProbability(features);
     }
 
-    @Override
-    public NeighborFilter createNeighborFilter() {
-        return new LinkFilter(graph.concurrentCopy());
-    }
-
-    private static class LinkFilter implements NeighborFilter {
+    static class LinkFilter implements NeighborFilter {
 
         private final Graph graph;
 

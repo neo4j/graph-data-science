@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity.knn;
 public class KnnNeighborFilter implements NeighborFilter {
     private final long nodeCount;
 
-    KnnNeighborFilter(long nodeCount) {
+    public KnnNeighborFilter(long nodeCount) {
         this.nodeCount = nodeCount;
     }
 

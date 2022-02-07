@@ -94,7 +94,7 @@ class LinkPredictionSimilarityComputerTest {
             graph
         );
 
-        NeighborFilter filter = lpSimComputer.createNeighborFilter();
+        NeighborFilter filter = new LinkPredictionSimilarityComputer.LinkFilter(graph.concurrentCopy());
 
         // The node filter does not support self-loops as a node is always similar to itself so a-->a should be false.
         assertThat(filter.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("a"))).isEqualTo(true);
@@ -122,7 +122,7 @@ class LinkPredictionSimilarityComputerTest {
             graph
         );
 
-        NeighborFilter filter = lpSimComputer.createNeighborFilter();
+        NeighborFilter filter = new LinkPredictionSimilarityComputer.LinkFilter(graph.concurrentCopy());
 
         assertThat(filter.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("a")))
             .isLessThanOrEqualTo(1)

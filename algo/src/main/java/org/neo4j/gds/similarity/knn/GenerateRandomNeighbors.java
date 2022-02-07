@@ -32,6 +32,7 @@ final class GenerateRandomNeighbors implements Runnable {
     private final KnnSampler sampler;
     private final SplittableRandom random;
     private final SimilarityComputer computer;
+    private final NeighborFilter neighborFilter;
     private final HugeObjectArray<NeighborList> neighbors;
     private final int k;
     private final int boundedK;
@@ -43,6 +44,7 @@ final class GenerateRandomNeighbors implements Runnable {
         KnnSampler sampler,
         SplittableRandom random,
         SimilarityComputer computer,
+        NeighborFilter neighborFilter,
         HugeObjectArray<NeighborList> neighbors,
         int k,
         int boundedK,
@@ -52,6 +54,7 @@ final class GenerateRandomNeighbors implements Runnable {
         this.sampler = sampler;
         this.random = random;
         this.computer = computer;
+        this.neighborFilter = neighborFilter;
         this.neighbors = neighbors;
         this.k = k;
         this.boundedK = boundedK;
@@ -66,7 +69,7 @@ final class GenerateRandomNeighbors implements Runnable {
         var computer = this.computer;
         var k = this.k;
         var boundedK = this.boundedK;
-        var neighborFilter = computer.createNeighborFilter();
+        var neighborFilter = this.neighborFilter;
 
         partition.consume(nodeId -> {
             long[] chosen = sampler.sample(
