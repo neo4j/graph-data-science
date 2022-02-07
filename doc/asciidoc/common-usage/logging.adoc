@@ -105,7 +105,7 @@ Hints and warnings are also trackable by the GDS library.
 For this, the GDS library keeps track of the 100 most recent tasks that have generated hints or warnings per user and stores them in memory.
 When a user calls procedure `gds.alpha.userLog`, their respective list of hints and warnings is returned.
 
-[[logging-progress-logging-syntax]]
+[[userlog-syntax]]
 === Syntax
 
 .Getting the hints and warnings for a user:
@@ -118,7 +118,7 @@ YIELD
 ----
 
 .Results
-[opts="header",cols="1m,1,2"]
+[opts="header",cols="1m,1,3"]
 |===
 | Name          | Type      | Description
 | taskName      | String    | The name of the task that generated a warning or hint, i.e. `WCC`.
@@ -126,6 +126,7 @@ YIELD
 | Message      | String    | A hint or warning associated with the task.
 |===
 
+[[userlog-examples]]
 === Examples
 
 Suppose that we called the  `gds.wcc.stream` procedure and defined `relationshipWeightProperty` without specifying a `threshold` value.
@@ -141,6 +142,6 @@ YIELD
 .Results
 [opts="header"]
 |===
-taskName   | message
+|taskName   | message
 | "WCC"     |"Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set"
 |===
