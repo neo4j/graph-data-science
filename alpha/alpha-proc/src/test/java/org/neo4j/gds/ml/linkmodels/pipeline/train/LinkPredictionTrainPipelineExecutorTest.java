@@ -53,6 +53,7 @@ import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
@@ -200,6 +201,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     @Test
     void validateLinkFeatureSteps() {
         var pipeline = new LinkPredictionPipeline();
+        pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder().testFraction(0.5).trainFraction(0.5).validationFolds(2).build());
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "no-property", "no-prop-2")));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("other-no-property")));
 
@@ -224,11 +226,11 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         return Stream.of(
             Arguments.of(
                 LinkPredictionSplitConfig.builder().testFraction(0.01).build(),
-                "Test graph contains no relationships. Consider increasing the `testFraction` or provide a larger graph"
+                "The specified `testFraction` is too low for the current graph. The test set would have 0 relationship(s) but it must have at least 1."
             ),
             Arguments.of(
                 LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build(),
-                "Train graph contains no relationships. Consider increasing the `trainFraction` or provide a larger graph"
+                "The specified `trainFraction` is too low for the current graph. The train set would have 0 relationship(s) but it must have at least 2."
             )
         );
     }
@@ -257,7 +259,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             );
 
             assertThatThrownBy(executor::compute)
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedError);
         });
     }
@@ -383,8 +385,8 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                     "Link Prediction Train Pipeline :: execute node property steps :: step 1 of 1 100%",
                     "Link Prediction Train Pipeline :: execute node property steps :: step 1 of 1 :: Finished",
                     "Link Prediction Train Pipeline :: execute node property steps :: Finished",
-                    "Link Prediction Train Pipeline :: Size of the train-set: 8",
-                    "Link Prediction Train Pipeline :: Size of the test-set: 16",
+                    "Link Prediction Train Pipeline :: Size of the train-set: 9",
+                    "Link Prediction Train Pipeline :: Size of the test-set: 3",
                     "Link Prediction Train Pipeline :: LinkPredictionTrain :: extract train features :: Start",
                     "Link Prediction Train Pipeline :: LinkPredictionTrain :: extract train features 100%",
                     "Link Prediction Train Pipeline :: LinkPredictionTrain :: extract train features :: Finished",

@@ -59,7 +59,7 @@ public final class NonEmptySetValidation {
             throw new IllegalArgumentException(formatWithLocale(
                 "The specified %s for the current graph. " +
                 "The %s set would have %d %s " +
-                "but it must have at least %d. ",
+                "but it must have at least %d.",
                 parameterName, errorDesc, elementsInSet, elementType, expectedMinNumberOfElements
             ));
         }

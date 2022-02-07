@@ -80,7 +80,6 @@ public class RelationshipSplitter {
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
         relationshipSplit(splitConfig.trainSplit(), nodeLabels, List.of(testComplementRelationshipType), randomSeed, relationshipWeightProperty);
-        validateTrainSplit(graphStore);
 
         graphStore.deleteRelationships(RelationshipType.of(testComplementRelationshipType));
 
@@ -96,25 +95,6 @@ public class RelationshipSplitter {
                 LinkPredictionSplitConfig.TEST_FRACTION_KEY
             ));
         }
-    }
-
-    private void validateTrainSplit(GraphStore graphStore) {
-        if (graphStore.getGraph(RelationshipType.of(splitConfig.trainRelationshipType())).relationshipCount() <= 0) {
-            throw new IllegalStateException(formatWithLocale(
-                SPLIT_ERROR_TEMPLATE,
-                "Train",
-                LinkPredictionSplitConfig.TRAIN_FRACTION_KEY
-            ));
-        }
-
-        if (graphStore
-                .getGraph(RelationshipType.of(splitConfig.featureInputRelationshipType()))
-                .relationshipCount() <= 0)
-            throw new IllegalStateException(formatWithLocale(
-                "Feature graph contains no relationships. Consider decreasing %s or %s or provide a larger graph.",
-                LinkPredictionSplitConfig.TEST_FRACTION_KEY,
-                LinkPredictionSplitConfig.TRAIN_FRACTION_KEY
-            ));
     }
 
     private void relationshipSplit(
