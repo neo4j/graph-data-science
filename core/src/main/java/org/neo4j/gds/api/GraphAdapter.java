@@ -22,10 +22,12 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.LongPredicate;
@@ -61,6 +63,11 @@ public abstract class GraphAdapter implements Graph {
     @Override
     public void canRelease(boolean canRelease) {
         graph.canRelease(canRelease);
+    }
+
+    @Override
+    public Optional<NodeFilteredGraph> asNodeFilteredGraph() {
+        return graph.asNodeFilteredGraph();
     }
 
     @Override

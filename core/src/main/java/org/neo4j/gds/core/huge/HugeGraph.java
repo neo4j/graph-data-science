@@ -367,6 +367,11 @@ public class HugeGraph implements CSRGraph {
         );
     }
 
+    @Override
+    public Optional<NodeFilteredGraph> asNodeFilteredGraph() {
+        return Optional.empty();
+    }
+
     /**
      * O(n) !
      */
