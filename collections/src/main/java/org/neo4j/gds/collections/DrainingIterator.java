@@ -30,7 +30,7 @@ public final class DrainingIterator<PAGE> {
     private final int pageSize;
     private final AtomicInteger globalPageId;
 
-    DrainingIterator(PAGE[] pages, int pageSize) {
+    public DrainingIterator(PAGE[] pages, int pageSize) {
         this.pages = pages;
         this.pageSize = pageSize;
         this.globalPageId = new AtomicInteger(0);

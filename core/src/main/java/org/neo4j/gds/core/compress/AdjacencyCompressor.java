@@ -19,9 +19,6 @@
  */
 package org.neo4j.gds.core.compress;
 
-import org.neo4j.gds.core.loading.CompressedLongArray;
-import org.neo4j.gds.core.loading.CompressedLongArrayStruct;
-
 public interface AdjacencyCompressor extends AutoCloseable {
 
     /**
@@ -56,22 +53,20 @@ public interface AdjacencyCompressor extends AutoCloseable {
      *
      * @param nodeId The node id that is the source node for this adjacency list.
      *              The id is from the GDS internal scope, it is *not* the Neo4j ID.
-     * @param values A list of target ids, unsorted and compressed.
+     * @param targets A list of target ids, unsorted and compressed.
+     * @param properties A nested list of property values.
+     * @param numberOfCompressedTargets The number of targets compressed in `targets`.
+     * @param compressedBytesSize The byte size of targets.
      * @param buffer A long array that may or may not be used during the compression.
      * @param mapper A mapper to transform values before compressing them.
      * @return the degree of the compressed adjacency list
      */
     int compress(
         long nodeId,
-        CompressedLongArray values,
-        LongArrayBuffer buffer,
-        ValueMapper mapper
-    );
-
-    int compress(
-        long nodeId,
-        CompressedLongArrayStruct targets,
-        long localIndex,
+        byte[] targets,
+        long[][] properties,
+        int numberOfCompressedTargets,
+        int compressedBytesSize,
         LongArrayBuffer buffer,
         ValueMapper mapper
     );

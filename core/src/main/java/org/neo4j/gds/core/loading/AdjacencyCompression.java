@@ -29,6 +29,7 @@ import java.util.Arrays;
 
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongsSize;
+import static org.neo4j.gds.core.loading.ZigZagLongDecoding.zigZagUncompress;
 
 public final class AdjacencyCompression {
 
@@ -37,14 +38,15 @@ public final class AdjacencyCompression {
      * After this, {@link org.neo4j.gds.core.compress.LongArrayBuffer#length} will reflect the number of decompressed values
      * that are in the {@link org.neo4j.gds.core.compress.LongArrayBuffer#buffer}.
      */
-    static void copyFrom(LongArrayBuffer into, CompressedLongArray array, AdjacencyCompressor.ValueMapper mapper) {
-        into.ensureCapacity(array.length());
-        into.length = array.uncompress(into.buffer, mapper);
+    public static void copyFrom(LongArrayBuffer into, byte[] targets, int compressedValues, int limit, AdjacencyCompressor.ValueMapper mapper) {
+        into.ensureCapacity(compressedValues);
+        copyFrom(into.buffer, targets, compressedValues, limit, mapper);
+        into.length = compressedValues;
     }
 
-    static void copyFrom(LongArrayBuffer into, CompressedLongArrayStruct array, long localIndex, AdjacencyCompressor.ValueMapper mapper) {
-        into.ensureCapacity(array.length(localIndex));
-        into.length = array.uncompress(localIndex, into.buffer, mapper);
+    public static void copyFrom(long[] into, byte[] targets, int compressedValues, int limit, AdjacencyCompressor.ValueMapper mapper) {
+        assert into.length >= compressedValues;
+        zigZagUncompress(targets, limit, into, mapper);
     }
 
     public static int applyDeltaEncoding(LongArrayBuffer data, Aggregation aggregation) {

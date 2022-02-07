@@ -31,13 +31,23 @@ final class ThreadLocalRelationshipsCompressor implements AutoCloseable {
     }
 
     int applyVariableDeltaEncoding(
-        CompressedLongArrayStruct array,
-        long localId,
-        LongArrayBuffer buffer,
         long nodeId,
+        byte[] targets,
+        long[][] properties,
+        int numberOfCompressedTargets,
+        int compressedBytesSize,
+        LongArrayBuffer buffer,
         AdjacencyCompressor.ValueMapper mapper
     ) {
-        return adjacencyCompressor.compress(nodeId, array, localId, buffer, mapper);
+        return adjacencyCompressor.compress(
+            nodeId,
+            targets,
+            properties,
+            numberOfCompressedTargets,
+            compressedBytesSize,
+            buffer,
+            mapper
+        );
     }
 
     @Override

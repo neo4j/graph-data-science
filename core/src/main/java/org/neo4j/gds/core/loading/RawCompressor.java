@@ -88,22 +88,26 @@ public final class RawCompressor implements AdjacencyCompressor {
     @Override
     public int compress(
         long nodeId,
-        CompressedLongArray values,
+        byte[] targets,
+        long[][] properties,
+        int numberOfCompressedTargets,
+        int compressedBytesSize,
         LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
-        if (values.hasProperties()) {
-            return withWeights(nodeId, values, buffer, mapper);
+        if (properties != null) {
+            return withWeights(
+                nodeId,
+                targets,
+                properties,
+                numberOfCompressedTargets,
+                compressedBytesSize,
+                buffer,
+                mapper
+            );
         } else {
-            return withoutWeights(nodeId, values, buffer, mapper);
+            return withoutWeights(nodeId, targets, numberOfCompressedTargets, compressedBytesSize, buffer, mapper);
         }
-    }
-
-    @Override
-    public int compress(
-        long nodeId, CompressedLongArrayStruct targets, long localIndex, LongArrayBuffer buffer, ValueMapper mapper
-    ) {
-        throw new RuntimeException("Not implemented");
     }
 
     @Override
@@ -118,12 +122,14 @@ public final class RawCompressor implements AdjacencyCompressor {
 
     private int withoutWeights(
         long nodeId,
-        CompressedLongArray array,
+        byte[] targets,
+        int numberOfCompressedTargets,
+        int compressedBytesSize,
         LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
         // decompress target ids
-        AdjacencyCompression.copyFrom(buffer, array, mapper);
+        AdjacencyCompression.copyFrom(buffer, targets, numberOfCompressedTargets, compressedBytesSize, mapper);
 
         int degree = aggregate(buffer, aggregations[0]);
 
@@ -131,8 +137,6 @@ public final class RawCompressor implements AdjacencyCompressor {
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
-
-        array.release();
 
         return degree;
     }
@@ -225,13 +229,14 @@ public final class RawCompressor implements AdjacencyCompressor {
 
     private int withWeights(
         long nodeId,
-        CompressedLongArray array,
+        byte[] targets,
+        long[][] uncompressedWeights,
+        int numberOfCompressedTargets,
+        int compressedBytesSize,
         LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
-        long[][] uncompressedWeights = array.properties();
-
-        AdjacencyCompression.copyFrom(buffer, array, mapper);
+        AdjacencyCompression.copyFrom(buffer, targets, numberOfCompressedTargets, compressedBytesSize, mapper);
 
         int degree = aggregateWithWeights(buffer, uncompressedWeights, aggregations);
 
@@ -241,7 +246,6 @@ public final class RawCompressor implements AdjacencyCompressor {
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
-        array.release();
 
         return degree;
     }

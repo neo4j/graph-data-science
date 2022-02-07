@@ -33,11 +33,12 @@ class CompressedLongArrayStructTest {
         var input = new long[]{ 42L, 1337L, 5L};
         compressedLongArrays.add(0, input, 0, 3, 3);
 
-        assertThat(compressedLongArrays.length(0)).isEqualTo(3);
-
         var expectedTargets = new long[]{42L, 1337L, 5L};
         var actualTargets = new long[3];
-        compressedLongArrays.uncompress(0, actualTargets, INSTANCE);
+
+        compressedLongArrays.consume((nodeId, targets, __, position, length) -> {
+            AdjacencyCompression.copyFrom(actualTargets, targets, length, position, INSTANCE);
+        });
         assertThat(actualTargets).containsExactly(expectedTargets);
     }
 
@@ -48,11 +49,11 @@ class CompressedLongArrayStructTest {
         compressedLongArrays.add(0, new long[]{ 42L, 1337L, 5L}, 0, 3, 3);
         compressedLongArrays.add(0, new long[]{ 42L, 1337L, 5L}, 1, 3, 2);
 
-        assertThat(compressedLongArrays.length(0)).isEqualTo(5);
-
         var expectedTargets = new long[]{42L, 1337L, 5L, 1337L, 5L};
         var actualTargets = new long[5];
-        compressedLongArrays.uncompress(0, actualTargets, INSTANCE);
+        compressedLongArrays.consume((nodeId, targets, __, position, length) -> {
+            AdjacencyCompression.copyFrom(actualTargets, targets, length, position, INSTANCE);
+        });
         assertThat(actualTargets).containsExactly(expectedTargets);
     }
 }

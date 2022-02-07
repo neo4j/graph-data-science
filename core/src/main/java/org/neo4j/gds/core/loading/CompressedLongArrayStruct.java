@@ -19,22 +19,22 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.collections.DrainingIterator;
 import org.neo4j.gds.collections.arraylist.HugeSparseIntArrayList;
 import org.neo4j.gds.collections.arraylist.HugeSparseLongArrayList;
 import org.neo4j.gds.collections.arraylist.HugeSparseObjectArrayList;
-import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.mem.BitUtil;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.function.LongConsumer;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.gds.core.loading.VarLongEncoding.zigZag;
-import static org.neo4j.gds.core.loading.ZigZagLongDecoding.zigZagUncompress;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CompressedLongArrayStruct {
@@ -43,18 +43,16 @@ public final class CompressedLongArrayStruct {
     private static final long[] EMPTY_PROPERTIES = new long[0];
 
     private final HugeSparseObjectArrayList<byte[]> targetLists;
-    private final Map<Integer, HugeSparseObjectArrayList<long[]>> weights;
+    private final Map<Integer, HugeSparseObjectArrayList<long[]>> properties;
     private final HugeSparseIntArrayList positions;
     private final HugeSparseLongArrayList lastValues;
     private final HugeSparseIntArrayList lengths;
-    
-    private final long[][] weightsBuffer; 
 
     public CompressedLongArrayStruct() {
         this(0);
     }
 
-    public CompressedLongArrayStruct(int numberOfProperties) {
+    CompressedLongArrayStruct(int numberOfProperties) {
         this.targetLists = HugeSparseObjectArrayList.of(EMPTY_BYTES, byte[].class);
         this.positions = HugeSparseIntArrayList.of(0);
         this.lastValues = HugeSparseLongArrayList.of(0);
@@ -62,15 +60,13 @@ public final class CompressedLongArrayStruct {
 
 
         if (numberOfProperties > 0) {
-            this.weights = new HashMap<>(numberOfProperties);
+            this.properties = new HashMap<>(numberOfProperties);
             for (int i = 0; i < numberOfProperties; i++) {
-                this.weights.put(i, HugeSparseObjectArrayList.of(EMPTY_PROPERTIES, long[].class));
+                this.properties.put(i, HugeSparseObjectArrayList.of(EMPTY_PROPERTIES, long[].class));
             }
         } else {
-            this.weights = null;
+            this.properties = null;
         }
-
-        weightsBuffer = new long[numberOfProperties][];
     }
 
     /**
@@ -87,7 +83,7 @@ public final class CompressedLongArrayStruct {
         long compressedValue;
         int requiredBytes = 0;
         for (int i = start; i < end; i++) {
-            if(values[i] == IGNORE_VALUE) {
+            if (values[i] == IGNORE_VALUE) {
                 continue;
             }
 
@@ -112,35 +108,43 @@ public final class CompressedLongArrayStruct {
     /**
      * For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
      *
-     * @param values        values to write
-     * @param allWeights    weights to write
-     * @param start         start index in values and weights
-     * @param end           end index in values and weights
-     * @param valuesToAdd  the actual number of targets to import from this range
+     * @param values      values to write
+     * @param allProperties  properties to write
+     * @param start       start index in values and properties
+     * @param end         end index in values and properties
+     * @param valuesToAdd the actual number of targets to import from this range
      */
-    public void add(long index, long[] values, long[][] allWeights, int start, int end, int valuesToAdd) {
-        // write weights
-        for (int i = 0; i < allWeights.length; i++) {
-            long[] weights = allWeights[i];
-            addWeights(index, values, weights, start, end, i, valuesToAdd);
+    public void add(long index, long[] values, long[][] allProperties, int start, int end, int valuesToAdd) {
+        // write properties
+        for (int i = 0; i < allProperties.length; i++) {
+            long[] properties = allProperties[i];
+            addProperties(index, values, properties, start, end, i, valuesToAdd);
         }
 
         // write values
         add(index, values, start, end, valuesToAdd);
     }
 
-    private void addWeights(long index, long[] values, long[] weights, int start, int end, int weightIndex, int weightsToAdd) {
+    private void addProperties(
+        long index,
+        long[] values,
+        long[] properties,
+        int start,
+        int end,
+        int weightIndex,
+        int propertiesToAdd
+    ) {
         var length = lengths.get(index);
-        
-        var currentWeights = ensurePropertyCapacity(index, length, weightsToAdd, weightIndex);
-        
-        if (weightsToAdd == end - start) {
-            System.arraycopy(weights, start, currentWeights, length, weightsToAdd);
+
+        var currentProperties = ensurePropertyCapacity(index, length, propertiesToAdd, weightIndex);
+
+        if (propertiesToAdd == end - start) {
+            System.arraycopy(properties, start, currentProperties, length, propertiesToAdd);
         } else {
             var writePos = length;
             for (int i = 0; i < (end - start); i++) {
                 if (values[start + i] != IGNORE_VALUE) {
-                    currentWeights[writePos++] = weights[start + i];
+                    currentProperties[writePos++] = properties[start + i];
                 }
             }
         }
@@ -167,40 +171,22 @@ public final class CompressedLongArrayStruct {
 
     private long[] ensurePropertyCapacity(long index, int pos, int required, int weightIndex) {
         int targetLength = pos + required;
-        
-        var currentWeights = weights.get(weightIndex).get(index);
-        
+
+        var currentProperties = properties.get(weightIndex).get(index);
+
         if (targetLength < 0) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Encountered numeric overflow in internal buffer. Was at position %d and needed to grow by %d.",
                 pos,
                 required
             ));
-        } else if (currentWeights.length <= pos + required) {
+        } else if (currentProperties.length <= pos + required) {
             int newLength = BitUtil.nextHighestPowerOfTwo(pos + required);
-            currentWeights = Arrays.copyOf(currentWeights, newLength);
-            weights.get(weightIndex).set(index, currentWeights);
+            currentProperties = Arrays.copyOf(currentProperties, newLength);
+            properties.get(weightIndex).set(index, currentProperties);
         }
-        
-        return currentWeights;
-    }
 
-    public int length(long index) {
-        return lengths.get(index);
-    }
-
-    public int uncompress(long index, long[] into, AdjacencyCompressor.ValueMapper mapper) {
-        assert into.length >= lengths.get(index);
-        return zigZagUncompress(targetLists.get(index), positions.get(index), into, mapper);
-    }
-
-    public byte[] storage(long index) {
-        return targetLists.get(index);
-    }
-
-    public long[][] weights(long index) {
-        weights.forEach((propertyIndex, weightList) -> weightsBuffer[propertyIndex] = weightList.get(index));
-        return weightsBuffer;
+        return currentProperties;
     }
 
     public long capacity() {
@@ -211,18 +197,95 @@ public final class CompressedLongArrayStruct {
         return targetLists.contains(index);
     }
 
-    public boolean hasWeights() {
-        return weights != null && !(weights.isEmpty());
-    }
-
-    public void consume(LongConsumer consumer) {
-        targetLists.forAll((index, __) -> {
-            consumer.accept(index);
-            targetLists.set(index, null);
-        });
+    public void consume(Consumer consumer) {
+        new CompositeDrainingIterator(targetLists, properties, positions, lastValues, lengths).consume(consumer);
     }
 
     public void release() {
 
+    }
+
+    public interface Consumer {
+        void accept(long sourceId, byte[] targets, long[][] properties, int compressedByteSize, int numberOfCompressedTargets);
+    }
+
+    private static class CompositeDrainingIterator {
+        private final DrainingIterator<byte[][]> targetListIterator;
+        private final DrainingIterator.DrainingBatch<byte[][]> targetListBatch;
+        private final DrainingIterator<int[]> positionsListIterator;
+        private final DrainingIterator.DrainingBatch<int[]> positionsListBatch;
+        private final DrainingIterator<long[]> lastValuesListIterator;
+        private final DrainingIterator.DrainingBatch<long[]> lastValuesListBatch;
+        private final DrainingIterator<int[]> lengthsListIterator;
+        private final DrainingIterator.DrainingBatch<int[]> lengthsListBatch;
+        private final List<DrainingIterator<long[][]>> propertyIterators;
+        private final List<DrainingIterator.DrainingBatch<long[][]>> propertyBatches;
+
+        private final long[][] propertiesBuffer;
+
+        CompositeDrainingIterator(
+            HugeSparseObjectArrayList<byte[]> targets,
+            Map<Integer, HugeSparseObjectArrayList<long[]>> properties,
+            HugeSparseIntArrayList positions,
+            HugeSparseLongArrayList lastValues,
+            HugeSparseIntArrayList lengths
+        ) {
+            this.targetListIterator = targets.drainingIterator();
+            this.targetListBatch = targetListIterator.drainingBatch();
+            this.positionsListIterator = positions.drainingIterator();
+            this.positionsListBatch = positionsListIterator.drainingBatch();
+            this.lastValuesListIterator = lastValues.drainingIterator();
+            this.lastValuesListBatch = lastValuesListIterator.drainingBatch();
+            this.lengthsListIterator = lengths.drainingIterator();
+            this.lengthsListBatch = lengthsListIterator.drainingBatch();
+
+            if (properties == null) {
+                propertyIterators = List.of();
+                propertyBatches = List.of();
+                propertiesBuffer = null;
+            } else {
+                this.propertyIterators = properties
+                    .values()
+                    .stream()
+                    .map(HugeSparseObjectArrayList::drainingIterator)
+                    .collect(Collectors.toList());
+                this.propertyBatches = propertyIterators
+                    .stream()
+                    .map(DrainingIterator::drainingBatch)
+                    .collect(Collectors.toList());
+                propertiesBuffer = new long[properties.size()][];
+            }
+        }
+
+        public void consume(Consumer consumer) {
+            while (targetListIterator.next(targetListBatch)) {
+                positionsListIterator.next(positionsListBatch);
+                lastValuesListIterator.next(lastValuesListBatch);
+                lengthsListIterator.next(lengthsListBatch);
+                for (int i = 0; i < propertyIterators.size(); i++) {
+                    propertyIterators.get(i).next(propertyBatches.get(i));
+                }
+
+                var targetsPage = targetListBatch.page;
+                var positionsPage = positionsListBatch.page;
+                var lengthsPage = lengthsListBatch.page;
+
+                var offset = targetListBatch.offset;
+
+                for (int indexInPage = 0; indexInPage < targetsPage.length; indexInPage++) {
+                    var targets = targetsPage[indexInPage];
+                    if (targets == EMPTY_BYTES) {
+                        continue;
+                    }
+                    var position = positionsPage[indexInPage];
+                    var length = lengthsPage[indexInPage];
+                    for (int propertyIndex = 0; propertyIndex < propertyBatches.size(); propertyIndex++) {
+                        propertiesBuffer[propertyIndex] = propertyBatches.get(propertyIndex).page[indexInPage];
+                    }
+
+                    consumer.accept(offset + indexInPage, targets, propertiesBuffer, position, length);
+                }
+            }
+        }
     }
 }
