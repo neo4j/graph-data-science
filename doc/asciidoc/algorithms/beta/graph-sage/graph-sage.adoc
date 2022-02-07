@@ -272,7 +272,9 @@ Below is an example of how to do that.
 
 NOTE: The names specified in the `featureProperties` configuration parameter must exist in the in-memory graph.
 
-[source, cypher, role=noplay query-example, no-result=true]
+[role=query-example]
+--
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.train(
   'persons',
@@ -281,11 +283,12 @@ CALL gds.beta.graphSage.train(
     featureProperties: ['age', 'heightAndWeight'],
     aggregator: 'mean',
     activationFunction: 'sigmoid',
+    randomSeed: 1337,
     sampleSizes: [25, 10]
   }
 ) YIELD modelInfo as info
 RETURN
-  info.name as modelName,
+  info.modelName as modelName,
   info.metrics.didConverge as didConverge,
   info.metrics.ranEpochs as ranEpochs,
   info.metrics.epochLosses as epochLosses
@@ -294,9 +297,10 @@ RETURN
 [opts="header",cols="2,1,1,4"]
 .Results
 |===
-| modelName         | didConverge | ranEpochs | epochLosses
-| exampleTrainModel | true        | 1         | [186.0494816886275, 186.04946806237382]
+| modelName           | didConverge | ranEpochs | epochLosses
+| "exampleTrainModel" | false       | 1         | [186.04946807210226]
 |===
+--
 
 NOTE: Due to the random initialisation of the weight variables the results may vary between different runs.
 
