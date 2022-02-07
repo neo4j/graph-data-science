@@ -21,7 +21,7 @@ A related procedure for computing Jaccard similarity is described in <<algorithm
 [[alpha-algorithms-similarity-jaccard-context]]
 == History and explanation
 
-Jaccard Similarity is computed using the following formula:
+Given two sets `A` and `B`, the Jaccard Similarity is computed using the following formula:
 
 image::jaccard.png[role="middle"]
 
@@ -155,5 +155,3 @@ ORDER BY to, similarity DESC
 | "Karin" | "Praveena" | 0.0
 | "Karin" | "Zhen"     | 0.0
 |===
-
-
