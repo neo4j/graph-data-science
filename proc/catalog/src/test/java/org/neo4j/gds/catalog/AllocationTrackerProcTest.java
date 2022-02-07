@@ -47,7 +47,7 @@ public class AllocationTrackerProcTest extends BaseProcTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(Settings.memoryTransactionMaxSize(), 1024 * 1024 + 1L);
+        builder.setConfig(Settings.memoryTransactionMaxSize(), 2 * 1024 * 1024 + 1L);
     }
 
     @BeforeEach
