@@ -111,7 +111,7 @@ When a user calls procedure `gds.alpha.userLog`, their respective list of hints 
 .Getting the hints and warnings for a user:
 [source,cypher,role=noplay]
 ----
-CALL gds.alpha.userlog()
+CALL gds.alpha.userLog()
 YIELD
   taskName,
   message
