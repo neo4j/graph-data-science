@@ -31,9 +31,12 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
@@ -138,6 +141,12 @@ public abstract class DocTestBase extends BaseProcTest {
         }
     }
 
+    private static final NumberFormat FLOAT_FORMAT = DecimalFormat.getInstance(Locale.ENGLISH);
+    static {
+        FLOAT_FORMAT.setMaximumFractionDigits(15);
+        FLOAT_FORMAT.setGroupingUsed(false);
+    }
+
     private void runQueryExampleAndAssertResults(QueryExample queryExample) {
         runQueryWithResultConsumer(queryExample.query(), result -> {
             assertThat(queryExample.resultColumns()).containsExactlyElementsOf(result.columns());
@@ -151,10 +160,24 @@ public abstract class DocTestBase extends BaseProcTest {
                     .collect(Collectors.toList());
                 actualResults.add(actualResultValues);
             }
+            var expectedResults = reducePrecisionOfDoubles(queryExample.results());
             assertThat(actualResults)
                 .as(queryExample.query())
-                .containsExactlyElementsOf(queryExample.results());
+                .containsExactlyElementsOf(expectedResults);
         });
+    }
+
+    private List<List<String>> reducePrecisionOfDoubles(Collection<List<String>> resultsFromDoc) {
+        return resultsFromDoc
+            .stream()
+            .map(list -> list.stream().map(string -> {
+                    try {
+                        return FLOAT_FORMAT.format(Double.parseDouble(string));
+                    } catch (NumberFormatException e) {
+                        return string;
+                    }
+                }).collect(Collectors.toList())
+            ).collect(Collectors.toList());
     }
 
     private String valueToString(Object value) {
@@ -164,6 +187,8 @@ public abstract class DocTestBase extends BaseProcTest {
             return "null";
         } else if (value instanceof String) {
             return "\"" + value + "\"";
+        } else if (value instanceof Double) {
+            return FLOAT_FORMAT.format(value);
         } else {
             return value.toString();
         }
