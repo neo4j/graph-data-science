@@ -20,14 +20,24 @@
 package org.neo4j.gds.core.utils.warnings;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.values.storable.LocalTimeValue;
+
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
 
 public class UserLogEntry {
     public String taskName;
     public String message;
+    public LocalTimeValue timeStarted;
 
     UserLogEntry(Task task, String message) {
         this.taskName = task.description();
         this.message = message;
+        this.timeStarted = LocalTimeValue.localTime(LocalTime.ofInstant(
+            Instant.ofEpochMilli(task.startTime()),
+            ZoneId.systemDefault()
+        ));
     }
 
     public String getTaskName() {
@@ -37,4 +47,8 @@ public class UserLogEntry {
     public String getMessage() {
         return message;
     }
+
+    public LocalTimeValue getTimeStarted() {return timeStarted;}
+    
+
 }
