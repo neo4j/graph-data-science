@@ -21,14 +21,12 @@ package org.neo4j.gds.doc;
 
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.SafeMode;
-import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.values.storable.Values;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -166,8 +164,6 @@ public abstract class DocTestBase extends BaseProcTest {
             return "null";
         } else if (value instanceof String) {
             return "\"" + value + "\"";
-        } else if (Arrays.isArray(value)) {
-            return Values.of(value).prettyPrint();
         } else {
             return value.toString();
         }
