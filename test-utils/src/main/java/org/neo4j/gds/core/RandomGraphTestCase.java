@@ -82,7 +82,7 @@ public abstract class RandomGraphTestCase extends BaseTest {
     }
 
     @BeforeEach
-    void setupGraph() {
+    protected void setupGraph() {
         buildGraph(NODE_COUNT);
     }
 
