@@ -22,9 +22,9 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':open-model-catalog')
+    implementation project(':open-write-services')
     implementation project(':string-formatting')
     implementation project(':transaction')
-    implementation project(':open-write-services')
 
     implementation(
         [group: 'org.neo4j',               name: 'neo4j-cypher-dsl',        version: ver.'cypher-dsl'],
