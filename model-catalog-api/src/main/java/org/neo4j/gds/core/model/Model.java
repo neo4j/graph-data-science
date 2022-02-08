@@ -74,6 +74,11 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
         return false;
     }
 
+    @Value.Derived
+    default boolean isPublished() {
+        return sharedWith().contains(ALL_USERS);
+    }
+
     @Value.Default
     @Value.Derived
     default void load() {
