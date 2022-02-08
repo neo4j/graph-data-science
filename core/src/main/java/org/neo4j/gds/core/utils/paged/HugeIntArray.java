@@ -67,16 +67,16 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      * @return the int value at the given index
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public int get(long index);
+    public abstract int get(long index);
 
-    abstract public int getAndAdd(long index, int delta);
+    public abstract int getAndAdd(long index, int delta);
 
     /**
      * Sets the int value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public void set(long index, int value);
+    public abstract void set(long index, int value);
 
     /**
      * Computes the bit-wise OR ({@code |}) of the existing value and the provided value at the given index.
@@ -84,7 +84,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public void or(long index, int value);
+    public abstract void or(long index, int value);
 
     /**
      * Computes the bit-wise AND ({@code &}) of the existing value and the provided value at the given index.
@@ -93,7 +93,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      * @return the now current value after the operation
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public int and(long index, int value);
+    public abstract int and(long index, int value);
 
     /**
      * Adds ({@code +}) the existing value and the provided value at the given index and stored the result into the given index.
@@ -101,51 +101,51 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public void addTo(long index, int value);
+    public abstract void addTo(long index, int value);
 
     /**
      * Set all elements using the provided generator function to compute each element.
      * <p>
      * The behavior is identical to {@link Arrays#setAll(int[], java.util.function.IntUnaryOperator)}.
      */
-    abstract public void setAll(LongToIntFunction gen);
+    public abstract void setAll(LongToIntFunction gen);
 
     /**
      * Assigns the specified int value to each element.
      * <p>
      * The behavior is identical to {@link Arrays#fill(int[], int)}.
      */
-    abstract public void fill(int value);
+    public abstract void fill(int value);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public long size();
+    public abstract long size();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public long sizeOf();
+    public abstract long sizeOf();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public long release();
+    public abstract long release();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public HugeCursor<int[]> newCursor();
+    public abstract HugeCursor<int[]> newCursor();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public void copyTo(final HugeIntArray dest, final long length);
+    public abstract void copyTo(final HugeIntArray dest, final long length);
 
     /**
      * {@inheritDoc}

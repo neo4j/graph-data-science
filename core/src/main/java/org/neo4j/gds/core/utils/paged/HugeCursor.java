@@ -65,14 +65,14 @@ public abstract class HugeCursor<Array> implements AutoCloseable {
      *
      * @return true, iff the cursor is still valid on contains new data; false if there is no more data.
      */
-    abstract public boolean next();
+    public abstract boolean next();
 
     /**
      * Releases the reference to the underlying array so that it might be garbage collected.
      * The cursor can never be used again after calling this method, doing so results in undefined behavior.
      */
     @Override
-    abstract public void close();
+    public abstract void close();
 
     /**
      * initializes cursor from 0 to capacity

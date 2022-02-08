@@ -68,14 +68,14 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      * @return the double value at the given index
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public double get(long index);
+    public abstract double get(long index);
 
     /**
      * Sets the double value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public void set(long index, double value);
+    public abstract void set(long index, double value);
 
     /**
      * Adds ({@code +}) the existing value and the provided value at the given index and stored the result into the given index.
@@ -83,53 +83,53 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public void addTo(long index, double value);
+    public abstract void addTo(long index, double value);
 
     /**
      * Set all elements using the provided generator function to compute each element.
      * <p>
      * The behavior is identical to {@link Arrays#setAll(double[], java.util.function.IntToDoubleFunction)}.
      */
-    abstract public void setAll(LongToDoubleFunction gen);
+    public abstract void setAll(LongToDoubleFunction gen);
 
     /**
      * Assigns the specified double value to each element.
      * <p>
      * The behavior is identical to {@link Arrays#fill(double[], double)}.
      */
-    abstract public void fill(double value);
+    public abstract void fill(double value);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public long size();
+    public abstract long size();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public long sizeOf();
+    public abstract long sizeOf();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public long release();
+    public abstract long release();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public HugeCursor<double[]> newCursor();
+    public abstract HugeCursor<double[]> newCursor();
 
-    abstract public DoubleStream stream();
+    public abstract DoubleStream stream();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public void copyTo(final HugeDoubleArray dest, final long length);
+    public abstract void copyTo(final HugeDoubleArray dest, final long length);
 
     /**
      * {@inheritDoc}
