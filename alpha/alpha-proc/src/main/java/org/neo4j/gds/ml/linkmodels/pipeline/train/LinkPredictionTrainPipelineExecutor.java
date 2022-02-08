@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallRelationshipSets;
 
 public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPredictionTrainConfig, LinkPredictionPipeline, LinkPredictionTrainResult> {
 
@@ -104,9 +104,12 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
             Optional.of("label")
         );
 
-        progressTracker.logMessage("Size of the train-set: " + trainGraph.relationshipCount());
-        progressTracker.logMessage("Size of the test-set: " + testGraph.relationshipCount());
-        warnIfRelationshipSplitsAreTooSmall(trainGraph.relationshipCount(), testGraph.relationshipCount());
+        warnForSmallRelationshipSets(
+            trainGraph.relationshipCount(),
+            testGraph.relationshipCount(),
+            pipeline.splitConfig().validationFolds(),
+            progressTracker
+        );
 
         return new LinkPredictionTrain(
             trainGraph,
@@ -115,26 +118,6 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
             config,
             progressTracker
         ).compute();
-    }
-
-    private void warnIfRelationshipSplitsAreTooSmall(long trainSetSize, long testSetSize) {
-        if (testSetSize < RECOMMENDED_MIN_RELS_PER_SET) {
-            progressTracker.logWarning(formatWithLocale(
-                "The specified `testFraction` leads to a very small test set " +
-                "with only %d relationship(s). Proceeding with such a small set might lead to unreliable results.",
-                testSetSize
-            ));
-        }
-
-        long validationSetSize = trainSetSize / pipeline.splitConfig().validationFolds();
-        //No need to check train set as it is always larger or equal to validation set.
-        if (validationSetSize < RECOMMENDED_MIN_RELS_PER_SET) {
-            progressTracker.logWarning(formatWithLocale(
-                "The specified `validationFolds` leads to very small validation sets " +
-                "with only %d relationship(s). Proceeding with such small sets might lead to unreliable results.",
-                validationSetSize
-            ));
-        }
     }
 
     private void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets) {

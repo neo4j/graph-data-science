@@ -279,8 +279,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
                 .contains(
-                    "Node Classification Train Pipeline :: NCTrain :: ShuffleAndSplit :: Size of the train-set: 3",
-                    "Node Classification Train Pipeline :: NCTrain :: ShuffleAndSplit :: Size of the test-set: 6"
+                    "Node Classification Train Pipeline :: NCTrain :: ShuffleAndSplit :: Train set size is 6",
+                    "Node Classification Train Pipeline :: NCTrain :: ShuffleAndSplit :: Test set size is 3"
                 );
         });
     }

@@ -79,6 +79,7 @@ public abstract class PipelineExecutor<
 
         var dataSplits = splitDataset();
         try {
+            // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships
             var featureInputGraphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
 
             progressTracker.beginSubTask("execute node property steps");
@@ -106,7 +107,6 @@ public abstract class PipelineExecutor<
     }
 
     private void executeNodePropertySteps(GraphFilter graphFilter) {
-        // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships
         for (ExecutableNodePropertyStep step : pipeline.nodePropertySteps()) {
             progressTracker.beginSubTask();
             step.execute(executionContext, graphName, graphFilter.nodeLabels(), graphFilter.relationshipTypes());

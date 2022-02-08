@@ -216,8 +216,8 @@ class NodeClassificationTrainTest {
             .containsExactly(
                 "NCTrain :: Start",
                 "NCTrain :: ShuffleAndSplit :: Start",
-                "NCTrain :: ShuffleAndSplit :: Size of the train-set: 5",
-                "NCTrain :: ShuffleAndSplit :: Size of the test-set: 10",
+                "NCTrain :: ShuffleAndSplit :: Train set size is 10",
+                "NCTrain :: ShuffleAndSplit :: Test set size is 5",
                 "NCTrain :: ShuffleAndSplit 100%",
                 "NCTrain :: ShuffleAndSplit :: Finished",
                 "NCTrain :: SelectBestModel :: Start",
