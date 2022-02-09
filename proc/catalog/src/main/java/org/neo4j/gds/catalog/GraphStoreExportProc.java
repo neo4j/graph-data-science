@@ -35,6 +35,7 @@ import org.neo4j.gds.core.utils.io.file.GraphStoreExporterUtil;
 import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.io.file.csv.estimation.CsvExportEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.preconditions.ClusterRestrictions;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StringJoining;
@@ -60,6 +61,8 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        ClusterRestrictions.disallowRunningOnCluster(api, "Export a graph to Neo4j database");
+
         var cypherConfig = CypherMapWrapper.create(configuration);
         var exportConfig = GraphStoreToDatabaseExporterConfig.of(cypherConfig);
         validateConfig(cypherConfig, exportConfig);
@@ -103,6 +106,8 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        ClusterRestrictions.disallowRunningOnCluster(api, "Export a graph to CSV");
+
         var cypherConfig = CypherMapWrapper.create(configuration);
         var exportConfig = GraphStoreToFileExporterConfig.of(username(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
@@ -139,6 +144,8 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        ClusterRestrictions.disallowRunningOnCluster(api, "Estimation for exporting a graph to CSV");
+
         var cypherConfig = CypherMapWrapper.create(configuration);
         var exportConfig = GraphStoreToCsvEstimationConfig.of(username(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
