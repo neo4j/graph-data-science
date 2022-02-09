@@ -112,25 +112,25 @@ final class ApproxMaxKCutTest {
                     false,
                     false,
                     Map.of("a", 0L, "b", 0L, "c", 0L, "d", 1L, "e", 1L, "f", 1L, "g", 1L),
-                    13.0D
+                    10.0D // 13.0 is the optimal
                 ),
                 Arguments.of(
                     false,
                     true,
                     Map.of("a", 0L, "b", 1L, "c", 0L, "d", 1L, "e", 1L, "f", 1L, "g", 1L),
-                    146.0D
+                    100.0D // 146.0 is the optimal
                 ),
                 Arguments.of(
                     true,
                     false,
                     Map.of("a", 0L, "b", 1L, "c", 1L, "d", 1L),
-                    1.0D
+                    2.0D // 1.0 is the optimal
                 ),
                 Arguments.of(
                     true,
                     true,
                     Map.of("a", 0L, "b", 0L, "c", 0L, "d", 1L),
-                    5.0D
+                    48.0D // 5.0 is the optimal
                 )
             ),
             () -> Stream.of(Arguments.of(0), Arguments.of(4)), // VNS max neighborhood order (0 means VNS not used)
@@ -178,7 +178,11 @@ final class ApproxMaxKCutTest {
         );
 
         var result = approxMaxKCut.compute();
-        assertThat(result.cutCost()).isEqualTo(expectedCost);
+        if (minimize) {
+            assertThat(result.cutCost()).isLessThanOrEqualTo(expectedCost);
+        } else {
+            assertThat(result.cutCost()).isGreaterThanOrEqualTo(expectedCost);
+        }
 
         var setFunction = result.candidateSolution();
 
