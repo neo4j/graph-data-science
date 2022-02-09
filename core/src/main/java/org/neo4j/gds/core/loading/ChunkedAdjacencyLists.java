@@ -19,11 +19,17 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.gds.collections.DrainingIterator;
 import org.neo4j.gds.collections.arraylist.HugeSparseIntArrayList;
 import org.neo4j.gds.collections.arraylist.HugeSparseLongArrayList;
 import org.neo4j.gds.collections.arraylist.HugeSparseObjectArrayList;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeArrays;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,6 +41,7 @@ import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.gds.core.loading.VarLongEncoding.zigZag;
+import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ChunkedAdjacencyLists {
@@ -47,6 +54,50 @@ public final class ChunkedAdjacencyLists {
     private final HugeSparseIntArrayList positions;
     private final HugeSparseLongArrayList lastValues;
     private final HugeSparseIntArrayList lengths;
+
+    public static MemoryEstimation memoryEstimation(long avgDegree, long nodeCount, int propertyCount) {
+        // Best case scenario:
+        // Difference between node identifiers in each adjacency list is 1.
+        // This leads to ideal compression through delta encoding.
+        int deltaBestCase = 1;
+        long bestCaseCompressedTargetsSize = compressedTargetSize(avgDegree, nodeCount, deltaBestCase);
+
+        // Worst case scenario:
+        // Relationships are equally distributed across nodes, i.e. each node has the same number of rels.
+        // Within each adjacency list, all identifiers have the highest possible difference between each other.
+        // Highest possible difference is the number of nodes divided by the average degree.
+        long deltaWorstCase = (avgDegree > 0) ? ceilDiv(nodeCount, avgDegree) : 0L;
+        long worstCaseCompressedTargetsSize = compressedTargetSize(avgDegree, nodeCount, deltaWorstCase);
+
+        return MemoryEstimations.builder(ChunkedAdjacencyLists.class)
+            .fixed("compressed targets", MemoryRange.of(bestCaseCompressedTargetsSize, worstCaseCompressedTargetsSize))
+            .fixed("positions", estimateArraysSize(nodeCount, MemoryUsage::sizeOfIntArray))
+            .fixed("lengths", estimateArraysSize(nodeCount, MemoryUsage::sizeOfIntArray))
+            .fixed("lastValues", estimateArraysSize(nodeCount, MemoryUsage::sizeOfLongArray))
+            .fixed("properties", MemoryUsage.sizeOfObjectArray(propertyCount) + propertyCount * estimateArraysSize(nodeCount, MemoryUsage::sizeOfLongArray))
+            .build();
+    }
+
+    private static long compressedTargetSize(long avgDegree, long nodeCount, long delta) {
+        long firstAdjacencyIdAvgByteSize = (avgDegree > 0) ? ceilDiv(encodedVLongSize(nodeCount), 2) : 0L;
+        int relationshipByteSize = encodedVLongSize(delta);
+        long compressedAdjacencyByteSize = relationshipByteSize * Math.max(0, (avgDegree - 1));
+        return nodeCount * MemoryUsage.sizeOfByteArray(firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize);
+    }
+
+    private static long estimateArraysSize(long size, LongToLongFunction primitiveArraySizeEstimator) {
+        assert size >= 0;
+        long sizeOfInstance = MemoryUsage.sizeOfInstance(HugeSparseIntArrayList.class);
+
+        int numPages = HugeArrays.numberOfPages(size);
+
+        long memoryUsed = MemoryUsage.sizeOfObjectArray(numPages);
+        final long pageBytes = primitiveArraySizeEstimator.applyAsLong(HugeArrays.PAGE_SIZE);
+        memoryUsed += (numPages - 1) * pageBytes;
+        final int lastPageSize = HugeArrays.exclusiveIndexOfPage(size);
+
+        return sizeOfInstance + memoryUsed + primitiveArraySizeEstimator.applyAsLong(lastPageSize);
+    }
 
     public static ChunkedAdjacencyLists of(int numberOfProperties, long initialCapacity) {
         return new ChunkedAdjacencyLists(numberOfProperties, initialCapacity);
@@ -131,12 +182,12 @@ public final class ChunkedAdjacencyLists {
         long[] properties,
         int start,
         int end,
-        int weightIndex,
+        int propertyIndex,
         int propertiesToAdd
     ) {
         var length = lengths.get(index);
 
-        var currentProperties = ensurePropertyCapacity(index, length, propertiesToAdd, weightIndex);
+        var currentProperties = ensurePropertyCapacity(index, length, propertiesToAdd, propertyIndex);
 
         if (propertiesToAdd == end - start) {
             System.arraycopy(properties, start, currentProperties, length, propertiesToAdd);
@@ -169,10 +220,10 @@ public final class ChunkedAdjacencyLists {
         return compressedTargets;
     }
 
-    private long[] ensurePropertyCapacity(long index, int pos, int required, int weightIndex) {
+    private long[] ensurePropertyCapacity(long index, int pos, int required, int propertyIndex) {
         int targetLength = pos + required;
 
-        var currentProperties = properties.get(weightIndex).get(index);
+        var currentProperties = properties.get(propertyIndex).get(index);
 
         if (targetLength < 0) {
             throw new IllegalArgumentException(formatWithLocale(
@@ -183,7 +234,7 @@ public final class ChunkedAdjacencyLists {
         } else if (currentProperties.length <= pos + required) {
             int newLength = BitUtil.nextHighestPowerOfTwo(pos + required);
             currentProperties = Arrays.copyOf(currentProperties, newLength);
-            properties.get(weightIndex).set(index, currentProperties);
+            properties.get(propertyIndex).set(index, currentProperties);
         }
 
         return currentProperties;

@@ -98,11 +98,10 @@ public final class AdjacencyBuffer {
         var numberOfPages = importSizing.numberOfPages();
         var pageSize = importSizing.pageSize();
 
-        var compressedLongArrayPages = sizeOfObjectArray(numberOfPages) + numberOfPages * sizeOfObjectArray(pageSize);
         return MemoryEstimations
             .builder(AdjacencyBuffer.class)
-            .fixed("compressed long array pages", compressedLongArrayPages)
-            .perNode("CompressedLongArray", CompressedLongArray.memoryEstimation(avgDegree, nodeCount, propertyCount))
+            .fixed("ChunkedAdjacencyLists pages", sizeOfObjectArray(numberOfPages))
+            .add("ChunkedAdjacencyLists", ChunkedAdjacencyLists.memoryEstimation(avgDegree, pageSize, propertyCount).times(numberOfPages))
             .build();
     }
 
