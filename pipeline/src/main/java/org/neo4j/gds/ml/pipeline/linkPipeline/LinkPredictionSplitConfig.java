@@ -169,7 +169,7 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
         long positiveTrainSetSize = (long) (testComplementSize * trainFraction() * (1 + negativeSamplingRatio()));
         long trainSetSize = (long) (positiveTrainSetSize * (1 + negativeSamplingRatio()));
         long featureInputSize = (long) (testComplementSize * (1 - trainFraction()));
-        long foldSize = positiveTrainSetSize / validationFolds();
+        long foldSize = trainSetSize / validationFolds();
 
         validateRelSetSize(testSetSize, MIN_SET_SIZE, "test", "`testFraction` is too low");
         validateRelSetSize(
@@ -186,5 +186,25 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             "validation",
             "`validationFolds` is too high or the `trainFraction` too low"
         );
+    }
+
+    @Value.Derived
+    @Configuration.Ignore
+    default ExpectedSetSizes expectedSetSizes(long relationshipCount) {
+        long positiveTestSetSize = (long) (relationshipCount * testFraction());
+        long testSetSize = (long) (positiveTestSetSize * (1 + negativeSamplingRatio()));
+        long testComplementSize = relationshipCount - positiveTestSetSize;
+
+        long positiveTrainSetSize = (long) (testComplementSize * trainFraction() * (1 + negativeSamplingRatio()));
+        long trainSetSize = (long) (positiveTrainSetSize * (1 + negativeSamplingRatio()));
+        long featureInputSize = (long) (testComplementSize * (1 - trainFraction()));
+        long foldSize = trainSetSize / validationFolds();
+
+        return ImmutableExpectedSetSizes.builder()
+            .testSize(testSetSize)
+            .trainSize(trainSetSize)
+            .featureInputSize(featureInputSize)
+            .validationFoldSize(foldSize)
+            .build();
     }
 }

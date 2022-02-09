@@ -20,6 +20,9 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
@@ -28,6 +31,16 @@ import java.util.Optional;
 
 @ValueClass
 public interface LinkLogisticRegressionData {
+
+    static MemoryEstimation memoryEstimation(MemoryRange linkFeatureDimension) {
+        return MemoryEstimations.builder(LinkLogisticRegressionData.class)
+            .fixed("weights", linkFeatureDimension.apply(featureDim -> Weights.sizeInBytes(
+                1,
+                Math.toIntExact(featureDim)
+            )))
+            .fixed("bias", Weights.sizeInBytes(1, 1))
+            .build();
+    }
 
     Weights<Matrix> weights();
     Optional<Weights<Scalar>> bias();

@@ -21,33 +21,39 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.immutables.value.Value;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.collections.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
-import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrain;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.BestMetricData;
 import org.neo4j.gds.ml.nodemodels.BestModelStats;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
+import org.neo4j.gds.ml.nodemodels.StatsMap;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
@@ -58,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
@@ -387,6 +394,12 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             this.sum = new HashMap<>();
         }
 
+        static long sizeInBytes(long numberOfMetrics) {
+            int numberOfStats = 3;
+            long statMaps = numberOfStats * (sizeOfInstance(HashMap.class) + numberOfMetrics * Double.BYTES);
+            return MemoryUsage.sizeOf(ModelStatsBuilder.class) + statMaps;
+        }
+
         void update(LinkMetric metric, double value) {
             min.merge(metric, value, Math::min);
             max.merge(metric, value, Math::max);
@@ -426,5 +439,90 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     @Override
     public void release() {
 
+    }
+
+    public static final class Estimation {
+
+        private Estimation() {}
+
+        public static MemoryEstimation estimate(
+            LinkPredictionPipeline pipeline,
+            LinkPredictionTrainConfig trainConfig
+        ) {
+            var splitConfig = pipeline.splitConfig();
+
+            var builder = org.neo4j.gds.core.utils.mem.MemoryEstimations.builder(LinkPredictionTrain.class);
+
+            var fudgedLinkFeatureDim = MemoryRange.of(10, 500);
+
+            // TODO outer train + test eval
+
+            return builder
+                .add(estimateFeaturesAndTargets(fudgedLinkFeatureDim, totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).trainSize()))
+                .add(estimateModelSelection(pipeline, fudgedLinkFeatureDim, trainConfig.metrics().size()))
+                .build();
+        }
+
+        @NotNull
+        private static MemoryEstimation estimateFeaturesAndTargets(
+            MemoryRange fudgedLinkFeatureDim,
+            LongUnaryOperator relSetSizeExtractor
+        ) {
+            return MemoryEstimations
+                .builder()
+                .rangePerGraphDimension("Relationship features", (graphDim, threads) -> fudgedLinkFeatureDim
+                    .apply(MemoryUsage::sizeOfDoubleArray)
+                    .times(relSetSizeExtractor.applyAsLong(graphDim.maxRelCount()))
+                    .add(MemoryUsage.sizeOfInstance(HugeObjectArray.class)))
+                .perGraphDimension(
+                    "Relationship targets",
+                    (graphDim, threads) -> MemoryRange.of(
+                        HugeDoubleArray.memoryEstimation(relSetSizeExtractor.applyAsLong(graphDim.maxRelCount()))
+                    )
+                ).build();
+        }
+
+        private static MemoryEstimation estimateModelSelection(LinkPredictionPipeline pipeline, MemoryRange linkFeatureDimension, int numberOfMetrics) {
+            var splitConfig = pipeline.splitConfig();
+            var maxEstimationForModelCandidates = maxEstimation("Max over model candidates", pipeline.trainingParameterSpace()
+                .stream()
+                .map(llrConfig -> MemoryEstimations.builder("Train and evaluate model")
+                    .fixed("Stats map builder train", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
+                    .fixed("Stats map builder validation", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
+                    .max(List.of(
+                            LinkLogisticRegressionTrain.estimate(llrConfig, linkFeatureDimension),
+                            estimateComputeTrainMetrics(pipeline.splitConfig())
+                        )
+                    ).build()
+                ).collect(Collectors.toList())
+            );
+
+            return MemoryEstimations.builder("model selection")
+                .add("Cross-Validation splitting",
+                    StratifiedKFoldSplitter.memoryEstimation(
+                            splitConfig.validationFolds(),
+                            dim -> splitConfig.expectedSetSizes(dim.maxRelCount()).trainSize()
+                        )
+                )
+                .add(maxEstimationForModelCandidates)
+                .add("Inner train stats map", StatsMap.memoryEstimation(numberOfMetrics, pipeline.trainingParameterSpace().size(), 1))
+                .add("Validation stats map", StatsMap.memoryEstimation(numberOfMetrics, pipeline.trainingParameterSpace().size(), 1))
+                .build();
+        }
+
+        @NotNull
+        private static MemoryEstimation estimateComputeTrainMetrics(LinkPredictionSplitConfig splitConfig) {
+            return MemoryEstimations
+                .builder("Compute train metrics")
+                .perGraphDimension(
+                    "Sorted probabilities",
+                    (dim, threads) -> {
+                        long trainSetSize = splitConfig
+                            .expectedSetSizes(dim.maxRelCount())
+                            .trainSize();
+                        return LinkPredictionEvaluationMetricComputer.estimate(trainSetSize);
+                    }
+                ).build();
+        }
     }
 }

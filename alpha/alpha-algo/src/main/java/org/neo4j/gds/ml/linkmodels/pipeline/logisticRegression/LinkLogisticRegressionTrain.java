@@ -20,6 +20,9 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -39,6 +42,21 @@ public class LinkLogisticRegressionTrain {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final int concurrency;
+
+    public static MemoryEstimation estimate(LinkLogisticRegressionTrainConfig llrConfig, MemoryRange linkFeatureDimension) {
+        return MemoryEstimations.builder("train model")
+            .add("model data", LinkLogisticRegressionData.memoryEstimation(linkFeatureDimension))
+            .add("update weights", Training.memoryEstimation(linkFeatureDimension, 1, 1))
+            .perThread(
+                "computation graph",
+                linkFeatureDimension.apply(featureDim -> LinkLogisticRegressionObjective.sizeOfBatchInBytes(
+                    llrConfig.batchSize(),
+                    Math.toIntExact(featureDim),
+                    llrConfig.useBiasFeature()
+                ))
+            )
+            .build();
+    }
 
     public LinkLogisticRegressionTrain(
         ReadOnlyHugeLongArray trainSet,

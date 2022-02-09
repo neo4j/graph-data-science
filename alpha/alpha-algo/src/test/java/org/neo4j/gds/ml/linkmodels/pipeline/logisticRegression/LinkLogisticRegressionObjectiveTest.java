@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -132,5 +133,17 @@ class LinkLogisticRegressionObjectiveTest {
 
         // weights are zero. penalty part of objective is 0. remaining part of logistic-loss is -Math.log(0.5).
         assertThat(lossValue).isEqualTo(-Math.log(0.5));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "10, 1, false, 816",
+        "10, 1, true, 1200",
+        "100, 1, true, 8400",
+        "10, 100, true, 9912",
+    })
+    void shouldEstimateMemoryUsage(int batchSize, int featureDim, boolean useBias, long expected) {
+        var memoryUsageInBytes = LinkLogisticRegressionObjective.sizeOfBatchInBytes(batchSize, featureDim, useBias);
+        assertThat(memoryUsageInBytes).isEqualTo(expected);
     }
 }
