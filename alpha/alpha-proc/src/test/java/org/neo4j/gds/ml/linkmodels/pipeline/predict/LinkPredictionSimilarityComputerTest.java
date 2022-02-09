@@ -20,6 +20,11 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.beta.generator.PropertyProducer;
+import org.neo4j.gds.beta.generator.RandomGraphGenerator;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -28,6 +33,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
+import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionSimilarityComputer.LinkFilter;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
@@ -35,8 +41,11 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 
 import java.util.List;
+import java.util.Random;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 
 @GdlExtension
 class LinkPredictionSimilarityComputerTest {
@@ -94,7 +103,7 @@ class LinkPredictionSimilarityComputerTest {
             graph
         );
 
-        NeighborFilter filter = new LinkPredictionSimilarityComputer.LinkFilter(graph.concurrentCopy());
+        NeighborFilter filter = new LinkFilter(graph.concurrentCopy());
 
         // The node filter does not support self-loops as a node is always similar to itself so a-->a should be false.
         assertThat(filter.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("a"))).isEqualTo(true);
@@ -122,7 +131,7 @@ class LinkPredictionSimilarityComputerTest {
             graph
         );
 
-        NeighborFilter filter = new LinkPredictionSimilarityComputer.LinkFilter(graph.concurrentCopy());
+        NeighborFilter filter = new LinkFilter(graph.concurrentCopy());
 
         assertThat(filter.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("a")))
             .isLessThanOrEqualTo(1)
@@ -133,5 +142,46 @@ class LinkPredictionSimilarityComputerTest {
         assertThat(filter.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("c")))
             .isLessThanOrEqualTo(1)
             .isGreaterThanOrEqualTo(0);
+    }
+
+    @Test
+    void shouldFailIfWeCouldFigureOutHowToWriteTheTestCorrectly() {
+        var nodeCount = 1500;
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(nodeCount)
+            .nodePropertyProducer(PropertyProducer.randomDouble("prop", 0.0, 1.0))
+            .averageDegree(1)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .orientation(UNDIRECTED)
+            .seed(43L)
+            .build()
+            .generate();
+
+        NeighborFilter filter = new LinkFilter(graph);
+
+        Random random = new Random();
+
+        Runnable r1 = runnable(nodeCount, 0, nodeCount / 2, random, filter);
+        Runnable r2 = runnable(nodeCount, nodeCount / 2 + 1, nodeCount, random, filter);
+
+        var tasks = List.of(r1, r2);
+
+        ParallelUtil.run(tasks, Pools.DEFAULT);
+    }
+
+    private Runnable runnable(long nodeCount, long startNodeId, long endNodeId, Random random, NeighborFilter filter) {
+
+        return () -> {
+            LongStream.range(startNodeId, endNodeId)
+                .forEach(sourceNode ->
+                    LongStream.range(startNodeId, endNodeId)
+                        .forEach(__ -> {
+                                var targetNode = Math.abs(random.nextLong()) % nodeCount;
+                                filter.excludeNodePair(sourceNode, targetNode);
+                            }
+                        )
+                );
+        };
+
     }
 }

@@ -67,7 +67,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             graph,
             knnConfig,
             linkPredictionSimilarityComputer,
-            new LinkPredictionSimilarityComputer.LinkFilter(graph.concurrentCopy()),
+            new LinkPredictionSimilarityComputer.LinkFilterFactory(graph),
             ImmutableKnnContext.of(
                 Pools.DEFAULT,
                 AllocationTracker.empty(),
