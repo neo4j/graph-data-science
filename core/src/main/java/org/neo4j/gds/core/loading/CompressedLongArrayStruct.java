@@ -280,8 +280,13 @@ public final class CompressedLongArrayStruct {
                     var position = positionsPage[indexInPage];
                     var length = lengthsPage[indexInPage];
                     for (int propertyIndex = 0; propertyIndex < propertyBatches.size(); propertyIndex++) {
-                        propertiesBuffer[propertyIndex] = propertyBatches.get(propertyIndex).page[indexInPage];
+                        var page = propertyBatches.get(propertyIndex).page;
+                        propertiesBuffer[propertyIndex] = page[indexInPage];
+                        // make properties eligible for GC
+                        page[indexInPage] = null;
                     }
+                    // make targets eligible for GC
+                    targetsPage[indexInPage] = null;
 
                     consumer.accept(offset + indexInPage, targets, propertiesBuffer, position, length);
                 }
