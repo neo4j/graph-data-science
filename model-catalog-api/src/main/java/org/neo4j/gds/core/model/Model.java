@@ -86,14 +86,6 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
         return fileLocation().isPresent();
     }
 
-    default Model<DATA, CONFIG, INFO> publish() {
-        return ImmutableModel.<DATA, CONFIG, INFO>builder()
-            .from(this)
-            .sharedWith(List.of(ALL_USERS))
-            .name(name() + PUBLIC_MODEL_SUFFIX)
-            .build();
-    }
-
     @Value.Derived
     default boolean isPublished() {
         return sharedWith().contains(ALL_USERS);
