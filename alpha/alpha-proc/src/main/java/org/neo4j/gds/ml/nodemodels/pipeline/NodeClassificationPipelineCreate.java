@@ -55,7 +55,7 @@ public class NodeClassificationPipelineCreate {
         String pipelineName,
         NodeClassificationPipeline pipeline
     ) {
-        var model = Model.of(
+        return Model.of(
             username,
             pipelineName,
             PIPELINE_MODEL_TYPE,
@@ -64,6 +64,5 @@ public class NodeClassificationPipelineCreate {
             PipelineCreateConfig.of(username),
             pipeline
         );
-        return model;
     }
 }
