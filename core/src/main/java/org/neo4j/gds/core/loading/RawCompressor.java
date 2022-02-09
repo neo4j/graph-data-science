@@ -96,7 +96,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         ValueMapper mapper
     ) {
         if (properties != null) {
-            return withWeights(
+            return withProperties(
                 nodeId,
                 targets,
                 properties,
@@ -106,7 +106,7 @@ public final class RawCompressor implements AdjacencyCompressor {
                 mapper
             );
         } else {
-            return withoutWeights(nodeId, targets, numberOfCompressedTargets, compressedBytesSize, buffer, mapper);
+            return withoutProperties(nodeId, targets, numberOfCompressedTargets, compressedBytesSize, buffer, mapper);
         }
     }
 
@@ -120,7 +120,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         }
     }
 
-    private int withoutWeights(
+    private int withoutProperties(
         long nodeId,
         byte[] targets,
         int numberOfCompressedTargets,
@@ -163,22 +163,22 @@ public final class RawCompressor implements AdjacencyCompressor {
         return write;
     }
 
-    private int aggregateWithWeights(LongArrayBuffer targets, long[][] weights, Aggregation[] aggregations) {
+    private int aggregateWithProperties(LongArrayBuffer targets, long[][] properties, Aggregation[] aggregations) {
         var values = targets.buffer;
         var length = targets.length;
 
         int[] order = IndirectSort.mergesort(0, length, new AscendingLongComparator(values));
 
         long[] outValues = new long[length];
-        long[][] outWeights = new long[weights.length][length];
+        long[][] outProperties = new long[properties.length][length];
 
         int firstSortIdx = order[0];
         long value = values[firstSortIdx];
         long delta;
 
         outValues[0] = value;
-        for (int i = 0; i < weights.length; i++) {
-            outWeights[i][0] = weights[i][firstSortIdx];
+        for (int i = 0; i < properties.length; i++) {
+            outProperties[i][0] = properties[i][firstSortIdx];
         }
 
         int in = 1, out = 1;
@@ -187,8 +187,8 @@ public final class RawCompressor implements AdjacencyCompressor {
             for (; in < length; ++in) {
                 int sortIdx = order[in];
 
-                for (int i = 0; i < weights.length; i++) {
-                    outWeights[i][out] = weights[i][sortIdx];
+                for (int i = 0; i < properties.length; i++) {
+                    outProperties[i][out] = properties[i][sortIdx];
                 }
 
                 outValues[out++] = values[sortIdx];
@@ -200,37 +200,37 @@ public final class RawCompressor implements AdjacencyCompressor {
                 value = values[sortIdx];
 
                 if (delta > 0L) {
-                    for (int i = 0; i < weights.length; i++) {
-                        outWeights[i][out] = weights[i][sortIdx];
+                    for (int i = 0; i < properties.length; i++) {
+                        outProperties[i][out] = properties[i][sortIdx];
                     }
                     outValues[out++] = value;
                 } else {
-                    for (int i = 0; i < weights.length; i++) {
+                    for (int i = 0; i < properties.length; i++) {
                         Aggregation aggregation = aggregations[i];
                         int existingIdx = out - 1;
-                        long[] outWeight = outWeights[i];
-                        double existingWeight = Double.longBitsToDouble(outWeight[existingIdx]);
-                        double newWeight = Double.longBitsToDouble(weights[i][sortIdx]);
-                        newWeight = aggregation.merge(existingWeight, newWeight);
-                        outWeight[existingIdx] = Double.doubleToLongBits(newWeight);
+                        long[] outProperty = outProperties[i];
+                        double existingProperty = Double.longBitsToDouble(outProperty[existingIdx]);
+                        double newProperty = Double.longBitsToDouble(properties[i][sortIdx]);
+                        newProperty = aggregation.merge(existingProperty, newProperty);
+                        outProperty[existingIdx] = Double.doubleToLongBits(newProperty);
                     }
                 }
             }
         }
 
         System.arraycopy(outValues, 0, values, 0, out);
-        for (int i = 0; i < outWeights.length; i++) {
-            System.arraycopy(outWeights[i], 0, weights[i], 0, out);
+        for (int i = 0; i < outProperties.length; i++) {
+            System.arraycopy(outProperties[i], 0, properties[i], 0, out);
         }
 
         return out;
 
     }
 
-    private int withWeights(
+    private int withProperties(
         long nodeId,
         byte[] targets,
-        long[][] uncompressedWeights,
+        long[][] uncompressedProperties,
         int numberOfCompressedTargets,
         int compressedBytesSize,
         LongArrayBuffer buffer,
@@ -238,11 +238,11 @@ public final class RawCompressor implements AdjacencyCompressor {
     ) {
         AdjacencyCompression.copyFrom(buffer, targets, numberOfCompressedTargets, compressedBytesSize, mapper);
 
-        int degree = aggregateWithWeights(buffer, uncompressedWeights, aggregations);
+        int degree = aggregateWithProperties(buffer, uncompressedProperties, aggregations);
 
         long address = copy(buffer.buffer, degree, adjacencyAllocator);
 
-        copyProperties(uncompressedWeights, degree, nodeId, propertyOffsets);
+        copyProperties(uncompressedProperties, degree, nodeId, propertyOffsets);
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);

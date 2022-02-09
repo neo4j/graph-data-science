@@ -45,41 +45,6 @@ class AdjacencyBufferTest {
         assertThat((double) max1 / max2).isCloseTo((double) max2 / max3, Percentage.withPercentage(20));
     }
 
-    @Test
-    void memoryEstimationShouldGrowLinearlyWithAvgDegree() {
-        var estimationWith1Property = estimate(10_000_000, 100, 1, 4);
-        var estimationWith2Property = estimate(10_000_000, 1000, 1, 4);
-        var estimationWith3Property = estimate(10_000_000, 10000, 1, 4);
-
-        var min1 = estimationWith1Property.memoryUsage().min;
-        var min2 = estimationWith2Property.memoryUsage().min;
-        var min3 = estimationWith3Property.memoryUsage().min;
-        assertThat((double) min1 / min2).isCloseTo((double) min2 / min3, Percentage.withPercentage(20));
-
-        var max1 = estimationWith1Property.memoryUsage().max;
-        var max2 = estimationWith2Property.memoryUsage().max;
-        var max3 = estimationWith3Property.memoryUsage().max;
-        assertThat((double) max1 / max2).isCloseTo((double) max2 / max3, Percentage.withPercentage(20));
-    }
-
-    @Test
-    void memoryEstimationShouldGrowLinearlyWithNumberOfProperties() {
-        var estimationWith1Property = estimate(10_000_000, 10, 10, 4);
-        var estimationWith2Property = estimate(10_000_000, 10, 100, 4);
-        var estimationWith3Property = estimate(10_000_000, 10, 1000, 4);
-
-        var min1 = estimationWith1Property.memoryUsage().min;
-        var min2 = estimationWith2Property.memoryUsage().min;
-        var min3 = estimationWith3Property.memoryUsage().min;
-        assertThat((double) min1 / min2).isCloseTo((double) min2 / min3, Percentage.withPercentage(20));
-
-        var max1 = estimationWith1Property.memoryUsage().max;
-        var max2 = estimationWith2Property.memoryUsage().max;
-        var max3 = estimationWith3Property.memoryUsage().max;
-        assertThat((double) max1 / max2).isCloseTo((double) max2 / max3, Percentage.withPercentage(20));
-    }
-
-
     private MemoryTree estimate(long nodeCount, long avgDegree, int propertyCount, int concurrency) {
         var dimensions = ImmutableGraphDimensions
             .builder()
