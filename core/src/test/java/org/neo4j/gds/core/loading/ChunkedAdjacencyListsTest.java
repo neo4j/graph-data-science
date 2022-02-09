@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.assertj.core.data.Index;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 import static org.neo4j.gds.core.loading.ZigZagLongDecoding.Identity.INSTANCE;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ChunkedAdjacencyListsTest {
 
@@ -63,5 +67,102 @@ class ChunkedAdjacencyListsTest {
             INSTANCE
         ));
         assertThat(actualTargets).containsExactly(expectedTargets);
+    }
+
+    @Test
+    void shouldWriteWithProperties() {
+        var adjacencyLists = ChunkedAdjacencyLists.of(2, 0);
+
+        var input = new long[]{ 42L, 1337L, 5L, 6L};
+        var properties = new long[][]{ {42L, 1337L, 5L, 6L}, {8L, 8L, 8L, 8L}};
+        adjacencyLists.add(0, input, properties, 0, 4, 4);
+
+        adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> assertThat(actualProperties)
+            .hasDimensions(2, 4)
+            .contains(new long[]{42L, 1337L, 5L, 6L}, Index.atIndex(0))
+            .contains(new long[]{8L, 8L, 8L, 8L}, Index.atIndex(1)));
+    }
+
+    @Test
+    void shouldAllowConsumptionOfAllElements() {
+        var adjacencyLists = ChunkedAdjacencyLists.of(0, 0);
+
+        adjacencyLists.add(1, new long[]{ 42L, 1337L, 5L}, 0, 3, 3);
+        adjacencyLists.add(8, new long[]{ 1L, 2L}, 0, 2, 2);
+
+        // Skip 2 pages
+        var largeIndex = 3 * 4096 + 1;
+        adjacencyLists.add(largeIndex, new long[]{ 42L, 42L}, 0, 2, 2);
+
+        adjacencyLists.consume((id, targets, properties, compressedBytesSize, compressedTargets) -> {
+            assertThat(properties).isNull();
+
+            var uncompressedTargets = new long[compressedTargets];
+            ZigZagLongDecoding.zigZagUncompress(targets, compressedBytesSize, uncompressedTargets);
+
+            if (id == 1) {
+                assertThat(uncompressedTargets).containsExactly(42L, 1337L, 5L);
+                assertThat(compressedBytesSize).isEqualTo(5);
+                assertThat(compressedTargets).isEqualTo(3);
+            } else if (id == 8) {
+                assertThat(uncompressedTargets).containsExactly(1L, 2L);
+                assertThat(compressedBytesSize).isEqualTo(2);
+                assertThat(compressedTargets).isEqualTo(2);
+            } else if (id == largeIndex) {
+                assertThat(uncompressedTargets).containsExactly(42L, 42L);
+                assertThat(compressedBytesSize).isEqualTo(2);
+                assertThat(compressedTargets).isEqualTo(2);
+            } else {
+                fail(formatWithLocale("Did not expect to see node id %d", id));
+            }
+        });
+    }
+
+    @Test
+    void addWithPreAggregation() {
+        var adjacencyLists = ChunkedAdjacencyLists.of(0, 0);
+
+        var input = new long[]{ 42L, IGNORE_VALUE, IGNORE_VALUE, 1337L, 5L};
+        adjacencyLists.add(0, input, 0, 5, 3);
+
+        var expectedTargets = new long[]{42L, 1337L, 5L};
+        var actualTargets = new long[3];
+
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.copyFrom(
+            actualTargets,
+            targets,
+            length,
+            position,
+            INSTANCE
+        ));
+        assertThat(actualTargets).containsExactly(expectedTargets);
+    }
+
+    @Test
+    void addWithPreAggregatedWeights() {
+        var adjacencyLists = ChunkedAdjacencyLists.of(1, 0);
+
+        var input = new long[]{ 42L, IGNORE_VALUE, 1337L, 5L};
+        var properties = new long[][]{{3L, 2L, 3L, 4L}};
+        adjacencyLists.add(0, input, properties, 0, 4, 3);
+
+        var expectedTargets = new long[]{42L, 1337L, 5L};
+
+        adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> {
+            var actualTargets = new long[3];
+            AdjacencyCompression.copyFrom(
+                actualTargets,
+                targets,
+                length,
+                position,
+                INSTANCE
+            );
+            assertThat(actualTargets).containsExactly(expectedTargets);
+
+            assertThat(actualProperties)
+                // there is an additional entry, because we double the buffers in size
+                .hasDimensions(1, 4)
+                .contains(new long[]{3L, 3L, 4L, 0L}, Index.atIndex(0));
+        });
     }
 }
