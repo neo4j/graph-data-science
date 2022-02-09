@@ -533,6 +533,23 @@ public final class MemoryEstimations {
         }
 
         /**
+         * Adds a {@link MemoryEstimation} as a sub-component to the builder.
+         *
+         * The given memory range is multiplied by the number of available threads.
+         *
+         * @param description description of the sub-component
+         * @param range       memory range
+         * @return this builder
+         */
+        public Builder perThread(final String description, final MemoryRange range) {
+            components.add(new LeafEstimation(
+                description,
+                (dim, threads) -> range.times(threads)
+            ));
+            return this;
+        }
+
+        /**
          * Adds the biggest of several {@link MemoryEstimation} as a sub-component to the builder.
          *
          * Handy for when you do not not know ahead of time which one is going to result in the largest memory usage high-water mark

@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.mem;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Objects;
+import java.util.function.LongUnaryOperator;
 
 /**
  * Represents a range of positive byte values.
@@ -62,6 +63,10 @@ public final class MemoryRange {
     private MemoryRange(final long min, final long max) {
         this.min = min;
         this.max = max;
+    }
+
+    public MemoryRange add(final long value) {
+        return new MemoryRange(this.min + value, this.max + value);
     }
 
     public MemoryRange add(final MemoryRange other) {
@@ -108,6 +113,10 @@ public final class MemoryRange {
 
     public MemoryRange max(MemoryRange other) {
         return MemoryRange.of(Math.max(this.min, other.min), Math.max(this.max, other.max));
+    }
+
+    public MemoryRange apply(LongUnaryOperator function) {
+        return new MemoryRange(function.applyAsLong(this.min), function.applyAsLong(this.max));
     }
 
     public boolean isEmpty() {
