@@ -127,7 +127,7 @@ public final class AdjacencyBuffer {
             allocationTracker.add(sizeOfObjectPage);
             allocationTracker.add(sizeOfObjectPage);
             allocationTracker.add(sizeOfLongPage);
-            compressedAdjacencyLists[page] = new CompressedLongArrayStruct(importMetaData.propertyKeyIds().length);
+            compressedAdjacencyLists[page] = CompressedLongArrayStruct.of(importMetaData.propertyKeyIds().length, pageSize);
             localBuilders[page] = new ThreadLocalRelationshipsBuilder(adjacencyCompressorFactory);
         }
 
