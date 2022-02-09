@@ -33,7 +33,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
-import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionSimilarityComputer.LinkFilter;
+import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionSimilarityComputer.LinkFilterFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
@@ -103,7 +103,7 @@ class LinkPredictionSimilarityComputerTest {
             graph
         );
 
-        NeighborFilter filter = new LinkFilter(graph.concurrentCopy());
+        NeighborFilter filter = new LinkFilterFactory(graph).create();
 
         // The node filter does not support self-loops as a node is always similar to itself so a-->a should be false.
         assertThat(filter.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("a"))).isEqualTo(true);
@@ -131,7 +131,7 @@ class LinkPredictionSimilarityComputerTest {
             graph
         );
 
-        NeighborFilter filter = new LinkFilter(graph.concurrentCopy());
+        NeighborFilter filter = new LinkFilterFactory(graph).create();
 
         assertThat(filter.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("a")))
             .isLessThanOrEqualTo(1)
@@ -157,7 +157,7 @@ class LinkPredictionSimilarityComputerTest {
             .build()
             .generate();
 
-        NeighborFilter filter = new LinkFilter(graph);
+        NeighborFilter filter = new LinkFilterFactory(graph).create();
 
         Random random = new Random();
 

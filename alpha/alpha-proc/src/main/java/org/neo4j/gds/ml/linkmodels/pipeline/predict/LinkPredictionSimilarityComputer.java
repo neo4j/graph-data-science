@@ -48,11 +48,11 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
         return predictor.predictedProbability(features);
     }
 
-    static class LinkFilter implements NeighborFilter {
+    static final class LinkFilter implements NeighborFilter {
 
         private final Graph graph;
 
-        LinkFilter(Graph graph) {
+        private LinkFilter(Graph graph) {
             this.graph = graph;
         }
 
