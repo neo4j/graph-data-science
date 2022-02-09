@@ -209,12 +209,6 @@ public final class AdjacencyBuffer {
                 int localId = (int) (source & pageMask);
 
                 ChunkedAdjacencyLists compressedTargets = this.compressedAdjacencyLists[pageIndex];
-//                if (compressedTargets == null) {
-//                    compressedTargets = new CompressedLongArray(
-//                        propertyValues == null ? 0 : propertyValues.length
-//                    );
-//                    this.compressedAdjacencyLists[pageIndex][localId] = compressedTargets;
-//                }
 
                 var targetsToImport = endOffset - startOffset;
                 if (propertyValues == null) {

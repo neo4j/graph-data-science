@@ -94,9 +94,9 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         ValueMapper mapper
     ) {
         if (properties != null) {
-            return applyVariableDeltaEncodingWithWeights(nodeId, targets, properties, numberOfCompressedTargets, compressedBytesSize, buffer, mapper);
+            return applyVariableDeltaEncodingWithProperties(nodeId, targets, properties, numberOfCompressedTargets, compressedBytesSize, buffer, mapper);
         } else {
-            return applyVariableDeltaEncodingWithoutWeights(nodeId, targets, numberOfCompressedTargets, compressedBytesSize, buffer, mapper);
+            return applyVariableDeltaEncodingWithoutProperties(nodeId, targets, numberOfCompressedTargets, compressedBytesSize, buffer, mapper);
         }
     }
 
@@ -110,7 +110,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         }
     }
 
-    private int applyVariableDeltaEncodingWithoutWeights(
+    private int applyVariableDeltaEncodingWithoutProperties(
         long nodeId,
         byte[] semiCompressedBytesDuringLoading,
         int numberOfCompressedTargets,
@@ -133,10 +133,10 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         return degree;
     }
 
-    private int applyVariableDeltaEncodingWithWeights(
+    private int applyVariableDeltaEncodingWithProperties(
         long nodeId,
         byte[] semiCompressedBytesDuringLoading,
-        long[][] uncompressedWeightsPerProperty,
+        long[][] uncompressedPropertiesPerProperty,
         int numberOfCompressedTargets,
         int compressedByteSize,
         LongArrayBuffer buffer,
@@ -149,7 +149,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         int degree = AdjacencyCompression.applyDeltaEncoding(
             buffer,
-            uncompressedWeightsPerProperty,
+            uncompressedPropertiesPerProperty,
             aggregations,
             noAggregation
         );
@@ -164,7 +164,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         var address = copyIds(semiCompressedBytesDuringLoading, requiredBytes);
         // values are in the final adjacency list
 
-        copyProperties(uncompressedWeightsPerProperty, degree, nodeId, propertyOffsets);
+        copyProperties(uncompressedPropertiesPerProperty, degree, nodeId, propertyOffsets);
 
         this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);

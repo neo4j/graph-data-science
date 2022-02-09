@@ -24,13 +24,10 @@ public interface AdjacencyCompressor extends AutoCloseable {
     /**
      * Compress a list of target ids into an adjacency list.
      * The input {@code values} are an unsorted and separately compressed list of target ids.
-     * Those ids can be unpacked into a {@code long[]} using {@link org.neo4j.gds.core.loading.CompressedLongArray#uncompress(long[], org.neo4j.gds.core.compress.AdjacencyCompressor.ValueMapper)}.
-     * The provided {@code long[]} must be able to hold at least {@link org.neo4j.gds.core.loading.CompressedLongArray#length()} elements.
+     * The provided {@code long[]} must be able to hold at least {@code numberOfCompressedTargets} elements.
      *
-     * The input {@code values} might also store properties (called 'weights').
-     * This can be checked with {@link org.neo4j.gds.core.loading.CompressedLongArray#hasProperties()}
-     * and read with {@link org.neo4j.gds.core.loading.CompressedLongArray#properties()}.
-     * The returned {@code long[][]} has the number of properties in the first dimension, followed by an
+     * The input {@code values} might also store properties.
+     * The {@code properties} has the number of properties in the first dimension, followed by an
      * uncompressed {@code long[]} for each property. Those values belong to the target id that is stored at
      * the same array index in the uncompressed target list. Implementors need to make sure to maintain that order
      * when re-ordering the target ids.
@@ -40,14 +37,13 @@ public interface AdjacencyCompressor extends AutoCloseable {
      * The buffer exists solely so that implementors can reduce allocations of {@code long[]}.
      * It is not expected that the buffer contains any useful data after this method invocation.
      *
-     * The provided {@code values} array will not be used after this method call and should be released at the end
-     * using {@link org.neo4j.gds.core.loading.CompressedLongArray#release()}.
+     * The provided {@code targets} array will not be used after this method call.
      *
      * Implementors will need to write the resulting target list somewhere. Where exactly is up to the implementation.
      * The results should end up in the data that is returned by the
      * {@link AdjacencyCompressorFactory#build()} method.
      * The method only needs to return the degree of the compressed adjacency list. This value can be different from
-     * {@link org.neo4j.gds.core.loading.CompressedLongArray#length()} due to possible deduplication, though it
+     * {@code numberOfCompressedTargets} due to possible deduplication, though it
      * should never be larger. The return value is only used for tracking progress and reporting, it is not stored in
      * the graph. How the degree is stored so that it can be used by the Graph is up the implementor of this method.
      *
