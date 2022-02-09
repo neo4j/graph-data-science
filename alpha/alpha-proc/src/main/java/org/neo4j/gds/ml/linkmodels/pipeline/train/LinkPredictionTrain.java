@@ -60,6 +60,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionEvaluationMetricComputer.computeMetric;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -242,7 +245,9 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             testData,
             modelData,
             new BatchQueue(testData.size()),
-            progressTracker
+            trainConfig,
+            progressTracker,
+            terminationFlag
         );
         progressTracker.endSubTask("compute test metrics");
 
@@ -278,7 +283,10 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             .orElseThrow();
     }
 
-    private List<TrainingExamplesSplit> trainValidationSplits(ReadOnlyHugeLongArray trainRelationshipIds, HugeDoubleArray actualTargets) {
+    private List<TrainingExamplesSplit> trainValidationSplits(
+        ReadOnlyHugeLongArray trainRelationshipIds,
+        HugeDoubleArray actualTargets
+    ) {
         var splitter = new StratifiedKFoldSplitter(
             pipeline.splitConfig().validationFolds(),
             trainRelationshipIds,
@@ -354,40 +362,14 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         ReadOnlyHugeLongArray evaluationSet,
         ProgressTracker progressTracker
     ) {
-        return computeMetric(trainData, modelData, new HugeBatchQueue(evaluationSet), progressTracker);
-    }
-
-    private Map<LinkMetric, Double> computeMetric(
-        FeaturesAndTargets inputData,
-        LinkLogisticRegressionData modelData,
-        BatchQueue evaluationQueue,
-        ProgressTracker progressTracker
-    ) {
-        progressTracker.setVolume(inputData.size());
-
-        var predictor = new LinkLogisticRegressionPredictor(modelData);
-        var signedProbabilities = SignedProbabilities.create(inputData.size());
-        var targets = inputData.targets();
-        var features = inputData.features();
-
-        evaluationQueue.parallelConsume(trainConfig.concurrency(), thread -> (batch) -> {
-                for (Long relationshipIdx : batch.nodeIds()) {
-                    double predictedProbability = predictor.predictedProbability(features.get(relationshipIdx));
-                    boolean isEdge = targets.get(relationshipIdx) == 1.0D;
-
-                    var signedProbability = isEdge ? predictedProbability : -1 * predictedProbability;
-                    signedProbabilities.add(signedProbability);
-                }
-
-                progressTracker.logProgress(batch.size());
-            },
+        return computeMetric(
+            trainData,
+            modelData,
+            new HugeBatchQueue(evaluationSet),
+            trainConfig,
+            progressTracker,
             terminationFlag
         );
-
-        return trainConfig.metrics().stream().collect(Collectors.toMap(
-            Function.identity(),
-            metric -> metric.compute(signedProbabilities, trainConfig.negativeClassWeight())
-        ));
     }
 
     static class ModelStatsBuilder {
