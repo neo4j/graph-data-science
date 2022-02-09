@@ -24,36 +24,44 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.core.loading.ZigZagLongDecoding.Identity.INSTANCE;
 
-class CompressedLongArrayStructTest {
+class ChunkedAdjacencyListsTest {
 
     @Test
     void shouldWriteSingleTargetList() {
-       var compressedLongArrays = CompressedLongArrayStruct.of(0, 0);
+       var adjacencyLists = ChunkedAdjacencyLists.of(0, 0);
 
         var input = new long[]{ 42L, 1337L, 5L};
-        compressedLongArrays.add(0, input, 0, 3, 3);
+        adjacencyLists.add(0, input, 0, 3, 3);
 
         var expectedTargets = new long[]{42L, 1337L, 5L};
         var actualTargets = new long[3];
 
-        compressedLongArrays.consume((nodeId, targets, __, position, length) -> {
-            AdjacencyCompression.copyFrom(actualTargets, targets, length, position, INSTANCE);
-        });
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.copyFrom(
+            actualTargets,
+            targets,
+            length,
+            position,
+            INSTANCE
+        ));
         assertThat(actualTargets).containsExactly(expectedTargets);
     }
 
     @Test
     void shouldWriteMultipleTimesIntoTargetList() {
-        var compressedLongArrays = CompressedLongArrayStruct.of(0, 0);
+        var adjacencyLists = ChunkedAdjacencyLists.of(0, 0);
 
-        compressedLongArrays.add(0, new long[]{ 42L, 1337L, 5L}, 0, 3, 3);
-        compressedLongArrays.add(0, new long[]{ 42L, 1337L, 5L}, 1, 3, 2);
+        adjacencyLists.add(0, new long[]{42L, 1337L, 5L}, 0, 3, 3);
+        adjacencyLists.add(0, new long[]{42L, 1337L, 5L}, 1, 3, 2);
 
         var expectedTargets = new long[]{42L, 1337L, 5L, 1337L, 5L};
         var actualTargets = new long[5];
-        compressedLongArrays.consume((nodeId, targets, __, position, length) -> {
-            AdjacencyCompression.copyFrom(actualTargets, targets, length, position, INSTANCE);
-        });
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.copyFrom(
+            actualTargets,
+            targets,
+            length,
+            position,
+            INSTANCE
+        ));
         assertThat(actualTargets).containsExactly(expectedTargets);
     }
 }
