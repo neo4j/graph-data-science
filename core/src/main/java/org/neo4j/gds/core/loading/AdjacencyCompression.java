@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.AscendingLongComparator;
 import java.util.Arrays;
 
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
+import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongsSize;
 
 public final class AdjacencyCompression {
 
@@ -80,6 +81,18 @@ public final class AdjacencyCompression {
         }
 
         return length;
+    }
+
+    static byte[] ensureBufferSize(LongArrayBuffer data, byte[] out) {
+        return ensureBufferSize(data.buffer, out, data.length);
+    }
+
+    static byte[] ensureBufferSize(long[] data, byte[] out, int length) {
+        var requiredBytes = encodedVLongsSize(data, length);
+        if (requiredBytes > out.length) {
+            return new byte[requiredBytes];
+        }
+        return out;
     }
 
     public static int compress(LongArrayBuffer data, byte[] out) {

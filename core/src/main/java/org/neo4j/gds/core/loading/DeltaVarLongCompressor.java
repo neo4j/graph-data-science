@@ -116,6 +116,9 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         byte[] storage = array.storage();
         AdjacencyCompression.copyFrom(buffer, array, mapper);
         int degree = AdjacencyCompression.applyDeltaEncoding(buffer, aggregations[0]);
+        if (mapper != ZigZagLongDecoding.Identity.INSTANCE) {
+            storage = AdjacencyCompression.ensureBufferSize(buffer, storage);
+        }
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
 
         long address = copyIds(storage, requiredBytes);
