@@ -48,21 +48,21 @@ public final class CompressedLongArrayStruct {
     private final HugeSparseLongArrayList lastValues;
     private final HugeSparseIntArrayList lengths;
 
-    public CompressedLongArrayStruct() {
-        this(0);
+    public static CompressedLongArrayStruct of(int numberOfProperties, long initialCapacity) {
+        return new CompressedLongArrayStruct(numberOfProperties, initialCapacity);
     }
 
-    CompressedLongArrayStruct(int numberOfProperties) {
-        this.targetLists = HugeSparseObjectArrayList.of(EMPTY_BYTES, byte[].class);
-        this.positions = HugeSparseIntArrayList.of(0);
-        this.lastValues = HugeSparseLongArrayList.of(0);
-        this.lengths = HugeSparseIntArrayList.of(0);
+    private CompressedLongArrayStruct(int numberOfProperties, long initialCapacity) {
+        this.targetLists = HugeSparseObjectArrayList.of(EMPTY_BYTES, initialCapacity, byte[].class);
+        this.positions = HugeSparseIntArrayList.of(0, initialCapacity);
+        this.lastValues = HugeSparseLongArrayList.of(0, initialCapacity);
+        this.lengths = HugeSparseIntArrayList.of(0, initialCapacity);
 
 
         if (numberOfProperties > 0) {
             this.properties = new HashMap<>(numberOfProperties);
             for (int i = 0; i < numberOfProperties; i++) {
-                this.properties.put(i, HugeSparseObjectArrayList.of(EMPTY_PROPERTIES, long[].class));
+                this.properties.put(i, HugeSparseObjectArrayList.of(EMPTY_PROPERTIES, initialCapacity, long[].class));
             }
         } else {
             this.properties = null;
