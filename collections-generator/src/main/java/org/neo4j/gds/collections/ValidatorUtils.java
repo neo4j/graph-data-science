@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections.hsa;
+package org.neo4j.gds.collections;
 
 import com.google.auto.common.MoreTypes;
 
@@ -30,9 +30,9 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.util.List;
 
-final class ValidatorUtils {
+public final class ValidatorUtils {
 
-    static boolean mustReturn(ExecutableElement e, TypeKind returnKind, Messager messager) {
+    public static boolean mustReturn(ExecutableElement e, TypeKind returnKind, Messager messager) {
         if (e.getReturnType().getKind() != returnKind) {
             messager.printMessage(Diagnostic.Kind.ERROR, "method must return " + returnKind.name(), e);
             return false;
@@ -40,7 +40,7 @@ final class ValidatorUtils {
         return true;
     }
 
-    static boolean mustReturn(ExecutableElement e, TypeMirror returnType, Messager messager) {
+    public static boolean mustReturn(ExecutableElement e, TypeMirror returnType, Messager messager) {
         if (!MoreTypes.equivalence().equivalent(e.getReturnType(), returnType)) {
             messager.printMessage(Diagnostic.Kind.ERROR, "method must return " + returnType, e);
             return false;
@@ -48,7 +48,7 @@ final class ValidatorUtils {
         return true;
     }
 
-    static boolean doesNotThrow(ExecutableElement e, Messager messager) {
+    public static boolean doesNotThrow(ExecutableElement e, Messager messager) {
         if (e.getThrownTypes().isEmpty()) {
             return true;
         }
@@ -56,7 +56,7 @@ final class ValidatorUtils {
         return false;
     }
 
-    static boolean isNotGeneric(ExecutableElement e, Messager messager) {
+    public static boolean isNotGeneric(ExecutableElement e, Messager messager) {
         if (e.getTypeParameters().isEmpty()) {
             return true;
         }
@@ -64,7 +64,7 @@ final class ValidatorUtils {
         return false;
     }
 
-    static boolean isAbstract(ExecutableElement e, Messager messager) {
+    public static boolean isAbstract(ExecutableElement e, Messager messager) {
         if (!e.isDefault() && e.getModifiers().containsAll(List.of(Modifier.ABSTRACT, Modifier.PUBLIC))) {
             return true;
         }
@@ -73,20 +73,20 @@ final class ValidatorUtils {
         return false;
     }
 
-    static boolean isStatic(ExecutableElement e, Messager messager) {
+    public static boolean isStatic(ExecutableElement e, Messager messager) {
         if (!e.isDefault() && e.getModifiers().containsAll(List.of(Modifier.STATIC, Modifier.PUBLIC))) {
             return true;
         }
 
-        messager.printMessage(Diagnostic.Kind.ERROR, "Method must be public static", e);
+        messager.printMessage(Diagnostic.Kind.ERROR, "Method must be public public static", e);
         return false;
     }
 
-    static boolean hasNoParameters(ExecutableElement e, Messager messager) {
+    public static boolean hasNoParameters(ExecutableElement e, Messager messager) {
         return hasParameterCount(e, 0, messager);
     }
 
-    static boolean hasParameterCount(ExecutableElement e, int expectedCount, Messager messager) {
+    public static boolean hasParameterCount(ExecutableElement e, int expectedCount, Messager messager) {
         if (e.getParameters().size() != expectedCount) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
@@ -98,7 +98,7 @@ final class ValidatorUtils {
         return true;
     }
 
-    static boolean hasTypeKindAtIndex(ExecutableElement e, int index, TypeKind typeKind, Messager messager) {
+    public static boolean hasTypeKindAtIndex(ExecutableElement e, int index, TypeKind typeKind, Messager messager) {
         var parameters = e.getParameters();
 
         if (parameters.size() <= index) {
@@ -114,7 +114,7 @@ final class ValidatorUtils {
         return true;
     }
 
-    static boolean hasTypeAtIndex(
+    public static boolean hasTypeAtIndex(
         Types typeUtils,
         ExecutableElement e,
         int index,
@@ -141,7 +141,7 @@ final class ValidatorUtils {
         return true;
     }
 
-    static boolean hasSingleLongParameter(ExecutableElement e, Messager messager) {
+    public static boolean hasSingleLongParameter(ExecutableElement e, Messager messager) {
         var parameters = e.getParameters();
 
         if (parameters.size() != 1) {

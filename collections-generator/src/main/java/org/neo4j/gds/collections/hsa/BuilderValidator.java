@@ -27,13 +27,13 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleElementVisitor9;
 import javax.tools.Diagnostic;
 
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.doesNotThrow;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasNoParameters;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasParameterCount;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasTypeKindAtIndex;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.isAbstract;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.isNotGeneric;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.mustReturn;
+import static org.neo4j.gds.collections.ValidatorUtils.doesNotThrow;
+import static org.neo4j.gds.collections.ValidatorUtils.hasNoParameters;
+import static org.neo4j.gds.collections.ValidatorUtils.hasParameterCount;
+import static org.neo4j.gds.collections.ValidatorUtils.hasTypeKindAtIndex;
+import static org.neo4j.gds.collections.ValidatorUtils.isAbstract;
+import static org.neo4j.gds.collections.ValidatorUtils.isNotGeneric;
+import static org.neo4j.gds.collections.ValidatorUtils.mustReturn;
 
 class BuilderValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
 
