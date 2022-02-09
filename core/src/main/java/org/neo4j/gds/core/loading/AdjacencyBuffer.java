@@ -80,7 +80,7 @@ public final class AdjacencyBuffer {
             long nodeCount = dimensions.nodeCount();
             long relCountForType = dimensions
                 .relationshipCounts()
-                .getOrDefault(relationshipType, dimensions.maxRelCount());
+                .getOrDefault(relationshipType, dimensions.relCountUpperBound());
             long relCount = undirected ? relCountForType * 2 : relCountForType;
             long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
             return memoryEstimation(avgDegree, nodeCount, propertyCount, concurrency);

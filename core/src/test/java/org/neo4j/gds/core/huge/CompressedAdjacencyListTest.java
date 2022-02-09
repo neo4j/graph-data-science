@@ -42,7 +42,7 @@ class CompressedAdjacencyListTest {
         var nodeCount = 100;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(nodeCount)
-            .maxRelCount(100)
+            .relCountUpperBound(100)
             .build();
 
         MemoryTree memRec = CompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
@@ -73,7 +73,7 @@ class CompressedAdjacencyListTest {
         var nodeCount = 100_000_000L;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(nodeCount)
-            .maxRelCount(100_000_000_000L)
+            .relCountUpperBound(100_000_000_000L)
             .build();
 
         MemoryTree memRec = CompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);

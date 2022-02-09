@@ -62,7 +62,7 @@ public class FictitiousGraphStoreLoader implements GraphStoreCreator {
             .highestPossibleNodeCount(graphProjectConfig().nodeCount())
             .estimationNodeLabelCount(labelCount)
             .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, graphProjectConfig().relationshipCount()))
-            .maxRelCount(Math.max(graphProjectConfig().relationshipCount(), 0))
+            .relCountUpperBound(Math.max(graphProjectConfig().relationshipCount(), 0))
             .build();
     }
 

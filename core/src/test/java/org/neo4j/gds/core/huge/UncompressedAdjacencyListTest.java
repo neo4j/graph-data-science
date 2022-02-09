@@ -39,7 +39,7 @@ class UncompressedAdjacencyListTest {
     void shouldComputeUncompressedMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100)
-            .maxRelCount(100)
+            .relCountUpperBound(100)
             .build();
 
         MemoryTree memRec = UncompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
@@ -63,7 +63,7 @@ class UncompressedAdjacencyListTest {
     void shouldComputeUncompressedMemoryEstimationForMultiplePage() {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
-            .maxRelCount(100_000_000_000L)
+            .relCountUpperBound(100_000_000_000L)
             .build();
 
         MemoryTree memRec = UncompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);

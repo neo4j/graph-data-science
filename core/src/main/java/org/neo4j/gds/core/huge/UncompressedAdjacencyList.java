@@ -97,7 +97,7 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
         boolean undirected
     ) {
         long nodeCount = dimensions.nodeCount();
-        long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
+        long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.relCountUpperBound());
         long relCount = undirected ? relCountForType * 2 : relCountForType;
         return (nodeCount > 0) ? BitUtil.ceilDiv(relCount, nodeCount) : 0L;
     }
