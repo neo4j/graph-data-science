@@ -162,26 +162,19 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             ));
         }
 
-        long positiveTestSetSize = (long) (graphStore.relationshipCount() * testFraction());
-        long testSetSize = (long) (positiveTestSetSize * (1 + negativeSamplingRatio()));
-        long testComplementSize = graphStore.relationshipCount() - positiveTestSetSize;
+        var expectedSetSizes = expectedSetSizes(graphStore.relationshipCount());
 
-        long positiveTrainSetSize = (long) (testComplementSize * trainFraction() * (1 + negativeSamplingRatio()));
-        long trainSetSize = (long) (positiveTrainSetSize * (1 + negativeSamplingRatio()));
-        long featureInputSize = (long) (testComplementSize * (1 - trainFraction()));
-        long foldSize = trainSetSize / validationFolds();
-
-        validateRelSetSize(testSetSize, MIN_SET_SIZE, "test", "`testFraction` is too low");
+        validateRelSetSize(expectedSetSizes.testSize(), MIN_SET_SIZE, "test", "`testFraction` is too low");
         validateRelSetSize(
-            testComplementSize,
+            expectedSetSizes.testComplementSize(),
             MIN_TEST_COMPLEMENT_SET_SIZE,
             "test-complement",
             "`testFraction` is too high"
         );
-        validateRelSetSize(trainSetSize, MIN_TRAIN_SET_SIZE, "train", "`trainFraction` is too low");
-        validateRelSetSize(featureInputSize, MIN_SET_SIZE, "feature-input", "`trainFraction` is too high");
+        validateRelSetSize(expectedSetSizes.trainSize(), MIN_TRAIN_SET_SIZE, "train", "`trainFraction` is too low");
+        validateRelSetSize(expectedSetSizes.featureInputSize(), MIN_SET_SIZE, "feature-input", "`trainFraction` is too high");
         validateRelSetSize(
-            foldSize,
+            expectedSetSizes.validationFoldSize(),
             MIN_SET_SIZE,
             "validation",
             "`validationFolds` is too high or the `trainFraction` too low"
@@ -204,6 +197,7 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             .testSize(testSetSize)
             .trainSize(trainSetSize)
             .featureInputSize(featureInputSize)
+            .testComplementSize(testComplementSize)
             .validationFoldSize(foldSize)
             .build();
     }

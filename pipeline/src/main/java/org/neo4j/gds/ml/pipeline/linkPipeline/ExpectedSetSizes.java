@@ -30,5 +30,7 @@ public interface ExpectedSetSizes {
 
     long trainSize();
 
+    long testComplementSize();
+
     long validationFoldSize();
 }
