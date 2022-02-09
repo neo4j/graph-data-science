@@ -28,7 +28,7 @@ class CompressedLongArrayStructTest {
 
     @Test
     void shouldWriteSingleTargetList() {
-       var compressedLongArrays = new CompressedLongArrayStruct();
+       var compressedLongArrays = CompressedLongArrayStruct.of(0, 0);
 
         var input = new long[]{ 42L, 1337L, 5L};
         compressedLongArrays.add(0, input, 0, 3, 3);
@@ -44,7 +44,7 @@ class CompressedLongArrayStructTest {
 
     @Test
     void shouldWriteMultipleTimesIntoTargetList() {
-        var compressedLongArrays = new CompressedLongArrayStruct();
+        var compressedLongArrays = CompressedLongArrayStruct.of(0, 0);
 
         compressedLongArrays.add(0, new long[]{ 42L, 1337L, 5L}, 0, 3, 3);
         compressedLongArrays.add(0, new long[]{ 42L, 1337L, 5L}, 1, 3, 2);
