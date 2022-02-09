@@ -89,7 +89,7 @@ public class LinkPredictionTrainEstimation {
             ).collect(Collectors.toList())
         );
         return MemoryEstimations.builder("model selection")
-            .add("split", StratifiedKFoldSplitter.memoryEstimation(config.validationFolds(), 1.0))
+            .add("split", StratifiedKFoldSplitter.memoryEstimationForNodeSet(config.validationFolds(), 1.0))
             // train and validation
             .fixed("stats maps", 2 * estimateStatsMap(config.params().size()))
             .add(maxOverParams)

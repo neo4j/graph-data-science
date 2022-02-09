@@ -47,10 +47,15 @@ public final class SignedProbabilities {
         var relationshipCount = dimensions.relationshipCounts().containsKey(relationshipType)
             ? dimensions.relationshipCounts().get(relationshipType) * relationshipFraction
             : dimensions.relCountUpperBound() * relationshipFraction;
+
+        return estimateMemory((long) relationshipCount);
+    }
+
+    public static long estimateMemory(long relationshipSetSize) {
         return MemoryUsage.sizeOfInstance(SignedProbabilities.class) +
                MemoryUsage.sizeOfInstance(Optional.class) +
                MemoryUsage.sizeOfInstance(ArrayList.class) +
-               MemoryUsage.sizeOfInstance(Double.class) * ((long) relationshipCount);
+               MemoryUsage.sizeOfInstance(Double.class) * relationshipSetSize;
     }
 
     private SignedProbabilities(Optional<TreeSet<Double>> tree, Optional<List<Double>> list, boolean isTree) {

@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.splitting;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.math3.random.RandomDataGenerator;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -31,6 +32,7 @@ import org.neo4j.gds.ml.util.ShuffleUtil;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -51,15 +53,19 @@ public class StratifiedKFoldSplitter {
     private final ReadOnlyHugeLongArray targets;
     private final RandomDataGenerator random;
 
-    public static MemoryEstimation memoryEstimation(int k, double trainFraction) {
+    public static MemoryEstimation memoryEstimationForNodeSet(int k, double trainFraction) {
+        return memoryEstimation(k, dim -> (long) (dim.nodeCount() * trainFraction));
+    }
+
+    public static MemoryEstimation memoryEstimation(int k, ToLongFunction<GraphDimensions> idsSetSizeExtractor) {
         return MemoryEstimations.setup("", (dimensions) ->  {
-            long nodeCount = (long) (dimensions.nodeCount() * trainFraction);
+            var idSetSize = idsSetSizeExtractor.applyAsLong(dimensions);
             var builder = MemoryEstimations.builder(StratifiedKFoldSplitter.class);
-            long baseBucketSize = nodeCount / k;
+            long baseBucketSize = idSetSize / k;
             for (int fold = 0; fold < k; fold++) {
-                var testSize = fold < nodeCount % k ? baseBucketSize + 1 : baseBucketSize;
+                var testSize = fold < idSetSize % k ? baseBucketSize + 1 : baseBucketSize;
                 var test = HugeLongArray.memoryEstimation(testSize);
-                var train = HugeLongArray.memoryEstimation(nodeCount - testSize);
+                var train = HugeLongArray.memoryEstimation(idSetSize - testSize);
                 builder.add(
                     "Fold " + fold, MemoryEstimations.builder()
                         .add(

@@ -73,11 +73,30 @@ public class Training {
         int numberOfClasses,
         int numberOfWeights
     ) {
+        return memoryEstimation(MemoryRange.of(numberOfFeatures), numberOfClasses, numberOfWeights);
+    }
+
+    public static MemoryEstimation memoryEstimation(
+        MemoryRange numberOfFeaturesRange,
+        int numberOfClasses,
+        int numberOfWeights
+    ) {
         return MemoryEstimations.builder(Training.class)
             .add(MemoryEstimations.of(
-                "updater",
-                MemoryRange.of(AdamOptimizer.sizeInBytes(numberOfClasses, numberOfFeatures, numberOfWeights))))
-            .perThread("weight gradients", Weights.sizeInBytes(numberOfClasses, numberOfFeatures) * numberOfWeights)
+                    "updater",
+                    numberOfFeaturesRange.apply(features -> AdamOptimizer.sizeInBytes(
+                        numberOfClasses,
+                        Math.toIntExact(features),
+                        numberOfWeights
+                    ))
+                )
+            )
+            .perThread(
+                "weight gradients",
+                numberOfFeaturesRange
+                    .apply(features -> Weights.sizeInBytes(numberOfClasses, Math.toIntExact(features)))
+                    .times(numberOfWeights)
+            )
             .build();
     }
 

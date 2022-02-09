@@ -32,11 +32,15 @@ import java.util.Map;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 
-final class StatsMap {
+public final class StatsMap {
 
     static MemoryEstimation memoryEstimation(int numberOfMetricsSpecifications, int numberOfParams) {
         int fudgedNumberOfClasses = 1000;
-        var numberOfMetrics = numberOfMetricsSpecifications * fudgedNumberOfClasses;
+        return memoryEstimation(numberOfMetricsSpecifications, numberOfParams, fudgedNumberOfClasses);
+    }
+
+    public static MemoryEstimation memoryEstimation(int numberOfMetricsSpecifications, int numberOfParams, int numberOfClasses) {
+        var numberOfMetrics = numberOfMetricsSpecifications * numberOfClasses;
         var numberOfModelStats = numberOfMetrics * numberOfParams;
         var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableModelStats.class);
         var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfModelStats;

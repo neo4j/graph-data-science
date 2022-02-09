@@ -115,7 +115,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
             .add("metrics", MetricSpecification.memoryEstimation(fudgedClassCount))
             .perNode("node IDs", HugeLongArray::memoryEstimation)
             .add("outer split", FractionSplitter.estimate(1 - holdoutFraction))
-            .add("inner split", StratifiedKFoldSplitter.memoryEstimation(validationFolds, 1 - holdoutFraction))
+            .add("inner split", StratifiedKFoldSplitter.memoryEstimationForNodeSet(validationFolds, 1 - holdoutFraction))
             .add("stats map train", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
             .add("stats map validation", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
             .add("max of model selection and best model evaluation", maxOfModelSelectionAndBestModelEvaluation)

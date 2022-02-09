@@ -119,7 +119,7 @@ class StratifiedKFoldSplitterTest {
 
     @Test
     void minAndMaxEstimationsAreTheSame() {
-        var estimation = StratifiedKFoldSplitter.memoryEstimation(5, 0.1)
+        var estimation = StratifiedKFoldSplitter.memoryEstimationForNodeSet(5, 0.1)
             .estimate(GraphDimensions.of(1000), 1)
             .memoryUsage();
         assertThat(estimation.min).isEqualTo(estimation.max);
@@ -128,10 +128,10 @@ class StratifiedKFoldSplitterTest {
     @Test
     void memoryEstimationShouldScaleWithNumberOfFolds() {
         var dimensions = GraphDimensions.of(1000);
-        var memoryUsageForTenFolds = StratifiedKFoldSplitter.memoryEstimation(10, 0.1)
+        var memoryUsageForTenFolds = StratifiedKFoldSplitter.memoryEstimationForNodeSet(10, 0.1)
             .estimate(dimensions, 1)
             .memoryUsage();
-        var memoryUsageForFiveFolds = StratifiedKFoldSplitter.memoryEstimation(5, 0.1)
+        var memoryUsageForFiveFolds = StratifiedKFoldSplitter.memoryEstimationForNodeSet(5, 0.1)
             .estimate(dimensions, 1)
             .memoryUsage();
         assertThat(memoryUsageForTenFolds.min).isCloseTo(2 * memoryUsageForFiveFolds.min, Offset.offset(100L));
