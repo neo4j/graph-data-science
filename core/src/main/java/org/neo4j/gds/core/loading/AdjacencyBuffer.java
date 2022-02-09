@@ -62,7 +62,7 @@ public final class AdjacencyBuffer {
 
     private final AdjacencyCompressorFactory adjacencyCompressorFactory;
     private final ThreadLocalRelationshipsBuilder[] localBuilders;
-    private final CompressedLongArrayStruct[] compressedAdjacencyLists;
+    private final ChunkedAdjacencyLists[] compressedAdjacencyLists;
     private final int pageShift;
     private final long pageMask;
     private final LongAdder relationshipCounter;
@@ -121,13 +121,13 @@ public final class AdjacencyBuffer {
 
         allocationTracker.add(sizeOfObjectArray(numPages) << 2);
         ThreadLocalRelationshipsBuilder[] localBuilders = new ThreadLocalRelationshipsBuilder[numPages];
-        CompressedLongArrayStruct[] compressedAdjacencyLists = new CompressedLongArrayStruct[numPages];
+        ChunkedAdjacencyLists[] compressedAdjacencyLists = new ChunkedAdjacencyLists[numPages];
 
         for (int page = 0; page < numPages; page++) {
             allocationTracker.add(sizeOfObjectPage);
             allocationTracker.add(sizeOfObjectPage);
             allocationTracker.add(sizeOfLongPage);
-            compressedAdjacencyLists[page] = CompressedLongArrayStruct.of(importMetaData.propertyKeyIds().length, pageSize);
+            compressedAdjacencyLists[page] = ChunkedAdjacencyLists.of(importMetaData.propertyKeyIds().length, pageSize);
             localBuilders[page] = new ThreadLocalRelationshipsBuilder(adjacencyCompressorFactory);
         }
 
@@ -148,7 +148,7 @@ public final class AdjacencyBuffer {
         SingleTypeRelationshipImporter.ImportMetaData importMetaData,
         AdjacencyCompressorFactory adjacencyCompressorFactory,
         ThreadLocalRelationshipsBuilder[] localBuilders,
-        CompressedLongArrayStruct[] compressedAdjacencyLists,
+        ChunkedAdjacencyLists[] compressedAdjacencyLists,
         int pageSize,
         boolean atLeastOnePropertyToLoad
     ) {
@@ -209,7 +209,7 @@ public final class AdjacencyBuffer {
 
                 int localId = (int) (source & pageMask);
 
-                CompressedLongArrayStruct compressedTargets = this.compressedAdjacencyLists[pageIndex];
+                ChunkedAdjacencyLists compressedTargets = this.compressedAdjacencyLists[pageIndex];
 //                if (compressedTargets == null) {
 //                    compressedTargets = new CompressedLongArray(
 //                        propertyValues == null ? 0 : propertyValues.length
@@ -278,7 +278,7 @@ public final class AdjacencyBuffer {
 
         private final long baseNodeId;
         private final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder;
-        private final CompressedLongArrayStruct compressedLongArrays;
+        private final ChunkedAdjacencyLists compressedLongArrays;
         // A long array that may or may not be used during the compression.
         private final LongArrayBuffer buffer;
         private final LongAdder relationshipCounter;
@@ -287,7 +287,7 @@ public final class AdjacencyBuffer {
         AdjacencyListBuilderTask(
             long baseNodeId,
             ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder,
-            CompressedLongArrayStruct compressedLongArrays,
+            ChunkedAdjacencyLists compressedLongArrays,
             LongAdder relationshipCounter,
             AdjacencyCompressor.ValueMapper valueMapper
         ) {

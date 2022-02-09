@@ -37,7 +37,7 @@ import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.gds.core.loading.VarLongEncoding.zigZag;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class CompressedLongArrayStruct {
+public final class ChunkedAdjacencyLists {
 
     private static final byte[] EMPTY_BYTES = new byte[0];
     private static final long[] EMPTY_PROPERTIES = new long[0];
@@ -48,11 +48,11 @@ public final class CompressedLongArrayStruct {
     private final HugeSparseLongArrayList lastValues;
     private final HugeSparseIntArrayList lengths;
 
-    public static CompressedLongArrayStruct of(int numberOfProperties, long initialCapacity) {
-        return new CompressedLongArrayStruct(numberOfProperties, initialCapacity);
+    public static ChunkedAdjacencyLists of(int numberOfProperties, long initialCapacity) {
+        return new ChunkedAdjacencyLists(numberOfProperties, initialCapacity);
     }
 
-    private CompressedLongArrayStruct(int numberOfProperties, long initialCapacity) {
+    private ChunkedAdjacencyLists(int numberOfProperties, long initialCapacity) {
         this.targetLists = HugeSparseObjectArrayList.of(EMPTY_BYTES, initialCapacity, byte[].class);
         this.positions = HugeSparseIntArrayList.of(0, initialCapacity);
         this.lastValues = HugeSparseLongArrayList.of(0, initialCapacity);
