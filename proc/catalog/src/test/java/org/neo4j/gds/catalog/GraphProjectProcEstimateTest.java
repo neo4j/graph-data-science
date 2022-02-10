@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -39,6 +42,7 @@ import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.compat.MapUtil.map;
 
+@ExtendWith(SoftAssertionsExtension.class)
 class GraphProjectProcEstimateTest extends BaseProcTest {
 
     private static final String DB_CYPHER_ESTIMATE =
@@ -91,7 +95,7 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
     }
 
     @Test
-    void virtualEstimateHeapPercentage() {
+    void virtualEstimateHeapPercentage(SoftAssertions softly) {
         Map<String, Object> relProjection = map(
             "B",
             map("type", "REL")
@@ -104,10 +108,10 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
 
         runQueryWithRowConsumer(query, map("relProjection", relProjection),
             row -> {
-                assertEquals(68674728, row.getNumber("bytesMin").longValue());
-                assertEquals(68674728, row.getNumber("bytesMax").longValue());
-                assertEquals(expectedPercentage, row.getNumber("heapPercentageMin").doubleValue());
-                assertEquals(expectedPercentage, row.getNumber("heapPercentageMax").doubleValue());
+                softly.assertThat(row.getNumber("bytesMin").longValue()).isEqualTo(68674720);
+                softly.assertThat(row.getNumber("bytesMax").longValue()).isEqualTo(68674720);
+                softly.assertThat(row.getNumber("heapPercentageMin").doubleValue()).isEqualTo(expectedPercentage);
+                softly.assertThat(row.getNumber("heapPercentageMax").doubleValue()).isEqualTo(expectedPercentage);
             }
         );
     }
@@ -198,14 +202,15 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
     }
 
     @Test
-    void computeMemoryEstimationForVirtualGraphWithLargeValues() {
+    void computeMemoryEstimationForVirtualGraphWithLargeValues(SoftAssertions softly) {
         String query = "CALL gds.graph.project.estimate('*', '*', {nodeCount: 5000000000, relationshipCount: 20000000000})";
-        runQueryWithRowConsumer(query,
+        runQueryWithRowConsumer(
+            query,
             row -> {
-                assertEquals(344_072_381_216L, row.getNumber("bytesMin").longValue());
-                assertEquals(384_874_570_528L, row.getNumber("bytesMax").longValue());
-                assertEquals(5_000_000_000L, row.getNumber("nodeCount").longValue());
-                assertEquals(20_000_000_000L, row.getNumber("relationshipCount").longValue());
+                softly.assertThat(row.getNumber("bytesMin").longValue()).isEqualTo(344_072_381_208L);
+                softly.assertThat(row.getNumber("bytesMax").longValue()).isEqualTo(384_874_570_520L);
+                softly.assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(5_000_000_000L);
+                softly.assertThat(row.getNumber("relationshipCount").longValue()).isEqualTo(20_000_000_000L);
             }
         );
     }
