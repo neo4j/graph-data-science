@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -58,12 +57,5 @@ final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<No
     @Override
     void closeCursorReference(NodeReference nodeReference) {
         ((NodeLabelIndexReference) nodeReference).close();
-    }
-
-    @Override
-    boolean needsPatchingForLabelScanAlignment() {
-        var neo4jVersion = Neo4jVersion.findNeo4jVersion();
-        // Bug was fixed in 4.2 (#6156)
-        return neo4jVersion.compareTo(Neo4jVersion.V_4_2) < 0;
     }
 }

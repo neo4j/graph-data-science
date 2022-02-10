@@ -21,12 +21,10 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
-import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.gds.StoreLoaderBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -39,8 +37,6 @@ public class NodeLabelIndexTest extends BaseTest {
     public static final String DB_CYPHER = "CREATE (a:Foo),(b:Bar)";
 
     @Test
-    @DisableForNeo4jVersion(value = Neo4jVersion.V_4_1, message = "Label index is mandatory in 4.1.")
-    @DisableForNeo4jVersion(value = Neo4jVersion.V_4_2, message = "Label index is mandatory in 4.2.")
     void shouldLoadWithoutNodeLabelIndex() {
         runQueryWithResultConsumer(
             "SHOW INDEXES WHERE entityType = 'NODE'",

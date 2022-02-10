@@ -117,10 +117,6 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
      */
     abstract void closeCursorReference(Reference reference);
 
-    boolean needsPatchingForLabelScanAlignment() {
-        return false;
-    }
-
     int batchSize() {
         // We want to scan about 100 pages per bulk, so start with that value
         var bulkSize = prefetchSize * recordsPerPage();
@@ -130,18 +126,11 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
         // we always align.
         bulkSize = (int) BitUtil.align(bulkSize, 64);
 
-        // The label scan cursor on Neo4j <= 4.1 has a bug where it would add 64 to the bulks size
-        // even if the value is already divisible by 64. (#6156)
-        // We need to subtract 64 on those cases, to get a final bulk size of what we really want.
-        if (needsPatchingForLabelScanAlignment()) {
-            bulkSize = Math.max(0, bulkSize - 64);
-        }
-
         return bulkSize;
     }
 
     @Override
     public int bufferSize() {
-        return batchSize() + (needsPatchingForLabelScanAlignment() ? Long.SIZE : 0);
+        return batchSize();
     }
 }
