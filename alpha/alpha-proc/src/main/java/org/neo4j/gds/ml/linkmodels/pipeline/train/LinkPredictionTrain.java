@@ -451,31 +451,41 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         ) {
             var splitConfig = pipeline.splitConfig();
 
-            var builder = org.neo4j.gds.core.utils.mem.MemoryEstimations.builder(LinkPredictionTrain.class);
+            var builder = MemoryEstimations.builder(LinkPredictionTrain.class);
 
             var fudgedLinkFeatureDim = MemoryRange.of(10, 500);
 
-            // TODO outer train + test eval
-
+            int numberOfMetrics = trainConfig.metrics().size();
             return builder
-                .add(estimateFeaturesAndTargets(fudgedLinkFeatureDim, totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).trainSize()))
-                .add(estimateModelSelection(pipeline, fudgedLinkFeatureDim, trainConfig.metrics().size()))
+                // After the training, the training features and targets are no longer accessed.
+                // As the lifetimes of training and test data is non-overlapping, we assume the max is sufficient.
+                .max("Features and targets", List.of(
+                    estimateFeaturesAndTargets(fudgedLinkFeatureDim, totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).trainSize(), "Train"),
+                    estimateFeaturesAndTargets(fudgedLinkFeatureDim, totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).testSize(), "Test")
+                ))
+                .add(estimateModelSelection(pipeline, fudgedLinkFeatureDim, numberOfMetrics))
+                // we do not consider the training of the best model on the outer train set as the memory estimation is at most the maximum of the model training during the model selection
+                // this assumes the training is independent of the relationship set size
+                .add("Outer train stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
+                .add("Test stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
+                .fixed("Best model stats", numberOfMetrics * BestMetricData.estimateMemory())
                 .build();
         }
 
         @NotNull
         private static MemoryEstimation estimateFeaturesAndTargets(
             MemoryRange fudgedLinkFeatureDim,
-            LongUnaryOperator relSetSizeExtractor
+            LongUnaryOperator relSetSizeExtractor,
+            String setDesc
         ) {
             return MemoryEstimations
                 .builder()
-                .rangePerGraphDimension("Relationship features", (graphDim, threads) -> fudgedLinkFeatureDim
+                .rangePerGraphDimension(setDesc + " relationship features", (graphDim, threads) -> fudgedLinkFeatureDim
                     .apply(MemoryUsage::sizeOfDoubleArray)
                     .times(relSetSizeExtractor.applyAsLong(graphDim.maxRelCount()))
                     .add(MemoryUsage.sizeOfInstance(HugeObjectArray.class)))
                 .perGraphDimension(
-                    "Relationship targets",
+                    setDesc + "relationship targets",
                     (graphDim, threads) -> MemoryRange.of(
                         HugeDoubleArray.memoryEstimation(relSetSizeExtractor.applyAsLong(graphDim.maxRelCount()))
                     )
@@ -484,17 +494,18 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         private static MemoryEstimation estimateModelSelection(LinkPredictionPipeline pipeline, MemoryRange linkFeatureDimension, int numberOfMetrics) {
             var splitConfig = pipeline.splitConfig();
-            var maxEstimationForModelCandidates = maxEstimation("Max over model candidates", pipeline.trainingParameterSpace()
-                .stream()
-                .map(llrConfig -> MemoryEstimations.builder("Train and evaluate model")
-                    .fixed("Stats map builder train", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
-                    .fixed("Stats map builder validation", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
-                    .max(List.of(
-                            LinkLogisticRegressionTrain.estimate(llrConfig, linkFeatureDimension),
-                            estimateComputeTrainMetrics(pipeline.splitConfig())
-                        )
-                    ).build()
-                ).collect(Collectors.toList())
+            var maxEstimationOverModelCandidates = maxEstimation(
+                "Max over model candidates",
+                pipeline.trainingParameterSpace().stream()
+                    .map(llrConfig -> MemoryEstimations.builder("Train and evaluate model")
+                        .fixed("Stats map builder train", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
+                        .fixed("Stats map builder validation", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
+                        .max(List.of(
+                                LinkLogisticRegressionTrain.estimate(llrConfig, linkFeatureDimension),
+                                estimateComputeTrainMetrics(pipeline.splitConfig())
+                            )
+                        ).build()
+                    ).collect(Collectors.toList())
             );
 
             return MemoryEstimations.builder("model selection")
@@ -504,7 +515,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                             dim -> splitConfig.expectedSetSizes(dim.maxRelCount()).trainSize()
                         )
                 )
-                .add(maxEstimationForModelCandidates)
+                .add(maxEstimationOverModelCandidates)
                 .add("Inner train stats map", StatsMap.memoryEstimation(numberOfMetrics, pipeline.trainingParameterSpace().size(), 1))
                 .add("Validation stats map", StatsMap.memoryEstimation(numberOfMetrics, pipeline.trainingParameterSpace().size(), 1))
                 .build();

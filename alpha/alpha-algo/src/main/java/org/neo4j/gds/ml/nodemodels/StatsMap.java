@@ -34,14 +34,14 @@ import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 
 public final class StatsMap {
 
-    static MemoryEstimation memoryEstimation(int numberOfMetricsSpecifications, int numberOfParams) {
+    static MemoryEstimation memoryEstimation(int numberOfMetricsSpecifications, int numberOfModelCandidates) {
         int fudgedNumberOfClasses = 1000;
-        return memoryEstimation(numberOfMetricsSpecifications, numberOfParams, fudgedNumberOfClasses);
+        return memoryEstimation(numberOfMetricsSpecifications, numberOfModelCandidates, fudgedNumberOfClasses);
     }
 
-    public static MemoryEstimation memoryEstimation(int numberOfMetricsSpecifications, int numberOfParams, int numberOfClasses) {
+    public static MemoryEstimation memoryEstimation(int numberOfMetricsSpecifications, int numberOfModelCandidates, int numberOfClasses) {
         var numberOfMetrics = numberOfMetricsSpecifications * numberOfClasses;
-        var numberOfModelStats = numberOfMetrics * numberOfParams;
+        var numberOfModelStats = numberOfMetrics * numberOfModelCandidates;
         var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableModelStats.class);
         var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfModelStats;
         return MemoryEstimations.builder(StatsMap.class)
