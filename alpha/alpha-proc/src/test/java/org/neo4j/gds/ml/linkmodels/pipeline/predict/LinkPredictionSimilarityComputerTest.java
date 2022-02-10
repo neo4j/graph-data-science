@@ -20,11 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.beta.generator.PropertyProducer;
-import org.neo4j.gds.beta.generator.RandomGraphGenerator;
-import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -41,11 +36,8 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 
 import java.util.List;
-import java.util.Random;
-import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.Orientation.UNDIRECTED;
 
 @GdlExtension
 class LinkPredictionSimilarityComputerTest {
@@ -91,18 +83,6 @@ class LinkPredictionSimilarityComputerTest {
 
     @Test
     void filterExistingRelationships() {
-        var linkFeatureSteps = List.<LinkFeatureStep>of();
-        var linkFeatureExtractor = LinkFeatureExtractor.of(graph, linkFeatureSteps);
-        var modelData = ImmutableLinkLogisticRegressionData.of(
-            Weights.ofMatrix(1, 2),
-            Weights.ofScalar(0)
-        );
-        var lpSimComputer = new LinkPredictionSimilarityComputer(
-            linkFeatureExtractor,
-            new LinkLogisticRegressionPredictor(modelData),
-            graph
-        );
-
         NeighborFilter filter = new LinkFilterFactory(graph).create();
 
         // The node filter does not support self-loops as a node is always similar to itself so a-->a should be false.
@@ -119,18 +99,6 @@ class LinkPredictionSimilarityComputerTest {
 
     @Test
     void neighbourEstimates() {
-        var linkFeatureSteps = List.<LinkFeatureStep>of();
-        var linkFeatureExtractor = LinkFeatureExtractor.of(graph, linkFeatureSteps);
-        var modelData = ImmutableLinkLogisticRegressionData.of(
-            Weights.ofMatrix(1, 2),
-            Weights.ofScalar(0)
-        );
-        var lpSimComputer = new LinkPredictionSimilarityComputer(
-            linkFeatureExtractor,
-            new LinkLogisticRegressionPredictor(modelData),
-            graph
-        );
-
         NeighborFilter filter = new LinkFilterFactory(graph).create();
 
         assertThat(filter.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("a")))
