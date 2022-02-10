@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
@@ -32,7 +31,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -50,7 +48,6 @@ import org.neo4j.gds.ml.nodemodels.BestModelStats;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.nodemodels.StatsMap;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
@@ -64,14 +61,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndTargetsExtractor.extractFeaturesAndTargets;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionEvaluationMetricComputer.computeMetric;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
@@ -118,7 +114,13 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         progressTracker.beginSubTask();
 
         progressTracker.beginSubTask("extract train features");
-        var trainData = extractFeaturesAndTargets(trainGraph);
+        var trainData = extractFeaturesAndTargets(
+            trainGraph,
+            pipeline.featureSteps(),
+            trainConfig.concurrency(),
+            progressTracker,
+            allocationTracker
+        );
         var trainRelationshipIds = new ReadOnlyHugeLongIdentityArray(trainData.size());
         progressTracker.endSubTask("extract train features");
 
@@ -150,43 +152,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         progressTracker.endSubTask();
 
         return ImmutableLinkPredictionTrainResult.of(model, modelSelectResult);
-    }
-
-    private FeaturesAndTargets extractFeaturesAndTargets(Graph graph) {
-        progressTracker.setVolume(graph.relationshipCount() * 2);
-        var features = LinkFeatureExtractor.extractFeatures(
-            graph,
-            pipeline.featureSteps(),
-            trainConfig.concurrency(),
-            progressTracker
-        );
-
-        var targets = extractTargets(graph, features.size());
-
-        return ImmutableFeaturesAndTargets.of(features, targets);
-    }
-
-    private HugeDoubleArray extractTargets(Graph graph, long numberOfTargets) {
-        var globalTargets = HugeDoubleArray.newArray(numberOfTargets, allocationTracker);
-        var relationshipIdx = new MutableLong();
-        graph.forEachNode(nodeId -> {
-            graph.forEachRelationship(nodeId, -10, (src, trg, weight) -> {
-                if (weight == 0.0D || weight == 1.0D) {
-                    globalTargets.set(relationshipIdx.getAndIncrement(), weight);
-                } else {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "Target should be either `1` or `0`. But got %f for relationship (%d, %d)",
-                        weight,
-                        src,
-                        trg
-                    ));
-                }
-                return true;
-            });
-            progressTracker.logProgress(graph.degree(nodeId));
-            return true;
-        });
-        return globalTargets;
     }
 
     private LinkPredictionTrain.ModelSelectResult modelSelect(
@@ -244,7 +209,13 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
     private Map<LinkMetric, Double> computeTestMetric(LinkLogisticRegressionData modelData) {
         progressTracker.beginSubTask("extract test features");
-        var testData = extractFeaturesAndTargets(validationGraph);
+        var testData = extractFeaturesAndTargets(
+            validationGraph,
+            pipeline.featureSteps(),
+            trainConfig.concurrency(),
+            progressTracker,
+            allocationTracker
+        );
         progressTracker.endSubTask("extract test features");
 
         progressTracker.beginSubTask("compute test metrics");
@@ -441,106 +412,94 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
     }
 
-    public static final class Estimation {
+    public static MemoryEstimation estimate(
+        LinkPredictionPipeline pipeline,
+        LinkPredictionTrainConfig trainConfig
+    ) {
+        var splitConfig = pipeline.splitConfig();
 
-        private Estimation() {}
+        var builder = MemoryEstimations.builder(LinkPredictionTrain.class);
 
-        public static MemoryEstimation estimate(
-            LinkPredictionPipeline pipeline,
-            LinkPredictionTrainConfig trainConfig
-        ) {
-            var splitConfig = pipeline.splitConfig();
+        var fudgedLinkFeatureDim = MemoryRange.of(10, 500);
 
-            var builder = MemoryEstimations.builder(LinkPredictionTrain.class);
-
-            var fudgedLinkFeatureDim = MemoryRange.of(10, 500);
-
-            int numberOfMetrics = trainConfig.metrics().size();
-            return builder
-                // After the training, the training features and targets are no longer accessed.
-                // As the lifetimes of training and test data is non-overlapping, we assume the max is sufficient.
-                .max("Features and targets", List.of(
-                    estimateFeaturesAndTargets(
-                        fudgedLinkFeatureDim,
-                        totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).trainSize(),
-                        "Train"
-                    ),
-                    estimateFeaturesAndTargets(
-                        fudgedLinkFeatureDim,
-                        totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).testSize(),
-                        "Test"
-                    )
-                ))
-                .add(estimateModelSelection(pipeline, fudgedLinkFeatureDim, numberOfMetrics))
-                // we do not consider the training of the best model on the outer train set as the memory estimation is at most the maximum of the model training during the model selection
-                // this assumes the training is independent of the relationship set size
-                .add("Outer train stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
-                .add("Test stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
-                .fixed("Best model stats", numberOfMetrics * BestMetricData.estimateMemory())
-                .build();
-        }
-
-        private static MemoryEstimation estimateFeaturesAndTargets(
-            MemoryRange fudgedLinkFeatureDim,
-            LongUnaryOperator relSetSizeExtractor,
-            String setDesc
-        ) {
-            return MemoryEstimations
-                .builder()
-                .rangePerGraphDimension(setDesc + " relationship features", (graphDim, threads) -> fudgedLinkFeatureDim
-                    .apply(MemoryUsage::sizeOfDoubleArray)
-                    .times(relSetSizeExtractor.applyAsLong(graphDim.maxRelCount()))
-                    .add(MemoryUsage.sizeOfInstance(HugeObjectArray.class)))
-                .perGraphDimension(
-                    setDesc + "relationship targets",
-                    (graphDim, threads) -> MemoryRange.of(
-                        HugeDoubleArray.memoryEstimation(relSetSizeExtractor.applyAsLong(graphDim.maxRelCount()))
-                    )
-                ).build();
-        }
-
-        private static MemoryEstimation estimateModelSelection(LinkPredictionPipeline pipeline, MemoryRange linkFeatureDimension, int numberOfMetrics) {
-            var splitConfig = pipeline.splitConfig();
-            var maxEstimationOverModelCandidates = maxEstimation(
-                "Max over model candidates",
-                pipeline.trainingParameterSpace().stream()
-                    .map(llrConfig -> MemoryEstimations.builder("Train and evaluate model")
-                        .fixed("Stats map builder train", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
-                        .fixed("Stats map builder validation", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
-                        .max(List.of(
-                                LinkLogisticRegressionTrain.estimate(llrConfig, linkFeatureDimension),
-                                estimateComputeTrainMetrics(pipeline.splitConfig())
-                            )
-                        ).build()
-                    ).collect(Collectors.toList())
-            );
-
-            return MemoryEstimations.builder("model selection")
-                .add("Cross-Validation splitting",
-                    StratifiedKFoldSplitter.memoryEstimation(
-                            splitConfig.validationFolds(),
-                            dim -> splitConfig.expectedSetSizes(dim.maxRelCount()).trainSize()
-                        )
+        int numberOfMetrics = trainConfig.metrics().size();
+        return builder
+            // After the training, the training features and targets are no longer accessed.
+            // As the lifetimes of training and test data is non-overlapping, we assume the max is sufficient.
+            .max("Features and targets", List.of(
+                LinkFeaturesAndTargetsExtractor.estimate(
+                    fudgedLinkFeatureDim,
+                    totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).trainSize(),
+                    "Train"
+                ),
+                LinkFeaturesAndTargetsExtractor.estimate(
+                    fudgedLinkFeatureDim,
+                    totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).testSize(),
+                    "Test"
                 )
-                .add(maxEstimationOverModelCandidates)
-                .add("Inner train stats map", StatsMap.memoryEstimation(numberOfMetrics, pipeline.trainingParameterSpace().size(), 1))
-                .add("Validation stats map", StatsMap.memoryEstimation(numberOfMetrics, pipeline.trainingParameterSpace().size(), 1))
-                .build();
-        }
-
-        @NotNull
-        private static MemoryEstimation estimateComputeTrainMetrics(LinkPredictionSplitConfig splitConfig) {
-            return MemoryEstimations
-                .builder("Compute train metrics")
-                .perGraphDimension(
-                    "Sorted probabilities",
-                    (dim, threads) -> {
-                        long trainSetSize = splitConfig
-                            .expectedSetSizes(dim.maxRelCount())
-                            .trainSize();
-                        return LinkPredictionEvaluationMetricComputer.estimate(trainSetSize);
-                    }
-                ).build();
-        }
+            ))
+            .add(estimateModelSelection(pipeline, fudgedLinkFeatureDim, numberOfMetrics))
+            // we do not consider the training of the best model on the outer train set as the memory estimation is at most the maximum of the model training during the model selection
+            // this assumes the training is independent of the relationship set size
+            .add("Outer train stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
+            .add("Test stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
+            .fixed("Best model stats", numberOfMetrics * BestMetricData.estimateMemory())
+            .build();
     }
+
+    private static MemoryEstimation estimateModelSelection(
+        LinkPredictionPipeline pipeline,
+        MemoryRange linkFeatureDimension,
+        int numberOfMetrics
+    ) {
+        var splitConfig = pipeline.splitConfig();
+        var maxEstimationOverModelCandidates = maxEstimation(
+            "Max over model candidates",
+            pipeline.trainingParameterSpace().stream()
+                .map(llrConfig -> MemoryEstimations.builder("Train and evaluate model")
+                    .fixed("Stats map builder train", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
+                    .fixed("Stats map builder validation", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
+                    .max(List.of(
+                            LinkLogisticRegressionTrain.estimate(llrConfig, linkFeatureDimension),
+                            estimateComputeTrainMetrics(pipeline.splitConfig())
+                        )
+                    ).build()
+                ).collect(Collectors.toList())
+        );
+
+        return MemoryEstimations.builder("model selection")
+            .add(
+                "Cross-Validation splitting",
+                StratifiedKFoldSplitter.memoryEstimation(
+                    splitConfig.validationFolds(),
+                    dim -> splitConfig.expectedSetSizes(dim.maxRelCount()).trainSize()
+                )
+            )
+            .add(maxEstimationOverModelCandidates)
+            .add(
+                "Inner train stats map",
+                StatsMap.memoryEstimation(numberOfMetrics, pipeline.trainingParameterSpace().size(), 1)
+            )
+            .add(
+                "Validation stats map",
+                StatsMap.memoryEstimation(numberOfMetrics, pipeline.trainingParameterSpace().size(), 1)
+            )
+            .build();
+    }
+
+    @NotNull
+    private static MemoryEstimation estimateComputeTrainMetrics(LinkPredictionSplitConfig splitConfig) {
+        return MemoryEstimations
+            .builder("Compute train metrics")
+            .perGraphDimension(
+                "Sorted probabilities",
+                (dim, threads) -> {
+                    long trainSetSize = splitConfig
+                        .expectedSetSizes(dim.maxRelCount())
+                        .trainSize();
+                    return LinkPredictionEvaluationMetricComputer.estimate(trainSetSize);
+                }
+            ).build();
+    }
+
 }
