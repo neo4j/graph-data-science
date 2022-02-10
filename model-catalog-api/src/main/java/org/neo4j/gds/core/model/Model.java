@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.model;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.annotation.ValueClass;
@@ -28,10 +29,12 @@ import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.model.ModelConfig;
 
+import java.nio.file.Path;
 import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @ValueClass
 public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends ToMapConvertible> {
@@ -46,7 +49,10 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
 
     String creator();
 
-    List<String> sharedWith();
+    @Value.Default
+    default List<String> sharedWith() {
+        return List.of();
+    }
 
     String name();
 
@@ -54,46 +60,33 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
 
     GraphSchema graphSchema();
 
-    DATA data();
+    @Nullable DATA data();
 
     CONFIG trainConfig();
 
-    ZonedDateTime creationTime();
+    @Value.Default
+    default ZonedDateTime creationTime() {
+        return now();
+    }
 
     INFO customInfo();
 
     @Value.Default
-    @Value.Parameter(false)
+    default Optional<Path> fileLocation() {
+        return Optional.empty();
+    }
+
+    @Value.Derived
     default boolean loaded() {
-        return true;
+        return data() != null;
     }
 
-    @Value.Default
-    @Value.Parameter(false)
+    @Value.Derived
     default boolean stored() {
-        return false;
+        return fileLocation().isPresent();
     }
 
-    @Value.Default
     @Value.Derived
-    default void load() {
-
-    }
-
-    @Value.Default
-    @Value.Derived
-    default void unload() {
-        throw new RuntimeException("Only stored models can be unloaded.");
-    }
-
-    default Model<DATA, CONFIG, INFO> publish() {
-        return ImmutableModel.<DATA, CONFIG, INFO>builder()
-            .from(this)
-            .sharedWith(List.of(ALL_USERS))
-            .name(name() + PUBLIC_MODEL_SUFFIX)
-            .build();
-    }
-
     default boolean isPublished() {
         return sharedWith().contains(ALL_USERS);
     }
@@ -107,16 +100,14 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
         C trainConfig,
         INFO customInfo
     ) {
-        return ImmutableModel.of(
-            creator,
-            List.of(),
-            name,
-            algoType,
-            graphSchema,
-            modelData,
-            trainConfig,
-            now(),
-            customInfo
-        );
+        return ImmutableModel.<D, C, INFO>builder()
+            .creator(creator)
+            .name(name)
+            .algoType(algoType)
+            .graphSchema(graphSchema)
+            .data(modelData)
+            .trainConfig(trainConfig)
+            .customInfo(customInfo)
+            .build();
     }
 }
