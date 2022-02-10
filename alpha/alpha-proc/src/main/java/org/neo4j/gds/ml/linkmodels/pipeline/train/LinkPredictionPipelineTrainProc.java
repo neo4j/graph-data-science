@@ -19,16 +19,20 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
-import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.ml.MLTrainResult;
+import org.neo4j.gds.ml.PipelineCompanion;
+import org.neo4j.gds.ml.TrainingPipelineMemoryEstimator;
+import org.neo4j.gds.ml.pipeline.PipelineTrainingExecutorFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -38,6 +42,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
+import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.ml.pipeline.linkPrediction.train", description = "Trains a link prediction model based on a pipeline", executionMode = TRAIN)
 public class LinkPredictionPipelineTrainProc extends TrainProc<
@@ -58,14 +63,33 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
         return trainAndStoreModelWithResult(compute(graphName, config));
     }
 
+    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.train.estimate", mode = READ)
+    @Description("Estimates memory for applying a linkPrediction model")
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        PipelineCompanion.prepareTrainConfig(graphNameOrConfiguration, algoConfiguration);
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
     @Override
     protected LinkPredictionTrainConfig newConfig(String username, CypherMapWrapper config) {
         return LinkPredictionTrainConfig.of(username(), config);
     }
 
     @Override
-    public GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory() {
-        return new LinkPredictionTrainPipelineAlgorithmFactory(executionContext(), modelCatalog());
+    public PipelineTrainingExecutorFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory() {
+        return new LinkPredictionTrainPipelineAlgorithmFactory(executionContext(), modelCatalog);
+    }
+
+    @Override
+    protected Stream<MemoryEstimateResult> computeEstimate(Object graphNameOrConfiguration, Map<String, Object> algoConfiguration) {
+        return new TrainingPipelineMemoryEstimator<>(
+            this,
+            new ProcedureExecutorSpec<>(),
+            executionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

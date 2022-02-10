@@ -319,6 +319,21 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         assertThat(data1).usingRecursiveComparison().isNotEqualTo(modelData("trainedModel7"));
     }
 
+    @Test
+    void estimate() {
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
+
+        assertCypherResult(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.train.estimate(" +
+            "   $graphName, " +
+            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337}" +
+            ") YIELD requiredMemory",
+            Map.of("graphName", GRAPH_NAME),
+            List.of(Map.of("requiredMemory", "[65 KiB ... 1699 KiB]"))
+        );
+    }
+
     private LinkLogisticRegressionData modelData(String trainedModelName) {
         Stream<Model<?, ?, ?>> allModels = modelCatalog.getAllModels();
         Model<?, ?, ?> model = allModels.filter(m -> m.name().equals(trainedModelName)).findFirst().get();
