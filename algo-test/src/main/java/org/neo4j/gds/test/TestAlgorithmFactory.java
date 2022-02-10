@@ -54,7 +54,7 @@ public class TestAlgorithmFactory<CONFIG extends TestConfig> extends GraphAlgori
     public MemoryEstimation memoryEstimation(TestConfig configuration) {
         return MemoryEstimations.builder(TestAlgorithm.class)
             .perNode("nodes", l -> l)
-            .perGraphDimension("relationships", (dimensions, concurrency) -> MemoryRange.of(dimensions.maxRelCount()))
+            .perGraphDimension("relationships", (dimensions, concurrency) -> MemoryRange.of(dimensions.relCountUpperBound()))
             .build();
     }
 }

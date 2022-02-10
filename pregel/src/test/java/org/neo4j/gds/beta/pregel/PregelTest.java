@@ -470,7 +470,7 @@ class PregelTest {
     ) {
         var dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(10_000)
-            .maxRelCount(100_000)
+            .relCountUpperBound(100_000)
             .build();
 
         assertEquals(

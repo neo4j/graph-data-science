@@ -39,7 +39,7 @@ class MemoryValidationTest {
     private static final GraphDimensions TEST_DIMENSIONS = ImmutableGraphDimensions
         .builder()
         .nodeCount(100)
-        .maxRelCount(1000)
+        .relCountUpperBound(1000)
         .build();
 
     static Stream<Arguments> input() {

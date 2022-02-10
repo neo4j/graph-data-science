@@ -65,7 +65,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
                 MemoryEstimations.setup("", (dimensions, concurrency) -> {
                     int averageDegree = dimensions.nodeCount() == 0
                         ? 0
-                        : Math.toIntExact(dimensions.maxRelCount() / dimensions.nodeCount());
+                        : Math.toIntExact(dimensions.relCountUpperBound() / dimensions.nodeCount());
                     long averageVectorSize = sizeOfLongArray(averageDegree);
                     return MemoryEstimations.builder(HugeObjectArray.class)
                         .perNode("array", nodeCount -> nodeCount * averageVectorSize).build();
@@ -75,7 +75,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
                 MemoryEstimations.setup("", (dimensions, concurrency) -> {
                 int averageDegree = dimensions.nodeCount() == 0
                     ? 0
-                    : Math.toIntExact(dimensions.maxRelCount() / dimensions.nodeCount());
+                    : Math.toIntExact(dimensions.relCountUpperBound() / dimensions.nodeCount());
                 long averageVectorSize = sizeOfDoubleArray(averageDegree);
                 return MemoryEstimations.builder(HugeObjectArray.class)
                     .rangePerNode("array", nodeCount -> MemoryRange.of(0, nodeCount * averageVectorSize))

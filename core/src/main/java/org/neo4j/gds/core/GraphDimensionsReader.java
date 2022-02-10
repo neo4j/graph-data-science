@@ -96,13 +96,13 @@ public abstract class GraphDimensionsReader<T extends GraphProjectConfig> extend
             labelTokenNodeLabelMappings,
             typeTokenRelTypeMappings
         );
-        long maxRelCount = relationshipCounts.values().stream().mapToLong(Long::longValue).sum();
+        long relCountUpperBound = relationshipCounts.values().stream().mapToLong(Long::longValue).sum();
         long allRelationshipsCount = Neo4jProxy.getHighestPossibleRelationshipCount(dataRead, idGeneratorFactory);
 
         return ImmutableGraphDimensions.builder()
             .nodeCount(finalNodeCount)
             .highestPossibleNodeCount(allNodesCount)
-            .maxRelCount(maxRelCount)
+            .relCountUpperBound(relCountUpperBound)
             .relationshipCounts(relationshipCounts)
             .highestRelationshipId(allRelationshipsCount)
             .nodeLabelTokens(labelTokenNodeLabelMappings.keys())
@@ -150,7 +150,7 @@ public abstract class GraphDimensionsReader<T extends GraphProjectConfig> extend
                     if (typeToken != NO_SUCH_RELATIONSHIP_TYPE) {
                         long numberOfRelationships = labelTokenNodeLabelMappings
                             .keyStream()
-                            .mapToLong(labelToken -> maxRelCountForLabelAndType(dataRead, labelToken, typeToken)).sum();
+                            .mapToLong(labelToken -> relCountUpperBoundForLabelAndType(dataRead, labelToken, typeToken)).sum();
 
                         relationshipCountsByType.put(relationshipType, numberOfRelationships);
                     }
@@ -160,7 +160,7 @@ public abstract class GraphDimensionsReader<T extends GraphProjectConfig> extend
         return relationshipCountsByType;
     }
 
-    private static long maxRelCountForLabelAndType(Read dataRead, int labelId, int id) {
+    private static long relCountUpperBoundForLabelAndType(Read dataRead, int labelId, int id) {
         return Math.max(
             dataRead.countsForRelationshipWithoutTxState(labelId, id, ANY_LABEL),
             dataRead.countsForRelationshipWithoutTxState(ANY_LABEL, id, labelId)

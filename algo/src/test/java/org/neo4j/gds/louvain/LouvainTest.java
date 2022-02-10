@@ -343,7 +343,7 @@ class LouvainTest {
     void testMemoryEstimation(int concurrency, int levels, long expectedMinBytes, long expectedMaxBytes) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000L)
-            .maxRelCount(500_000L)
+            .relCountUpperBound(500_000L)
             .build();
 
         LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()
@@ -367,7 +367,7 @@ class LouvainTest {
     void testMemoryEstimationUsesOnlyOnePropertyForEachEntity() {
         ImmutableGraphDimensions.Builder dimensionsBuilder = ImmutableGraphDimensions.builder()
             .nodeCount(100_000L)
-            .maxRelCount(500_000L);
+            .relCountUpperBound(500_000L);
 
         GraphDimensions dimensionsWithoutProperties = dimensionsBuilder.build();
         GraphDimensions dimensionsWithOneProperty = dimensionsBuilder

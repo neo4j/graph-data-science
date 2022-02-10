@@ -103,7 +103,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
             .from(dimensions)
             .highestPossibleNodeCount(getNodeEstimation().estimatedRows())
             .nodeCount(getNodeEstimation().estimatedRows())
-            .maxRelCount(getRelationshipEstimation().estimatedRows())
+            .relCountUpperBound(getRelationshipEstimation().estimatedRows())
             .build();
     }
 
@@ -155,7 +155,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
         var task = Tasks.task(
             "Loading",
             Tasks.leaf("Nodes"),
-            Tasks.leaf("Relationships", dimensions.maxRelCount())
+            Tasks.leaf("Relationships", dimensions.relCountUpperBound())
         );
         return new TaskProgressTracker(
             task,

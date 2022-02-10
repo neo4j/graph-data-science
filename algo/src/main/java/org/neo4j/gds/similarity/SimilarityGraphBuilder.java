@@ -39,7 +39,7 @@ public class SimilarityGraphBuilder {
 
     public static MemoryEstimation memoryEstimation(int topK, int topN) {
         return MemoryEstimations.setup("", (dimensions, concurrency) -> {
-            long maxNodesToCompare = Math.min(dimensions.maxRelCount(), dimensions.nodeCount());
+            long maxNodesToCompare = Math.min(dimensions.relCountUpperBound(), dimensions.nodeCount());
             long maxNumberOfSimilarityResults = maxNodesToCompare * (maxNodesToCompare - 1) / 2;
 
             long newNodeCount = maxNodesToCompare;

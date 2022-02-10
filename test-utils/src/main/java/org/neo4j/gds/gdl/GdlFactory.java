@@ -434,7 +434,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             return ImmutableGraphDimensions.builder()
                 .nodeCount(nodeCount)
                 .highestPossibleNodeCount(highestId + 1)
-                .maxRelCount(relCount)
+                .relCountUpperBound(relCount)
                 .build();
         }
     }

@@ -81,7 +81,7 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
         return ImmutableGraphDimensions.builder()
             .nodeCount(filteredGraph.nodeCount())
             .relationshipCounts(filteredGraphRelationshipCounts(config, graphStore, filteredGraph))
-            .maxRelCount(relCount)
+            .relCountUpperBound(relCount)
             .build();
     }
 

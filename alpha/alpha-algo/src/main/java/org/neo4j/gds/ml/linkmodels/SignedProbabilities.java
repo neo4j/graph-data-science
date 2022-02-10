@@ -46,7 +46,7 @@ public final class SignedProbabilities {
     public static long estimateMemory(GraphDimensions dimensions, RelationshipType relationshipType, double relationshipFraction) {
         var relationshipCount = dimensions.relationshipCounts().containsKey(relationshipType)
             ? dimensions.relationshipCounts().get(relationshipType) * relationshipFraction
-            : dimensions.maxRelCount() * relationshipFraction;
+            : dimensions.relCountUpperBound() * relationshipFraction;
         return MemoryUsage.sizeOfInstance(SignedProbabilities.class) +
                MemoryUsage.sizeOfInstance(Optional.class) +
                MemoryUsage.sizeOfInstance(ArrayList.class) +

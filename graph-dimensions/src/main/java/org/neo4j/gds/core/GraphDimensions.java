@@ -57,7 +57,7 @@ public interface GraphDimensions {
     }
 
     @Value.Default
-    default long maxRelCount() {
+    default long relCountUpperBound() {
         return 0L;
     }
 
@@ -67,8 +67,9 @@ public interface GraphDimensions {
     }
 
     @Value.Default
+    //Upper bound because due to limitations in the kernel API we might count relationships we end up not loading.
     default long highestRelationshipId() {
-        return maxRelCount();
+        return relCountUpperBound();
     }
 
     @Nullable
@@ -85,7 +86,7 @@ public interface GraphDimensions {
 
     @Value.Derived
     default long averageDegree() {
-        return nodeCount() == 0 ? 0 : maxRelCount() / nodeCount();
+        return nodeCount() == 0 ? 0 : relCountUpperBound() / nodeCount();
     }
 
     @Value.Derived
@@ -139,7 +140,7 @@ public interface GraphDimensions {
         return ImmutableGraphDimensions.builder()
             .nodeCount(nodeCount)
             .relationshipCounts(Map.of(RelationshipType.ALL_RELATIONSHIPS, relationshipCount))
-            .maxRelCount(relationshipCount)
+            .relCountUpperBound(relationshipCount)
             .build();
     }
 }

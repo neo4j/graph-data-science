@@ -684,7 +684,7 @@ final class NodeSimilarityTest {
     void shouldComputeMemrec(int topK) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(1_000_000)
-            .maxRelCount(5_000_000)
+            .relCountUpperBound(5_000_000)
             .build();
 
         NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig
@@ -738,7 +738,7 @@ final class NodeSimilarityTest {
     void shouldComputeMemrecWithTop(int topK) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(1_000_000)
-            .maxRelCount(5_000_000)
+            .relCountUpperBound(5_000_000)
             .build();
 
         NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig

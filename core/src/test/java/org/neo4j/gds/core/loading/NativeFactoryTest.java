@@ -42,7 +42,7 @@ class NativeFactoryTest {
         var expectedMaxUsage = 4600799544L;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
-            .maxRelCount(500_000_000L)
+            .relCountUpperBound(500_000_000L)
             .build();
 
         var memoryEstimation = new AtomicReference<MemoryEstimation>();

@@ -60,7 +60,7 @@ public class MemoryEstimateResult {
         this.heapPercentageMin = getPercentage(bytesMin, heapSize);
         this.heapPercentageMax = getPercentage(bytesMax, heapSize);
         this.nodeCount = dimensions.nodeCount();
-        this.relationshipCount = dimensions.maxRelCount();
+        this.relationshipCount = dimensions.relCountUpperBound();
     }
 
     private double getPercentage(long requiredBytes, long heapSizeBytes) {
