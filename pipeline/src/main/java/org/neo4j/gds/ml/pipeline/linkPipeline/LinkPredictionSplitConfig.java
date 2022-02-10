@@ -114,23 +114,23 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
     @Value.Derived
     @Configuration.Ignore
     default SplitRelationshipsBaseConfig testSplit() {
-        return new SplitRelationshipsBaseConfigImpl(CypherMapWrapper.create(Map.of(
-            "holdoutRelationshipType", testRelationshipType(),
-            "remainingRelationshipType", testComplementRelationshipType(),
-            "holdOutFraction", testFraction(),
-            "negativeSamplingRatio", negativeSamplingRatio()
-        )));
+        return SplitRelationshipsBaseConfigImpl.builder()
+            .holdoutRelationshipType(testRelationshipType())
+            .remainingRelationshipType(testComplementRelationshipType())
+            .holdoutFraction(testFraction())
+            .negativeSamplingRatio(negativeSamplingRatio())
+            .build();
     }
 
     @Value.Derived
     @Configuration.Ignore
     default SplitRelationshipsBaseConfig trainSplit() {
-        return new SplitRelationshipsBaseConfigImpl(CypherMapWrapper.create(Map.of(
-            "holdoutRelationshipType", trainRelationshipType(),
-            "remainingRelationshipType", featureInputRelationshipType(),
-            "holdOutFraction", trainFraction(),
-            "negativeSamplingRatio", negativeSamplingRatio()
-        )));
+        return SplitRelationshipsBaseConfigImpl.builder()
+            .holdoutRelationshipType(trainRelationshipType())
+            .remainingRelationshipType(featureInputRelationshipType())
+            .holdoutFraction(trainFraction())
+            .negativeSamplingRatio(negativeSamplingRatio())
+            .build();
     }
 
     static LinkPredictionSplitConfig of(CypherMapWrapper config) {
