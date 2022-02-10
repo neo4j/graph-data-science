@@ -125,6 +125,19 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.pagesPerThread")
+    @Description("Toggle how many pages per thread are being used by the loader.")
+    public void pagesPerThread(@Name(value = "pagesPerThread") long pagesPerThread) {
+        if (pagesPerThread <= 0 || pagesPerThread > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Invalid value for pagesPerThread: %d, must be a non-zero, positive integer",
+                pagesPerThread
+            ));
+        }
+        GdsFeatureToggles.PAGES_PER_THREAD.set((int) pagesPerThread);
+    }
+
+    @Internal
     @Procedure("gds.features.useUncompressedAdjacencyList")
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
@@ -160,6 +173,14 @@ public final class FeatureToggleProc {
     public Stream<FeatureValue> resetMaxArrayLengthShift() {
         GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.set(GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING);
         return Stream.of(new FeatureValue(GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING));
+    }
+
+    @Internal
+    @Procedure("gds.features.pagesPerThread.reset")
+    @Description("Set the value of pages per thread to the default. That value is returned.")
+    public Stream<FeatureValue> resetPagesPerThread() {
+        GdsFeatureToggles.PAGES_PER_THREAD.set(GdsFeatureToggles.PAGES_PER_THREAD_DEFAULT_SETTING);
+        return Stream.of(new FeatureValue(GdsFeatureToggles.PAGES_PER_THREAD_DEFAULT_SETTING));
     }
 
     @SuppressWarnings("unused")

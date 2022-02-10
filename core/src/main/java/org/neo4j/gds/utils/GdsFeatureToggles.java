@@ -99,6 +99,15 @@ public enum GdsFeatureToggles {
     );
     public static final AtomicInteger MAX_ARRAY_LENGTH_SHIFT = new AtomicInteger(MAX_ARRAY_LENGTH_SHIFT_FLAG);
 
+    // How many pages per loading thread. Pages are being locked while written to, so
+    // more pages allow for less contention, fewer pages allow for higher throughput.
+    public static final int PAGES_PER_THREAD_DEFAULT_SETTING = 4;
+    private static final int PAGES_PER_THREAD_FLAG = Integer.getInteger(
+        name(GdsFeatureToggles.class, "pagesPerThread"),
+        PAGES_PER_THREAD_DEFAULT_SETTING
+    );
+    public static final AtomicInteger PAGES_PER_THREAD = new AtomicInteger(PAGES_PER_THREAD_FLAG);
+
     private static String name(Class<?> location, String name) {
         return location.getCanonicalName() + "." + name;
     }

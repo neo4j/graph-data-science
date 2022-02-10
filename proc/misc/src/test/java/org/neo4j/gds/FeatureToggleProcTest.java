@@ -211,4 +211,50 @@ class FeatureToggleProcTest extends BaseProcTest {
         );
         assertEquals(defaultValue, GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get());
     }
+
+    @Test
+    void togglePagesPerThread() {
+        var pagesPerThread = GdsFeatureToggles.PAGES_PER_THREAD.get();
+        runQuery("CALL gds.features.pagesPerThread($value)", Map.of("value", pagesPerThread + 1));
+        assertEquals(pagesPerThread + 1, GdsFeatureToggles.PAGES_PER_THREAD.get());
+        runQuery("CALL gds.features.pagesPerThread($value)", Map.of("value", pagesPerThread));
+        assertEquals(pagesPerThread, GdsFeatureToggles.PAGES_PER_THREAD.get());
+    }
+
+    @Test
+    void togglePagesPerThreadValidationForNegativeValue() {
+        var pagesPerThread = GdsFeatureToggles.PAGES_PER_THREAD.get();
+        var exception = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery("CALL gds.features.pagesPerThread($value)", Map.of("value", -42))
+        );
+        assertThat(exception)
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .hasRootCauseMessage("Invalid value for pagesPerThread: -42, must be a non-zero, positive integer");
+        assertEquals(pagesPerThread, GdsFeatureToggles.PAGES_PER_THREAD.get());
+    }
+
+    @Test
+    void togglePagesPerThreadValidationForTooLargeValue() {
+        var pagesPerThread = GdsFeatureToggles.PAGES_PER_THREAD.get();
+        var exception = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery("CALL gds.features.pagesPerThread($value)", Map.of("value", 133713371337L))
+        );
+        assertThat(exception)
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .hasRootCauseMessage("Invalid value for pagesPerThread: 133713371337, must be a non-zero, positive integer");
+        assertEquals(pagesPerThread, GdsFeatureToggles.PAGES_PER_THREAD.get());
+    }
+
+    @Test
+    void resetPagesPerThread() {
+        var defaultValue = GdsFeatureToggles.PAGES_PER_THREAD_DEFAULT_SETTING;
+        GdsFeatureToggles.PAGES_PER_THREAD.set(defaultValue + 1);
+        assertCypherResult(
+            "CALL gds.features.pagesPerThread.reset()",
+            List.of(Map.of("value", (long) defaultValue))
+        );
+        assertEquals(defaultValue, GdsFeatureToggles.PAGES_PER_THREAD.get());
+    }
 }

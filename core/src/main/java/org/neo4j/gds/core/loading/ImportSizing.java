@@ -23,6 +23,7 @@ import org.neo4j.gds.mem.BitUtil;
 
 import java.util.OptionalInt;
 
+import static org.neo4j.gds.utils.GdsFeatureToggles.PAGES_PER_THREAD;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ImportSizing {
@@ -35,8 +36,6 @@ public final class ImportSizing {
 
     // don't attempt to page if the page size would be less than this value
     public static final long MIN_PAGE_SIZE = 1024L;
-
-    private static final int PAGES_PER_THREAD = 4;
 
     private static final String TOO_MANY_PAGES_REQUIRED =
         "Importing %d nodes would need %d arrays of %d-long nested arrays each, which cannot be created.";
@@ -60,8 +59,7 @@ public final class ImportSizing {
     }
 
     private static ImportSizing determineBestThreadSize(long nodeCount, long targetThreads) {
-        // try to get about 4 pages per importer thread
-        long pageSize = BitUtil.ceilDiv(nodeCount, targetThreads * PAGES_PER_THREAD);
+        long pageSize = BitUtil.ceilDiv(nodeCount, targetThreads * PAGES_PER_THREAD.get());
 
         // page size must be a power of two
         pageSize = BitUtil.previousPowerOfTwo(pageSize);
@@ -96,8 +94,7 @@ public final class ImportSizing {
     }
 
     private static ImportSizing determineBestThreadSize(long targetThreads) {
-        // try to get 4 pages per importer thread
-        long numberOfPages = targetThreads * PAGES_PER_THREAD;
+        long numberOfPages = targetThreads * PAGES_PER_THREAD.get();
 
         // number of pages must be a power of two
         numberOfPages = BitUtil.nextHighestPowerOfTwo(numberOfPages);
