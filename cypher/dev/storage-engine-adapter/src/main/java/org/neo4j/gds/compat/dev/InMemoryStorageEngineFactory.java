@@ -238,7 +238,6 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         DatabaseLayout databaseLayout,
         FileSystemAbstraction fileSystemAbstraction,
         PageCache pageCache,
-        PageCacheTracer pageCacheTracer,
         Config config,
         MemoryTracker memoryTracker,
         ReadBehaviour readBehaviour,
@@ -259,7 +258,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
             neoStores,
             readBehaviour.decorateTokenHolders(this.loadReadOnlyTokens(neoStores, true, cursorContextFactory)),
             true,
-            pageCacheTracer,
+            cursorContextFactory,
             readBehaviour
         );
     }
