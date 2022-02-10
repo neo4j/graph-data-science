@@ -21,8 +21,13 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.mem.CompositeMaxTree;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
@@ -30,6 +35,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainResult;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -63,6 +69,34 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
             executionContext,
             progressTracker
         );
+    }
+
+    public static MemoryTree estimate(LinkPredictionPipeline pipeline, LinkPredictionTrainConfig configuration, GraphDimensions graphDimensions) {
+        // FIXME estimate memory for relationship splits
+
+
+        var nodePropertyStepEstimations = pipeline
+            .nodePropertySteps()
+            .stream()
+            .map(ExecutableNodePropertyStep::estimate)
+            .collect(Collectors.toList());
+
+        long featureInputRelSize = pipeline.splitConfig().expectedSetSizes(graphDimensions.relCountUpperBound()).featureInputSize();
+        GraphDimensions dimensionForNodePropertySteps = GraphDimensions.of(graphDimensions.nodeCount(), featureInputRelSize);
+        // this has the drawback, that we disregard the sizes of the mutate-properties, but it's a better approximation than adding all together
+        MemoryTree maxOverNodePropertySteps = MemoryEstimations
+            .maxEstimation("NodeProperty Steps", nodePropertyStepEstimations)
+            .estimate(dimensionForNodePropertySteps, configuration.concurrency());
+
+        // FIXME use a graphDimension with test and train relationship type here
+        var trainingEstimation = MemoryEstimations
+            .builder()
+            .add("Train pipeline", LinkPredictionTrain.estimate(pipeline, configuration))
+            .build()
+            .estimate(graphDimensions, configuration.concurrency());
+
+        // FIXME consider size of LinkPredictionTrainPipelineExecutor instance
+        return new CompositeMaxTree("Pipeline execution", List.of(maxOverNodePropertySteps, trainingEstimation));
     }
 
     @Override

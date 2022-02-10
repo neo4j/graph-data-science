@@ -798,9 +798,7 @@ final class AndThenTree extends BaseTree {
 final class CompositeTree extends BaseTree {
     private final Collection<MemoryTree> components;
 
-    CompositeTree(
-            final String description,
-            final Collection<MemoryTree> components) {
+    CompositeTree(final String description, final Collection<MemoryTree> components) {
         super(description);
         this.components = components;
     }
@@ -821,9 +819,10 @@ final class CompositeTree extends BaseTree {
 final class CompositeMaxTree extends BaseTree {
     private final Collection<MemoryTree> components;
 
-    CompositeMaxTree(
+    public CompositeMaxTree(
         final String description,
-        final Collection<MemoryTree> components) {
+        final Collection<MemoryTree> components
+    ) {
         super(description);
         this.components = components;
     }
