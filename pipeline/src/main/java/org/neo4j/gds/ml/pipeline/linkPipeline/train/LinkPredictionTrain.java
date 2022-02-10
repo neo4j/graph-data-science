@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
@@ -35,7 +34,6 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
@@ -45,7 +43,6 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.BestMetricData;
 import org.neo4j.gds.ml.nodemodels.BestModelStats;
-import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.nodemodels.StatsMap;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
@@ -64,7 +61,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndTargetsExtractor.extractFeaturesAndTargets;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionEvaluationMetricComputer.computeMetric;
@@ -166,14 +162,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var linkLogisticRegressionTrainConfigs = pipeline.trainingParameterSpace();
         progressTracker.setVolume(linkLogisticRegressionTrainConfigs.size());
         linkLogisticRegressionTrainConfigs.forEach(modelParams -> {
-            var trainStatsBuilder = new ModelStatsBuilder(
-                modelParams,
-                pipeline.splitConfig().validationFolds()
-            );
-            var validationStatsBuilder = new ModelStatsBuilder(
-                modelParams,
-                pipeline.splitConfig().validationFolds()
-            );
+            var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
+            var validationStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
             for (TrainingExamplesSplit relSplit : validationSplits) {
                 // train each model candidate on the train sets
                 var trainSet = relSplit.trainSet();
@@ -314,14 +304,13 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
     }
 
-
     private LinkLogisticRegressionData trainModel(
         ReadOnlyHugeLongArray trainSet,
         FeaturesAndTargets trainData,
         LinkLogisticRegressionTrainConfig llrConfig,
         ProgressTracker progressTracker
     ) {
-        var llrTrain = new LinkLogisticRegressionTrain(
+        return new LinkLogisticRegressionTrain(
             trainSet,
             trainData.features(),
             trainData.targets(),
@@ -329,9 +318,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             progressTracker,
             terminationFlag,
             trainConfig.concurrency()
-        );
-
-        return llrTrain.compute();
+        ).compute();
     }
 
     private Map<LinkMetric, Double> computeTrainMetric(
@@ -348,43 +335,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             progressTracker,
             terminationFlag
         );
-    }
-
-    static class ModelStatsBuilder {
-        private final Map<LinkMetric, Double> min;
-        private final Map<LinkMetric, Double> max;
-        private final Map<LinkMetric, Double> sum;
-        private final LinkLogisticRegressionTrainConfig modelParams;
-        private final int numberOfSplits;
-
-        ModelStatsBuilder(LinkLogisticRegressionTrainConfig modelParams, int numberOfSplits) {
-            this.modelParams = modelParams;
-            this.numberOfSplits = numberOfSplits;
-            this.min = new HashMap<>();
-            this.max = new HashMap<>();
-            this.sum = new HashMap<>();
-        }
-
-        static long sizeInBytes(long numberOfMetrics) {
-            int numberOfStats = 3;
-            long statMaps = numberOfStats * (sizeOfInstance(HashMap.class) + numberOfMetrics * Double.BYTES);
-            return MemoryUsage.sizeOf(ModelStatsBuilder.class) + statMaps;
-        }
-
-        void update(LinkMetric metric, double value) {
-            min.merge(metric, value, Math::min);
-            max.merge(metric, value, Math::max);
-            sum.merge(metric, value, Double::sum);
-        }
-
-        ModelStats<LinkLogisticRegressionTrainConfig> modelStats(LinkMetric metric) {
-            return ImmutableModelStats.of(
-                modelParams,
-                sum.get(metric) / numberOfSplits,
-                min.get(metric),
-                max.get(metric)
-            );
-        }
     }
 
     private Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
@@ -457,9 +407,9 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             "Max over model candidates",
             pipeline.trainingParameterSpace().stream()
                 .map(llrConfig -> MemoryEstimations.builder("Train and evaluate model")
-                    .fixed("Stats map builder train", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
-                    .fixed("Stats map builder validation", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
-                    .max(List.of(
+                    .fixed("Stats map builder train", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
+                    .fixed("Stats map builder validation", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
+                    .max("Train model and compute train metrics", List.of(
                             LinkLogisticRegressionTrain.estimate(llrConfig, linkFeatureDimension),
                             estimateComputeTrainMetrics(pipeline.splitConfig())
                         )
@@ -487,7 +437,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             .build();
     }
 
-    @NotNull
     private static MemoryEstimation estimateComputeTrainMetrics(LinkPredictionSplitConfig splitConfig) {
         return MemoryEstimations
             .builder("Compute train metrics")
@@ -501,5 +450,4 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 }
             ).build();
     }
-
 }
