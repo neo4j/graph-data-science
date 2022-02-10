@@ -252,7 +252,7 @@ public final class GraphFactory {
 
         var importSizing = nodes.rootNodeCount() > 0
             ? ImportSizing.of(finalConcurrency, nodes.rootNodeCount())
-            : ImportSizing.ofUnknownNodeCount(finalConcurrency);
+            : ImportSizing.of(finalConcurrency);
 
         int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
         if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {

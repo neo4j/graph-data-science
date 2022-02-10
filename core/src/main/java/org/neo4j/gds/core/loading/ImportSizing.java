@@ -54,7 +54,7 @@ public final class ImportSizing {
         return determineBestThreadSize(nodeCount, concurrency);
     }
 
-    public static ImportSizing ofUnknownNodeCount(int concurrency) {
+    public static ImportSizing of(int concurrency) {
         return determineBestThreadSize(concurrency);
     }
 
