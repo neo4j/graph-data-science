@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
+import org.neo4j.gds.similarity.knn.NeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.SimilarityComputer;
 
 class LinkPredictionSimilarityComputer implements SimilarityComputer {
@@ -47,11 +48,11 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
         return predictor.predictedProbability(features);
     }
 
-    static class LinkFilter implements NeighborFilter {
+    static final class LinkFilter implements NeighborFilter {
 
         private final Graph graph;
 
-        LinkFilter(Graph graph) {
+        private LinkFilter(Graph graph) {
             this.graph = graph;
         }
 
@@ -68,6 +69,20 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
         @Override
         public long lowerBoundOfPotentialNeighbours(long node) {
             return graph.nodeCount() - 1 - graph.degree(node);
+        }
+    }
+
+    static class LinkFilterFactory implements NeighborFilterFactory {
+
+        private final Graph graph;
+
+        LinkFilterFactory(Graph graph) {
+            this.graph = graph;
+        }
+
+        @Override
+        public NeighborFilter create() {
+            return new LinkPredictionSimilarityComputer.LinkFilter(graph.concurrentCopy());
         }
     }
 }

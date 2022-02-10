@@ -47,7 +47,7 @@ public class Knn extends Algorithm<Knn.Result> {
 
     private final Graph graph;
     private final KnnBaseConfig config;
-    private final NeighborFilter neighborFilter;
+    private final NeighborFilterFactory neighborFilterFactory;
     private final KnnContext context;
     private final SplittableRandom random;
     private final SimilarityComputer computer;
@@ -58,7 +58,7 @@ public class Knn extends Algorithm<Knn.Result> {
             graph,
             config,
             SimilarityComputer.ofProperties(graph, config.nodeProperties()),
-            new KnnNeighborFilter(graph.nodeCount()),
+            new KnnNeighborFilterFactory(graph.nodeCount()),
             context
         );
     }
@@ -67,14 +67,14 @@ public class Knn extends Algorithm<Knn.Result> {
         Graph graph,
         KnnBaseConfig config,
         SimilarityComputer similarityComputer,
-        NeighborFilter neighborFilter,
+        NeighborFilterFactory neighborFilterFactory,
         KnnContext context
     ) {
         super(context.progressTracker());
         this.graph = graph;
         this.config = config;
         this.computer = similarityComputer;
-        this.neighborFilter = neighborFilter;
+        this.neighborFilterFactory = neighborFilterFactory;
         this.context = context;
 
         this.random = this.config.randomSeed().isPresent()
@@ -162,7 +162,7 @@ public class Knn extends Algorithm<Knn.Result> {
                     initializeSampler(localRandom),
                     localRandom,
                     this.computer,
-                    this.neighborFilter,
+                    this.neighborFilterFactory.create(),
                     neighbors,
                     k,
                     boundedK,
@@ -250,7 +250,7 @@ public class Knn extends Algorithm<Knn.Result> {
             partition -> new JoinNeighbors(
                 this.random.split(),
                 this.computer,
-                this.neighborFilter,
+                this.neighborFilterFactory.create(),
                 neighbors,
                 allOldNeighbors,
                 allNewNeighbors,
