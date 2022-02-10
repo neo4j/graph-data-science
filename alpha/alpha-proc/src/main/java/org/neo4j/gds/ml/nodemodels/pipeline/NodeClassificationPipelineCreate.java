@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.model.Model;
@@ -37,18 +38,31 @@ public class NodeClassificationPipelineCreate {
     ) {
         StringIdentifierValidations.validateNoWhiteCharacter(pipelineName, "pipelineName");
 
-        var model = Model.of(
+        var pipeline = new NodeClassificationPipeline();
+
+        modelCatalog.set(fromTrainingPipelineToModel(
+            username,
+            pipelineName,
+            pipeline
+        ));
+
+        return new PipelineInfoResult(pipelineName, pipeline);
+    }
+
+    @NotNull
+    public static Model<Object, PipelineCreateConfig, NodeClassificationPipeline> fromTrainingPipelineToModel(
+        String username,
+        String pipelineName,
+        NodeClassificationPipeline pipeline
+    ) {
+        return Model.of(
             username,
             pipelineName,
             PIPELINE_MODEL_TYPE,
             GraphSchema.empty(),
             new Object(),
             PipelineCreateConfig.of(username),
-            new NodeClassificationPipeline()
+            pipeline
         );
-
-        modelCatalog.set(model);
-
-        return new PipelineInfoResult(pipelineName, model.customInfo());
     }
 }
