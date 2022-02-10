@@ -143,45 +143,4 @@ class LinkPredictionSimilarityComputerTest {
             .isLessThanOrEqualTo(1)
             .isGreaterThanOrEqualTo(0);
     }
-
-    @Test
-    void shouldFailIfWeCouldFigureOutHowToWriteTheTestCorrectly() {
-        var nodeCount = 1500;
-        var graph = RandomGraphGenerator.builder()
-            .nodeCount(nodeCount)
-            .nodePropertyProducer(PropertyProducer.randomDouble("prop", 0.0, 1.0))
-            .averageDegree(1)
-            .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .orientation(UNDIRECTED)
-            .seed(43L)
-            .build()
-            .generate();
-
-        NeighborFilter filter = new LinkFilterFactory(graph).create();
-
-        Random random = new Random();
-
-        Runnable r1 = runnable(nodeCount, 0, nodeCount / 2, random, filter);
-        Runnable r2 = runnable(nodeCount, nodeCount / 2 + 1, nodeCount, random, filter);
-
-        var tasks = List.of(r1, r2);
-
-        ParallelUtil.run(tasks, Pools.DEFAULT);
-    }
-
-    private Runnable runnable(long nodeCount, long startNodeId, long endNodeId, Random random, NeighborFilter filter) {
-
-        return () -> {
-            LongStream.range(startNodeId, endNodeId)
-                .forEach(sourceNode ->
-                    LongStream.range(startNodeId, endNodeId)
-                        .forEach(__ -> {
-                                var targetNode = Math.abs(random.nextLong()) % nodeCount;
-                                filter.excludeNodePair(sourceNode, targetNode);
-                            }
-                        )
-                );
-        };
-
-    }
 }
