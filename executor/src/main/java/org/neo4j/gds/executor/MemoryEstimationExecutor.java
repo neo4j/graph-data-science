@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.executor;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
@@ -65,11 +66,20 @@ public class MemoryEstimationExecutor<
     ) {
         var configParser = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext);
         CONFIG algoConfig = configParser.processInput(algoConfiguration);
-        GraphDimensions graphDimensions;
-        Optional<MemoryEstimation> memoryEstimation;
 
+        Pair<GraphDimensions, Optional<MemoryEstimation>> graphEstimation = graphEstimation(graphNameOrConfiguration, algoConfig);
+        MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(
+            graphEstimation.getLeft(),
+            graphEstimation.getRight(),
+            algoSpec.algorithmFactory(),
+            algoConfig
+        );
+
+        return Stream.of(new MemoryEstimateResult(memoryTreeWithDimensions));
+    }
+
+    private Pair<GraphDimensions, Optional<MemoryEstimation>> graphEstimation(Object graphNameOrConfiguration, CONFIG algoConfig) {
         if (graphNameOrConfiguration instanceof Map) {
-
             // if the api is null, we are probably using EstimationCli
             var graphLoaderContext = (executionContext.api() == null)
                 ? GraphLoaderContext.NULL_CONTEXT
@@ -92,10 +102,9 @@ public class MemoryEstimationExecutor<
                 ? new FictitiousGraphStoreLoader(graphProjectConfig)
                 : new GraphStoreFromDatabaseLoader(graphProjectConfig, executionContext.username(), graphLoaderContext);
 
-            graphDimensions = graphStoreCreator.graphDimensions();
-            memoryEstimation = Optional.of(graphStoreCreator.estimateMemoryUsageAfterLoading());
+            return Pair.of(graphStoreCreator.graphDimensions(), Optional.of(graphStoreCreator.estimateMemoryUsageAfterLoading()));
         } else if (graphNameOrConfiguration instanceof String) {
-            graphDimensions = new GraphStoreFromCatalogLoader(
+            var dimensions = new GraphStoreFromCatalogLoader(
                 (String) graphNameOrConfiguration,
                 algoConfig,
                 executionContext.username(),
@@ -103,22 +112,13 @@ public class MemoryEstimationExecutor<
                 executionContext.isGdsAdmin()
             ).graphDimensions();
 
-            memoryEstimation = Optional.empty();
+            return Pair.of(dimensions, Optional.empty());
         } else {
             throw new IllegalArgumentException(formatWithLocale(
                 "Expected `graphNameOrConfiguration` to be of type String or Map, but got",
                 graphNameOrConfiguration.getClass().getSimpleName()
             ));
         }
-
-        MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(
-            graphDimensions,
-            memoryEstimation,
-            algoSpec.algorithmFactory(),
-            algoConfig
-        );
-
-        return Stream.of(new MemoryEstimateResult(memoryTreeWithDimensions));
     }
 
     private MemoryTreeWithDimensions procedureMemoryEstimation(
@@ -129,8 +129,7 @@ public class MemoryEstimationExecutor<
     ) {
         MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
-        maybeGraphMemoryEstimation.map(graphEstimation -> estimationBuilder.add("graph", graphEstimation));
-
+        maybeGraphMemoryEstimation.ifPresent(graphEstimation -> estimationBuilder.add("graph", graphEstimation));
         estimationBuilder.add("algorithm", algorithmFactory.memoryEstimation(config));
 
         MemoryTree memoryTree = estimationBuilder.build().estimate(dimensions, config.concurrency());
