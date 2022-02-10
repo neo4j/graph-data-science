@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -33,7 +34,8 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 
 import java.util.List;
-import java.util.function.LongUnaryOperator;
+import java.util.Map;
+import java.util.function.ToLongFunction;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -43,19 +45,19 @@ final class LinkFeaturesAndTargetsExtractor {
 
     static MemoryEstimation estimate(
         MemoryRange fudgedLinkFeatureDim,
-        LongUnaryOperator relSetSizeExtractor,
+        ToLongFunction<Map<RelationshipType, Long>> relSetSizeExtractor,
         String setDesc
     ) {
         return MemoryEstimations
             .builder()
             .rangePerGraphDimension(setDesc + " relationship features", (graphDim, threads) -> fudgedLinkFeatureDim
                 .apply(MemoryUsage::sizeOfDoubleArray)
-                .times(relSetSizeExtractor.applyAsLong(graphDim.relCountUpperBound()))
+                .times(relSetSizeExtractor.applyAsLong(graphDim.relationshipCounts()))
                 .add(MemoryUsage.sizeOfInstance(HugeObjectArray.class)))
             .perGraphDimension(
                 setDesc + "relationship targets",
                 (graphDim, threads) -> MemoryRange.of(
-                    HugeDoubleArray.memoryEstimation(relSetSizeExtractor.applyAsLong(graphDim.relCountUpperBound()))
+                    HugeDoubleArray.memoryEstimation(relSetSizeExtractor.applyAsLong(graphDim.relationshipCounts()))
                 )
             ).build();
     }

@@ -25,9 +25,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -219,7 +221,9 @@ class LinkPredictionTrainTest {
 
         var pipeline = new LinkPredictionPipeline();
         var graphDim = GraphDimensions.of(nodeCount, relationshipCount);
-        var actualEstimation = LinkPredictionTrain.estimate(pipeline, trainConfig).estimate(graphDim, trainConfig.concurrency());
+        MemoryTree actualEstimation = LinkPredictionTrain
+            .estimate(pipeline, trainConfig)
+            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
 
         assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
     }
@@ -237,7 +241,9 @@ class LinkPredictionTrainTest {
         var pipeline = new LinkPredictionPipeline();
         pipeline.setSplitConfig(splitConfig);
         var graphDim = GraphDimensions.of(100, 1_000);
-        var actualEstimation = LinkPredictionTrain.estimate(pipeline, trainConfig).estimate(graphDim, trainConfig.concurrency());
+        MemoryTree actualEstimation = LinkPredictionTrain
+            .estimate(pipeline, trainConfig)
+            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
 
         assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
     }
@@ -255,7 +261,9 @@ class LinkPredictionTrainTest {
         var pipeline = new LinkPredictionPipeline();
         pipeline.setTrainingParameterSpace(parameterSpace);
         var graphDim = GraphDimensions.of(100, 1_000);
-        var actualEstimation = LinkPredictionTrain.estimate(pipeline, trainConfig).estimate(graphDim, trainConfig.concurrency());
+        MemoryTree actualEstimation = LinkPredictionTrain
+            .estimate(pipeline, trainConfig)
+            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
 
         assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
     }
@@ -277,7 +285,9 @@ class LinkPredictionTrainTest {
 
         var pipeline = new LinkPredictionPipeline();
         var graphDim = GraphDimensions.of(100, 1_000);
-        var actualEstimation = LinkPredictionTrain.estimate(pipeline, trainConfig).estimate(graphDim, trainConfig.concurrency());
+        MemoryTree actualEstimation = LinkPredictionTrain
+            .estimate(pipeline, trainConfig)
+            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
 
         assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
     }
@@ -325,5 +335,17 @@ class LinkPredictionTrainTest {
         );
 
         return linkPredictionTrain.compute();
+    }
+
+    GraphDimensions graphDimensionsWithSplits(GraphDimensions inputDimensions, LinkPredictionSplitConfig splitConfig) {
+        var expectedSetSizes = splitConfig.expectedSetSizes(inputDimensions.relCountUpperBound());
+
+        return GraphDimensions.builder()
+            .from(inputDimensions)
+            .putRelationshipCount(RelationshipType.of(splitConfig.testRelationshipType()), expectedSetSizes.testSize())
+            .putRelationshipCount(RelationshipType.of(splitConfig.testComplementRelationshipType()), expectedSetSizes.testComplementSize())
+            .putRelationshipCount(RelationshipType.of(splitConfig.featureInputRelationshipType()), expectedSetSizes.featureInputSize())
+            .putRelationshipCount(RelationshipType.of(splitConfig.trainRelationshipType()), expectedSetSizes.trainSize())
+            .build();
     }
 }

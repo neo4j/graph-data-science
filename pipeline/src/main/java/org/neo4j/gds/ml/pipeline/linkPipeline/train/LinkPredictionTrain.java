@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.collections.ReadOnlyHugeLongIdentityArray;
@@ -379,12 +380,12 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             .max("Features and targets", List.of(
                 LinkFeaturesAndTargetsExtractor.estimate(
                     fudgedLinkFeatureDim,
-                    totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).trainSize(),
+                    relCounts -> relCounts.get(RelationshipType.of(splitConfig.trainRelationshipType())),
                     "Train"
                 ),
                 LinkFeaturesAndTargetsExtractor.estimate(
                     fudgedLinkFeatureDim,
-                    totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).testSize(),
+                    relCounts -> relCounts.get(RelationshipType.of(splitConfig.testRelationshipType())),
                     "Test"
                 )
             ))
