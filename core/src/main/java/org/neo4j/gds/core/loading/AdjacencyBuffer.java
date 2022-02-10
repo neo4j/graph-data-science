@@ -45,7 +45,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 /**
- * Wraps a paged representation of {@link org.neo4j.gds.core.loading.CompressedLongArray}s
+ * Wraps a paged representation of {@link org.neo4j.gds.core.loading.ChunkedAdjacencyLists}s
  * which store the target ids for each node during import.
  *
  * An instance of this class exists exactly once per relationship type and has the following
@@ -62,7 +62,7 @@ public final class AdjacencyBuffer {
 
     private final AdjacencyCompressorFactory adjacencyCompressorFactory;
     private final ThreadLocalRelationshipsBuilder[] localBuilders;
-    private final ChunkedAdjacencyLists[] compressedAdjacencyLists;
+    private final ChunkedAdjacencyLists[] chunkedAdjacencyLists;
     private final int pageShift;
     private final long pageMask;
     private final LongAdder relationshipCounter;
@@ -147,13 +147,13 @@ public final class AdjacencyBuffer {
         SingleTypeRelationshipImporter.ImportMetaData importMetaData,
         AdjacencyCompressorFactory adjacencyCompressorFactory,
         ThreadLocalRelationshipsBuilder[] localBuilders,
-        ChunkedAdjacencyLists[] compressedAdjacencyLists,
+        ChunkedAdjacencyLists[] chunkedAdjacencyLists,
         int pageSize,
         boolean atLeastOnePropertyToLoad
     ) {
         this.adjacencyCompressorFactory = adjacencyCompressorFactory;
         this.localBuilders = localBuilders;
-        this.compressedAdjacencyLists = compressedAdjacencyLists;
+        this.chunkedAdjacencyLists = chunkedAdjacencyLists;
         this.pageShift = Integer.numberOfTrailingZeros(pageSize);
         this.pageMask = pageSize - 1;
         this.relationshipCounter = adjacencyCompressorFactory.relationshipCounter();
@@ -208,7 +208,7 @@ public final class AdjacencyBuffer {
 
                 int localId = (int) (source & pageMask);
 
-                ChunkedAdjacencyLists compressedTargets = this.compressedAdjacencyLists[pageIndex];
+                ChunkedAdjacencyLists compressedTargets = this.chunkedAdjacencyLists[pageIndex];
 
                 var targetsToImport = endOffset - startOffset;
                 if (propertyValues == null) {
@@ -239,7 +239,7 @@ public final class AdjacencyBuffer {
             tasks.add(new AdjacencyListBuilderTask(
                 baseNodeId,
                 localBuilders[page],
-                compressedAdjacencyLists[page],
+                chunkedAdjacencyLists[page],
                 relationshipCounter,
                 mapper.orElse(ZigZagLongDecoding.Identity.INSTANCE)
             ));
@@ -265,13 +265,13 @@ public final class AdjacencyBuffer {
     }
 
     /**
-     * Responsible for writing a page of CompressedLongArrays into the adjacency list.
+     * Responsible for writing a page of ChunkedAdjacencyLists into the adjacency list.
      */
     static final class AdjacencyListBuilderTask implements Runnable {
 
         private final long baseNodeId;
         private final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder;
-        private final ChunkedAdjacencyLists compressedLongArrays;
+        private final ChunkedAdjacencyLists chunkedAdjacencyLists;
         // A long array that may or may not be used during the compression.
         private final LongArrayBuffer buffer;
         private final LongAdder relationshipCounter;
@@ -280,13 +280,13 @@ public final class AdjacencyBuffer {
         AdjacencyListBuilderTask(
             long baseNodeId,
             ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder,
-            ChunkedAdjacencyLists compressedLongArrays,
+            ChunkedAdjacencyLists chunkedAdjacencyLists,
             LongAdder relationshipCounter,
             AdjacencyCompressor.ValueMapper valueMapper
         ) {
             this.baseNodeId = baseNodeId;
             this.threadLocalRelationshipsBuilder = threadLocalRelationshipsBuilder;
-            this.compressedLongArrays = compressedLongArrays;
+            this.chunkedAdjacencyLists = chunkedAdjacencyLists;
             this.valueMapper = valueMapper;
             this.buffer = new LongArrayBuffer();
             this.relationshipCounter = relationshipCounter;
@@ -296,7 +296,7 @@ public final class AdjacencyBuffer {
         public void run() {
             try (var compressor = threadLocalRelationshipsBuilder.intoCompressor()) {
                 var importedRelationships = new MutableLong(0L);
-                compressedLongArrays.consume((localId, targets, properties, compressedByteSize, numberOfCompressedTargets) -> {
+                chunkedAdjacencyLists.consume((localId, targets, properties, compressedByteSize, numberOfCompressedTargets) -> {
                     var nodeId = valueMapper.map(baseNodeId + localId);
                     importedRelationships.add(compressor.applyVariableDeltaEncoding(
                         nodeId,
