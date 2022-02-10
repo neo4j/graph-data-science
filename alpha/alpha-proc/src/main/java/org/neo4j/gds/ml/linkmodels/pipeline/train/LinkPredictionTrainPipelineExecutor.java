@@ -97,12 +97,15 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
             .maxEstimation("NodeProperty Steps", nodePropertyStepEstimations)
             .estimate(dimensionForNodePropertySteps, configuration.concurrency());
 
-        // FIXME use a graphDimension with test and train relationship type here
+        var trainDimensions = GraphDimensions.builder().from(graphDimensions)
+            .putRelationshipCount(RelationshipType.of(pipeline.splitConfig().trainRelationshipType()), expectedSetSizes.trainSize())
+            .putRelationshipCount(RelationshipType.of(pipeline.splitConfig().testRelationshipType()), expectedSetSizes.testSize())
+            .build();
         var trainingEstimation = MemoryEstimations
             .builder()
             .add("Train pipeline", LinkPredictionTrain.estimate(pipeline, configuration))
             .build()
-            .estimate(graphDimensions, configuration.concurrency());
+            .estimate(trainDimensions, configuration.concurrency());
 
         // FIXME consider size of LinkPredictionTrainPipelineExecutor instance
         return new CompositeMaxTree("Pipeline execution", List.of(splitEstimations, maxOverNodePropertySteps, trainingEstimation));
