@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.datasets;
 
+import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
@@ -52,6 +53,7 @@ public final class CommunityDbCreator implements DbCreator {
     private static DatabaseManagementServiceBuilder builder(Path storeDir) {
         return new DatabaseManagementServiceBuilder(storeDir)
             .setConfig(Settings.procedureUnrestricted(), List.of("gds.*"))
+            .setConfig(GraphDatabaseSettings.procedure_allowlist, List.of("gds.*"))
             .setConfig(Settings.udc(), false)
             .setConfig(Settings.boltEnabled(), false)
             .setConfig(Settings.httpEnabled(), false)

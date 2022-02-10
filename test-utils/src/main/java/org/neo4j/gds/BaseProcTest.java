@@ -26,21 +26,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.ExceptionMessageMatcher;
-import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
-import org.neo4j.test.TestDatabaseManagementServiceBuilder;
-import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,13 +48,6 @@ public class BaseProcTest extends BaseTest {
     @AfterEach
     void cleanupGraphStoreCatalog() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-    }
-
-    @Override
-    @ExtensionCallback
-    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        super.configuration(builder);
-        builder.setConfig(Settings.procedureUnrestricted(), singletonList("gds.*"));
     }
 
     protected void registerFunctions(Class<?>... functionClasses) throws Exception {
