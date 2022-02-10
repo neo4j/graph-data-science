@@ -50,12 +50,12 @@ final class LinkFeaturesAndTargetsExtractor {
             .builder()
             .rangePerGraphDimension(setDesc + " relationship features", (graphDim, threads) -> fudgedLinkFeatureDim
                 .apply(MemoryUsage::sizeOfDoubleArray)
-                .times(relSetSizeExtractor.applyAsLong(graphDim.maxRelCount()))
+                .times(relSetSizeExtractor.applyAsLong(graphDim.relCountUpperBound()))
                 .add(MemoryUsage.sizeOfInstance(HugeObjectArray.class)))
             .perGraphDimension(
                 setDesc + "relationship targets",
                 (graphDim, threads) -> MemoryRange.of(
-                    HugeDoubleArray.memoryEstimation(relSetSizeExtractor.applyAsLong(graphDim.maxRelCount()))
+                    HugeDoubleArray.memoryEstimation(relSetSizeExtractor.applyAsLong(graphDim.relCountUpperBound()))
                 )
             ).build();
     }

@@ -422,7 +422,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 "Cross-Validation splitting",
                 StratifiedKFoldSplitter.memoryEstimation(
                     splitConfig.validationFolds(),
-                    dim -> splitConfig.expectedSetSizes(dim.maxRelCount()).trainSize()
+                    dim -> splitConfig.expectedSetSizes(dim.relCountUpperBound()).trainSize()
                 )
             )
             .add(maxEstimationOverModelCandidates)
@@ -444,7 +444,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 "Sorted probabilities",
                 (dim, threads) -> {
                     long trainSetSize = splitConfig
-                        .expectedSetSizes(dim.maxRelCount())
+                        .expectedSetSizes(dim.relCountUpperBound())
                         .trainSize();
                     return LinkPredictionEvaluationMetricComputer.estimate(trainSetSize);
                 }

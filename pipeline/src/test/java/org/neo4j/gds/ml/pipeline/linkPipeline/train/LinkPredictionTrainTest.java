@@ -257,9 +257,6 @@ class LinkPredictionTrainTest {
         var graphDim = GraphDimensions.of(100, 1_000);
         var actualEstimation = LinkPredictionTrain.estimate(pipeline, trainConfig).estimate(graphDim, trainConfig.concurrency());
 
-        System.out.println("actualEstimation.memoryUsage().min = " + actualEstimation.memoryUsage().min);
-        System.out.println("actualEstimation.memoryUsage().max = " + actualEstimation.memoryUsage().max);
-
         assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
     }
 
