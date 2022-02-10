@@ -48,11 +48,11 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
-import static org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrain.MODEL_TYPE;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain.MODEL_TYPE;
 
 @Neo4jModelCatalogExtension
 class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {

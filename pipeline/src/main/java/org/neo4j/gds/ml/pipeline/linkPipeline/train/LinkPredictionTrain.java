@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.train;
+package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.immutables.value.Value;
@@ -69,8 +69,8 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionEvaluationMetricComputer.computeMetric;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionEvaluationMetricComputer.computeMetric;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
@@ -98,7 +98,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         this.allocationTracker = AllocationTracker.empty();
     }
 
-    static Task progressTask() {
+    public static Task progressTask() {
         return Tasks.task(
             LinkPredictionTrain.class.getSimpleName(),
             Tasks.leaf("extract train features"),
@@ -460,8 +460,16 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 // After the training, the training features and targets are no longer accessed.
                 // As the lifetimes of training and test data is non-overlapping, we assume the max is sufficient.
                 .max("Features and targets", List.of(
-                    estimateFeaturesAndTargets(fudgedLinkFeatureDim, totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).trainSize(), "Train"),
-                    estimateFeaturesAndTargets(fudgedLinkFeatureDim, totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).testSize(), "Test")
+                    estimateFeaturesAndTargets(
+                        fudgedLinkFeatureDim,
+                        totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).trainSize(),
+                        "Train"
+                    ),
+                    estimateFeaturesAndTargets(
+                        fudgedLinkFeatureDim,
+                        totalRelCount -> splitConfig.expectedSetSizes(totalRelCount).testSize(),
+                        "Test"
+                    )
                 ))
                 .add(estimateModelSelection(pipeline, fudgedLinkFeatureDim, numberOfMetrics))
                 // we do not consider the training of the best model on the outer train set as the memory estimation is at most the maximum of the model training during the model selection
@@ -472,7 +480,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 .build();
         }
 
-        @NotNull
         private static MemoryEstimation estimateFeaturesAndTargets(
             MemoryRange fudgedLinkFeatureDim,
             LongUnaryOperator relSetSizeExtractor,

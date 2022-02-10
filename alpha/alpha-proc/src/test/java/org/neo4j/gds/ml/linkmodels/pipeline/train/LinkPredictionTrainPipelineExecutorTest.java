@@ -55,6 +55,9 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.ImmutableLinkPredictionTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
 

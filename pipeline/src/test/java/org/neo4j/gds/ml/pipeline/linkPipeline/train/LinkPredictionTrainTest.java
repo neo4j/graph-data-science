@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.train;
+package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
@@ -192,4 +192,6 @@ class LinkPredictionTrainTest {
 
         return linkPredictionTrain.compute();
     }
+
+
 }

@@ -26,6 +26,9 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainResult;
 
 import java.util.Map;
 import java.util.Optional;
@@ -34,8 +37,6 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallRelationshipSets;
 
 public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPredictionTrainConfig, LinkPredictionPipeline, LinkPredictionTrainResult> {
-
-    private static final int RECOMMENDED_MIN_RELS_PER_SET = 5;
 
     private final RelationshipSplitter relationshipSplitter;
 

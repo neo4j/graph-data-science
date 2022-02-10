@@ -17,19 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.train;
+package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 
 @ValueClass
-interface FeaturesAndTargets {
-    HugeObjectArray<double[]> features();
+public interface LinkPredictionTrainResult {
+    Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model();
 
-    HugeDoubleArray targets();
-
-    default long size() {
-        return features().size();
-    }
+    LinkPredictionTrain.ModelSelectResult modelSelectionStatistics();
 }
