@@ -22,14 +22,11 @@ package org.neo4j.gds.ml.splitting;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -42,7 +39,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.values.storable.NumberType;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -72,39 +68,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
 
     @Override
     public GraphStoreAlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> algorithmFactory() {
-        return new GraphStoreAlgorithmFactory<>() {
-
-            @Override
-            public String taskName() {
-                return "SplitRelationships";
-            }
-
-            @Override
-            public SplitRelationships build(
-                GraphStore graphStore,
-                SplitRelationshipsMutateConfig configuration,
-                AllocationTracker allocationTracker,
-                ProgressTracker progressTracker
-            ) {
-                Optional<String> weightProperty = configuration != null
-                    ? Optional.ofNullable(configuration.relationshipWeightProperty())
-                    : Optional.empty();
-
-                Collection<NodeLabel> nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
-                Collection<RelationshipType> relationshipTypes = configuration.internalRelationshipTypes(graphStore);
-
-                var graph = graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
-                var masterGraph = graph;
-                if (!configuration.nonNegativeRelationshipTypes().isEmpty()) {
-                    masterGraph = graphStore.getGraph(
-                        configuration.nodeLabelIdentifiers(graphStore),
-                        configuration.superGraphTypes(),
-                        Optional.empty()
-                    );
-                }
-                return new SplitRelationships(graph, masterGraph, configuration);
-            }
-        };
+        return new SplitRelationshipsAlgorithmFactory();
 
     }
 
