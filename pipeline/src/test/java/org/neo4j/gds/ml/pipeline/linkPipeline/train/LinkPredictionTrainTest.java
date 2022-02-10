@@ -21,7 +21,13 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -30,10 +36,13 @@ import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -104,6 +113,50 @@ class LinkPredictionTrainTest {
     @Inject
     Graph validationGraph;
 
+    static Stream<Arguments> paramsForEstimationsWithSplitConfigs() {
+        return Stream.of(
+            Arguments.of(
+                "Default",
+                LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.1).validationFolds(2).build(),
+                108_088,
+                3_138_248
+            ),
+            Arguments.of(
+                "Higher test-set",
+                LinkPredictionSplitConfigImpl.builder().testFraction(0.6).trainFraction(0.1).validationFolds(2).build(),
+                192_248,
+                6_515_208
+            ),
+            Arguments.of(
+                "Higher train-set",
+                LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.6).validationFolds(2).build(),
+                324_088,
+                10_410_248
+            ),
+            Arguments.of(
+                "Higher validation folds",
+                LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.6).validationFolds(5).build(),
+                376_264,
+                10_462_424
+            )
+        );
+    }
+
+    static Stream<Arguments> paramsForEstimationsWithParamSpace() {
+        var llrConfigs = Stream.of(
+                Map.<String, Object>of("batchSize", 10),
+                Map.<String, Object>of("batchSize", 100L)
+            )
+            .map(LinkLogisticRegressionTrainConfig::of)
+            .collect(Collectors.toList());
+
+        return Stream.of(
+            Arguments.of("LLR batchSize 10", List.of(llrConfigs.get(0)), 56360, 1675320),
+            Arguments.of("LLR batchSize 100", List.of(llrConfigs.get(1)), 111080, 3141240),
+            Arguments.of("LLR batchSize 10,100", llrConfigs, 111176, 3141336)
+        );
+    }
+
     @Test
     void trainsAModel() {
         String modelName = "model";
@@ -149,6 +202,90 @@ class LinkPredictionTrainTest {
         assertThat(modelBias).isEqualTo(modelBiasRepeated);
     }
 
+    @ParameterizedTest
+    @CsvSource(value = {
+        "  10,   10,  65_256, 1_692_056",
+        "  10,  100,  69_608, 1_829_688",
+        "  10, 1000, 111_080, 3_141_240",
+        "1000, 1000, 111_080, 3_141_240"
+    })
+    void estimateWithDifferentGraphSizes(int nodeCount, int relationshipCount, int expectedMinEstimation, int expectedMaxEstimation) {
+        var trainConfig = LinkPredictionTrainConfig
+            .builder()
+            .modelName("DUMMY")
+            .graphName("DUMMY")
+            .pipeline("DUMMY")
+            .build();
+
+        var pipeline = new LinkPredictionPipeline();
+        var graphDim = GraphDimensions.of(nodeCount, relationshipCount);
+        var actualEstimation = LinkPredictionTrain.estimate(pipeline, trainConfig).estimate(graphDim, trainConfig.concurrency());
+
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("paramsForEstimationsWithSplitConfigs")
+    void estimateWithDifferentSplits(String desc, LinkPredictionSplitConfig splitConfig, int expectedMinEstimation, int expectedMaxEstimation) {
+        var trainConfig = LinkPredictionTrainConfig
+            .builder()
+            .modelName("DUMMY")
+            .graphName("DUMMY")
+            .pipeline("DUMMY")
+            .build();
+
+        var pipeline = new LinkPredictionPipeline();
+        pipeline.setSplitConfig(splitConfig);
+        var graphDim = GraphDimensions.of(100, 1_000);
+        var actualEstimation = LinkPredictionTrain.estimate(pipeline, trainConfig).estimate(graphDim, trainConfig.concurrency());
+
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("paramsForEstimationsWithParamSpace")
+    void estimateWithParameterSpace(String desc, List<LinkLogisticRegressionTrainConfig> parameterSpace, int expectedMinEstimation, int expectedMaxEstimation) {
+        var trainConfig = LinkPredictionTrainConfig
+            .builder()
+            .modelName("DUMMY")
+            .graphName("DUMMY")
+            .pipeline("DUMMY")
+            .build();
+
+        var pipeline = new LinkPredictionPipeline();
+        pipeline.setTrainingParameterSpace(parameterSpace);
+        var graphDim = GraphDimensions.of(100, 1_000);
+        var actualEstimation = LinkPredictionTrain.estimate(pipeline, trainConfig).estimate(graphDim, trainConfig.concurrency());
+
+        System.out.println("actualEstimation.memoryUsage().min = " + actualEstimation.memoryUsage().min);
+        System.out.println("actualEstimation.memoryUsage().max = " + actualEstimation.memoryUsage().max);
+
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "  1,  63_776, 1_894_416",
+        "  2,  79_544, 2_310_024",
+        "  4, 111_080, 3_141_240",
+    })
+    void estimateWithConcurrency(int concurrency, int expectedMinEstimation, int expectedMaxEstimation) {
+        var trainConfig = LinkPredictionTrainConfig
+            .builder()
+            .modelName("DUMMY")
+            .graphName("DUMMY")
+            .pipeline("DUMMY")
+            .concurrency(concurrency)
+            .build();
+
+        var pipeline = new LinkPredictionPipeline();
+        var graphDim = GraphDimensions.of(100, 1_000);
+        var actualEstimation = LinkPredictionTrain.estimate(pipeline, trainConfig).estimate(graphDim, trainConfig.concurrency());
+
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
+    }
+
+
     private LinkPredictionPipeline linkPredictionPipeline() {
         LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
 
@@ -192,6 +329,4 @@ class LinkPredictionTrainTest {
 
         return linkPredictionTrain.compute();
     }
-
-
 }
