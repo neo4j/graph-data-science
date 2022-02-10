@@ -104,8 +104,8 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
 
         runQueryWithRowConsumer(query, map("relProjection", relProjection),
             row -> {
-                assertEquals(112097208, row.getNumber("bytesMin").longValue());
-                assertEquals(112097208, row.getNumber("bytesMax").longValue());
+                assertEquals(68674728, row.getNumber("bytesMin").longValue());
+                assertEquals(68674728, row.getNumber("bytesMax").longValue());
                 assertEquals(expectedPercentage, row.getNumber("heapPercentageMin").doubleValue());
                 assertEquals(expectedPercentage, row.getNumber("heapPercentageMax").doubleValue());
             }
@@ -202,8 +202,8 @@ class GraphProjectProcEstimateTest extends BaseProcTest {
         String query = "CALL gds.graph.project.estimate('*', '*', {nodeCount: 5000000000, relationshipCount: 20000000000})";
         runQueryWithRowConsumer(query,
             row -> {
-                assertEquals(560_443_848_664L, row.getNumber("bytesMin").longValue());
-                assertEquals(640_443_848_664L, row.getNumber("bytesMax").longValue());
+                assertEquals(344_072_381_216L, row.getNumber("bytesMin").longValue());
+                assertEquals(384_874_570_528L, row.getNumber("bytesMax").longValue());
                 assertEquals(5_000_000_000L, row.getNumber("nodeCount").longValue());
                 assertEquals(20_000_000_000L, row.getNumber("relationshipCount").longValue());
             }
