@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Collection;
@@ -60,5 +61,10 @@ public class SplitRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFacto
             );
         }
         return new SplitRelationships(graph, masterGraph, configuration);
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(SplitRelationshipsMutateConfig configuration) {
+        return SplitRelationships.estimate(configuration);
     }
 }

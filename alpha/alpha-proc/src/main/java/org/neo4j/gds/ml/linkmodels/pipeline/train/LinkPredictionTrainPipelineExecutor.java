@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.linkPipeline.ExpectedSetSizes;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
@@ -40,6 +41,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.ml.linkmodels.pipeline.train.RelationshipSplitter.splitEstimation;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallRelationshipSets;
 
 public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPredictionTrainConfig, LinkPredictionPipeline, LinkPredictionTrainResult> {
@@ -72,8 +74,16 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
     }
 
     public static MemoryTree estimate(LinkPredictionPipeline pipeline, LinkPredictionTrainConfig configuration, GraphDimensions graphDimensions) {
-        // FIXME estimate memory for relationship splits
+        ExpectedSetSizes expectedSetSizes = pipeline
+            .splitConfig()
+            .expectedSetSizes(graphDimensions.relCountUpperBound());
 
+        MemoryTree splitEstimations = splitEstimation(
+            pipeline.splitConfig(),
+            configuration.concurrency(),
+            graphDimensions,
+            expectedSetSizes
+        );
 
         var nodePropertyStepEstimations = pipeline
             .nodePropertySteps()
@@ -81,8 +91,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
             .map(ExecutableNodePropertyStep::estimate)
             .collect(Collectors.toList());
 
-        long featureInputRelSize = pipeline.splitConfig().expectedSetSizes(graphDimensions.relCountUpperBound()).featureInputSize();
-        GraphDimensions dimensionForNodePropertySteps = GraphDimensions.of(graphDimensions.nodeCount(), featureInputRelSize);
+        GraphDimensions dimensionForNodePropertySteps = GraphDimensions.of(graphDimensions.nodeCount(), expectedSetSizes.featureInputSize());
         // this has the drawback, that we disregard the sizes of the mutate-properties, but it's a better approximation than adding all together
         MemoryTree maxOverNodePropertySteps = MemoryEstimations
             .maxEstimation("NodeProperty Steps", nodePropertyStepEstimations)
@@ -96,7 +105,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
             .estimate(graphDimensions, configuration.concurrency());
 
         // FIXME consider size of LinkPredictionTrainPipelineExecutor instance
-        return new CompositeMaxTree("Pipeline execution", List.of(maxOverNodePropertySteps, trainingEstimation));
+        return new CompositeMaxTree("Pipeline execution", List.of(splitEstimations, maxOverNodePropertySteps, trainingEstimation));
     }
 
     @Override

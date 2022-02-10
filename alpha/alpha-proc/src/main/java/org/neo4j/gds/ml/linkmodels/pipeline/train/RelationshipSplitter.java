@@ -19,19 +19,26 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
+import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
+import org.neo4j.gds.ml.splitting.ImmutableSplitRelationshipsMutateConfig;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsAlgorithmFactory;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateConfig;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -118,5 +125,35 @@ public class RelationshipSplitter {
             new ProcedureExecutorSpec<>(),
             executionContext
         ).compute(graphName, splitRelationshipProcConfig, false, false);
+    }
+
+    static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, List<String> relationshipTypes) {
+        List<String> checkRelTypes = relationshipTypes
+            .stream()
+            .map(type -> type.equals(ElementProjection.PROJECT_ALL) ? RelationshipType.ALL_RELATIONSHIPS.name : type)
+            .collect(Collectors.toList());
+
+        SplitRelationshipsMutateConfig testSplitConfig =  ImmutableSplitRelationshipsMutateConfig.builder()
+            .from(splitConfig.testSplit())
+            .relationshipTypes(checkRelTypes)
+            .build();
+
+        var firstSplitEstimation = MemoryEstimations
+            .builder("Test/Test-complement split")
+            .add(new SplitRelationshipsAlgorithmFactory().memoryEstimation(testSplitConfig))
+            .build();
+
+
+        SplitRelationshipsMutateConfig trainSplitConfig = ImmutableSplitRelationshipsMutateConfig.builder()
+            .from(splitConfig.trainSplit())
+            .relationshipTypes(List.of(splitConfig.testComplementRelationshipType()))
+            .build();
+
+        var secondSplitEstimation = MemoryEstimations
+            .builder("Train/Feature-input split")
+            .add(new SplitRelationshipsAlgorithmFactory().memoryEstimation(trainSplitConfig))
+            .build();
+
+        return MemoryEstimations.maxEstimation("Split relationships", List.of(firstSplitEstimation, secondSplitEstimation));
     }
 }

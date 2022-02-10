@@ -39,9 +39,12 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -56,7 +59,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.ImmutableLinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.test.TestMutateProc;
@@ -419,5 +421,23 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                     "Link Prediction Train Pipeline :: Finished"
                 );
         });
+    }
+
+    @Test
+    void estimate() {
+        var config = LinkPredictionTrainConfig
+            .builder()
+            .modelName("DUMMY")
+            .graphName("DUMMY")
+            .pipeline("DUMMY")
+            .build();
+
+        MemoryTree actualEstimation = LinkPredictionTrainPipelineExecutor.estimate(
+            new LinkPredictionPipeline(),
+            config,
+            GraphDimensions.of(10, 1337)
+        );
+
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(42, 42));
     }
 }
