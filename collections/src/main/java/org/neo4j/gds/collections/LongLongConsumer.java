@@ -19,28 +19,7 @@
  */
 package org.neo4j.gds.collections;
 
-import com.google.auto.common.BasicAnnotationProcessor;
-import com.google.auto.service.AutoService;
-import org.neo4j.gds.collections.hsa.HugeSparseArrayStep;
-import org.neo4j.gds.collections.hsal.HugeSparseArrayListStep;
-
-import javax.annotation.processing.Processor;
-import javax.lang.model.SourceVersion;
-import java.util.List;
-
-@AutoService(Processor.class)
-public class CollectionsProcessor extends BasicAnnotationProcessor {
-
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.RELEASE_11;
-    }
-
-    @Override
-    protected Iterable<? extends Step> steps() {
-        return List.of(
-            new HugeSparseArrayStep(processingEnv),
-            new HugeSparseArrayListStep(processingEnv)
-        );
-    }
+@FunctionalInterface
+interface LongLongConsumer {
+    void consume(long index, long value);
 }

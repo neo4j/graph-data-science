@@ -19,28 +19,34 @@
  */
 package org.neo4j.gds.collections;
 
-import com.google.auto.common.BasicAnnotationProcessor;
-import com.google.auto.service.AutoService;
-import org.neo4j.gds.collections.hsa.HugeSparseArrayStep;
-import org.neo4j.gds.collections.hsal.HugeSparseArrayListStep;
+@HugeSparseArrayList(
+    valueType = long.class,
+    forAllConsumerType = LongLongConsumer.class
+)
+public interface HugeSparseLongArrayList {
 
-import javax.annotation.processing.Processor;
-import javax.lang.model.SourceVersion;
-import java.util.List;
-
-@AutoService(Processor.class)
-public class CollectionsProcessor extends BasicAnnotationProcessor {
-
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.RELEASE_11;
+    static HugeSparseLongArrayList of(long defaultValue) {
+        return null;
     }
 
-    @Override
-    protected Iterable<? extends Step> steps() {
-        return List.of(
-            new HugeSparseArrayStep(processingEnv),
-            new HugeSparseArrayListStep(processingEnv)
-        );
+    static HugeSparseLongArrayList of(long defaultValue, long initialCapacity) {
+        return null;
     }
+
+    long capacity();
+
+    boolean contains(long index);
+
+    long get(long index);
+
+    void set(long index, long value);
+
+    boolean setIfAbsent(long index, long value);
+
+    void addTo(long index, long value);
+
+    void forAll(LongLongConsumer consumer);
+
+    DrainingIterator<long[]> drainingIterator();
+
 }

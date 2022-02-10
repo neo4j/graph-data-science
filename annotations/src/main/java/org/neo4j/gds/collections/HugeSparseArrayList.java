@@ -19,28 +19,31 @@
  */
 package org.neo4j.gds.collections;
 
-import com.google.auto.common.BasicAnnotationProcessor;
-import com.google.auto.service.AutoService;
-import org.neo4j.gds.collections.hsa.HugeSparseArrayStep;
-import org.neo4j.gds.collections.hsal.HugeSparseArrayListStep;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import javax.annotation.processing.Processor;
-import javax.lang.model.SourceVersion;
-import java.util.List;
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.CLASS)
+public @interface HugeSparseArrayList {
 
-@AutoService(Processor.class)
-public class CollectionsProcessor extends BasicAnnotationProcessor {
+    /**
+     * The type which is stored in the generated HugeSparseArrayList.
+     */
+    Class<?> valueType();
 
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.RELEASE_11;
-    }
+    /**
+     * The type which is provided to the forAll method.
+     *
+     * @return
+     */
+    Class<?> forAllConsumerType();
 
-    @Override
-    protected Iterable<? extends Step> steps() {
-        return List.of(
-            new HugeSparseArrayStep(processingEnv),
-            new HugeSparseArrayListStep(processingEnv)
-        );
-    }
+    /**
+     * The page shift defines the page size used in the
+     * generated HugeSparseArray. The default value of 12
+     * leads so 2^12 = 4096 elements per page (array).
+     */
+    int pageShift() default 12;
 }
