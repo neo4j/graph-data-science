@@ -51,10 +51,10 @@ import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.gds.similarity.knn.KnnWriteProc.computeToGraph;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.beta.knn.mutate", description = KNN_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.knn.mutate", description = KNN_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class KnnMutateProc extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig, KnnMutateProc.Result> {
 
-    @Procedure(name = "gds.beta.knn.mutate", mode = READ)
+    @Procedure(name = "gds.knn.mutate", mode = READ)
     @Description(KNN_DESCRIPTION)
     public Stream<Result> mutate(
         @Name(value = "graphName") String graphName,
@@ -64,7 +64,7 @@ public class KnnMutateProc extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig
         return computationResultConsumer().consume(computationResult, executionContext());
     }
 
-    @Procedure(value = "gds.beta.knn.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.knn.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

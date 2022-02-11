@@ -74,7 +74,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
     @Test
     void shouldWriteResults() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds", "beta", "knn")
+            .algo("gds.knn")
             .writeMode()
             .addParameter("sudo", true)
             .addParameter("nodeProperties", List.of("knn"))
@@ -152,7 +152,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
         runQuery(graphCreateQuery);
 
         var query = GdsCypher.call(graphName)
-            .algo("gds", "beta", "knn")
+            .algo("gds.knn")
             .writeMode()
             .addParameter("sudo", true)
             .addParameter("nodeProperties", List.of("knn"))
@@ -219,7 +219,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
         String relationshipProperty = "score";
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.beta.knn")
+            .algo("gds.knn")
             .writeMode()
             .addParameter("nodeLabels", List.of("Foo"))
             .addParameter("nodeProperties", List.of("age"))

@@ -200,14 +200,14 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.beta.k1coloring.write",
         "gds.beta.k1coloring.write.estimate",
 
-        "gds.beta.knn.mutate",
-        "gds.beta.knn.mutate.estimate",
-        "gds.beta.knn.stats",
-        "gds.beta.knn.stats.estimate",
-        "gds.beta.knn.stream",
-        "gds.beta.knn.stream.estimate",
-        "gds.beta.knn.write",
-        "gds.beta.knn.write.estimate",
+        "gds.knn.mutate",
+        "gds.knn.mutate.estimate",
+        "gds.knn.stats",
+        "gds.knn.stats.estimate",
+        "gds.knn.stream",
+        "gds.knn.stream.estimate",
+        "gds.knn.write",
+        "gds.knn.write.estimate",
 
         "gds.beta.listProgress",
 

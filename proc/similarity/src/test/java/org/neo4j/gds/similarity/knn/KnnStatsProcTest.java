@@ -59,7 +59,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
 
         String query = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "knn")
+            .algo("gds.knn")
             .statsMode()
             .addParameter("sudo", true)
             .addParameter("nodeProperties", List.of("knn"))
@@ -111,7 +111,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
     @Test
     void statsShouldNotHaveWriteProperties() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds", "beta", "knn")
+            .algo("gds.knn")
             .statsMode()
             .addParameter("nodeProperties", List.of("knn"))
             .yields();
@@ -151,7 +151,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
 
         String algoQuery = GdsCypher
             .call("graph")
-            .algo("gds.beta.knn")
+            .algo("gds.knn")
             .statsMode()
             .addParameter("nodeProperties", List.of("weight"))
             .addParameter("concurrency", 1)

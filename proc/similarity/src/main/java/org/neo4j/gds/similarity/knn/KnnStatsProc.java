@@ -48,10 +48,10 @@ import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.gds.similarity.knn.KnnWriteProc.computeToGraph;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.beta.knn.stats", description = STATS_DESCRIPTION, executionMode = STATS)
+@GdsCallable(name = "gds.knn.stats", description = STATS_DESCRIPTION, executionMode = STATS)
 public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.Result, KnnStatsConfig> {
 
-    @Procedure(name = "gds.beta.knn.stats", mode = READ)
+    @Procedure(name = "gds.knn.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<Result> stats(
         @Name(value = "graphName") String graphName,
@@ -60,7 +60,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
         return stats(compute(graphName, configuration));
     }
 
-    @Procedure(value = "gds.beta.knn.stats.estimate", mode = READ)
+    @Procedure(value = "gds.knn.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

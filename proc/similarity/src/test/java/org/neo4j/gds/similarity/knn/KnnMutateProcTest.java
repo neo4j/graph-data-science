@@ -97,7 +97,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
     @Test
     void shouldMutateResults() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds", "beta", "knn")
+            .algo("gds.knn")
             .mutateMode()
             .addParameter("sudo", true)
             .addParameter("nodeProperties", List.of("knn"))
@@ -165,7 +165,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         runQuery(graphCreateQuery);
 
         var query = GdsCypher.call(graphName)
-            .algo("gds", "beta", "knn")
+            .algo("gds.knn")
             .mutateMode()
             .addParameter("sudo", true)
             .addParameter("nodeProperties", List.of("knn"))
@@ -225,7 +225,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         String relationshipProperty = "score";
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.beta.knn")
+            .algo("gds.knn")
             .mutateMode()
             .addParameter("nodeLabels", List.of("Foo"))
             .addParameter("nodeProperties", List.of("age"))
@@ -268,7 +268,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         runQuery(createQuery);
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.beta.knn")
+            .algo("gds.knn")
             .mutateMode()
             .addParameter("nodeProperties", List.of("age"))
             .addParameter("similarityThreshold", 0.14)
@@ -309,7 +309,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         String relationshipProperty = "score";
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.beta.knn")
+            .algo("gds.knn")
             .mutateMode()
             .addParameter("nodeLabels", List.of("Foo"))
             .addParameter("nodeProperties", List.of("age", "knn"))

@@ -63,13 +63,13 @@ class KnnFilteredGraphTest extends BaseProcTest {
                      "}" +
                      ")";
         runQuery(create);
-        var knnQuery1 = "CALL gds.beta.knn.mutate('g', {" +
+        var knnQuery1 = "CALL gds.knn.mutate('g', {" +
                         "    nodeLabels: ['Horse']," +
                         "    mutateRelationshipType: 'FOO1'," +
                         "    mutateProperty: 'score'," +
                         "    nodeProperties: ['knn']" +
                         "})";
-        var knnQuery2 = "CALL gds.beta.knn.mutate('g', {" +
+        var knnQuery2 = "CALL gds.knn.mutate('g', {" +
                         "    nodeLabels: ['Person']," +
                         "    mutateRelationshipType: 'FOO2'," +
                         "    mutateProperty: 'score'," +

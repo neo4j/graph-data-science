@@ -39,10 +39,10 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.beta.knn.stream", description = KNN_DESCRIPTION, executionMode = ExecutionMode.STREAM)
+@GdsCallable(name = "gds.knn.stream", description = KNN_DESCRIPTION, executionMode = ExecutionMode.STREAM)
 public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult, KnnStreamConfig> {
 
-    @Procedure(value = "gds.beta.knn.stream", mode = READ)
+    @Procedure(value = "gds.knn.stream", mode = READ)
     @Description(KNN_DESCRIPTION)
     public Stream<SimilarityResult> stream(
         @Name(value = "graphName") String graphName,
@@ -52,7 +52,7 @@ public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult,
         return computationResultConsumer().consume(computationResult, executionContext());
     }
 
-    @Procedure(value = "gds.beta.knn.stream.estimate", mode = READ)
+    @Procedure(value = "gds.knn.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
