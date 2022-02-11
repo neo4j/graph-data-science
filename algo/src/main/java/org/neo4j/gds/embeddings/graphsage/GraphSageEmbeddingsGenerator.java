@@ -96,7 +96,6 @@ public class GraphSageEmbeddingsGenerator {
         HugeObjectArray<double[]> result
     ) {
         return () -> {
-            ComputationContext ctx = new ComputationContext();
             Variable<Matrix> embeddingVariable = embeddings(
                 graph,
                 isWeighted,
@@ -105,7 +104,8 @@ public class GraphSageEmbeddingsGenerator {
                 layers,
                 featureFunction
             );
-            Matrix embeddings = ctx.forward(embeddingVariable);
+
+            Matrix embeddings = new ComputationContext().forward(embeddingVariable);
 
             var partitionStartNodeId = partition.startNode();
             var partitionNodeCount = partition.nodeCount();

@@ -225,9 +225,24 @@ public class GraphSageModelTrainer {
     }
 
     private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features, Layer[] layers) {
-        var batchLocalRandomSeed = getBatchIndex(batch, graph.nodeCount()) + randomSeed;
+        var localGraph = graph.concurrentCopy();
 
-        var neighbours = neighborBatch(graph, batch, batchLocalRandomSeed).toArray();
+        long[] totalBatch = addSamplesPerBatchNode(batch, localGraph);
+
+        Variable<Matrix> embeddingVariable = embeddings(localGraph, useWeights, totalBatch, features, layers, featureFunction);
+
+        return new GraphSageLoss(
+            useWeights ? localGraph::relationshipProperty : UNWEIGHTED,
+            embeddingVariable,
+            totalBatch,
+            negativeSampleWeight
+        );
+    }
+
+    private long[] addSamplesPerBatchNode(Partition batch, Graph localGraph) {
+        var batchLocalRandomSeed = getBatchIndex(batch, localGraph.nodeCount()) + randomSeed;
+
+        var neighbours = neighborBatch(localGraph, batch, batchLocalRandomSeed).toArray();
 
         var neighborsSet = new LongHashSet(neighbours.length);
         neighborsSet.addAll(neighbours);
@@ -237,18 +252,10 @@ public class GraphSageModelTrainer {
             LongStream.concat(
                 Arrays.stream(neighbours),
                 // batch.nodeCount is <= config.batchsize (which is an int)
-                negativeBatch(graph, Math.toIntExact(batch.nodeCount()), neighborsSet, batchLocalRandomSeed)
+                negativeBatch(localGraph, Math.toIntExact(batch.nodeCount()), neighborsSet, batchLocalRandomSeed)
             )
         ).toArray();
-
-        Variable<Matrix> embeddingVariable = embeddings(graph, useWeights, totalBatch, features, layers, featureFunction);
-
-        return new GraphSageLoss(
-            useWeights ? graph::relationshipProperty : UNWEIGHTED,
-            embeddingVariable,
-            totalBatch,
-            negativeSampleWeight
-        );
+        return totalBatch;
     }
 
     LongStream neighborBatch(Graph graph, Partition batch, long batchLocalSeed) {
