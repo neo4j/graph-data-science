@@ -19,16 +19,17 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.PipelineCompanion;
-import org.neo4j.gds.ml.TrainingPipelineMemoryEstimator;
-import org.neo4j.gds.ml.pipeline.PipelineTrainingExecutorFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainResult;
@@ -39,9 +40,11 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.getLPPipeline;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.ml.pipeline.linkPrediction.train", description = "Trains a link prediction model based on a pipeline", executionMode = TRAIN)
@@ -79,16 +82,25 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
     }
 
     @Override
-    public PipelineTrainingExecutorFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory() {
         return new LinkPredictionTrainPipelineAlgorithmFactory(executionContext(), modelCatalog);
     }
 
     @Override
     protected Stream<MemoryEstimateResult> computeEstimate(Object graphNameOrConfiguration, Map<String, Object> algoConfiguration) {
-        return new TrainingPipelineMemoryEstimator<>(
+        BiFunction<GraphDimensions, LinkPredictionTrainConfig, GraphDimensions> graphDimTransformer = (graphDim, algoConfig) -> getLPPipeline(
+            modelCatalog,
+            algoConfig.pipeline(),
+            algoConfig.username()
+        )
+            .splitConfig()
+            .expectedGraphDimensions(graphDim.nodeCount(), graphDim.relCountUpperBound());
+
+        return new MemoryEstimationExecutor<>(
             this,
             new ProcedureExecutorSpec<>(),
-            executionContext()
+            executionContext(),
+            graphDimTransformer
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

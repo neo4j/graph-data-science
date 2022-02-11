@@ -19,14 +19,11 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -87,18 +84,13 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
         );
     }
 
-    @Override
     public MemoryEstimation memoryEstimation(LinkPredictionTrainConfig configuration) {
-        throw new NotImplementedException("The pipeline execution creates and uses multiple graphs. Therefore we cannot use this function");
-    }
-
-    public MemoryTree estimateMemory(LinkPredictionTrainConfig configuration, GraphDimensions graphDimensions) {
         var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(
             this.modelCatalog,
             configuration.pipeline(),
             configuration.username()
         );
 
-        return LinkPredictionTrainPipelineExecutor.estimate(pipeline, configuration, graphDimensions);
+        return LinkPredictionTrainPipelineExecutor.estimate(pipeline, configuration);
     }
 }

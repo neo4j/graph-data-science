@@ -39,12 +39,10 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -432,11 +430,11 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .pipeline("DUMMY")
             .build();
 
-        MemoryTree actualEstimation = LinkPredictionTrainPipelineExecutor.estimate(
-            new LinkPredictionPipeline(),
-            config,
-            GraphDimensions.of(10, 1337)
-        );
+        LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
+        var actualEstimation = LinkPredictionTrainPipelineExecutor.estimate(
+            pipeline,
+            config
+        ).estimate(pipeline.splitConfig().expectedGraphDimensions(100, 1_000), config.concurrency());
 
         assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(42, 42));
     }

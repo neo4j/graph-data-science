@@ -28,6 +28,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfigImpl;
 import org.neo4j.gds.utils.StringJoining;
@@ -199,6 +200,22 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             .featureInputSize(featureInputSize)
             .testComplementSize(testComplementSize)
             .validationFoldSize(foldSize)
+            .build();
+    }
+
+    @Value.Derived
+    @Configuration.Ignore
+    default GraphDimensions expectedGraphDimensions(long nodeCount, long relationshipCount) {
+        var expectedSetSizes = expectedSetSizes(relationshipCount);
+
+        return GraphDimensions.builder()
+            .nodeCount(nodeCount)
+            // matches the relCount of the original GraphStore and thus lower than the sum of all relationshipCounts
+            .relCountUpperBound(relationshipCount)
+            .putRelationshipCount(RelationshipType.of(testRelationshipType()), expectedSetSizes.testSize())
+            .putRelationshipCount(RelationshipType.of(testComplementRelationshipType()), expectedSetSizes.testComplementSize())
+            .putRelationshipCount(RelationshipType.of(trainRelationshipType()), expectedSetSizes.trainSize())
+            .putRelationshipCount(RelationshipType.of(featureInputRelationshipType()), expectedSetSizes.featureInputSize())
             .build();
     }
 }

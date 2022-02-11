@@ -36,6 +36,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -49,15 +50,26 @@ public class MemoryEstimationExecutor<
     private final AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec;
     private final ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec;
     private final ExecutionContext executionContext;
+    private final BiFunction<GraphDimensions, CONFIG, GraphDimensions> graphDimTransformer;
 
     public MemoryEstimationExecutor(
         AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec,
         ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec,
         ExecutionContext executionContext
     ) {
+        this(algoSpec, executorSpec, executionContext, (graphDimensions, config) -> graphDimensions);
+    }
+
+    public MemoryEstimationExecutor(
+        AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec,
+        ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec,
+        ExecutionContext executionContext,
+        BiFunction<GraphDimensions, CONFIG, GraphDimensions> graphDimTransformer
+    ) {
         this.algoSpec = algoSpec;
         this.executorSpec = executorSpec;
         this.executionContext = executionContext;
+        this.graphDimTransformer = graphDimTransformer;
     }
 
     public Stream<MemoryEstimateResult> computeEstimate(
@@ -69,7 +81,7 @@ public class MemoryEstimationExecutor<
 
         Pair<GraphDimensions, Optional<MemoryEstimation>> graphEstimation = graphEstimation(graphNameOrConfiguration, algoConfig);
         MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(
-            graphEstimation.getLeft(),
+            graphDimTransformer.apply(graphEstimation.getLeft(), algoConfig),
             graphEstimation.getRight(),
             algoSpec.algorithmFactory(),
             algoConfig
@@ -121,7 +133,7 @@ public class MemoryEstimationExecutor<
         }
     }
 
-    private MemoryTreeWithDimensions procedureMemoryEstimation(
+    protected MemoryTreeWithDimensions procedureMemoryEstimation(
         GraphDimensions dimensions,
         Optional<MemoryEstimation> maybeGraphMemoryEstimation,
         AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory,
