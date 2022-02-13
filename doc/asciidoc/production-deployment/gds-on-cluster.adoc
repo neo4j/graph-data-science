@@ -33,7 +33,7 @@ For more information on setting up, configuring and managing a Neo4j Causal Clus
 
 == GDS Configuration
 
-The following optional https://neo4j.com/docs/operations-manual/current/configuration/dynamic-settings/[dynamic settings] can be used to control transaction size.
+The following optional settings can be used to control transaction size.
 
 [opts="header"]
 |===
