@@ -62,6 +62,8 @@
                 </d:tocentry>
                 <d:tocentry linkend="catalog-graph-project-cypher"><?dbhtml filename="graph-project-cypher/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="catalog-graph-project-cypher-aggregation"><?dbhtml filename="graph-project-cypher-aggregation/index.html"?>
+                </d:tocentry>
                 <d:tocentry linkend="catalog-graph-list"><?dbhtml filename="graph-list/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="catalog-graph-exists"><?dbhtml filename="graph-exists/index.html"?>

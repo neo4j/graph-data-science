@@ -27,6 +27,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ReturnType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStoreFactory;
@@ -124,7 +125,7 @@ public final class CypherAggregation extends BaseProc {
         public void update(
             @Name("graphName") String graphName,
             @Name("sourceNode") Node sourceNode,
-            @Nullable @Name("target") Node targetNode,
+            @Nullable @Name("targetNode") Node targetNode,
             @Nullable @Name(value = "sourceNodeProperties", defaultValue = "null") Map<String, Object> sourceNodeProperties,
             @Nullable @Name(value = "targetNodeProperties", defaultValue = "null") Map<String, Object> targetNodeProperties,
             @Nullable @Name(value = "relationshipProperties", defaultValue = "null") Map<String, Object> relationshipProperties
@@ -247,7 +248,10 @@ public final class CypherAggregation extends BaseProc {
             return propertyValues.toArray();
         }
 
+        // TODO: generate some code for the ReturnType annotation to convert from an instance of its type
+        //  to a Map<String, Object> (similar to toMap in configuration)
         @UserAggregationResult
+        @ReturnType(AggregationResult.class)
         public Map<String, Object> result() {
 
             var graphName = this.graphName;
@@ -366,6 +370,13 @@ public final class CypherAggregation extends BaseProc {
 
             R cypherAggregation(GraphProjectFromCypherAggregation cypherAggregationConfig);
         }
+    }
+
+    public static final class AggregationResult {
+        public String graphName;
+        public long nodeCount;
+        public long relationshipCount;
+        public long projectMillis;
     }
 }
 

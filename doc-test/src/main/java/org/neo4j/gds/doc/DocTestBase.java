@@ -68,6 +68,7 @@ public abstract class DocTestBase extends BaseProcTest {
         Class<?>[] clazzArray = new Class<?>[0];
         registerProcedures(procedures().toArray(clazzArray));
         registerFunctions(functions().toArray(clazzArray));
+        registerAggregationFunctions(aggregationFunctions().toArray(clazzArray));
 
         QueryCollectingTreeProcessor treeProcessor;
         try (var asciidoctor = create()) {
@@ -127,14 +128,20 @@ public abstract class DocTestBase extends BaseProcTest {
         });
     }
 
-    List<Class<?>> functions() { return List.of(); }
+    List<Class<?>> functions() {
+        return List.of();
+    }
+
+    List<Class<?>> aggregationFunctions() {
+        return List.of();
+    }
 
     Runnable cleanup() {
         return GraphStoreCatalog::removeAllLoadedGraphs;
     }
 
     private void runQueryExample(QueryExample queryExample) {
-        if(queryExample.assertResults()) {
+        if (queryExample.assertResults()) {
             runQueryExampleAndAssertResults(queryExample);
         } else {
             assertThatNoException().isThrownBy(() -> runQuery(queryExample.query()));

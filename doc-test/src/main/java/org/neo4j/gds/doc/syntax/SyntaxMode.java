@@ -30,6 +30,7 @@ public enum SyntaxMode {
     MODEL_DROP("model-drop-syntax"),
     GRAPH_PROJECT("graph-project-syntax"),
     GRAPH_PROJECT_CYPHER("graph-project-cypher-syntax"),
+    GRAPH_PROJECT_CYPHER_AGGREGATION("graph-project-cypher-aggregation-syntax"),
     STREAM_NODE_PROPERTIES("stream-node-properties-syntax"),
     STREAM_SINGLE_PROPERTY("include-with-stream-single-property"),
     GRAPH_EXISTS("graph-exists-syntax"),

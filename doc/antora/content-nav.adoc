@@ -19,6 +19,7 @@
 ** xref:management-ops/graph-catalog-ops/index.adoc[]
 *** xref:graph-project/index.adoc[]
 *** xref:graph-project-cypher/index.adoc[]
+*** xref:graph-project-cypher-aggregation/index.adoc[]
 *** xref:graph-list/index.adoc[]
 *** xref:graph-exists/index.adoc[]
 *** xref:graph-drop/index.adoc[]
