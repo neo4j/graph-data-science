@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections.hsal;
+package org.neo4j.gds.collections.hsl;
 
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
@@ -37,16 +37,16 @@ import java.util.stream.IntStream;
 
 import static java.util.Map.entry;
 
-final class HugeSparseArrayListTestGenerator {
+final class HugeSparseListTestGenerator {
 
     // To avoid having implementation dependencies on
     // junit / assertj, we use fully qualified names instead.
     private static final ClassName ASSERTJ_ASSERTIONS = ClassName.get("org.assertj.core.api", "Assertions");
     private static final ClassName TEST_ANNOTATION = ClassName.get("org.junit.jupiter.api", "Test");
 
-    private HugeSparseArrayListTestGenerator() {}
+    private HugeSparseListTestGenerator() {}
 
-    static TypeSpec generate(HugeSparseArrayListValidation.Spec spec) {
+    static TypeSpec generate(HugeSparseListValidation.Spec spec) {
         var className = ClassName.get(spec.rootPackage().toString(), spec.className() + "Test");
         var elementType = TypeName.get(spec.element().asType());
         var valueType = TypeName.get(spec.valueType());

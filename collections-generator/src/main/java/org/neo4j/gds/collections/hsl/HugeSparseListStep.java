@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections.hsal;
+package org.neo4j.gds.collections.hsl;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSet;
@@ -35,18 +35,18 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
 
-public class HugeSparseArrayListStep implements BasicAnnotationProcessor.Step {
+public class HugeSparseListStep implements BasicAnnotationProcessor.Step {
 
     private static final Class<HugeSparseList> HSAL_ANNOTATION = HugeSparseList.class;
 
     private final Messager messager;
     private final Filer filer;
 
-    private final HugeSparseArrayListValidation validation;
+    private final HugeSparseListValidation validation;
     private final Path sourcePath;
 
-    public HugeSparseArrayListStep(ProcessingEnvironment processingEnv, Path sourcePath) {
-        this.validation = new HugeSparseArrayListValidation(
+    public HugeSparseListStep(ProcessingEnvironment processingEnv, Path sourcePath) {
+        this.validation = new HugeSparseListValidation(
             processingEnv.getTypeUtils(),
             processingEnv.getElementUtils(),
             processingEnv.getMessager()
@@ -86,7 +86,7 @@ public class HugeSparseArrayListStep implements BasicAnnotationProcessor.Step {
 
         var spec = validationResult.get();
 
-        var typeSpec = HugeSparseArrayListGenerator.generate(spec);
+        var typeSpec = HugeSparseListGenerator.generate(spec);
         var mainFile = javaFile(spec.rootPackage().toString(), typeSpec);
 
         var result = writeFile(element, mainFile);

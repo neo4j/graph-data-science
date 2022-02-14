@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections.hsal;
+package org.neo4j.gds.collections.hsl;
 
 import com.google.auto.common.MoreElements;
 import com.squareup.javapoet.ArrayTypeName;
@@ -37,13 +37,13 @@ import java.util.Optional;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 
-final class HugeSparseArrayListValidation {
+final class HugeSparseListValidation {
 
     private final Types typeUtils;
     private final Elements elementUtils;
     private final Messager messager;
 
-    HugeSparseArrayListValidation(Types typeUtils, Elements elementUtils, Messager messager) {
+    HugeSparseListValidation(Types typeUtils, Elements elementUtils, Messager messager) {
         this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
         this.messager = messager;
