@@ -416,7 +416,7 @@ We use default values for the procedure configuration parameter for most paramet
 The `randomSeed` and `concurrency` is set to produce the same result on every invocation.
 The `topK` parameter is set to 1 to only return the single nearest neighbor for every node.
 Notice that the similarity between Dave and Eve is very low.
-Setting the `similarityThreshold` parameter to 0.10 will filter the relationship between them, removing it from the result.
+Setting the `similarityCutoff` parameter to 0.10 will filter the relationship between them, removing it from the result.
 
 [[algorithms-knn-examples-stats]]
 === Stats

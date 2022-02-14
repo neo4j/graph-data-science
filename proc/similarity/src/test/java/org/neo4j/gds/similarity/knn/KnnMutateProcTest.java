@@ -271,7 +271,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             .algo("gds.knn")
             .mutateMode()
             .addParameter("nodeProperties", List.of("age"))
-            .addParameter("similarityThreshold", 0.14)
+            .addParameter("similarityCutoff", 0.14)
             .addParameter("mutateRelationshipType", relationshipType)
             .addParameter("mutateProperty", relationshipProperty).yields();
         runQuery(algoQuery);

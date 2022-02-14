@@ -67,8 +67,8 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
 
     @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
-    default double similarityThreshold() {
-        return 0;
+    default double similarityCutoff() {
+        return 1E-42;
     }
 
     @Configuration.IntegerRange(min = 1)

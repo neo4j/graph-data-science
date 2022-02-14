@@ -238,7 +238,7 @@ class KnnTest {
             .nodeProperties(List.of("age"))
             .concurrency(1)
             .randomSeed(19L)
-            .similarityThreshold(0.14)
+            .similarityCutoff(0.14)
             .topK(2)
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
