@@ -53,6 +53,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.database.NamedDatabaseId;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserAggregationFunction;
 import org.neo4j.procedure.UserAggregationResult;
@@ -71,6 +72,7 @@ import java.util.function.LongPredicate;
 public final class CypherAggregation extends BaseProc {
 
     @UserAggregationFunction(name = "gds.alpha.graph")
+    @Description("Creates a named graph in the catalog for use by algorithms.")
     public GraphAggregator projectFromCypherAggregation() {
 
         var progressTimer = ProgressTimer.start();
