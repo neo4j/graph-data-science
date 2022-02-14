@@ -19,31 +19,7 @@
  */
 package org.neo4j.gds.collections;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
-public @interface HugeSparseArrayList {
-
-    /**
-     * The type which is stored in the generated HugeSparseArrayList.
-     */
-    Class<?> valueType();
-
-    /**
-     * The type which is provided to the forAll method.
-     *
-     * @return
-     */
-    Class<?> forAllConsumerType();
-
-    /**
-     * The page shift defines the page size used in the
-     * generated HugeSparseArray. The default value of 12
-     * leads so 2^12 = 4096 elements per page (array).
-     */
-    int pageShift() default 12;
+@FunctionalInterface
+public interface LongLongArrayConsumer {
+    void consume(long index, long[] value);
 }

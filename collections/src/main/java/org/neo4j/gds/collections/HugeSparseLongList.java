@@ -20,29 +20,33 @@
 package org.neo4j.gds.collections;
 
 @HugeSparseList(
-    valueType = long[].class,
-    forAllConsumerType = LongLongArrayConsumer.class
+    valueType = long.class,
+    forAllConsumerType = LongLongConsumer.class
 )
-public interface HugeSparseLongArrayList {
+public interface HugeSparseLongList {
 
-    static HugeSparseLongArrayList of(long[] defaultValue) {
+    static HugeSparseLongList of(long defaultValue) {
         return of(defaultValue, 0);
     }
 
-    static HugeSparseLongArrayList of(long[] defaultValue, long initialCapacity) {
-        return new HugeSparseLongArrayListSon(defaultValue, initialCapacity);
+    static HugeSparseLongList of(long defaultValue, long initialCapacity) {
+        return new HugeSparseLongListSon(defaultValue, initialCapacity);
     }
 
     long capacity();
 
     boolean contains(long index);
 
-    long[] get(long index);
+    long get(long index);
 
-    void set(long index, long[] value);
+    void set(long index, long value);
 
-    void forAll(LongLongArrayConsumer consumer);
+    boolean setIfAbsent(long index, long value);
 
-    DrainingIterator<long[][]> drainingIterator();
+    void addTo(long index, long value);
+
+    void forAll(LongLongConsumer consumer);
+
+    DrainingIterator<long[]> drainingIterator();
 
 }

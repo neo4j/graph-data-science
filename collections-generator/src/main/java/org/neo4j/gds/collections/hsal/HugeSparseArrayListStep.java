@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import org.neo4j.gds.collections.HugeSparseArrayList;
+import org.neo4j.gds.collections.HugeSparseList;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -37,7 +37,7 @@ import java.util.Set;
 
 public class HugeSparseArrayListStep implements BasicAnnotationProcessor.Step {
 
-    private static final Class<HugeSparseArrayList> HSAL_ANNOTATION = HugeSparseArrayList.class;
+    private static final Class<HugeSparseList> HSAL_ANNOTATION = HugeSparseList.class;
 
     private final Messager messager;
     private final Filer filer;

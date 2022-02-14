@@ -23,7 +23,7 @@ import com.google.auto.common.MoreElements;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.TypeName;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.collections.HugeSparseArrayList;
+import org.neo4j.gds.collections.HugeSparseList;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
@@ -50,7 +50,7 @@ final class HugeSparseArrayListValidation {
     }
 
     Optional<Spec> validate(Element element) {
-        var annotationMirror = MoreElements.getAnnotationMirror(element, HugeSparseArrayList.class).get();
+        var annotationMirror = MoreElements.getAnnotationMirror(element, HugeSparseList.class).get();
         var valueType = (TypeMirror) getAnnotationValue(annotationMirror, "valueType").getValue();
 
         if (!isValidValueType(valueType)) {

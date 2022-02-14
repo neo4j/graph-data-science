@@ -19,30 +19,7 @@
  */
 package org.neo4j.gds.collections;
 
-@HugeSparseList(
-    valueType = long[].class,
-    forAllConsumerType = LongLongArrayConsumer.class
-)
-public interface HugeSparseLongArrayList {
-
-    static HugeSparseLongArrayList of(long[] defaultValue) {
-        return of(defaultValue, 0);
-    }
-
-    static HugeSparseLongArrayList of(long[] defaultValue, long initialCapacity) {
-        return new HugeSparseLongArrayListSon(defaultValue, initialCapacity);
-    }
-
-    long capacity();
-
-    boolean contains(long index);
-
-    long[] get(long index);
-
-    void set(long index, long[] value);
-
-    void forAll(LongLongArrayConsumer consumer);
-
-    DrainingIterator<long[][]> drainingIterator();
-
+@FunctionalInterface
+public interface LongIntConsumer {
+    void consume(long index, int value);
 }
