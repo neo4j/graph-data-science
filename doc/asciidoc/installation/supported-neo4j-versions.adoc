@@ -18,7 +18,7 @@ Time to upgrade!
 | `4.3`
 | `4.2`
 | `4.1` footnote:neo411bug[There is a bug in Neo4j 4.1.1 that can lead to an exception when using Cypher projection. If possible, use the latest patch version.]
-.3+<.^|`1.7`
+.3+<.^|`1.7` footnote:deprecated[This version series is end-of-life and will not receive further patches. Please use a later version.]
 | `4.3`
 | `4.2`
 | `4.1` footnote:neo411bug[There is a bug in Neo4j 4.1.1 that can lead to an exception when using Cypher projection. If possible, use the latest patch version.]
