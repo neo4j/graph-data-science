@@ -62,7 +62,7 @@ public final class GraphSageHelper {
 
     private GraphSageHelper() {}
 
-    public static Variable<Matrix> embeddings(
+    public static Variable<Matrix> embeddingsComputationGraph(
         Graph graph,
         boolean useWeights,
         long[] nodeIds,
@@ -70,19 +70,18 @@ public final class GraphSageHelper {
         Layer[] layers,
         FeatureFunction featureFunction
     ) {
-        var localGraph = graph.concurrentCopy();
-        List<SubGraph> subGraphs = subGraphsPerLayer(localGraph, useWeights, nodeIds, layers);
+        List<SubGraph> subGraphs = subGraphsPerLayer(graph, useWeights, nodeIds, layers);
 
         Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
-            localGraph,
+            graph,
             subGraphs.get(subGraphs.size() - 1).originalNodeIds(),
             features
         );
 
-        return embeddings(subGraphs, layers, batchedFeaturesExtractor);
+        return embeddingsComputationGraph(subGraphs, layers, batchedFeaturesExtractor);
     }
 
-    public static Variable<Matrix> embeddings(
+    public static Variable<Matrix> embeddingsComputationGraph(
         List<SubGraph> subGraphs,
         Layer[] layers,
         Variable<Matrix> batchedFeaturesExtractor

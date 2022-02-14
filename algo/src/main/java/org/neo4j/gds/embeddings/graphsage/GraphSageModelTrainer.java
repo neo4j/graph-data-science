@@ -57,7 +57,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddingsComputationGraph;
 import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
 import static org.neo4j.gds.ml.core.tensor.TensorFunctions.averageTensors;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -229,7 +229,7 @@ public class GraphSageModelTrainer {
 
         long[] totalBatch = addSamplesPerBatchNode(batch, localGraph);
 
-        Variable<Matrix> embeddingVariable = embeddings(localGraph, useWeights, totalBatch, features, layers, featureFunction);
+        Variable<Matrix> embeddingVariable = embeddingsComputationGraph(localGraph, useWeights, totalBatch, features, layers, featureFunction);
 
         return new GraphSageLoss(
             useWeights ? localGraph::relationshipProperty : UNWEIGHTED,
@@ -247,7 +247,7 @@ public class GraphSageModelTrainer {
         var neighborsSet = new LongHashSet(neighbours.length);
         neighborsSet.addAll(neighbours);
 
-        var totalBatch = LongStream.concat(
+        return LongStream.concat(
             batch.stream(),
             LongStream.concat(
                 Arrays.stream(neighbours),
@@ -255,7 +255,6 @@ public class GraphSageModelTrainer {
                 negativeBatch(localGraph, Math.toIntExact(batch.nodeCount()), neighborsSet, batchLocalRandomSeed)
             )
         ).toArray();
-        return totalBatch;
     }
 
     LongStream neighborBatch(Graph graph, Partition batch, long batchLocalSeed) {
