@@ -1,5 +1,4 @@
 [[algorithms-knn]]
-[.beta]
 = K-Nearest Neighbors
 
 :entity: relationship
