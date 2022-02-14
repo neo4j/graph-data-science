@@ -27,10 +27,8 @@ import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
-import java.util.Locale;
 
 final class BetweennessCentralityProc {
 
@@ -47,7 +45,7 @@ final class BetweennessCentralityProc {
     }
 
     static <PROC_RESULT, CONFIG extends BetweennessCentralityBaseConfig> AbstractCentralityResultBuilder<PROC_RESULT> resultBuilder(
-        BetweennessCentralityResultBuilder<PROC_RESULT> procResultBuilder,
+        AbstractCentralityResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult
     ) {
         if (computeResult.result() != null) {
@@ -68,16 +66,5 @@ final class BetweennessCentralityProc {
         };
     }
 
-    abstract static class BetweennessCentralityResultBuilder<PROC_RESULT> extends AbstractCentralityResultBuilder<PROC_RESULT> {
 
-        boolean computeDeprecatedStats;
-
-        BetweennessCentralityResultBuilder(ProcedureCallContext callContext, int concurrency) {
-            super(callContext, concurrency);
-            this.computeDeprecatedStats = callContext
-                .outputFields()
-                .anyMatch(s -> s.toLowerCase(Locale.ENGLISH).contains("score"));
-        }
-
-    }
 }

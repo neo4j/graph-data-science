@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
@@ -112,7 +113,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
             this.centralityDistribution = centralityDistribution;
         }
 
-        static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<StatsResult> {
+        static final class Builder extends AbstractCentralityResultBuilder<StatsResult> {
             protected Builder(ProcedureCallContext callContext, int concurrency) {
                 super(callContext, concurrency);
             }

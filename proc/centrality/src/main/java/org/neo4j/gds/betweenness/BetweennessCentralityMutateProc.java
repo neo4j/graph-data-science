@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -121,7 +122,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
             this.mutateMillis = mutateMillis;
         }
 
-        static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<MutateResult> {
+        static final class Builder extends AbstractCentralityResultBuilder<MutateResult> {
 
             Builder(ProcedureCallContext context, int concurrency) {
                 super(context, concurrency);
