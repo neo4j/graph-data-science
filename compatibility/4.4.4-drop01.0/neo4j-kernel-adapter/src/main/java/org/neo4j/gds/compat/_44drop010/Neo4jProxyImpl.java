@@ -33,6 +33,7 @@ import org.neo4j.gds.compat.MemoryTrackerProxy;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.compat.StoreScan;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -489,5 +490,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
                 kernelTransaction.memoryTracker()
             ));
         }
+    }
+
+    @Override
+    public TestLog testLog() {
+        return new TestLogImpl();
     }
 }

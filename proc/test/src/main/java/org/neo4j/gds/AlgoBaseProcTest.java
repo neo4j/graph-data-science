@@ -26,6 +26,7 @@ import org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -406,7 +407,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
                 .api(db)
-                .log(new TestLog())
+                .log(Neo4jProxy.testLog())
                 .build())
             .username("")
             .projectConfig(graphProjectConfig)

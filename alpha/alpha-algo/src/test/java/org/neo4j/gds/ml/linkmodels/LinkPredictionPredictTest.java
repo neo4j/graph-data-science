@@ -25,9 +25,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.Model;
@@ -50,8 +50,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
 @ModelCatalogExtension
@@ -142,7 +142,7 @@ class LinkPredictionPredictTest {
             .batchSize(1)
             .build();
 
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var algo = new LinkPredictionPredictFactory<>(modelCatalog).build(
             graph,
             config,

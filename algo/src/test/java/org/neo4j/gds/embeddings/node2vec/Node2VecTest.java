@@ -33,9 +33,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoTestBase;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -114,7 +115,7 @@ class Node2VecTest extends AlgoTestBase {
         int embeddingDimension = 128;
         Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().embeddingDimension(embeddingDimension).build();
         var progressTask = new Node2VecAlgorithmFactory<>().progressTask(graph, config);
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();;
         var progressTracker = new TestProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
         new Node2Vec(
             graph,

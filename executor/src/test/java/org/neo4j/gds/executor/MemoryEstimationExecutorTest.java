@@ -26,9 +26,9 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -66,7 +66,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .api(db)
             .allocationTracker(AllocationTracker.empty())
             .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
-            .log(new TestLog())
+            .log(Neo4jProxy.testLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .username("")

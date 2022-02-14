@@ -28,11 +28,12 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -189,7 +190,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         Graph graph = GdlFactory.of("(a)-[:T]->(b),".repeat(20)).build().getUnion();
 
         // with a rel exporter
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var task = Tasks.leaf("WriteRelationships", graph.relationshipCount());
         var progressTracker = new TaskProgressTracker(task, log, RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY, EmptyTaskRegistryFactory.INSTANCE);
 

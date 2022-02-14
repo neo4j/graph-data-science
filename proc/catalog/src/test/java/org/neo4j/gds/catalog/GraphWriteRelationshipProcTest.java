@@ -28,7 +28,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.TestLog;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -171,7 +172,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
 
     @Test
     void shouldLogProgress() {
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
 
         applyOnProcedure(
             db,

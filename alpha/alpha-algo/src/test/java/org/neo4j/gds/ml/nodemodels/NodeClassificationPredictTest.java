@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.Model;
@@ -48,8 +48,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Percentage.withPercentage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
 @ModelCatalogExtension
@@ -234,7 +234,7 @@ class NodeClassificationPredictTest {
         );
         modelCatalog.set(model);
 
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory<>(modelCatalog).build(
             graph,
             ImmutableNodeClassificationMutateConfig.builder()

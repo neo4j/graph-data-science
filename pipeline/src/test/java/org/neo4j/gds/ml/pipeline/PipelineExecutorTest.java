@@ -22,9 +22,10 @@ package org.neo4j.gds.ml.pipeline;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -86,7 +87,7 @@ class PipelineExecutorTest {
 
     @Test
     void shouldHaveCorrectProgressLoggingOnSuccessfulComputation() {
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();;
         var pipelineExecutor = new SucceedingPipelineExecutor(
             new BogusNodePropertyPipeline(),
             new PipelineExecutorTestConfig(),
@@ -122,7 +123,7 @@ class PipelineExecutorTest {
 
     @Test
     void shouldHaveCorrectProgressLoggingOnFailure() {
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();;
         var pipelineExecutor = new FailingPipelineExecutor(
             new BogusNodePropertyPipeline(),
             new PipelineExecutorTestConfig(),

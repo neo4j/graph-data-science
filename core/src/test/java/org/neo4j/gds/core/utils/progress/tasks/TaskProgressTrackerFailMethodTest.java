@@ -20,7 +20,8 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.TestLog;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +32,7 @@ class TaskProgressTrackerFailMethodTest {
     @Test
     void failingTask() {
         var failingTask = Tasks.leaf("failingTask");
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var tracker = new TaskProgressTracker(failingTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
         tracker.beginSubTask();
@@ -52,7 +53,7 @@ class TaskProgressTrackerFailMethodTest {
         var failingSubTask = Tasks.leaf("failingSubTask");
 
         var rootTask = Tasks.task("rootTask", failingSubTask);
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var tracker = new TaskProgressTracker(rootTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
         tracker.beginSubTask("rootTask");

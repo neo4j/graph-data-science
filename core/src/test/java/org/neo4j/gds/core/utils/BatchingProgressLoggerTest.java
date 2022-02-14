@@ -23,7 +23,8 @@ import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.neo4j.gds.TestLog;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -45,7 +46,7 @@ class BatchingProgressLoggerTest {
 
     @Test
     void mustLogProgressOnlyAfterBatchSizeInvocations() {
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var taskVolume = 42;
         var batchSize = 8;
         var logger = new BatchingProgressLogger(
@@ -76,7 +77,7 @@ class BatchingProgressLoggerTest {
 
     @Test
     void mustLogProgressOnlyAfterHittingOrExceedingBatchSize() {
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var taskVolume = 1337;
         var progressStep = 5;
         var batchSize = 16;
@@ -138,7 +139,7 @@ class BatchingProgressLoggerTest {
         var concurrency = 1;
         var taskVolume = 1337;
 
-        TestLog log = new TestLog();
+        TestLog log = Neo4jProxy.testLog();
         var logger = new BatchingProgressLogger(log, Tasks.leaf("Test", taskVolume), concurrency); // batchSize is 13
         logger.reset(taskVolume);
         logger.logProgress(20); // callCount is 20, call count after logging == 20 - 13 = 7
@@ -155,7 +156,7 @@ class BatchingProgressLoggerTest {
     @Test
     void log100Percent() {
         try (var ignore = RenamesCurrentThread.renameThread("test")) {
-            TestLog log = new TestLog();
+            TestLog log = Neo4jProxy.testLog();
             var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), 1);
             testProgressLogger.reset(1337);
             testProgressLogger.logFinishPercentage();
@@ -166,7 +167,7 @@ class BatchingProgressLoggerTest {
     @Test
     void shouldLog100OnlyOnce() {
         try (var ignore = RenamesCurrentThread.renameThread("test")) {
-            TestLog log = new TestLog();
+            TestLog log = Neo4jProxy.testLog();
             var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), 1);
             testProgressLogger.reset(1);
             testProgressLogger.logProgress(1);
@@ -176,7 +177,7 @@ class BatchingProgressLoggerTest {
     }
 
     private static List<Integer> performLogging(long taskVolume, int concurrency) {
-        TestLog log = new TestLog();
+        TestLog log = Neo4jProxy.testLog();
         var logger = new BatchingProgressLogger(log, Tasks.leaf("Test", taskVolume), concurrency);
         logger.reset(taskVolume);
 

@@ -26,11 +26,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -52,9 +52,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;
-import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.TestSupport.ids;
 import static org.neo4j.gds.beta.modularity.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
+import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 @GdlExtension
@@ -171,7 +171,7 @@ class ModularityOptimizationTest {
 
     @Test
     void testLogging() {
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
 
         compute(graph, K1COLORING_MAX_ITERATIONS, null, 3, 2, log);
 
@@ -212,7 +212,7 @@ class ModularityOptimizationTest {
         int concurrency,
         int minBatchSize
     ) {
-        return compute(graph, maxIterations, properties, concurrency, minBatchSize, new TestLog());
+        return compute(graph, maxIterations, properties, concurrency, minBatchSize, Neo4jProxy.testLog());
     }
 
     @NotNull

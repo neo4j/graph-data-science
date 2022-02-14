@@ -26,7 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TestLog;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -45,8 +45,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
 class NodeClassificationTrainTest {
@@ -190,7 +190,7 @@ class NodeClassificationTrainTest {
             Map.<String, Object>of("penalty", 0.0625, "maxEpochs", 100),
             Map.<String, Object>of("penalty", 0.125, "maxEpochs", 100)
         );
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
 
         var config = createConfig(
             modelCandidates,

@@ -31,8 +31,9 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestGraphLoaderFactory;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -109,7 +110,7 @@ class GraphLoaderTest extends BaseTest {
 
     @Test
     void shouldLogProgressWithNativeLoading() {
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         new StoreLoaderBuilder()
             .api(db)
             .graphName("graph")
@@ -126,7 +127,7 @@ class GraphLoaderTest extends BaseTest {
 
     @Test
     public void shouldTrackProgressWithNativeLoading() {
-        TestLog log = new TestLog();
+        TestLog log = Neo4jProxy.testLog();
 
         new StoreLoaderBuilder()
             .api(db)
@@ -167,7 +168,7 @@ class GraphLoaderTest extends BaseTest {
 
     @Test
     public void shouldTrackProgressWithNativeLoadingUsingIndex() {
-        TestLog log = new TestLog();
+        TestLog log = Neo4jProxy.testLog();
 
         USE_PROPERTY_VALUE_INDEX.enableAndRun(() -> testPropertyLoadingWithIndex(NATIVE, log));
 
@@ -202,7 +203,7 @@ class GraphLoaderTest extends BaseTest {
 
     @Test
     void shouldLogProgressWithCypherLoading() {
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         new CypherLoaderBuilder()
             .api(db)
             .graphName("graph")
@@ -396,7 +397,7 @@ class GraphLoaderTest extends BaseTest {
 
     @AllGraphStoreFactoryTypesTest
     void testLoggingActualGraphSize(GraphFactoryTestSupport.FactoryType factoryType) {
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withDefaultAggregation(Aggregation.SINGLE)
             .withLog(log)

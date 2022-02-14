@@ -23,8 +23,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
@@ -238,7 +239,7 @@ final class ApproxMaxKCutTest {
 
         var config = configBuilder.build();
 
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var approxMaxKCut = new ApproxMaxKCutFactory<>().build(
             maxGraph,
             config,

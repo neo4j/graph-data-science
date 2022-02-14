@@ -26,7 +26,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
@@ -34,6 +33,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
@@ -61,9 +61,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
+import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain.MODEL_TYPE;
 
 @Neo4jModelCatalogExtension
@@ -247,7 +247,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 LinkPredictionModelInfo.of(LinkLogisticRegressionTrainConfig.of(Map.of()), Map.of(), pipeline)
             ));
 
-            var log = new TestLog();
+            var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
                 new LinkPredictionPredictPipelineAlgorithmFactory<>(caller.executionContext(), modelCatalog).progressTask(graphStore, config),
                 log,

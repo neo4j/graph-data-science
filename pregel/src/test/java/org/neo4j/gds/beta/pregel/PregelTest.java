@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestTaskStore;
@@ -39,6 +38,8 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -133,7 +134,7 @@ class PregelTest {
         var computation = new TestPregelComputation();
 
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(task, log, config.concurrency(), EmptyTaskRegistryFactory.INSTANCE);
 
         Pregel.create(
@@ -195,7 +196,7 @@ class PregelTest {
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
         var progressTracker = new TaskProgressTracker(
             task,
-            new TestLog(),
+            Neo4jProxy.testLog(),
             config.concurrency(),
             () -> new TaskRegistry("", taskStore)
         );

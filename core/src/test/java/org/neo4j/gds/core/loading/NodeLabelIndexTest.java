@@ -22,7 +22,8 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.TestLog;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
 
@@ -49,7 +50,7 @@ public class NodeLabelIndexTest extends BaseTest {
             }
         );
 
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();;
         var graph = new StoreLoaderBuilder()
             .api(db)
             .log(log)

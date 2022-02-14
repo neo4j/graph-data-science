@@ -28,10 +28,11 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -509,7 +510,7 @@ class FastRPTest extends AlgoTestBase {
         var factory = new FastRPFactory();
 
         var progressTask = factory.progressTask(graph, config);
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();;
         var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
 
         factory

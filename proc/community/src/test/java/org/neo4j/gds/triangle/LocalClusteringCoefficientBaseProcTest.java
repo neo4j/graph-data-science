@@ -31,9 +31,9 @@ import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.OnlyUndirectedTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -153,7 +153,7 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
 
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.empty());
 
-        var testLog = new TestLog();
+        var testLog = Neo4jProxy.testLog();
 
         applyOnProcedure(proc -> {
             proc.log = testLog;

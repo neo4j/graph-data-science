@@ -25,10 +25,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -46,9 +46,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestLog.DEBUG;
-import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.DEBUG;
+import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
 class LinkPredictionTrainTest {
@@ -283,7 +283,7 @@ class LinkPredictionTrainTest {
                 expectedWinner
             )).build();
 
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var algo = new LinkPredictionTrainFactory().build(
             graph,
             config,

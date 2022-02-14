@@ -20,7 +20,8 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.TestLog;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
@@ -149,7 +150,7 @@ public class TaskProgressTrackerTest {
     void shouldLog100WhenTaskFinishedEarly() {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.leaf("leaf", 4);
-            var log = new TestLog();
+            var log = Neo4jProxy.testLog();
             var progressTracker = new TaskProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
             progressTracker.beginSubTask();
             progressTracker.logProgress(1);
@@ -172,7 +173,7 @@ public class TaskProgressTrackerTest {
     void shouldLog100OnlyOnLeafTasks() {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.task("root", Tasks.leaf("leaf", 4));
-            var log = new TestLog();
+            var log = Neo4jProxy.testLog();
             var progressTracker = new TaskProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
             progressTracker.beginSubTask("root");
@@ -198,7 +199,7 @@ public class TaskProgressTrackerTest {
 
         var taskStore = new GlobalTaskStore();
         var taskRegistry = new TaskRegistry("", taskStore);
-        var progressTracker = new TaskProgressTracker(task, new TestLog(), 1, () -> taskRegistry);
+        var progressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), 1, () -> taskRegistry);
 
         assertThat(taskStore.query("")).isEmpty();
 
@@ -212,6 +213,6 @@ public class TaskProgressTrackerTest {
     }
 
     private TaskProgressTracker progressTracker(Task task) {
-        return progressTracker(task, new TestLog());
+        return progressTracker(task, Neo4jProxy.testLog());
     }
 }

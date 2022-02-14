@@ -30,7 +30,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
@@ -38,6 +37,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -351,7 +352,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         modelCatalog.set(model);
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var log = new TestLog();
+            var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
                 new LinkPredictionTrainPipelineAlgorithmFactory(caller.executionContext(), modelCatalog).progressTask(graphStore, config),
                 log,

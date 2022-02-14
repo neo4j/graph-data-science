@@ -31,8 +31,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -56,10 +56,10 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.TestLog.INFO;
-import static org.neo4j.gds.TestLog.WARN;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
+import static org.neo4j.gds.compat.TestLog.WARN;
 
 class WccTest {
 
@@ -175,7 +175,7 @@ class WccTest {
 
     @Test
     void shouldWarnAboutThresholdOnUnweightedGraphs() {
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
 
         new WccAlgorithmFactory<>().build(
             createTestGraph(Orientation.NATURAL),
@@ -195,7 +195,7 @@ class WccTest {
     void shouldLogProgress(Orientation orientation) {
         var graph = createTestGraph(orientation);
 
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var wcc = new WccAlgorithmFactory<>().build(
             graph,
             ImmutableWccStreamConfig.builder().concurrency(2).build(),

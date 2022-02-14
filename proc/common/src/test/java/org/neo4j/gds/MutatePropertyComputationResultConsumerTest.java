@@ -29,6 +29,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -69,7 +70,7 @@ class MutatePropertyComputationResultConsumerTest {
         .builder()
         .allocationTracker(AllocationTracker.empty())
         .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
-        .log(new TestLog())
+        .log(Neo4jProxy.testLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
         .username("")
         .build();

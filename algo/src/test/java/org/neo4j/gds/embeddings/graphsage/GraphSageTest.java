@@ -25,11 +25,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -56,8 +56,8 @@ import java.util.Random;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
 @ModelCatalogExtension
@@ -213,7 +213,7 @@ class GraphSageTest {
             .batchSize(1)
             .build();
 
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
             graph,
             streamConfig,

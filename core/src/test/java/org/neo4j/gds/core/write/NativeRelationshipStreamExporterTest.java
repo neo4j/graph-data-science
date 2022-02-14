@@ -23,10 +23,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -229,7 +230,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
         var rand = new Random();
 
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             RelationshipStreamExporter.baseTask("OpName"),
             log,

@@ -27,10 +27,11 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -179,7 +180,7 @@ class YensTest {
             .build();
 
         var progressTask = new YensFactory<>().progressTask(graph, config);
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
         Yens.sourceTarget(graph, config, progressTracker, AllocationTracker.empty())
@@ -213,7 +214,7 @@ class YensTest {
             .build();
 
         var progressTask = new YensFactory<>().progressTask(graph, config);
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
         Yens.sourceTarget(graph, config, progressTracker, AllocationTracker.empty())

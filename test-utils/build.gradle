@@ -32,6 +32,7 @@ dependencies {
     )
 
     api project(':core-test-utils')
+
     api(group: 'org.neo4j.community', name: 'it-test-support', version: ver.'neo4j') {
         exclude group:'org.junit.vintage', module: 'junit-vintage-engine'
     }

@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest.InvocationCountingTaskStore;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -108,7 +109,7 @@ class WriteProcCancellationTest extends BaseTest {
                 .taskRegistryFactory(() -> new TaskRegistry("", taskStore))
                 .username("")
                 .allocationTracker(AllocationTracker.empty())
-                .log(new TestLog())
+                .log(Neo4jProxy.testLog())
                 .build();
 
             assertThatThrownBy(() -> resultConsumer.consume(computationResult, executionContext))

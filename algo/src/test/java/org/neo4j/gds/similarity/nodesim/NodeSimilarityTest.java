@@ -27,10 +27,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -63,12 +64,12 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
-import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.toArguments;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig.TOP_K_DEFAULT;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -799,7 +800,7 @@ final class NodeSimilarityTest {
         var graph = naturalGraph;
         var config = configBuilder().topN(100).topK(topK).concurrency(concurrency).build();
 
-        var progressLog = new TestLog();
+        var progressLog = Neo4jProxy.testLog();
         var nodeSimilarity = new NodeSimilarityFactory<>().build(
             graph,
             config,
@@ -826,7 +827,7 @@ final class NodeSimilarityTest {
         var graph = naturalGraph;
         var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).concurrency(concurrency).build();
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
-        TestLog log = new TestLog();
+        TestLog log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
             progressTask,
             log,

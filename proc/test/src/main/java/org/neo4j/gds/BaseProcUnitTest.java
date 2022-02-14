@@ -21,6 +21,8 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 
 import java.util.function.Supplier;
 
@@ -35,7 +37,7 @@ class BaseProcUnitTest {
 
     @BeforeEach
     void setup() {
-        log = new TestLog();
+        log = Neo4jProxy.testLog();
         baseProc = new BaseProc() {};
         baseProc.log = log;
     }

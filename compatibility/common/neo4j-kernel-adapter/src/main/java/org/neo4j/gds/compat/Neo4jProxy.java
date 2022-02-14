@@ -352,6 +352,10 @@ public final class Neo4jProxy {
         return IMPL.versionLongToString(storeVersion);
     }
 
+    public static TestLog testLog() {
+        return IMPL.testLog();
+    }
+
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }

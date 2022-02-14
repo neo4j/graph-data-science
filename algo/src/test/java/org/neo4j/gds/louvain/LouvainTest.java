@@ -25,10 +25,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -54,9 +54,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.CommunityHelper.assertCommunitiesWithLabels;
-import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.TestSupport.ids;
+import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.gds.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
@@ -436,7 +436,7 @@ class LouvainTest {
         var config = defaultConfigBuilder().build();
 
         var progressTask = new LouvainFactory<>().progressTask(graph, config);
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             progressTask,
             log,

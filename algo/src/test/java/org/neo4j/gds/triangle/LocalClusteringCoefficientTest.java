@@ -25,9 +25,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -304,7 +305,7 @@ class LocalClusteringCoefficientTest {
             : createConfig().build();
 
         var progressTask = factory.progressTask(graph, config);
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
 
         factory

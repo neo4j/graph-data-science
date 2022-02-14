@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -98,7 +99,7 @@ class ProcedureRunnerTest extends BaseTest {
     void shouldPassCorrectParameters() {
         try (var tx = db.beginTx()) {
             var procedureCallContext = ProcedureCallContext.EMPTY;
-            var log = new TestLog();
+            var log = Neo4jProxy.testLog();
             var username = Username.of("foo");
             TaskRegistryFactory taskRegistryFactory = () -> new TaskRegistry(
                 username.username(),

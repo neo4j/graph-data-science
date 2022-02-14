@@ -210,4 +210,6 @@ public interface Neo4jProxyApi {
     long getHighestPossibleRelationshipCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory);
 
     String versionLongToString(long storeVersion);
+
+    TestLog testLog();
 }

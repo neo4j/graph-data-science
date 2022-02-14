@@ -31,9 +31,10 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.IdentityProperties;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
@@ -252,7 +253,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void shouldLogProgressForIndividualLabels() {
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
 
         applyOnProcedure(
             db,

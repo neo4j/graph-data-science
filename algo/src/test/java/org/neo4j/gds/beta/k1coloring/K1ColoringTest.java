@@ -22,11 +22,12 @@ package org.neo4j.gds.beta.k1coloring;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
@@ -214,7 +215,7 @@ class K1ColoringTest {
             .build();
 
         var progressTask = new K1ColoringFactory<>().progressTask(graph, config);
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();;
         var progressTracker = new TestProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         var k1Coloring = new K1Coloring(

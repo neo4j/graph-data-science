@@ -28,8 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -55,8 +55,8 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph.DUMMY_PROPERTY;
 
@@ -191,7 +191,7 @@ class GraphSageModelTrainerTest {
             .randomSeed(42L)
             .build();
 
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
 
         var algo = new GraphSageTrainAlgorithmFactory().build(
             graph,

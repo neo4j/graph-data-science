@@ -25,8 +25,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -162,7 +163,7 @@ final class ConductanceTest {
         var factory = new ConductanceFactory<>();
 
         var progressTask = factory.progressTask(naturalGraph, config);
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             progressTask,
             log,

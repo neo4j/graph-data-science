@@ -17,55 +17,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.compat.dev;
 
 import org.neo4j.gds.annotation.SuppressForbidden;
-import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.logging.Log;
-import org.neo4j.logging.Logger;
+import org.neo4j.gds.compat.TestLog;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Consumer;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
-public class TestLog implements Log {
-    public static final String DEBUG = "debug";
-    public static final String INFO = "info";
-    public static final String WARN = "warn";
-    public static final String ERROR = "error";
+public class TestLogImpl implements TestLog {
 
     private final ConcurrentMap<String, ConcurrentLinkedQueue<String>> messages;
 
-    public TestLog() {
+    TestLogImpl() {
         messages = new ConcurrentHashMap<>(3);
     }
 
+    @Override
     public void assertContainsMessage(String level, String fragment) {
-        assertThat(containsMessage(level, fragment))
-            .withFailMessage(() ->
-                formatWithLocale(
+        if (!containsMessage(level, fragment)) {
+            throw new RuntimeException(
+                String.format(
+                    Locale.US,
                     "Expected log output to contain `%s` for log level `%s`\nLog messages:\n%s",
                     fragment,
                     level,
-                    StringJoining.joinInGivenOrder(messages.get(level).stream(), "\n")
-                ))
-            .isTrue();
+                    String.join("\n", messages.get(level))
+                )
+            );
+        }
     }
 
+    @Override
     public boolean containsMessage(String level, String fragment) {
         ConcurrentLinkedQueue<String> messageList = messages.getOrDefault(level, new ConcurrentLinkedQueue<>());
         return messageList.stream().anyMatch((message) -> message.contains(fragment));
     }
 
+    @Override
     public boolean hasMessages(String level) {
         return !messages.getOrDefault(level, new ConcurrentLinkedQueue<>()).isEmpty();
     }
 
+    @Override
     public ArrayList<String> getMessages(String level) {
         return new ArrayList<>(messages.getOrDefault(level, new ConcurrentLinkedQueue<>()));
     }
@@ -87,12 +84,12 @@ public class TestLog implements Log {
 
     @Override
     public void debug(String message, Throwable throwable) {
-        debug(formatWithLocale("%s - %s", message, throwable.getMessage()));
+        debug(String.format(Locale.US, "%s - %s", message, throwable.getMessage()));
     }
 
     @Override
     public void debug(String format, Object... arguments) {
-        debug(formatWithLocale(format, arguments));
+        debug(String.format(Locale.US, format, arguments));
     }
 
     @Override
@@ -102,12 +99,12 @@ public class TestLog implements Log {
 
     @Override
     public void info(String message, Throwable throwable) {
-        info(formatWithLocale("%s - %s", message, throwable.getMessage()));
+        info(String.format(Locale.US, "%s - %s", message, throwable.getMessage()));
     }
 
     @Override
     public void info(String format, Object... arguments) {
-        info(formatWithLocale(format, arguments));
+        info(String.format(Locale.US, format, arguments));
     }
 
     @Override
@@ -117,12 +114,12 @@ public class TestLog implements Log {
 
     @Override
     public void warn(String message, Throwable throwable) {
-        warn(formatWithLocale("%s - %s", message, throwable.getMessage()));
+        warn(String.format(Locale.US, "%s - %s", message, throwable.getMessage()));
     }
 
     @Override
     public void warn(String format, Object... arguments) {
-        warn(formatWithLocale(format, arguments));
+        warn(String.format(Locale.US, format, arguments));
     }
 
     @Override
@@ -132,17 +129,12 @@ public class TestLog implements Log {
 
     @Override
     public void error(String message, Throwable throwable) {
-        error(formatWithLocale("%s - %s", message, throwable.getMessage()));
+        error(String.format(Locale.US, "%s - %s", message, throwable.getMessage()));
     }
 
+    @Override
     public void error(String format, Object... arguments) {
-        error(formatWithLocale(format, arguments));
-    }
-
-    public void bulk(Consumer<Log> consumer) {
-        // this is a bit of a hack as in neo <= 4.4
-        // this method still exist while on neo 5.x
-        // it does not, so we cannot annotate it
+        error(String.format(Locale.US, format, arguments));
     }
 
     private void logMessage(String level, String message) {
@@ -150,23 +142,6 @@ public class TestLog implements Log {
             level,
             (ignore) -> new ConcurrentLinkedQueue<>()
         ).add(message);
-    }
-
-    // deprecated overrides
-    public Logger debugLogger() {
-        return null;
-    }
-
-    public Logger infoLogger() {
-        return null;
-    }
-
-    public Logger warnLogger() {
-        return null;
-    }
-
-    public Logger errorLogger() {
-        return null;
     }
 }
 

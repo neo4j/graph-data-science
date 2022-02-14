@@ -25,10 +25,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.DirectIdMap;
@@ -159,7 +160,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
         Graph graph = new StoreLoaderBuilder().api(db).addNodeLabel("A").build().graph();
 
         // with a node exporter
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var writeConcurrency = 4;
         var progressTracker = new TaskProgressTracker(
             NodePropertyExporter.baseTask("AlgoNameGoesHere", graph.nodeCount()),

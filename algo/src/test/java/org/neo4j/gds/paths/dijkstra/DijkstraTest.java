@@ -25,10 +25,11 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -270,7 +271,7 @@ final class DijkstraTest {
                 .build();
 
             var progressTask = DijkstraFactory.sourceTarget().progressTask(graph, config);
-            var testLog = new TestLog();
+            var testLog = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
             Dijkstra.sourceTarget(graph, config, Optional.empty(), progressTracker, AllocationTracker.empty())

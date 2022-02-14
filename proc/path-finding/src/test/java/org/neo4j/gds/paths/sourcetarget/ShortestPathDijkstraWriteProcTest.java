@@ -26,7 +26,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
-import org.neo4j.gds.TestLog;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -82,7 +83,7 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        testLog = new TestLog();
+        testLog = Neo4jProxy.testLog();
         builder.setUserLogProvider(new LogProvider() {
             @Override
             public Log getLog(Class<?> loggingClass) {

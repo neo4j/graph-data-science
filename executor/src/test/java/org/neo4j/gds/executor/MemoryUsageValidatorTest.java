@@ -21,8 +21,8 @@ package org.neo4j.gds.executor;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
@@ -40,7 +40,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = MemoryTree.empty();
 
-        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(new TestLog(), db)
+        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(Neo4jProxy.testLog(), db)
             .tryValidateMemoryUsage(
                 TestConfig.empty(),
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
@@ -53,7 +53,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
 
-        assertThatThrownBy(() -> new MemoryUsageValidator(new TestLog(), db)
+        assertThatThrownBy(() -> new MemoryUsageValidator(Neo4jProxy.testLog(), db)
             .tryValidateMemoryUsage(
                 TestConfig.empty(),
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
@@ -68,7 +68,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
 
-        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(new TestLog(), db)
+        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(Neo4jProxy.testLog(), db)
             .tryValidateMemoryUsage(
                 TestConfig.of(CypherMapWrapper.empty().withBoolean("sudo", true)),
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),

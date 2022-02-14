@@ -25,8 +25,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -197,7 +198,7 @@ final class DegreeCentralityTest {
         var config = configBuilder.build();
 
         var progressTask = new DegreeCentralityFactory<>().progressTask(graph, config);
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();;
         var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
         var degreeCentrality = new DegreeCentrality(
             graph,

@@ -20,9 +20,9 @@
 package org.neo4j.gds.impl.scc;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -39,8 +39,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
 class SccTest {
@@ -135,7 +135,7 @@ class SccTest {
     @Test
     void testLogging() {
         var task = Tasks.leaf("My task");
-        var log = new TestLog();
+        var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
         var algo = new SccAlgorithm(

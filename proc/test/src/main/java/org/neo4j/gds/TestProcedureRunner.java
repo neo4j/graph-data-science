@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -40,7 +41,7 @@ public final class TestProcedureRunner {
         Class<P> procClass,
         Consumer<P> func
     ) {
-        applyOnProcedure(graphDb, procClass, new TestLog(), func);
+        applyOnProcedure(graphDb, procClass, Neo4jProxy.testLog(), func);
     }
 
     public static <P extends BaseProc> void applyOnProcedure(
@@ -71,7 +72,7 @@ public final class TestProcedureRunner {
             graphDb,
             procClass,
             ProcedureCallContext.EMPTY,
-            new TestLog(),
+            Neo4jProxy.testLog(),
             EmptyTaskRegistryFactory.INSTANCE,
             EmptyUserLogRegistryFactory.INSTANCE,
             AllocationTracker.empty(),
