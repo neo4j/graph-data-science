@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
@@ -74,21 +73,21 @@ public final class GraphSageHelper {
         var localGraph = graph.concurrentCopy();
         List<SubGraph> subGraphs = subGraphsPerLayer(localGraph, useWeights, nodeIds, layers);
 
-        Supplier<Variable<Matrix>> batchedFeaturesSupplier = () -> featureFunction.apply(
+        Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
             localGraph,
             subGraphs.get(subGraphs.size() - 1).originalNodeIds(),
             features
         );
 
-        return embeddings(subGraphs, layers, batchedFeaturesSupplier);
+        return embeddings(subGraphs, layers, batchedFeaturesExtractor);
     }
 
     public static Variable<Matrix> embeddings(
         List<SubGraph> subGraphs,
         Layer[] layers,
-        Supplier<Variable<Matrix>> batchedFeaturesSupplier
+        Variable<Matrix> batchedFeaturesExtractor
     ) {
-        Variable<Matrix> previousLayerRepresentations = batchedFeaturesSupplier.get();
+        Variable<Matrix> previousLayerRepresentations = batchedFeaturesExtractor;
 
         for (int layerNr = layers.length - 1; layerNr >= 0; layerNr--) {
             Layer layer = layers[layers.length - layerNr - 1];
