@@ -42,7 +42,7 @@ public class TestLogImpl implements TestLog {
             throw new RuntimeException(
                 String.format(
                     Locale.US,
-                    "Expected log output to contain `%s` for log level `%s`\nLog messages:\n%s",
+                    "Expected log output to contain `%s` for log level `%s`%nLog messages:%n%s",
                     fragment,
                     level,
                     String.join("\n", messages.get(level))

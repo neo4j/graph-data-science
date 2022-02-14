@@ -44,7 +44,7 @@ public class TestLogImpl implements TestLog {
             throw new RuntimeException(
                 String.format(
                     Locale.US,
-                    "Expected log output to contain `%s` for log level `%s`\nLog messages:\n%s",
+                    "Expected log output to contain `%s` for log level `%s`%nLog messages:%n%s",
                     fragment,
                     level,
                     String.join("\n", messages.get(level))
@@ -149,22 +149,22 @@ public class TestLogImpl implements TestLog {
 
     @Override
     public Logger debugLogger() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Logger infoLogger() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Logger warnLogger() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Logger errorLogger() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     private void logMessage(String level, String message) {
