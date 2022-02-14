@@ -8,11 +8,12 @@
 [opts=header,cols="1, 1"]
 |===
 |Description | Operation
-.4+<.^|<<catalog-graph-project, Project Graph>>
+.5+<.^|<<catalog-graph-project, Project Graph>>
 | `gds.graph.project`
 | `gds.graph.project.estimate`
 | `gds.graph.project.cypher`
 | `gds.graph.project.cypher.estimate`
+| `gds.alpha.graph`
 .4+<.^|<<catalog-graph-project, Deprecated: Create Graph>>
 | `gds.graph.create`
 | `gds.graph.create.estimate`
