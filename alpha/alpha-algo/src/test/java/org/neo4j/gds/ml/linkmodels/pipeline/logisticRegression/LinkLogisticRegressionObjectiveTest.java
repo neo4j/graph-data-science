@@ -137,10 +137,10 @@ class LinkLogisticRegressionObjectiveTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "10, 1, false, 816",
-        "10, 1, true, 1200",
-        "100, 1, true, 8400",
-        "10, 100, true, 9912",
+        " 10,   1, false,  816",
+        " 10,   1, true, 1_008",
+        "100,   1, true, 6_768",
+        " 10, 100, true, 9_720",
     })
     void shouldEstimateMemoryUsage(int batchSize, int featureDim, boolean useBias, long expected) {
         var memoryUsageInBytes = LinkLogisticRegressionObjective.sizeOfBatchInBytes(batchSize, featureDim, useBias);

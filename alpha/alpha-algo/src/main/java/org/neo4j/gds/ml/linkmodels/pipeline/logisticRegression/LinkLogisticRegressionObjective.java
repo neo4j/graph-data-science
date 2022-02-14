@@ -78,7 +78,7 @@ public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRe
         var constantScale = Scalar.sizeInBytes();
         var elementSum = Scalar.sizeInBytes();
 
-        var maybeBias = useBias ? weightedFeatures * 2 : 0;
+        var maybeBias = useBias ? weightedFeatures : 0;
         var penalty = l2norm + constantScale;
 
         // 2 * x == computing data and gradient for this computation variable
