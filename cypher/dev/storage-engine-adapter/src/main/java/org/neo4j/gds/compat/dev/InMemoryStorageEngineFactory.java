@@ -65,8 +65,8 @@ import org.neo4j.kernel.impl.store.StoreType;
 import org.neo4j.kernel.impl.store.cursor.CachedStoreCursors;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.lock.LockService;
-import org.neo4j.logging.Log;
-import org.neo4j.logging.LogProvider;
+import org.neo4j.logging.InternalLog;
+import org.neo4j.logging.InternalLogProvider;
 import org.neo4j.logging.NullLogProvider;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
@@ -125,8 +125,8 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         IdGeneratorFactory idGeneratorFactory,
         IdController idController,
         DatabaseHealth databaseHealth,
-        LogProvider internalLogProvider,
-        LogProvider userLogProvider,
+        InternalLogProvider internalLogProvider,
+        InternalLogProvider userLogProvider,
         RecoveryCleanupWorkCollector recoveryCleanupWorkCollector,
         boolean createStoreIfNotExists,
         DatabaseReadOnlyChecker readOnlyChecker,
@@ -271,25 +271,6 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         PageCache pageCache
     ) {
         return 0;
-    }
-
-    @Override
-    public void consistencyCheck(
-        FileSystemAbstraction fileSystemAbstraction,
-        DatabaseLayout databaseLayout,
-        Config config,
-        PageCache pageCache,
-        IndexProviderMap indexProviderMap,
-        Log log,
-        ConsistencySummaryStatistics consistencySummaryStatistics,
-        int i,
-        double v,
-        OutputStream outputStream,
-        boolean b,
-        ConsistencyFlags consistencyFlags,
-        CursorContextFactory cursorContextFactory
-    ) {
-
     }
 
     @Override
@@ -484,5 +465,24 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         MemoryTracker memoryTracker
     ) {
         return schemaRuleMigrationAccess();
+    }
+
+    @Override
+    public void consistencyCheck(
+        FileSystemAbstraction fileSystemAbstraction,
+        DatabaseLayout databaseLayout,
+        Config config,
+        PageCache pageCache,
+        IndexProviderMap indexProviderMap,
+        InternalLog internalLog,
+        ConsistencySummaryStatistics consistencySummaryStatistics,
+        int i,
+        double v,
+        OutputStream outputStream,
+        boolean b,
+        ConsistencyFlags consistencyFlags,
+        CursorContextFactory cursorContextFactory
+    ) {
+
     }
 }

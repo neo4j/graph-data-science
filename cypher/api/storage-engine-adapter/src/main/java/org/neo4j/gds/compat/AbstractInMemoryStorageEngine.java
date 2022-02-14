@@ -29,7 +29,6 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
-import org.neo4j.internal.diagnostics.DiagnosticsLogger;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.KernelVersion;
@@ -38,7 +37,6 @@ import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.lock.LockGroup;
 import org.neo4j.lock.LockService;
-import org.neo4j.logging.Log;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.CommandStream;
@@ -210,11 +208,6 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
     @Override
     public CountsAccessor countsAccessor() {
         return countsStore;
-    }
-
-    @Override
-    public void dumpDiagnostics(Log errorLog, DiagnosticsLogger diagnosticsLog) {
-
     }
 
     @Override

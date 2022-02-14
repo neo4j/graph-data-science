@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat.dev;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.internal.recordstorage.AbstractInMemoryStoreVersion;
 
 import java.util.Optional;
@@ -31,7 +32,7 @@ public class InMemoryStoreVersion extends AbstractInMemoryStoreVersion {
     }
 
     @Override
-    public String latestStoreVersion() {
+    public String latestStoreVersion(Config config) {
         return getClass().getSimpleName();
     }
 

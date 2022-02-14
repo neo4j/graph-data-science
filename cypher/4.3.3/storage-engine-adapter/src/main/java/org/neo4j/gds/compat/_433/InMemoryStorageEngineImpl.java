@@ -26,10 +26,12 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
 import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.internal.diagnostics.DiagnosticsLogger;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.lock.LockTracer;
 import org.neo4j.lock.ResourceLocker;
+import org.neo4j.logging.Log;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.MetadataProvider;
@@ -102,5 +104,10 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
                 storageReaderFn
             );
         }
+    }
+
+    @Override
+    public void dumpDiagnostics(Log errorLog, DiagnosticsLogger diagnosticsLog) {
+
     }
 }

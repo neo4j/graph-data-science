@@ -21,8 +21,8 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.logging.AbstractLog;
 import org.neo4j.logging.Log;
+import org.neo4j.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class TestLog extends AbstractLog {
+public class TestLog implements Log {
     public static final String DEBUG = "debug";
     public static final String INFO = "info";
     public static final String WARN = "warn";
@@ -135,7 +135,6 @@ public class TestLog extends AbstractLog {
         error(formatWithLocale("%s - %s", message, throwable.getMessage()));
     }
 
-    @Override
     public void error(String format, Object... arguments) {
         error(formatWithLocale(format, arguments));
     }
@@ -151,6 +150,23 @@ public class TestLog extends AbstractLog {
             level,
             (ignore) -> new ConcurrentLinkedQueue<>()
         ).add(message);
+    }
+
+    // deprecated overrides
+    public Logger debugLogger() {
+        return null;
+    }
+
+    public Logger infoLogger() {
+        return null;
+    }
+
+    public Logger warnLogger() {
+        return null;
+    }
+
+    public Logger errorLogger() {
+        return null;
     }
 }
 
