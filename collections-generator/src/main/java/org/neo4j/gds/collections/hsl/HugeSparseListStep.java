@@ -94,11 +94,10 @@ public class HugeSparseListStep implements BasicAnnotationProcessor.Step {
             return result;
         }
 
-//        var testTypeSpec = HugeSparseArrayListTestGenerator.generate(spec);
-//        var testFile = javaFile(spec.rootPackage().toString(), testTypeSpec);
+        var testTypeSpec = HugeSparseListTestGenerator.generate(spec);
+        var testFile = javaFile(spec.rootPackage().toString(), testTypeSpec);
 
-//        return writeTestFile(element, testFile);
-        return ProcessResult.PROCESSED;
+        return writeTestFile(element, testFile);
     }
 
     private static JavaFile javaFile(String rootPackage, TypeSpec typeSpec) {
