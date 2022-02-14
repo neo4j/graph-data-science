@@ -48,6 +48,6 @@ class KnnDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/beta/knn.adoc";
+        return "algorithms/knn/knn.adoc";
     }
 }
