@@ -31,7 +31,6 @@ import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
-import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -44,7 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 import static java.util.Collections.singletonMap;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -161,7 +160,7 @@ public final class CSRGraphStoreUtil {
 
     public static void extractNodeProperties(
         GraphStoreBuilder graphStoreBuilder,
-        NodeSchema nodeSchema,
+        Function<NodeLabel, Map<String, PropertySchema>> nodeSchema,
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties
     ) {
         nodeProperties.forEach((label, propertyMap) -> {
@@ -171,30 +170,28 @@ public final class CSRGraphStoreUtil {
     }
 
     private static Map<String, NodeProperty> propertyKeyToNodePropertyMapping(
-        NodeSchema nodeSchema,
+        Function<NodeLabel, Map<String, PropertySchema>> nodeSchema,
         NodeLabel label,
         Map<String, NodeProperties> propertyMap
     ) {
-        var propertySchemaForLabel = nodeSchema.properties().get(label);
-        // TODO: Maybe replace with forEach
-        return propertyMap.entrySet().stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> nodePropertiesFrom(entry.getKey(), entry.getValue(), propertySchemaForLabel)
-            ));
+        var propertySchemaForLabel = nodeSchema.apply(label);
+        var propertyMapping = new HashMap<String, NodeProperty>(propertyMap.size());
+        propertyMap.forEach((propertyKey, propertyValue) -> {
+            var nodeProperty = nodePropertiesFrom(propertyValue, propertySchemaForLabel.get(propertyKey));
+            propertyMapping.put(propertyKey, nodeProperty);
+        });
+        return propertyMapping;
     }
 
     private static NodeProperty nodePropertiesFrom(
-        String propertyKey,
         NodeProperties nodeProperties,
-        Map<String, PropertySchema> propertySchema
+        PropertySchema propertySchema
     ) {
-        var propertySchemaForKey = propertySchema.get(propertyKey);
         return NodeProperty.of(
-            propertySchemaForKey.key(),
-            propertySchemaForKey.state(),
+            propertySchema.key(),
+            propertySchema.state(),
             nodeProperties,
-            propertySchemaForKey.defaultValue()
+            propertySchema.defaultValue()
         );
     }
 

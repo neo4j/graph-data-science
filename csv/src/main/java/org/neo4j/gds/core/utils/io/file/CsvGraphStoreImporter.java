@@ -169,9 +169,10 @@ public final class CsvGraphStoreImporter {
 
         var idMapAndProperties = nodesBuilder.build();
         graphStoreBuilder.nodes(idMapAndProperties.idMap());
+        var schemaProperties = nodeSchema.properties();
         CSRGraphStoreUtil.extractNodeProperties(
             graphStoreBuilder,
-            nodeSchema,
+            schemaProperties::get,
             idMapAndProperties.nodeProperties().orElse(Map.of())
         );
 

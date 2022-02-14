@@ -31,8 +31,10 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
@@ -57,6 +59,7 @@ import org.neo4j.procedure.UserAggregationFunction;
 import org.neo4j.procedure.UserAggregationResult;
 import org.neo4j.procedure.UserAggregationUpdate;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.stream.Collectors;
 
 public final class CypherAggregation extends BaseProc {
 
@@ -98,7 +102,6 @@ public final class CypherAggregation extends BaseProc {
 
         private @Nullable String graphName;
         private @Nullable RelationshipsBuilder relImporter;
-        private @Nullable NodeSchema nodeSchema;
         private @Nullable LazyIdMapBuilder idMapBuilder;
         private final List<RelationshipPropertySchema> relationshipPropertySchemas;
 
@@ -135,12 +138,9 @@ public final class CypherAggregation extends BaseProc {
             var sourceNodePropertyValues = objectsToValues(sourceNodeProperties);
             var targetNodePropertyValues = objectsToValues(targetNodeProperties);
 
-            if (this.nodeSchema == null && sourceNodePropertyValues != null) {
-                this.nodeSchema = newNodeSchema(sourceNodePropertyValues);
-            }
-
             if (this.idMapBuilder == null) {
-                this.idMapBuilder = new LazyIdMapBuilder(this.nodeSchema, this.allocationTracker);
+                var nodeSchema = sourceNodeProperties != null ? newNodeSchema(sourceNodeProperties.keySet()) : null;
+                this.idMapBuilder = new LazyIdMapBuilder(nodeSchema, this.allocationTracker);
             }
 
             if (this.relImporter == null) {
@@ -195,14 +195,14 @@ public final class CypherAggregation extends BaseProc {
             return relationshipsBuilderBuilder.build();
         }
 
-        private NodeSchema newNodeSchema(Map<String, Value> nodeProperties) {
+        private NodeSchema newNodeSchema(Iterable<String> nodePropertyKeys) {
             var nodeSchemaBuilder = NodeSchema.builder();
 
-            nodeProperties.forEach((propertyName, propertyValue) -> {
+            nodePropertyKeys.forEach(propertyName -> {
                 nodeSchemaBuilder.addProperty(
                     NodeLabel.ALL_NODES,
                     propertyName,
-                    ValueConverter.valueType(propertyValue)
+                    PropertySchema.of(propertyName, ValueType.UNKNOWN, DefaultValue.DEFAULT, PropertyState.PERSISTENT)
                 );
             });
 
@@ -215,8 +215,10 @@ public final class CypherAggregation extends BaseProc {
             }
             var values = new HashMap<String, Value>(properties.size());
             properties.forEach((key, valueObject) -> {
-                var value = ValueConverter.toValue(valueObject);
-                values.put(key, value);
+                if (valueObject != null) {
+                    var value = ValueConverter.toValue(valueObject);
+                    values.put(key, value);
+                }
             });
             return values;
         }
@@ -229,10 +231,8 @@ public final class CypherAggregation extends BaseProc {
 
         private double loadOneRelationshipProperty(@NotNull Map<String, Object> relationshipProperties) {
             var propertyValueObject = relationshipProperties.values().iterator().next();
-            return ReadHelper.extractValue(
-                ValueConverter.toValue(propertyValueObject),
-                DefaultValue.DOUBLE_DEFAULT_FALLBACK
-            );
+            var propertyValue = propertyValueObject != null ? ValueConverter.toValue(propertyValueObject) : Values.NO_VALUE;
+            return ReadHelper.extractValue(propertyValue, DefaultValue.DOUBLE_DEFAULT_FALLBACK);
         }
 
         private double[] loadMultipleRelationshipProperties(@NotNull Map<String, Object> relationshipProperties) {
@@ -281,15 +281,25 @@ public final class CypherAggregation extends BaseProc {
             var nodes = this.idMapBuilder.build();
             graphStoreBuilder.nodes(nodes.idMap());
 
-            if (this.nodeSchema != null) {
-                nodes.nodeProperties().ifPresent(allNodeProperties -> {
-                    CSRGraphStoreUtil.extractNodeProperties(
-                        graphStoreBuilder,
-                        this.nodeSchema,
-                        allNodeProperties
-                    );
-                });
-            }
+            nodes.nodeProperties().ifPresent(allNodeProperties -> {
+                var nodeSchema = allNodeProperties.values()
+                    .stream()
+                    .flatMap(map -> map.entrySet().stream())
+                    .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> PropertySchema.of(
+                            entry.getKey(),
+                            entry.getValue().valueType()
+                        )
+                    ));
+
+                CSRGraphStoreUtil.extractNodeProperties(
+                    graphStoreBuilder,
+                    ignore -> nodeSchema,
+                    allNodeProperties
+                );
+            });
+
 
             assert this.relImporter != null;
 
