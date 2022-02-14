@@ -20,6 +20,6 @@
 package org.neo4j.gds.collections;
 
 @FunctionalInterface
-interface LongLongConsumer {
+public interface LongLongConsumer {
     void consume(long index, long value);
 }

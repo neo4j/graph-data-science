@@ -36,13 +36,13 @@ import javax.lang.model.element.Modifier;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
-import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.LongConsumer;
 
-import static java.util.Map.entry;
+import static org.neo4j.gds.collections.EqualityUtils.DEFAULT_VALUES;
+import static org.neo4j.gds.collections.EqualityUtils.isEqual;
+import static org.neo4j.gds.collections.EqualityUtils.isNotEqual;
 
 final class HugeSparseArrayGenerator {
 
@@ -221,71 +221,6 @@ final class HugeSparseArrayGenerator {
                 .build())
             .build();
     }
-
-    private static final Map<TypeName, String> EQUAL_PREDICATES = Map.ofEntries(
-        entry(TypeName.BYTE, "%s == %s"),
-        entry(TypeName.SHORT, "%s == %s"),
-        entry(TypeName.INT, "%s == %s"),
-        entry(TypeName.LONG, "%s == %s"),
-        entry(TypeName.FLOAT, "Float.compare(%s, %s) == 0"),
-        entry(TypeName.DOUBLE, "Double.compare(%s, %s) == 0"),
-        entry(ArrayTypeName.of(TypeName.BYTE), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.SHORT), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.INT), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.LONG), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.FLOAT), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.DOUBLE), "Arrays.equals(%1$s, %2$s)")
-    );
-
-    private static final Map<TypeName, String> NOT_EQUAL_PREDICATES = Map.ofEntries(
-        entry(TypeName.BYTE, "%s != %s"),
-        entry(TypeName.SHORT, "%s != %s"),
-        entry(TypeName.INT, "%s != %s"),
-        entry(TypeName.LONG, "%s != %s"),
-        entry(TypeName.FLOAT, "Float.compare(%s, %s) != 0"),
-        entry(TypeName.DOUBLE, "Double.compare(%s, %s) != 0"),
-        entry(ArrayTypeName.of(TypeName.BYTE), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.SHORT), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.INT), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.LONG), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.FLOAT), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.DOUBLE), "%1$s != null && !Arrays.equals(%1$s, %2$s)")
-    );
-
-    private static <LHS, RHS> CodeBlock isEqual(
-        TypeName typeName,
-        String lhsType,
-        String rhsType,
-        LHS lhs,
-        RHS rhs
-    ) {
-        return CodeBlock
-            .builder()
-            .add(String.format(Locale.ENGLISH, EQUAL_PREDICATES.get(typeName), lhsType, rhsType), lhs, rhs)
-            .build();
-    }
-
-    private static <LHS, RHS> CodeBlock isNotEqual(
-        TypeName typeName,
-        String lhsType,
-        String rhsType,
-        LHS lhs,
-        RHS rhs
-    ) {
-        return CodeBlock
-            .builder()
-            .add(String.format(Locale.ENGLISH, NOT_EQUAL_PREDICATES.get(typeName), lhsType, rhsType), lhs, rhs)
-            .build();
-    }
-
-    private static final Map<TypeName, String> DEFAULT_VALUES = Map.of(
-        TypeName.BYTE, Byte.toString((new byte[1])[0]),
-        TypeName.SHORT, Short.toString((new short[1])[0]),
-        TypeName.INT, Integer.toString((new int[1])[0]),
-        TypeName.LONG, (new long[1])[0] + "L",
-        TypeName.FLOAT, (new float[1])[0] + "F",
-        TypeName.DOUBLE, (new double[1])[0] + "D"
-    );
 
     private static MethodSpec containsMethod(
         TypeName valueType,

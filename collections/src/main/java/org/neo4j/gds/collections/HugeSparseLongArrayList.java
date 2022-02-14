@@ -26,11 +26,11 @@ package org.neo4j.gds.collections;
 public interface HugeSparseLongArrayList {
 
     static HugeSparseLongArrayList of(long defaultValue) {
-        return null;
+        return of(defaultValue, 0);
     }
 
     static HugeSparseLongArrayList of(long defaultValue, long initialCapacity) {
-        return null;
+        return new HugeSparseLongArrayListSon(defaultValue, initialCapacity);
     }
 
     long capacity();

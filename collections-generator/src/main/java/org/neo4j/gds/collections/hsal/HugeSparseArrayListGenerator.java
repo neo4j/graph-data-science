@@ -33,20 +33,16 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.util.Arrays;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReferenceArray;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.LongConsumer;
 
-import static java.util.Map.entry;
+import static org.neo4j.gds.collections.EqualityUtils.DEFAULT_VALUES;
+import static org.neo4j.gds.collections.EqualityUtils.isEqual;
+import static org.neo4j.gds.collections.EqualityUtils.isNotEqual;
 
 final class HugeSparseArrayListGenerator {
 
     private static final ClassName PAGE_UTIL = ClassName.get("org.neo4j.gds.collections", "PageUtil");
+    private static final ClassName HUGE_ARRAYS = ClassName.get("org.neo4j.gds.mem", "HugeArrays");
     private static final ClassName DRAINING_ITERATOR = ClassName.get("org.neo4j.gds.collections", "DrainingIterator");
 
     private HugeSparseArrayListGenerator() {}
@@ -76,33 +72,31 @@ final class HugeSparseArrayListGenerator {
         builder.addField(pageSizeInBytes);
 
         // instance fields
-        var capacity = capacityField();
         var pages = pagesField(valueType);
         var defaultValue = defaultValueField(valueType);
-        builder.addField(capacity);
+
         builder.addField(pages);
         builder.addField(defaultValue);
 
         // constructor
-        builder.addMethod(constructor(valueType));
+        builder.addMethod(constructor(valueType, pages, defaultValue, pageShift));
 
-        // instance methods
-        builder.addMethod(capacityMethod(capacity));
+        // public instance methods
+        builder.addMethod(capacityMethod(pages, pageShift));
         builder.addMethod(getMethod(valueType, pages, pageShift, pageMask, defaultValue));
         builder.addMethod(containsMethod(valueType, pages, pageShift, pageMask, defaultValue));
         builder.addMethod(drainingIteratorMethod(valueType, pages, pageSize));
+        builder.addMethod(forAllMethod(valueType, forAllConsumerType, pages, pageShift, defaultValue));
+        builder.addMethod(setMethod(valueType, pageShift, pageMask));
+        if (valueType.isPrimitive()) {
+            builder.addMethod(setIfAbsentMethod(valueType, pageShift, pageMask, defaultValue));
+            builder.addMethod(addToMethod(valueType, pageShift, pageMask));
+        }
 
-        // GrowingBuilder
-        builder.addType(GrowingBuilderGenerator.growingBuilder(
-            className,
-            elementType,
-            forAllConsumerType,
-            valueType,
-            pageSize,
-            pageShift,
-            pageMask,
-            pageSizeInBytes
-        ));
+        // private instance methods
+        builder.addMethod(getPageMethod(valueType, pages));
+        builder.addMethod(growMethod(pages));
+        builder.addMethod(allocateNewPageMethod(valueType, pages, pageSize, defaultValue));
 
         return builder.build();
     }
@@ -145,15 +139,9 @@ final class HugeSparseArrayListGenerator {
             .build();
     }
 
-    private static FieldSpec capacityField() {
-        return FieldSpec
-            .builder(TypeName.LONG, "capacity", Modifier.PRIVATE, Modifier.FINAL)
-            .build();
-    }
-
     private static FieldSpec pagesField(TypeName valueType) {
         return FieldSpec
-            .builder(valueArrayType(valueType), "pages", Modifier.PRIVATE, Modifier.FINAL)
+            .builder(valueArrayType(valueType), "pages", Modifier.PRIVATE)
             .build();
     }
 
@@ -163,24 +151,45 @@ final class HugeSparseArrayListGenerator {
             .build();
     }
 
-    private static MethodSpec constructor(TypeName valueType) {
+    private static MethodSpec constructor(
+        TypeName valueType,
+        FieldSpec pages,
+        FieldSpec defaultValue,
+        FieldSpec pageShift
+    ) {
+        CodeBlock newPagesBlock;
+
+        if (valueType.isPrimitive()) {
+            newPagesBlock = CodeBlock.of(
+                "this.$N = new $T[numPages][]",
+                pages,
+                valueType
+            );
+        } else {
+            var componentType = ((ArrayTypeName) valueType).componentType;
+            newPagesBlock = CodeBlock.of(
+                "this.$N = new $T[numPages][][]",
+                pages,
+                componentType
+            );
+        }
+
         return MethodSpec.constructorBuilder()
-            .addModifiers(Modifier.PRIVATE)
-            .addParameter(TypeName.LONG, "capacity")
-            .addParameter(valueArrayType(valueType), "pages")
-            .addParameter(valueType, "defaultValue")
-            .addStatement("this.capacity = capacity")
-            .addStatement("this.pages = pages")
-            .addStatement("this.defaultValue = defaultValue")
+            .addParameter(valueType, defaultValue.name)
+            .addParameter(TypeName.LONG, "initialCapacity")
+            .addStatement("int numPages = $T.pageIndex(initialCapacity, $N)", PAGE_UTIL, pageShift)
+            .addStatement(newPagesBlock)
+            .addStatement("this.$N = $N", defaultValue, defaultValue)
             .build();
     }
 
-    private static MethodSpec capacityMethod(FieldSpec capacityField) {
+    private static MethodSpec capacityMethod(FieldSpec pages, FieldSpec pageShift) {
         return MethodSpec.methodBuilder("capacity")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .returns(TypeName.LONG)
-            .addStatement("return $N", capacityField)
+            .addStatement("int numPages = $N.length", pages)
+            .addStatement("return ((long) numPages) << $N", pageShift)
             .build();
     }
 
@@ -222,70 +231,7 @@ final class HugeSparseArrayListGenerator {
             .build();
     }
 
-    private static final Map<TypeName, String> EQUAL_PREDICATES = Map.ofEntries(
-        entry(TypeName.BYTE, "%s == %s"),
-        entry(TypeName.SHORT, "%s == %s"),
-        entry(TypeName.INT, "%s == %s"),
-        entry(TypeName.LONG, "%s == %s"),
-        entry(TypeName.FLOAT, "Float.compare(%s, %s) == 0"),
-        entry(TypeName.DOUBLE, "Double.compare(%s, %s) == 0"),
-        entry(ArrayTypeName.of(TypeName.BYTE), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.SHORT), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.INT), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.LONG), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.FLOAT), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.DOUBLE), "Arrays.equals(%1$s, %2$s)")
-    );
 
-    private static final Map<TypeName, String> NOT_EQUAL_PREDICATES = Map.ofEntries(
-        entry(TypeName.BYTE, "%s != %s"),
-        entry(TypeName.SHORT, "%s != %s"),
-        entry(TypeName.INT, "%s != %s"),
-        entry(TypeName.LONG, "%s != %s"),
-        entry(TypeName.FLOAT, "Float.compare(%s, %s) != 0"),
-        entry(TypeName.DOUBLE, "Double.compare(%s, %s) != 0"),
-        entry(ArrayTypeName.of(TypeName.BYTE), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.SHORT), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.INT), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.LONG), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.FLOAT), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.DOUBLE), "%1$s != null && !Arrays.equals(%1$s, %2$s)")
-    );
-
-    private static <LHS, RHS> CodeBlock isEqual(
-        TypeName typeName,
-        String lhsType,
-        String rhsType,
-        LHS lhs,
-        RHS rhs
-    ) {
-        return CodeBlock
-            .builder()
-            .add(String.format(Locale.ENGLISH, EQUAL_PREDICATES.get(typeName), lhsType, rhsType), lhs, rhs)
-            .build();
-    }
-
-    private static <LHS, RHS> CodeBlock isNotEqual(
-        TypeName typeName,
-        String lhsType,
-        String rhsType,
-        LHS lhs,
-        RHS rhs
-    ) {
-        return CodeBlock
-            .builder()
-            .add(String.format(Locale.ENGLISH, NOT_EQUAL_PREDICATES.get(typeName), lhsType, rhsType), lhs, rhs)
-            .build();
-    }
-
-    private static final Map<TypeName, String> DEFAULT_VALUES = Map.of(
-        TypeName.BYTE, Byte.toString((new byte[1])[0]),
-        TypeName.SHORT, Short.toString((new short[1])[0]),
-        TypeName.INT, Integer.toString((new int[1])[0]),
-        TypeName.LONG, (new long[1])[0] + "L",
-        TypeName.FLOAT, (new float[1])[0] + "F",
-        TypeName.DOUBLE, (new double[1])[0] + "D"
-    );
 
     private static MethodSpec containsMethod(
         TypeName valueType,
@@ -326,367 +272,189 @@ final class HugeSparseArrayListGenerator {
             .build();
     }
 
-    private static class GrowingBuilderGenerator {
+    private static MethodSpec forAllMethod(
+        TypeName valueType,
+        TypeName forAllConsumerType,
+        FieldSpec pages,
+        FieldSpec pageShift,
+        FieldSpec defaultValue
+    ) {
+        return MethodSpec.methodBuilder("forAll")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .addParameter(ParameterSpec.builder(forAllConsumerType, "consumer").build())
+            .returns(TypeName.VOID)
+            .addStatement("$T pages = this.$N", valueArrayType(valueType), pages)
+            .beginControlFlow("for (int pageIndex = 0; pageIndex < pages.length; pageIndex++)")
+            .addStatement("$T page = pages[pageIndex]", ArrayTypeName.of(valueType))
+            .beginControlFlow("if (page == null)")
+            .addStatement("continue")
+            .endControlFlow() // end if
+            .beginControlFlow("for (int indexInPage = 0; indexInPage < page.length; indexInPage++)")
+            .addStatement("$T value = page[indexInPage]", valueType)
+            .beginControlFlow("if (" + isEqual(valueType, "$1L", "$2N", "value", defaultValue) + ")")
+            .addStatement("continue")
+            .endControlFlow() // end if
+            .addStatement("long index = ((long) pageIndex << $N) | (long) indexInPage", pageShift)
+            .addStatement("consumer.consume(index, value)")
+            .endControlFlow() // end for
+            .endControlFlow() // outer for
+            .build();
+    }
 
-        private static TypeSpec growingBuilder(
-            ClassName className,
-            TypeName elementType,
-            TypeName builderType,
-            TypeName valueType,
-            FieldSpec pageSize,
-            FieldSpec pageShift,
-            FieldSpec pageMask,
-            FieldSpec pageSizeInBytes
-        ) {
-            var builder = TypeSpec.classBuilder("GrowingBuilder")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                .addSuperinterface(builderType);
+    private static MethodSpec getPageMethod(TypeName valueType, FieldSpec pages) {
+        return MethodSpec.methodBuilder("getPage")
+            .addModifiers(Modifier.PRIVATE)
+            .returns(ArrayTypeName.of(valueType))
+            .addParameter(TypeName.INT, "pageIndex")
+            .addCode(CodeBlock.builder()
+                .beginControlFlow("if (pageIndex >= $N.length)", pages)
+                .addStatement("grow(pageIndex + 1)")
+                .endControlFlow()
 
-            var arrayHandle = arrayHandleField(valueType);
-            var pageLock = newPageLockField();
-            var defaultValue = defaultValueField(valueType);
-            var pages = pagesField(valueType);
-            var trackAllocation = trackAllocationField();
-            var initialCapacitySpec = initialCapacitySpec();
+                .addStatement("$T page = $N[pageIndex]", ArrayTypeName.of(valueType), pages)
+                .beginControlFlow("if (page == null)")
+                .addStatement("page = allocateNewPage(pageIndex)")
+                .endControlFlow()
 
-            builder.addField(arrayHandle);
-            builder.addField(pageLock);
-            builder.addField(defaultValue);
-            builder.addField(pages);
-            builder.addField(trackAllocation);
+                .addStatement("return page")
 
-            builder.addMethod(constructor(
-                valueType,
-                pages,
-                pageShift,
-                pageLock,
-                defaultValue,
-                trackAllocation,
-                initialCapacitySpec
-            ));
+                .build()
+            )
+            .build();
+    }
 
-            // public methods
-            builder.addMethod(setMethod(valueType, pageShift, pageMask, arrayHandle));
-            builder.addMethod(buildMethod(valueType, elementType, pages, pageShift, defaultValue, className));
-
-            if (valueType.isPrimitive()) {
-                builder.addMethod(setIfAbsentMethod(valueType, pageShift, pageMask, arrayHandle, defaultValue));
-                builder.addMethod(addToMethod(valueType, pageShift, pageMask, arrayHandle));
-            }
-
-            // helper methods
-            builder.addMethod(growMethod(valueType, pageLock, pages));
-            builder.addMethod(getPageMethod(valueType, pages));
-            builder.addMethod(allocateNewPageMethod(
-                valueType,
-                pageLock,
-                pages,
-                pageSize,
-                defaultValue,
-                trackAllocation,
-                pageSizeInBytes
-            ));
-
-            return builder.build();
-        }
-
-        private static FieldSpec newPageLockField() {
-            return FieldSpec
-                .builder(ReentrantLock.class, "newPageLock")
-                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                .build();
-        }
-
-        private static FieldSpec trackAllocationField() {
-            return FieldSpec
-                .builder(LongConsumer.class, "trackAllocation")
-                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                .build();
-        }
-
-        private static FieldSpec arrayHandleField(TypeName valueType) {
-            return FieldSpec
-                .builder(VarHandle.class, "ARRAY_HANDLE")
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                .initializer("$T.arrayElementVarHandle($T.class)", MethodHandles.class, ArrayTypeName.of(valueType))
-                .build();
-        }
-
-        private static FieldSpec pagesField(TypeName valueType) {
-            return FieldSpec
-                .builder(ParameterizedTypeName.get(
-                    ClassName.get(AtomicReferenceArray.class),
-                    ArrayTypeName.of(valueType)
-                ), "pages")
-                .addModifiers(Modifier.PRIVATE)
-                .build();
-        }
-
-        private static ParameterSpec initialCapacitySpec() {
-            return ParameterSpec
-                .builder(long.class, "initialCapacity")
-                .build();
-        }
-
-        private static MethodSpec constructor(
-            TypeName valueType,
-            FieldSpec pages,
-            FieldSpec pageShift,
-            FieldSpec pageLock,
-            FieldSpec defaultValue,
-            FieldSpec trackAllocation,
-            ParameterSpec initialCapacity
-        ) {
-            return MethodSpec.constructorBuilder()
-                .addParameter(valueType, defaultValue.name)
-                .addParameter(long.class, "initialCapacity")
-                .addParameter(LongConsumer.class, "trackAllocation")
-                .addStatement("int pageCount = $T.pageIndex($N, $N)", PAGE_UTIL, initialCapacity, pageShift)
-                .addStatement("this.$N = new $T(pageCount)", pages, pages.type)
-                .addStatement("this.$N = $N", defaultValue, defaultValue)
-                .addStatement("this.$N = new $T(true)", pageLock, pageLock.type)
-                .addStatement("this.$N = trackAllocation", trackAllocation)
-                .build();
-        }
-
-        private static MethodSpec setMethod(
-            TypeName valueType,
-            FieldSpec pageShift,
-            FieldSpec pageMask,
-            FieldSpec arrayHandle
-        ) {
-            return MethodSpec.methodBuilder("set")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(TypeName.VOID)
-                .addParameter(TypeName.LONG, "index")
-                .addParameter(valueType, "value")
-                .addCode(CodeBlock.builder()
-                    .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
-                    .addStatement("int indexInPage = $T.indexInPage(index, $N)", PAGE_UTIL, pageMask)
-                    .addStatement("$N.setVolatile(getPage(pageIndex), indexInPage, value)", arrayHandle)
-                    .build()
+    private static MethodSpec growMethod(FieldSpec pages) {
+        return MethodSpec.methodBuilder("grow")
+            .addModifiers(Modifier.PRIVATE)
+            .returns(TypeName.VOID)
+            .addParameter(TypeName.INT, "minNewSize")
+            .addCode(CodeBlock.builder()
+                .beginControlFlow("if (minNewSize <= $N.length)", pages)
+                .addStatement("return")
+                .endControlFlow()
+                .addStatement(
+                    "int newSize = $T.oversizeInt(minNewSize, $T.BYTES_OBJECT_REF)",
+                    HUGE_ARRAYS,
+                    MemoryUsage.class
                 )
-                .build();
+                .addStatement("this.$N = $T.copyOf(this.$N, newSize)", pages, Arrays.class, pages)
+                .build())
+            .build();
+    }
+
+    private static MethodSpec allocateNewPageMethod(
+        TypeName valueType,
+        FieldSpec pages,
+        FieldSpec pageSize,
+        FieldSpec defaultValue
+    ) {
+        // 💪
+        var bodyBuilder = CodeBlock.builder();
+
+        if (valueType.isPrimitive()) {
+            bodyBuilder.addStatement(CodeBlock.of(
+                "$T page = new $T[$N]",
+                ArrayTypeName.of(valueType),
+                valueType,
+                pageSize
+            ));
+        } else {
+            var componentType = ((ArrayTypeName) valueType).componentType;
+            bodyBuilder.addStatement(CodeBlock.of(
+                "$T page = new $T[$N][]",
+                ArrayTypeName.of(valueType),
+                componentType,
+                pageSize
+            ));
         }
 
-        private static MethodSpec setIfAbsentMethod(
-            TypeName valueType,
-            FieldSpec pageShift,
-            FieldSpec pageMask,
-            FieldSpec arrayHandle,
-            FieldSpec defaultValue
-        ) {
-            return MethodSpec.methodBuilder("setIfAbsent")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(TypeName.BOOLEAN)
-                .addParameter(TypeName.LONG, "index")
-                .addParameter(valueType, "value")
+        // The following is an optimization applicable for primitive
+        // types only: If the default value is equal to the default
+        // value for the type, there is no need to call Array.fill().
+        if (valueType.isPrimitive()) {
+            bodyBuilder.beginControlFlow(
+                    "if ($L)",
+                    isNotEqual(valueType, "$1N", "$2L", defaultValue, DEFAULT_VALUES.get(valueType))
+                )
+                .addStatement("$T.fill(page, $N)", ClassName.get(Arrays.class), defaultValue)
+                .endControlFlow();
+        } else {
+            bodyBuilder.addStatement("$T.fill(page, $N)", ClassName.get(Arrays.class), defaultValue);
+        }
+
+
+        bodyBuilder
+            .addStatement("this.$N[pageIndex] = page", pages)
+            .addStatement("return page");
+
+        return MethodSpec.methodBuilder("allocateNewPage")
+            .addModifiers(Modifier.PRIVATE)
+            .returns(ArrayTypeName.of(valueType))
+            .addParameter(TypeName.INT, "pageIndex")
+            .addCode(bodyBuilder.build())
+            .build();
+    }
+
+    private static MethodSpec setMethod(
+        TypeName valueType,
+        FieldSpec pageShift,
+        FieldSpec pageMask
+    ) {
+        return MethodSpec.methodBuilder("set")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .returns(TypeName.VOID)
+            .addParameter(TypeName.LONG, "index")
+            .addParameter(valueType, "value")
+            .addCode(CodeBlock.builder()
                 .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
                 .addStatement("int indexInPage = $T.indexInPage(index, $N)", PAGE_UTIL, pageMask)
-                .addStatement(
-                    "$T storedValue = ($T) $N.compareAndExchange(getPage(pageIndex), indexInPage, $N, value)",
-                    valueType,
-                    valueType,
-                    arrayHandle,
-                    defaultValue
-                )
-                .addStatement("return " + isEqual(valueType, "$1L", "$2N", "storedValue", defaultValue))
-                .build();
-        }
+                .addStatement("getPage(pageIndex)[indexInPage] = value")
+                .build()
+            )
+            .build();
+    }
 
-        private static MethodSpec addToMethod(
-            TypeName valueType,
-            FieldSpec pageShift,
-            FieldSpec pageMask,
-            FieldSpec arrayHandle
-        ) {
-            return MethodSpec.methodBuilder("addTo")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(TypeName.VOID)
-                .addParameter(TypeName.LONG, "index")
-                .addParameter(valueType, "value")
-                .addCode(CodeBlock.builder()
-                    .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
-                    .addStatement("int indexInPage = $T.indexInPage(index, $N)", PAGE_UTIL, pageMask)
-                    .addStatement("$T page = getPage(pageIndex)", ArrayTypeName.of(valueType))
-                    .addStatement(
-                        "$T expectedCurrentValue = ($T) $N.getVolatile(page, indexInPage)",
-                        valueType,
-                        valueType,
-                        arrayHandle
-                    )
-                    .beginControlFlow("while (true)")
-                    .addStatement("$1T newValueToStore = ($1T) (expectedCurrentValue + value)", valueType)
-                    .addStatement(
-                        "$T actualCurrentValue = ($T) $N.compareAndExchange(page, indexInPage, expectedCurrentValue, newValueToStore)",
-                        valueType,
-                        valueType,
-                        arrayHandle
-                    )
-                    .beginControlFlow("if (actualCurrentValue == expectedCurrentValue)")
-                    .addStatement("return")
-                    .endControlFlow()
-                    .addStatement("expectedCurrentValue = actualCurrentValue")
-                    .endControlFlow() // eo while
-                    .build()
-                )
-                .build();
-        }
+    private static MethodSpec setIfAbsentMethod(
+        TypeName valueType,
+        FieldSpec pageShift,
+        FieldSpec pageMask,
+        FieldSpec defaultValue
+    ) {
+        return MethodSpec.methodBuilder("setIfAbsent")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .returns(TypeName.BOOLEAN)
+            .addParameter(TypeName.LONG, "index")
+            .addParameter(valueType, "value")
+            .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+            .addStatement("int indexInPage = $T.indexInPage(index, $N)", PAGE_UTIL, pageMask)
+            .addStatement("$T page = getPage(pageIndex)", ArrayTypeName.of(valueType))
+            .addStatement("$T currentValue = page[indexInPage]", valueType)
+            .beginControlFlow("if (" + isEqual(valueType, "$1L", "$2N", "currentValue", defaultValue) + ")")
+            .addStatement("page[indexInPage] = value")
+            .addStatement("return true")
+            .endControlFlow()
+            .addStatement("return false")
+            .build();
+    }
 
-        private static MethodSpec buildMethod(
-            TypeName valueType,
-            TypeName elementType,
-            FieldSpec pages,
-            FieldSpec pageShift,
-            FieldSpec defaultValue,
-            ClassName className
-        ) {
-            final CodeBlock newPagesBlock;
-
-            if (valueType.isPrimitive()) {
-                newPagesBlock = CodeBlock.of(
-                    "$T newPages = new $T[numPages][]",
-                    ArrayTypeName.of(ArrayTypeName.of(valueType)),
-                    valueType
-                );
-            } else {
-                var componentType = ((ArrayTypeName) valueType).componentType;
-                newPagesBlock = CodeBlock.of(
-                    "$T newPages = new $T[numPages][][]",
-                    ArrayTypeName.of(ArrayTypeName.of(valueType)),
-                    componentType
-                );
-            }
-
-            return MethodSpec.methodBuilder("build")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(elementType)
-                .addCode(CodeBlock.builder()
-                    .addStatement("int numPages = $N.length()", pages)
-                    .addStatement("long capacity = ((long) numPages) << $N", pageShift)
-                    .addStatement(newPagesBlock)
-                    .addStatement("$T.setAll(newPages, $N::get)", ClassName.get(Arrays.class), pages)
-                    .addStatement("return new $T(capacity, newPages, $N)", className, defaultValue)
-                    .build()
-                ).build();
-        }
-
-        private static MethodSpec getPageMethod(TypeName valueType, FieldSpec pages) {
-            return MethodSpec.methodBuilder("getPage")
-                .addModifiers(Modifier.PRIVATE)
-                .returns(ArrayTypeName.of(valueType))
-                .addParameter(TypeName.INT, "pageIndex")
-                .addCode(CodeBlock.builder()
-                    .beginControlFlow("if (pageIndex >= $N.length())", pages)
-                    .addStatement("grow(pageIndex + 1)")
-                    .endControlFlow()
-
-                    .addStatement("$T page = $N.get(pageIndex)", ArrayTypeName.of(valueType), pages)
-                    .beginControlFlow("if (page == null)")
-                    .addStatement("page = allocateNewPage(pageIndex)")
-                    .endControlFlow()
-
-                    .addStatement("return page")
-
-                    .build()
-                )
-                .build();
-        }
-
-        private static MethodSpec growMethod(
-            TypeName valueType,
-            FieldSpec pageLock,
-            FieldSpec pages
-        ) {
-            return MethodSpec.methodBuilder("grow")
-                .addModifiers(Modifier.PRIVATE)
-                .returns(TypeName.VOID)
-                .addParameter(TypeName.INT, "newSize")
-                .addCode(CodeBlock.builder()
-                    .addStatement("$N.lock()", pageLock)
-                    .beginControlFlow("try")
-                    .beginControlFlow("if (newSize <= $N.length())", pages)
-                    .addStatement("return")
-                    .endControlFlow() // eo if (newSize <= pages.length())
-                    // TODO avoid using FQN literal for HugeArrays (e.g. by introducing collections-util module)
-                    .addStatement(
-                        "$T newPages = new $T(org.neo4j.gds.mem.HugeArrays.oversizeInt(newSize, $T.BYTES_OBJECT_REF))",
-                        pages.type,
-                        pages.type,
-                        MemoryUsage.class
-                    )
-                    .beginControlFlow("for (int pageIndex = 0; pageIndex < $N.length(); pageIndex++)", pages)
-                    .addStatement("$T page = $N.get(pageIndex)", ArrayTypeName.of(valueType), pages)
-                    .beginControlFlow("if (page != null)")
-                    .addStatement("newPages.set(pageIndex, page)")
-                    .endControlFlow() // eo if (page != null)
-                    .endControlFlow() // eo for
-                    .addStatement("$N = newPages", pages)
-                    .endControlFlow() // eo try
-                    .beginControlFlow("finally")
-                    .addStatement("$N.unlock()", pageLock)
-                    .endControlFlow() // eo finally
-                    .build())
-                .build();
-        }
-
-        private static MethodSpec allocateNewPageMethod(
-            TypeName valueType,
-            FieldSpec pageLock,
-            FieldSpec pages,
-            FieldSpec pageSize,
-            FieldSpec defaultValue,
-            FieldSpec trackAllocation,
-            FieldSpec pageSizeInBytes
-        ) {
-            final CodeBlock pageAssignmentBlock;
-
-            if (valueType.isPrimitive()) {
-                pageAssignmentBlock = CodeBlock.of("page = new $T[$N]", valueType, pageSize);
-            } else {
-                var componentType = ((ArrayTypeName) valueType).componentType;
-                pageAssignmentBlock = CodeBlock.of("page = new $T[$N][]", componentType, pageSize);
-            }
-
-            // 💪
-            var bodyBuilder = CodeBlock.builder()
-                .addStatement("$N.lock()", pageLock)
-                .beginControlFlow("try")
-                .addStatement("$T page = $N.get(pageIndex)", ArrayTypeName.of(valueType), pages)
-                .beginControlFlow("if (page != null)")
-                .addStatement("return page")
-                .endControlFlow()
-                .addStatement("$N.accept($N)", trackAllocation, pageSizeInBytes)
-                .addStatement(pageAssignmentBlock);
-
-            // The following is an optimization applicable for primitive
-            // types only: If the default value is equal to the default
-            // value for the type, there is no need to call Array.fill().
-            if (valueType.isPrimitive()) {
-                bodyBuilder.beginControlFlow(
-                        "if ($L)",
-                        isNotEqual(valueType, "$1N", "$2L", defaultValue, DEFAULT_VALUES.get(valueType))
-                    )
-                    .addStatement("$T.fill(page, $N)", ClassName.get(Arrays.class), defaultValue)
-                    .endControlFlow();
-            }
-
-            bodyBuilder.addStatement("$N.set(pageIndex, page)", pages)
-                .addStatement("return page")
-                .nextControlFlow("finally")
-                .addStatement("$N.unlock()", pageLock)
-                .endControlFlow();  // eo try/finally
-
-            return MethodSpec.methodBuilder("allocateNewPage")
-                .addModifiers(Modifier.PRIVATE)
-                .returns(ArrayTypeName.of(valueType))
-                .addParameter(TypeName.INT, "pageIndex")
-                .addCode(bodyBuilder.build())
-                .build();
-        }
+    private static MethodSpec addToMethod(
+        TypeName valueType,
+        FieldSpec pageShift,
+        FieldSpec pageMask
+    ) {
+        return MethodSpec.methodBuilder("addTo")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .returns(TypeName.VOID)
+            .addParameter(TypeName.LONG, "index")
+            .addParameter(valueType, "value")
+            .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+            .addStatement("int indexInPage = $T.indexInPage(index, $N)", PAGE_UTIL, pageMask)
+            .addStatement("$T page = getPage(pageIndex)", ArrayTypeName.of(valueType))
+            .addStatement("page[indexInPage] += value")
+            .build();
     }
 }

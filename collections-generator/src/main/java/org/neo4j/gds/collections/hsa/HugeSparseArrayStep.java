@@ -31,7 +31,6 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
-import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
@@ -46,7 +45,7 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
     private final HugeSparseArrayValidation validation;
     private final Path sourcePath;
 
-    public HugeSparseArrayStep(ProcessingEnvironment processingEnv) {
+    public HugeSparseArrayStep(ProcessingEnvironment processingEnv, Path sourcePath) {
         this.validation = new HugeSparseArrayValidation(
             processingEnv.getTypeUtils(),
             processingEnv.getElementUtils(),
@@ -55,7 +54,7 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
 
         this.messager = processingEnv.getMessager();
         this.filer = processingEnv.getFiler();
-        this.sourcePath = fetchSourcePath();
+        this.sourcePath = sourcePath;
     }
 
     @Override
@@ -123,33 +122,6 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
             );
             return ProcessResult.RETRY;
         }
-    }
-
-    private Path fetchSourcePath() {
-        JavaFileObject tmpFile = null;
-        try {
-            // We want to retrieve the path for generated source files managed
-            // by the filer object and its underlying FileManager. In order to
-            // retrieve it, we create a temporary file, convert it into a Path
-            // object and navigate to the parent directories.
-            tmpFile = filer.createSourceFile("tmpFile");
-            // the new file is open for writing; we don't do that so we close it
-            tmpFile.openWriter().close();
-            // build/generated/sources/annotationProcessor/java/main/tmpFile
-            var tmpFilePath = Path.of(tmpFile.toUri());
-            // build/generated/sources/annotationProcessor/java/main
-            var mainPath = tmpFilePath.getParent();
-            // build/generated/sources/annotationProcessor/java
-            return mainPath.getParent();
-        } catch (IOException e) {
-            messager.printMessage(Diagnostic.Kind.ERROR, "Unable to determine source path");
-        } finally {
-            if (tmpFile != null) {
-                tmpFile.delete();
-            }
-        }
-
-        return null;
     }
 
     private ProcessResult writeFile(Element element, JavaFile file) {
