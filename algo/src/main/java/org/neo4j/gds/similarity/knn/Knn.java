@@ -125,9 +125,16 @@ public class Knn extends Algorithm<Knn.Result> {
                 }
             }
             if (config.similarityCutoff() > 0) {
-                for (long i = 0; i < neighbors.size(); i++) {
-                    neighbors.get(i).filterHighSimilarityResults(config.similarityCutoff());
-                }
+                var similarityCutoff = config.similarityCutoff();
+                var neighborFilterTasks = PartitionUtils.rangePartition(
+                    config.concurrency(),
+                    neighbors.size(),
+                    partition -> (Runnable) () -> partition.consume(
+                        nodeId -> neighbors.get(nodeId).filterHighSimilarityResults(similarityCutoff)
+                    ),
+                    Optional.of(config.minBatchSize())
+                );
+                ParallelUtil.runWithConcurrency(config.concurrency(), neighborFilterTasks, context.executor());
             }
             this.progressTracker.endSubTask();
 
