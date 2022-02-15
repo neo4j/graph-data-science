@@ -30,7 +30,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.math.L2Norm;
 
 import java.util.List;
 import java.util.Map;
@@ -169,18 +168,12 @@ class NodeLogisticRegressionTrainTest {
         assertThat(trainedWeights.dimension(COLUMNS_INDEX)).isEqualTo(3);
 
         var trainedData = trainedWeights.data().data();
-        // print trainedData to find out expected
         var expectedData = new double[] {
-            0.022915472581588624, -0.09767437979347163, -0.21143317671562675,
-            0.09183252837946605, -0.0575686740478883, 0.3521360232938111,
-            -0.11474625069183589, 0.15521199231546134, -0.42655763365466565
+            0.005293430162533111, -0.11334111495741299, -0.014532098026766848,
+            0.14370668087438856, 0.003356779719037068, 0.04827915664328568,
+            -0.1489973177649605, 0.10997941169303799, -0.033746029788612415
         };
-        var deviation = new double[9];
-        for (int i = 0; i < 9; i++) {
-            deviation[i] = (trainedData[i] - expectedData[i]);
-        }
 
-        // could be flaky but passed 1212 times in a row
-        assertThat(L2Norm.l2Norm(deviation) / L2Norm.l2Norm(expectedData)).isLessThan(0.05);
+        assertThat(trainedData).containsExactly(expectedData, Offset.offset(1e-200));
     }
 }

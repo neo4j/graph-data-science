@@ -40,7 +40,8 @@ class L2NormSquaredTest implements FiniteDifferenceTest {
         var l2 = new L2NormSquared(weights);
         var ctx = new ComputationContext();
         var l2Result = ctx.forward(l2);
-        assertThat(l2Result.value()).isCloseTo(28, Offset.offset(1e-8));
+
+        assertThat(l2Result.value()).isCloseTo(31, Offset.offset(1e-8));
     }
 
     @Test

@@ -577,11 +577,11 @@ CALL gds.alpha.ml.linkPrediction.predict.stream('myGraph', {
 [opts="header"]
 |===
 | person1 | person2   | probability
-| "Karin" | "Greg"    | 0.4991363247445545
-| "Karin" | "Mark"    | 0.49896977670628373
-| "Mark"  | "Greg"    | 0.49869219716877955
-| "Will"  | "Veselin" | 0.49869219716877955
-| "Alice" | "Mark"    | 0.49719328593255546
+| "Karin" | "Greg"    | 0.499136998882367
+| "Karin" | "Mark"    | 0.498970450843246
+| "Mark"  | "Greg"    | 0.498692871303992
+| "Will"  | "Veselin" | 0.498692871303992
+| "Alice" | "Mark"    | 0.49719396005114
 |===
 --
 

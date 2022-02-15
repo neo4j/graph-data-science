@@ -157,7 +157,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
             "RETURN gds.util.asNode(nodeId).name AS name, predictedClass, predictedProbabilities AS probabilities " +
             "  ORDER BY name ASC",
             List.of(
-                Map.of("name", "0_hidden", "predictedClass", 0L, "probabilities", listOfSize(3)),
+                Map.of("name", "0_hidden", "predictedClass", 1L, "probabilities", listOfSize(3)),
                 Map.of("name", "1_hidden", "predictedClass", 1L, "probabilities", listOfSize(3)),
                 Map.of("name", "2_hidden", "predictedClass", 2L, "probabilities", listOfSize(3))
             )
