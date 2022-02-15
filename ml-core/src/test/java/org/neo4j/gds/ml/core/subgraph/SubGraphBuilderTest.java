@@ -22,15 +22,20 @@ package org.neo4j.gds.ml.core.subgraph;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.RelationshipCursor;
+import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,6 +58,10 @@ class SubGraphBuilderTest {
         "(e)-[]->(g)," +
         "(e)-[]->(h)," +
         "(e)-[]->(i)";
+
+    private static final NeighborhoodFunction ALL_NEIGBHORS = (graph, nodeId) -> graph
+        .streamRelationships(nodeId, -1D)
+        .mapToLong(RelationshipCursor::targetId);
 
     @Inject
     private IdFunction idFunction;
@@ -202,5 +211,25 @@ class SubGraphBuilderTest {
         );
 
         assertEquals(6, subGraph.neighbors.length);
+    }
+
+    @Test
+    void shouldHandleNodeFilteredGraphs() {
+        GdlFactory factory = GdlFactory.of("(a:IGNORE), (b:N), (c:N), (d:N), (a)-->(d), (b)-->(c), (c)-->(d), (d)-->(b)");
+        IdFunction idFunction = factory::nodeId;
+        CSRGraphStore graphStore = factory.build();
+        Graph filteredGraph = graphStore.getGraph("N", RelationshipType.ALL_RELATIONSHIPS.name, Optional.empty());
+
+        long[] batch = {
+            filteredGraph.toMappedNodeId(idFunction.of("b")),
+            filteredGraph.toMappedNodeId(idFunction.of("d"))
+        };
+        var subgraph = SubGraph.buildSubGraph(batch, ALL_NEIGBHORS, filteredGraph);
+
+        // b, c, d
+        assertThat(subgraph.nodeCount()).isEqualTo(filteredGraph.nodeCount());
+
+        assertThat(Arrays.stream(subgraph.originalNodeIds()))
+            .allMatch(nodeId -> nodeId < filteredGraph.nodeCount());
     }
 }
