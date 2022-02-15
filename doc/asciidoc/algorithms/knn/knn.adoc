@@ -10,6 +10,10 @@
 This section describes the K-Nearest Neighbors (KNN) algorithm in the Neo4j Graph Data Science library.
 --
 
+:directed:
+:undirected:
+:homogeneous:
+:weighted:
 
 [[algorithms-knn-intro]]
 == Introduction
