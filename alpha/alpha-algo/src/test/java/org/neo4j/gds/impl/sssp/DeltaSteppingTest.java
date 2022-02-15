@@ -28,6 +28,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -103,6 +104,7 @@ final class DeltaSteppingTest {
                 delta,
                 concurrency,
                 Pools.DEFAULT,
+                ProgressTracker.NULL_TRACKER,
                 AllocationTracker.empty()
             ).compute();
 
@@ -127,6 +129,7 @@ final class DeltaSteppingTest {
                 delta,
                 concurrency,
                 Pools.DEFAULT,
+                ProgressTracker.NULL_TRACKER,
                 AllocationTracker.empty()
             ).compute();
 
@@ -189,6 +192,7 @@ final class DeltaSteppingTest {
                 delta,
                 concurrency,
                 Pools.DEFAULT,
+                ProgressTracker.NULL_TRACKER,
                 AllocationTracker.empty()
             ).compute();
 

@@ -134,6 +134,7 @@ final class ShortestPathDeltaSteppingTest {
             3,
             concurrency,
             Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 

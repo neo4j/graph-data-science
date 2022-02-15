@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.DoublePageCreator;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class DeltaStepping extends Algorithm<DeltaStepping, DeltaStepping.DeltaSteppingResult> {
+public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> {
 
     private static final double DIST_INF = Double.MAX_VALUE;
     private static final int NO_BIN = Integer.MAX_VALUE;
@@ -60,8 +61,10 @@ public class DeltaStepping extends Algorithm<DeltaStepping, DeltaStepping.DeltaS
         double delta,
         int concurrency,
         ExecutorService executorService,
+        ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.startNode = startNode;
         this.delta = delta;
@@ -121,11 +124,6 @@ public class DeltaStepping extends Algorithm<DeltaStepping, DeltaStepping.DeltaS
         }
 
         return new DeltaSteppingResult(iteration, distances);
-    }
-
-    @Override
-    public DeltaStepping me() {
-        return this;
     }
 
     @Override
