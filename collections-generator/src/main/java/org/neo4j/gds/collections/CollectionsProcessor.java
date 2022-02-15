@@ -47,8 +47,8 @@ public class CollectionsProcessor extends BasicAnnotationProcessor {
         var sourcePath = fetchSourcePath(processingEnv.getFiler(), processingEnv.getMessager());
 
         return List.of(
-            new HugeSparseArrayStep(processingEnv, sourcePath),
-            new HugeSparseListStep(processingEnv, sourcePath)
+            HugeSparseArrayStep.of(processingEnv, sourcePath),
+            HugeSparseListStep.of(processingEnv, sourcePath)
         );
     }
 

@@ -23,6 +23,7 @@ import com.google.auto.common.MoreElements;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.TypeName;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.collections.CollectionStep;
 import org.neo4j.gds.collections.HugeSparseList;
 
 import javax.annotation.processing.Messager;
@@ -37,7 +38,7 @@ import java.util.Optional;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 
-final class HugeSparseListValidation {
+final class HugeSparseListValidation implements CollectionStep.Validation<HugeSparseListValidation.Spec> {
 
     private final Types typeUtils;
     private final Elements elementUtils;
@@ -49,7 +50,8 @@ final class HugeSparseListValidation {
         this.messager = messager;
     }
 
-    Optional<Spec> validate(Element element) {
+    @Override
+    public Optional<Spec> validate(Element element) {
         var annotationMirror = MoreElements.getAnnotationMirror(element, HugeSparseList.class).get();
         var valueType = (TypeMirror) getAnnotationValue(annotationMirror, "valueType").getValue();
 
@@ -123,7 +125,7 @@ final class HugeSparseListValidation {
     }
 
     @ValueClass
-    public interface Spec {
+    public interface Spec extends CollectionStep.Spec {
         Element element();
 
         TypeMirror valueType();
@@ -132,6 +134,7 @@ final class HugeSparseListValidation {
 
         int pageShift();
 
+        @Override
         Name rootPackage();
 
         default String className() {

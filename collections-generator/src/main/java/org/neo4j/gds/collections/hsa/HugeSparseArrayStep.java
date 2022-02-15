@@ -19,128 +19,41 @@
  */
 package org.neo4j.gds.collections.hsa;
 
-import com.google.auto.common.BasicAnnotationProcessor;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeSpec;
+import org.neo4j.gds.collections.CollectionStep;
 import org.neo4j.gds.collections.HugeSparseArray;
 
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
-import javax.tools.Diagnostic;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Set;
 
-public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
+public final class HugeSparseArrayStep extends CollectionStep<HugeSparseArrayValidation.Spec> {
 
     private static final Class<HugeSparseArray> HSA_ANNOTATION = HugeSparseArray.class;
 
-    private final Messager messager;
-    private final Filer filer;
-
-    private final HugeSparseArrayValidation validation;
-    private final Path sourcePath;
-
-    public HugeSparseArrayStep(ProcessingEnvironment processingEnv, Path sourcePath) {
-        this.validation = new HugeSparseArrayValidation(
+    public static HugeSparseArrayStep of(ProcessingEnvironment processingEnv, Path sourcePath) {
+        var validation = new HugeSparseArrayValidation(
             processingEnv.getTypeUtils(),
             processingEnv.getElementUtils(),
             processingEnv.getMessager()
         );
 
-        this.messager = processingEnv.getMessager();
-        this.filer = processingEnv.getFiler();
-        this.sourcePath = sourcePath;
+        var mainGenerator = new HugeSparseArrayGenerator();
+        var testGenerator = new HugeSparseArrayTestGenerator();
+
+        return new HugeSparseArrayStep(processingEnv, sourcePath, validation, mainGenerator, testGenerator);
+    }
+
+    private HugeSparseArrayStep(
+        ProcessingEnvironment processingEnv,
+        Path sourcePath,
+        Validation<HugeSparseArrayValidation.Spec> validation,
+        Generator<HugeSparseArrayValidation.Spec> mainGenerator,
+        Generator<HugeSparseArrayValidation.Spec> testGenerator
+    ) {
+        super(processingEnv, sourcePath, validation, mainGenerator, testGenerator);
     }
 
     @Override
-    public Set<String> annotations() {
-        return Set.of(HSA_ANNOTATION.getCanonicalName());
-    }
-
-    @Override
-    public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
-        var elements = elementsByAnnotation.get(HSA_ANNOTATION.getCanonicalName());
-
-        ImmutableSet.Builder<Element> elementsToRetry = ImmutableSet.builder();
-
-        for (Element element : elements) {
-            if (process(element) == ProcessResult.RETRY) {
-                elementsToRetry.add(element);
-            }
-        }
-
-        return elementsToRetry.build();
-    }
-
-    private ProcessResult process(Element element) {
-        var validationResult = validation.validate(element);
-
-        if (validationResult.isEmpty()) {
-            return ProcessResult.INVALID;
-        }
-
-        var spec = validationResult.get();
-
-        var typeSpec = HugeSparseArrayGenerator.generate(spec);
-        var mainFile = javaFile(spec.rootPackage().toString(), typeSpec);
-
-        var result = writeFile(element, mainFile);
-        if (result != ProcessResult.PROCESSED) {
-            return result;
-        }
-
-        var testTypeSpec = HugeSparseArrayTestGenerator.generate(spec);
-        var testFile = javaFile(spec.rootPackage().toString(), testTypeSpec);
-
-        return writeTestFile(element, testFile);
-    }
-
-    private static JavaFile javaFile(String rootPackage, TypeSpec typeSpec) {
-        return JavaFile
-            .builder(rootPackage, typeSpec)
-            .indent("    ")
-            .skipJavaLangImports(true)
-            .build();
-    }
-
-    private ProcessResult writeTestFile(Element element, JavaFile file) {
-        var testSourcePath = sourcePath.resolve("test");
-
-        try {
-            file.writeTo(testSourcePath);
-            return ProcessResult.PROCESSED;
-        } catch (IOException e) {
-            messager.printMessage(
-                Diagnostic.Kind.ERROR,
-                "Could not write HugeSparseArray java file: " + e.getMessage(),
-                element
-            );
-            return ProcessResult.RETRY;
-        }
-    }
-
-    private ProcessResult writeFile(Element element, JavaFile file) {
-        try {
-            file.writeTo(filer);
-            return ProcessResult.PROCESSED;
-        } catch (IOException e) {
-            messager.printMessage(
-                Diagnostic.Kind.ERROR,
-                "Could not write HugeSparseArray java file: " + e.getMessage(),
-                element
-            );
-            return ProcessResult.RETRY;
-        }
-    }
-
-    enum ProcessResult {
-        PROCESSED,
-        INVALID,
-        RETRY
+    public String annotation() {
+        return HSA_ANNOTATION.getCanonicalName();
     }
 }

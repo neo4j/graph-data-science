@@ -24,6 +24,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.neo4j.gds.collections.CollectionStep;
 
 import javax.lang.model.element.Modifier;
 import java.util.HashMap;
@@ -38,11 +39,10 @@ import static org.neo4j.gds.collections.TestGeneratorUtils.randomIndex;
 import static org.neo4j.gds.collections.TestGeneratorUtils.randomValue;
 import static org.neo4j.gds.collections.TestGeneratorUtils.zeroValue;
 
-final class HugeSparseListTestGenerator {
+final class HugeSparseListTestGenerator implements CollectionStep.Generator<HugeSparseListValidation.Spec> {
 
-    private HugeSparseListTestGenerator() {}
-
-    static TypeSpec generate(HugeSparseListValidation.Spec spec) {
+    @Override
+    public TypeSpec generate(HugeSparseListValidation.Spec spec) {
         var className = ClassName.get(spec.rootPackage().toString(), spec.className() + "Test");
         var elementType = TypeName.get(spec.element().asType());
         var valueType = TypeName.get(spec.valueType());

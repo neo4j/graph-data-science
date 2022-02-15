@@ -29,6 +29,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.neo4j.gds.collections.CollectionStep;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import javax.annotation.processing.Generated;
@@ -39,15 +40,14 @@ import static org.neo4j.gds.collections.EqualityUtils.DEFAULT_VALUES;
 import static org.neo4j.gds.collections.EqualityUtils.isEqual;
 import static org.neo4j.gds.collections.EqualityUtils.isNotEqual;
 
-final class HugeSparseListGenerator {
+final class HugeSparseListGenerator implements CollectionStep.Generator<HugeSparseListValidation.Spec> {
 
     private static final ClassName PAGE_UTIL = ClassName.get("org.neo4j.gds.collections", "PageUtil");
     private static final ClassName HUGE_ARRAYS = ClassName.get("org.neo4j.gds.mem", "HugeArrays");
     private static final ClassName DRAINING_ITERATOR = ClassName.get("org.neo4j.gds.collections", "DrainingIterator");
 
-    private HugeSparseListGenerator() {}
-
-    static TypeSpec generate(HugeSparseListValidation.Spec spec) {
+    @Override
+    public TypeSpec generate(HugeSparseListValidation.Spec spec) {
         var className = ClassName.get(spec.rootPackage().toString(), spec.className());
         var elementType = TypeName.get(spec.element().asType());
         var valueType = TypeName.get(spec.valueType());
