@@ -66,6 +66,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
@@ -416,8 +417,8 @@ final class LazyIdMapBuilder implements IdMap {
     }
 
     @Override
-    public long rootNodeCount() {
-        return this.nodeCount();
+    public OptionalLong rootNodeCount() {
+        return OptionalLong.of(this.nodeCount());
     }
 
     @Override

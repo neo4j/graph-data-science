@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
@@ -68,8 +69,8 @@ public final class DirectIdMap implements IdMap {
     }
 
     @Override
-    public long rootNodeCount() {
-        return nodeCount;
+    public OptionalLong rootNodeCount() {
+        return OptionalLong.of(nodeCount);
     }
 
     @Override

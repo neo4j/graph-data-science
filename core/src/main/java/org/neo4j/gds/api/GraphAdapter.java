@@ -26,6 +26,7 @@ import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
@@ -108,7 +109,7 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public long rootNodeCount() {
+    public OptionalLong rootNodeCount() {
         return graph.rootNodeCount();
     }
 

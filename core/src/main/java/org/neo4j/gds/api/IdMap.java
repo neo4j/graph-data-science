@@ -22,6 +22,7 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.NodeLabel;
 
 import java.util.Collection;
+import java.util.OptionalLong;
 import java.util.Set;
 
 /**
@@ -86,7 +87,7 @@ public interface IdMap extends NodeIterator, BatchNodeIterable{
      * Number of mapped node ids in the root mapping.
      * This is necessary for nested (filtered) id mappings.
      */
-    long rootNodeCount();
+    OptionalLong rootNodeCount();
 
     long highestNeoId();
 

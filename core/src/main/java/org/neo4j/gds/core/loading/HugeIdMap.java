@@ -35,6 +35,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Collection;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
@@ -124,8 +125,8 @@ public class HugeIdMap implements IdMap {
     }
 
     @Override
-    public long rootNodeCount() {
-        return nodeCount;
+    public OptionalLong rootNodeCount() {
+        return OptionalLong.of(nodeCount);
     }
 
     @Override
@@ -246,7 +247,7 @@ public class HugeIdMap implements IdMap {
         }
 
         @Override
-        public long rootNodeCount() {
+        public OptionalLong rootNodeCount() {
             return rootIdMap.rootNodeCount();
         }
 
