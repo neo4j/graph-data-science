@@ -19,16 +19,15 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.gds.collections.DrainingIterator;
 import org.neo4j.gds.collections.HugeSparseByteArrayList;
+import org.neo4j.gds.collections.HugeSparseCollections;
 import org.neo4j.gds.collections.HugeSparseIntList;
 import org.neo4j.gds.collections.HugeSparseLongArrayList;
 import org.neo4j.gds.collections.HugeSparseLongList;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeArrays;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 
@@ -72,10 +71,10 @@ public final class ChunkedAdjacencyLists {
 
         return MemoryEstimations.builder(ChunkedAdjacencyLists.class)
             .fixed("compressed targets", MemoryRange.of(bestCaseCompressedTargetsSize, worstCaseCompressedTargetsSize))
-            .fixed("positions", estimateArraysSize(nodeCount, MemoryUsage::sizeOfIntArray))
-            .fixed("lengths", estimateArraysSize(nodeCount, MemoryUsage::sizeOfIntArray))
-            .fixed("lastValues", estimateArraysSize(nodeCount, MemoryUsage::sizeOfLongArray))
-            .fixed("properties", MemoryUsage.sizeOfObjectArray(propertyCount) + propertyCount * estimateArraysSize(nodeCount, MemoryUsage::sizeOfLongArray))
+            .fixed("positions", HugeSparseCollections.estimateInt(nodeCount, nodeCount))
+            .fixed("lengths", HugeSparseCollections.estimateInt(nodeCount, nodeCount))
+            .fixed("lastValues", HugeSparseCollections.estimateLong(nodeCount, nodeCount))
+            .fixed("properties", HugeSparseCollections.estimateLongArray(nodeCount, nodeCount, (int) avgDegree).times(propertyCount))
             .build();
     }
 
@@ -84,20 +83,6 @@ public final class ChunkedAdjacencyLists {
         int relationshipByteSize = encodedVLongSize(delta);
         long compressedAdjacencyByteSize = relationshipByteSize * Math.max(0, (avgDegree - 1));
         return nodeCount * MemoryUsage.sizeOfByteArray(firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize);
-    }
-
-    private static long estimateArraysSize(long size, LongToLongFunction primitiveArraySizeEstimator) {
-        assert size >= 0;
-        long sizeOfInstance = MemoryUsage.sizeOfInstance(HugeSparseIntList.class);
-
-        int numPages = HugeArrays.numberOfPages(size);
-
-        long memoryUsed = MemoryUsage.sizeOfObjectArray(numPages);
-        final long pageBytes = primitiveArraySizeEstimator.applyAsLong(HugeArrays.PAGE_SIZE);
-        memoryUsed += (numPages - 1) * pageBytes;
-        final int lastPageSize = HugeArrays.exclusiveIndexOfPage(size);
-
-        return sizeOfInstance + memoryUsed + primitiveArraySizeEstimator.applyAsLong(lastPageSize);
     }
 
     public static ChunkedAdjacencyLists of(int numberOfProperties, long initialCapacity) {
