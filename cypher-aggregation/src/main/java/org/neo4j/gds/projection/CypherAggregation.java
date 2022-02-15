@@ -30,7 +30,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStoreFactory;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
@@ -47,8 +47,6 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.Node;
@@ -61,14 +59,11 @@ import org.neo4j.procedure.UserAggregationUpdate;
 import org.neo4j.values.storable.Value;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.Set;
-import java.util.function.LongPredicate;
 
 public final class CypherAggregation extends BaseProc {
 
@@ -364,7 +359,7 @@ public final class CypherAggregation extends BaseProc {
     }
 }
 
-final class LazyIdMapBuilder implements IdMap {
+final class LazyIdMapBuilder implements PartialIdMap {
     private final NodesBuilder nodesBuilder;
 
     LazyIdMapBuilder(@Nullable NodeSchema nodeSchema, AllocationTracker allocationTracker) {
@@ -394,84 +389,9 @@ final class LazyIdMapBuilder implements IdMap {
         return this.addNode(nodeId);
     }
 
-
-    // TODO: throw unsupported operation instead of dummy impls
-    @Override
-    public long toOriginalNodeId(long nodeId) {
-        return -1L;
-    }
-
-    @Override
-    public long toRootNodeId(long nodeId) {
-        return nodeId;
-    }
-
-    @Override
-    public boolean contains(long nodeId) {
-        return true;
-    }
-
-    @Override
-    public long nodeCount() {
-        return this.nodesBuilder.importedNodes();
-    }
-
     @Override
     public OptionalLong rootNodeCount() {
-        return OptionalLong.of(this.nodeCount());
-    }
-
-    @Override
-    public long highestNeoId() {
-        return -1L;
-    }
-
-    @Override
-    public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
-        return Set.of();
-    }
-
-    @Override
-    public Set<NodeLabel> nodeLabels(long nodeId) {
-        return Set.of();
-    }
-
-    @Override
-    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-    }
-
-    @Override
-    public Set<NodeLabel> availableNodeLabels() {
-        return Set.of();
-    }
-
-    @Override
-    public boolean hasLabel(long nodeId, NodeLabel label) {
-        return false;
-    }
-
-    @Override
-    public IdMap rootIdMap() {
-        return this;
-    }
-
-    @Override
-    public void forEachNode(LongPredicate consumer) {
-    }
-
-    @Override
-    public PrimitiveLongIterator nodeIterator() {
-        return new PrimitiveLongIterator() {
-            @Override
-            public boolean hasNext() {
-                return false;
-            }
-
-            @Override
-            public long next() {
-                return 0;
-            }
-        };
+        return OptionalLong.of(this.nodesBuilder.importedNodes());
     }
 
     NodesBuilder.IdMapAndProperties build() {
