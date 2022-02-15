@@ -62,7 +62,7 @@ public final class GraphSageHelper {
 
     private GraphSageHelper() {}
 
-    public static Variable<Matrix> embeddings(
+    public static Variable<Matrix> embeddingsComputationGraph(
         Graph graph,
         boolean useWeights,
         long[] nodeIds,
@@ -70,18 +70,23 @@ public final class GraphSageHelper {
         Layer[] layers,
         FeatureFunction featureFunction
     ) {
-        List<NeighborhoodFunction> neighborhoodFunctions = Arrays
-            .stream(layers)
-            .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
-            .collect(Collectors.toList());
-        Collections.reverse(neighborhoodFunctions);
-        List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph, useWeights);
+        List<SubGraph> subGraphs = subGraphsPerLayer(graph, useWeights, nodeIds, layers);
 
-        Variable<Matrix> previousLayerRepresentations = featureFunction.apply(
+        Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
             graph,
             subGraphs.get(subGraphs.size() - 1).originalNodeIds(),
             features
         );
+
+        return embeddingsComputationGraph(subGraphs, layers, batchedFeaturesExtractor);
+    }
+
+    public static Variable<Matrix> embeddingsComputationGraph(
+        List<SubGraph> subGraphs,
+        Layer[] layers,
+        Variable<Matrix> batchedFeaturesExtractor
+    ) {
+        Variable<Matrix> previousLayerRepresentations = batchedFeaturesExtractor;
 
         for (int layerNr = layers.length - 1; layerNr >= 0; layerNr--) {
             Layer layer = layers[layers.length - layerNr - 1];
@@ -93,6 +98,15 @@ public final class GraphSageHelper {
                 );
         }
         return new NormalizeRows(previousLayerRepresentations);
+    }
+
+    public static List<SubGraph> subGraphsPerLayer(Graph graph, boolean useWeights, long[] nodeIds, Layer[] layers) {
+        List<NeighborhoodFunction> neighborhoodFunctions = Arrays
+            .stream(layers)
+            .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
+            .collect(Collectors.toList());
+        Collections.reverse(neighborhoodFunctions);
+        return SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph, useWeights);
     }
 
     public static MemoryEstimation embeddingsEstimation(

@@ -32,8 +32,6 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
-
 public class GraphSageEmbeddingsGenerator {
     private final Layer[] layers;
     private final int batchSize;
@@ -96,8 +94,7 @@ public class GraphSageEmbeddingsGenerator {
         HugeObjectArray<double[]> result
     ) {
         return () -> {
-            ComputationContext ctx = new ComputationContext();
-            Variable<Matrix> embeddingVariable = embeddings(
+            Variable<Matrix> embeddingVariable = GraphSageHelper.embeddingsComputationGraph(
                 graph,
                 isWeighted,
                 partition.stream().toArray(),
@@ -105,7 +102,8 @@ public class GraphSageEmbeddingsGenerator {
                 layers,
                 featureFunction
             );
-            Matrix embeddings = ctx.forward(embeddingVariable);
+
+            Matrix embeddings = new ComputationContext().forward(embeddingVariable);
 
             var partitionStartNodeId = partition.startNode();
             var partitionNodeCount = partition.nodeCount();

@@ -57,7 +57,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddingsComputationGraph;
 import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
 import static org.neo4j.gds.ml.core.tensor.TensorFunctions.averageTensors;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -225,30 +225,36 @@ public class GraphSageModelTrainer {
     }
 
     private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features, Layer[] layers) {
-        var batchLocalRandomSeed = getBatchIndex(batch, graph.nodeCount()) + randomSeed;
+        var localGraph = graph.concurrentCopy();
 
-        var neighbours = neighborBatch(graph, batch, batchLocalRandomSeed).toArray();
+        long[] totalBatch = addSamplesPerBatchNode(batch, localGraph);
 
-        var neighborsSet = new LongHashSet(neighbours.length);
-        neighborsSet.addAll(neighbours);
-
-        var totalBatch = LongStream.concat(
-            batch.stream(),
-            LongStream.concat(
-                Arrays.stream(neighbours),
-                // batch.nodeCount is <= config.batchsize (which is an int)
-                negativeBatch(graph, Math.toIntExact(batch.nodeCount()), neighborsSet, batchLocalRandomSeed)
-            )
-        ).toArray();
-
-        Variable<Matrix> embeddingVariable = embeddings(graph, useWeights, totalBatch, features, layers, featureFunction);
+        Variable<Matrix> embeddingVariable = embeddingsComputationGraph(localGraph, useWeights, totalBatch, features, layers, featureFunction);
 
         return new GraphSageLoss(
-            useWeights ? graph::relationshipProperty : UNWEIGHTED,
+            useWeights ? localGraph::relationshipProperty : UNWEIGHTED,
             embeddingVariable,
             totalBatch,
             negativeSampleWeight
         );
+    }
+
+    private long[] addSamplesPerBatchNode(Partition batch, Graph localGraph) {
+        var batchLocalRandomSeed = getBatchIndex(batch, localGraph.nodeCount()) + randomSeed;
+
+        var neighbours = neighborBatch(localGraph, batch, batchLocalRandomSeed).toArray();
+
+        var neighborsSet = new LongHashSet(neighbours.length);
+        neighborsSet.addAll(neighbours);
+
+        return LongStream.concat(
+            batch.stream(),
+            LongStream.concat(
+                Arrays.stream(neighbours),
+                // batch.nodeCount is <= config.batchsize (which is an int)
+                negativeBatch(localGraph, Math.toIntExact(batch.nodeCount()), neighborsSet, batchLocalRandomSeed)
+            )
+        ).toArray();
     }
 
     LongStream neighborBatch(Graph graph, Partition batch, long batchLocalSeed) {

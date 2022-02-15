@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.functions.Constant;
+import org.neo4j.gds.ml.core.functions.LazyConstant;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
 public class SingleLabelFeatureFunction implements FeatureFunction {
@@ -32,6 +33,17 @@ public class SingleLabelFeatureFunction implements FeatureFunction {
         Graph graph, long[] nodeIds, HugeObjectArray<double[]> features
     ) {
         int featureDimension = features.get(0).length;
+        int[] dimension = {nodeIds.length, featureDimension};
+
+        return new LazyConstant<>(() -> batchedFeatureExtractor(nodeIds, features, featureDimension), dimension);
+    }
+
+    @NotNull
+    private Matrix batchedFeatureExtractor(
+        long[] nodeIds,
+        HugeObjectArray<double[]> features,
+        int featureDimension
+    ) {
         int batchLength = nodeIds.length;
         var batchFeatures = new Matrix(batchLength, featureDimension);
 
@@ -39,6 +51,6 @@ public class SingleLabelFeatureFunction implements FeatureFunction {
             batchFeatures.setRow(batchIdx, features.get(nodeIds[batchIdx]));
         }
 
-        return new Constant<>(batchFeatures);
+        return batchFeatures;
     }
 }

@@ -59,7 +59,6 @@ class GraphSageHelperTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource({"parameters"})
     void shouldInitializeFeaturesCorrectly(String name, GraphSageTrainConfig config, HugeObjectArray<double[]> expected) {
-
         var multiLabelFeatureExtractors = GraphSageHelper.multiLabelFeatureExtractors(graph, config);
         var actual = config.isMultiLabel() ? GraphSageHelper.initializeMultiLabelFeatures(
             graph,
