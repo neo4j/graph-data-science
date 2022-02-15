@@ -414,7 +414,7 @@ We can see, that the two `READ` relationships between Florentin and the Hobbit s
 === Projecting filtered Neo4j graphs
 
 Cypher-projections allow us to specify the graph to project in a more fine-grained way.
-The following examples will demonstrate how we to filter out `READ` relationship if they do not have a `numberOfPages` property.
+The following examples will demonstrate how to filter out `READ` relationships if they do not have a `numberOfPages` property.
 
 [role=query-example, group=cypher-aggregation-rel-filtering-properties]
 --
