@@ -258,8 +258,11 @@ public final class GraphFactory {
             : ImportSizing.of(finalConcurrency);
 
         int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
-        if (maybeRootNodeCount.isPresent() && maybeRootNodeCount.getAsLong() < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
-            bufferSize = (int) maybeRootNodeCount.getAsLong();
+        if (maybeRootNodeCount.isPresent()) {
+            var rootNodeCount = maybeRootNodeCount.getAsLong();
+            if (rootNodeCount > 0 && rootNodeCount < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
+                bufferSize = (int) rootNodeCount;
+            }
         }
 
         var importMetaData = ImmutableImportMetaData.builder()
