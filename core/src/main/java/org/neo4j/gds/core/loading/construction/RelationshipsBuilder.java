@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading.construction;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 
 public class RelationshipsBuilder {
 
-    private final IdMap idMap;
+    private final PartialIdMap idMap;
 
     private final boolean loadRelationshipProperty;
     private final boolean isMultiGraph;
@@ -53,7 +53,7 @@ public class RelationshipsBuilder {
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilders;
 
     RelationshipsBuilder(
-        IdMap idMap,
+        PartialIdMap idMap,
         Orientation orientation,
         int bufferSize,
         int[] propertyKeyIds,
@@ -184,7 +184,7 @@ public class RelationshipsBuilder {
         private int localRelationshipId;
 
         ThreadLocalBuilder(
-            IdMap idMap,
+            PartialIdMap idMap,
             SingleTypeRelationshipImporter singleTypeRelationshipImporter,
             int bufferSize,
             int[] propertyKeyIds

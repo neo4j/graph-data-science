@@ -77,10 +77,6 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
 
     long highestNeoId();
 
-    default IdMap cloneIdMap() {
-        return this;
-    }
-
     Set<NodeLabel> nodeLabels(long nodeId);
 
     void forEachNodeLabel(long nodeId, IdMap.NodeLabelConsumer consumer);

@@ -26,6 +26,7 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
@@ -104,7 +105,7 @@ public final class SingleTypeRelationshipImporter {
     }
 
     public ThreadLocalSingleTypeRelationshipImporter threadLocalImporter(
-        IdMap idMap,
+        PartialIdMap idMap,
         int bulkSize,
         PropertyReader propertyReader
     ) {
@@ -138,9 +139,9 @@ public final class SingleTypeRelationshipImporter {
     }
 
     @NotNull
-    private RelationshipsBatchBuffer createBuffer(IdMap idMap, int bulkSize) {
+    private RelationshipsBatchBuffer createBuffer(PartialIdMap idMap, int bulkSize) {
         return new RelationshipsBatchBuffer(
-            idMap.cloneIdMap(),
+            idMap,
             typeId,
             bulkSize,
             validateRelationships

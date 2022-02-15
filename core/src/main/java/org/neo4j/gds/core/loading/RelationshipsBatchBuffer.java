@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.compat.PropertyReference;
 
 import static org.neo4j.gds.utils.ExceptionUtil.validateSourceNodeIsLoaded;
@@ -29,7 +29,7 @@ import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
 
-    private final IdMap idMap;
+    private final PartialIdMap idMap;
     private final int type;
     private final boolean throwOnUnMappedNodeIds;
 
@@ -42,15 +42,15 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
     private final int[] histogram;
 
     public RelationshipsBatchBuffer(
-        final IdMap idMap,
+        final PartialIdMap idMap,
         final int type,
         int capacity
     ) {
         this(idMap, type, capacity, true);
     }
 
-    public RelationshipsBatchBuffer(
-        final IdMap idMap,
+    RelationshipsBatchBuffer(
+        final PartialIdMap idMap,
         final int type,
         int capacity,
         boolean throwOnUnMappedNodeIds
