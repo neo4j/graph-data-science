@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.sssp;
+package org.neo4j.gds.paths.delta;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.TestInstance;
@@ -85,7 +85,7 @@ final class DeltaSteppingTest {
         private IdFunction idFunction;
 
         @ParameterizedTest
-        @MethodSource("org.neo4j.gds.impl.sssp.DeltaSteppingTest#deltaAndConcurrency")
+        @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#deltaAndConcurrency")
         void singleSource(double delta, int concurrency) {
             var expected = Map.of(
                 graph.toMappedNodeId("a"), 0.0,
@@ -112,7 +112,7 @@ final class DeltaSteppingTest {
         }
 
         @ParameterizedTest
-        @MethodSource("org.neo4j.gds.impl.sssp.DeltaSteppingTest#deltaAndConcurrency")
+        @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#deltaAndConcurrency")
         void singleSourceFromDisconnectedNode(double delta, int concurrency) {
             var expected = Map.of(
                 graph.toMappedNodeId("c"), 0.0,
@@ -172,7 +172,7 @@ final class DeltaSteppingTest {
         private IdFunction idFunction;
 
         @ParameterizedTest
-        @MethodSource("org.neo4j.gds.impl.sssp.DeltaSteppingTest#deltaAndConcurrency")
+        @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#deltaAndConcurrency")
         void singleSource(double delta, int concurrency) {
             var expected = Map.of(
                 graph.toMappedNodeId("n1"), 0.0,

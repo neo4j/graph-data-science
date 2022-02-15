@@ -22,8 +22,6 @@ package org.neo4j.gds.impl;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -31,7 +29,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.impl.sssp.DeltaStepping;
 
 import java.util.concurrent.Executors;
 
@@ -122,25 +119,6 @@ final class ShortestPathDeltaSteppingTest {
         var sp = sssp.compute().getShortestPaths();
 
         assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId("x"))], 0.1);
-    }
-
-    @Test
-    void testParallelNew() {
-        var concurrency = 4;
-
-        var sssp = new DeltaStepping(
-            graph,
-            graph.toMappedNodeId("s"),
-            3,
-            concurrency,
-            Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
-        );
-
-        var result = sssp.compute();
-
-        assertEquals(8, result.distance(graph.toMappedNodeId("x")), 0.1);
     }
 
     @Test
