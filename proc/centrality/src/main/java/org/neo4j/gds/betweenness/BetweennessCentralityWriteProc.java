@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -116,7 +117,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
             this.writeMillis = writeMillis;
         }
 
-        static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<WriteResult> {
+        static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
 
             protected Builder(ProcedureCallContext callContext, int concurrency) {
                 super(callContext, concurrency);
