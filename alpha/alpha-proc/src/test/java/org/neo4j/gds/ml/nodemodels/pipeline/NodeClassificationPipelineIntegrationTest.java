@@ -197,7 +197,6 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
         // let's try both list and single string syntaxes
         runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures('p', 'embedding')");
 
-        // FIXME: NPE as modelCatalog cannot be accessed
         runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.train('g', {" +
                  " nodeLabels: ['N']," +
                  " pipeline: 'p'," +
@@ -209,7 +208,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.beta.model.list() YIELD modelInfo RETURN count(*) AS modelCount",
-            List.of(Map.of("modelCount", 2L))
+            List.of(Map.of("modelCount", 3L))
         );
     }
 
