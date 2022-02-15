@@ -31,8 +31,6 @@ import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.function.Consumer;
 
 public final class ProcedureRunner {
@@ -80,23 +78,9 @@ public final class ProcedureRunner {
         proc.taskRegistryFactory = taskRegistryFactory;
         proc.userLogRegistryFactory = userLogRegistryFactory;
         proc.username = username;
-
-        var maybeModelCatalogField = Arrays.stream(procClass.getFields())
-            .filter(field -> ModelCatalog.class.isAssignableFrom(field.getType()))
-            .findFirst();
-
-        maybeModelCatalogField.ifPresent(field -> injectModelCatalog(proc, field));
+        proc.modelCatalog = GraphDatabaseApiProxy.resolveDependency(proc.api, ModelCatalog.class);
 
         return proc;
-    }
-
-    private static void injectModelCatalog(BaseProc procInstance, Field field) {
-        try {
-            var modelCatalog = GraphDatabaseApiProxy.resolveDependency(procInstance.api, ModelCatalog.class);
-            field.set(procInstance, modelCatalog);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static <P extends BaseProc> P applyOnProcedure(
