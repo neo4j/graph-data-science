@@ -664,4 +664,17 @@
         <Bug pattern="SSCU_SUSPICIOUS_SHADED_CLASS_USE"/>
     </Match>
 
+
+    <!--
+        Match for specific rules in specific classes
+    -->
+
+    <!--
+        This exclusion is needed as the result class is only used for reflective type information
+        but is not actually used.
+    -->
+    <Match>
+        <Class name="~org.neo4j.gds.projection.CypherAggregation.AggregationResult"/>
+        <Bug pattern="UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD"/>
+    </Match>
 </FindBugsFilter>
