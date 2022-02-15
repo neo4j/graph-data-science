@@ -24,9 +24,11 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CSRGraphAdapter;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.ImmutableRelationshipCursor;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.ConcurrencyConfig;
@@ -43,6 +45,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.LongPredicate;
+import java.util.stream.Stream;
 
 public class NodeFilteredGraph extends CSRGraphAdapter {
 
@@ -192,7 +195,14 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
         return consumer.target;
     }
 
-    public long getFilteredMappedNodeId(long nodeId) {
+    @Override
+    public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
+        return super.streamRelationships(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue)
+            .filter(rel -> filteredIdMap.contains(rel.sourceId()) && filteredIdMap.contains(rel.targetId()))
+            .map(rel -> ImmutableRelationshipCursor.of(filteredIdMap.toMappedNodeId(rel.sourceId()), filteredIdMap.toMappedNodeId(rel.targetId()), rel.property()));
+    }
+
+    long getFilteredMappedNodeId(long nodeId) {
         return filteredIdMap.toMappedNodeId(nodeId);
     }
 
