@@ -24,12 +24,16 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,13 +42,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class NodeFilteredGraphTest {
 
     @GdlGraph
-    static String GDL = " (a:Person)," +
+    static String GDL = " (x:Ignore)," +
+                        " (a:Person)," +
                         " (b:Ignore:Person)," +
                         " (c:Ignore:Person)," +
                         " (d:Person)," +
                         " (e:Ignore)," +
                         " (a)-->(b)," +
-                        " (a)-->(e)";
+                        " (a)-->(e)," +
+                        " (b)-->(c)," +
+                        " (b)-->(d)," +
+                        " (c)-->(e)";
 
     @Inject
     GraphStore graphStore;
@@ -56,15 +64,25 @@ class NodeFilteredGraphTest {
     void filteredIdMapThatIncludesAllNodes() {
         Graph unfilteredGraph = graphStore.getGraph(RelationshipType.ALL_RELATIONSHIPS);
 
+        NodeLabel filterLabel = NodeLabel.of("Person");
+
         Graph filteredGraph = graphStore.getGraph(
-            NodeLabel.of("Person"),
+            filterLabel,
             RelationshipType.ALL_RELATIONSHIPS,
             Optional.empty()
         );
 
         assertEquals(4L, filteredGraph.nodeCount());
-        filteredGraph.forEachNode(nodeId -> {
-            assertEquals(unfilteredGraph.toOriginalNodeId(nodeId), filteredGraph.toOriginalNodeId(nodeId));
+
+
+        unfilteredGraph.forEachNode(nodeId -> {
+            long filteredNodeId = filteredGraph.toMappedNodeId(nodeId);
+            if (unfilteredGraph.hasLabel(nodeId, filterLabel)) {
+                assertThat(filteredGraph.toOriginalNodeId(filteredNodeId)).isEqualTo(unfilteredGraph.toOriginalNodeId(nodeId));
+            } else {
+                assertThat(filteredNodeId).isEqualTo(IdMap.NOT_FOUND);
+            }
+
             return true;
         });
     }
@@ -76,7 +94,7 @@ class NodeFilteredGraphTest {
             RelationshipType.ALL_RELATIONSHIPS,
             Optional.empty()
         );
-        assertThat(graph.relationshipCount()).isEqualTo(1L);
+        assertThat(graph.relationshipCount()).isEqualTo(3L);
     }
 
     @Test
@@ -87,7 +105,7 @@ class NodeFilteredGraphTest {
             Optional.empty()
         );
 
-        assertThat(graph.degree(idFunction.of("a"))).isEqualTo(1L);
+        assertThat(graph.degree(filteredIdFunction(graph).apply("a"))).isEqualTo(1L);
     }
 
     @Test
@@ -98,6 +116,25 @@ class NodeFilteredGraphTest {
             Optional.empty()
         );
 
-        assertThat(graph.degreeWithoutParallelRelationships(idFunction.of("a"))).isEqualTo(1L);
+        assertThat(graph.degreeWithoutParallelRelationships(filteredIdFunction(graph).apply("a"))).isEqualTo(1L);
+    }
+
+    @Test
+    void filterStreamRelationships() {
+        var graph = graphStore.getGraph(
+            NodeLabel.of("Person"),
+            RelationshipType.ALL_RELATIONSHIPS,
+            Optional.empty()
+        );
+
+        Function<String, Long> filteredIdFunction = (variable) -> graph.toMappedNodeId(idFunction.of(variable));
+
+        assertThat(graph.streamRelationships(filteredIdFunction.apply("a"), Double.NaN).mapToLong(RelationshipCursor::targetId)).containsExactlyInAnyOrder(Stream.of("b").map(filteredIdFunction).toArray(Long[]::new));
+        assertThat(graph.streamRelationships(filteredIdFunction.apply("b"), Double.NaN).mapToLong(RelationshipCursor::targetId)).containsExactlyInAnyOrder(Stream.of("c", "d").map(filteredIdFunction).toArray(Long[]::new));
+        assertThat(graph.streamRelationships(filteredIdFunction.apply("c"), Double.NaN).mapToLong(RelationshipCursor::targetId)).isEmpty();
+    }
+
+    Function<String, Long> filteredIdFunction(Graph graph) {
+        return (variable) -> graph.toMappedNodeId(idFunction.of(variable));
     }
 }
