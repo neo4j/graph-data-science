@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.hamcrest.Matchers.instanceOf;
 
 class CypherAggregationTest extends BaseProcTest {
@@ -201,6 +202,14 @@ class CypherAggregationTest extends BaseProcTest {
                 assertThat(prop4.longArrayValue(nodeId)).containsExactly((long[]) expectedProp4);
             }
         });
+    }
+
+    @Test
+    void shouldNotFailOnMissingProperty() {
+        var query = "MATCH (s:B)-[:REL]->(t:B) " +
+                    "WITH gds.alpha.graph('g', s, t, s { .prop2 }, t { .prop2 }) AS g " +
+                    "RETURN g.graphName";
+        assertThatCode(() -> runQuery(query)).doesNotThrowAnyException();
     }
 
     @Test
