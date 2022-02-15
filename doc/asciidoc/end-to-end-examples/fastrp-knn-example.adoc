@@ -126,7 +126,7 @@ Note that we use the algorithm's <<running-algos-write, `write` mode>> to write 
 .Run kNN with FastRP node embeddings as input:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.knn.write('purchases', {
+CALL gds.knn.write('purchases', {
     topK: 2,
     nodeProperties: ['embedding'],
     randomSeed: 42,

@@ -43,10 +43,10 @@ import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.beta.knn.write", description = KNN_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+@GdsCallable(name = "gds.knn.write", description = KNN_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteProc.Result, KnnWriteConfig> {
 
-    @Procedure(name = "gds.beta.knn.write", mode = WRITE)
+    @Procedure(name = "gds.knn.write", mode = WRITE)
     @Description(KNN_DESCRIPTION)
     public Stream<Result> write(
         @Name(value = "graphName") String graphName,
@@ -55,7 +55,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
         return write(compute(graphName, configuration));
     }
 
-    @Procedure(value = "gds.beta.knn.write.estimate", mode = READ)
+    @Procedure(value = "gds.knn.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

@@ -11,7 +11,6 @@ The Neo4j GDS library includes the following similarity algorithms, grouped by q
 
 * Production-quality
 ** <<algorithms-node-similarity, Node Similarity>>
-* Beta
 ** <<algorithms-knn, K-Nearest Neighbors>>
 * Alpha
 ** <<alpha-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbors>>
