@@ -19,6 +19,17 @@
  */
 package org.neo4j.gds.collections;
 
+/**
+ * A long-indexable version of a primitive int list that can
+ * contain more than 2bn. elements and is growable.
+ * <p>
+ * It is implemented by paging of smaller arrays where each array, a so-called
+ * page, can store up to 4096 elements. Using small pages can lead to fewer
+ * array allocations if the value distribution is sparse. For indices for which
+ * no value has been inserted, a user-defined default value is returned.
+ * <p>
+ * The list is mutable and not thread-safe.
+ */
 @HugeSparseList(
     valueType = int.class,
     forAllConsumerType = LongIntConsumer.class
@@ -33,20 +44,47 @@ public interface HugeSparseIntList {
         return new HugeSparseIntListSon(defaultValue, initialCapacity);
     }
 
+    /**
+     * @return the current maximum number of values that can be stored in the list
+     */
     long capacity();
 
+    /**
+     * @return true, iff the value at the given index is not the default value
+     */
     boolean contains(long index);
 
+    /**
+     * @return the int value at the given index
+     */
     int get(long index);
 
+    /**
+     * Sets the value at the given index.
+     */
     void set(long index, int value);
 
+    /**
+     * Sets the value at the given index iff it has not been set before.
+     */
     boolean setIfAbsent(long index, int value);
 
+    /**
+     * Adds the given value to the value stored at the index. If no value
+     * has been stored before, the value is added to the default value.
+     */
     void addTo(long index, int value);
 
+    /**
+     * Applies to given consumer to all non-default values stored in the list.
+     */
     void forAll(LongIntConsumer consumer);
 
+    /**
+     * Returns an iterator that consumes the underlying pages of this list.
+     * Once the iterator has been consumed, the list is empty and will return
+     * the default value for each index.
+     */
     DrainingIterator<int[]> drainingIterator();
 
 }

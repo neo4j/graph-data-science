@@ -19,6 +19,17 @@
  */
 package org.neo4j.gds.collections;
 
+/**
+ * A long-indexable version of a list of byte arrays that can
+ * contain more than 2bn. elements and is growable.
+ * <p>
+ * It is implemented by paging of smaller arrays where each array, a so-called
+ * page, can store up to 4096 elements. Using small pages can lead to fewer
+ * array allocations if the value distribution is sparse. For indices for which
+ * no value has been inserted, a user-defined default value is returned.
+ * <p>
+ * The list is mutable and not thread-safe.
+ */
 @HugeSparseList(
     valueType = byte[].class,
     forAllConsumerType = LongByteArrayConsumer.class
@@ -33,16 +44,36 @@ public interface HugeSparseByteArrayList {
         return new HugeSparseByteArrayListSon(defaultValue, initialCapacity);
     }
 
+    /**
+     * @return the current maximum number of values that can be stored in the list
+     */
     long capacity();
 
+    /**
+     * @return true, iff the value at the given index is not the default value
+     */
     boolean contains(long index);
 
+    /**
+     * @return the byte array at the given index
+     */
     byte[] get(long index);
 
+    /**
+     * Sets the value at the given index.
+     */
     void set(long index, byte[] value);
 
+    /**
+     * Applies to given consumer to all non-default values stored in the list.
+     */
     void forAll(LongByteArrayConsumer consumer);
 
+    /**
+     * Returns an iterator that consumes the underlying pages of this list.
+     * Once the iterator has been consumed, the list is empty and will return
+     * the default value for each index.
+     */
     DrainingIterator<byte[][]> drainingIterator();
 
 }
