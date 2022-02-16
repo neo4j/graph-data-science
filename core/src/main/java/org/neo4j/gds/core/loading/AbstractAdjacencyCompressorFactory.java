@@ -31,7 +31,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongSupplier;
-import java.util.stream.Stream;
 
 abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> implements AdjacencyCompressorFactory {
 
@@ -45,7 +44,7 @@ abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> im
 
     HugeIntArray adjacencyDegrees;
     HugeLongArray adjacencyOffsets;
-    HugeLongArray[] propertyOffsets;
+    HugeLongArray propertyOffsets;
 
     AbstractAdjacencyCompressorFactory(
         LongSupplier nodeCountSupplier,
@@ -69,10 +68,7 @@ abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> im
         var nodeCount = this.nodeCountSupplier.getAsLong();
         this.adjacencyDegrees = HugeIntArray.newArray(nodeCount, this.allocationTracker);
         this.adjacencyOffsets = HugeLongArray.newArray(nodeCount, this.allocationTracker);
-        this.propertyOffsets = Stream
-            .generate(() -> HugeLongArray.newArray(nodeCount, this.allocationTracker))
-            .limit(propertyBuilders.length)
-            .toArray(HugeLongArray[]::new);
+        this.propertyOffsets = HugeLongArray.newArray(nodeCount, this.allocationTracker);
     }
 
     @Override
@@ -86,8 +82,8 @@ abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> im
             .builder()
             .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets));
 
-        for (int i = 0; i < propertyBuilders.length; i++) {
-            var properties = propertyBuilders[i].build(this.adjacencyDegrees, propertyOffsets[i]);
+        for (var propertyBuilder : propertyBuilders) {
+            var properties = propertyBuilder.build(this.adjacencyDegrees, propertyOffsets);
             builder.addProperty(properties);
         }
 
