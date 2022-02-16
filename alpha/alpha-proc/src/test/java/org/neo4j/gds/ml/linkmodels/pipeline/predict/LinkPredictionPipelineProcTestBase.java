@@ -35,8 +35,8 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
@@ -86,17 +86,18 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
     }
 
     private void withModelInCatalog() {
-        var weights = new double[]{-2.0, -1.0, 3.0};
+        var weights = new double[]{0, 0, 0, -2.0, -1.0, 3.0};
         var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
-        var modelData = ImmutableLinkLogisticRegressionData.of(
+        var modelData = ImmutableLogisticRegressionData.of(
             new Weights<>(new Matrix(
                 weights,
-                1,
-                weights.length
+                2,
+                weights.length / 2
             )),
-            Weights.ofScalar(0)
+            Weights.ofScalar(0),
+            LinkPrediction.makeLabelIdMap()
         );
 
         modelCatalog.set(Model.of(

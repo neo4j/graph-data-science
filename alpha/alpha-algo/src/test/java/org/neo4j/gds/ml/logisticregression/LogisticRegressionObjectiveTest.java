@@ -142,10 +142,10 @@ class LogisticRegressionObjectiveTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        " 10,   1, false,  816",
-        " 10,   1, true, 1_008",
-        "100,   1, true, 6_768",
-        " 10, 100, true, 9_720",
+        " 10,   1, false,  808",
+        " 10,   1, true, 1_000",
+        "100,   1, true, 6_760",
+        " 10, 100, true, 9_716",
     })
     void shouldEstimateMemoryUsage(int batchSize, int featureDim, boolean useBias, long expected) {
         var memoryUsageInBytes = LogisticRegressionObjective.sizeOfBatchInBytes(batchSize, featureDim, useBias);

@@ -17,16 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
+package org.neo4j.gds.ml.logisticregression;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer.LogisticRegressionData;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LinkLogisticRegressionDataTest {
+class LogisticRegressionDataTest {
 
     @ParameterizedTest
     @CsvSource(value = {
@@ -38,7 +39,7 @@ class LinkLogisticRegressionDataTest {
     void shouldEstimateCorrectly(int relCount, int minFeatureCount, int maxFeatureCount, int minEstimation, int maxEstimation) {
         var estimatedFeatureCount = MemoryRange.of(minFeatureCount, maxFeatureCount);
         var dimensions = GraphDimensions.of(1000L, relCount);
-        var memoryEstimation = LinkLogisticRegressionData
+        var memoryEstimation = LogisticRegressionData
             .memoryEstimation(estimatedFeatureCount)
             .estimate(dimensions, 5000);
 

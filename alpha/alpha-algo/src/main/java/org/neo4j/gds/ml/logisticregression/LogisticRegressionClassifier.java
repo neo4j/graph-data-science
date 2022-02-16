@@ -31,15 +31,16 @@ import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand
 import org.neo4j.gds.ml.core.functions.Softmax;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer.LogisticRegressionData;
 
 import java.util.List;
 
 public class LogisticRegressionClassifier implements Trainer.Classifier {
 
-    private final LogisticRegressionTrainer.LogisticRegressionData data;
+    private final LogisticRegressionData data;
 
-    LogisticRegressionClassifier(
-        LogisticRegressionTrainer.LogisticRegressionData data
+    public LogisticRegressionClassifier(
+        LogisticRegressionData data
     ) {
         this.data = data;
     }
@@ -84,7 +85,7 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
     }
 
     @Override
-    public LogisticRegressionTrainer.LogisticRegressionData data() {
+    public LogisticRegressionData data() {
         return data;
     }
 }

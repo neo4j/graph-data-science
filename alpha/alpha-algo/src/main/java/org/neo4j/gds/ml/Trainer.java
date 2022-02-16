@@ -63,5 +63,20 @@ public interface Trainer {
                 }
             };
         }
+
+        static Features wrap(double[] features) {
+            return new Features() {
+                @Override
+                public long size() {
+                    return 1;
+                }
+
+                @Override
+                public double[] get(long id) {
+                    assert id == 0;
+                    return features;
+                }
+            };
+        }
     }
 }

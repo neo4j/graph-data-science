@@ -58,9 +58,9 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             " ORDER BY probability DESC, node1",
             Map.of("topN", 3, "concurrency", concurrency, "nodeLabel", nodeLabel),
             List.of(
-                Map.of("node1", 0L + labelOffset, "node2", 4L + labelOffset, "probability", .49750002083312506),
-                Map.of("node1", 1L + labelOffset, "node2", 4L + labelOffset, "probability", .11815697780926958),
-                Map.of("node1", 0L + labelOffset, "node2", 1L + labelOffset, "probability", .11506673204554983)
+                Map.of("node1", 0L + labelOffset, "node2", 4L + labelOffset, "probability", .4975000208331247),
+                Map.of("node1", 1L + labelOffset, "node2", 4L + labelOffset, "probability", .11815697780926944),
+                Map.of("node1", 0L + labelOffset, "node2", 1L + labelOffset, "probability", .1150667320455497)
             )
         );
     }

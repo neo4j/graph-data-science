@@ -35,7 +35,6 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 
 import java.util.Optional;
@@ -51,7 +50,7 @@ public final class LogisticRegressionTrainer implements Trainer {
 
     public static MemoryEstimation estimate(LinkLogisticRegressionTrainConfig llrConfig, MemoryRange linkFeatureDimension) {
         return MemoryEstimations.builder("train model")
-            .add("model data", LinkLogisticRegressionData.memoryEstimation(linkFeatureDimension))
+            .add("model data", LogisticRegressionData.memoryEstimation(linkFeatureDimension))
             .add("update weights", Training.memoryEstimation(linkFeatureDimension, 1, 1))
             .perThread(
                 "computation graph",
@@ -93,6 +92,16 @@ public final class LogisticRegressionTrainer implements Trainer {
 
     @ValueClass
     public interface LogisticRegressionData extends ClassifierData {
+        static MemoryEstimation memoryEstimation(MemoryRange linkFeatureDimension) {
+            return MemoryEstimations.builder(LogisticRegressionData.class)
+                .fixed("weights", linkFeatureDimension.apply(featureDim -> Weights.sizeInBytes(
+                    1,
+                    Math.toIntExact(featureDim)
+                )))
+                .fixed("bias", Weights.sizeInBytes(1, 1))
+                .build();
+        }
+
         Weights<Matrix> weights();
         Optional<Weights<Scalar>> bias();
         LocalIdMap classIdMap();

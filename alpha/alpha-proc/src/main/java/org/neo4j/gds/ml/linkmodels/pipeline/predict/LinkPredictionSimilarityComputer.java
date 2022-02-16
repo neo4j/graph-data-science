@@ -20,8 +20,10 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
+import org.neo4j.gds.ml.Trainer.Features;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
+import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 import org.neo4j.gds.similarity.knn.NeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.SimilarityComputer;
@@ -29,20 +31,22 @@ import org.neo4j.gds.similarity.knn.SimilarityComputer;
 class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
     private final LinkFeatureExtractor linkFeatureExtractor;
-    private final LinkLogisticRegressionPredictor predictor;
+    private final LogisticRegressionClassifier classifier;
+    private final int positiveClassLocalId;
 
     LinkPredictionSimilarityComputer(
         LinkFeatureExtractor linkFeatureExtractor,
-        LinkLogisticRegressionPredictor predictor
+        LogisticRegressionClassifier classifier
     ) {
         this.linkFeatureExtractor = linkFeatureExtractor;
-        this.predictor = predictor;
+        this.classifier = classifier;
+        this.positiveClassLocalId = classifier.classIdMap().toMapped((long)EdgeSplitter.POSITIVE);
     }
 
     @Override
     public double similarity(long sourceId, long targetId) {
         var features = linkFeatureExtractor.extractFeatures(sourceId, targetId);
-        return predictor.predictedProbability(features);
+        return classifier.predictProbabilities(0L, Features.wrap(features))[positiveClassLocalId];
     }
 
     static final class LinkFilter implements NeighborFilter {
