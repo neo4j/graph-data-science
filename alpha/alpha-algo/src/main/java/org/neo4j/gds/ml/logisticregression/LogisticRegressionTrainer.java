@@ -63,44 +63,14 @@ public final class LogisticRegressionTrainer implements Trainer {
     @Override
     public LogisticRegressionClassifier train(Features features, HugeLongArray labels) {
         var data = LogisticRegressionData.of(features.get(0).length, labels, trainConfig.useBiasFeature());
-        var objective = new LogisticRegressionObjective(data, trainConfig.penalty(), features, labels);
+        var classifier = new LogisticRegressionClassifier(data);
+        var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);
         var training = new Training(trainConfig, progressTracker, features.size(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, trainConfig.batchSize());
 
         training.train(objective, queueSupplier, concurrency);
 
-        return new LogisticRegressionClassifier(data);
-    }
-
-    public static final class LogisticRegressionClassifier implements Classifier {
-
-        private final LogisticRegressionData data;
-
-        LogisticRegressionClassifier(
-            LogisticRegressionData data
-        ) {
-            this.data = data;
-        }
-
-        @Override
-        public LocalIdMap classIdMap() {
-            return data.classIdMap();
-        }
-
-        @Override
-        public long predict(long id, Features features) {
-            return 0;
-        }
-
-        @Override
-        public double[] predictProbabilities(long id, Features features) {
-            return new double[0];
-        }
-
-        @Override
-        public LogisticRegressionData data() {
-            return data;
-        }
+        return classifier;
     }
 
     @ValueClass
@@ -110,12 +80,12 @@ public final class LogisticRegressionTrainer implements Trainer {
         LocalIdMap classIdMap();
 
         static LogisticRegressionData of(int numberOfLinkFeatures, HugeLongArray labels, boolean useBias) {
-            var weights = Weights.ofMatrix(1, numberOfLinkFeatures);
-
             var classIdMap = new LocalIdMap();
             for (long i = 0; i < labels.size(); i++) {
                 classIdMap.toMapped(labels.get(i));
             }
+
+            var weights = Weights.ofMatrix(classIdMap.size(), numberOfLinkFeatures);
 
             var bias = useBias
                 ? Optional.of(Weights.ofScalar(0))

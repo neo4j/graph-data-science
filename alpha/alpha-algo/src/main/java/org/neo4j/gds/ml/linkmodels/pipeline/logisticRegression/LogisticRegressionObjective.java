@@ -27,35 +27,33 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ConstantScale;
-import org.neo4j.gds.ml.core.functions.EWiseAddMatrixScalar;
+import org.neo4j.gds.ml.core.functions.CrossEntropyLoss;
 import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
-import org.neo4j.gds.ml.core.functions.LogisticLoss;
-import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 
 import java.util.List;
 import java.util.Optional;
 
 public class LogisticRegressionObjective implements Objective<LogisticRegressionTrainer.LogisticRegressionData> {
-    private final LogisticRegressionTrainer.LogisticRegressionData modelData;
+    private final LogisticRegressionClassifier classifier;
     private final double penalty;
     private final Trainer.Features features;
     private final HugeLongArray labels;
 
     public LogisticRegressionObjective(
-        LogisticRegressionTrainer.LogisticRegressionData llrData,
+        LogisticRegressionClassifier classifier,
         double penalty,
         Trainer.Features features,
         HugeLongArray labels
     ) {
-        this.modelData = llrData;
+        this.classifier = classifier;
         this.penalty = penalty;
         this.features = features;
         this.labels = labels;
@@ -65,64 +63,39 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
-        Optional<Weights<Scalar>> bias = modelData.bias();
+        Optional<Weights<Scalar>> bias = classifier.data().bias();
         if (bias.isPresent()) {
-            Weights<Scalar> weights = bias.get();
-            return List.of(modelData.weights(), weights);
+            return List.of(classifier.data().weights(), bias.get());
         } else {
-            return List.of(modelData.weights());
+            return List.of(classifier.data().weights());
         }
     }
 
     @Override
-    public Variable<Scalar> loss(Batch relationshipBatch, long trainSize) {
-        var batchedTargets = batchLabelVector(relationshipBatch);
-        var features = batchFeatureMatrix(relationshipBatch);
-        var weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.of(features, modelData.weights());
-
-        LogisticLoss unpenalizedLoss;
-
-        Optional<Weights<Scalar>> potentialBias = modelData.bias();
-        if (potentialBias.isPresent()) {
-            Weights<Scalar> bias = potentialBias.get();
-            var weightedFeaturesWithBias = new EWiseAddMatrixScalar(weightedFeatures, bias);
-            var predictions = new Sigmoid<>(weightedFeaturesWithBias);
-            unpenalizedLoss = new LogisticLoss(modelData.weights(), bias, predictions, features, batchedTargets);
-        } else {
-            var predictions = new Sigmoid<>(weightedFeatures);
-            unpenalizedLoss = new LogisticLoss(modelData.weights(), predictions, features, batchedTargets);
-        }
-
-        var penaltyVariable = new ConstantScale<>(
-            new L2NormSquared(modelData.weights()),
-            relationshipBatch.size() * penalty / trainSize
+    public Variable<Scalar> loss(Batch batch, long trainSize) {
+        var batchLabels = batchLabelVector(batch, classifier.classIdMap());
+        var predictions = classifier.predictionsVariable(batch, features);
+        var unpenalizedLoss = new CrossEntropyLoss(
+            predictions,
+            batchLabels
         );
-
+        var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData().weights()), batch.size() * penalty / trainSize);
         return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
     }
 
     @Override
     public LogisticRegressionTrainer.LogisticRegressionData modelData() {
-        return modelData;
+        return classifier.data();
     }
 
-    private Constant<Vector> batchLabelVector(Batch batch) {
+    private Constant<Vector> batchLabelVector(Batch batch, LocalIdMap localIdMap) {
         var batchedTargets = new Vector(batch.size());
         var batchOffset = new MutableInt();
 
         batch.nodeIds().forEach(
-            relationshipId -> batchedTargets.setDataAt(batchOffset.getAndIncrement(), labels.get(relationshipId))
+            relationshipId -> batchedTargets.setDataAt(batchOffset.getAndIncrement(), localIdMap.toMapped(labels.get(relationshipId)))
         );
 
         return new Constant<>(batchedTargets);
-    }
-
-    private Constant<Matrix> batchFeatureMatrix(Batch batch) {
-        var batchFeatures = new Matrix(batch.size(), features.get(0).length);
-        var batchFeaturesOffset = new MutableInt();
-
-        batch.nodeIds().forEach(id -> batchFeatures.setRow(batchFeaturesOffset.getAndIncrement(), features.get(id)));
-
-        return new Constant<>(batchFeatures);
     }
 }
