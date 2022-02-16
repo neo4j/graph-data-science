@@ -367,6 +367,10 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         LinkPredictionPipeline pipeline,
         LinkPredictionTrainConfig trainConfig
     ) {
+        // This estimation assumes the given graph dimensions used to compute the MemoryTree to contain the expected set
+        // sizes for the test and train relationshipTypes. That is, the graph dimension input needs to have the test and
+        // train relationship types as well as their relationship counts.
+
         var splitConfig = pipeline.splitConfig();
 
         var builder = MemoryEstimations.builder(LinkPredictionTrain.class);
@@ -423,7 +427,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 "Cross-Validation splitting",
                 StratifiedKFoldSplitter.memoryEstimation(
                     splitConfig.validationFolds(),
-                    dim -> splitConfig.expectedSetSizes(dim.relCountUpperBound()).trainSize()
+                    dim -> dim.relationshipCounts().get(RelationshipType.of(splitConfig.trainRelationshipType()))
                 )
             )
             .add(maxEstimationOverModelCandidates)
@@ -444,9 +448,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             .perGraphDimension(
                 "Sorted probabilities",
                 (dim, threads) -> {
-                    long trainSetSize = splitConfig
-                        .expectedSetSizes(dim.relCountUpperBound())
-                        .trainSize();
+                    long trainSetSize = dim.relationshipCounts().get(RelationshipType.of(splitConfig.trainRelationshipType()));
                     return LinkPredictionEvaluationMetricComputer.estimate(trainSetSize);
                 }
             ).build();
