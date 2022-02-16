@@ -154,6 +154,9 @@ public class RelationshipSplitter {
             .add(new SplitRelationshipsAlgorithmFactory().memoryEstimation(trainSplitConfig))
             .build();
 
-        return MemoryEstimations.maxEstimation("Split relationships", List.of(firstSplitEstimation, secondSplitEstimation));
+        return MemoryEstimations.builder("Split relationships")
+            .add(firstSplitEstimation)
+            .add(secondSplitEstimation)
+            .build();
     }
 }
