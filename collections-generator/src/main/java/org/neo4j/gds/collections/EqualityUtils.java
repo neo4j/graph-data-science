@@ -31,12 +31,12 @@ import static java.util.Map.entry;
 public final class EqualityUtils {
 
     public static final Map<TypeName, String> DEFAULT_VALUES = Map.of(
-        TypeName.BYTE, Byte.toString((new byte[1])[0]),
-        TypeName.SHORT, Short.toString((new short[1])[0]),
-        TypeName.INT, Integer.toString((new int[1])[0]),
-        TypeName.LONG, (new long[1])[0] + "L",
-        TypeName.FLOAT, (new float[1])[0] + "F",
-        TypeName.DOUBLE, (new double[1])[0] + "D"
+        TypeName.BYTE, "0",
+        TypeName.SHORT, "0",
+        TypeName.INT, "0",
+        TypeName.LONG, "0l",
+        TypeName.FLOAT, "0f",
+        TypeName.DOUBLE, "0d"
     );
 
     public static <LHS, RHS> CodeBlock isEqual(
