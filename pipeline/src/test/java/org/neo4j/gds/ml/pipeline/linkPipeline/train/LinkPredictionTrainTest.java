@@ -120,22 +120,22 @@ class LinkPredictionTrainTest {
             Arguments.of(
                 "Default",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.1).validationFolds(2).build(),
-                MemoryRange.of(101_560, 3_131_720)
+                MemoryRange.of(82_040, 2_485_000)
             ),
             Arguments.of(
                 "Higher test-set",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.6).trainFraction(0.1).validationFolds(2).build(),
-                MemoryRange.of(185_720, 6_508_680)
+                MemoryRange.of(184_440, 6_507_400)
             ),
             Arguments.of(
                 "Higher train-set",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.6).validationFolds(2).build(),
-                MemoryRange.of(317_560, 10_403_720)
+                MemoryRange.of(187_960, 6_040_520)
             ),
             Arguments.of(
                 "Higher validation folds",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.6).validationFolds(5).build(),
-                MemoryRange.of(369_736, 10_455_896)
+                MemoryRange.of(214_216, 6_066_776)
             )
         );
     }
@@ -149,9 +149,9 @@ class LinkPredictionTrainTest {
             .collect(Collectors.toList());
 
         return Stream.of(
-            Arguments.of("LLR batchSize 10", List.of(llrConfigs.get(0)), MemoryRange.of(56_112, 1_674_552)),
-            Arguments.of("LLR batchSize 100", List.of(llrConfigs.get(1)), MemoryRange.of(104_552, 3_134_712)),
-            Arguments.of("LLR batchSize 10,100", llrConfigs, MemoryRange.of(104_648, 3_134_808))
+            Arguments.of("LLR batchSize 10", List.of(llrConfigs.get(0)), MemoryRange.of(34_632, 1_026_392)),
+            Arguments.of("LLR batchSize 100", List.of(llrConfigs.get(1)), MemoryRange.of(83_592, 2_486_552)),
+            Arguments.of("LLR batchSize 10,100", llrConfigs, MemoryRange.of(83_688, 2_486_648))
         );
     }
 
@@ -202,10 +202,10 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "  10,   10,  58_728, 1_685_528",
-        "  10,  100,  63_080, 1_823_160",
-        "  10, 1000, 104_552, 3_134_712",
-        "1000, 1000, 104_552, 3_134_712"
+        "  10,   10, 58_680, 1_685_480",
+        "  10,  100, 60_984, 1_758_344",
+        "  10, 1000, 83_592, 2_486_552",
+        "1000, 1000, 83_592, 2_486_552"
     })
     void estimateWithDifferentGraphSizes(int nodeCount, int relationshipCount, int expectedMinEstimation, int expectedMaxEstimation) {
         var trainConfig = LinkPredictionTrainConfig
@@ -293,9 +293,9 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "  1,  62_144, 1_892_784",
-        "  2,  76_280, 2_306_760",
-        "  4, 104_552, 3_134_712",
+        "  1,  41184, 1244624",
+        "  2,  55320, 1658600",
+        "  4, 83592, 2486552",
     })
     void estimateWithConcurrency(int concurrency, int expectedMinEstimation, int expectedMaxEstimation) {
         var trainConfig = LinkPredictionTrainConfig
