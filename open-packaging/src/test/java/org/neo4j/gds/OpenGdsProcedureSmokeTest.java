@@ -409,7 +409,11 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
     );
 
-    private static final List<String> AGGREGATION_FUNCTIONS = List.of("gds.alpha.similarity.asVector");
+    private static final List<String> AGGREGATION_FUNCTIONS = List.of(
+        "gds.alpha.graph",
+
+        "gds.alpha.similarity.asVector"
+    );
 
     private static final List<String> PAGE_RANK = asList(
         "gds.pageRank.mutate",
