@@ -113,28 +113,28 @@ final class HugeSparseListGenerator implements CollectionStep.Generator<HugeSpar
 
     private static FieldSpec pageShiftField(int pageShift) {
         return FieldSpec
-            .builder(TypeName.INT, "PAGE_SHIFT", Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
+            .builder(TypeName.INT, "PAGE_SHIFT", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             .initializer("$L", pageShift)
             .build();
     }
 
     private static FieldSpec pageSizeField(FieldSpec pageShiftField) {
         return FieldSpec
-            .builder(TypeName.INT, "PAGE_SIZE", Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
+            .builder(TypeName.INT, "PAGE_SIZE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             .initializer("1 << $N", pageShiftField)
             .build();
     }
 
     private static FieldSpec pageMaskField(FieldSpec pageSizeField) {
         return FieldSpec
-            .builder(TypeName.INT, "PAGE_MASK", Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
+            .builder(TypeName.INT, "PAGE_MASK", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             .initializer("$N - 1", pageSizeField)
             .build();
     }
 
     private static FieldSpec pageSizeInBytesField(FieldSpec pageSizeField) {
         return FieldSpec
-            .builder(TypeName.LONG, "PAGE_SIZE_IN_BYTES", Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
+            .builder(TypeName.LONG, "PAGE_SIZE_IN_BYTES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             .initializer("$T.sizeOfLongArray($N)", MemoryUsage.class, pageSizeField)
             .build();
     }
