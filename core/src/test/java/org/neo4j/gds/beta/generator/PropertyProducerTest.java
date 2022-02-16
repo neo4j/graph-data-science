@@ -103,4 +103,27 @@ class PropertyProducerTest {
                 assertThat(value[0]).isEqualTo(6);
             });
     }
+
+    @Test
+    void testRandomLongArrayPropertyProducer() {
+        var propertyName = "foo";
+        var length = 3;
+        var min = 5;
+        var max = 10;
+        var producer = PropertyProducer.randomLongArray(propertyName, length, min, max);
+        assertThat(producer)
+            .returns(propertyName, PropertyProducer::getPropertyName)
+            .returns(ValueType.LONG_ARRAY, PropertyProducer::propertyType)
+            .satisfies(p -> {
+                var random = new Random();
+                long[][] value = {{}};
+                p.setProperty(value, 0, random);
+                var actual = value[0];
+                assertThat(actual.length).isEqualTo(length);
+                for (long l : actual) {
+                    assertThat(l).isGreaterThanOrEqualTo(min);
+                    assertThat(l).isLessThanOrEqualTo(max);
+                }
+            });
+    }
 }

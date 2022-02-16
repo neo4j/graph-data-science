@@ -42,6 +42,10 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         return new RandomLongProducer(propertyName, min, max);
     }
 
+    static PropertyProducer<long[][]> randomLongArray(String propertyName, int length, long min, long max) {
+        return new RandomLongArrayProducer(propertyName, length, min, max);
+    }
+
     String getPropertyName();
 
     ValueType propertyType();
@@ -247,6 +251,49 @@ public interface PropertyProducer<PROPERTY_SLICE> {
             } else {
                 longs[index] = modulo + max;
             }
+        }
+    }
+
+    class RandomLongArrayProducer implements PropertyProducer<long[][]> {
+
+        private final String propertyName;
+        private final int length;
+        private final long min;
+        private final long max;
+
+        RandomLongArrayProducer(String propertyName, int length, long min, long max) {
+            this.propertyName = propertyName;
+            this.length = length;
+            this.min = min;
+            this.max = max;
+
+            if (max <= min) {
+                throw new IllegalArgumentException("Max value must be greater than min value");
+            }
+        }
+
+        @Override
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+        @Override
+        public ValueType propertyType() {
+                return ValueType.LONG_ARRAY;
+        }
+
+        @Override
+        public void setProperty(long[][] longs, int index, Random random) {
+            var value = new long[length];
+            for (int i = 0; i < length; i++) {
+                var modulo = random.nextLong() % (max - min);
+                if (modulo >= 0) {
+                    value[i] = modulo + min;
+                } else {
+                    value[i]  = modulo + max;
+                }
+            }
+            longs[index] = value;
         }
     }
 
