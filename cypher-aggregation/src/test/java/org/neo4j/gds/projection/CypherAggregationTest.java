@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
@@ -175,6 +177,28 @@ class CypherAggregationTest extends BaseProcTest {
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
         assertThat(graphStore.nodeCount()).isEqualTo(16);
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A", "B", "__ALL__", "DifferentLabel");
+    }
+
+    @Test
+    void testDirectLabelMapping() {
+        runQuery("MATCH (s)" +
+                 "RETURN gds.alpha.graph('g', s, null, { sourceNodeLabels: true })");
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A", "B", "__ALL__", "DifferentLabel");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "",
+        ", { sourceNodeLabels: false }"
+    })
+    void testWithoutLabelInformation(String nodeConfig) {
+        runQuery("MATCH (s)" +
+                 "RETURN gds.alpha.graph('g', s, null" + nodeConfig + ")");
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("__ALL__");
     }
 
     @Test

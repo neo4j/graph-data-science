@@ -50,6 +50,7 @@ import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.procedure.Description;
@@ -67,6 +68,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -152,29 +154,55 @@ public final class CypherAggregation extends BaseProc {
                     ));
                 }
 
-                var targetNodeProperties = nodesConfig.get("targetNodeProperties");
-                if (targetNodeProperties == null || targetNodeProperties instanceof Map) {
-                    targetNodePropertyValues = objectsToValues((Map<String, Object>) targetNodeProperties);
-                } else {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "Expected a map for key %s, but got %s.",
-                        "targetNodeProperties",
-                        targetNodeProperties.getClass().getSimpleName()
-                    ));
-                }
-
                 var sourceNodeLabelsEntry = nodesConfig.get("sourceNodeLabels");
                 if (sourceNodeLabelsEntry instanceof List) {
                     sourceNodeLabels = ((List<String>) sourceNodeLabelsEntry).stream().map(NodeLabel::new).toArray(NodeLabel[]::new);
-                } else {
+                } else if (sourceNodeLabelsEntry == null || (sourceNodeLabelsEntry instanceof Boolean && ((Boolean) sourceNodeLabelsEntry))) {
+                    sourceNodeLabels = StreamSupport.stream(sourceNode.getLabels().spliterator(), false)
+                        .map(Label::name)
+                        .map(NodeLabel::new)
+                        .toArray(NodeLabel[]::new);
+                } else if (sourceNodeLabelsEntry instanceof Boolean) {
+                    // boolean is false
                     sourceNodeLabels = new NodeLabel[]{ NodeLabel.ALL_NODES };
+                } else {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Expected a list or a boolean for key %s, but got %s.",
+                        "sourceNodeLabels",
+                        sourceNodeLabelsEntry.getClass().getSimpleName()
+                    ));
                 }
 
-                var targetNodeLabelsEntry = nodesConfig.get("targetNodeLabels");
-                if (targetNodeLabelsEntry instanceof List) {
-                    targetNodeLabels = ((List<String>) targetNodeLabelsEntry).stream().map(NodeLabel::new).toArray(NodeLabel[]::new);
-                } else {
-                    targetNodeLabels = new NodeLabel[]{ NodeLabel.ALL_NODES };
+                if (targetNode != null) {
+                    var targetNodeProperties = nodesConfig.get("targetNodeProperties");
+                    if (targetNodeProperties == null || targetNodeProperties instanceof Map) {
+                        targetNodePropertyValues = objectsToValues((Map<String, Object>) targetNodeProperties);
+                    } else {
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Expected a map for key %s, but got %s.",
+                            "targetNodeProperties",
+                            targetNodeProperties.getClass().getSimpleName()
+                        ));
+                    }
+
+                    var targetNodeLabelsEntry = nodesConfig.get("targetNodeLabels");
+                    if (targetNodeLabelsEntry instanceof List) {
+                        targetNodeLabels = ((List<String>) targetNodeLabelsEntry).stream().map(NodeLabel::new).toArray(NodeLabel[]::new);
+                    } else if (targetNodeLabelsEntry == null || (targetNodeLabelsEntry instanceof Boolean && ((Boolean) targetNodeLabelsEntry))) {
+                        targetNodeLabels = StreamSupport.stream(targetNode.getLabels().spliterator(), false)
+                            .map(Label::name)
+                            .map(NodeLabel::new)
+                            .toArray(NodeLabel[]::new);
+                    } else if (targetNodeLabelsEntry instanceof Boolean) {
+                        // boolean is false
+                        targetNodeLabels = new NodeLabel[]{ NodeLabel.ALL_NODES };
+                    } else {
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Expected a list or a boolean for key %s, but got %s.",
+                            "targetNodeLabels",
+                            targetNodeLabelsEntry.getClass().getSimpleName()
+                        ));
+                    }
                 }
             }
 
