@@ -136,7 +136,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
         SYNC
     }
 
-    static class DeltaSteppingTask implements Runnable {
+    private static class DeltaSteppingTask implements Runnable {
         private final Graph graph;
         private final HugeLongArray frontier;
         private final HugeAtomicDoubleArray distances;
@@ -145,7 +145,11 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
         private final AtomicLong frontierIndex;
         private long frontierLength;
 
-        // TODO: hugify
+        // Although there is a probability that a local bin exceeds
+        // 2^31 entries, it is very unlikely and if it happens, we
+        // certainly have a problem managing the graph size anyway.
+        // Overflowing can only happen in the global phase, as the
+        // local phase is bounded by the BIN_SIZE_THRESHOLD.
         private LongArrayList[] localBins;
         private Phase phase = Phase.RELAX;
 
@@ -229,7 +233,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
 
                 while (Double.compare(newDist, oldDist) < 0) {
                     var witness = distances.compareAndExchange(targetNodeId, oldDist, newDist);
-                    
+
                     if (Double.compare(witness, oldDist) == 0) {
                         int destBin = (int) (newDist / delta);
 
