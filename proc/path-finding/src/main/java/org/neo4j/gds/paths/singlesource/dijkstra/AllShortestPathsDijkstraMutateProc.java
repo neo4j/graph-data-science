@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.singlesource;
+package org.neo4j.gds.paths.singlesource.dijkstra;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.paths.ShortestPathStreamProc;
-import org.neo4j.gds.paths.StreamResult;
+import org.neo4j.gds.paths.MutateResult;
+import org.neo4j.gds.paths.ShortestPathMutateProc;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
-import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
+import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -35,23 +35,23 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraProc.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
+import static org.neo4j.gds.paths.singlesource.dijkstra.AllShortestPathsDijkstraProc.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.allShortestPaths.dijkstra.stream", description = DIJKSTRA_DESCRIPTION, executionMode = STREAM)
-public class AllShortestPathsDijkstraStreamProc extends ShortestPathStreamProc<Dijkstra, AllShortestPathsDijkstraStreamConfig> {
+@GdsCallable(name = "gds.allShortestPaths.dijkstra.mutate", description = DIJKSTRA_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+public class AllShortestPathsDijkstraMutateProc extends ShortestPathMutateProc<Dijkstra, AllShortestPathsDijkstraMutateConfig> {
 
-    @Procedure(name = "gds.allShortestPaths.dijkstra.stream", mode = READ)
+    @Procedure(name = "gds.allShortestPaths.dijkstra.mutate", mode = READ)
     @Description(DIJKSTRA_DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration, false, true));
+        return mutate(compute(graphName, configuration, false, true));
     }
 
-    @Procedure(name = "gds.allShortestPaths.dijkstra.stream.estimate", mode = READ)
+    @Procedure(name = "gds.allShortestPaths.dijkstra.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -61,13 +61,12 @@ public class AllShortestPathsDijkstraStreamProc extends ShortestPathStreamProc<D
     }
 
     @Override
-    protected AllShortestPathsDijkstraStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return AllShortestPathsDijkstraStreamConfig.of(config);
+    protected AllShortestPathsDijkstraMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return AllShortestPathsDijkstraMutateConfig.of(config);
     }
 
     @Override
-    public GraphAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraStreamConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraMutateConfig> algorithmFactory() {
         return DijkstraFactory.singleSource();
     }
 }
-

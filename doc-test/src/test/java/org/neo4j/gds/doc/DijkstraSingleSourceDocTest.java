@@ -21,9 +21,9 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraMutateProc;
-import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraStreamProc;
-import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraWriteProc;
+import org.neo4j.gds.paths.singlesource.dijkstra.AllShortestPathsDijkstraMutateProc;
+import org.neo4j.gds.paths.singlesource.dijkstra.AllShortestPathsDijkstraStreamProc;
+import org.neo4j.gds.paths.singlesource.dijkstra.AllShortestPathsDijkstraWriteProc;
 
 import java.util.List;
 

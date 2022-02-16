@@ -29,6 +29,7 @@ import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
+import org.neo4j.gds.paths.singlesource.dijkstra.AllShortestPathsDijkstraStreamProc;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.List;
