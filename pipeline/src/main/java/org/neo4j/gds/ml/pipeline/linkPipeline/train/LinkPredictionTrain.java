@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
@@ -30,18 +31,19 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrain;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.nodemodels.BestMetricData;
 import org.neo4j.gds.ml.nodemodels.BestModelStats;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
@@ -63,7 +65,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
-import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndTargetsExtractor.extractFeaturesAndTargets;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndTargetsExtractor.extractFeaturesAndLabels;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionEvaluationMetricComputer.computeMetric;
 
 public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
@@ -111,7 +113,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         progressTracker.beginSubTask();
 
         progressTracker.beginSubTask("extract train features");
-        var trainData = extractFeaturesAndTargets(
+        var trainData = extractFeaturesAndLabels(
             trainGraph,
             pipeline.featureSteps(),
             trainConfig.concurrency(),
@@ -127,34 +129,49 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         // train best model on the entire training graph
         progressTracker.beginSubTask("train best model");
-        var modelData = trainModel(trainRelationshipIds, trainData, bestParameters, progressTracker);
+        var classifier = trainModel(trainData, trainRelationshipIds, bestParameters);
         progressTracker.endSubTask("train best model");
 
         // evaluate the best model on the training and test graphs
         progressTracker.beginSubTask("compute train metrics");
-        var outerTrainMetrics = computeTrainMetric(trainData, modelData, trainRelationshipIds, progressTracker);
+        var outerTrainMetrics = computeTrainMetric(trainData, classifier, trainRelationshipIds, progressTracker);
         progressTracker.endSubTask("compute train metrics");
 
         progressTracker.beginSubTask("evaluate on test data");
-        var testMetrics = computeTestMetric(modelData);
+        var testMetrics = computeTestMetric(classifier);
         progressTracker.endSubTask("evaluate on test data");
 
         var model = createModel(
             bestParameters,
-            modelData,
+            classifier.data(),
             combineBestParameterMetrics(modelSelectResult, outerTrainMetrics, testMetrics)
         );
 
         progressTracker.endSubTask();
 
-        return ImmutableLinkPredictionTrainResult.of(model, modelSelectResult);
+        return LinkPredictionTrainResult.of(model, modelSelectResult);
+    }
+
+    @NotNull
+    private Trainer.Classifier trainModel(
+        FeaturesAndLabels featureAndLabels,
+        ReadOnlyHugeLongArray trainSet,
+        LinkLogisticRegressionTrainConfig modelConfig
+    ) {
+        return new LogisticRegressionTrainer(
+            trainSet,
+            trainConfig.concurrency(),
+            modelConfig,
+            terminationFlag,
+            progressTracker
+        ).train(featureAndLabels.features(), featureAndLabels.labels());
     }
 
     private LinkPredictionTrain.ModelSelectResult modelSelect(
-        FeaturesAndTargets trainData,
+        FeaturesAndLabels trainData,
         ReadOnlyHugeLongArray trainRelationshipIds
     ) {
-        var validationSplits = trainValidationSplits(trainRelationshipIds, trainData.targets());
+        var validationSplits = trainValidationSplits(trainRelationshipIds, trainData.labels());
 
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
@@ -169,12 +186,12 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 var trainSet = relSplit.trainSet();
                 var validationSet = relSplit.testSet();
                 // the below calls intentionally suppress progress logging of individual models
-                var modelData = trainModel(ReadOnlyHugeLongArray.of(trainSet), trainData, modelParams, ProgressTracker.NULL_TRACKER);
+                var classifier = trainModel(trainData, trainRelationshipIds, modelParams);
 
                 // evaluate each model candidate on the train and validation sets
-                computeTrainMetric(trainData, modelData, ReadOnlyHugeLongArray.of(trainSet), ProgressTracker.NULL_TRACKER)
+                computeTrainMetric(trainData, classifier, ReadOnlyHugeLongArray.of(trainSet), ProgressTracker.NULL_TRACKER)
                     .forEach(trainStatsBuilder::update);
-                computeTrainMetric(trainData, modelData, ReadOnlyHugeLongArray.of(validationSet), ProgressTracker.NULL_TRACKER)
+                computeTrainMetric(trainData, classifier, ReadOnlyHugeLongArray.of(validationSet), ProgressTracker.NULL_TRACKER)
                     .forEach(validationStatsBuilder::update);
             }
 
@@ -197,9 +214,9 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         return ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
-    private Map<LinkMetric, Double> computeTestMetric(LinkLogisticRegressionData modelData) {
+    private Map<LinkMetric, Double> computeTestMetric(Trainer.Classifier classifier) {
         progressTracker.beginSubTask("extract test features");
-        var testData = extractFeaturesAndTargets(
+        var testData = extractFeaturesAndLabels(
             validationGraph,
             pipeline.featureSteps(),
             trainConfig.concurrency(),
@@ -210,7 +227,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         progressTracker.beginSubTask("compute test metrics");
         var result = computeMetric(
             testData,
-            modelData,
+            classifier,
             new BatchQueue(testData.size()),
             trainConfig,
             progressTracker,
@@ -252,12 +269,12 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
     private List<TrainingExamplesSplit> trainValidationSplits(
         ReadOnlyHugeLongArray trainRelationshipIds,
-        HugeDoubleArray actualTargets
+        HugeLongArray actualTargets
     ) {
         var splitter = new StratifiedKFoldSplitter(
             pipeline.splitConfig().validationFolds(),
             trainRelationshipIds,
-            new ReadOnlyHugeDoubleToLongArrayWrapper(actualTargets),
+            ReadOnlyHugeLongArray.of(actualTargets),
             trainConfig.randomSeed()
         );
         return splitter.splits();
@@ -303,32 +320,15 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
     }
 
-    private LinkLogisticRegressionData trainModel(
-        ReadOnlyHugeLongArray trainSet,
-        FeaturesAndTargets trainData,
-        LinkLogisticRegressionTrainConfig llrConfig,
-        ProgressTracker progressTracker
-    ) {
-        return new LinkLogisticRegressionTrain(
-            trainSet,
-            trainData.features(),
-            trainData.targets(),
-            llrConfig,
-            progressTracker,
-            terminationFlag,
-            trainConfig.concurrency()
-        ).compute();
-    }
-
     private Map<LinkMetric, Double> computeTrainMetric(
-        FeaturesAndTargets trainData,
-        LinkLogisticRegressionData modelData,
+        FeaturesAndLabels trainData,
+        Trainer.Classifier classifier,
         ReadOnlyHugeLongArray evaluationSet,
         ProgressTracker progressTracker
     ) {
         return computeMetric(
             trainData,
-            modelData,
+            classifier,
             new HugeBatchQueue(evaluationSet),
             trainConfig,
             progressTracker,
@@ -336,9 +336,9 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         );
     }
 
-    private Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
+    private Model<Trainer.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
         LinkLogisticRegressionTrainConfig bestParameters,
-        LinkLogisticRegressionData modelData,
+        Trainer.ClassifierData classifierData,
         Map<LinkMetric, BestMetricData> winnerMetrics
     ) {
         return Model.of(
@@ -346,7 +346,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             trainConfig.modelName(),
             MODEL_TYPE,
             trainGraph.schema(),
-            modelData,
+            classifierData,
             trainConfig,
             LinkPredictionModelInfo.of(
                 bestParameters,

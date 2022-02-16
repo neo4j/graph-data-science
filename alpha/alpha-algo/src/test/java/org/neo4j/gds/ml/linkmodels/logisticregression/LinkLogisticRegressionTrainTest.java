@@ -57,6 +57,7 @@ class LinkLogisticRegressionTrainTest {
     @Inject
     private Graph graph;
 
+    // not ported; don't need it
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopper(int concurrency) {
@@ -88,6 +89,7 @@ class LinkLogisticRegressionTrainTest {
         assertThat(result.weights().data()).matches(matrix -> matrix.equals(expected, 1e-8));
     }
 
+    // ported
     @Test
     void usingPenaltyShouldGiveSmallerAbsoluteValueWeights() {
         var featureProperties = List.of("a", "b");

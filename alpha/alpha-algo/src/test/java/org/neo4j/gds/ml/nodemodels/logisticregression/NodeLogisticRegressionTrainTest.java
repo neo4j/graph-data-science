@@ -53,6 +53,7 @@ class NodeLogisticRegressionTrainTest {
     @Inject
     private Graph graph;
 
+    // ported
     @Test
     void shouldHandleLargeValuedFeatures() {
         var config = new NodeLogisticRegressionTrainConfigImpl(
@@ -88,6 +89,7 @@ class NodeLogisticRegressionTrainTest {
         );
     }
 
+    // replaced
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopper() {
         var config = new NodeLogisticRegressionTrainConfigImpl(
@@ -135,6 +137,7 @@ class NodeLogisticRegressionTrainTest {
         }
     }
 
+    // ported
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopperConcurrently() {
         var config = new NodeLogisticRegressionTrainConfigImpl(

@@ -22,11 +22,11 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
+import org.neo4j.gds.ml.splitting.EdgeSplitter;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -41,8 +41,8 @@ public final class LinkPredictionEvaluationMetricComputer {
     }
 
     static Map<LinkMetric, Double> computeMetric(
-        FeaturesAndTargets inputData,
-        LinkLogisticRegressionData modelData,
+        FeaturesAndLabels inputData,
+        Trainer.Classifier classifier,
         BatchQueue evaluationQueue,
         LinkPredictionTrainConfig trainConfig,
         ProgressTracker progressTracker,
@@ -50,17 +50,18 @@ public final class LinkPredictionEvaluationMetricComputer {
     ) {
         progressTracker.setVolume(inputData.size());
 
-        var predictor = new LinkLogisticRegressionPredictor(modelData);
         var signedProbabilities = SignedProbabilities.create(inputData.size());
-        var targets = inputData.targets();
+        var targets = inputData.labels();
         var features = inputData.features();
 
         evaluationQueue.parallelConsume(trainConfig.concurrency(), thread -> (batch) -> {
                 for (Long relationshipIdx : batch.nodeIds()) {
-                    double predictedProbability = predictor.predictedProbability(features.get(relationshipIdx));
-                    boolean isEdge = targets.get(relationshipIdx) == 1.0D;
+                    double[] classProbabilities = classifier.predictProbabilities(relationshipIdx, features);
+                    int positiveClassId = classifier.classIdMap().toMapped((long) EdgeSplitter.POSITIVE);
+                    double probabilityOfPositiveEdge = classProbabilities[positiveClassId];
+                    boolean isEdge = targets.get(relationshipIdx) == EdgeSplitter.POSITIVE;
 
-                    var signedProbability = isEdge ? predictedProbability : -1 * predictedProbability;
+                    var signedProbability = isEdge ? probabilityOfPositiveEdge : -1 * probabilityOfPositiveEdge;
                     signedProbabilities.add(signedProbability);
                 }
 
