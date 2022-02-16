@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.paths.delta;
 
+
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.DoublePageCreator;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.LongPageCreator;
+
+import java.util.Optional;
 
 public interface TentativeDistances {
 
@@ -39,6 +42,12 @@ public interface TentativeDistances {
 
     default long predecessor(long nodeId) {
         return -1;
+    }
+
+    HugeAtomicDoubleArray distances();
+
+    default Optional<HugeAtomicLongArray> predecessors() {
+        return Optional.empty();
     }
 
     static DistanceOnly distanceOnly(
@@ -94,6 +103,11 @@ public interface TentativeDistances {
         public double compareAndExchange(long nodeId, double currentDistance, double newDistance, long predecessor) {
             return distances.compareAndExchange(nodeId, currentDistance, newDistance);
         }
+
+        @Override
+        public HugeAtomicDoubleArray distances() {
+            return distances;
+        }
     }
 
     class DistanceAndPredecessor implements TentativeDistances {
@@ -115,6 +129,16 @@ public interface TentativeDistances {
         @Override
         public long predecessor(long nodeId) {
             return predecessors.get(nodeId);
+        }
+
+        @Override
+        public HugeAtomicDoubleArray distances() {
+            return distances;
+        }
+
+        @Override
+        public Optional<HugeAtomicLongArray> predecessors() {
+            return Optional.of(predecessors);
         }
 
         @Override

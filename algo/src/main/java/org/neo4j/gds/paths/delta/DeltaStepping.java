@@ -27,10 +27,13 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -119,7 +122,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
             frontierIndex.set(0);
         }
 
-        return ImmutableDeltaSteppingResult.of(iteration, distances);
+        return DeltaSteppingResult.of(iteration, distances);
     }
 
     @Override
@@ -271,6 +274,16 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
 
         int iterations();
 
-        TentativeDistances distances();
+        HugeAtomicDoubleArray distances();
+
+        Optional<HugeAtomicLongArray> predecessors();
+
+        static DeltaSteppingResult of(int iterations, TentativeDistances tentativeDistances) {
+            return ImmutableDeltaSteppingResult.of(
+                iterations,
+                tentativeDistances.distances(),
+                tentativeDistances.predecessors()
+            );
+        }
     }
 }
