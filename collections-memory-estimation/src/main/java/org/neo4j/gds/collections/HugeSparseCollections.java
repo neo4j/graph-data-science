@@ -22,7 +22,7 @@ package org.neo4j.gds.collections;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public final class HugeSparseArrays {
+public final class HugeSparseCollections {
 
     static final int DEFAULT_PAGE_SHIFT = 12;
 
@@ -300,5 +300,5 @@ public final class HugeSparseArrays {
         }
     }
 
-    private HugeSparseArrays() {}
+    private HugeSparseCollections() {}
 }

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections.hsa;
+package org.neo4j.gds.collections.hsl;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -27,12 +27,9 @@ import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.collections.CollectionStep;
 
 import javax.lang.model.element.Modifier;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.neo4j.gds.collections.TestGeneratorUtils.ASSERTJ_ASSERTIONS;
 import static org.neo4j.gds.collections.TestGeneratorUtils.TEST_ANNOTATION;
@@ -40,13 +37,12 @@ import static org.neo4j.gds.collections.TestGeneratorUtils.defaultValue;
 import static org.neo4j.gds.collections.TestGeneratorUtils.nonDefaultValue;
 import static org.neo4j.gds.collections.TestGeneratorUtils.randomIndex;
 import static org.neo4j.gds.collections.TestGeneratorUtils.randomValue;
-import static org.neo4j.gds.collections.TestGeneratorUtils.variableValue;
 import static org.neo4j.gds.collections.TestGeneratorUtils.zeroValue;
 
-final class HugeSparseArrayTestGenerator implements CollectionStep.Generator<HugeSparseArrayValidation.Spec> {
+final class HugeSparseListTestGenerator implements CollectionStep.Generator<HugeSparseListValidation.Spec> {
 
     @Override
-    public TypeSpec generate(HugeSparseArrayValidation.Spec spec) {
+    public TypeSpec generate(HugeSparseListValidation.Spec spec) {
         var className = ClassName.get(spec.rootPackage().toString(), spec.className() + "Test");
         var elementType = TypeName.get(spec.element().asType());
         var valueType = TypeName.get(spec.valueType());
@@ -64,19 +60,9 @@ final class HugeSparseArrayTestGenerator implements CollectionStep.Generator<Hug
         builder.addMethod(shouldReturnDefaultValue(valueType, elementType));
         builder.addMethod(shouldHaveSaneCapacity(valueType, elementType));
         builder.addMethod(shouldReportContainsCorrectly(valueType, elementType));
-        builder.addMethod(shouldSetParallel(valueType, elementType));
+        builder.addMethod(shouldReturnValuesUsingForAll(valueType, elementType));
 
         return builder.build();
-    }
-
-    private static CodeBlock newBuilder(TypeName elementType, String defaultValue) {
-        return CodeBlock.builder()
-            .addStatement(
-                "var builder = $T.builder($L, (__) -> {})",
-                elementType,
-                defaultValue
-            )
-            .build();
     }
 
     private static MethodSpec shouldSetAndGet(TypeName valueType, TypeName elementType) {
@@ -85,12 +71,11 @@ final class HugeSparseArrayTestGenerator implements CollectionStep.Generator<Hug
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
-                .add(newBuilder(elementType, defaultValue(valueType)))
+                .addStatement("var list = $T.of($L)", elementType, defaultValue(valueType))
                 .addStatement("long index = $L", randomIndex())
                 .addStatement("$T value = $L", valueType, randomValue(valueType))
-                .addStatement("builder.set(index, value)")
-                .addStatement("var array = builder.build()")
-                .addStatement("$T.assertThat(array.get(index)).isEqualTo(value)", ASSERTJ_ASSERTIONS)
+                .addStatement("list.set(index, value)")
+                .addStatement("$T.assertThat(list.get(index)).isEqualTo(value)", ASSERTJ_ASSERTIONS)
                 .build())
             .build();
     }
@@ -102,11 +87,11 @@ final class HugeSparseArrayTestGenerator implements CollectionStep.Generator<Hug
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
-                .add(newBuilder(elementType, defaultValue(valueType)))
+                .addStatement("var list = $T.of($L)", elementType, defaultValue(valueType))
                 .addStatement("long index = $L", randomIndex())
                 .addStatement("$T value = $L", valueType, nonDefaultValue(valueType))
-                .addStatement("$T.assertThat(builder.setIfAbsent(index, value)).isTrue()", ASSERTJ_ASSERTIONS)
-                .addStatement("$T.assertThat(builder.setIfAbsent(index, value)).isFalse()", ASSERTJ_ASSERTIONS)
+                .addStatement("$T.assertThat(list.setIfAbsent(index, value)).isTrue()", ASSERTJ_ASSERTIONS)
+                .addStatement("$T.assertThat(list.setIfAbsent(index, value)).isFalse()", ASSERTJ_ASSERTIONS)
                 .build())
             .build();
     }
@@ -117,14 +102,13 @@ final class HugeSparseArrayTestGenerator implements CollectionStep.Generator<Hug
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
-                .add(newBuilder(elementType, defaultValue(valueType)))
+                .addStatement("var list = $T.of($L)", elementType, defaultValue(valueType))
                 .addStatement("long index = $L", randomIndex())
                 .addStatement("$T value = $L", valueType, defaultValue(valueType))
-                .addStatement("builder.addTo(index, value)")
-                .addStatement("builder.addTo(index, value)")
-                .addStatement("var array = builder.build()")
+                .addStatement("list.addTo(index, value)")
+                .addStatement("list.addTo(index, value)")
                 .addStatement(
-                    "$1T.assertThat(array.get(index)).isEqualTo(($2T) ($3L + $3L + $3L))",
+                    "$1T.assertThat(list.get(index)).isEqualTo(($2T) ($3L + $3L + $3L))",
                     ASSERTJ_ASSERTIONS,
                     valueType,
                     defaultValue(valueType)
@@ -139,14 +123,13 @@ final class HugeSparseArrayTestGenerator implements CollectionStep.Generator<Hug
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
-                .add(newBuilder(elementType, zeroValue(valueType)))
+                .addStatement("var list = $T.of($L)", elementType, zeroValue(valueType))
                 .addStatement("long index = $L", randomIndex())
                 .addStatement("$T value = $L", valueType, defaultValue(valueType))
-                .addStatement("builder.addTo(index, value)")
-                .addStatement("builder.addTo(index, value)")
-                .addStatement("var array = builder.build()")
+                .addStatement("list.addTo(index, value)")
+                .addStatement("list.addTo(index, value)")
                 .addStatement(
-                    "$1T.assertThat(array.get(index)).isEqualTo(($2T) ($3L + $3L))",
+                    "$1T.assertThat(list.get(index)).isEqualTo(($2T) ($3L + $3L))",
                     ASSERTJ_ASSERTIONS,
                     valueType,
                     defaultValue(valueType)
@@ -160,20 +143,19 @@ final class HugeSparseArrayTestGenerator implements CollectionStep.Generator<Hug
             .addAnnotation(TEST_ANNOTATION)
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
-                .add(newBuilder(elementType, defaultValue(valueType)))
+                .addStatement("var list = $T.of($L)", elementType, defaultValue(valueType))
                 .addStatement("// > PAGE_SIZE")
                 .addStatement("var index = 224242")
-                .addStatement("builder.set(index, $N)", nonDefaultValue(valueType))
-                .addStatement("var array = builder.build()")
+                .addStatement("list.set(index, $N)", nonDefaultValue(valueType))
                 .beginControlFlow("for (long i = 0; i < index; i++)")
                 .addStatement(
-                    "$T.assertThat(array.get(i)).isEqualTo($N)",
+                    "$T.assertThat(list.get(i)).isEqualTo($N)",
                     ASSERTJ_ASSERTIONS,
                     defaultValue(valueType)
                 )
                 .endControlFlow()
                 .addStatement(
-                    "$T.assertThat(array.get(index)).isEqualTo($N)",
+                    "$T.assertThat(list.get(index)).isEqualTo($N)",
                     ASSERTJ_ASSERTIONS,
                     nonDefaultValue(valueType)
                 )
@@ -186,13 +168,12 @@ final class HugeSparseArrayTestGenerator implements CollectionStep.Generator<Hug
             .addAnnotation(TEST_ANNOTATION)
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
-                .add(newBuilder(elementType, defaultValue(valueType)))
+                .addStatement("var list = $T.of($L)", elementType, defaultValue(valueType))
                 .addStatement("// > PAGE_SIZE")
                 .addStatement("var index = 224242")
                 .addStatement("$T value = $L", valueType, nonDefaultValue(valueType))
-                .addStatement("builder.set(index, value)")
-                .addStatement("var array = builder.build()")
-                .addStatement("$T.assertThat(array.capacity()).isGreaterThanOrEqualTo(index)", ASSERTJ_ASSERTIONS)
+                .addStatement("list.set(index, value)")
+                .addStatement("$T.assertThat(list.capacity()).isGreaterThanOrEqualTo(index)", ASSERTJ_ASSERTIONS)
                 .build())
             .build();
     }
@@ -203,57 +184,37 @@ final class HugeSparseArrayTestGenerator implements CollectionStep.Generator<Hug
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
-                .add(newBuilder(elementType, defaultValue(valueType)))
+                .addStatement("var list = $T.of($L)", elementType, defaultValue(valueType))
                 .addStatement("long index = $L", randomIndex())
                 .addStatement("$T value = $L", valueType, nonDefaultValue(valueType))
-                .addStatement("builder.set(index, value)")
-                .addStatement("var array = builder.build()")
-                .addStatement("$T.assertThat(array.contains(index)).isTrue()", ASSERTJ_ASSERTIONS)
-                .addStatement("$T.assertThat(array.contains(index + 1)).isFalse()", ASSERTJ_ASSERTIONS)
+                .addStatement("list.set(index, value)")
+                .addStatement("$T.assertThat(list.contains(index)).isTrue()", ASSERTJ_ASSERTIONS)
+                .addStatement("$T.assertThat(list.contains(index + 1)).isFalse()", ASSERTJ_ASSERTIONS)
                 .build())
             .build();
     }
 
-    private static MethodSpec shouldSetParallel(TypeName valueType, TypeName elementType) {
-        return MethodSpec.methodBuilder("shouldSetParallel")
+    private static MethodSpec shouldReturnValuesUsingForAll(TypeName valueType, TypeName elementType) {
+        return MethodSpec.methodBuilder("shouldReturnValuesUsingForAll")
             .addAnnotation(TEST_ANNOTATION)
             .returns(TypeName.VOID)
-            .addException(ExecutionException.class)
-            .addException(InterruptedException.class)
             .addCode(CodeBlock.builder()
-                .add(newBuilder(elementType, defaultValue(valueType)))
-                .addStatement("var cores = $T.getRuntime().availableProcessors()", Runtime.class)
-                .addStatement("var executor = $T.newFixedThreadPool(cores)", Executors.class)
-                .addStatement("var batches = 10")
-                .addStatement("var batchSize = 10_000")
-                .addStatement("var processed = new $T(0)", AtomicLong.class)
+                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
+                .addStatement("var list = $T.of($L)", elementType, defaultValue(valueType))
                 .addStatement(
-                    "var tasks = $T.range(0, batches)\n" +
-                    ".mapToObj(threadId -> ($T) () -> {\n" +
-                    "   var start = processed.getAndAdd(batchSize);\n" +
-                    "   var end = start + batchSize;\n" +
-                    "   for (long idx = start; idx < end; idx++) {\n" +
-                    "       builder.set(idx, $L);\n" +
-                    "   }\n" +
-                    "}).collect($T.toList());",
-                    IntStream.class,
-                    Runnable.class,
-                    variableValue(valueType, "threadId"),
-                    Collectors.class
+                    "var expected = $T.of($L, $L, $L, $L, $L, $L)",
+                    Map.class,
+                    randomIndex(0, 4096),
+                    randomValue(valueType),
+                    randomIndex(4096, 8192),
+                    randomValue(valueType),
+                    randomIndex(8192, 8192 + 4096),
+                    randomValue(valueType)
                 )
-                .addStatement(
-                    "var futures = tasks.stream().map(executor::submit).collect($T.toList())",
-                    Collectors.class
-                )
-                .beginControlFlow("for (var future : futures)")
-                .addStatement("future.get()")
-                .endControlFlow()
-                .addStatement("var array = builder.build()")
-                .addStatement("long sum = 0")
-                .beginControlFlow("for (long idx = 0; idx < batchSize * batches; idx++)")
-                .addStatement(valueType.isPrimitive() ? "sum += array.get(idx)" : "sum += array.get(idx)[0]")
-                .endControlFlow()
-                .addStatement("$T.assertThat(sum).isEqualTo(450_000)", ASSERTJ_ASSERTIONS)
+                .addStatement("expected.forEach(list::set)")
+                .addStatement("var actual = new $T<>()", HashMap.class)
+                .addStatement("list.forAll(actual::put)")
+                .addStatement("$T.assertThat(actual).isEqualTo(expected)", ASSERTJ_ASSERTIONS)
                 .build())
             .build();
     }

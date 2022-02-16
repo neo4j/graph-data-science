@@ -30,16 +30,16 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.util.List;
 
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.doesNotThrow;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasNoParameters;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasParameterCount;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasSingleLongParameter;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasTypeAtIndex;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasTypeKindAtIndex;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.isAbstract;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.isNotGeneric;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.isStatic;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.mustReturn;
+import static org.neo4j.gds.collections.ValidatorUtils.doesNotThrow;
+import static org.neo4j.gds.collections.ValidatorUtils.hasNoParameters;
+import static org.neo4j.gds.collections.ValidatorUtils.hasParameterCount;
+import static org.neo4j.gds.collections.ValidatorUtils.hasSingleLongParameter;
+import static org.neo4j.gds.collections.ValidatorUtils.hasTypeAtIndex;
+import static org.neo4j.gds.collections.ValidatorUtils.hasTypeKindAtIndex;
+import static org.neo4j.gds.collections.ValidatorUtils.isAbstract;
+import static org.neo4j.gds.collections.ValidatorUtils.isNotGeneric;
+import static org.neo4j.gds.collections.ValidatorUtils.isStatic;
+import static org.neo4j.gds.collections.ValidatorUtils.mustReturn;
 
 final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
 

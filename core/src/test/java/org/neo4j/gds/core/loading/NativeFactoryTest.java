@@ -77,7 +77,7 @@ class NativeFactoryTest {
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
             .estimate(dimensions, 1);
 
-        assertEquals(12_054_322_472L, estimate.memoryUsage().min);
-        assertEquals(13_664_935_208L, estimate.memoryUsage().max);
+        assertEquals(12_056_534_408L, estimate.memoryUsage().min);
+        assertEquals(13_667_147_144L, estimate.memoryUsage().max);
     }
 }

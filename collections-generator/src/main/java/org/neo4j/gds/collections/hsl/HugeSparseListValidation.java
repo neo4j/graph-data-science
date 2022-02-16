@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections.hsa;
+package org.neo4j.gds.collections.hsl;
 
 import com.google.auto.common.MoreElements;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.TypeName;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.CollectionStep;
-import org.neo4j.gds.collections.HugeSparseArray;
+import org.neo4j.gds.collections.HugeSparseList;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
@@ -35,17 +35,16 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.util.Optional;
-import java.util.function.LongConsumer;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 
-final class HugeSparseArrayValidation implements CollectionStep.Validation<HugeSparseArrayValidation.Spec> {
+final class HugeSparseListValidation implements CollectionStep.Validation<HugeSparseListValidation.Spec> {
 
     private final Types typeUtils;
     private final Elements elementUtils;
     private final Messager messager;
 
-    HugeSparseArrayValidation(Types typeUtils, Elements elementUtils, Messager messager) {
+    HugeSparseListValidation(Types typeUtils, Elements elementUtils, Messager messager) {
         this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
         this.messager = messager;
@@ -53,22 +52,21 @@ final class HugeSparseArrayValidation implements CollectionStep.Validation<HugeS
 
     @Override
     public Optional<Spec> validate(Element element) {
-        var annotationMirror = MoreElements.getAnnotationMirror(element, HugeSparseArray.class).get();
+        var annotationMirror = MoreElements.getAnnotationMirror(element, HugeSparseList.class).get();
         var valueType = (TypeMirror) getAnnotationValue(annotationMirror, "valueType").getValue();
-        var isArrayType = valueType.getKind() == TypeKind.ARRAY;
 
         if (!isValidValueType(valueType)) {
             return Optional.empty();
         }
 
+        var forAllConsumerType = (TypeMirror) getAnnotationValue(annotationMirror, "forAllConsumerType").getValue();
+        var isArrayType = valueType.getKind() == TypeKind.ARRAY;
         var pageShift = (int) getAnnotationValue(annotationMirror, "pageShift").getValue();
-        var longConsumerType = elementUtils.getTypeElement(LongConsumer.class.getName()).asType();
         var drainingIteratorType = elementUtils.getTypeElement("org.neo4j.gds.collections.DrainingIterator").asType();
 
         var elementValidator = new ElementValidator(
             typeUtils,
-            element.asType(),
-            longConsumerType,
+            forAllConsumerType,
             drainingIteratorType,
             isArrayType,
             this.messager
@@ -78,13 +76,12 @@ final class HugeSparseArrayValidation implements CollectionStep.Validation<HugeS
             return Optional.empty();
         }
 
-        var builderType = elementValidator.builderType().asType();
         var rootPackage = rootPackage(element);
 
         var spec = ImmutableSpec.builder()
             .element(element)
             .valueType(valueType)
-            .builderType(builderType)
+            .forAllConsumerType(forAllConsumerType)
             .rootPackage(rootPackage)
             .pageShift(pageShift)
             .build();
@@ -133,7 +130,7 @@ final class HugeSparseArrayValidation implements CollectionStep.Validation<HugeS
 
         TypeMirror valueType();
 
-        TypeMirror builderType();
+        TypeMirror forAllConsumerType();
 
         int pageShift();
 

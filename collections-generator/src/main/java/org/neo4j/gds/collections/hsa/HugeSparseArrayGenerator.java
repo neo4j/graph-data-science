@@ -29,6 +29,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.neo4j.gds.collections.CollectionStep;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import javax.annotation.processing.Generated;
@@ -36,22 +37,21 @@ import javax.lang.model.element.Modifier;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
-import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.LongConsumer;
 
-import static java.util.Map.entry;
+import static org.neo4j.gds.collections.EqualityUtils.DEFAULT_VALUES;
+import static org.neo4j.gds.collections.EqualityUtils.isEqual;
+import static org.neo4j.gds.collections.EqualityUtils.isNotEqual;
 
-final class HugeSparseArrayGenerator {
+final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSparseArrayValidation.Spec> {
 
     private static final ClassName PAGE_UTIL = ClassName.get("org.neo4j.gds.collections", "PageUtil");
     private static final ClassName DRAINING_ITERATOR = ClassName.get("org.neo4j.gds.collections", "DrainingIterator");
 
-    private HugeSparseArrayGenerator() {}
-
-    static TypeSpec generate(HugeSparseArrayValidation.Spec spec) {
+    @Override
+    public TypeSpec generate(HugeSparseArrayValidation.Spec spec) {
         var className = ClassName.get(spec.rootPackage().toString(), spec.className());
         var elementType = TypeName.get(spec.element().asType());
         var valueType = TypeName.get(spec.valueType());
@@ -119,28 +119,28 @@ final class HugeSparseArrayGenerator {
 
     private static FieldSpec pageShiftField(int pageShift) {
         return FieldSpec
-            .builder(TypeName.INT, "PAGE_SHIFT", Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
+            .builder(TypeName.INT, "PAGE_SHIFT", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             .initializer("$L", pageShift)
             .build();
     }
 
     private static FieldSpec pageSizeField(FieldSpec pageShiftField) {
         return FieldSpec
-            .builder(TypeName.INT, "PAGE_SIZE", Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
+            .builder(TypeName.INT, "PAGE_SIZE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             .initializer("1 << $N", pageShiftField)
             .build();
     }
 
     private static FieldSpec pageMaskField(FieldSpec pageSizeField) {
         return FieldSpec
-            .builder(TypeName.INT, "PAGE_MASK", Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
+            .builder(TypeName.INT, "PAGE_MASK", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             .initializer("$N - 1", pageSizeField)
             .build();
     }
 
     private static FieldSpec pageSizeInBytesField(FieldSpec pageSizeField) {
         return FieldSpec
-            .builder(TypeName.LONG, "PAGE_SIZE_IN_BYTES", Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
+            .builder(TypeName.LONG, "PAGE_SIZE_IN_BYTES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             .initializer("$T.sizeOfLongArray($N)", MemoryUsage.class, pageSizeField)
             .build();
     }
@@ -221,71 +221,6 @@ final class HugeSparseArrayGenerator {
                 .build())
             .build();
     }
-
-    private static final Map<TypeName, String> EQUAL_PREDICATES = Map.ofEntries(
-        entry(TypeName.BYTE, "%s == %s"),
-        entry(TypeName.SHORT, "%s == %s"),
-        entry(TypeName.INT, "%s == %s"),
-        entry(TypeName.LONG, "%s == %s"),
-        entry(TypeName.FLOAT, "Float.compare(%s, %s) == 0"),
-        entry(TypeName.DOUBLE, "Double.compare(%s, %s) == 0"),
-        entry(ArrayTypeName.of(TypeName.BYTE), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.SHORT), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.INT), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.LONG), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.FLOAT), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.DOUBLE), "Arrays.equals(%1$s, %2$s)")
-    );
-
-    private static final Map<TypeName, String> NOT_EQUAL_PREDICATES = Map.ofEntries(
-        entry(TypeName.BYTE, "%s != %s"),
-        entry(TypeName.SHORT, "%s != %s"),
-        entry(TypeName.INT, "%s != %s"),
-        entry(TypeName.LONG, "%s != %s"),
-        entry(TypeName.FLOAT, "Float.compare(%s, %s) != 0"),
-        entry(TypeName.DOUBLE, "Double.compare(%s, %s) != 0"),
-        entry(ArrayTypeName.of(TypeName.BYTE), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.SHORT), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.INT), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.LONG), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.FLOAT), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.DOUBLE), "%1$s != null && !Arrays.equals(%1$s, %2$s)")
-    );
-
-    private static <LHS, RHS> CodeBlock isEqual(
-        TypeName typeName,
-        String lhsType,
-        String rhsType,
-        LHS lhs,
-        RHS rhs
-    ) {
-        return CodeBlock
-            .builder()
-            .add(String.format(Locale.ENGLISH, EQUAL_PREDICATES.get(typeName), lhsType, rhsType), lhs, rhs)
-            .build();
-    }
-
-    private static <LHS, RHS> CodeBlock isNotEqual(
-        TypeName typeName,
-        String lhsType,
-        String rhsType,
-        LHS lhs,
-        RHS rhs
-    ) {
-        return CodeBlock
-            .builder()
-            .add(String.format(Locale.ENGLISH, NOT_EQUAL_PREDICATES.get(typeName), lhsType, rhsType), lhs, rhs)
-            .build();
-    }
-
-    private static final Map<TypeName, String> DEFAULT_VALUES = Map.of(
-        TypeName.BYTE, Byte.toString((new byte[1])[0]),
-        TypeName.SHORT, Short.toString((new short[1])[0]),
-        TypeName.INT, Integer.toString((new int[1])[0]),
-        TypeName.LONG, (new long[1])[0] + "L",
-        TypeName.FLOAT, (new float[1])[0] + "F",
-        TypeName.DOUBLE, (new double[1])[0] + "D"
-    );
 
     private static MethodSpec containsMethod(
         TypeName valueType,

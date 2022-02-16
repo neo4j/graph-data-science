@@ -23,7 +23,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.collections.HugeSparseArrays;
+import org.neo4j.gds.collections.HugeSparseCollections;
 import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -43,7 +43,7 @@ public final class NodePropertiesFromStoreBuilder {
         .builder(NodePropertiesFromStoreBuilder.class)
         .rangePerGraphDimension(
             "property values",
-            (dimensions, concurrency) -> HugeSparseArrays.estimateLong(
+            (dimensions, concurrency) -> HugeSparseCollections.estimateLong(
                 dimensions.nodeCount(),
                 dimensions.nodeCount()
             )

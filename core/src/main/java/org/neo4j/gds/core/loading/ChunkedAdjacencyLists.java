@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.gds.collections.DrainingIterator;
-import org.neo4j.gds.collections.arraylist.HugeSparseIntArrayList;
-import org.neo4j.gds.collections.arraylist.HugeSparseLongArrayList;
-import org.neo4j.gds.collections.arraylist.HugeSparseObjectArrayList;
+import org.neo4j.gds.collections.HugeSparseByteArrayList;
+import org.neo4j.gds.collections.HugeSparseCollections;
+import org.neo4j.gds.collections.HugeSparseIntList;
+import org.neo4j.gds.collections.HugeSparseLongArrayList;
+import org.neo4j.gds.collections.HugeSparseLongList;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeArrays;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 
@@ -49,11 +49,11 @@ public final class ChunkedAdjacencyLists {
     private static final byte[] EMPTY_BYTES = new byte[0];
     private static final long[] EMPTY_PROPERTIES = new long[0];
 
-    private final HugeSparseObjectArrayList<byte[]> targetLists;
-    private final Map<Integer, HugeSparseObjectArrayList<long[]>> properties;
-    private final HugeSparseIntArrayList positions;
-    private final HugeSparseLongArrayList lastValues;
-    private final HugeSparseIntArrayList lengths;
+    private final HugeSparseByteArrayList targetLists;
+    private final Map<Integer, HugeSparseLongArrayList> properties;
+    private final HugeSparseIntList positions;
+    private final HugeSparseLongList lastValues;
+    private final HugeSparseIntList lengths;
 
     public static MemoryEstimation memoryEstimation(long avgDegree, long nodeCount, int propertyCount) {
         // Best case scenario:
@@ -71,10 +71,10 @@ public final class ChunkedAdjacencyLists {
 
         return MemoryEstimations.builder(ChunkedAdjacencyLists.class)
             .fixed("compressed targets", MemoryRange.of(bestCaseCompressedTargetsSize, worstCaseCompressedTargetsSize))
-            .fixed("positions", estimateArraysSize(nodeCount, MemoryUsage::sizeOfIntArray))
-            .fixed("lengths", estimateArraysSize(nodeCount, MemoryUsage::sizeOfIntArray))
-            .fixed("lastValues", estimateArraysSize(nodeCount, MemoryUsage::sizeOfLongArray))
-            .fixed("properties", MemoryUsage.sizeOfObjectArray(propertyCount) + propertyCount * estimateArraysSize(nodeCount, MemoryUsage::sizeOfLongArray))
+            .fixed("positions", HugeSparseCollections.estimateInt(nodeCount, nodeCount))
+            .fixed("lengths", HugeSparseCollections.estimateInt(nodeCount, nodeCount))
+            .fixed("lastValues", HugeSparseCollections.estimateLong(nodeCount, nodeCount))
+            .fixed("properties", HugeSparseCollections.estimateLongArray(nodeCount, nodeCount, (int) avgDegree).times(propertyCount))
             .build();
     }
 
@@ -85,35 +85,21 @@ public final class ChunkedAdjacencyLists {
         return nodeCount * MemoryUsage.sizeOfByteArray(firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize);
     }
 
-    private static long estimateArraysSize(long size, LongToLongFunction primitiveArraySizeEstimator) {
-        assert size >= 0;
-        long sizeOfInstance = MemoryUsage.sizeOfInstance(HugeSparseIntArrayList.class);
-
-        int numPages = HugeArrays.numberOfPages(size);
-
-        long memoryUsed = MemoryUsage.sizeOfObjectArray(numPages);
-        final long pageBytes = primitiveArraySizeEstimator.applyAsLong(HugeArrays.PAGE_SIZE);
-        memoryUsed += (numPages - 1) * pageBytes;
-        final int lastPageSize = HugeArrays.exclusiveIndexOfPage(size);
-
-        return sizeOfInstance + memoryUsed + primitiveArraySizeEstimator.applyAsLong(lastPageSize);
-    }
-
     public static ChunkedAdjacencyLists of(int numberOfProperties, long initialCapacity) {
         return new ChunkedAdjacencyLists(numberOfProperties, initialCapacity);
     }
 
     private ChunkedAdjacencyLists(int numberOfProperties, long initialCapacity) {
-        this.targetLists = HugeSparseObjectArrayList.of(EMPTY_BYTES, initialCapacity, byte[].class);
-        this.positions = HugeSparseIntArrayList.of(0, initialCapacity);
-        this.lastValues = HugeSparseLongArrayList.of(0, initialCapacity);
-        this.lengths = HugeSparseIntArrayList.of(0, initialCapacity);
+        this.targetLists = HugeSparseByteArrayList.of(EMPTY_BYTES, initialCapacity);
+        this.positions = HugeSparseIntList.of(0, initialCapacity);
+        this.lastValues = HugeSparseLongList.of(0, initialCapacity);
+        this.lengths = HugeSparseIntList.of(0, initialCapacity);
 
 
         if (numberOfProperties > 0) {
             this.properties = new HashMap<>(numberOfProperties);
             for (int i = 0; i < numberOfProperties; i++) {
-                this.properties.put(i, HugeSparseObjectArrayList.of(EMPTY_PROPERTIES, initialCapacity, long[].class));
+                this.properties.put(i, HugeSparseLongArrayList.of(EMPTY_PROPERTIES, initialCapacity));
             }
         } else {
             this.properties = null;
@@ -275,11 +261,11 @@ public final class ChunkedAdjacencyLists {
         private final long[][] propertiesBuffer;
 
         CompositeDrainingIterator(
-            HugeSparseObjectArrayList<byte[]> targets,
-            Map<Integer, HugeSparseObjectArrayList<long[]>> properties,
-            HugeSparseIntArrayList positions,
-            HugeSparseLongArrayList lastValues,
-            HugeSparseIntArrayList lengths
+            HugeSparseByteArrayList targets,
+            Map<Integer, HugeSparseLongArrayList> properties,
+            HugeSparseIntList positions,
+            HugeSparseLongList lastValues,
+            HugeSparseIntList lengths
         ) {
             this.targetListIterator = targets.drainingIterator();
             this.targetListBatch = targetListIterator.drainingBatch();
@@ -298,7 +284,7 @@ public final class ChunkedAdjacencyLists {
                 this.propertyIterators = properties
                     .values()
                     .stream()
-                    .map(HugeSparseObjectArrayList::drainingIterator)
+                    .map(HugeSparseLongArrayList::drainingIterator)
                     .collect(Collectors.toList());
                 this.propertyBatches = propertyIterators
                     .stream()

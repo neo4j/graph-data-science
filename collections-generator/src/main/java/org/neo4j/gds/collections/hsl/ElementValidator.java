@@ -17,32 +17,48 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections.hsa;
+package org.neo4j.gds.collections.hsl;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleElementVisitor9;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import java.util.List;
 
 import static org.neo4j.gds.collections.ValidatorUtils.doesNotThrow;
 import static org.neo4j.gds.collections.ValidatorUtils.hasNoParameters;
 import static org.neo4j.gds.collections.ValidatorUtils.hasParameterCount;
+import static org.neo4j.gds.collections.ValidatorUtils.hasSingleLongParameter;
 import static org.neo4j.gds.collections.ValidatorUtils.hasTypeKindAtIndex;
 import static org.neo4j.gds.collections.ValidatorUtils.isAbstract;
 import static org.neo4j.gds.collections.ValidatorUtils.isNotGeneric;
+import static org.neo4j.gds.collections.ValidatorUtils.isStatic;
 import static org.neo4j.gds.collections.ValidatorUtils.mustReturn;
 
-class BuilderValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
+final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
 
-    private final TypeMirror rootType;
+    private final Types typeUtils;
     private final boolean isArrayType;
     private final Messager messager;
+    private final TypeMirror forAllConsumerType;
+    private final TypeMirror drainingIteratorType;
 
-    BuilderValidator(TypeMirror rootType, boolean isArrayType, Messager messager) {
-        this.rootType = rootType;
+    ElementValidator(
+        Types typeUtils,
+        TypeMirror forAllConsumerType,
+        TypeMirror drainingIteratorType,
+        boolean isArrayType,
+        Messager messager
+    ) {
+        super(false);
+        this.typeUtils = typeUtils;
+        this.forAllConsumerType = forAllConsumerType;
+        this.drainingIteratorType = drainingIteratorType;
         this.isArrayType = isArrayType;
         this.messager = messager;
     }
@@ -56,8 +72,16 @@ class BuilderValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
     @Override
     public Boolean visitExecutable(ExecutableElement e, TypeMirror elementType) {
         switch (e.getSimpleName().toString()) {
+            case "capacity":
+                return validateCapacityMethod(e);
+            case "contains":
+                return validateContainsMethod(e);
+            case "get":
+                return validateGetMethod(e, elementType);
             case "set":
                 return validateSetMethod(e, elementType);
+            case "forAll":
+                return validateForAllMethod(e);
             case "setIfAbsent":
                 if (isArrayType) {
                     messager.printMessage(
@@ -78,14 +102,51 @@ class BuilderValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
                     return false;
                 }
                 return validateAddToMethod(e, elementType);
-
-            case "build":
-                return validateBuildMethod(e);
+            case "drainingIterator":
+                return validateDrainingIterator(e, elementType);
+            case "of":
+                switch (e.getParameters().size()) {
+                    case 1:
+                        return validateFactoryMethod(e, elementType);
+                    case 2:
+                        return validateFactoryWithInitialCapacityMethod(e, elementType);
+                    default:
+                        messager.printMessage(
+                            Diagnostic.Kind.ERROR,
+                            "method has wrong number of parameters, expected one of " + List.of(2, 3),
+                            e
+                        );
+                }
+                break;
             default:
                 messager.printMessage(Diagnostic.Kind.ERROR, "unexpected method", e);
         }
 
         return false;
+    }
+
+    private boolean validateCapacityMethod(ExecutableElement e) {
+        return hasNoParameters(e, messager)
+               && mustReturn(e, TypeKind.LONG, messager)
+               && doesNotThrow(e, messager)
+               && isNotGeneric(e, messager)
+               && isAbstract(e, messager);
+    }
+
+    private boolean validateGetMethod(ExecutableElement e, TypeMirror elementType) {
+        return mustReturn(e, elementType.getKind(), messager)
+               && hasSingleLongParameter(e, messager)
+               && doesNotThrow(e, messager)
+               && isNotGeneric(e, messager)
+               && isAbstract(e, messager);
+    }
+
+    private boolean validateContainsMethod(ExecutableElement e) {
+        return mustReturn(e, TypeKind.BOOLEAN, messager)
+               && hasSingleLongParameter(e, messager)
+               && doesNotThrow(e, messager)
+               && isNotGeneric(e, messager)
+               && isAbstract(e, messager);
     }
 
     private boolean validateSetMethod(ExecutableElement e, TypeMirror elementType) {
@@ -118,11 +179,39 @@ class BuilderValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
                && isAbstract(e, messager);
     }
 
-    private boolean validateBuildMethod(ExecutableElement e) {
-        return mustReturn(e, rootType, messager)
-               && hasNoParameters(e, messager)
+    private boolean validateForAllMethod(ExecutableElement e) {
+        return mustReturn(e, TypeKind.VOID, messager)
+               && hasParameterCount(e, 1, messager)
+               && hasTypeKindAtIndex(e, 0, forAllConsumerType.getKind(), messager)
                && doesNotThrow(e, messager)
                && isNotGeneric(e, messager)
                && isAbstract(e, messager);
+    }
+
+    private boolean validateDrainingIterator(ExecutableElement e, TypeMirror elementType) {
+        var element = (TypeElement) typeUtils.asElement(drainingIteratorType);
+        var arrayType = typeUtils.getArrayType(elementType);
+        var expectedReturnType = typeUtils.getDeclaredType(element, arrayType);
+
+        return hasNoParameters(e, messager)
+               && mustReturn(e, expectedReturnType, messager)
+               && doesNotThrow(e, messager)
+               && isNotGeneric(e, messager)
+               && isAbstract(e, messager);
+    }
+
+    private boolean validateFactoryMethod(ExecutableElement e, TypeMirror elementType) {
+        return doesNotThrow(e, messager)
+               && isStatic(e, messager)
+               && hasParameterCount(e, 1, messager)
+               && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager);
+    }
+
+    private boolean validateFactoryWithInitialCapacityMethod(ExecutableElement e, TypeMirror elementType) {
+        return doesNotThrow(e, messager)
+               && isStatic(e, messager)
+               && hasParameterCount(e, 2, messager)
+               && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
+               && hasTypeKindAtIndex(e, 1, TypeKind.LONG, messager);
     }
 }

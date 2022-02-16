@@ -29,9 +29,9 @@ import java.util.stream.Stream;
 import static io.qala.datagen.RandomShortApi.integer;
 import static io.qala.datagen.RandomValue.between;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.collections.HugeSparseArrays.DEFAULT_PAGE_SHIFT;
+import static org.neo4j.gds.collections.HugeSparseCollections.DEFAULT_PAGE_SHIFT;
 
-class HugeSparseArraysTest {
+class HugeSparseCollectionsTest {
 
     static Stream<Class<?>> valueClasses() {
         return Stream.of(
@@ -56,8 +56,8 @@ class HugeSparseArraysTest {
         long size = integer(Integer.MAX_VALUE);
 
         var memoryRange = valueClazz.isPrimitive()
-            ? HugeSparseArrays.estimatePrimitive(valueClazz, size, size, DEFAULT_PAGE_SHIFT)
-            : HugeSparseArrays.estimateArray(valueClazz, size, size, 0, DEFAULT_PAGE_SHIFT);
+            ? HugeSparseCollections.estimatePrimitive(valueClazz, size, size, DEFAULT_PAGE_SHIFT)
+            : HugeSparseCollections.estimateArray(valueClazz, size, size, 0, DEFAULT_PAGE_SHIFT);
 
         assertThat(memoryRange.min).isEqualTo(memoryRange.max);
     }
@@ -70,8 +70,8 @@ class HugeSparseArraysTest {
         long maxId = between(maxEntries + pageSize, maxEntries * pageSize).Long();
 
         var memoryRange = valueClazz.isPrimitive()
-            ? HugeSparseArrays.estimatePrimitive(valueClazz, maxId, maxEntries, DEFAULT_PAGE_SHIFT)
-            : HugeSparseArrays.estimateArray(valueClazz, maxId, maxEntries, 0, DEFAULT_PAGE_SHIFT);
+            ? HugeSparseCollections.estimatePrimitive(valueClazz, maxId, maxEntries, DEFAULT_PAGE_SHIFT)
+            : HugeSparseCollections.estimateArray(valueClazz, maxId, maxEntries, 0, DEFAULT_PAGE_SHIFT);
 
         assertThat(memoryRange.min).isLessThan(memoryRange.max);
     }
@@ -127,7 +127,7 @@ class HugeSparseArraysTest {
         long expectedMax
     ) {
         assertThat(MemoryRange.of(expectedMin, expectedMax))
-            .isEqualTo(HugeSparseArrays.estimatePrimitive(
+            .isEqualTo(HugeSparseCollections.estimatePrimitive(
                 valueClazz,
                 maxId,
                 maxEntries,
@@ -216,7 +216,7 @@ class HugeSparseArraysTest {
         long expectedMin,
         long expectedMax
     ) {
-        assertThat(MemoryRange.of(expectedMin, expectedMax)).isEqualTo(HugeSparseArrays.estimateArray(
+        assertThat(MemoryRange.of(expectedMin, expectedMax)).isEqualTo(HugeSparseCollections.estimateArray(
             valueClazz,
             maxId,
             maxEntries,

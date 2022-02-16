@@ -17,43 +17,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.collections.hsa;
+package org.neo4j.gds.collections.hsl;
 
 import org.neo4j.gds.collections.CollectionStep;
-import org.neo4j.gds.collections.HugeSparseArray;
+import org.neo4j.gds.collections.HugeSparseList;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import java.nio.file.Path;
 
-public final class HugeSparseArrayStep extends CollectionStep<HugeSparseArrayValidation.Spec> {
+public final class HugeSparseListStep extends CollectionStep<HugeSparseListValidation.Spec> {
 
-    private static final Class<HugeSparseArray> HSA_ANNOTATION = HugeSparseArray.class;
+    private static final Class<HugeSparseList> HSAL_ANNOTATION = HugeSparseList.class;
 
-    public static HugeSparseArrayStep of(ProcessingEnvironment processingEnv, Path sourcePath) {
-        var validation = new HugeSparseArrayValidation(
+    public static HugeSparseListStep of(ProcessingEnvironment processingEnv, Path sourcePath) {
+        var validation = new HugeSparseListValidation(
             processingEnv.getTypeUtils(),
             processingEnv.getElementUtils(),
             processingEnv.getMessager()
         );
 
-        var mainGenerator = new HugeSparseArrayGenerator();
-        var testGenerator = new HugeSparseArrayTestGenerator();
+        var mainGenerator = new HugeSparseListGenerator();
+        var testGenerator = new HugeSparseListTestGenerator();
 
-        return new HugeSparseArrayStep(processingEnv, sourcePath, validation, mainGenerator, testGenerator);
+       return new HugeSparseListStep(processingEnv, sourcePath, validation, mainGenerator, testGenerator);
     }
 
-    private HugeSparseArrayStep(
+    private HugeSparseListStep(
         ProcessingEnvironment processingEnv,
         Path sourcePath,
-        Validation<HugeSparseArrayValidation.Spec> validation,
-        Generator<HugeSparseArrayValidation.Spec> mainGenerator,
-        Generator<HugeSparseArrayValidation.Spec> testGenerator
+        Validation<HugeSparseListValidation.Spec> validation,
+        Generator<HugeSparseListValidation.Spec> mainGenerator,
+        Generator<HugeSparseListValidation.Spec> testGenerator
     ) {
         super(processingEnv, sourcePath, validation, mainGenerator, testGenerator);
     }
 
     @Override
     public String annotation() {
-        return HSA_ANNOTATION.getCanonicalName();
+        return HSAL_ANNOTATION.getCanonicalName();
     }
 }
