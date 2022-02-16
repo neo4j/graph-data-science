@@ -53,16 +53,18 @@ class SplitRelationshipsTest {
         MemoryTree actualEstimate = SplitRelationships.estimate(config)
             .estimate(graphDimensions, config.concurrency());
 
-        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(272_000));
+        assertThat(actualEstimate.memoryUsage())
+            .withFailMessage("expected: " + actualEstimate.memoryUsage().max)
+            .isEqualTo(MemoryRange.of(208_000));
     }
 
     public static Stream<Arguments> withTypesParams() {
         return Stream.of(
-            Arguments.of(List.of("TYPE1"), MemoryRange.of(272)),
-            Arguments.of(List.of("TYPE2"), MemoryRange.of(544)),
-            Arguments.of(List.of("*"), MemoryRange.of(1_632)),
-            Arguments.of(List.of("TYPE1", "TYPE2", "TYPE3"), MemoryRange.of(1_632)),
-            Arguments.of(List.of("TYPE1", "TYPE3"), MemoryRange.of(1_088))
+            Arguments.of(List.of("TYPE1"), MemoryRange.of(208)),
+            Arguments.of(List.of("TYPE2"), MemoryRange.of(416)),
+            Arguments.of(List.of("*"), MemoryRange.of(1_248)),
+            Arguments.of(List.of("TYPE1", "TYPE2", "TYPE3"), MemoryRange.of(1_248)),
+            Arguments.of(List.of("TYPE1", "TYPE3"), MemoryRange.of(832))
         );
     }
 
@@ -94,7 +96,9 @@ class SplitRelationshipsTest {
         MemoryTree actualEstimate = SplitRelationships.estimate(config)
             .estimate(graphDimensions, config.concurrency());
 
-        assertThat(actualEstimate.memoryUsage()).isEqualTo(expectedMemory);
+        assertThat(actualEstimate.memoryUsage())
+            .withFailMessage("expected: " + actualEstimate.memoryUsage().max)
+            .isEqualTo(expectedMemory);
     }
 
     @Test
@@ -111,12 +115,12 @@ class SplitRelationshipsTest {
         var graphDimensions = GraphDimensions.of(1, 10_000);
         MemoryTree actualEstimate = SplitRelationships.estimate(config)
             .estimate(graphDimensions, config.concurrency());
-        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(272_000));
+        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(208_000));
 
         graphDimensions = GraphDimensions.of(100_000, 10_000);
         actualEstimate = SplitRelationships.estimate(config)
             .estimate(graphDimensions, config.concurrency());
-        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(272_000));
+        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(208_000));
     }
 
     @Test
@@ -133,12 +137,16 @@ class SplitRelationshipsTest {
         var config = configBuilder.negativeSamplingRatio(1.0).build();
         MemoryTree actualEstimate = SplitRelationships.estimate(config)
             .estimate(graphDimensions, config.concurrency());
-        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(272_000));
+        assertThat(actualEstimate.memoryUsage())
+            .withFailMessage("expected: " + actualEstimate.memoryUsage().max)
+            .isEqualTo(MemoryRange.of(208_000));
 
         config = configBuilder.negativeSamplingRatio(2.0).build();
         actualEstimate = SplitRelationships.estimate(config)
             .estimate(graphDimensions, config.concurrency());
-        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(384_000));
+        assertThat(actualEstimate.memoryUsage())
+            .withFailMessage("expected: " + actualEstimate.memoryUsage().max)
+            .isEqualTo(MemoryRange.of(256_000));
     }
 
     @Test
@@ -155,11 +163,15 @@ class SplitRelationshipsTest {
         var config = configBuilder.holdoutFraction(0.3).build();
         MemoryTree actualEstimate = SplitRelationships.estimate(config)
             .estimate(graphDimensions, config.concurrency());
-        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(272_000));
+        assertThat(actualEstimate.memoryUsage())
+            .withFailMessage("expected: " + actualEstimate.memoryUsage().max)
+            .isEqualTo(MemoryRange.of(208_000));
 
         config = configBuilder.holdoutFraction(0.1).build();
         actualEstimate = SplitRelationships.estimate(config)
             .estimate(graphDimensions, config.concurrency());
-        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(304_000));
+        assertThat(actualEstimate.memoryUsage())
+            .withFailMessage("expected: " + actualEstimate.memoryUsage().max)
+            .isEqualTo(MemoryRange.of(176_000));
     }
 }

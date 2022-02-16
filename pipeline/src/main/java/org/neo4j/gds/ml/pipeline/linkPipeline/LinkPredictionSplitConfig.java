@@ -189,7 +189,7 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
         long testSetSize = (long) (positiveTestSetSize * (1 + negativeSamplingRatio()));
         long testComplementSize = relationshipCount - positiveTestSetSize;
 
-        long positiveTrainSetSize = (long) (testComplementSize * trainFraction() * (1 + negativeSamplingRatio()));
+        long positiveTrainSetSize = (long) (testComplementSize * trainFraction());
         long trainSetSize = (long) (positiveTrainSetSize * (1 + negativeSamplingRatio()));
         long featureInputSize = (long) (testComplementSize * (1 - trainFraction()));
         long foldSize = trainSetSize / validationFolds();

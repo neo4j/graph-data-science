@@ -50,16 +50,15 @@ public class SplitRelationships extends Algorithm<SplitResult> {
 
         return MemoryEstimations.builder("Relationship splitter")
             .perGraphDimension("Selected relationships", (graphDimensions, threads) -> {
-                var positiveRelCount = graphDimensions.estimatedRelCount(configuration.relationshipTypes()) * (1 - configuration.holdoutFraction());
+                var positiveRelCount = graphDimensions.estimatedRelCount(configuration.relationshipTypes()) * configuration.holdoutFraction();
                 var negativeRelCount = positiveRelCount * configuration.negativeSamplingRatio();
+                long selectedRelCount = (long) (positiveRelCount + negativeRelCount);
 
-                var selectedRelCount = positiveRelCount + negativeRelCount;
-
-                return MemoryRange.of((long) selectedRelCount * pessimisticSizePerRel);
+                return MemoryRange.of(selectedRelCount * pessimisticSizePerRel);
             })
             .perGraphDimension("Remaining relationships", (graphDimensions, threads) -> {
-                var remainingRelCount = graphDimensions.estimatedRelCount(configuration.relationshipTypes()) * configuration.holdoutFraction();
-                return MemoryRange.of((long) (remainingRelCount * pessimisticSizePerRel));
+                long remainingRelCount = (long) (graphDimensions.estimatedRelCount(configuration.relationshipTypes()) * (1 - configuration.holdoutFraction()));
+                return MemoryRange.of(remainingRelCount * pessimisticSizePerRel);
             })
             .build();
     }

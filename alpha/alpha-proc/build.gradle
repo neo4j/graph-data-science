@@ -53,4 +53,5 @@ dependencies {
     testImplementation project(':proc-centrality')
 
     testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito'
+    testImplementation group: 'org.assertj', name: 'assertj-core',          version: ver.'assertj'
 }

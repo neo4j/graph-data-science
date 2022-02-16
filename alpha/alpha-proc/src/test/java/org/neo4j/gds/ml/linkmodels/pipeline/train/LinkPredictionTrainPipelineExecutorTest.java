@@ -423,7 +423,8 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     }
 
     @Test
-    void estimate() {
+    void estimateWithDifferentSplitConfig() {
+        // FIXME: This is not working
         var config = LinkPredictionTrainConfig
             .builder()
             .modelName("DUMMY")
@@ -432,6 +433,14 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .build();
 
         LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
+
+        var splitConfig = LinkPredictionSplitConfigImpl.builder()
+            .testFraction(0.2)
+            .trainFraction(0.3)
+            .validationFolds(3)
+            .negativeSamplingRatio(1.0)
+            .build();
+        pipeline.setSplitConfig(splitConfig);
         var actualEstimation = LinkPredictionTrainPipelineExecutor.estimate(
             pipeline,
             config
