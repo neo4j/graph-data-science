@@ -32,12 +32,10 @@ import org.neo4j.gds.annotation.ReturnType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStoreFactory;
-import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
@@ -72,7 +70,6 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.stream.StreamSupport;
-import java.util.stream.Collectors;
 
 public final class CypherAggregation extends BaseProc {
 
@@ -307,7 +304,7 @@ public final class CypherAggregation extends BaseProc {
             maybeNodeProperties.ifPresent(allNodeProperties -> {
                 CSRGraphStoreUtil.extractNodeProperties(
                     graphStoreBuilder,
-                    nodeSchema,
+                    nodeSchema.properties()::get,
                     allNodeProperties
                 );
             });

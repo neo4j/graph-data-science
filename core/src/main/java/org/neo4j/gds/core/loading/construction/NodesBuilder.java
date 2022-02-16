@@ -276,7 +276,7 @@ public final class NodesBuilder {
 
     private static class ThreadLocalBuilder implements AutoCloseable {
 
-        private static final long[] ANY_LABEL_ARRAY = { ANY_LABEL };
+        private final long[] anyLabelArray = { ANY_LABEL };
 
         private final LongAdder importedNodes;
         private final LongPredicate seenNodeIdPredicate;
@@ -348,8 +348,10 @@ public final class NodesBuilder {
 
         private long[] labelTokens(NodeLabel... nodeLabels) {
             if (nodeLabels == null || nodeLabels.length == 0) {
-                return ANY_LABEL_ARRAY;
+                anyLabelArray[0] = labelTokenIdFn.apply(NodeLabel.ALL_NODES);
+                return anyLabelArray;
             }
+
             long[] labelIds = new long[nodeLabels.length];
 
             for (int i = 0; i < nodeLabels.length; i++) {

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphDropProc;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,7 +56,7 @@ class CypherAggregationTest extends BaseProcTest {
         " (:A)-[:REL]->(:A)<-[:REL]-(:A)" +
         ",(:A)-[:REL]->(:A)<-[:REL]-(:A)" +
         ",(:A)-[:REL]->(:DifferentLabel)" +
-        ",(:A)-[:DISCONNECTED]->()" +
+        ",(:A)-[:DISCONNECTED]->({ foo: 42 })" +
 
         ",(a:B { prop1: 42, prop2: 13.37, prop3: [42.0, 13.37], prop4: [13, 37] })" +
         ",(b:B { prop1: 43,               prop3: [44.0, 15.37], prop4: [14, 38] })" +
@@ -162,6 +164,33 @@ class CypherAggregationTest extends BaseProcTest {
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A", "B");
+    }
+
+    @Test
+    void testEmptyNodeLabel() {
+        runQuery("MATCH (s)" +
+                 "RETURN gds.alpha.graph('g', s)");
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        assertThat(graphStore.nodeCount()).isEqualTo(16);
+        assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A", "B", "__ALL__", "DifferentLabel");
+    }
+
+    @Test
+    void testPropertiesOnEmptyNodes() {
+        runQuery("MATCH (s)" +
+                 "RETURN gds.alpha.graph('g', s, null, s { .foo })");
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        var graph = graphStore.getUnion();
+        var nodeProperties = graph.nodeProperties("foo");
+
+        var nonDefaultProperties = LongStream.range(0, graph.nodeCount())
+            .map(nodeProperties::longValue)
+            .filter(prop -> prop != DefaultValue.forLong().longValue())
+            .toArray();
+
+        assertThat(nonDefaultProperties).containsExactly(42);
     }
 
     @Test
