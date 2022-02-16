@@ -44,8 +44,5 @@ public interface AlgorithmSpec<
         return ValidationConfiguration.empty();
     }
 
-    default AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ALGO_FACTORY> withModelCatalog(ModelCatalog modelCatalog) {
-        // do nothing
-        return this;
-    }
+    AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ALGO_FACTORY> withModelCatalog(ModelCatalog modelCatalog);
 }

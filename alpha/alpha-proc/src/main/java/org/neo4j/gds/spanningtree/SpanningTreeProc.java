@@ -20,14 +20,17 @@
 package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.impl.spanningTrees.Prim;
 import org.neo4j.gds.impl.spanningTrees.SpanningGraph;
@@ -62,6 +65,13 @@ public abstract class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, 
                 return new Prim(graph, graph, configuration.minMax(), configuration.startNodeId(), progressTracker);
             }
         };
+    }
+
+    @Override
+    public AlgorithmSpec<Prim, SpanningTree, SpanningTreeConfig, Stream<Prim.Result>, AlgorithmFactory<?, Prim, SpanningTreeConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

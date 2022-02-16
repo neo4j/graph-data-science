@@ -20,11 +20,14 @@
 package org.neo4j.gds.louvain;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -72,6 +75,13 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
     @Override
     public GraphAlgorithmFactory<Louvain, LouvainStreamConfig> algorithmFactory() {
         return new LouvainFactory<>();
+    }
+
+    @Override
+    public AlgorithmSpec<Louvain, Louvain, LouvainStreamConfig, Stream<StreamResult>, AlgorithmFactory<?, Louvain, LouvainStreamConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

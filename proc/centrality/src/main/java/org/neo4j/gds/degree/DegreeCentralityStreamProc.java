@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.degree;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -67,6 +70,13 @@ public class DegreeCentralityStreamProc extends StreamProc<DegreeCentrality, Deg
     @Override
     public GraphAlgorithmFactory<DegreeCentrality, DegreeCentralityStreamConfig> algorithmFactory() {
         return DegreeCentralityProc.algorithmFactory();
+    }
+
+    @Override
+    public AlgorithmSpec<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStreamConfig, Stream<CentralityStreamResult>, AlgorithmFactory<?, DegreeCentrality, DegreeCentralityStreamConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

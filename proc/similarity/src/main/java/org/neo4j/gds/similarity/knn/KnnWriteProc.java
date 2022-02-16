@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -89,6 +92,13 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
     @Override
     public GraphAlgorithmFactory<Knn, KnnWriteConfig> algorithmFactory() {
         return new KnnFactory<>();
+    }
+
+    @Override
+    public AlgorithmSpec<Knn, Knn.Result, KnnWriteConfig, Stream<Result>, AlgorithmFactory<?, Knn, KnnWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

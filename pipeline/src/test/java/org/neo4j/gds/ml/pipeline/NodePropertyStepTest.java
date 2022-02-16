@@ -31,13 +31,13 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -80,7 +80,7 @@ class NodePropertyStepTest extends BaseProcTest {
             .findByName("gds.testProc.mutate", List.of())
             .get();
 
-        var step = new NodePropertyStep(gdsCallableDefinition, Map.of("mutateProperty", PROPERTY_NAME), Optional.empty());
+        var step = new NodePropertyStep(gdsCallableDefinition, Map.of("mutateProperty", PROPERTY_NAME));
         TestProcedureRunner.applyOnProcedure(
             db,
             TestProc.class,
@@ -98,9 +98,9 @@ class NodePropertyStepTest extends BaseProcTest {
             .findByName("gds.testProc.mutate", List.of())
             .orElseThrow();
 
-        var step = new NodePropertyStep(gdsCallableDefinition, Map.of("mutateProperty", PROPERTY_NAME, "throwOnEstimate", true), Optional.empty());
+        var step = new NodePropertyStep(gdsCallableDefinition, Map.of("mutateProperty", PROPERTY_NAME, "throwOnEstimate", true));
 
         // verify exception is caught
-        assertThat(step.estimate().estimate(GraphDimensions.of(1), 4).memoryUsage().max).isZero();
+        assertThat(step.estimate(new OpenModelCatalog()).estimate(GraphDimensions.of(1), 4).memoryUsage().max).isZero();
     }
 }

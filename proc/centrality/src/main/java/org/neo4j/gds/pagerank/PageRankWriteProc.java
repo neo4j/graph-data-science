@@ -20,10 +20,13 @@
 package org.neo4j.gds.pagerank;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -92,6 +95,13 @@ public class PageRankWriteProc extends WriteProc<PageRankAlgorithm, PageRankResu
     @Override
     public ValidationConfiguration<PageRankWriteConfig> validationConfig() {
         return PageRankProc.getValidationConfig(log);
+    }
+
+    @Override
+    public AlgorithmSpec<PageRankAlgorithm, PageRankResult, PageRankWriteConfig, Stream<WriteResult>, AlgorithmFactory<?, PageRankAlgorithm, PageRankWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

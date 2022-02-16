@@ -20,13 +20,17 @@
 package org.neo4j.gds.pregel.proc;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public abstract class PregelMutateProc<
     ALGO extends Algorithm<PregelResult>,
@@ -36,5 +40,12 @@ public abstract class PregelMutateProc<
     @Override
     protected List<NodeProperty> nodePropertyList(ComputationResult<ALGO, PregelResult, CONFIG> computationResult) {
         return PregelBaseProc.nodeProperties(computationResult, computationResult.config().mutateProperty());
+    }
+
+    @Override
+    public AlgorithmSpec<ALGO, PregelResult, CONFIG, Stream<PregelMutateResult>, AlgorithmFactory<?, ALGO, CONFIG>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 }

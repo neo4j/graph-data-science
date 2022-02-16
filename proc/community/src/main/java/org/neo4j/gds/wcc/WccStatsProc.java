@@ -19,12 +19,15 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
@@ -87,6 +90,13 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
     @Override
     public GraphAlgorithmFactory<Wcc, WccStatsConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
+    }
+
+    @Override
+    public AlgorithmSpec<Wcc, DisjointSetStruct, WccStatsConfig, Stream<StatsResult>, AlgorithmFactory<?, Wcc, WccStatsConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @SuppressWarnings("unused")

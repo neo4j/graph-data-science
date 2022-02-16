@@ -20,12 +20,15 @@
 package org.neo4j.gds.shortestpaths;
 
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
@@ -96,6 +99,17 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
                 }
             }
         };
+    }
+
+    @Override
+    public AlgorithmSpec<
+        MSBFSASPAlgorithm,
+        Stream<AllShortestPathsStream.Result>,
+        AllShortestPathsConfig,
+        Stream<AllShortestPathsStream.Result>,
+        AlgorithmFactory<?, MSBFSASPAlgorithm, AllShortestPathsConfig>
+        > withModelCatalog(ModelCatalog modelCatalog) {
+        return this;
     }
 
     @Override

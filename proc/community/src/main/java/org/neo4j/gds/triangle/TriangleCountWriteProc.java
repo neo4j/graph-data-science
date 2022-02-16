@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -65,6 +68,13 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     @Override
     public ValidationConfiguration<TriangleCountWriteConfig> validationConfig() {
         return TriangleCountCompanion.getValidationConfig();
+    }
+
+    @Override
+    public AlgorithmSpec<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteConfig, Stream<WriteResult>, AlgorithmFactory<?, IntersectingTriangleCount, TriangleCountWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

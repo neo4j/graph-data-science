@@ -20,13 +20,24 @@
 package org.neo4j.gds.pregel.proc;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
+
+import java.util.stream.Stream;
 
 public abstract class PregelStatsProc<
     ALGO extends Algorithm<PregelResult>,
     CONFIG extends PregelProcedureConfig>
     extends StatsProc<ALGO, PregelResult, PregelStatsResult, CONFIG> {
 
+    @Override
+    public AlgorithmSpec<ALGO, PregelResult, CONFIG, Stream<PregelStatsResult>, AlgorithmFactory<?, ALGO, CONFIG>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
+    }
 }

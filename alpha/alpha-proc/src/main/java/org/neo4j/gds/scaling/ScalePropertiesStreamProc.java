@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.scaling;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.procedure.Description;
@@ -62,6 +65,13 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
     @Override
     public GraphAlgorithmFactory<ScaleProperties, ScalePropertiesStreamConfig> algorithmFactory() {
         return new ScalePropertiesFactory<>();
+    }
+
+    @Override
+    public AlgorithmSpec<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamConfig, Stream<Result>, AlgorithmFactory<?, ScaleProperties, ScalePropertiesStreamConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

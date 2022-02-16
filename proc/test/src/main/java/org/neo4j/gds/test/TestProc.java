@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.test;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -78,5 +81,12 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestResult
     @Override
     public GraphAlgorithmFactory<TestAlgorithm, TestWriteConfig> algorithmFactory() {
         return new TestAlgorithmFactory<>();
+    }
+
+    @Override
+    public AlgorithmSpec<TestAlgorithm, TestAlgorithm, TestWriteConfig, Stream<TestResult>, AlgorithmFactory<?, TestAlgorithm, TestWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 }

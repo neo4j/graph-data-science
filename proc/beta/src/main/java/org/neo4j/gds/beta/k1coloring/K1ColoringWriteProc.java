@@ -19,12 +19,15 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -84,6 +87,13 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
     @Override
     public GraphAlgorithmFactory<K1Coloring, K1ColoringWriteConfig> algorithmFactory() {
         return new K1ColoringFactory<>();
+    }
+
+    @Override
+    public AlgorithmSpec<K1Coloring, HugeLongArray, K1ColoringWriteConfig, Stream<WriteResult>, AlgorithmFactory<?, K1Coloring, K1ColoringWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

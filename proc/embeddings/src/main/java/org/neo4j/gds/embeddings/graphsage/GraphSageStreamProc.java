@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
@@ -27,6 +28,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
@@ -98,6 +100,14 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     @Override
     public ValidationConfiguration<GraphSageStreamConfig> validationConfig() {
         return GraphSageCompanion.getValidationConfig(modelCatalog, username());
+    }
+
+    @Override
+    public AlgorithmSpec<GraphSage, GraphSage.GraphSageResult, GraphSageStreamConfig, Stream<GraphSageStreamResult>, AlgorithmFactory<?, GraphSage, GraphSageStreamConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.modelCatalog = modelCatalog;
+        return this;
     }
 
     @Override

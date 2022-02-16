@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.GraphAlgorithmFactory;
@@ -44,6 +45,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -52,6 +54,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -333,6 +336,13 @@ public class PregelProcTest extends BaseProcTest {
                 }
             };
         }
+
+        @Override
+        public AlgorithmSpec<CompositeTestAlgorithm, PregelResult, TestPregelConfig, Stream<PregelMutateResult>, AlgorithmFactory<?, CompositeTestAlgorithm, TestPregelConfig>> withModelCatalog(
+            ModelCatalog modelCatalog
+        ) {
+            return this;
+        }
     }
 
     public static class WriteProc extends PregelWriteProc<CompositeTestAlgorithm, TestPregelConfig> {
@@ -403,6 +413,13 @@ public class PregelProcTest extends BaseProcTest {
                 }
             };
         }
+
+        @Override
+        public AlgorithmSpec<CompositeTestAlgorithm, PregelResult, TestPregelConfig, Stream<PregelWriteResult>, AlgorithmFactory<?, CompositeTestAlgorithm, TestPregelConfig>> withModelCatalog(
+            ModelCatalog modelCatalog
+        ) {
+            return this;
+        }
     }
 
     public static class StreamProc extends PregelStreamProc<CompositeTestAlgorithm, TestPregelConfig> {
@@ -468,6 +485,13 @@ public class PregelProcTest extends BaseProcTest {
                     return Pregel.progressTask(graph, config);
                 }
             };
+        }
+
+        @Override
+        public AlgorithmSpec<CompositeTestAlgorithm, PregelResult, TestPregelConfig, Stream<PregelStreamResult>, AlgorithmFactory<?, CompositeTestAlgorithm, TestPregelConfig>> withModelCatalog(
+            ModelCatalog modelCatalog
+        ) {
+            return this;
         }
     }
 

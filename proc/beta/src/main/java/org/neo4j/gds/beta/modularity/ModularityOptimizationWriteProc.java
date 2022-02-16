@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.beta.modularity;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -71,6 +74,13 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
     @Override
     public GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationWriteConfig> algorithmFactory() {
         return new ModularityOptimizationFactory<>();
+    }
+
+    @Override
+    public AlgorithmSpec<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig, Stream<WriteResult>, AlgorithmFactory<?, ModularityOptimization, ModularityOptimizationWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

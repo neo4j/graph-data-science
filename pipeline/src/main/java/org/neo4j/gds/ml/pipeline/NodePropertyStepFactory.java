@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.AlgoConfigParser;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallableFinder;
@@ -30,7 +29,6 @@ import org.neo4j.gds.utils.StringJoining;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -46,8 +44,7 @@ public final class NodePropertyStepFactory {
     public static NodePropertyStep createNodePropertyStep(
         String username,
         String taskName,
-        Map<String, Object> configMap,
-        Optional<ModelCatalog> maybeModelCatalog
+        Map<String, Object> configMap
     ) {
         var normalizedName = normalizeName(taskName);
 
@@ -73,7 +70,7 @@ public final class NodePropertyStepFactory {
             configMap
         );
 
-        return new NodePropertyStep(gdsCallableDefinition, configMap, maybeModelCatalog);
+        return new NodePropertyStep(gdsCallableDefinition, configMap);
     }
 
     private static AlgoBaseConfig parseConfig(

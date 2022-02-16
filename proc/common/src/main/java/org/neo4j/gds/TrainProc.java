@@ -24,6 +24,7 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
@@ -45,7 +46,6 @@ public abstract class TrainProc<
     TRAIN_CONFIG extends AlgoBaseConfig & ModelConfig,
     PROC_RESULT
     > extends AlgoBaseProc<ALGO, ALGO_RESULT, TRAIN_CONFIG, PROC_RESULT> {
-
     @Context
     public ModelCatalog modelCatalog;
 
@@ -77,6 +77,14 @@ public abstract class TrainProc<
                 );
             }
         };
+    }
+
+    @Override
+    public AlgorithmSpec<ALGO, ALGO_RESULT, TRAIN_CONFIG, Stream<PROC_RESULT>, AlgorithmFactory<?, ALGO, TRAIN_CONFIG>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.modelCatalog = modelCatalog;
+        return this;
     }
 
     public static class TrainingConfigValidation<TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> implements BeforeLoadValidation<TRAIN_CONFIG> {

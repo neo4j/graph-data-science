@@ -20,10 +20,12 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
@@ -69,6 +71,14 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     @Override
     public ValidationConfiguration<LinkPredictionPredictStreamConfig> validationConfig() {
         return LinkPredictionPredictCompanion.getValidationConfig();
+    }
+
+    @Override
+    public AlgorithmSpec<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictStreamConfig, Stream<Result>, AlgorithmFactory<?, LinkPredictionPredict, LinkPredictionPredictStreamConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.modelCatalog = modelCatalog;
+        return this;
     }
 
     @Override

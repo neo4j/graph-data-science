@@ -19,15 +19,20 @@
  */
 package org.neo4j.gds.scc;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.impl.scc.SccAlgorithm;
 import org.neo4j.gds.impl.scc.SccConfig;
+
+import java.util.stream.Stream;
 
 public abstract class SccProc<PROC_RESULT> extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, SccConfig, PROC_RESULT> {
 
@@ -62,5 +67,12 @@ public abstract class SccProc<PROC_RESULT> extends NodePropertiesWriter<SccAlgor
                 );
             }
         };
+    }
+
+    @Override
+    public AlgorithmSpec<SccAlgorithm, HugeLongArray, SccConfig, Stream<PROC_RESULT>, AlgorithmFactory<?, SccAlgorithm, SccConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 }

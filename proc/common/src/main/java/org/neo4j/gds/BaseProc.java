@@ -27,6 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -56,6 +57,9 @@ public abstract class BaseProc {
 
     @Context
     public GraphDatabaseAPI api;
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Context
     public Log log;
@@ -169,6 +173,7 @@ public abstract class BaseProc {
         return ImmutableExecutionContext
             .builder()
             .api(api)
+            .modelCatalog(modelCatalog)
             .log(log)
             .procedureTransaction(procedureTransaction)
             .transaction(transaction)

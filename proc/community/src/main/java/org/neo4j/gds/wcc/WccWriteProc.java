@@ -19,13 +19,16 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
@@ -77,6 +80,13 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
     @Override
     public GraphAlgorithmFactory<Wcc, WccWriteConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
+    }
+
+    @Override
+    public AlgorithmSpec<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WriteResult>, AlgorithmFactory<?, Wcc, WccWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

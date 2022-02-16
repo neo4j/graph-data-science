@@ -58,7 +58,6 @@ import org.neo4j.gds.test.TestProc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -171,8 +170,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
                 ExecutionContext.EMPTY.username(),
                 "degree",
-                Map.of("mutateProperty", "degree"),
-                Optional.empty()
+                Map.of("mutateProperty", "degree")
             ));
             pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 
@@ -220,8 +218,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
                 ExecutionContext.EMPTY.username(),
                 "degree",
-                Map.of("mutateProperty", "degree"),
-                Optional.empty()
+                Map.of("mutateProperty", "degree")
             ));
             pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 

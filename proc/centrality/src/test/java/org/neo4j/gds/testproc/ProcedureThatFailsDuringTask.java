@@ -20,11 +20,14 @@
 package org.neo4j.gds.testproc;
 
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.test.config.DummyConfig;
 import org.neo4j.gds.test.config.DummyConfigImpl;
@@ -77,6 +80,13 @@ public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm,
     @Override
     public <T extends ComputationResultConsumer<FailingAlgorithm, Output, DummyConfig, Stream<Output>>> T computationResultConsumer() {
         throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public AlgorithmSpec<FailingAlgorithm, Output, DummyConfig, Stream<Output>, AlgorithmFactory<?, FailingAlgorithm, DummyConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     public class Output {

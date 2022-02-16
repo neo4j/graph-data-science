@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.executor.ExecutionContext;
 
@@ -41,5 +42,5 @@ public interface ExecutableNodePropertyStep extends ToMapConvertible {
 
     String procName();
 
-    MemoryEstimation estimate();
+    MemoryEstimation estimate(ModelCatalog modelCatalog);
 }

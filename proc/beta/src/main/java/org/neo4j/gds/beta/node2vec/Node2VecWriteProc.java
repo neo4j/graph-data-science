@@ -19,15 +19,18 @@
  */
 package org.neo4j.gds.beta.node2vec;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -78,6 +81,13 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
     @Override
     public GraphAlgorithmFactory<Node2Vec, Node2VecWriteConfig> algorithmFactory() {
         return new Node2VecAlgorithmFactory<>();
+    }
+
+    @Override
+    public AlgorithmSpec<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig, Stream<WriteResult>, AlgorithmFactory<?, Node2Vec, Node2VecWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

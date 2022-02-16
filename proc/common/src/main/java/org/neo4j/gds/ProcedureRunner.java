@@ -37,20 +37,6 @@ public final class ProcedureRunner {
 
     private ProcedureRunner() {}
 
-    public static <P extends BaseProc> P instantiateProcedureFromCaller(BaseProc caller, Class<P> procedureClass) {
-        return ProcedureRunner.instantiateProcedure(
-            caller.api,
-            procedureClass,
-            caller.callContext,
-            caller.log,
-            caller.taskRegistryFactory,
-            EmptyUserLogRegistryFactory.INSTANCE,
-            caller.allocationTracker,
-            caller.procedureTransaction,
-            caller.username
-        );
-    }
-
     public static <P extends BaseProc> P instantiateProcedure(
         GraphDatabaseAPI graphDb,
         Class<P> procClass,

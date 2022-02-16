@@ -57,7 +57,6 @@ import org.neo4j.gds.test.TestProc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -169,8 +168,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
                 ExecutionContext.EMPTY.username(),
                 "degree",
-                Map.of("mutateProperty", "degree"),
-                Optional.empty()
+                Map.of("mutateProperty", "degree")
             ));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
@@ -214,8 +212,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
                 ExecutionContext.EMPTY.username(),
                 "degree",
-                Map.of("mutateProperty", "degree"),
-                Optional.empty()
+                Map.of("mutateProperty", "degree")
             ));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
@@ -320,7 +317,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .username("user")
             .build();
 
-        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config);
+        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, modelCatalog);
         assertMemoryEstimation(
             () -> memoryEstimation,
             graphStore.nodeCount(),

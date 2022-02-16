@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -104,6 +106,14 @@ public class NodeClassificationPredictWriteProc extends WriteProc<NodeClassifica
     @Override
     public ValidationConfiguration<NodeClassificationPredictWriteConfig> validationConfig() {
         return NodeClassificationCompanion.getValidationConfig(modelCatalog);
+    }
+
+    @Override
+    public AlgorithmSpec<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig, Stream<Result>, AlgorithmFactory<?, NodeClassificationPredict, NodeClassificationPredictWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.modelCatalog = modelCatalog;
+        return this;
     }
 
     @Override

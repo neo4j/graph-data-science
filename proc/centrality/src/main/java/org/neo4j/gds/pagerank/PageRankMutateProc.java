@@ -20,10 +20,13 @@
 package org.neo4j.gds.pagerank;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -95,6 +98,17 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, Pa
     @Override
     public ValidationConfiguration<PageRankMutateConfig> validationConfig() {
         return PageRankProc.getValidationConfig(log);
+    }
+
+    @Override
+    public AlgorithmSpec<
+        PageRankAlgorithm,
+        PageRankResult,
+        PageRankMutateConfig,
+        Stream<MutateResult>,
+        AlgorithmFactory<?, PageRankAlgorithm, PageRankMutateConfig>
+        > withModelCatalog(ModelCatalog modelCatalog) {
+        return this;
     }
 
     @SuppressWarnings("unused")

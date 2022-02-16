@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,7 +38,6 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
-import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
@@ -68,12 +68,13 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
 
     public static MemoryEstimation estimate(
         NodeClassificationPipeline pipeline,
-        NodeClassificationPipelineTrainConfig configuration
+        NodeClassificationPipelineTrainConfig configuration,
+        ModelCatalog modelCatalog
     ) {
         var nodePropertyStepEstimations = pipeline
             .nodePropertySteps()
             .stream()
-            .map(ExecutableNodePropertyStep::estimate)
+            .map(step -> step.estimate(modelCatalog))
             .collect(Collectors.toList());
 
         var trainingEstimation = MemoryEstimations

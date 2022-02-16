@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.executor;
 
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmFactory;
 import org.neo4j.gds.test.TestMutateConfig;
@@ -40,6 +41,13 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
     @Override
     public NewConfigFunction<TestMutateConfig> newConfigFunction() {
         return (username, config) -> new TestMutateConfigImpl(config);
+    }
+
+    @Override
+    public AlgorithmSpec<TestAlgorithm, TestAlgorithm, TestMutateConfig, TestResult, TestAlgorithmFactory<TestMutateConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

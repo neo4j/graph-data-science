@@ -20,10 +20,13 @@
 package org.neo4j.gds.triangle;
 
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -67,6 +70,13 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     @Override
     public ValidationConfiguration<LocalClusteringCoefficientStatsConfig> validationConfig() {
         return LocalClusteringCoefficientCompanion.getValidationConfig(log);
+    }
+
+    @Override
+    public AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsConfig, Stream<StatsResult>, AlgorithmFactory<?, LocalClusteringCoefficient, LocalClusteringCoefficientStatsConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

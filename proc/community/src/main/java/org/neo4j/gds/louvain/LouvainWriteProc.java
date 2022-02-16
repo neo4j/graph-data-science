@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.louvain;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -94,6 +97,13 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
     @Override
     public GraphAlgorithmFactory<Louvain, LouvainWriteConfig> algorithmFactory() {
         return new LouvainFactory<>();
+    }
+
+    @Override
+    public AlgorithmSpec<Louvain, Louvain, LouvainWriteConfig, Stream<WriteResult>, AlgorithmFactory<?, Louvain, LouvainWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @SuppressWarnings("unused")

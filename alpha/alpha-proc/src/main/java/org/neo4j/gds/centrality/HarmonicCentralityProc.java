@@ -19,11 +19,16 @@
  */
 package org.neo4j.gds.centrality;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.impl.closeness.HarmonicCentralityConfig;
 import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
+
+import java.util.stream.Stream;
 
 public abstract class HarmonicCentralityProc<PROC_RESULT> extends NodePropertiesWriter<HarmonicCentrality, HarmonicCentrality, HarmonicCentralityConfig, PROC_RESULT> {
     protected static final String DESCRIPTION =
@@ -39,6 +44,13 @@ public abstract class HarmonicCentralityProc<PROC_RESULT> extends NodeProperties
     @Override
     public GraphAlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> algorithmFactory() {
         return new HarmonicCentralityAlgorithmFactory();
+    }
+
+    @Override
+    public AlgorithmSpec<HarmonicCentrality, HarmonicCentrality, HarmonicCentralityConfig, Stream<PROC_RESULT>, AlgorithmFactory<?, HarmonicCentrality, HarmonicCentralityConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @SuppressWarnings("unused")

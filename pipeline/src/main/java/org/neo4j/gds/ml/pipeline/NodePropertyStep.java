@@ -40,22 +40,18 @@ import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class NodePropertyStep implements ExecutableNodePropertyStep {
     private final GdsCallableFinder.GdsCallableDefinition callableDefinition;
     private final Map<String, Object> config;
-    private final Optional<ModelCatalog> maybeModelCatalog;
 
     public NodePropertyStep(
         GdsCallableFinder.GdsCallableDefinition callableDefinition,
-        Map<String, Object> config,
-        Optional<ModelCatalog> maybeModelCatalog
+        Map<String, Object> config
     ) {
         this.callableDefinition = callableDefinition;
         this.config = config;
-        this.maybeModelCatalog = maybeModelCatalog;
     }
 
     @Override
@@ -69,8 +65,8 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     }
 
     @Override
-    public MemoryEstimation estimate() {
-        var algoSpec = getAlgorithmSpec();
+    public MemoryEstimation estimate(ModelCatalog modelCatalog) {
+        var algoSpec = getAlgorithmSpec(modelCatalog);
         var algoConfig = new AlgoConfigParser<>("", algoSpec.newConfigFunction()).processInput(config);
 
         try {
@@ -96,7 +92,7 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         configCopy.put("nodeLabels", nodeLabelStrings);
         configCopy.put("relationshipTypes", relTypeStrings);
 
-        var algorithmSpec = getAlgorithmSpec();
+        var algorithmSpec = getAlgorithmSpec(executionContext.modelCatalog());
 
         new ProcedureExecutor<>(
             algorithmSpec,
@@ -105,12 +101,10 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         ).compute(graphName, configCopy, false, false);
     }
 
-    private AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>> getAlgorithmSpec() {
-        var algorithmSpec = callableDefinition.algorithmSpec();
-        if (maybeModelCatalog.isPresent()) {
-            algorithmSpec = algorithmSpec.withModelCatalog(maybeModelCatalog.get());
-        }
-        return algorithmSpec;
+    private AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>> getAlgorithmSpec(ModelCatalog modelCatalog) {
+        return callableDefinition
+            .algorithmSpec()
+            .withModelCatalog(modelCatalog);
     }
 
     @Override

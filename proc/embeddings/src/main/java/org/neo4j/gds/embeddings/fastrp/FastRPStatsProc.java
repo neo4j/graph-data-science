@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -80,6 +83,13 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FastRPResult, Fast
     @Override
     public GraphAlgorithmFactory<FastRP, FastRPStatsConfig> algorithmFactory() {
         return new FastRPFactory<>();
+    }
+
+    @Override
+    public AlgorithmSpec<FastRP, FastRP.FastRPResult, FastRPStatsConfig, Stream<StatsResult>, AlgorithmFactory<?, FastRP, FastRPStatsConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @SuppressWarnings("unused")

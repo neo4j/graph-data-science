@@ -20,12 +20,15 @@
 package org.neo4j.gds.pregel.proc;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.beta.pregel.Element;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 
 import java.util.Map;
@@ -70,5 +73,12 @@ public abstract class PregelStreamProc<
             return new PregelStreamResult(computationResult.graph().toOriginalNodeId(nodeId), values);
         });
 
+    }
+
+    @Override
+    public AlgorithmSpec<ALGO, PregelResult, CONFIG, Stream<PregelStreamResult>, AlgorithmFactory<?, ALGO, CONFIG>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 }

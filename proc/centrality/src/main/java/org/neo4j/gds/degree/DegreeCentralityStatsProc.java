@@ -20,10 +20,13 @@
 package org.neo4j.gds.degree;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -69,6 +72,13 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
     @Override
     public GraphAlgorithmFactory<DegreeCentrality, DegreeCentralityStatsConfig> algorithmFactory() {
         return new DegreeCentralityFactory<>();
+    }
+
+    @Override
+    public AlgorithmSpec<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStatsConfig, Stream<StatsResult>, AlgorithmFactory<?, DegreeCentrality, DegreeCentralityStatsConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        return this;
     }
 
     @Override

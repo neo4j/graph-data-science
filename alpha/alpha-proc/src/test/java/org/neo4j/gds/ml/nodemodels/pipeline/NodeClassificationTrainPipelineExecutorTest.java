@@ -57,7 +57,6 @@ import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -123,8 +122,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
             ExecutionContext.EMPTY.username(),
             "pageRank",
-            Map.of("mutateProperty", "pr"),
-            Optional.empty()
+            Map.of("mutateProperty", "pr")
         ));
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
 
@@ -322,14 +320,12 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
             ExecutionContext.EMPTY.username(),
             "pageRank",
-            Map.of("mutateProperty", "pr"),
-            Optional.empty()
+            Map.of("mutateProperty", "pr")
         ));
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
             "bestUser",
             "wcc",
-            Map.of("mutateProperty", "myNewProp", "threshold", 0.42F, "relationshipWeightProperty", "weight"),
-            Optional.empty()
+            Map.of("mutateProperty", "myNewProp", "threshold", 0.42F, "relationshipWeightProperty", "weight")
         ));
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
 
@@ -347,7 +343,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             .metrics(List.of(MetricSpecification.parse("F1_WEIGHTED")))
             .build();
 
-        var memoryEstimation = NodeClassificationTrainPipelineExecutor.estimate(pipeline, config);
+        var memoryEstimation = NodeClassificationTrainPipelineExecutor.estimate(pipeline, config, modelCatalog);
         assertMemoryEstimation(
             () -> memoryEstimation,
             graphStore.nodeCount(),
