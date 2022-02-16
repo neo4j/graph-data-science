@@ -28,14 +28,12 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStreamConfig;
 
 import java.util.Set;
+import java.util.function.LongSupplier;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -43,16 +41,19 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.paths.PathTestUtil.expected;
 
-@GdlExtension
 final class DeltaSteppingTest {
 
-    @GdlGraph
-    private static final String DUMMY = "()";
-
-    public static Stream<Arguments> deltaAndConcurrency() {
+    // delta X concurrency X id-supplier
+    public static Stream<Arguments> testParameters() {
         return TestSupport.crossArguments(
-            () -> DoubleStream.of(0.25, 0.5, 1, 2, 8).mapToObj(Arguments::of),
-            () -> IntStream.of(1, 4).mapToObj(Arguments::of)
+            () -> TestSupport.crossArguments(
+                () -> DoubleStream.of(0.25, 0.5, 1, 2, 8).mapToObj(Arguments::of),
+                () -> IntStream.of(1, 4).mapToObj(Arguments::of)
+            ),
+            () -> Stream.of(
+                new IncrementingIdSupplier(0L),
+                new IncrementingIdSupplier(42L)
+            ).map(Arguments::of)
         );
     }
 
@@ -61,7 +62,6 @@ final class DeltaSteppingTest {
     class Graph1 {
 
         // https://en.wikipedia.org/wiki/Shortest_path_problem#/media/File:Shortest_path_with_direct_weights.svg
-        @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
             "  (a:A)" +
@@ -79,15 +79,19 @@ final class DeltaSteppingTest {
             ", (d)-[:TYPE {cost: 11}]->(f)" +
             ", (e)-[:TYPE {cost: 4}]->(d)";
 
-        @Inject
-        private TestGraph graph;
-
-        @Inject
-        private IdFunction idFunction;
-
         @ParameterizedTest
-        @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#deltaAndConcurrency")
-        void singleSource(double delta, int concurrency) {
+        @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
+        void singleSource(double delta, int concurrency, LongSupplier idSupplier) {
+            var graphFactory = GdlFactory
+                .builder()
+                .gdlGraph(DB_CYPHER)
+                .nodeIdFunction(idSupplier)
+                .build();
+
+            var graph = graphFactory.build().getUnion();
+
+            IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graphFactory.nodeId(variable));
+
             var expected = Set.of(
                 expected(idFunction, 0, new double[]{0.0}, "a"),
                 expected(idFunction, 1, new double[]{0.0, 4.0}, "a", "b"),
@@ -97,7 +101,7 @@ final class DeltaSteppingTest {
                 expected(idFunction, 5, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f")
             );
 
-            var sourceNode = idFunction.of("a");
+            var sourceNode = graphFactory.nodeId("a");
 
             var config = ImmutableAllShortestPathsDijkstraStreamConfig.builder()
                 .concurrency(concurrency)
@@ -113,8 +117,18 @@ final class DeltaSteppingTest {
         }
 
         @ParameterizedTest
-        @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#deltaAndConcurrency")
-        void singleSourceFromDisconnectedNode(double delta, int concurrency) {
+        @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
+        void singleSourceFromDisconnectedNode(double delta, int concurrency, LongSupplier idSupplier) {
+            var graphFactory = GdlFactory
+                .builder()
+                .gdlGraph(DB_CYPHER)
+                .nodeIdFunction(idSupplier)
+                .build();
+
+            var graph = graphFactory.build().getUnion();
+
+            IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graphFactory.nodeId(variable));
+
             var expected = Set.of(
                 expected(idFunction, 0, new double[]{0.0}, "c"),
                 expected(idFunction, 1, new double[]{0.0, 3.0}, "c", "e"),
@@ -122,7 +136,7 @@ final class DeltaSteppingTest {
                 expected(idFunction, 3, new double[]{0.0, 3.0, 7.0, 18.0}, "c", "e", "d", "f")
             );
 
-            var sourceNode = idFunction.of("c");
+            var sourceNode = graphFactory.nodeId("c");
 
             var config = ImmutableAllShortestPathsDijkstraStreamConfig.builder()
                 .concurrency(concurrency)
@@ -142,7 +156,6 @@ final class DeltaSteppingTest {
     class Graph2 {
 
         // https://www.cise.ufl.edu/~sahni/cop3530/slides/lec326.pdf without relationship id 14
-        @GdlGraph
         private static final String DB_CYPHER2 =
             "CREATE" +
             "  (n1:Label)" +
@@ -166,15 +179,19 @@ final class DeltaSteppingTest {
             ", (n5)-[:TYPE {cost: 10}]->(n7)" +
             ", (n6)-[:TYPE {cost: 1}]->(n7)";
 
-        @Inject
-        private TestGraph graph;
-
-        @Inject
-        private IdFunction idFunction;
-
         @ParameterizedTest
-        @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#deltaAndConcurrency")
-        void singleSource(double delta, int concurrency) {
+        @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
+        void singleSource(double delta, int concurrency, LongSupplier idSupplier) {
+            var graphFactory = GdlFactory
+                .builder()
+                .gdlGraph(DB_CYPHER2)
+                .nodeIdFunction(idSupplier)
+                .build();
+
+            var graph = graphFactory.build().getUnion();
+
+            IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graphFactory.nodeId(variable));
+
             var expected = Set.of(
                 expected(idFunction, 0, new double[]{0.0}, "n1"),
                 expected(idFunction, 1, new double[]{0.0, 2.0}, "n1", "n3"),
@@ -185,7 +202,7 @@ final class DeltaSteppingTest {
                 expected(idFunction, 6, new double[]{0.0, 2.0, 10.0, 11.0}, "n1", "n3", "n6", "n7")
             );
 
-            var sourceNode = idFunction.of("n1");
+            var sourceNode = graphFactory.nodeId("n1");
 
             var config = ImmutableAllShortestPathsDijkstraStreamConfig.builder()
                 .concurrency(concurrency)
@@ -200,4 +217,19 @@ final class DeltaSteppingTest {
             assertEquals(expected, paths);
         }
     }
+
+    static class IncrementingIdSupplier implements LongSupplier {
+        private long offset;
+
+        IncrementingIdSupplier(long offset) {
+            this.offset = offset;
+        }
+
+        @Override
+        public long getAsLong() {
+            return offset++;
+        }
+    }
+
+    private DeltaSteppingTest() {}
 }

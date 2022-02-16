@@ -75,7 +75,7 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
     ) {
         return new DeltaStepping(
             graph,
-            config.sourceNode(),
+            graph.toMappedNodeId(config.sourceNode()),
             delta,
             config.concurrency(),
             true,
