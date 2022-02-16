@@ -21,8 +21,13 @@ package org.neo4j.gds.impl.traverse;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -30,8 +35,11 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.impl.traverse.Traverse.ExitPredicate.Result;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
 
@@ -232,7 +240,11 @@ class TraverseTest {
      */
     void assertContains(String[] expected, long[] given) {
         Arrays.sort(given);
-        assertEquals(expected.length, given.length, "expected " + Arrays.toString(expected) + " | given " + Arrays.toString(given));
+        assertEquals(
+            expected.length,
+            given.length,
+            "expected " + Arrays.toString(expected) + " | given " + Arrays.toString(given)
+        );
 
         for (String ex : expected) {
             final long id = naturalGraph.toMappedNodeId(ex);
@@ -240,5 +252,35 @@ class TraverseTest {
                 fail(ex + " not in " + Arrays.toString(expected));
             }
         }
+    }
+
+    @Test
+    void shouldLogProgress() {
+        //TODO:  Replace with TraverseFactory call
+        var progressTask = Tasks.leaf("BFS", naturalGraph.relationshipCount());
+        var testLog = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+        Traverse.bfs(
+            naturalGraph,
+            0,
+            (s, t, w) -> Result.FOLLOW,
+            Traverse.DEFAULT_AGGREGATOR,
+            progressTracker,
+            AllocationTracker.empty()
+        ).compute();
+        List<AtomicLong> progresses = progressTracker.getProgresses();
+        assertEquals(1, progresses.size());
+        assertEquals(naturalGraph.relationshipCount(), progresses.get(0).get());
+
+        assertTrue(testLog.containsMessage(TestLog.INFO, ":: Start"));
+        assertTrue(testLog.containsMessage(TestLog.INFO, "BFS 25%"));  //a-> b,a->c | 2 = 2/8 = 0.25
+        assertTrue(testLog.containsMessage(TestLog.INFO, "BFS 37%"));  //b-> d      |+1 = 3/8 = 0.375
+        assertTrue(testLog.containsMessage(TestLog.INFO, "BFS 50%"));  //c-> d      |+1 = 4/8 = 0.5
+        assertTrue(testLog.containsMessage(TestLog.INFO, "BFS 75%"));  //d-> e,d->f |+2 = 6/8 = 0.75
+        assertTrue(testLog.containsMessage(TestLog.INFO, "BFS 87%"));  //e->g       |+1 = 7/8 = 0.87
+        assertTrue(testLog.containsMessage(TestLog.INFO, "BFS 100%")); //f->g       |+1 = 8/8 = 1.00
+        assertTrue(testLog.containsMessage(TestLog.INFO, ":: Finished"));
+
+
     }
 }

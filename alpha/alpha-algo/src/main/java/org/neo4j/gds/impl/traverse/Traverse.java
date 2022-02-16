@@ -119,6 +119,7 @@ public final class Traverse extends Algorithm<Traverse> {
 
     @Override
     public Traverse compute() {
+        progressTracker.beginSubTask();
         LongArrayList result = new LongArrayList(nodeCount);
         BitSet inResult = new BitSet(nodeCount);
         nodes.clear();
@@ -143,11 +144,13 @@ public final class Traverse extends Algorithm<Traverse> {
                 case CONTINUE:
                     continue loop;
                 case FOLLOW:
-                    if(!inResult.getAndSet(node)) {
+                    if (!inResult.getAndSet(node)) {
                         result.add(graph.toOriginalNodeId(node));
                     }
                     break;
             }
+
+            progressTracker.logProgress(graph.degree(node));
 
             graph.forEachRelationship(
                 node,
@@ -164,6 +167,7 @@ public final class Traverse extends Algorithm<Traverse> {
         }
 
         this.resultNodes = result.toArray();
+        progressTracker.endSubTask();
         return this;
     }
 
