@@ -19,23 +19,30 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
+import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.LongStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -132,5 +139,56 @@ class GraphSageEmbeddingsGeneratorTest {
         assertEquals(graph.nodeCount(), embeddings.size());
 
         LongStream.range(0, graph.nodeCount()).forEach(n -> assertEquals(EMBEDDING_DIMENSION, embeddings.get(n).length));
+    }
+
+    @Test
+    void embeddingsForNodeFilteredGraph() {
+        GdlFactory factory = GdlFactory.of(
+            "(a:Ignore {age: 1}), (b:N {age: 42}), (c:N {age: 13}), (d:N {age: 14}), " +
+            "(a)-->(d), " +
+            "(b)-->(c), " +
+            "(c)-->(d), " +
+            "(d)-->(b)"
+        );
+        CSRGraphStore graphStore = factory.build();
+        Graph filteredGraph = graphStore.getGraph("N", RelationshipType.ALL_RELATIONSHIPS.name, Optional.empty());
+
+        var config = ImmutableGraphSageTrainConfig.builder()
+            .aggregator(Aggregator.AggregatorType.MEAN)
+            .modelName("DUMMY")
+            .addSampleSize(2)
+            .featureProperties(List.of("age"))
+            .embeddingDimension(3)
+            .build();
+
+        var trainer = new SingleLabelGraphSageTrain(
+            filteredGraph,
+            config,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        );
+
+        var model = trainer.compute();
+
+        var embeddingsGenerator = new GraphSageEmbeddingsGenerator(
+            model.data().layers(),
+            config.batchSize(),
+            config.concurrency(),
+            config.isWeighted(),
+            model.data().featureFunction(),
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        );
+
+        var embeddings = embeddingsGenerator.makeEmbeddings(
+            filteredGraph,
+            GraphSageHelper.initializeSingleLabelFeatures(filteredGraph, config, AllocationTracker.empty())
+        );
+
+        assertThat(embeddings)
+            .isNotNull()
+            .matches(i -> i.size() == filteredGraph.nodeCount());
     }
 }
