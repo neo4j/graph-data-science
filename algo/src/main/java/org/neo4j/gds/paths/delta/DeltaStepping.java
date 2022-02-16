@@ -26,7 +26,6 @@ import com.carrotsearch.hppc.cursors.LongCursor;
 import com.carrotsearch.hppc.procedures.LongProcedure;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -51,7 +50,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.delta.TentativeDistances.NO_PREDECESSOR;
 
-public class DeltaStepping extends Algorithm<DijkstraResult> {
+public final class DeltaStepping extends Algorithm<DijkstraResult> {
 
     private static final int NO_BIN = Integer.MAX_VALUE;
     private static final int BIN_SIZE_THRESHOLD = 1000;
@@ -163,7 +162,7 @@ public class DeltaStepping extends Algorithm<DijkstraResult> {
             frontierIndex.set(0);
         }
 
-        return new DijkstraResult(DeltaSteppingResult.of(distances).pathResults(startNode, concurrency));
+        return new DijkstraResult(pathResults(distances, startNode, concurrency));
     }
 
     @Override
@@ -310,51 +309,44 @@ public class DeltaStepping extends Algorithm<DijkstraResult> {
         }
     }
 
-    @ValueClass
-    public interface DeltaSteppingResult {
+    private static Stream<PathResult> pathResults(
+        TentativeDistances tentativeDistances,
+        long sourceNode,
+        int concurrency
+    ) {
+        assert tentativeDistances.predecessors().isPresent();
+        var distances = tentativeDistances.distances();
+        var predecessors = tentativeDistances.predecessors().get();
 
-        HugeAtomicDoubleArray distances();
+        var pathIndex = new AtomicLong(0L);
 
-        Optional<HugeAtomicLongArray> predecessors();
+        var partitions = PartitionUtils.rangePartition(
+            concurrency,
+            predecessors.size(),
+            partition -> partition,
+            Optional.empty()
+        );
 
-        static DeltaSteppingResult of(TentativeDistances distances) {
-            return ImmutableDeltaSteppingResult.of(distances.distances(), distances.predecessors());
-        }
+        return ParallelUtil.parallelStream(
+            partitions.stream(),
+            concurrency,
+            parallelStream -> parallelStream.flatMap(partition -> {
+                var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
+                var pathResultBuilder = ImmutablePathResult.builder().sourceNode(sourceNode);
 
-        default Stream<PathResult> pathResults(long sourceNode, int concurrency) {
-            assert predecessors().isPresent();
-
-            var pathIndex = new AtomicLong(0L);
-            var predecessors = predecessors().get();
-
-            var partitions = PartitionUtils.rangePartition(
-                concurrency,
-                predecessors.size(),
-                partition -> partition,
-                Optional.empty()
-            );
-
-            return ParallelUtil.parallelStream(
-                partitions.stream(),
-                concurrency,
-                parallelStream -> parallelStream.flatMap(partition -> {
-                    var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
-                    var pathResultBuilder = ImmutablePathResult.builder().sourceNode(sourceNode);
-
-                    return LongStream
-                        .range(partition.startNode(), partition.startNode() + partition.nodeCount())
-                        .filter(target -> predecessors.get(target) != NO_PREDECESSOR)
-                        .mapToObj(targetNode -> pathResult(
-                            pathResultBuilder,
-                            localPathIndex.getAndIncrement(),
-                            sourceNode,
-                            targetNode,
-                            distances(),
-                            predecessors
-                        ));
-                })
-            );
-        }
+                return LongStream
+                    .range(partition.startNode(), partition.startNode() + partition.nodeCount())
+                    .filter(target -> predecessors.get(target) != NO_PREDECESSOR)
+                    .mapToObj(targetNode -> pathResult(
+                        pathResultBuilder,
+                        localPathIndex.getAndIncrement(),
+                        sourceNode,
+                        targetNode,
+                        distances,
+                        predecessors
+                    ));
+            })
+        );
     }
 
     private static final long[] EMPTY_ARRAY = new long[0];
