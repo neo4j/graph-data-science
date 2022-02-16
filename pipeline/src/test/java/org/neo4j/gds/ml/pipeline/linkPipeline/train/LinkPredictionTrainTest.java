@@ -35,13 +35,12 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
-import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 
 import java.util.List;
 import java.util.Map;
@@ -53,21 +52,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 @GdlExtension
 class LinkPredictionTrainTest {
 
-    static String NODES = "(a:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
-                          "(b:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
-                          "(c:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
-                          "(d:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
-                          "(e:N {noise: 42, z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
-                          "(f:N {noise: 42, z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
-                          "(g:N {noise: 42, z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
-                          "(h:N {noise: 42, z: 200, array: [-1.0,-2.0,3.0,4.0,5.0]}), " +
-                          "(i:N {noise: 42, z: 200, array: [-1.0,-2.0,3.0,4.0,5.0]}), " +
-                          "(j:N {noise: 42, z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
-                          "(k:N {noise: 42, z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
-                          "(l:N {noise: 42, z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
-                          "(m:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
-                          "(n:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
-                          "(o:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), ";
+    static String NODES = "(a:N {scalar: 0, array: [-1.0, -2.0, 1.0, 1.0, 3.0]}), " +
+                          "(b:N {scalar: 4, array: [2.0, 1.0, -2.0, 2.0, 1.0]}), " +
+                          "(c:N {scalar: 0, array: [-3.0, 4.0, 3.0, 3.0, 2.0]}), " +
+                          "(d:N {scalar: 3, array: [1.0, 3.0, 1.0, -1.0, -1.0]}), " +
+                          "(e:N {scalar: 1, array: [-2.0, 1.0, 2.0, 1.0, -1.0]}), " +
+                          "(f:N {scalar: 0, array: [-1.0, -3.0, 1.0, 2.0, 2.0]}), " +
+                          "(g:N {scalar: 1, array: [3.0, 1.0, -3.0, 3.0, 1.0]}), " +
+                          "(h:N {scalar: 3, array: [-1.0, 3.0, 2.0, 1.0, -3.0]}), " +
+                          "(i:N {scalar: 3, array: [4.0, 1.0, 1.0, 2.0, 1.0]}), " +
+                          "(j:N {scalar: 4, array: [1.0, -4.0, 2.0, -2.0, 2.0]}), " +
+                          "(k:N {scalar: 0, array: [2.0, 1.0, 3.0, 1.0, 1.0]}), " +
+                          "(l:N {scalar: 1, array: [-1.0, 3.0, -2.0, 3.0, -2.0]}), " +
+                          "(m:N {scalar: 0, array: [4.0, 4.0, 1.0, 1.0, 1.0]}), " +
+                          "(n:N {scalar: 3, array: [1.0, -2.0, 3.0, 2.0, 3.0]}), " +
+                          "(o:N {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), ";
 
     @GdlGraph(graphNamePrefix = "train")
     static String GRAPH =
@@ -76,46 +75,29 @@ class LinkPredictionTrainTest {
         "(a)-[:REL {label: 1.0}]->(b), " +
         "(a)-[:REL {label: 1.0}]->(c), " +
         "(a)-[:REL {label: 0.0}]->(e), " +
-        "(a)-[:REL {label: 0.0}]->(h), " +
+        "(a)-[:REL {label: 1.0}]->(h), " +
+        "(a)-[:REL {label: 1.0}]->(i), " +
         "(a)-[:REL {label: 0.0}]->(i), " +
-        "(a)-[:REL {label: 0.0}]->(i), " +
-        "(b)-[:REL {label: 1.0}]->(c), " +
-        "(b)-[:REL {label: 0.0}]->(f), " +
-        "(b)-[:REL {label: 0.0}]->(g), " +
+        "(b)-[:REL {label: 0.0}]->(c), " +
+        "(b)-[:REL {label: 1.0}]->(f), " +
+        "(b)-[:REL {label: 1.0}]->(g), " +
         "(b)-[:REL {label: 0.0}]->(n), " +
-        "(b)-[:REL {label: 0.0}]->(o), " +
+        "(b)-[:REL {label: 1.0}]->(o), " +
         "(c)-[:REL {label: 1.0}]->(d), " +
-        "(c)-[:REL {label: 0.0}]->(h), " +
-        "(c)-[:REL {label: 0.0}]->(l), " +
-        "(e)-[:REL {label: 1.0}]->(f), " +
+        "(c)-[:REL {label: 1.0}]->(h), " +
+        "(c)-[:REL {label: 1.0}]->(l), " +
+        "(e)-[:REL {label: 0.0}]->(f), " +
         "(e)-[:REL {label: 0.0}]->(a), " +
-        "(f)-[:REL {label: 1.0}]->(g), " +
+        "(f)-[:REL {label: 0.0}]->(g), " +
         "(f)-[:REL {label: 0.0}]->(o), " +
-        "(h)-[:REL {label: 1.0}]->(i), " +
+        "(h)-[:REL {label: 0.0}]->(i), " +
         "(j)-[:REL {label: 1.0}]->(k), " +
-        "(k)-[:REL {label: 1.0}]->(l), " +
-        "(m)-[:REL {label: 1.0}]->(n), " +
-        "(n)-[:REL {label: 1.0}]->(o) ";
-
-    @GdlGraph(graphNamePrefix = "validation")
-    static String VALIDATION =
-        "CREATE " +
-       NODES +
-        "(a)-[:REL {label: 1.0}]->(d), " +
-        "(a)-[:REL {label: 0.0}]->(o), " +
-        "(b)-[:REL {label: 1.0}]->(d), " +
-        "(b)-[:REL {label: 0.0}]->(i), " +
-        "(e)-[:REL {label: 1.0}]->(g), " +
-        "(e)-[:REL {label: 0.0}]->(k), " +
-        "(j)-[:REL {label: 1.0}]->(l), " +
-        "(j)-[:REL {label: 0.0}]->(a), " +
-        "(m)-[:REL {label: 1.0}]->(o), " +
-        "(m)-[:REL {label: 0.0}]->(b), ";
+        "(k)-[:REL {label: 0.0}]->(l), " +
+        "(m)-[:REL {label: 0.0}]->(n), " +
+        "(n)-[:REL {label: 0.0}]->(o) ";
 
     @Inject
     Graph trainGraph;
-    @Inject
-    Graph validationGraph;
 
     static Stream<Arguments> paramsForEstimationsWithSplitConfigs() {
         return Stream.of(
@@ -172,9 +154,9 @@ class LinkPredictionTrainTest {
         assertThat(actualModel.trainConfig()).isEqualTo(trainConfig);
         // length of the linkFeatures
         assertThat(actualModel.data())
-            .asInstanceOf(InstanceOfAssertFactories.type(LinkLogisticRegressionData.class))
+            .asInstanceOf(InstanceOfAssertFactories.type(LogisticRegressionTrainer.LogisticRegressionData.class))
             .extracting(llrData -> llrData.weights().data().totalSize())
-            .isEqualTo(7);
+            .isEqualTo(12);
 
         var customInfo = actualModel.customInfo();
         assertThat(result.modelSelectionStatistics().validationStats().get(LinkMetric.AUCPR))
@@ -184,7 +166,7 @@ class LinkPredictionTrainTest {
 
         assertThat(customInfo.bestParameters())
             .usingRecursiveComparison()
-            .isEqualTo(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1)));
+            .isEqualTo(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
     }
 
     @Test
@@ -333,7 +315,6 @@ class LinkPredictionTrainTest {
             .isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
     }
 
-
     private LinkPredictionPipeline linkPredictionPipeline() {
         LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
 
@@ -345,11 +326,11 @@ class LinkPredictionTrainTest {
             .build());
 
         pipeline.setTrainingParameterSpace(List.of(
-            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
-            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))
+            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)),
+            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 100, "patience", 5, "tolerance", 0.00001))
         ));
 
-        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
         return pipeline;
     }
 
@@ -369,7 +350,7 @@ class LinkPredictionTrainTest {
     ) {
         var linkPredictionTrain = new LinkPredictionTrain(
             trainGraph,
-            validationGraph,
+            trainGraph,
             linkPredictionPipeline(),
             trainConfig,
             ProgressTracker.NULL_TRACKER
