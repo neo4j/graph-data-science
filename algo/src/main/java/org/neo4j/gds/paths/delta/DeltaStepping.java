@@ -22,8 +22,8 @@ package org.neo4j.gds.paths.delta;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.carrotsearch.hppc.procedures.LongProcedure;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -123,7 +123,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
             frontierIndex.set(0);
         }
 
-        return new DeltaSteppingResult(iteration, distances);
+        return ImmutableDeltaSteppingResult.of(iteration, distances);
     }
 
     @Override
@@ -264,33 +264,11 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
         }
     }
 
-    public static class DeltaSteppingResult {
-        private final int iterations;
-        private final HugeAtomicDoubleArray distances;
+    @ValueClass
+    public interface DeltaSteppingResult {
 
-        DeltaSteppingResult(int iterations, HugeAtomicDoubleArray distances) {
-            this.iterations = iterations;
-            this.distances = distances;
-        }
+        int iterations();
 
-        public int iterations() {
-            return this.iterations;
-        }
-
-        public double distance(long nodeId) {
-            return distances.get(nodeId);
-        }
-
-        @TestOnly
-        public long numberOfTargetNodes() {
-            long numberOfTargetNodes = 0;
-            for (long i = 0; i < distances.size(); i++) {
-                if (distances.get(i) != DIST_INF) {
-                    numberOfTargetNodes++;
-                }
-            }
-
-            return numberOfTargetNodes;
-        }
+        HugeAtomicDoubleArray distances();
     }
 }

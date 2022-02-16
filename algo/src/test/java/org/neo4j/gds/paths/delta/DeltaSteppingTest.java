@@ -207,9 +207,9 @@ final class DeltaSteppingTest {
     ) {
         for (long i = 0; i < graph.nodeCount(); i++) {
             if (expected.containsKey(i)) {
-                assertThat(actual.distance(i)).isEqualTo(expected.get(i));
+                assertThat(actual.distances().get(i)).isEqualTo(expected.get(i));
             } else {
-                assertThat(actual.distance(i)).isEqualTo(Double.MAX_VALUE);
+                assertThat(actual.distances().get(i)).isEqualTo(Double.MAX_VALUE);
             }
         }
     }
