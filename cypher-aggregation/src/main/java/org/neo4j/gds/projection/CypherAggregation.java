@@ -20,7 +20,6 @@
 package org.neo4j.gds.projection;
 
 import com.carrotsearch.hppc.DoubleArrayList;
-import org.eclipse.collections.impl.EmptyIterator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.BaseProc;
@@ -51,7 +50,6 @@ import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.procedure.Description;
@@ -69,7 +67,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
-import java.util.stream.StreamSupport;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CypherAggregation extends BaseProc {
 
@@ -127,8 +126,7 @@ public final class CypherAggregation extends BaseProc {
             @Name("graphName") String graphName,
             @Name("sourceNode") Node sourceNode,
             @Nullable @Name(value = "targetNode", defaultValue = "null") Node targetNode,
-            @Nullable @Name(value = "sourceNodeProperties", defaultValue = "null") Map<String, Object> sourceNodeProperties,
-            @Nullable @Name(value = "targetNodeProperties", defaultValue = "null") Map<String, Object> targetNodeProperties,
+            @Nullable @Name(value = "nodesConfig", defaultValue = "null") Map<String, Object> nodesConfig,
             @Nullable @Name(value = "relationshipProperties", defaultValue = "null") Map<String, Object> relationshipProperties
         ) {
 
@@ -137,8 +135,48 @@ public final class CypherAggregation extends BaseProc {
                 this.graphName = graphName;
             }
 
-            var sourceNodePropertyValues = objectsToValues(sourceNodeProperties);
-            var targetNodePropertyValues = objectsToValues(targetNodeProperties);
+            Map<String, Value> sourceNodePropertyValues = null;
+            Map<String, Value> targetNodePropertyValues = null;
+            NodeLabel[] sourceNodeLabels = null;
+            NodeLabel[] targetNodeLabels = null;
+
+            if (nodesConfig != null) {
+                var sourceNodeProperties = nodesConfig.get("sourceNodeProperties");
+                if (sourceNodeProperties == null || sourceNodeProperties instanceof Map) {
+                    sourceNodePropertyValues = objectsToValues((Map<String, Object>) sourceNodeProperties);
+                } else {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Expected a map for key %s, but got %s.",
+                        "sourceNodeProperties",
+                        sourceNodeProperties.getClass().getSimpleName()
+                    ));
+                }
+
+                var targetNodeProperties = nodesConfig.get("targetNodeProperties");
+                if (targetNodeProperties == null || targetNodeProperties instanceof Map) {
+                    targetNodePropertyValues = objectsToValues((Map<String, Object>) targetNodeProperties);
+                } else {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Expected a map for key %s, but got %s.",
+                        "targetNodeProperties",
+                        targetNodeProperties.getClass().getSimpleName()
+                    ));
+                }
+
+                var sourceNodeLabelsEntry = nodesConfig.get("sourceNodeLabels");
+                if (sourceNodeLabelsEntry instanceof List) {
+                    sourceNodeLabels = ((List<String>) sourceNodeLabelsEntry).stream().map(NodeLabel::new).toArray(NodeLabel[]::new);
+                } else {
+                    sourceNodeLabels = new NodeLabel[]{ NodeLabel.ALL_NODES };
+                }
+
+                var targetNodeLabelsEntry = nodesConfig.get("targetNodeLabels");
+                if (targetNodeLabelsEntry instanceof List) {
+                    targetNodeLabels = ((List<String>) targetNodeLabelsEntry).stream().map(NodeLabel::new).toArray(NodeLabel[]::new);
+                } else {
+                    targetNodeLabels = new NodeLabel[]{ NodeLabel.ALL_NODES };
+                }
+            }
 
             if (this.idMapBuilder == null) {
                 this.idMapBuilder = new LazyIdMapBuilder(this.allocationTracker);
@@ -148,10 +186,10 @@ public final class CypherAggregation extends BaseProc {
                 this.relImporter = newRelImporter(relationshipProperties);
             }
 
-            var sourceNodeId = loadNode(sourceNode, sourceNodePropertyValues);
+            var sourceNodeId = loadNode(sourceNode, sourceNodeLabels, sourceNodePropertyValues);
 
             if (targetNode != null) {
-                var targetNodeId = loadNode(targetNode, targetNodePropertyValues);
+                var targetNodeId = loadNode(targetNode, targetNodeLabels, targetNodePropertyValues);
 
                 if (relationshipProperties != null) {
                     if (relationshipProperties.size() == 1) {
@@ -210,10 +248,10 @@ public final class CypherAggregation extends BaseProc {
             return values;
         }
 
-        private long loadNode(Node node, @Nullable Map<String, Value> nodeProperties) {
+        private long loadNode(Node node, @Nullable NodeLabel [] nodeLabels, @Nullable Map<String, Value> nodeProperties) {
             return (nodeProperties == null)
-                ? this.idMapBuilder.addNode(node.getId(), node.getLabels())
-                : this.idMapBuilder.addNodeWithProperties(node.getId(), nodeProperties, node.getLabels());
+                ? this.idMapBuilder.addNode(node.getId(), nodeLabels)
+                : this.idMapBuilder.addNodeWithProperties(node.getId(), nodeProperties, nodeLabels);
         }
 
         private double loadOneRelationshipProperty(@NotNull Map<String, Object> relationshipProperties) {
@@ -404,19 +442,15 @@ final class LazyIdMapBuilder implements PartialIdMap {
             .build();
     }
 
-    long addNode(long nodeId, Iterable<Label> labels) {
+    long addNode(long nodeId, @Nullable NodeLabel[] labels) {
         return addNodeWithProperties(nodeId, Map.of(), labels);
     }
 
     long addNodeWithProperties(
         long nodeId,
         Map<String, Value> properties,
-        Iterable<Label> labels
+        @Nullable NodeLabel[] nodeLabels
     ) {
-        var nodeLabels = StreamSupport.stream(labels.spliterator(), false)
-            .map(Label::name)
-            .map(NodeLabel::of)
-            .toArray(NodeLabel[]::new);
 
         if (properties.isEmpty()) {
             this.nodesBuilder.addNode(nodeId, nodeLabels);
@@ -428,7 +462,7 @@ final class LazyIdMapBuilder implements PartialIdMap {
 
     @Override
     public long toMappedNodeId(long nodeId) {
-        return this.addNode(nodeId, EmptyIterator::getInstance);
+        return this.addNode(nodeId, null);
     }
 
     @Override

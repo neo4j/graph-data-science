@@ -161,7 +161,7 @@ class CypherAggregationTest extends BaseProcTest {
     @Test
     void testNodeLabels() {
         runQuery("MATCH (s) WHERE s:A or s:B " +
-                 "RETURN gds.alpha.graph('g', s)");
+                 "RETURN gds.alpha.graph('g', s, null, { sourceNodeLabels: labels(s) })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A", "B");
@@ -170,7 +170,7 @@ class CypherAggregationTest extends BaseProcTest {
     @Test
     void testEmptyNodeLabel() {
         runQuery("MATCH (s)" +
-                 "RETURN gds.alpha.graph('g', s)");
+                 "RETURN gds.alpha.graph('g', s, null, { sourceNodeLabels: labels(s) })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
         assertThat(graphStore.nodeCount()).isEqualTo(16);
@@ -180,7 +180,7 @@ class CypherAggregationTest extends BaseProcTest {
     @Test
     void testPropertiesOnEmptyNodes() {
         runQuery("MATCH (s)" +
-                 "RETURN gds.alpha.graph('g', s, null, s { .foo })");
+                 "RETURN gds.alpha.graph('g', s, null, { sourceNodeProperties: s { .foo } })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
         var graph = graphStore.getUnion();
@@ -194,14 +194,23 @@ class CypherAggregationTest extends BaseProcTest {
         assertThat(nonDefaultProperties).containsExactly(42);
     }
 
+//    @Test
+//    void foo() {
+//        "MATCH (s)" +
+//        "RETURN gds.alpha.graph('g', s, null, {" +
+//        "   sourceNodeProperties: s { .prop1 }," +
+//        "   sourceNodeLabels: [true|false|List of String]" +
+//        "})";
+//    }
+
     @Test
     void testNodeProperties() {
         runQuery(
             "MATCH (s:B)-[:REL]->(t:B) RETURN " +
-            "gds.alpha.graph('g', s, t" +
-            ", s {.prop1, another_prop: coalesce(s.prop2, 84.0), doubles: coalesce(s.prop3, [13.37, 42.0]), longs: coalesce(s.prop4, [42]) }" +
-            ", t {.prop1, another_prop: coalesce(t.prop2, 84.0), doubles: coalesce(t.prop3, [13.37, 42.0]), longs: coalesce(t.prop4, [42]) }" +
-            ")");
+            "gds.alpha.graph('g', s, t, {" +
+            "   sourceNodeProperties: s {.prop1, another_prop: coalesce(s.prop2, 84.0), doubles: coalesce(s.prop3, [13.37, 42.0]), longs: coalesce(s.prop4, [42]) }," +
+            "   targetNodeProperties: t {.prop1, another_prop: coalesce(t.prop2, 84.0), doubles: coalesce(t.prop3, [13.37, 42.0]), longs: coalesce(t.prop4, [42]) }" +
+            "})");
 
         assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
         var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
@@ -255,8 +264,8 @@ class CypherAggregationTest extends BaseProcTest {
     void testSingleRelationshipProperties() {
         runQuery(
             "MATCH (s:B)-[r:REL]->(t:B) RETURN " +
-            "gds.alpha.graph('g', s, t, null, null" +
-            ", r {.prop}" +
+            "gds.alpha.graph('g', s, t, null," +
+            "   r {.prop}" +
             ")");
 
         assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
@@ -292,8 +301,8 @@ class CypherAggregationTest extends BaseProcTest {
     void testMultipleRelationshipProperties() {
         runQuery(
             "MATCH (s:B)-[r:REL]->(t:B) RETURN " +
-            "gds.alpha.graph('g', s, t, null, null" +
-            ", r {.prop, prop_by_another_name: r.prop}" +
+            "gds.alpha.graph('g', s, t, null, " +
+            "   r {.prop, prop_by_another_name: r.prop}" +
             ")");
 
         assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
@@ -338,8 +347,8 @@ class CypherAggregationTest extends BaseProcTest {
         runQuery(
             "MATCH (s:B)-[r:REL]->(t:B) " +
             "WITH s, t, avg(r.prop) AS average, sum(r.prop) AS sum, max(r.prop) AS max, min(r.prop) AS min " +
-            "RETURN gds.alpha.graph('g', s, t, null, null" +
-            ", {average: average, sum: sum, max: max, min: min}" +
+            "RETURN gds.alpha.graph('g', s, t, null," +
+            "   {average: average, sum: sum, max: max, min: min}" +
             ")");
 
         assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
