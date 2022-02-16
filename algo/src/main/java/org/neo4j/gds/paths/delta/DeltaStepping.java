@@ -33,6 +33,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.ImmutablePathResult;
@@ -162,7 +163,7 @@ public class DeltaStepping extends Algorithm<DijkstraResult> {
             frontierIndex.set(0);
         }
 
-        return new DijkstraResult(DeltaSteppingResult.of(iteration, distances).pathResults(startNode));
+        return new DijkstraResult(DeltaSteppingResult.of(distances).pathResults(startNode, concurrency));
     }
 
     @Override
@@ -312,36 +313,46 @@ public class DeltaStepping extends Algorithm<DijkstraResult> {
     @ValueClass
     public interface DeltaSteppingResult {
 
-        int iterations();
-
         HugeAtomicDoubleArray distances();
 
         Optional<HugeAtomicLongArray> predecessors();
 
-        default Stream<PathResult> pathResults(long sourceNode) {
-            assert predecessors().isPresent();
-
-            var pathResultBuilder = ImmutablePathResult.builder().sourceNode(sourceNode);
-            var pathIndex = new MutableLong(0);
-            var predecessors = predecessors().get();
-
-            return LongStream.range(0, predecessors.size())
-                .filter(target -> predecessors.get(target) != NO_PREDECESSOR)
-                .mapToObj(targetNode -> pathResult(
-                    pathResultBuilder,
-                    pathIndex.getAndIncrement(),
-                    sourceNode,
-                    targetNode,
-                    distances(),
-                    predecessors
-                ));
+        static DeltaSteppingResult of(TentativeDistances distances) {
+            return ImmutableDeltaSteppingResult.of(distances.distances(), distances.predecessors());
         }
 
-        static DeltaSteppingResult of(int iterations, TentativeDistances tentativeDistances) {
-            return ImmutableDeltaSteppingResult.of(
-                iterations,
-                tentativeDistances.distances(),
-                tentativeDistances.predecessors()
+        default Stream<PathResult> pathResults(long sourceNode, int concurrency) {
+            assert predecessors().isPresent();
+
+            var pathIndex = new AtomicLong(0L);
+            var predecessors = predecessors().get();
+
+            var partitions = PartitionUtils.rangePartition(
+                concurrency,
+                predecessors.size(),
+                partition -> partition,
+                Optional.empty()
+            );
+
+            return ParallelUtil.parallelStream(
+                partitions.stream(),
+                concurrency,
+                parallelStream -> parallelStream.flatMap(partition -> {
+                    var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
+                    var pathResultBuilder = ImmutablePathResult.builder().sourceNode(sourceNode);
+
+                    return LongStream
+                        .range(partition.startNode(), partition.startNode() + partition.nodeCount())
+                        .filter(target -> predecessors.get(target) != NO_PREDECESSOR)
+                        .mapToObj(targetNode -> pathResult(
+                            pathResultBuilder,
+                            localPathIndex.getAndIncrement(),
+                            sourceNode,
+                            targetNode,
+                            distances(),
+                            predecessors
+                        ));
+                })
             );
         }
     }
