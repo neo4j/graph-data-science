@@ -20,19 +20,12 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.ElementProjection;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class SplitRelationships extends Algorithm<SplitResult> {
 
@@ -57,7 +50,7 @@ public class SplitRelationships extends Algorithm<SplitResult> {
 
         return MemoryEstimations.builder("Relationship splitter")
             .perGraphDimension("Selected relationships", (graphDimensions, threads) -> {
-                var positiveRelCount = estimatedRelCount(graphDimensions, configuration.relationshipTypes()) * (1 - configuration.holdoutFraction());
+                var positiveRelCount = graphDimensions.estimatedRelCount(configuration.relationshipTypes()) * (1 - configuration.holdoutFraction());
                 var negativeRelCount = positiveRelCount * configuration.negativeSamplingRatio();
 
                 var selectedRelCount = positiveRelCount + negativeRelCount;
@@ -65,25 +58,10 @@ public class SplitRelationships extends Algorithm<SplitResult> {
                 return MemoryRange.of((long) selectedRelCount * pessimisticSizePerRel);
             })
             .perGraphDimension("Remaining relationships", (graphDimensions, threads) -> {
-                var remainingRelCount = estimatedRelCount(graphDimensions, configuration.relationshipTypes()) * configuration.holdoutFraction();
+                var remainingRelCount = graphDimensions.estimatedRelCount(configuration.relationshipTypes()) * configuration.holdoutFraction();
                 return MemoryRange.of((long) (remainingRelCount * pessimisticSizePerRel));
             })
             .build();
-    }
-
-    private static long estimatedRelCount(GraphDimensions graphDim, List<String> relationshipTypeNames) {
-        if (!(relationshipTypeNames.contains(ElementProjection.PROJECT_ALL))) {
-            Map<RelationshipType, Long> relCounts = graphDim.relationshipCounts();
-            List<RelationshipType> relationshipTypes = relationshipTypeNames.stream()
-                .map(RelationshipType::of)
-                .collect(Collectors.toList());
-
-            if (relCounts.keySet().containsAll(relationshipTypes)) {
-                return relationshipTypes.stream().mapToLong(relCounts::get).sum();
-            }
-        }
-
-        return graphDim.relCountUpperBound();
     }
 
     @Override
