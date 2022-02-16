@@ -156,15 +156,23 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     private Trainer.Classifier trainModel(
         FeaturesAndLabels featureAndLabels,
         ReadOnlyHugeLongArray trainSet,
-        LinkLogisticRegressionTrainConfig modelConfig
+        LinkLogisticRegressionTrainConfig modelConfig,
+        ProgressTracker customProgressTracker
     ) {
         return new LogisticRegressionTrainer(
             trainSet,
             trainConfig.concurrency(),
             modelConfig,
             terminationFlag,
-            progressTracker
+            customProgressTracker
         ).train(featureAndLabels.features(), featureAndLabels.labels());
+    }
+
+    private Trainer.Classifier trainModel(
+        FeaturesAndLabels featureAndLabels,
+        ReadOnlyHugeLongArray trainSet,
+        LinkLogisticRegressionTrainConfig modelConfig) {
+        return trainModel(featureAndLabels, trainSet, modelConfig, progressTracker);
     }
 
     private LinkPredictionTrain.ModelSelectResult modelSelect(
@@ -186,7 +194,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 var trainSet = relSplit.trainSet();
                 var validationSet = relSplit.testSet();
                 // the below calls intentionally suppress progress logging of individual models
-                var classifier = trainModel(trainData, trainRelationshipIds, modelParams);
+                var classifier = trainModel(trainData, ReadOnlyHugeLongArray.of(trainSet), modelParams, ProgressTracker.NULL_TRACKER);
 
                 // evaluate each model candidate on the train and validation sets
                 computeTrainMetric(trainData, classifier, ReadOnlyHugeLongArray.of(trainSet), ProgressTracker.NULL_TRACKER)
