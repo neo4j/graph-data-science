@@ -85,12 +85,19 @@ class NodePropertyStepTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(
             db,
             TestProc.class,
-            proc -> step.execute(proc.executionContext(), GRAPH_NAME, List.of(NodeLabel.ALL_NODES), List.of(RelationshipType.ALL_RELATIONSHIPS))
+            proc -> step.execute(
+                proc.executionContext(),
+                GRAPH_NAME,
+                List.of(NodeLabel.ALL_NODES),
+                List.of(RelationshipType.ALL_RELATIONSHIPS)
+            )
         );
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), GRAPH_NAME).graphStore();
 
-        graphStore.nodeLabels().forEach(label -> assertThat(graphStore.nodePropertyKeys(label)).containsExactly(PROPERTY_NAME));
+        graphStore
+            .nodeLabels()
+            .forEach(label -> assertThat(graphStore.nodePropertyKeys(label)).containsExactly(PROPERTY_NAME));
     }
 
     @Test
@@ -99,11 +106,14 @@ class NodePropertyStepTest extends BaseProcTest {
             .findByName("gds.testProc.mutate", List.of())
             .orElseThrow();
 
-        var step = new NodePropertyStep(gdsCallableDefinition, Map.of("mutateProperty", PROPERTY_NAME, "throwOnEstimate", true));
+        var step = new NodePropertyStep(
+            gdsCallableDefinition,
+            Map.of("mutateProperty", PROPERTY_NAME, "throwOnEstimate", true)
+        );
 
         // verify exception is caught
         assertThat(step
-            .estimate(new OpenModelCatalog(), List.of(ElementProjection.PROJECT_ALL))
+            .estimate(new OpenModelCatalog(), List.of(ElementProjection.PROJECT_ALL), List.of(ElementProjection.PROJECT_ALL))
             .estimate(GraphDimensions.of(1), 4)
             .memoryUsage().max).isZero();
     }

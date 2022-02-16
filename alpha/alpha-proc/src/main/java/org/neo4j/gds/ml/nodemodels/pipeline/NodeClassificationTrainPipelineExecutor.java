@@ -74,7 +74,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         var nodePropertyStepEstimations = pipeline
             .nodePropertySteps()
             .stream()
-            .map(step -> step.estimate(modelCatalog, configuration.relationshipTypes()))
+            .map(step -> step.estimate(modelCatalog, configuration.nodeLabels(), configuration.relationshipTypes()))
             .collect(Collectors.toList());
 
         var trainingEstimation = MemoryEstimations

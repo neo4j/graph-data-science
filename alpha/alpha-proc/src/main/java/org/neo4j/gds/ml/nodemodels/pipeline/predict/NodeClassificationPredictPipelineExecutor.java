@@ -46,7 +46,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     NodeClassificationPredictPipelineBaseConfig,
     NodeClassificationPipeline,
     NodeClassificationResult
-> {
+    > {
     private static final int MIN_BATCH_SIZE = 100;
     private final NodeLogisticRegressionData modelData;
 
@@ -75,7 +75,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         var nodePropertyStepEstimations = pipeline
             .nodePropertySteps()
             .stream()
-            .map(step -> step.estimate(modelCatalog, configuration.relationshipTypes()))
+            .map(step -> step.estimate(modelCatalog, configuration.nodeLabels(), configuration.relationshipTypes()))
             .collect(Collectors.toList());
 
         var predictionEstimation = MemoryEstimations.builder().add(
@@ -109,7 +109,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
 
     @Override
     protected NodeClassificationResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
-        var graph =graphStore.getGraph(
+        var graph = graphStore.getGraph(
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore),
             Optional.empty()

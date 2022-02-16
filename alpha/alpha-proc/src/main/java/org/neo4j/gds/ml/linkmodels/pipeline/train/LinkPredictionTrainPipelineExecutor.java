@@ -75,14 +75,20 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
         var nodePropertyStepEstimations = pipeline
             .nodePropertySteps()
             .stream()
-            .map(step -> step.estimate(List.of(pipeline.splitConfig().featureInputRelationshipType())))
+            .map(step -> step.estimate(
+                configuration.nodeLabels(),
+                List.of(pipeline.splitConfig().featureInputRelationshipType())
+            ))
             .collect(Collectors.toList());
 
         // NOTE: Theoretically we clean the feature dataset after the node property steps have run, but we never account for this
         // in the memory estimation.
 
         // NOTE: This has the drawback, that we disregard the sizes of the mutate-properties, but it's a better approximation than adding all together.
-        MemoryEstimation maxOverNodePropertySteps = MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations);
+        MemoryEstimation maxOverNodePropertySteps = MemoryEstimations.maxEstimation(
+            "NodeProperty Steps",
+            nodePropertyStepEstimations
+        );
 
         MemoryEstimation trainingEstimation = MemoryEstimations
             .builder()
