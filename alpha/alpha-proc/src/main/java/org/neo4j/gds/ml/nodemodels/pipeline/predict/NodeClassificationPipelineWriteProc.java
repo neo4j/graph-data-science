@@ -36,7 +36,6 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -61,8 +60,6 @@ public class NodeClassificationPipelineWriteProc
     NodeClassificationPipelineWriteProc.WriteResult,
     NodeClassificationPredictPipelineWriteConfig>
 {
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.write", mode = Mode.WRITE)
     @Description(PREDICT_DESCRIPTION)

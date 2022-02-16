@@ -46,7 +46,6 @@ import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.gds.results.StandardMutateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -63,9 +62,6 @@ import static org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelin
 @GdsCallable(name = "gds.alpha.ml.pipeline.linkPrediction.predict.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPredictPipelineMutateConfig> {
     static final String DESCRIPTION = "Predicts relationships for all non-connected node pairs based on a previously trained Link prediction pipeline.";
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.mutate", mode = Mode.READ)
     @Description(DESCRIPTION)

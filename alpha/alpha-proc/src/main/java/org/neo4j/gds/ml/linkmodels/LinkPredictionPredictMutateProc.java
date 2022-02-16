@@ -40,7 +40,6 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -57,9 +56,6 @@ import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.ml.linkPrediction.predict.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateProc.MutateResult, LinkPredictionPredictMutateConfig> {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.mutate", mode = Mode.READ)
     @Description(DESCRIPTION)

@@ -35,7 +35,6 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -50,9 +49,6 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.alpha.ml.nodeClassification.predict.mutate", description = "Predicts classes for all nodes based on a previously trained model", executionMode = MUTATE_NODE_PROPERTY)
 public class NodeClassificationPredictMutateProc extends MutatePropertyProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationMutateConfig> {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.mutate", mode = Mode.READ)
     @Description("Predicts classes for all nodes based on a previously trained model")

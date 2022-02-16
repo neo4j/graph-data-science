@@ -20,8 +20,6 @@
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -32,9 +30,6 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class NodeClassificationPipelineAddStepProcs extends BaseProc {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.addNodeProperty", mode = READ)
     @Description("Add a node property step to an existing node classification pipeline.")

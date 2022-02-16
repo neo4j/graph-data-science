@@ -21,10 +21,8 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfigImpl;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -37,9 +35,6 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPipelineConfigureParamsProc extends BaseProc {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.configureParams", mode = READ)
     @Description("Configures the parameters of the link prediction train pipeline.")

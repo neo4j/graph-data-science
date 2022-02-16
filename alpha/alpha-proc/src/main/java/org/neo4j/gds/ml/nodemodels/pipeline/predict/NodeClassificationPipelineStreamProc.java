@@ -33,7 +33,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationStreamResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -60,9 +59,6 @@ public class NodeClassificationPipelineStreamProc
     NodeClassificationStreamResult,
     NodeClassificationPredictPipelineStreamConfig>
 {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)

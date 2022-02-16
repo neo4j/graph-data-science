@@ -31,7 +31,6 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -46,9 +45,6 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.alpha.ml.linkPrediction.predict.write", description = DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsProc<LinkPredictionPredict, ExhaustiveLinkPredictionResult, StandardWriteRelationshipsResult, LinkPredictionPredictWriteConfig> {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.write", mode = WRITE)
     @Description(DESCRIPTION)

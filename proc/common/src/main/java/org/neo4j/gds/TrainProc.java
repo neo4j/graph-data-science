@@ -30,7 +30,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.model.ModelConfig;
-import org.neo4j.procedure.Context;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,8 +45,6 @@ public abstract class TrainProc<
     TRAIN_CONFIG extends AlgoBaseConfig & ModelConfig,
     PROC_RESULT
     > extends AlgoBaseProc<ALGO, ALGO_RESULT, TRAIN_CONFIG, PROC_RESULT> {
-    @Context
-    public ModelCatalog modelCatalog;
 
     protected abstract String modelType();
 

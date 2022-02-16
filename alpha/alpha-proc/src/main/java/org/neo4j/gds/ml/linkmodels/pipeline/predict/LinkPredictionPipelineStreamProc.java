@@ -31,7 +31,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -45,9 +44,6 @@ import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompani
 
 @GdsCallable(name = "gds.alpha.ml.pipeline.linkPrediction.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
 public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig, LinkPredictionPipelineStreamProc.Result> {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)

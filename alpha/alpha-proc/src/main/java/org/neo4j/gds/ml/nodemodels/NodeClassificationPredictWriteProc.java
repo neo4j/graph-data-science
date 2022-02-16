@@ -34,7 +34,6 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -50,9 +49,6 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.alpha.ml.nodeClassification.predict.write", description = "Predicts classes for all nodes based on a previously trained model", executionMode = WRITE_NODE_PROPERTY)
 public class NodeClassificationPredictWriteProc extends WriteProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteProc.Result, NodeClassificationPredictWriteConfig> {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.write", mode = WRITE)
     @Description("Predicts classes for all nodes based on a previously trained model")

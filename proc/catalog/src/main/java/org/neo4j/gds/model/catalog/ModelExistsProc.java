@@ -20,8 +20,6 @@
 package org.neo4j.gds.model.catalog;
 
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -34,9 +32,6 @@ import static org.neo4j.procedure.Mode.READ;
 public class ModelExistsProc extends ModelCatalogProc {
 
     private static final String DESCRIPTION = "Checks if a given model exists in the model catalog.";
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.beta.model.exists", mode = READ)
     @Description(DESCRIPTION)
