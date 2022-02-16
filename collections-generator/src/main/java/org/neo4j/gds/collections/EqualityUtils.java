@@ -72,12 +72,12 @@ public final class EqualityUtils {
         entry(TypeName.LONG, "%s == %s"),
         entry(TypeName.FLOAT, "Float.compare(%s, %s) == 0"),
         entry(TypeName.DOUBLE, "Double.compare(%s, %s) == 0"),
-        entry(ArrayTypeName.of(TypeName.BYTE), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.SHORT), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.INT), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.LONG), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.FLOAT), "Arrays.equals(%1$s, %2$s)"),
-        entry(ArrayTypeName.of(TypeName.DOUBLE), "Arrays.equals(%1$s, %2$s)")
+        entry(ArrayTypeName.of(TypeName.BYTE), "%1$s != null && Arrays.equals(%1$s, %2$s)"),
+        entry(ArrayTypeName.of(TypeName.SHORT), "%1$s != null && Arrays.equals(%1$s, %2$s)"),
+        entry(ArrayTypeName.of(TypeName.INT), "%1$s != null && Arrays.equals(%1$s, %2$s)"),
+        entry(ArrayTypeName.of(TypeName.LONG), "%1$s != null && Arrays.equals(%1$s, %2$s)"),
+        entry(ArrayTypeName.of(TypeName.FLOAT), "%1$s != null && Arrays.equals(%1$s, %2$s)"),
+        entry(ArrayTypeName.of(TypeName.DOUBLE), "%1$s != null && Arrays.equals(%1$s, %2$s)")
     );
 
     private static final Map<TypeName, String> NOT_EQUAL_PREDICATES = Map.ofEntries(

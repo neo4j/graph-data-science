@@ -35,8 +35,6 @@ public @interface HugeSparseList {
 
     /**
      * The type which is provided to the forAll method.
-     *
-     * @return
      */
     Class<?> forAllConsumerType();
 
