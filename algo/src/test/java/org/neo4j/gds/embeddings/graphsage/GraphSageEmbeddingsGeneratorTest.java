@@ -150,7 +150,7 @@ class GraphSageEmbeddingsGeneratorTest {
             "(c)-->(d), " +
             "(d)-->(b)"
         );
-        CSRGraphStore graphStore = factory.build();
+        CSRGraphStore graphStore = factory.build().graphStore();
         Graph filteredGraph = graphStore.getGraph("N", RelationshipType.ALL_RELATIONSHIPS.name, Optional.empty());
 
         var config = ImmutableGraphSageTrainConfig.builder()

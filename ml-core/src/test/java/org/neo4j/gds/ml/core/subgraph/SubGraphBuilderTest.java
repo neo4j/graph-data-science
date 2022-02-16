@@ -217,7 +217,7 @@ class SubGraphBuilderTest {
     void shouldHandleNodeFilteredGraphs() {
         GdlFactory factory = GdlFactory.of("(a:IGNORE), (b:N), (c:N), (d:N), (a)-->(d), (b)-->(c), (c)-->(d), (d)-->(b)");
         IdFunction idFunction = factory::nodeId;
-        CSRGraphStore graphStore = factory.build();
+        CSRGraphStore graphStore = factory.build().graphStore();
         Graph filteredGraph = graphStore.getGraph("N", RelationshipType.ALL_RELATIONSHIPS.name, Optional.empty());
 
         long[] batch = {
@@ -227,9 +227,8 @@ class SubGraphBuilderTest {
         var subgraph = SubGraph.buildSubGraph(batch, ALL_NEIGBHORS, filteredGraph);
 
         // b, c, d
-        assertThat(subgraph.nodeCount()).isEqualTo(filteredGraph.nodeCount());
-
         assertThat(Arrays.stream(subgraph.originalNodeIds()))
+            .hasSize(Math.toIntExact(filteredGraph.nodeCount()))
             .allMatch(nodeId -> nodeId < filteredGraph.nodeCount());
     }
 }
