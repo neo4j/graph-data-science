@@ -133,7 +133,7 @@ class KnnFactoryTest {
         return ImmutableKnnBaseConfig.builder()
             .nodeProperties(List.of("knn"))
             .initialSampler(initialSampler)
-            .similarityThreshold(0.8)
+            .similarityCutoff(0.8)
             .build();
     }
 

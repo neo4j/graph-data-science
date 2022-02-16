@@ -135,9 +135,9 @@ include::specific-configuration.adoc[]
 | Name                          | Type      | Description
 | preProcessingMillis           | Integer   | Milliseconds for preprocessing the data.
 | computeMillis                 | Integer   | Milliseconds for running the algorithm.
-| nodesCompared                 | Integer   | The number of nodes compared.
 | postProcessingMillis          | Integer   | Milliseconds for computing component count and distribution statistics.
-| similarityPairs               | Integer   | The number of pairs of similar nodes computed.
+| nodesCompared                 | Integer   | The number of nodes for which similarity was computed.
+| similarityPairs               | Integer   | The number of similarities in the result.
 | similarityDistribution        | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of the computed similarity results.
 | configuration                 | Map       | The configuration used for running the algorithm.
 |===
@@ -173,12 +173,12 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                   | Type    | Description
-| nodesCompared          | Integer | The number of nodes compared.
-| relationshipsWritten   | Integer | The number of relationships created.
 | preProcessingMillis    | Integer | Milliseconds for preprocessing the data.
 | computeMillis          | Integer | Milliseconds for running the algorithm.
 | mutateMillis           | Integer | Milliseconds for adding properties to the projected graph.
 | postProcessingMillis   | Integer | Milliseconds for computing percentiles.
+| nodesCompared          | Integer | The number of nodes for which similarity was computed.
+| relationshipsWritten   | Integer | The number of relationships created.
 | similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
@@ -214,12 +214,12 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                   | Type    | Description
-| nodesCompared          | Integer | The number of nodes compared.
-| relationshipsWritten   | Integer | The number of relationships created.
 | preProcessingMillis    | Integer | Milliseconds for preprocessing data.
 | computeMillis          | Integer | Milliseconds for running the algorithm.
 | writeMillis            | Integer | Milliseconds for writing result data back to Neo4j.
 | postProcessingMillis   | Integer | Milliseconds for computing percentiles.
+| nodesCompared          | Integer | The number of nodes for which similarity was computed.
+| relationshipsWritten   | Integer | The number of relationships created.
 | similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
 | configuration          | Map     | The configuration used for running the algorithm.
 |===

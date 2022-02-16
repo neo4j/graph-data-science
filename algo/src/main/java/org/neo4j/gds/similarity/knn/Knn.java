@@ -124,9 +124,9 @@ public class Knn extends Algorithm<Knn.Result> {
                     break;
                 }
             }
-            if (config.similarityThreshold() > 0) {
+            if (config.similarityCutoff() > 0) {
                 for (long i = 0; i < neighbors.size(); i++) {
-                    neighbors.get(i).filterHighSimilarityResults(config.similarityThreshold());
+                    neighbors.get(i).filterHighSimilarityResults(config.similarityCutoff());
                 }
             }
             this.progressTracker.endSubTask();
