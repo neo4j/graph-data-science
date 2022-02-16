@@ -72,17 +72,16 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
     public static MemoryEstimation estimate(LinkPredictionPipeline pipeline, LinkPredictionTrainConfig configuration) {
         var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.relationshipTypes());
 
-        // TODO Test-Complement only during estimation / train
-
         var nodePropertyStepEstimations = pipeline
             .nodePropertySteps()
             .stream()
             .map(step -> step.estimate(List.of(pipeline.splitConfig().featureInputRelationshipType())))
             .collect(Collectors.toList());
 
-        // TODO When is the feature-input split removed?
+        // NOTE: Theoretically we clean the feature dataset after the node property steps have run, but we never account for this
+        // in the memory estimation.
 
-        // this has the drawback, that we disregard the sizes of the mutate-properties, but it's a better approximation than adding all together
+        // NOTE: This has the drawback, that we disregard the sizes of the mutate-properties, but it's a better approximation than adding all together.
         MemoryEstimation maxOverNodePropertySteps = MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations);
 
         MemoryEstimation trainingEstimation = MemoryEstimations
@@ -90,8 +89,9 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
             .add("Train pipeline", LinkPredictionTrain.estimate(pipeline, configuration))
             .build();
 
-        // FIXME consider size of LinkPredictionTrainPipelineExecutor instance
-        return MemoryEstimations.maxEstimation("Pipeline execution", List.of(splitEstimations, maxOverNodePropertySteps, trainingEstimation));
+        return MemoryEstimations.builder(LinkPredictionTrainPipelineExecutor.class)
+            .max("Pipeline execution", List.of(splitEstimations, maxOverNodePropertySteps, trainingEstimation))
+            .build();
     }
 
     @Override
