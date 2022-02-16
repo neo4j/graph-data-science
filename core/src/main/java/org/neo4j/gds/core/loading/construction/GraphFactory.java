@@ -32,6 +32,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -209,7 +210,7 @@ public final class GraphFactory {
 
     @Builder.Factory
     static RelationshipsBuilder relationshipsBuilder(
-        IdMap nodes,
+        PartialIdMap nodes,
         Optional<Orientation> orientation,
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
@@ -250,13 +251,18 @@ public final class GraphFactory {
 
         int finalConcurrency = concurrency.orElse(1);
 
-        var importSizing = nodes.rootNodeCount() > 0
-            ? ImportSizing.of(finalConcurrency, nodes.rootNodeCount())
+        var maybeRootNodeCount = nodes.rootNodeCount();
+
+        var importSizing = maybeRootNodeCount.isPresent()
+            ? ImportSizing.of(finalConcurrency, maybeRootNodeCount.getAsLong())
             : ImportSizing.of(finalConcurrency);
 
         int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
-        if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
-            bufferSize = (int) nodes.rootNodeCount();
+        if (maybeRootNodeCount.isPresent()) {
+            var rootNodeCount = maybeRootNodeCount.getAsLong();
+            if (rootNodeCount > 0 && rootNodeCount < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
+                bufferSize = (int) rootNodeCount;
+            }
         }
 
         var importMetaData = ImmutableImportMetaData.builder()
@@ -270,7 +276,7 @@ public final class GraphFactory {
 
         var importerFactory = new SingleTypeRelationshipImporterBuilder()
             .importMetaData(importMetaData)
-            .nodeCountSupplier(nodes::rootNodeCount)
+            .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
             .importSizing(importSizing)
             .validateRelationships(validateRelationships.orElse(false))
             .allocationTracker(allocationTracker)

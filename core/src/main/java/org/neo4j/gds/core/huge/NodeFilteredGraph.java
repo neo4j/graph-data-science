@@ -43,6 +43,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
@@ -129,7 +130,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
-    public long rootNodeCount() {
+    public OptionalLong rootNodeCount() {
         return filteredIdMap.rootNodeCount();
     }
 

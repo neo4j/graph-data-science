@@ -27,7 +27,7 @@ import java.util.Set;
 /**
  * Bi-directional mapping between two id spaces.
  */
-public interface IdMap extends NodeIterator, BatchNodeIterable{
+public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
 
     /**
      * Defines the lower bound of mapped ids
@@ -39,13 +39,6 @@ public interface IdMap extends NodeIterator, BatchNodeIterable{
      * Defines the value for unmapped ids
      */
     long NOT_FOUND = -1;
-
-    /**
-     * Map original nodeId to inner nodeId
-     *
-     * @param nodeId must be smaller or equal to the id returned by {@link IdMap#highestNeoId}
-     */
-    long toMappedNodeId(long nodeId);
 
     /**
      * Map original nodeId to inner nodeId
@@ -82,17 +75,7 @@ public interface IdMap extends NodeIterator, BatchNodeIterable{
      */
     long nodeCount();
 
-    /**
-     * Number of mapped node ids in the root mapping.
-     * This is necessary for nested (filtered) id mappings.
-     */
-    long rootNodeCount();
-
     long highestNeoId();
-
-    default IdMap cloneIdMap() {
-        return this;
-    }
 
     Set<NodeLabel> nodeLabels(long nodeId);
 

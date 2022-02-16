@@ -181,7 +181,7 @@ class UnionGraphTest {
             Optional.empty()
         );
 
-        assertThat(unionGraph.rootNodeCount()).isEqualTo(graphStore.nodeCount());
+        assertThat(unionGraph.rootNodeCount().getAsLong()).isEqualTo(graphStore.nodeCount());
     }
 
 }

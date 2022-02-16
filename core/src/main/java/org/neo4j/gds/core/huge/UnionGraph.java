@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
@@ -75,7 +76,7 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public long rootNodeCount() {
+    public OptionalLong rootNodeCount() {
         return first.rootNodeCount();
     }
 
