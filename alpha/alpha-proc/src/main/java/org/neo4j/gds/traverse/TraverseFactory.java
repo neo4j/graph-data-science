@@ -25,6 +25,8 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.impl.traverse.Traverse;
 import org.neo4j.gds.impl.traverse.TraverseConfig;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -96,6 +98,12 @@ public class TraverseFactory<CONFIG extends TraverseConfig> extends GraphAlgorit
         return "Traverse";
     }
 
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.leaf(taskName(), graph.relationshipCount());
+    }
+    
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(Traverse.class);
