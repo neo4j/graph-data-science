@@ -33,22 +33,33 @@ public interface TentativeDistances {
     double DIST_INF = Double.MAX_VALUE;
     long NO_PREDECESSOR = Long.MAX_VALUE;
 
-    double get(long nodeId);
+    /**
+     * Returns the distance for the given node or {@link Double#MAX_VALUE} if not set.
+     */
+    double distance(long nodeId);
 
-    // not thread-safe
+    /**
+     * Returns the predecessor for the given node or {@link Long#MAX_VALUE} if not set.
+     */
+    long predecessor(long nodeId);
+
+    /**
+     * Sets the distance and the predecessor for the given node.
+     */
     void set(long nodeId, long predecessor, double distance);
 
-    double compareAndExchange(long nodeId, double currentDistance, double newDistance, long predecessor);
-
-    default long predecessor(long nodeId) {
-        return -1;
-    }
+    /**
+     * Atomically updates the distance and the predecessor for the given node.
+     *
+     * The method returns the witness value, which is the value we saw when
+     * attempting a store operation. If the witness value is the expected
+     * distance, the update for both, distance and predecessor, was successful.
+     */
+    double compareAndExchange(long nodeId, double expectedDistance, double newDistance, long predecessor);
 
     HugeAtomicDoubleArray distances();
 
-    default Optional<HugeAtomicLongArray> predecessors() {
-        return Optional.empty();
-    }
+    Optional<HugeAtomicLongArray> predecessors();
 
     static DistanceOnly distanceOnly(
         long size,
@@ -90,8 +101,13 @@ public interface TentativeDistances {
         public DistanceOnly(HugeAtomicDoubleArray distances) {this.distances = distances;}
 
         @Override
-        public double get(long nodeId) {
+        public double distance(long nodeId) {
             return distances.get(nodeId);
+        }
+
+        @Override
+        public long predecessor(long nodeId) {
+            return NO_PREDECESSOR;
         }
 
         @Override
@@ -100,13 +116,18 @@ public interface TentativeDistances {
         }
 
         @Override
-        public double compareAndExchange(long nodeId, double currentDistance, double newDistance, long predecessor) {
-            return distances.compareAndExchange(nodeId, currentDistance, newDistance);
+        public double compareAndExchange(long nodeId, double expectedDistance, double newDistance, long predecessor) {
+            return distances.compareAndExchange(nodeId, expectedDistance, newDistance);
         }
 
         @Override
         public HugeAtomicDoubleArray distances() {
             return distances;
+        }
+
+        @Override
+        public Optional<HugeAtomicLongArray> predecessors() {
+            return Optional.empty();
         }
     }
 
@@ -122,7 +143,7 @@ public interface TentativeDistances {
         }
 
         @Override
-        public double get(long nodeId) {
+        public double distance(long nodeId) {
             return distances.get(nodeId);
         }
 
@@ -148,19 +169,19 @@ public interface TentativeDistances {
         }
 
         @Override
-        public double compareAndExchange(long nodeId, double currentDistance, double newDistance, long predecessor) {
+        public double compareAndExchange(long nodeId, double expectedDistance, double newDistance, long predecessor) {
             long currentPredecessor = predecessors.get(nodeId);
 
             // locked by another thread
             if (currentPredecessor < 0) {
-                return currentPredecessor;
+                return distances.get(nodeId);
             }
 
             var witness = predecessors.compareAndExchange(nodeId, currentPredecessor, -predecessor);
 
             // CAX failed
             if (witness != currentPredecessor) {
-                return witness;
+                return distances.get(nodeId);
             }
 
             // we have the look
@@ -170,7 +191,7 @@ public interface TentativeDistances {
             predecessors.set(nodeId, predecessor);
 
             // return previous distance to signal successful CAX
-            return currentDistance;
+            return expectedDistance;
         }
     }
 }

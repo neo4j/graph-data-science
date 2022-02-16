@@ -207,7 +207,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
 
                 for (long idx = offset; idx < limit; idx++) {
                     var nodeId = frontier.get(idx);
-                    if (distances.get(nodeId) >= delta * binIndex) {
+                    if (distances.distance(nodeId) >= delta * binIndex) {
                         relaxNode(nodeId);
                     }
                 }
@@ -227,8 +227,8 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
 
         private void relaxNode(long nodeId) {
             graph.forEachRelationship(nodeId, 1.0, (sourceNodeId, targetNodeId, weight) -> {
-                var oldDist = distances.get(targetNodeId);
-                var newDist = distances.get(sourceNodeId) + weight;
+                var oldDist = distances.distance(targetNodeId);
+                var newDist = distances.distance(sourceNodeId) + weight;
 
                 while (Double.compare(newDist, oldDist) < 0) {
                     var witness = distances.compareAndExchange(targetNodeId, oldDist, newDist, sourceNodeId);
