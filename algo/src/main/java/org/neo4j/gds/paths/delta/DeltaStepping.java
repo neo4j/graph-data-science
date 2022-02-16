@@ -228,7 +228,9 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
                 var newDist = distances.get(sourceNodeId) + weight;
 
                 while (Double.compare(newDist, oldDist) < 0) {
-                    if (distances.compareAndSet(targetNodeId, oldDist, newDist)) {
+                    var witness = distances.compareAndExchange(targetNodeId, oldDist, newDist);
+                    
+                    if (Double.compare(witness, oldDist) == 0) {
                         int destBin = (int) (newDist / delta);
 
                         if (destBin >= localBins.length) {
@@ -241,8 +243,8 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
                         this.localBins[destBin].add(targetNodeId);
                         break;
                     }
-                    // CAS failed, retry
-                    oldDist = distances.get(targetNodeId);
+                    // CAX failed, retry
+                    oldDist = witness;
                 }
 
                 return true;
