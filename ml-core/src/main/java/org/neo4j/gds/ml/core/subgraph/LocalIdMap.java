@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -72,5 +73,13 @@ public class LocalIdMap {
     public int size() {
         assert originalIds.size() == originalToInternalIdMap.size();
         return originalIds.size();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LocalIdMap that = (LocalIdMap) o;
+        return Arrays.equals(originalIds(), that.originalIds());
     }
 }

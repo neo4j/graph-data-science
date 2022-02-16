@@ -35,11 +35,12 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcs;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer.LogisticRegressionData;
 import org.neo4j.gds.model.catalog.ModelDropProc;
 
 import java.util.List;
@@ -292,7 +293,8 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
 
-        assertThat(data1).usingRecursiveComparison().isEqualTo(modelData("trainedModel6"));
+        assertThat(data1).usingRecursiveComparison().ignoringFieldsOfTypes(LocalIdMap.class).isEqualTo(modelData("trainedModel6"));
+        assertThat(data1.classIdMap()).isEqualTo(modelData("trainedModel6").classIdMap());
     }
 
     @Test
@@ -334,9 +336,9 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         );
     }
 
-    private LinkLogisticRegressionData modelData(String trainedModelName) {
+    private LogisticRegressionData modelData(String trainedModelName) {
         Stream<Model<?, ?, ?>> allModels = modelCatalog.getAllModels();
         Model<?, ?, ?> model = allModels.filter(m -> m.name().equals(trainedModelName)).findFirst().get();
-        return (LinkLogisticRegressionData) model.data();
+        return (LogisticRegressionData) model.data();
     }
 }
