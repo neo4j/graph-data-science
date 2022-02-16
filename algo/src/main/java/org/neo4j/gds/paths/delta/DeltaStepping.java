@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.paths.delta;
 
+import com.carrotsearch.hppc.DoubleArrayDeque;
+import com.carrotsearch.hppc.LongArrayDeque;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.carrotsearch.hppc.procedures.LongProcedure;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
@@ -31,6 +34,10 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
+import org.neo4j.gds.paths.ImmutablePathResult;
+import org.neo4j.gds.paths.PathResult;
+import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -38,8 +45,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
-public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> {
+import static org.neo4j.gds.paths.delta.TentativeDistances.NO_PREDECESSOR;
+
+public class DeltaStepping extends Algorithm<DijkstraResult> {
 
     private static final int NO_BIN = Integer.MAX_VALUE;
     private static final int BIN_SIZE_THRESHOLD = 1000;
@@ -54,11 +65,32 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
 
     private final ExecutorService executorService;
 
-    public DeltaStepping(
+    public static DeltaStepping of(
+        Graph graph,
+        AllShortestPathsBaseConfig config,
+        double delta,
+        ExecutorService executorService,
+        ProgressTracker progressTracker,
+        AllocationTracker allocationTracker
+    ) {
+        return new DeltaStepping(
+            graph,
+            config.sourceNode(),
+            delta,
+            config.concurrency(),
+            true,
+            executorService,
+            progressTracker,
+            allocationTracker
+        );
+    }
+
+    private DeltaStepping(
         Graph graph,
         long startNode,
         double delta,
         int concurrency,
+        boolean storePredecessors,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
@@ -71,15 +103,23 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
         this.executorService = executorService;
 
         this.frontier = HugeLongArray.newArray(graph.relationshipCount(), allocationTracker);
-        this.distances = TentativeDistances.distanceOnly(
-            graph.nodeCount(),
-            concurrency,
-            allocationTracker
-        );
+        if (storePredecessors) {
+            this.distances = TentativeDistances.distanceAndPredecessors(
+                graph.nodeCount(),
+                concurrency,
+                allocationTracker
+            );
+        } else {
+            this.distances = TentativeDistances.distanceOnly(
+                graph.nodeCount(),
+                concurrency,
+                allocationTracker
+            );
+        }
     }
 
     @Override
-    public DeltaSteppingResult compute() {
+    public DijkstraResult compute() {
         int iteration = 0;
         int currentBin = 0;
 
@@ -122,7 +162,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
             frontierIndex.set(0);
         }
 
-        return DeltaSteppingResult.of(iteration, distances);
+        return new DijkstraResult(DeltaSteppingResult.of(iteration, distances).pathResults(startNode));
     }
 
     @Override
@@ -278,6 +318,25 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
 
         Optional<HugeAtomicLongArray> predecessors();
 
+        default Stream<PathResult> pathResults(long sourceNode) {
+            assert predecessors().isPresent();
+
+            var pathResultBuilder = ImmutablePathResult.builder().sourceNode(sourceNode);
+            var pathIndex = new MutableLong(0);
+            var predecessors = predecessors().get();
+
+            return LongStream.range(0, predecessors.size())
+                .filter(target -> predecessors.get(target) != NO_PREDECESSOR)
+                .mapToObj(targetNode -> pathResult(
+                    pathResultBuilder,
+                    pathIndex.getAndIncrement(),
+                    sourceNode,
+                    targetNode,
+                    distances(),
+                    predecessors
+                ));
+        }
+
         static DeltaSteppingResult of(int iterations, TentativeDistances tentativeDistances) {
             return ImmutableDeltaSteppingResult.of(
                 iterations,
@@ -285,5 +344,43 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
                 tentativeDistances.predecessors()
             );
         }
+    }
+
+    private static final long[] EMPTY_ARRAY = new long[0];
+
+    private static PathResult pathResult(
+        ImmutablePathResult.Builder pathResultBuilder,
+        long pathIndex,
+        long sourceNode,
+        long targetNode,
+        HugeAtomicDoubleArray distances,
+        HugeAtomicLongArray predecessors
+    ) {
+        // TODO: use LongArrayList and then ArrayUtils.reverse
+        var pathNodeIds = new LongArrayDeque();
+        var costs = new DoubleArrayDeque();
+
+        // We backtrack until we reach the source node.
+        var lastNode = targetNode;
+
+        while (true) {
+            pathNodeIds.addFirst(lastNode);
+            costs.addFirst(distances.get(lastNode));
+
+            // Break if we reach the end by hitting the source node.
+            if (lastNode == sourceNode) {
+                break;
+            }
+
+            lastNode = predecessors.get(lastNode);
+        }
+
+        return pathResultBuilder
+            .index(pathIndex)
+            .targetNode(targetNode)
+            .nodeIds(pathNodeIds.toArray())
+            .relationshipIds(EMPTY_ARRAY)
+            .costs(costs.toArray())
+            .build();
     }
 }

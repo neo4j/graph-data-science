@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -34,13 +33,15 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStreamConfig;
 
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.paths.PathTestUtil.expected;
 
 @GdlExtension
 final class DeltaSteppingTest {
@@ -87,53 +88,53 @@ final class DeltaSteppingTest {
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#deltaAndConcurrency")
         void singleSource(double delta, int concurrency) {
-            var expected = Map.of(
-                graph.toMappedNodeId("a"), 0.0,
-                graph.toMappedNodeId("c"), 2.0,
-                graph.toMappedNodeId("b"), 4.0,
-                graph.toMappedNodeId("e"), 5.0,
-                graph.toMappedNodeId("d"), 9.0,
-                graph.toMappedNodeId("f"), 20.0
+            var expected = Set.of(
+                expected(idFunction, 0, new double[]{0.0}, "a"),
+                expected(idFunction, 1, new double[]{0.0, 4.0}, "a", "b"),
+                expected(idFunction, 2, new double[]{0.0, 2.0}, "a", "c"),
+                expected(idFunction, 3, new double[]{0.0, 2.0, 5.0}, "a", "c", "e"),
+                expected(idFunction, 4, new double[]{0.0, 2.0, 5.0, 9.0}, "a", "c", "e", "d"),
+                expected(idFunction, 5, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f")
             );
 
             var sourceNode = idFunction.of("a");
 
-            var actual = new DeltaStepping(
-                graph,
-                sourceNode,
-                delta,
-                concurrency,
-                Pools.DEFAULT,
-                ProgressTracker.NULL_TRACKER,
-                AllocationTracker.empty()
-            ).compute();
+            var config = ImmutableAllShortestPathsDijkstraStreamConfig.builder()
+                .concurrency(concurrency)
+                .sourceNode(sourceNode)
+                .build();
 
-            assertResultEquals(graph, expected, actual);
+            var paths = DeltaStepping
+                .of(graph, config, delta, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
+                .compute()
+                .pathSet();
+
+            assertEquals(expected, paths);
         }
 
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#deltaAndConcurrency")
         void singleSourceFromDisconnectedNode(double delta, int concurrency) {
-            var expected = Map.of(
-                graph.toMappedNodeId("c"), 0.0,
-                graph.toMappedNodeId("e"), 3.0,
-                graph.toMappedNodeId("d"), 7.0,
-                graph.toMappedNodeId("f"), 18.0
+            var expected = Set.of(
+                expected(idFunction, 0, new double[]{0.0}, "c"),
+                expected(idFunction, 1, new double[]{0.0, 3.0}, "c", "e"),
+                expected(idFunction, 2, new double[]{0.0, 3.0, 7.0}, "c", "e", "d"),
+                expected(idFunction, 3, new double[]{0.0, 3.0, 7.0, 18.0}, "c", "e", "d", "f")
             );
 
             var sourceNode = idFunction.of("c");
 
-            var actual = new DeltaStepping(
-                graph,
-                sourceNode,
-                delta,
-                concurrency,
-                Pools.DEFAULT,
-                ProgressTracker.NULL_TRACKER,
-                AllocationTracker.empty()
-            ).compute();
+            var config = ImmutableAllShortestPathsDijkstraStreamConfig.builder()
+                .concurrency(concurrency)
+                .sourceNode(sourceNode)
+                .build();
 
-            assertResultEquals(graph, expected, actual);
+            var paths = DeltaStepping
+                .of(graph, config, delta, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
+                .compute()
+                .pathSet();
+
+            assertEquals(expected, paths);
         }
     }
 
@@ -174,43 +175,29 @@ final class DeltaSteppingTest {
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#deltaAndConcurrency")
         void singleSource(double delta, int concurrency) {
-            var expected = Map.of(
-                graph.toMappedNodeId("n1"), 0.0,
-                graph.toMappedNodeId("n3"), 2.0,
-                graph.toMappedNodeId("n5"), 5.0,
-                graph.toMappedNodeId("n2"), 6.0,
-                graph.toMappedNodeId("n4"), 9.0,
-                graph.toMappedNodeId("n6"), 10.0,
-                graph.toMappedNodeId("n7"), 11.0
+            var expected = Set.of(
+                expected(idFunction, 0, new double[]{0.0}, "n1"),
+                expected(idFunction, 1, new double[]{0.0, 2.0}, "n1", "n3"),
+                expected(idFunction, 2, new double[]{0.0, 2.0, 5.0}, "n1", "n3", "n5"),
+                expected(idFunction, 3, new double[]{0.0, 6.0}, "n1", "n2"),
+                expected(idFunction, 4, new double[]{0.0, 2.0, 5.0, 9.0}, "n1", "n3", "n5", "n4"),
+                expected(idFunction, 5, new double[]{0.0, 2.0, 10.0}, "n1", "n3", "n6"),
+                expected(idFunction, 6, new double[]{0.0, 2.0, 10.0, 11.0}, "n1", "n3", "n6", "n7")
             );
 
             var sourceNode = idFunction.of("n1");
 
-            var actual = new DeltaStepping(
-                graph,
-                sourceNode,
-                delta,
-                concurrency,
-                Pools.DEFAULT,
-                ProgressTracker.NULL_TRACKER,
-                AllocationTracker.empty()
-            ).compute();
+            var config = ImmutableAllShortestPathsDijkstraStreamConfig.builder()
+                .concurrency(concurrency)
+                .sourceNode(sourceNode)
+                .build();
 
-            assertResultEquals(graph, expected, actual);
-        }
-    }
+            var paths = DeltaStepping
+                .of(graph, config, delta, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
+                .compute()
+                .pathSet();
 
-    private void assertResultEquals(
-        Graph graph,
-        Map<Long, ? extends Number> expected,
-        DeltaStepping.DeltaSteppingResult actual
-    ) {
-        for (long i = 0; i < graph.nodeCount(); i++) {
-            if (expected.containsKey(i)) {
-                assertThat(actual.distances().get(i)).isEqualTo(expected.get(i));
-            } else {
-                assertThat(actual.distances().get(i)).isEqualTo(Double.MAX_VALUE);
-            }
+            assertEquals(expected, paths);
         }
     }
 }
