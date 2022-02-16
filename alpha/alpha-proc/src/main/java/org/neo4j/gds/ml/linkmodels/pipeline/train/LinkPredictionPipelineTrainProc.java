@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.PipelineCompanion;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainResult;
@@ -88,13 +89,17 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
 
     @Override
     protected Stream<MemoryEstimateResult> computeEstimate(Object graphNameOrConfiguration, Map<String, Object> algoConfiguration) {
-        BiFunction<GraphDimensions, LinkPredictionTrainConfig, GraphDimensions> graphDimTransformer = (graphDim, algoConfig) -> getLPPipeline(
-            modelCatalog,
-            algoConfig.pipeline(),
-            algoConfig.username()
-        )
-            .splitConfig()
-            .expectedGraphDimensions(graphDim.nodeCount(), graphDim.relCountUpperBound());
+        // inject expected relationship set sizes which are used in the estimation of the TrainPipelineExecutor
+        // this allows to compute the MemoryTree over a single graphDimension
+        BiFunction<GraphDimensions, LinkPredictionTrainConfig, GraphDimensions> graphDimTransformer = (graphDim, algoConfig) -> {
+            LinkPredictionSplitConfig splitConfig = getLPPipeline(
+                modelCatalog,
+                algoConfig.pipeline(),
+                algoConfig.username()
+            )
+                .splitConfig();
+            return splitConfig.expectedGraphDimensions(graphDim.nodeCount(), graphDim.relCountUpperBound());
+        };
 
         return new MemoryEstimationExecutor<>(
             this,

@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -369,15 +368,7 @@ class LinkPredictionTrainTest {
         return linkPredictionTrain.compute();
     }
 
-    GraphDimensions graphDimensionsWithSplits(GraphDimensions inputDimensions, LinkPredictionSplitConfig splitConfig) {
-        var expectedSetSizes = splitConfig.expectedSetSizes(inputDimensions.relCountUpperBound());
-
-        return GraphDimensions.builder()
-            .from(inputDimensions)
-            .putRelationshipCount(RelationshipType.of(splitConfig.testRelationshipType()), expectedSetSizes.testSize())
-            .putRelationshipCount(RelationshipType.of(splitConfig.testComplementRelationshipType()), expectedSetSizes.testComplementSize())
-            .putRelationshipCount(RelationshipType.of(splitConfig.featureInputRelationshipType()), expectedSetSizes.featureInputSize())
-            .putRelationshipCount(RelationshipType.of(splitConfig.trainRelationshipType()), expectedSetSizes.trainSize())
-            .build();
+    private GraphDimensions graphDimensionsWithSplits(GraphDimensions inputDimensions, LinkPredictionSplitConfig splitConfig) {
+        return splitConfig.expectedGraphDimensions(inputDimensions.nodeCount(), inputDimensions.relCountUpperBound());
     }
 }
