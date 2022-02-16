@@ -22,9 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.Objective;
-import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;
@@ -60,38 +58,6 @@ public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRe
         this.penalty = penalty;
         this.linkFeatures = linkFeatures;
         this.targets = targets;
-    }
-
-    public static long sizeOfBatchInBytes(int batchSize, int featureDim, boolean useBias) {
-        // we consider each variable in the computation graph
-        var batchedTargets = Matrix.sizeInBytes(batchSize, 1);
-        var features = Matrix.sizeInBytes(batchSize, featureDim);
-
-        var weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(
-            Dimensions.matrix(batchSize, featureDim),
-            Dimensions.matrix(1, featureDim)
-        );
-
-        var sigmoid = weightedFeatures;
-        var unpenalizedLoss = Scalar.sizeInBytes();
-        var l2norm = Scalar.sizeInBytes();
-        var constantScale = Scalar.sizeInBytes();
-        var elementSum = Scalar.sizeInBytes();
-
-        var maybeBias = useBias ? weightedFeatures : 0;
-        var penalty = l2norm + constantScale;
-
-        // 2 * x == computing data and gradient for this computation variable
-        return MemoryUsage.sizeOfInstance(LinkLogisticRegressionPredictor.class) +
-               Weights.sizeInBytes(1, featureDim) + // only gradient as data is the model data
-               batchedTargets +
-               features +
-               2 * weightedFeatures +
-               2 * maybeBias +
-               2 * sigmoid +
-               2 * unpenalizedLoss +
-               2 * penalty +
-               2 * elementSum;
     }
 
     @Override

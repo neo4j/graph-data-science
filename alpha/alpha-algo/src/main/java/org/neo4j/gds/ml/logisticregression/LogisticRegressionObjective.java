@@ -17,12 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
+package org.neo4j.gds.ml.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.Objective;
 import org.neo4j.gds.ml.Trainer;
+import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;
@@ -30,13 +32,13 @@ import org.neo4j.gds.ml.core.functions.ConstantScale;
 import org.neo4j.gds.ml.core.functions.CrossEntropyLoss;
 import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
+import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +48,39 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
     private final double penalty;
     private final Trainer.Features features;
     private final HugeLongArray labels;
+
+    //TODO: add support for number of classes and Fudge only in NC
+    public static long sizeOfBatchInBytes(int batchSize, int featureDim, boolean useBias) {
+        // we consider each variable in the computation graph
+        var batchedTargets = Matrix.sizeInBytes(batchSize, 1);
+        var features = Matrix.sizeInBytes(batchSize, featureDim);
+
+        var weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(
+            Dimensions.matrix(batchSize, featureDim),
+            Dimensions.matrix(1, featureDim)
+        );
+
+        var sigmoid = weightedFeatures;
+        var unpenalizedLoss = Scalar.sizeInBytes();
+        var l2norm = Scalar.sizeInBytes();
+        var constantScale = Scalar.sizeInBytes();
+        var elementSum = Scalar.sizeInBytes();
+
+        var maybeBias = useBias ? weightedFeatures : 0;
+        var penalty = l2norm + constantScale;
+
+        // 2 * x == computing data and gradient for this computation variable
+        return MemoryUsage.sizeOfInstance(LogisticRegressionClassifier.class) +
+               Weights.sizeInBytes(1, featureDim) + // only gradient as data is the model data
+               batchedTargets +
+               features +
+               2 * weightedFeatures +
+               2 * maybeBias +
+               2 * sigmoid +
+               2 * unpenalizedLoss +
+               2 * penalty +
+               2 * elementSum;
+    }
 
     public LogisticRegressionObjective(
         LogisticRegressionClassifier classifier,
@@ -88,7 +123,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
         return classifier.data();
     }
 
-    private Constant<Vector> batchLabelVector(Batch batch, LocalIdMap localIdMap) {
+    Constant<Vector> batchLabelVector(Batch batch, LocalIdMap localIdMap) {
         var batchedTargets = new Vector(batch.size());
         var batchOffset = new MutableInt();
 

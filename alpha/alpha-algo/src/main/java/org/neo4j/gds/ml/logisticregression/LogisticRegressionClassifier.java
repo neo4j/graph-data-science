@@ -61,7 +61,7 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
         return ctx.forward(predictionsVariable(batch, features)).data();
     }
 
-    public Variable<Matrix> predictionsVariable(Batch batch, Trainer.Features features) {
+    Variable<Matrix> predictionsVariable(Batch batch, Trainer.Features features) {
         var weights = data.weights();
         var batchFeatures = batchFeatureMatrix(batch, features);
         var weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.of(
@@ -74,7 +74,7 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
         return new Softmax(softmaxInput);
     }
 
-    private static Constant<Matrix> batchFeatureMatrix(Batch batch, Trainer.Features features) {
+    static Constant<Matrix> batchFeatureMatrix(Batch batch, Trainer.Features features) {
         var batchFeatures = new Matrix(batch.size(), features.get(0).length);
         var batchFeaturesOffset = new MutableInt();
 

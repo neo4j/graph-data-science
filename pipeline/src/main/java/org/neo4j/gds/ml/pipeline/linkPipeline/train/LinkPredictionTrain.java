@@ -41,7 +41,6 @@ import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrain;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.nodemodels.BestMetricData;
@@ -421,7 +420,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                     .fixed("Stats map builder train", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
                     .fixed("Stats map builder validation", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
                     .max("Train model and compute train metrics", List.of(
-                            LinkLogisticRegressionTrain.estimate(llrConfig, linkFeatureDimension),
+                            LogisticRegressionTrainer.estimate(llrConfig, linkFeatureDimension),
                             estimateComputeTrainMetrics(pipeline.splitConfig())
                         )
                     ).build()

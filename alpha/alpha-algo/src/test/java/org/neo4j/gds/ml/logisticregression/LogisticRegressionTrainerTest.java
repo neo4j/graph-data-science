@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.logisticregression;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -69,7 +68,7 @@ class LogisticRegressionTrainerTest {
 
     @Test
     void concurrently() {
-        HugeLongArray labels = HugeLongArray.newArray(20_000, AllocationTracker.empty());
+        HugeLongArray labels = HugeLongArray.newArray(20_000);
         labels.setAll(i -> i%4);
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(labels),

@@ -21,6 +21,9 @@ package org.neo4j.gds.ml.logisticregression;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -32,8 +35,8 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LogisticRegressionObjective;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -45,6 +48,21 @@ public final class LogisticRegressionTrainer implements Trainer {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final int concurrency;
+
+    public static MemoryEstimation estimate(LinkLogisticRegressionTrainConfig llrConfig, MemoryRange linkFeatureDimension) {
+        return MemoryEstimations.builder("train model")
+            .add("model data", LinkLogisticRegressionData.memoryEstimation(linkFeatureDimension))
+            .add("update weights", Training.memoryEstimation(linkFeatureDimension, 1, 1))
+            .perThread(
+                "computation graph",
+                linkFeatureDimension.apply(featureDim -> LogisticRegressionObjective.sizeOfBatchInBytes(
+                    llrConfig.batchSize(),
+                    Math.toIntExact(featureDim),
+                    llrConfig.useBiasFeature()
+                ))
+            )
+            .build();
+    }
 
     public LogisticRegressionTrainer(
         ReadOnlyHugeLongArray trainSet,

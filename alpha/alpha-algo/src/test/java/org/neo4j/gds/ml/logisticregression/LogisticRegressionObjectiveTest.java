@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
+package org.neo4j.gds.ml.logisticregression;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,11 +27,12 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
@@ -38,6 +40,7 @@ import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer.LogisticRegressionData;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +49,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class LinkLogisticRegressionObjectiveTest {
+class LogisticRegressionObjectiveTest {
 
     private static Stream<Arguments> featureBatches() {
         return Stream.of(
@@ -71,13 +74,13 @@ class LinkLogisticRegressionObjectiveTest {
     @Inject
     private Graph graph;
 
-    private LinkLogisticRegressionObjective objective;
+    private LogisticRegressionObjective objective;
     private final List<String> features = List.of("a", "b");
 
     @BeforeEach
     void setup() {
-        var targets = HugeDoubleArray.newArray(graph.relationshipCount());
-        targets.setAll(idx -> (idx < 2) ? 1 : 0);
+        var labels = HugeLongArray.newArray(graph.relationshipCount());
+        labels.setAll(idx -> (idx < 2) ? 1 : 0);
 
         // L2 Norm features for node properties a,b
         var linkFeatures = HugeObjectArray.of(
@@ -87,20 +90,22 @@ class LinkLogisticRegressionObjectiveTest {
             new double[]{Math.pow(0.3, 2), Math.pow(-0.4, 2)}
         );
 
-        this.objective = new LinkLogisticRegressionObjective(
-            LinkLogisticRegressionData.from(features.size(), true),
+        var classifier = new LogisticRegressionClassifier(LogisticRegressionData.of(features.size(), labels, true));
+        this.objective = new LogisticRegressionObjective(
+            classifier,
             1.0,
-            linkFeatures,
-            targets
+            Trainer.Features.wrap(linkFeatures),
+            labels
         );
     }
 
     @Test
     void makeTargets() {
         var batch = new LazyBatch(1, 2, graph.relationshipCount());
-        var batchedTargets = objective.makeTargetsArray(batch);
+        var batchedTargets = objective.batchLabelVector(batch, objective.modelData().classIdMap());
 
-        assertThat(batchedTargets.data()).isEqualTo(new Vector(1.0, 0.0));
+        // original labels are 1.0, 0.0 , but these are local ids. since nodeId 0 has label 1.0, this maps to 0.0.
+        assertThat(batchedTargets.data()).isEqualTo(new Vector(0.0, 1.0));
     }
 
     @ParameterizedTest
@@ -117,7 +122,8 @@ class LinkLogisticRegressionObjectiveTest {
             return features;
         });
 
-        Constant<Matrix> batchFeatures = objective.features(batch, allFeatures);
+        Constant<Matrix> batchFeatures = LogisticRegressionClassifier.batchFeatureMatrix(batch,
+            Trainer.Features.wrap(allFeatures));
 
         assertThat(batchFeatures.data()).isEqualTo(expected);
     }
@@ -130,8 +136,8 @@ class LinkLogisticRegressionObjectiveTest {
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
 
-        // weights are zero. penalty part of objective is 0. remaining part of logistic-loss is -Math.log(0.5).
-        assertThat(lossValue).isEqualTo(-Math.log(0.5));
+        // weights are zero. penalty part of objective is 0. remaining part of CEL is -Math.log(0.5).
+        assertThat(lossValue).isEqualTo(-Math.log(0.5), Offset.offset(1E-9));
     }
 
     @ParameterizedTest
@@ -142,7 +148,7 @@ class LinkLogisticRegressionObjectiveTest {
         " 10, 100, true, 9_720",
     })
     void shouldEstimateMemoryUsage(int batchSize, int featureDim, boolean useBias, long expected) {
-        var memoryUsageInBytes = LinkLogisticRegressionObjective.sizeOfBatchInBytes(batchSize, featureDim, useBias);
+        var memoryUsageInBytes = LogisticRegressionObjective.sizeOfBatchInBytes(batchSize, featureDim, useBias);
         assertThat(memoryUsageInBytes).isEqualTo(expected);
     }
 }
