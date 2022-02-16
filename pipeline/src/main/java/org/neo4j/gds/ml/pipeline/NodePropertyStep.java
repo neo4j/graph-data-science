@@ -19,14 +19,19 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.AlgoConfigParser;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -35,18 +40,22 @@ import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class NodePropertyStep implements ExecutableNodePropertyStep {
     private final GdsCallableFinder.GdsCallableDefinition callableDefinition;
     private final Map<String, Object> config;
+    private final Optional<ModelCatalog> maybeModelCatalog;
 
     public NodePropertyStep(
         GdsCallableFinder.GdsCallableDefinition callableDefinition,
-        Map<String, Object> config
+        Map<String, Object> config,
+        Optional<ModelCatalog> maybeModelCatalog
     ) {
         this.callableDefinition = callableDefinition;
         this.config = config;
+        this.maybeModelCatalog = maybeModelCatalog;
     }
 
     @Override
@@ -61,7 +70,7 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
 
     @Override
     public MemoryEstimation estimate() {
-        var algoSpec = callableDefinition.algorithmSpec();
+        var algoSpec = getAlgorithmSpec();
         var algoConfig = new AlgoConfigParser<>("", algoSpec.newConfigFunction()).processInput(config);
 
         try {
@@ -87,11 +96,21 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         configCopy.put("nodeLabels", nodeLabelStrings);
         configCopy.put("relationshipTypes", relTypeStrings);
 
+        var algorithmSpec = getAlgorithmSpec();
+
         new ProcedureExecutor<>(
-            callableDefinition.algorithmSpec(),
+            algorithmSpec,
             new ProcedureExecutorSpec<>(),
             executionContext
         ).compute(graphName, configCopy, false, false);
+    }
+
+    private AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>> getAlgorithmSpec() {
+        var algorithmSpec = callableDefinition.algorithmSpec();
+        if (maybeModelCatalog.isPresent()) {
+            algorithmSpec = algorithmSpec.withModelCatalog(maybeModelCatalog.get());
+        }
+        return algorithmSpec;
     }
 
     @Override

@@ -39,6 +39,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainCon
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class NodeClassificationPipelinePredictProcTestUtil {
@@ -75,7 +76,8 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
             ExecutionContext.EMPTY.username(),
             "degree",
-            Map.of("mutateProperty", "degree")
+            Map.of("mutateProperty", "degree"),
+            Optional.empty()
         ));
         for (String nodeFeature : nodeFeatures) {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of(nodeFeature));

@@ -28,6 +28,7 @@ import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,7 +70,8 @@ class NodeClassificationPipelineTest {
         var pipeline = new NodeClassificationPipeline();
         var pageRankPropertyStep = new NodePropertyStep(
             TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
-            Map.of("mutateProperty", "prop1")
+            Map.of("mutateProperty", "prop1"),
+            Optional.empty()
         );
 
         pipeline.addNodePropertyStep(pageRankPropertyStep);
@@ -79,7 +81,8 @@ class NodeClassificationPipelineTest {
 
         var degreeNodePropertyStep = new NodePropertyStep(
             TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
-            Map.of("mutateProperty", "prop2")
+            Map.of("mutateProperty", "prop2"),
+            Optional.empty()
         );
 
         pipeline.addNodePropertyStep(degreeNodePropertyStep);
@@ -171,7 +174,8 @@ class NodeClassificationPipelineTest {
             var pipeline = new NodeClassificationPipeline();
             var nodePropertyStep = new NodePropertyStep(
                 TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
-                Map.of("mutateProperty", "prop1")
+                Map.of("mutateProperty", "prop1"),
+                Optional.empty()
             );
             pipeline.addNodePropertyStep(nodePropertyStep);
 
@@ -241,7 +245,8 @@ class NodeClassificationPipelineTest {
             var pipeline = new NodeClassificationPipeline();
             var nodePropertyStep = new NodePropertyStep(
                 TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
-                Map.of("mutateProperty", "prop1")
+                Map.of("mutateProperty", "prop1"),
+                Optional.empty()
             );
             pipeline.addNodePropertyStep(nodePropertyStep);
 
@@ -254,7 +259,8 @@ class NodeClassificationPipelineTest {
 
             var otherNodePropertyStep = new NodePropertyStep(
                 TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
-                Map.of("mutateProperty", "prop2")
+                Map.of("mutateProperty", "prop2"),
+                Optional.empty()
             );
             pipeline.addNodePropertyStep(otherNodePropertyStep);
 

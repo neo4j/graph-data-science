@@ -31,6 +31,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,7 +56,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         var pipeline = getLPPipeline(modelCatalog, pipelineName, username());
         validateRelationshipProperty(pipeline, procedureConfig);
 
-        pipeline.addNodePropertyStep(createNodePropertyStep(executionContext().username(), taskName, procedureConfig));
+        pipeline.addNodePropertyStep(createNodePropertyStep(executionContext().username(), taskName, procedureConfig, Optional.of(modelCatalog)));
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }

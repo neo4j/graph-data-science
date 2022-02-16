@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.getNCPipeline;
 import static org.neo4j.gds.ml.pipeline.NodePropertyStepFactory.createNodePropertyStep;
@@ -43,7 +44,8 @@ public final class NodeClassificationPipelineAddSteps {
         pipeline.addNodePropertyStep(createNodePropertyStep(
             caller.executionContext().username(),
             taskName,
-            procedureConfig
+            procedureConfig,
+            Optional.of(modelCatalog)
         ));
 
         return new PipelineInfoResult(pipelineName, pipeline);

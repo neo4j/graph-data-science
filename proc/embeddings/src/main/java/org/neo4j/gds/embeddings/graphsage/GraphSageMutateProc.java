@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
@@ -27,6 +28,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -115,6 +117,14 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     @Override
     public GraphAlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>(modelCatalog);
+    }
+
+    @Override
+    public AlgorithmSpec<GraphSage, GraphSage.GraphSageResult, GraphSageMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, GraphSage, GraphSageMutateConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.modelCatalog = modelCatalog;
+        return this;
     }
 
     @SuppressWarnings("unused")

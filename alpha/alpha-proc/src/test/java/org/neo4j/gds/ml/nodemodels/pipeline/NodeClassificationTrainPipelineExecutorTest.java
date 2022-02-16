@@ -57,6 +57,7 @@ import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -122,7 +123,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
             ExecutionContext.EMPTY.username(),
             "pageRank",
-            Map.of("mutateProperty", "pr")
+            Map.of("mutateProperty", "pr"),
+            Optional.empty()
         ));
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
 
@@ -320,12 +322,14 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
             ExecutionContext.EMPTY.username(),
             "pageRank",
-            Map.of("mutateProperty", "pr")
+            Map.of("mutateProperty", "pr"),
+            Optional.empty()
         ));
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
             "bestUser",
             "wcc",
-            Map.of("mutateProperty", "myNewProp", "threshold", 0.42F, "relationshipWeightProperty", "weight")
+            Map.of("mutateProperty", "myNewProp", "threshold", 0.42F, "relationshipWeightProperty", "weight"),
+            Optional.empty()
         ));
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
 

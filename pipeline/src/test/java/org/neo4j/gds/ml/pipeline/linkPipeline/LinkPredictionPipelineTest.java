@@ -31,6 +31,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,13 +75,13 @@ class LinkPredictionPipelineTest {
         GdsCallableFinder.GdsCallableDefinition callableDefinition = GdsCallableFinder
             .findByName("gds.testProc.mutate", List.of())
             .orElseThrow();
-        var step = new NodePropertyStep(callableDefinition, Map.of("mutateProperty", "pr"));
+        var step = new NodePropertyStep(callableDefinition, Map.of("mutateProperty", "pr"), Optional.empty());
         pipeline.addNodePropertyStep(step);
 
         assertThat(pipeline)
             .returns(List.of(step), LinkPredictionPipeline::nodePropertySteps);
 
-        var otherStep = new NodePropertyStep(callableDefinition, Map.of("mutateProperty", "pr2"));
+        var otherStep = new NodePropertyStep(callableDefinition, Map.of("mutateProperty", "pr2"), Optional.empty());
         pipeline.addNodePropertyStep(otherStep);
 
         assertThat(pipeline)
@@ -172,7 +173,8 @@ class LinkPredictionPipelineTest {
             var pipeline = new LinkPredictionPipeline();
             var step = new NodePropertyStep(
                 TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
-                Map.of("mutateProperty", "prop1")
+                Map.of("mutateProperty", "prop1"),
+                Optional.empty()
             );
             pipeline.addNodePropertyStep(step);
 
@@ -241,7 +243,8 @@ class LinkPredictionPipelineTest {
             var pipeline = new LinkPredictionPipeline();
             var step = new NodePropertyStep(
                 TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
-                Map.of("mutateProperty", "prop1")
+                Map.of("mutateProperty", "prop1"),
+                Optional.empty()
             );
             pipeline.addNodePropertyStep(step);
 
@@ -254,7 +257,8 @@ class LinkPredictionPipelineTest {
 
             var otherStep = new NodePropertyStep(
                 TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
-                Map.of("mutateProperty", "prop2")
+                Map.of("mutateProperty", "prop2"),
+                Optional.empty()
             );
             pipeline.addNodePropertyStep(otherStep);
 
