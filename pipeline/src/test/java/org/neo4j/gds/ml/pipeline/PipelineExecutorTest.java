@@ -222,7 +222,7 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public MemoryEstimation estimate(ModelCatalog modelCatalog) {
+        public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> relTypes) {
             throw new MemoryEstimationNotImplementedException();
         }
 
@@ -259,7 +259,7 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public MemoryEstimation estimate(ModelCatalog modelCatalog) {
+        public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> relTypes) {
             throw new MemoryEstimationNotImplementedException();
         }
 

@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.executor.ExecutionContext;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public interface ExecutableNodePropertyStep extends ToMapConvertible {
@@ -42,5 +43,5 @@ public interface ExecutableNodePropertyStep extends ToMapConvertible {
 
     String procName();
 
-    MemoryEstimation estimate(ModelCatalog modelCatalog);
+    MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> relTypes);
 }

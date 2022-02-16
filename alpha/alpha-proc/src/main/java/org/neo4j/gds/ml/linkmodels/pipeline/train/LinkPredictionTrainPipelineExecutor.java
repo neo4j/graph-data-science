@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
@@ -78,7 +77,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
         var nodePropertyStepEstimations = pipeline
             .nodePropertySteps()
             .stream()
-            .map(ExecutableNodePropertyStep::estimate)
+            .map(step -> step.estimate(List.of(pipeline.splitConfig().featureInputRelationshipType())))
             .collect(Collectors.toList());
 
         // TODO When is the feature-input split removed?

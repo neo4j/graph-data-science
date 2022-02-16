@@ -143,7 +143,6 @@ public class RelationshipSplitter {
             .add(new SplitRelationshipsAlgorithmFactory().memoryEstimation(testSplitConfig))
             .build();
 
-
         SplitRelationshipsMutateConfig trainSplitConfig = ImmutableSplitRelationshipsMutateConfig.builder()
             .from(splitConfig.trainSplit())
             .relationshipTypes(List.of(splitConfig.testComplementRelationshipType()))

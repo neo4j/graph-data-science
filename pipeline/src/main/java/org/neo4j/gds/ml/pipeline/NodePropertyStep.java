@@ -39,6 +39,7 @@ import org.neo4j.gds.executor.ProcedureExecutorSpec;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -65,8 +66,10 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     }
 
     @Override
-    public MemoryEstimation estimate(ModelCatalog modelCatalog) {
+    public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> relTypes) {
         var algoSpec = getAlgorithmSpec(modelCatalog);
+
+        config.put("relationshipTypes", relTypes);
         var algoConfig = new AlgoConfigParser<>("", algoSpec.newConfigFunction()).processInput(config);
 
         try {

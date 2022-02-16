@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -101,6 +102,9 @@ class NodePropertyStepTest extends BaseProcTest {
         var step = new NodePropertyStep(gdsCallableDefinition, Map.of("mutateProperty", PROPERTY_NAME, "throwOnEstimate", true));
 
         // verify exception is caught
-        assertThat(step.estimate(new OpenModelCatalog()).estimate(GraphDimensions.of(1), 4).memoryUsage().max).isZero();
+        assertThat(step
+            .estimate(new OpenModelCatalog(), List.of(ElementProjection.PROJECT_ALL))
+            .estimate(GraphDimensions.of(1), 4)
+            .memoryUsage().max).isZero();
     }
 }
