@@ -62,6 +62,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -294,7 +295,8 @@ public final class TestSupport {
                     return true;
                 });
             });
-            softAssertions.assertThat(actual)
+
+            assertThat(actual)
                 .withFailMessage("Different amount of rows returned for actual result (%d) than expected (%d)",
                     actual.size(),
                     expected.size()

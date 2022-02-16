@@ -24,6 +24,7 @@ import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.stream.Stream;
@@ -41,30 +42,36 @@ public abstract class ShortestPathStreamProc<
 
     @Override
     public Stream<StreamResult> stream(ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
-        return runWithExceptionLogging("Result streaming failed", () -> {
-            var graph = computationResult.graph();
+        return runWithExceptionLogging("Result streaming failed", () -> stream(computationResult, executionContext()));
+    }
 
-            if (computationResult.isGraphEmpty()) {
-                graph.release();
-                return Stream.empty();
-            }
+    public static <ALGO extends Algorithm<DijkstraResult>, CONFIG extends AlgoBaseConfig> Stream<StreamResult> stream(
+        ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult,
+        ExecutionContext executionContext
+    ) {
+        var graph = computationResult.graph();
 
-            var shouldReturnPath = callContext
-                .outputFields()
-                .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
+        if (computationResult.isGraphEmpty()) {
+            graph.release();
+            return Stream.empty();
+        }
 
-            var resultBuilder = new StreamResult.Builder(graph, transaction.internalTransaction());
+        var shouldReturnPath = executionContext.callContext()
+            .outputFields()
+            .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
 
-            var resultStream = computationResult
-                .result()
-                .mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
+        var resultBuilder = new StreamResult.Builder(graph, executionContext.transaction().internalTransaction());
 
-            // this is necessary in order to close the result stream which triggers
-            // the progress tracker to close its root task
-            try(var statement = transaction.acquireStatement()) {
-                statement.registerCloseableResource(resultStream);
-            }
-            return resultStream;
-        });
+        var resultStream = computationResult
+            .result()
+            .mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
+
+        // this is necessary in order to close the result stream which triggers
+        // the progress tracker to close its root task
+        try (var statement = executionContext.transaction().acquireStatement()) {
+            statement.registerCloseableResource(resultStream);
+        }
+
+        return resultStream;
     }
 }
