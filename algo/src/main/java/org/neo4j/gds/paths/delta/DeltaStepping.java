@@ -27,8 +27,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.DoublePageCreator;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -40,9 +38,7 @@ import java.util.stream.IntStream;
 
 public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> {
 
-    private static final double DIST_INF = Double.MAX_VALUE;
     private static final int NO_BIN = Integer.MAX_VALUE;
-
     private static final int BIN_SIZE_THRESHOLD = 1000;
 
     private final Graph graph;
@@ -51,7 +47,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
     private final int concurrency;
 
     private final HugeLongArray frontier;
-    private final HugeAtomicDoubleArray distances;
+    private final TentativeDistances distances;
 
     private final ExecutorService executorService;
 
@@ -72,9 +68,9 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
         this.executorService = executorService;
 
         this.frontier = HugeLongArray.newArray(graph.relationshipCount(), allocationTracker);
-        this.distances = HugeAtomicDoubleArray.newArray(
+        this.distances = TentativeDistances.distanceOnly(
             graph.nodeCount(),
-            DoublePageCreator.of(concurrency, index -> DIST_INF),
+            concurrency,
             allocationTracker
         );
     }
@@ -88,7 +84,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
         var frontierSize = new AtomicLong(1);
 
         this.frontier.set(currentBin, startNode);
-        this.distances.set(startNode, 0);
+        this.distances.set(startNode, -1, 0);
 
         var relaxTasks = IntStream
             .range(0, concurrency)
@@ -139,7 +135,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
     private static class DeltaSteppingTask implements Runnable {
         private final Graph graph;
         private final HugeLongArray frontier;
-        private final HugeAtomicDoubleArray distances;
+        private final TentativeDistances distances;
         private final double delta;
         private int binIndex;
         private final AtomicLong frontierIndex;
@@ -156,7 +152,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
         DeltaSteppingTask(
             Graph graph,
             HugeLongArray frontier,
-            HugeAtomicDoubleArray distances,
+            TentativeDistances distances,
             double delta,
             AtomicLong frontierIndex
         ) {
@@ -232,7 +228,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
                 var newDist = distances.get(sourceNodeId) + weight;
 
                 while (Double.compare(newDist, oldDist) < 0) {
-                    var witness = distances.compareAndExchange(targetNodeId, oldDist, newDist);
+                    var witness = distances.compareAndExchange(targetNodeId, oldDist, newDist, sourceNodeId);
 
                     if (Double.compare(witness, oldDist) == 0) {
                         int destBin = (int) (newDist / delta);
@@ -275,6 +271,6 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
 
         int iterations();
 
-        HugeAtomicDoubleArray distances();
+        TentativeDistances distances();
     }
 }
