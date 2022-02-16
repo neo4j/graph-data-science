@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.NodePropertyContainer;
+import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.utils.Intersections;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.similarity.knn.LongArrayPropertySimilarityComputer.SortedLongArrayProperties;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +43,7 @@ public interface SimilarityComputer {
 
     double similarity(long firstNodeId, long secondNodeId);
 
-    static SimilarityComputer ofProperties(NodePropertyContainer graph, List<String> propertyNames) {
+    static SimilarityComputer ofProperties(Graph graph, List<String> propertyNames) {
         if (propertyNames.size() == 1) {
             return ofProperty((graph), propertyNames.get(0));
         }
@@ -57,7 +61,7 @@ public interface SimilarityComputer {
             case FLOAT_ARRAY:
                 return ofFloatArrayProperty(nodeProperties);
             case LONG_ARRAY:
-                return ofLongArrayProperty(nodeProperties);
+                return ofLongArrayProperty(new SortedLongArrayProperties(nodeProperties));
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "The property [%s] has an unsupported type [%s].",
@@ -186,13 +190,35 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
 
     @Override
     public double similarity(long firstNodeId, long secondNodeId) {
-        var left = nodeProperties.longArrayValue(firstNodeId).clone();
-        var right = nodeProperties.longArrayValue(secondNodeId).clone();
-        Arrays.sort(left);
-        Arrays.sort(right);
+        var left = nodeProperties.longArrayValue(firstNodeId);
+        var right = nodeProperties.longArrayValue(secondNodeId);
         long sameElements = Intersections.intersection3(left, right);
         long differentElements = left.length - sameElements;
         return 1.0 / (1.0 + differentElements);
+    }
+
+    static final class SortedLongArrayProperties implements LongArrayNodeProperties {
+
+        private final HugeObjectArray<long[]> properties;
+
+        SortedLongArrayProperties(NodeProperties nodeProperties) {
+            this.properties = HugeObjectArray.newArray(long[].class, nodeProperties.size());
+            this.properties.setAll(i -> {
+                var value = nodeProperties.longArrayValue(i).clone();
+                Arrays.sort(value);
+                return value;
+            });
+        }
+
+        @Override
+        public long size() {
+            return properties.size();
+        }
+
+        @Override
+        public long[] longArrayValue(long nodeId) {
+            return properties.get(nodeId);
+        }
     }
 }
 
