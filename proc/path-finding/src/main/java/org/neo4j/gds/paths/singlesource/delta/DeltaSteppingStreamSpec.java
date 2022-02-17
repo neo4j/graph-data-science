@@ -23,20 +23,20 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.ShortestPathStreamProc;
 import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingFactory;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.allShortestPaths.delta.stream", description = AllShortestPathsDeltaProc.DELTA_DESCRIPTION, executionMode = STREAM)
-public class DeltaSteppingStreamSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsBaseConfig, Stream<StreamResult>, DeltaSteppingFactory> {
+public class DeltaSteppingStreamSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaBaseConfig, Stream<StreamResult>, DeltaSteppingFactory> {
     @Override
     public String name() {
         return "gds.allShortestPaths.delta.stream";
@@ -48,13 +48,13 @@ public class DeltaSteppingStreamSpec implements AlgorithmSpec<DeltaStepping, Dij
     }
 
     @Override
-    public NewConfigFunction<AllShortestPathsBaseConfig> newConfigFunction() {
-        return (username, configuration) -> AllShortestPathsDijkstraStreamConfig.of(configuration);
+    public NewConfigFunction<AllShortestPathsDeltaBaseConfig> newConfigFunction() {
+        return (username, configuration) -> AllShortestPathsDeltaStreamConfig.of(configuration);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDijkstraStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return ShortestPathStreamProc::stream;
     }
 }
