@@ -21,21 +21,39 @@ include::../shared/algorithm-traits.adoc[]
 [[algorithms-delta-single-source-intro]]
 == Introduction
 
-The Delta-Stepping Shortest Path algorithm computes the shortest path between nodes.
+The Delta-Stepping Shortest Path algorithm computes all shortest paths between a source node and all reachable nodes in the graph.
 The algorithm supports weighted graphs with positive relationship weights.
-The Delta-Stepping Single-Source algorithm computes the shortest paths between a source node and all nodes reachable from that node.
-To compute the shortest path between a source and a target node, <<algorithms-delta-source-target, Delta-Stepping Source-Target>> can be used.
+To compute the shortest path between a source and a single target node, <<algorithms-dijkstra-source-target, Dijkstra Source-Target>> can be used.
 
-The GDS implementation is based on the http://www-m3.ma.tum.de/twiki/pub/MN0506/WebHome/delta.pdf[original description] and uses a binary heap as priority queue.
-The implementation is also used for the <<algorithms-astar, A*>> and <<algorithms-yens, Yen's>> algorithms.
-The algorithm implementation is executed using a single thread.
-Altering the concurrency configuration has no effect.
+In contrast to <<algorithms-dijkstra-single-source, Dijkstra Single-Source>>, the Delta-Stepping algorithm is a distance correcting algorithm.
+This property allows it to traverse the graph in parallel.
+The algorithm is guaranteed to always find the shortest path between a source node and a target node.
+However, if multiple shortest paths exist between two nodes, the algorithm is not guaranteed to return the same path in each computation.
+
+The GDS implementation is based on [1] and incorporates the bucket fusion optimization discussed in [2].
+The algorithm implementation is executed using multiple threads which can be defined in the procedure configuration.
+
+For more information on this algorithm, see:
+
+1. https://dl.acm.org/doi/10.1016/S0196-6774%2803%2900076-2[Ulrich Meyer and Peter Sanders. "δ-stepping: a parallelizable shortest path algorithm."^]
+2. https://arxiv.org/abs/1911.07260[Yunming Zhang, Ajay Brahmakshatriya, Xinyi Chen, Laxman Dhulipala, Shoaib Kamil, Saman Amarasinghe, and Julian Shun. "Optimizing ordered graph algorithms with GraphIt."^]
 
 
 [[algorithms-delta-single-source-syntax]]
 == Syntax
 
 include::path-syntax.adoc[]
+
+
+=== Delta
+
+The `delta` parameter defines a range which is used to group nodes with the same tentative distance to the start node.
+The ranges are also called buckets.
+In each iteration of the algorithm, the non-empty bucket with the smallest tentative distance is processed in parallel.
+The `delta` parameter is the main tuning knob for the algorithm and controls the workload that can be processed in parallel.
+Generally, for power-law graphs, where many nodes can be reached within a few hops, a small delta (e.g. `2`) is recommended.
+For high-diameter graphs, e.g. transport networks, a high delta value (e.g. `10000`) is recommended.
+Note, that the value might vary depending on the graph topology and the value range of relationship properties.
 
 
 [[algorithms-delta-single-source-examples]]
