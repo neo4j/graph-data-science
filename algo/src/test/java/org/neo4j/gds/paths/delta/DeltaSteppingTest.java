@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStreamConfig;
+import org.neo4j.gds.paths.delta.config.ImmutableAllShortestPathsDeltaStreamConfig;
 
 import java.util.Set;
 import java.util.function.LongSupplier;
@@ -103,13 +103,14 @@ final class DeltaSteppingTest {
 
             var sourceNode = graphFactory.nodeId("a");
 
-            var config = ImmutableAllShortestPathsDijkstraStreamConfig.builder()
+            var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
                 .concurrency(concurrency)
                 .sourceNode(sourceNode)
+                .delta(delta)
                 .build();
 
             var paths = DeltaStepping
-                .of(graph, config, delta, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
+                .of(graph, config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
@@ -138,13 +139,14 @@ final class DeltaSteppingTest {
 
             var sourceNode = graphFactory.nodeId("c");
 
-            var config = ImmutableAllShortestPathsDijkstraStreamConfig.builder()
+            var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
                 .concurrency(concurrency)
                 .sourceNode(sourceNode)
+                .delta(delta)
                 .build();
 
             var paths = DeltaStepping
-                .of(graph, config, delta, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
+                .of(graph, config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
@@ -204,13 +206,14 @@ final class DeltaSteppingTest {
 
             var sourceNode = graphFactory.nodeId("n1");
 
-            var config = ImmutableAllShortestPathsDijkstraStreamConfig.builder()
+            var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
                 .concurrency(concurrency)
                 .sourceNode(sourceNode)
+                .delta(delta)
                 .build();
 
             var paths = DeltaStepping
-                .of(graph, config, delta, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
+                .of(graph, config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 

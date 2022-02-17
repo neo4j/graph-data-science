@@ -34,9 +34,9 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.Arrays;
@@ -67,8 +67,7 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
 
     public static DeltaStepping of(
         Graph graph,
-        AllShortestPathsBaseConfig config,
-        double delta,
+        AllShortestPathsDeltaBaseConfig config,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
@@ -76,7 +75,7 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
         return new DeltaStepping(
             graph,
             graph.toMappedNodeId(config.sourceNode()),
-            delta,
+            config.delta(),
             config.concurrency(),
             true,
             executorService,
