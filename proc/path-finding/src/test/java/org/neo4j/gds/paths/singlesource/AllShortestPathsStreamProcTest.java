@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.singlesource;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -63,7 +62,6 @@ public abstract class AllShortestPathsStreamProcTest extends AllShortestPathsPro
     }
 
     @Test
-    @Disabled
     void testMemoryEstimation() {
         var query = GdsCypher.call("graph")
             .algo(getProcedureName())

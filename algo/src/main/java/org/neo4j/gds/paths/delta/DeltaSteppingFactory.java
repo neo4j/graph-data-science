@@ -23,6 +23,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 
@@ -43,4 +44,8 @@ public class DeltaSteppingFactory<T extends AllShortestPathsDeltaBaseConfig> ext
         return "DeltaStepping";
     }
 
+    @Override
+    public MemoryEstimation memoryEstimation(T configuration) {
+        return DeltaStepping.memoryEstimation(true);
+    }
 }

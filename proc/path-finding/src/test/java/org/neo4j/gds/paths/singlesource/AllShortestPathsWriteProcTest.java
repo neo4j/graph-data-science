@@ -20,7 +20,6 @@
 package org.neo4j.gds.paths.singlesource;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -110,7 +109,6 @@ public abstract class AllShortestPathsWriteProcTest extends AllShortestPathsProc
     }
 
     @Test
-    @Disabled
     void testMemoryEstimation() {
         var query = GdsCypher.call("graph")
             .algo(getProcedureName())
