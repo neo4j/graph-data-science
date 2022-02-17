@@ -22,6 +22,8 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.ImmutableRelationship;
 import org.neo4j.gds.core.write.Relationship;
@@ -32,6 +34,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
+import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -56,6 +59,15 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             progressTracker
         );
         this.knnConfig = knnConfig;
+    }
+
+    public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config) {
+        var knnConfig = config.approximateConfig();
+        var knnEstimation = new KnnFactory<>().memoryEstimation(knnConfig);
+
+        return MemoryEstimations.builder(ApproximateLinkPrediction.class)
+            .add(knnEstimation)
+            .build();
     }
 
     @Override
@@ -104,10 +116,10 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             return predictions
                 .streamSimilarityResult()
                 .map(i -> ImmutableRelationship.of(
-                i.node1,
-                i.node2,
-                new Value[]{Values.doubleValue(i.similarity)}
-            ));
+                    i.node1,
+                    i.node2,
+                    new Value[]{Values.doubleValue(i.similarity)}
+                ));
         }
 
         @Override

@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
@@ -30,6 +32,7 @@ import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,7 +40,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     LinkPredictionPredictPipelineBaseConfig,
     LinkPredictionPipeline,
     LinkPredictionResult
-> {
+    > {
     private final LinkLogisticRegressionData linkLogisticRegressionData;
 
     LinkPredictionPredictPipelineExecutor(
@@ -75,6 +78,25 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, pipeline.featureSteps());
         var linkPrediction = getLinkPredictionStrategy(graph, config.isApproximateStrategy(), linkFeatureExtractor);
         return linkPrediction.compute();
+    }
+
+    public static MemoryEstimation estimate(
+        LinkPredictionPipeline pipeline,
+        LinkPredictionPredictPipelineBaseConfig configuration
+    ) {
+        MemoryEstimation maxOverNodePropertySteps = PipelineExecutor.estimateNodePropertySteps(
+            pipeline.nodePropertySteps(),
+            configuration.nodeLabels(),
+            configuration.relationshipTypes()
+        );
+
+        var predictEstimation = configuration.isApproximateStrategy()
+            ? ApproximateLinkPrediction.estimate(configuration)
+            : ExhaustiveLinkPrediction.estimate(configuration);
+
+        return MemoryEstimations.builder(LinkPredictionPredictPipelineExecutor.class)
+            .max("Pipeline execution", List.of(maxOverNodePropertySteps, predictEstimation))
+            .build();
     }
 
     private LinkPrediction getLinkPredictionStrategy(

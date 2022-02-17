@@ -23,6 +23,8 @@ import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -56,6 +58,11 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         );
         this.topN = topN;
         this.threshold = threshold;
+    }
+
+    public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config) {
+        // TODO: Fill me in!
+        return MemoryEstimations.of(ExhaustiveLinkPrediction.class);
     }
 
     @Override

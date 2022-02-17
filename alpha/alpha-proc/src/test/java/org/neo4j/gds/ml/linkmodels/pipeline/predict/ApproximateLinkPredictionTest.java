@@ -30,6 +30,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -129,21 +130,21 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
         assertThat(predictedLinks.size()).isLessThanOrEqualTo((int) (topK * graph.nodeCount()));
 
-            var expectedLinks = List.of(
-                PredictedLink.of(0, 4, 0.49750002083312506),
-                PredictedLink.of(0, 3, 0.0024726231566347774),
-                PredictedLink.of(0, 1, 0.11506673204554983),
-                PredictedLink.of(1, 0, 0.11506673204554983),
-                PredictedLink.of(1, 4, 0.11815697780926958),
-                PredictedLink.of(1, 2, 0.0953494648991095),
-                PredictedLink.of(2, 1, 0.0953494648991095),
-                PredictedLink.of(2, 3, 2.810228605019867E-9),
-                PredictedLink.of(2, 0, 2.0547103309367397E-4),
-                PredictedLink.of(3, 0, 0.0024726231566347774),
-                PredictedLink.of(3, 2, 2.810228605019867E-9),
-                PredictedLink.of(4, 0, 0.49750002083312506),
-                PredictedLink.of(4, 1, 0.11815697780926958)
-            );
+        var expectedLinks = List.of(
+            PredictedLink.of(0, 4, 0.49750002083312506),
+            PredictedLink.of(0, 3, 0.0024726231566347774),
+            PredictedLink.of(0, 1, 0.11506673204554983),
+            PredictedLink.of(1, 0, 0.11506673204554983),
+            PredictedLink.of(1, 4, 0.11815697780926958),
+            PredictedLink.of(1, 2, 0.0953494648991095),
+            PredictedLink.of(2, 1, 0.0953494648991095),
+            PredictedLink.of(2, 3, 2.810228605019867E-9),
+            PredictedLink.of(2, 0, 2.0547103309367397E-4),
+            PredictedLink.of(3, 0, 0.0024726231566347774),
+            PredictedLink.of(3, 2, 2.810228605019867E-9),
+            PredictedLink.of(4, 0, 0.49750002083312506),
+            PredictedLink.of(4, 1, 0.11815697780926958)
+        );
 
         assertThat(predictedLinks)
             .isSubsetOf(expectedLinks)
@@ -237,5 +238,22 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             assertThat(graph.exists(predictedLink.targetId(), predictedLink.sourceId())).isFalse();
             assertThat(predictedLink.targetId()).isNotEqualTo(predictedLink.sourceId());
         });
+    }
+
+    @Test
+    void estimate() {
+        var config = LinkPredictionPredictPipelineBaseConfigImpl.builder()
+            .topK(10)
+            .sampleRate(0.1)
+            .username("DUMMY")
+            .modelName("DUMMY")
+            .graphName("DUMMY")
+            .build();
+
+        var actualEstimate = ApproximateLinkPrediction
+            .estimate(config)
+            .estimate(GraphDimensions.of(100, 1000), config.concurrency());
+
+        assertThat(actualEstimate.memoryUsage().toString()).isEqualTo("[23 KiB ... 42 KiB]");
     }
 }
