@@ -114,20 +114,20 @@ final class ShortestPathDeltaSteppingTest {
     @Test
     void testParallel() {
         var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"), 3, ProgressTracker.NULL_TRACKER)
-                .withExecutorService(Executors.newFixedThreadPool(3));
+            .withExecutorService(Executors.newFixedThreadPool(3));
 
         var sp = sssp.compute().getShortestPaths();
 
-        assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId("x"))],0.1);
+        assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId("x"))], 0.1);
     }
 
     @Test
     void distanceToNodeInDifferentComponentShouldBeInfinity() {
-        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"),3, ProgressTracker.NULL_TRACKER);
+        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"), 3, ProgressTracker.NULL_TRACKER);
 
         var sp = sssp.compute().getShortestPaths();
 
-        assertEquals(Double.POSITIVE_INFINITY, sp[Math.toIntExact(graph.toMappedNodeId("z"))],0.1);
+        assertEquals(Double.POSITIVE_INFINITY, sp[Math.toIntExact(graph.toMappedNodeId("z"))], 0.1);
     }
 
     @Test
