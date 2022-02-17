@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 
 @GdsCallable(name = "gds.allShortestPaths.delta.write", description = DeltaStepping.DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class AllShortestPathsDeltaSteppingWriteSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>, DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig>> {
+public class AllShortestPathsDeltaWriteSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>, DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig>> {
     @Override
     public String name() {
         return "gds.allShortestPaths.delta.write";

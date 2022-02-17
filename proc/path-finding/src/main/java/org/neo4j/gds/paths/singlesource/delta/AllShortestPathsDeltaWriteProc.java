@@ -54,7 +54,7 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var writeSpec = new AllShortestPathsDeltaSteppingWriteSpec();
+        var writeSpec = new AllShortestPathsDeltaWriteSpec();
         var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig>();
 
         return new ProcedureExecutor<>(
@@ -70,7 +70,7 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var writeSpec = new AllShortestPathsDeltaSteppingWriteSpec();
+        var writeSpec = new AllShortestPathsDeltaWriteSpec();
         var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig>();
 
         return new MemoryEstimationExecutor<>(

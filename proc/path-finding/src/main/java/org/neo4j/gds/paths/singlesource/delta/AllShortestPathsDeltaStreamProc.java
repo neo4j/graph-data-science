@@ -45,7 +45,7 @@ public class AllShortestPathsDeltaStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var deltaSteppingStreamSpec = new AllShortestPathsDeltaSteppingStreamSpec();
+        var deltaSteppingStreamSpec = new AllShortestPathsDeltaStreamSpec();
         var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig>();
 
         return new ProcedureExecutor<>(
@@ -61,7 +61,7 @@ public class AllShortestPathsDeltaStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var deltaSteppingStreamSpec = new AllShortestPathsDeltaSteppingStreamSpec();
+        var deltaSteppingStreamSpec = new AllShortestPathsDeltaStreamSpec();
         var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig>();
 
         return new MemoryEstimationExecutor<>(

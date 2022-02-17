@@ -45,7 +45,7 @@ public class AllShortestPathsDeltaMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var mutateSpec = new AllShortestPathsDeltaSteppingMutateSpec();
+        var mutateSpec = new AllShortestPathsDeltaMutateSpec();
         var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaMutateConfig>();
 
         return new ProcedureExecutor<>(
@@ -61,7 +61,7 @@ public class AllShortestPathsDeltaMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var mutateSpec = new AllShortestPathsDeltaSteppingMutateSpec();
+        var mutateSpec = new AllShortestPathsDeltaMutateSpec();
         var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaMutateConfig>();
 
         return new MemoryEstimationExecutor<>(
