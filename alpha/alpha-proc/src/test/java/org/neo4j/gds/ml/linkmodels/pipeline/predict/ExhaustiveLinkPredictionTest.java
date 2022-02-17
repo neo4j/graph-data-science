@@ -31,6 +31,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -179,5 +180,45 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         assertThat(predictedLinks).hasSize(expectedPredictions);
 
         assertThat(predictedLinks).allMatch(l -> l.probability() >= threshold);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "1, 3684",
+        "10, 3900"
+    })
+    void estimateWithDifferentTopN(int topN, long expectedEstimation) {
+        var config = LinkPredictionPredictPipelineBaseConfigImpl.builder()
+            .topN(topN)
+            .username("DUMMY")
+            .modelName("DUMMY")
+            .graphName("DUMMY")
+            .build();
+
+        var actualEstimate = ExhaustiveLinkPrediction
+            .estimate(config, 100)
+            .estimate(GraphDimensions.of(100, 1000), config.concurrency());
+
+        assertThat(actualEstimate.memoryUsage().max).isEqualTo(expectedEstimation);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "10, 1020",
+        "1000, 32700"
+    })
+    void estimateWithDifferentLinkFeatureDimension(int linkFeatureDimension, long expectedEstimation) {
+        var config = LinkPredictionPredictPipelineBaseConfigImpl.builder()
+            .topN(10)
+            .username("DUMMY")
+            .modelName("DUMMY")
+            .graphName("DUMMY")
+            .build();
+
+        var actualEstimate = ExhaustiveLinkPrediction
+            .estimate(config, linkFeatureDimension)
+            .estimate(GraphDimensions.of(100, 1000), config.concurrency());
+
+        assertThat(actualEstimate.memoryUsage().max).isEqualTo(expectedEstimation);
     }
 }

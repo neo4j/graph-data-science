@@ -25,10 +25,12 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.linkmodels.ExhaustiveLinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
@@ -61,8 +63,12 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
     }
 
     public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config, int linkFeatureDimension) {
-        // TODO: Fill me in!
-        return MemoryEstimations.of(ExhaustiveLinkPrediction.class);
+        return MemoryEstimations.builder(ExhaustiveLinkPrediction.class)
+            .add("Priority queue", BoundedLongLongPriorityQueue.memoryEstimation(config.topN().orElseThrow()))
+            .perGraphDimension("Predict links operation", (dim, threads) -> MemoryRange.of(
+                MemoryUsage.sizeOfDoubleArray(linkFeatureDimension) + MemoryUsage.sizeOfLongHashSet(dim.averageDegree())
+            ).times(threads))
+            .build();
     }
 
     @Override
