@@ -39,6 +39,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -52,6 +53,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
@@ -423,9 +425,29 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         });
     }
 
-    @Test
-    void estimateWithDifferentSplitConfig() {
-        // FIXME: This is not working
+    static Stream<Arguments> estimationsForDiffNodeSteps() {
+        var degreeCentr = NodePropertyStepFactory.createNodePropertyStep(
+            ExecutionContext.EMPTY.username(),
+            "degree",
+            Map.of("mutateProperty", "degree")
+        );
+
+        var fastRP = NodePropertyStepFactory.createNodePropertyStep(
+            ExecutionContext.EMPTY.username(),
+            "fastRP",
+            Map.of("mutateProperty", "fastRP", "embeddingDimension", 512)
+        );
+
+        return Stream.of(
+            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(71_080, 2_082_040)),
+            Arguments.of("only FastRP", List.of(fastRP), MemoryRange.of(6_204_288)),
+            Arguments.of("Both", List.of(degreeCentr, fastRP), MemoryRange.of(6_204_288))
+        );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("estimationsForDiffNodeSteps")
+    void estimateWithDifferentNodePropertySteps(String desc, List<NodePropertyStep> nodePropertySteps, MemoryRange expectedRange) {
         var config = LinkPredictionTrainConfig
             .builder()
             .modelName("DUMMY")
@@ -435,19 +457,19 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
 
-        var splitConfig = LinkPredictionSplitConfigImpl.builder()
-            .testFraction(0.2)
-            .trainFraction(0.3)
-            .validationFolds(3)
-            .negativeSamplingRatio(1.0)
-            .build();
-        pipeline.setSplitConfig(splitConfig);
-        var actualEstimation = LinkPredictionTrainPipelineExecutor.estimate(
-            new OpenModelCatalog(),
-            pipeline,
-            config
-        ).estimate(pipeline.splitConfig().expectedGraphDimensions(100, 1_000), config.concurrency());
+        for (NodePropertyStep propertyStep : nodePropertySteps) {
+            pipeline.addNodePropertyStep(propertyStep);
+        }
 
-        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(42, 42));
+        GraphDimensions graphDimensions = pipeline.splitConfig().expectedGraphDimensions(1000, 500);
+
+        var actualRange = LinkPredictionTrainPipelineExecutor
+            .estimate(new OpenModelCatalog(), pipeline, config)
+            .estimate(graphDimensions, config.concurrency())
+            .memoryUsage();
+
+        assertThat(actualRange)
+            .withFailMessage("Got %d, %d", actualRange.min, actualRange.max)
+            .isEqualTo(expectedRange);
     }
 }
