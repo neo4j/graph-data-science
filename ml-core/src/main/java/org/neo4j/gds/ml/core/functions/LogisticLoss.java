@@ -51,7 +51,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class LogisticLoss extends AbstractVariable<Scalar> {
     // 1 x d
     private final Variable<Matrix> weights;
-    private Variable<Scalar> bias = null;
+    private final Variable<Scalar> bias;
     // n x 1
     private final Variable<Matrix> predictions;
     // n x d
@@ -75,6 +75,7 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
         this.predictions = predictions;
         this.features = features;
         this.targets = targets;
+        this.bias = null;
     }
 
     public LogisticLoss(
