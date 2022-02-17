@@ -41,7 +41,14 @@ public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvid
         long commitTimestamp,
         CursorContext cursorContext
     ) {
-        this.transactionIdStore.transactionClosed(transactionId, logVersion, byteOffset, cursorContext);
+        this.transactionIdStore.transactionClosed(
+            transactionId,
+            logVersion,
+            byteOffset,
+            checksum,
+            commitTimestamp,
+            cursorContext
+        );
     }
 
     @Override
@@ -59,6 +66,8 @@ public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvid
             logVersion,
             byteOffset,
             missingLogs,
+            checksum,
+            commitTimestamp,
             cursorContext
         );
     }
