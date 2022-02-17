@@ -23,8 +23,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,6 +40,7 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.paths.PathTestUtil.expected;
 
@@ -55,6 +58,19 @@ final class DeltaSteppingTest {
                 new IncrementingIdSupplier(42L)
             ).map(Arguments::of)
         );
+    }
+
+    @ParameterizedTest
+    @CsvSource({"10_000,100_000,260216,1280216", "100_000,1_000_000,2600216,12800216"})
+    void memoryEstimation(long nodeCount, long relationshipCount, long expectedMin, long expectedMax) {
+        var dimensions = GraphDimensions.builder().nodeCount(nodeCount).relCountUpperBound(relationshipCount).build();
+
+        var estimation = DeltaStepping.memoryEstimation(true);
+
+        var actual = estimation.estimate(dimensions, 4).memoryUsage();
+
+        assertThat(actual.min).isEqualTo(expectedMin);
+        assertThat(actual.max).isEqualTo(expectedMax);
     }
 
     @Nested
