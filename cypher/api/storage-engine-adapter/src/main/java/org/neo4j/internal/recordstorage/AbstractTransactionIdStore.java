@@ -119,7 +119,7 @@ public abstract class AbstractTransactionIdStore implements TransactionIdStore {
     ) {
         this.committingTransactionId.set(transactionId);
         this.committedTransactionId.set(new TransactionId(transactionId, checksum, commitTimestamp));
-        this.closedTransactionId.set(transactionId, new long[]{logVersion, byteOffset});
+        this.closedTransactionId.set(transactionId, new long[]{logVersion, byteOffset, checksum, commitTimestamp});
     }
 
     public void transactionClosed(long transactionId, long logVersion, long byteOffset, CursorContext cursorContext) {
