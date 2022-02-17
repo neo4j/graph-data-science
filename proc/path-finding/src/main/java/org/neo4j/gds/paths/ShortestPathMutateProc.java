@@ -22,82 +22,29 @@ package org.neo4j.gds.paths;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.values.storable.NumberType;
 
-import java.util.Optional;
+public abstract class ShortestPathMutateProc<ALGO extends Algorithm<DijkstraResult>, CONFIG extends AlgoBaseConfig & MutateRelationshipConfig> extends MutateProc<ALGO, DijkstraResult, MutateResult, CONFIG> {
 
-import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
-
-public abstract class ShortestPathMutateProc<ALGO extends Algorithm<DijkstraResult>, CONFIG extends AlgoBaseConfig & MutateRelationshipConfig>
-    extends MutateProc<ALGO, DijkstraResult, MutateResult, CONFIG> {
+    @SuppressWarnings("unchecked")
     @Override
     public MutateComputationResultConsumer<ALGO, DijkstraResult, CONFIG, MutateResult> computationResultConsumer() {
-        return new MutateComputationResultConsumer<>(this::resultBuilder) {
-            @Override
-            protected void updateGraphStore(
-                AbstractResultBuilder<?> resultBuilder,
-                ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult,
-                ExecutionContext executionContext
-            ) {
-                var config = computationResult.config();
-                var result = computationResult.result();
-
-                var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
-
-                var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-                    .nodes(computationResult.graph())
-                    .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-                    .orientation(Orientation.NATURAL)
-                    .allocationTracker(allocationTracker())
-                    .build();
-
-                Relationships relationships;
-
-                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                    result.forEachPath(pathResult -> {
-                        relationshipsBuilder.addFromInternal(
-                            pathResult.sourceNode(),
-                            pathResult.targetNode(),
-                            pathResult.totalCost()
-                        );
-                    });
-                    relationships = relationshipsBuilder.build();
-                    resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
-                }
-
-                computationResult
-                    .graphStore()
-                    .addRelationshipType(
-                        mutateRelationshipType,
-                        Optional.of(TOTAL_COST_KEY),
-                        Optional.of(NumberType.FLOATING_POINT),
-                        relationships
-                    );
-            }
-        };
+        return new ShortestPathMutateResultConsumer<>();
     }
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<ALGO, DijkstraResult, CONFIG> computeResult,
-        ExecutionContext executionContext
+        ComputationResult<ALGO, DijkstraResult, CONFIG> computeResult, ExecutionContext executionContext
     ) {
         return new MutateResult.Builder()
             .withPreProcessingMillis(computeResult.preProcessingMillis())
             .withComputeMillis(computeResult.computeMillis())
             .withConfig(computeResult.config());
     }
+
 }

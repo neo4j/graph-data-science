@@ -23,9 +23,9 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
-import org.neo4j.gds.paths.StreamResult;
+import org.neo4j.gds.paths.MutateResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -35,38 +35,38 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.singlesource.delta.DeltaSteppingStreamSpec.DELTA_DESCRIPTION;
+import static org.neo4j.gds.paths.singlesource.delta.DeltaSteppingMutateSpec.DELTA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class AllShortestPathsDeltaStreamProc extends BaseProc {
+public class AllShortestPathsDeltaMutateProc extends BaseProc {
 
-    @Procedure(name = "gds.allShortestPaths.delta.stream", mode = READ)
+    @Procedure(name = "gds.allShortestPaths.delta.mutate", mode = READ)
     @Description(DELTA_DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<MutateResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var deltaSteppingStreamSpec = new DeltaSteppingStreamSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig>();
+        var mutateSpec = new DeltaSteppingMutateSpec();
+        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaMutateConfig>();
 
         return new ProcedureExecutor<>(
-            deltaSteppingStreamSpec,
+            mutateSpec,
             pipelineSpec,
             executionContext()
         ).compute(graphName, configuration, true, true);
     }
 
-    @Procedure(name = "gds.allShortestPaths.delta.stream.estimate", mode = READ)
+    @Procedure(name = "gds.allShortestPaths.delta.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var deltaSteppingStreamSpec = new DeltaSteppingStreamSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig>();
+        var mutateSpec = new DeltaSteppingMutateSpec();
+        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaMutateConfig>();
 
         return new MemoryEstimationExecutor<>(
-            deltaSteppingStreamSpec,
+            mutateSpec,
             pipelineSpec,
             executionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);

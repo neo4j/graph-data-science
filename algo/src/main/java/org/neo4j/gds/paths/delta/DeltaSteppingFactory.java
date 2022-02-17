@@ -26,12 +26,12 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 
-public class DeltaSteppingFactory extends GraphAlgorithmFactory<DeltaStepping, AllShortestPathsDeltaBaseConfig> {
+public class DeltaSteppingFactory<T extends AllShortestPathsDeltaBaseConfig> extends GraphAlgorithmFactory<DeltaStepping, T> {
 
     @Override
     public DeltaStepping build(
         Graph graph,
-        AllShortestPathsDeltaBaseConfig configuration,
+        T configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {

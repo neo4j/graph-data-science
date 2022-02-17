@@ -23,40 +23,40 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.paths.ShortestPathStreamResultConsumer;
-import org.neo4j.gds.paths.StreamResult;
+import org.neo4j.gds.paths.ShortestPathWriteResultConsumer;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingFactory;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.paths.singlesource.delta.DeltaSteppingStreamSpec.DELTA_DESCRIPTION;
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
+import static org.neo4j.gds.paths.singlesource.delta.DeltaSteppingWriteSpec.DELTA_DESCRIPTION;
 
-@GdsCallable(name = "gds.allShortestPaths.delta.stream", description = DELTA_DESCRIPTION, executionMode = STREAM)
-public class DeltaSteppingStreamSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>, DeltaSteppingFactory<AllShortestPathsDeltaStreamConfig>> {
+@GdsCallable(name = "gds.allShortestPaths.delta.write", description = DELTA_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+public class DeltaSteppingWriteSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>, DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig>> {
     static final String DELTA_DESCRIPTION = "The Delta Stepping shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
 
     @Override
     public String name() {
-        return "gds.allShortestPaths.delta.stream";
+        return "gds.allShortestPaths.delta.write";
     }
 
     @Override
-    public DeltaSteppingFactory<AllShortestPathsDeltaStreamConfig> algorithmFactory() {
+    public DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig> algorithmFactory() {
         return new DeltaSteppingFactory<>();
     }
 
     @Override
-    public NewConfigFunction<AllShortestPathsDeltaStreamConfig> newConfigFunction() {
-        return (username, configuration) -> AllShortestPathsDeltaStreamConfig.of(configuration);
+    public NewConfigFunction<AllShortestPathsDeltaWriteConfig> newConfigFunction() {
+        return (username, configuration) -> AllShortestPathsDeltaWriteConfig.of(configuration);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return new ShortestPathStreamResultConsumer<>();
+    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
+        return new ShortestPathWriteResultConsumer<>();
     }
 }

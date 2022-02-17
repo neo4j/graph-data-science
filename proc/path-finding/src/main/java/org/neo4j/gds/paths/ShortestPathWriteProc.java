@@ -21,25 +21,14 @@ package org.neo4j.gds.paths;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.StreamOfRelationshipsWriter;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.ImmutableRelationship;
-import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.COSTS_KEY;
-import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.NODE_IDS_KEY;
-import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
 public abstract class ShortestPathWriteProc<ALGO extends Algorithm<DijkstraResult>, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig & WritePathOptionsConfig>
     extends StreamOfRelationshipsWriter<ALGO, DijkstraResult, CONFIG, StandardWriteRelationshipsResult> {
@@ -48,118 +37,9 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<DijkstraResul
         return computationResultConsumer().consume(computationResult, executionContext());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public ComputationResultConsumer<ALGO, DijkstraResult, CONFIG, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging("Write relationships failed", () -> {
-            var config = computationResult.config();
-
-            var resultBuilder = new StandardWriteRelationshipsResult.Builder()
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withConfig(config);
-
-            if (computationResult.isGraphEmpty()) {
-                return Stream.of(new StandardWriteRelationshipsResult(
-                    computationResult.preProcessingMillis(),
-                    0L,
-                    0L,
-                    0L,
-                    0L,
-                    config.toMap()
-                ));
-            }
-
-            var algorithm = computationResult.algorithm();
-            var result = computationResult.result();
-
-            var writeRelationshipType = config.writeRelationshipType();
-
-            boolean writeNodeIds = config.writeNodeIds();
-            boolean writeCosts = config.writeCosts();
-
-            var graph = computationResult.graph();
-
-            var relationshipStream = result
-                .mapPaths(pathResult -> ImmutableRelationship.of(
-                    pathResult.sourceNode(),
-                    pathResult.targetNode(),
-                    createValues(graph, pathResult, writeNodeIds, writeCosts)
-                ));
-
-            var progressTracker = new TaskProgressTracker(
-                RelationshipStreamExporter.baseTask(name()),
-                log,
-                1,
-                taskRegistryFactory
-            );
-
-            // this is necessary in order to close the relationship stream which triggers
-            // the progress tracker to close its root task
-            try (var statement = transaction.acquireStatement()) {
-                statement.registerCloseableResource(relationshipStream);
-
-                var exporter = relationshipStreamExporterBuilder
-                    .withIdMappingOperator(computationResult.graph()::toOriginalNodeId)
-                    .withRelationships(relationshipStream)
-                    .withTerminationFlag(algorithm.getTerminationFlag())
-                    .withProgressTracker(progressTracker)
-                    .build();
-
-                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-                    resultBuilder.withRelationshipsWritten(exporter.write(
-                        writeRelationshipType,
-                        createKeys(writeNodeIds, writeCosts)
-                    ));
-                }
-            }
-
-            return Stream.of(resultBuilder.build());
-        });
-    }
-
-    private static String[] createKeys(boolean writeNodeIds, boolean writeCosts) {
-        if (writeNodeIds && writeCosts) {
-            return new String[]{TOTAL_COST_KEY, NODE_IDS_KEY, COSTS_KEY};
-        }
-        if (writeNodeIds) {
-            return new String[]{TOTAL_COST_KEY, NODE_IDS_KEY};
-        }
-        if (writeCosts) {
-            return new String[]{TOTAL_COST_KEY, COSTS_KEY};
-        }
-        return new String[]{TOTAL_COST_KEY};
-    }
-
-    private static Value[] createValues(IdMap idMap, PathResult pathResult, boolean writeNodeIds, boolean writeCosts) {
-        if (writeNodeIds && writeCosts) {
-            return new Value[]{
-                Values.doubleValue(pathResult.totalCost()),
-                Values.longArray(toOriginalIds(idMap, pathResult.nodeIds())),
-                Values.doubleArray(pathResult.costs())
-            };
-        }
-        if (writeNodeIds) {
-            return new Value[]{
-                Values.doubleValue(pathResult.totalCost()),
-                Values.longArray(toOriginalIds(idMap, pathResult.nodeIds())),
-            };
-        }
-        if (writeCosts) {
-            return new Value[]{
-                Values.doubleValue(pathResult.totalCost()),
-                Values.doubleArray(pathResult.costs())
-            };
-        }
-        return new Value[]{
-            Values.doubleValue(pathResult.totalCost()),
-        };
-    }
-
-    // Replaces the ids in the given array with the original ids
-    private static long[] toOriginalIds(IdMap idMap, long[] internalIds) {
-        for (int i = 0; i < internalIds.length; i++) {
-            internalIds[i] = idMap.toOriginalNodeId(internalIds[i]);
-        }
-        return internalIds;
+        return new ShortestPathWriteResultConsumer<>();
     }
 }

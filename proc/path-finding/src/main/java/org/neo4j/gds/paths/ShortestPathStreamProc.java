@@ -23,13 +23,10 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 public abstract class ShortestPathStreamProc<
     ALGO extends Algorithm<DijkstraResult>,
@@ -41,37 +38,7 @@ public abstract class ShortestPathStreamProc<
     }
 
     @Override
-    public Stream<StreamResult> stream(ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
-        return runWithExceptionLogging("Result streaming failed", () -> stream(computationResult, executionContext()));
-    }
-
-    public static <ALGO extends Algorithm<DijkstraResult>, CONFIG extends AlgoBaseConfig> Stream<StreamResult> stream(
-        ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var graph = computationResult.graph();
-
-        if (computationResult.isGraphEmpty()) {
-            graph.release();
-            return Stream.empty();
-        }
-
-        var shouldReturnPath = executionContext.callContext()
-            .outputFields()
-            .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
-
-        var resultBuilder = new StreamResult.Builder(graph, executionContext.transaction().internalTransaction());
-
-        var resultStream = computationResult
-            .result()
-            .mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
-
-        // this is necessary in order to close the result stream which triggers
-        // the progress tracker to close its root task
-        try (var statement = executionContext.transaction().acquireStatement()) {
-            statement.registerCloseableResource(resultStream);
-        }
-
-        return resultStream;
+    public ComputationResultConsumer<ALGO, DijkstraResult, CONFIG, Stream<StreamResult>> computationResultConsumer() {
+        return new ShortestPathStreamResultConsumer<>();
     }
 }
