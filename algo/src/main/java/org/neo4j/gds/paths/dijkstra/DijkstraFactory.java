@@ -60,43 +60,39 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
         return Tasks.leaf(taskName, graph.relationshipCount());
     }
 
-    public static <T extends ShortestPathBaseConfig> DijkstraFactory<T> sourceTarget() {
-        return new DijkstraFactory<>() {
-            @Override
-            public Dijkstra build(
-                Graph graph,
-                T configuration,
-                AllocationTracker allocationTracker,
-                ProgressTracker progressTracker
-            ) {
-                return Dijkstra.sourceTarget(
-                    graph,
-                    configuration,
-                    Optional.empty(),
-                    progressTracker,
-                    allocationTracker
-                );
-            }
-        };
+    public static class SourceTargetDijkstraFactory<T extends ShortestPathBaseConfig> extends DijkstraFactory<T> {
+        @Override
+        public Dijkstra build(
+            Graph graph,
+            T configuration,
+            AllocationTracker allocationTracker,
+            ProgressTracker progressTracker
+        ) {
+            return Dijkstra.sourceTarget(
+                graph,
+                configuration,
+                Optional.empty(),
+                progressTracker,
+                allocationTracker
+            );
+        }
     }
 
-    public static <T extends AllShortestPathsBaseConfig> DijkstraFactory<T> singleSource() {
-        return new DijkstraFactory<>() {
-            @Override
-            public Dijkstra build(
-                Graph graph,
-                T configuration,
-                AllocationTracker allocationTracker,
-                ProgressTracker progressTracker
-            ) {
-                return Dijkstra.singleSource(
-                    graph,
-                    configuration,
-                    Optional.empty(),
-                    progressTracker,
-                    allocationTracker
-                );
-            }
-        };
+    public static class AllShortestPathsDijkstraFactory<T extends AllShortestPathsBaseConfig> extends DijkstraFactory<T> {
+        @Override
+        public Dijkstra build(
+            Graph graph,
+            T configuration,
+            AllocationTracker allocationTracker,
+            ProgressTracker progressTracker
+        ) {
+            return Dijkstra.singleSource(
+                graph,
+                configuration,
+                Optional.empty(),
+                progressTracker,
+                allocationTracker
+            );
+        }
     }
 }

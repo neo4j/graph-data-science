@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.paths.singlesource.dijkstra;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.paths.ShortestPathStreamProc;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
+import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -35,38 +35,40 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.paths.singlesource.dijkstra.AllShortestPathsDijkstraProc.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.gds.paths.singlesource.dijkstra.DijkstraStreamSpec.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.allShortestPaths.dijkstra.stream", description = DIJKSTRA_DESCRIPTION, executionMode = STREAM)
-public class AllShortestPathsDijkstraStreamProc extends ShortestPathStreamProc<Dijkstra, AllShortestPathsDijkstraStreamConfig> {
+public class AllShortestPathsDijkstraStreamProc extends BaseProc {
 
-    @Procedure(name = "gds.allShortestPaths.dijkstra.stream", mode = READ)
+    @Procedure(name = "gds.allShortestPaths.delta.stream", mode = READ)
     @Description(DIJKSTRA_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration, false, true));
+        var deltaStreamSpec = new DijkstraStreamSpec();
+        var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraStreamConfig>();
+
+        return new ProcedureExecutor<>(
+            deltaStreamSpec,
+            pipelineSpec,
+            executionContext()
+        ).compute(graphName, configuration, true, true);
     }
 
-    @Procedure(name = "gds.allShortestPaths.dijkstra.stream.estimate", mode = READ)
+    @Procedure(name = "gds.allShortestPaths.delta.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
+        var deltaStreamSpec = new DijkstraStreamSpec();
+        var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraStreamConfig>();
 
-    @Override
-    protected AllShortestPathsDijkstraStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return AllShortestPathsDijkstraStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraStreamConfig> algorithmFactory() {
-        return DijkstraFactory.singleSource();
+        return new MemoryEstimationExecutor<>(
+            deltaStreamSpec,
+            pipelineSpec,
+            executionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

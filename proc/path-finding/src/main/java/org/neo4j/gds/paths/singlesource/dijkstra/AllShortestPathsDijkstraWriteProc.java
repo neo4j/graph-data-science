@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.paths.singlesource.dijkstra;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.paths.ShortestPathWriteProc;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
+import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
@@ -35,21 +35,26 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
-import static org.neo4j.gds.paths.singlesource.dijkstra.AllShortestPathsDijkstraProc.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.gds.paths.singlesource.dijkstra.DijkstraWriteSpec.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.allShortestPaths.dijkstra.write", description = DIJKSTRA_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dijkstra, AllShortestPathsDijkstraWriteConfig> {
+public class AllShortestPathsDijkstraWriteProc extends BaseProc {
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.write", mode = WRITE)
     @Description(DIJKSTRA_DESCRIPTION)
-    public Stream<StandardWriteRelationshipsResult> write(
+    public Stream<StandardWriteRelationshipsResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration, false, true));
+        var writeSpec = new DijkstraWriteSpec();
+        var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig>();
+
+        return new ProcedureExecutor<>(
+            writeSpec,
+            pipelineSpec,
+            executionContext()
+        ).compute(graphName, configuration, true, true);
     }
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.write.estimate", mode = READ)
@@ -58,16 +63,13 @@ public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dij
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
+        var writeSpec = new DijkstraWriteSpec();
+        var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig>();
 
-    @Override
-    protected AllShortestPathsDijkstraWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return AllShortestPathsDijkstraWriteConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraWriteConfig> algorithmFactory() {
-        return DijkstraFactory.singleSource();
+        return new MemoryEstimationExecutor<>(
+            writeSpec,
+            pipelineSpec,
+            executionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
