@@ -330,7 +330,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337}" +
             ") YIELD requiredMemory",
             Map.of("graphName", GRAPH_NAME),
-            List.of(Map.of("requiredMemory", "[65 KiB ... 1699 KiB]"))
+            List.of(Map.of("requiredMemory", "[58 KiB ... 1669 KiB]"))
         );
     }
 
