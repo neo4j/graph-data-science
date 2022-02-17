@@ -70,8 +70,7 @@ public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
 
         var linkPredictionSimilarityComputer = new LinkPredictionSimilarityComputer(
             linkFeatureExtractor,
-            predictor,
-            graph
+            predictor
         );
 
         return predictLinks(graph, linkPredictionSimilarityComputer);

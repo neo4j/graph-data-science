@@ -72,8 +72,7 @@ class LinkPredictionSimilarityComputerTest {
         );
         var lpSimComputer = new LinkPredictionSimilarityComputer(
             linkFeatureExtractor,
-            new LinkLogisticRegressionPredictor(modelData),
-            graph
+            new LinkLogisticRegressionPredictor(modelData)
         );
         assertThat(lpSimComputer.similarity(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"))).isEqualTo(
             0.5099986668799655);

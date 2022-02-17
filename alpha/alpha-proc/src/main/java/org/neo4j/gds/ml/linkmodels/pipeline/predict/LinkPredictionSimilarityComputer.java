@@ -30,16 +30,13 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
     private final LinkFeatureExtractor linkFeatureExtractor;
     private final LinkLogisticRegressionPredictor predictor;
-    private final Graph graph;
 
     LinkPredictionSimilarityComputer(
         LinkFeatureExtractor linkFeatureExtractor,
-        LinkLogisticRegressionPredictor predictor,
-        Graph graph
+        LinkLogisticRegressionPredictor predictor
     ) {
         this.linkFeatureExtractor = linkFeatureExtractor;
         this.predictor = predictor;
-        this.graph = graph;
     }
 
     @Override
