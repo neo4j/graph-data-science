@@ -160,6 +160,7 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
 
     @Override
     public DijkstraResult compute() {
+        progressTracker.beginSubTask();
         int iteration = 0;
         int currentBin = 0;
 
@@ -176,18 +177,21 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
 
         while (currentBin != NO_BIN) {
             // Phase 1
+            progressTracker.beginSubTask();
             for (var task : relaxTasks) {
                 task.setPhase(Phase.RELAX);
                 task.setBinIndex(currentBin);
                 task.setFrontierLength(frontierSize.longValue());
             }
             ParallelUtil.run(relaxTasks, executorService);
+            progressTracker.endSubTask();
 
             // Sync barrier
             // Find smallest non-empty bin across all tasks
             currentBin = relaxTasks.stream().mapToInt(DeltaSteppingTask::minNonEmptyBin).min().orElseThrow();
 
             // Phase 2
+            progressTracker.beginSubTask();
             frontierIndex.set(0);
             relaxTasks.forEach(task -> task.setPhase(Phase.SYNC));
 
@@ -196,13 +200,14 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
                 task.setBinIndex(currentBin);
             }
             ParallelUtil.run(relaxTasks, executorService);
+            progressTracker.endSubTask();
 
             iteration += 1;
             frontierSize.set(frontierIndex.longValue());
             frontierIndex.set(0);
         }
 
-        return new DijkstraResult(pathResults(distances, startNode, concurrency));
+        return new DijkstraResult(pathResults(distances, startNode, concurrency), progressTracker::endSubTask);
     }
 
     @Override

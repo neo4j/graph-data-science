@@ -20,28 +20,41 @@
 package org.neo4j.gds.paths.delta;
 
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.paths.delta.config.ImmutableAllShortestPathsDeltaStreamConfig;
 
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongSupplier;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.paths.PathTestUtil.expected;
 
 final class DeltaSteppingTest {
@@ -73,11 +86,13 @@ final class DeltaSteppingTest {
         assertThat(actual.max).isEqualTo(expectedMax);
     }
 
+    @GdlExtension
     @Nested
     @TestInstance(value = TestInstance.Lifecycle.PER_CLASS)
     class Graph1 {
 
         // https://en.wikipedia.org/wiki/Shortest_path_problem#/media/File:Shortest_path_with_direct_weights.svg
+        @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
             "  (a:A)" +
@@ -94,6 +109,12 @@ final class DeltaSteppingTest {
             ", (c)-[:TYPE {cost: 3}]->(e)" +
             ", (d)-[:TYPE {cost: 11}]->(f)" +
             ", (e)-[:TYPE {cost: 4}]->(d)";
+
+        @Inject
+        Graph graph;
+
+        @Inject
+        IdFunction idFunction;
 
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
@@ -168,6 +189,52 @@ final class DeltaSteppingTest {
 
             assertEquals(expected, paths);
         }
+
+        @Test
+        void shouldLogProgress() {
+            var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
+                .concurrency(4)
+                .sourceNode(idFunction.of("c"))
+                .delta(5)
+                .build();
+
+            var progressTask = new DeltaSteppingFactory().progressTask(graph, config);
+            var testLog = Neo4jProxy.testLog();
+            var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+
+            DeltaStepping.of(graph, config, Pools.DEFAULT, progressTracker, AllocationTracker.empty())
+                .compute()
+                .pathSet();
+
+            List<AtomicLong> progresses = progressTracker.getProgresses();
+            assertEquals(7, progresses.size());
+
+            var messagesInOrder = testLog.getMessages(INFO);
+
+            assertThat(messagesInOrder)
+                // avoid asserting on the thread id
+                .extracting(removingThreadId())
+                .hasSize(20)
+                .containsSequence(
+                    "DeltaStepping :: Start",
+                    "DeltaStepping :: RELAX 1 :: Start",
+                    "DeltaStepping :: RELAX 1 100%",
+                    "DeltaStepping :: RELAX 1 :: Finished",
+                    "DeltaStepping :: SYNC 1 :: Start",
+                    "DeltaStepping :: SYNC 1 100%",
+                    "DeltaStepping :: SYNC 1 :: Finished"
+                )
+                .containsSequence(
+                    "DeltaStepping :: RELAX 3 :: Start",
+                    "DeltaStepping :: RELAX 3 100%",
+                    "DeltaStepping :: RELAX 3 :: Finished",
+                    "DeltaStepping :: SYNC 3 :: Start",
+                    "DeltaStepping :: SYNC 3 100%",
+                    "DeltaStepping :: SYNC 3 :: Finished",
+                    "DeltaStepping :: Finished"
+                );
+        }
+
     }
 
     @Nested

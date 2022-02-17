@@ -25,7 +25,11 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
+
+import java.util.List;
 
 public class DeltaSteppingFactory<T extends AllShortestPathsDeltaBaseConfig> extends GraphAlgorithmFactory<DeltaStepping, T> {
 
@@ -42,6 +46,17 @@ public class DeltaSteppingFactory<T extends AllShortestPathsDeltaBaseConfig> ext
     @Override
     public String taskName() {
         return "DeltaStepping";
+    }
+
+    @Override
+    public Task progressTask(Graph graphOrGraphStore, AllShortestPathsDeltaBaseConfig config) {
+        return Tasks.iterativeOpen(
+            taskName(),
+            () -> List.of(
+                Tasks.leaf(DeltaStepping.Phase.RELAX.name()),
+                Tasks.leaf(DeltaStepping.Phase.SYNC.name())
+            )
+        );
     }
 
     @Override
