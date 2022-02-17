@@ -60,7 +60,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         this.threshold = threshold;
     }
 
-    public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config) {
+    public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config, int linkFeatureDimension) {
         // TODO: Fill me in!
         return MemoryEstimations.of(ExhaustiveLinkPrediction.class);
     }

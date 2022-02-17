@@ -82,7 +82,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
 
     public static MemoryEstimation estimate(
         LinkPredictionPipeline pipeline,
-        LinkPredictionPredictPipelineBaseConfig configuration
+        LinkPredictionPredictPipelineBaseConfig configuration,
+        int linkFeatureDimension
     ) {
         MemoryEstimation maxOverNodePropertySteps = PipelineExecutor.estimateNodePropertySteps(
             pipeline.nodePropertySteps(),
@@ -92,7 +93,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
 
         var predictEstimation = configuration.isApproximateStrategy()
             ? ApproximateLinkPrediction.estimate(configuration)
-            : ExhaustiveLinkPrediction.estimate(configuration);
+            : ExhaustiveLinkPrediction.estimate(configuration, linkFeatureDimension);
 
         return MemoryEstimations.builder(LinkPredictionPredictPipelineExecutor.class)
             .max("Pipeline execution", List.of(maxOverNodePropertySteps, predictEstimation))
