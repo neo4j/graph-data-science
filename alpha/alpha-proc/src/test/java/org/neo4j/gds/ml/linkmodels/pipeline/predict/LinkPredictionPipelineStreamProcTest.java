@@ -80,4 +80,20 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
 
         assertError(query, "Procedure requires relationship projections to be UNDIRECTED.");
     }
+
+    @Test
+    void estimate() {
+        assertCypherResult(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.predict.stream.estimate('g', {" +
+            " modelName: 'model'," +
+            " threshold: 0," +
+            " topN: $topN" +
+            "})" +
+            "YIELD requiredMemory",
+            Map.of("topN", 3),
+            List.of(
+                Map.of("requiredMemory", "644 Bytes")
+            )
+        );
+    }
 }

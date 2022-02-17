@@ -45,6 +45,7 @@ import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -57,7 +58,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
+import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
 import static org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc.DESCRIPTION;
+import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.ml.pipeline.linkPrediction.predict.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPredictPipelineMutateConfig> {
@@ -69,9 +72,18 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        // TODO: this will go away once node property steps do not rely on this method
-        configuration.put("graphName", graphName);
+        prepareTrainConfig(graphName, configuration);
         return mutate(compute(graphName, configuration));
+    }
+
+    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.mutate.estimate", mode = Mode.READ)
+    @Description(ESTIMATE_PREDICT_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        prepareTrainConfig(graphNameOrConfiguration, algoConfiguration);
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

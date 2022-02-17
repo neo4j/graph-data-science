@@ -175,4 +175,21 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             () -> List.of("N", "M").stream().map(Arguments::of)
         );
     }
+
+    @Test
+    void estimate() {
+        assertCypherResult(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate.estimate('g', {" +
+            " modelName: 'model'," +
+            " threshold: 0," +
+            " mutateRelationshipType: 'PREDICTED'," +
+            " topN: $topN" +
+            "})" +
+            "YIELD requiredMemory",
+            Map.of("topN", 3),
+            List.of(
+                Map.of("requiredMemory", "644 Bytes")
+            )
+        );
+    }
 }
