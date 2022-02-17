@@ -56,22 +56,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     @Override
     public Map<DatasetSplits, GraphFilter> splitDataset() {
         return Map.of(
-            DatasetSplits.TEST,
-            ImmutableGraphFilter.of(
-                config.nodeLabelIdentifiers(graphStore),
-                config.internalRelationshipTypes(graphStore)
-            ),
-            DatasetSplits.TRAIN,
-            ImmutableGraphFilter.of(
-                config.nodeLabelIdentifiers(graphStore),
-                config.internalRelationshipTypes(graphStore)
-            ),
             DatasetSplits.FEATURE_INPUT,
-            ImmutableGraphFilter.of(
-                config.nodeLabelIdentifiers(graphStore),
-                config.internalRelationshipTypes(graphStore)
-            ),
-            DatasetSplits.TEST_COMPLEMENT,
             ImmutableGraphFilter.of(
                 config.nodeLabelIdentifiers(graphStore),
                 config.internalRelationshipTypes(graphStore)
