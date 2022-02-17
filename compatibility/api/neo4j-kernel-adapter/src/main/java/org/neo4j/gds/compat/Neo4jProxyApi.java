@@ -23,6 +23,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -212,4 +215,6 @@ public interface Neo4jProxyApi {
     String versionLongToString(long storeVersion);
 
     TestLog testLog();
+
+    Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type);
 }

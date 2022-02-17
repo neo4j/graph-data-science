@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths;
+package org.neo4j.gds.compat;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -29,14 +29,14 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 
-public class VirtualRelationship implements Relationship {
+public abstract class VirtualRelationship implements Relationship {
     private final Node startNode;
     private final Node endNode;
     private final RelationshipType type;
     private final long id;
     private final Map<String, Object> props = new HashMap<>();
 
-    VirtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
+    public VirtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
         this.id = id;
         this.startNode = startNode;
         this.endNode = endNode;

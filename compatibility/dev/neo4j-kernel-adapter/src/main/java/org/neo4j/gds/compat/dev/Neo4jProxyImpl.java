@@ -37,6 +37,9 @@ import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -530,5 +533,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public TestLog testLog() {
         return new TestLogImpl();
+    }
+
+    @Override
+    public Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
+        return new VirtualRelationshipImpl(id, startNode, endNode, type);
     }
 }
