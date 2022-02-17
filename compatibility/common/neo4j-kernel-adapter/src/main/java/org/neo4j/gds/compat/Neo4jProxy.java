@@ -24,6 +24,9 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.annotation.SuppressForbidden;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -354,6 +357,10 @@ public final class Neo4jProxy {
 
     public static TestLog testLog() {
         return IMPL.testLog();
+    }
+
+    public static Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
+        return IMPL.virtualRelationship(id, startNode, endNode, type);
     }
 
     private Neo4jProxy() {

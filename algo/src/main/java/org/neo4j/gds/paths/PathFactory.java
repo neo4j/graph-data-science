@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphalgo.impl.util.PathImpl;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
@@ -46,7 +47,7 @@ public final class PathFactory {
             long sourceNodeId = nodeIds[i];
             long targetNodeId = nodeIds[i + 1];
 
-            var relationship = new VirtualRelationship(
+            var relationship = Neo4jProxy.virtualRelationship(
                 RelationshipIds.next(),
                 tx.getNodeById(sourceNodeId),
                 tx.getNodeById(targetNodeId),
@@ -72,7 +73,7 @@ public final class PathFactory {
             long sourceNodeId = nodeIds.get(i);
             long targetNodeId = nodeIds.get(i + 1);
 
-            var relationship = new VirtualRelationship(
+            var relationship = Neo4jProxy.virtualRelationship(
                 RelationshipIds.next(),
                 tx.getNodeById(sourceNodeId),
                 tx.getNodeById(targetNodeId),
