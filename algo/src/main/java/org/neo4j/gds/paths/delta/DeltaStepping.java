@@ -100,7 +100,7 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
                 // graph needs to be complete to reach all nodes from all threads.
                 var upperBound = HugeLongArray.memoryEstimation(dimensions.relCountUpperBound());
 
-                return MemoryRange.of(lowerBound, upperBound);
+                return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
             })
             .rangePerGraphDimension("local bins", (dimensions, concurrency) -> {
                 // We don't know how many buckets we have per thread since it depends on the delta
@@ -115,7 +115,7 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
                 // thread-local buckets in a single iteration.
                 var upperBound = HugeLongArray.memoryEstimation(concurrency * dimensions.nodeCount());
 
-                return MemoryRange.of(lowerBound, upperBound);
+                return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
             });
 
         if (storePredecessors) {
