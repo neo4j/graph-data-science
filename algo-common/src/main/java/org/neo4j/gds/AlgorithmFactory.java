@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -98,6 +99,14 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
      */
     default MemoryEstimation memoryEstimation(CONFIG configuration) {
         throw new MemoryEstimationNotImplementedException();
+    }
+
+    /**
+     * For memory estimation, this allows us to inject expected counts for relationship types and labels.
+     * These types and labels would be created during the algorithm execution.
+     */
+    default GraphDimensions estimatedGraphDimensionTransformer(GraphDimensions graphDimensions, CONFIG config) {
+        return graphDimensions;
     }
 
     ALGO accept(Visitor<ALGO, CONFIG> visitor);

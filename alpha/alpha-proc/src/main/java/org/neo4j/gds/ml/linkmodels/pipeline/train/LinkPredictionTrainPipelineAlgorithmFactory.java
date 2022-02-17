@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -33,6 +34,8 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 
 import java.util.List;
+
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.getLPPipeline;
 
 public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> {
     private final ExecutionContext executionContext;
@@ -92,5 +95,14 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
         );
 
         return LinkPredictionTrainPipelineExecutor.estimate(modelCatalog, pipeline, configuration);
+    }
+
+    @Override
+    public GraphDimensions estimatedGraphDimensionTransformer(GraphDimensions graphDimensions, LinkPredictionTrainConfig config) {
+        // inject expected relationship set sizes which are used in the estimation of the TrainPipelineExecutor
+        // this allows to compute the MemoryTree over a single graphDimension
+        var splitConfig = getLPPipeline(modelCatalog, config.pipeline(), config.username()).splitConfig();
+
+        return splitConfig.expectedGraphDimensions(graphDimensions.nodeCount(), graphDimensions.relCountUpperBound());
     }
 }

@@ -48,7 +48,9 @@ public class ProcedureMemoryEstimation<
 
         estimationBuilder.add("algorithm", algorithmFactory.memoryEstimation(config));
 
-        MemoryTree memoryTree = estimationBuilder.build().estimate(graphDimensions, config.concurrency());
+        GraphDimensions extendedDimension = algorithmFactory.estimatedGraphDimensionTransformer(graphDimensions, config);
+
+        MemoryTree memoryTree = estimationBuilder.build().estimate(extendedDimension, config.concurrency());
         return new MemoryTreeWithDimensions(memoryTree, graphDimensions);
     }
 }
