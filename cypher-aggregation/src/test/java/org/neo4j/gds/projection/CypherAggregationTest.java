@@ -30,6 +30,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphDropProc;
 import org.neo4j.gds.catalog.GraphListProc;
@@ -285,6 +286,24 @@ class CypherAggregationTest extends BaseProcTest {
         });
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"type(r)", "'REL'"})
+    void testRelationshipType(String type) {
+        runQuery(
+            "MATCH (s:B)-[r:REL]->(t:B) RETURN " +
+            "gds.alpha.graph('g', s, t, null," +
+            "   { relationshipType: " + type + " }" +
+            ")");
+
+        assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
+        var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore()
+            .getGraph(org.neo4j.gds.RelationshipType.of("REL"));
+
+        assertThat(graph)
+            .returns(6L, Graph::nodeCount)
+            .returns(4L, Graph::relationshipCount);
+    }
+
     @Test
     void shouldNotFailOnMissingProperty() {
         var query = "MATCH (s:B)-[:REL]->(t:B) " +
@@ -298,7 +317,7 @@ class CypherAggregationTest extends BaseProcTest {
         runQuery(
             "MATCH (s:B)-[r:REL]->(t:B) RETURN " +
             "gds.alpha.graph('g', s, t, null," +
-            "   r {.prop}" +
+            "   { properties: r {.prop} }" +
             ")");
 
         assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
@@ -335,7 +354,7 @@ class CypherAggregationTest extends BaseProcTest {
         runQuery(
             "MATCH (s:B)-[r:REL]->(t:B) RETURN " +
             "gds.alpha.graph('g', s, t, null, " +
-            "   r {.prop, prop_by_another_name: r.prop}" +
+            "   { properties: r {.prop, prop_by_another_name: r.prop} }" +
             ")");
 
         assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
@@ -378,14 +397,19 @@ class CypherAggregationTest extends BaseProcTest {
     void testRelationshipPropertiesAggregation() {
         runQuery("MATCH (a:B { prop1: 42 }), (b:B { prop1: 43 }) CREATE (a)-[:REL { prop:1337 }]->(b)");
         runQuery(
-            "MATCH (s:B)-[r:REL]->(t:B) " +
+            "MATCH (s:B { prop1: 42 })-[r:REL]->(t:B { prop1: 43 }) " +
             "WITH s, t, avg(r.prop) AS average, sum(r.prop) AS sum, max(r.prop) AS max, min(r.prop) AS min " +
             "RETURN gds.alpha.graph('g', s, t, null," +
-            "   {average: average, sum: sum, max: max, min: min}" +
-            ")");
+            "   { properties: {average: average, sum: sum, max: max, min: min} }" +
+            ")"
+        );
 
         assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+
+        assertThat(graphStore)
+            .returns(2L, GraphStore::nodeCount)
+            .returns(1L, GraphStore::relationshipCount);
 
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
             var neoNodeId = this.idFunction.of("a");
@@ -407,7 +431,9 @@ class CypherAggregationTest extends BaseProcTest {
                 var nodeId = graph.toMappedNodeId(neoNodeId);
                 assertThat(graph.degree(nodeId)).isEqualTo(1);
                 graph.forEachRelationship(nodeId, Double.NaN, (s, t, property) -> {
-                    assertThat(property).isEqualTo(expectedValue);
+                    assertThat(property)
+                        .as("source %d target %d key %s value %f", s, t, prop, property)
+                        .isEqualTo(expectedValue);
                     return true;
                 });
             });

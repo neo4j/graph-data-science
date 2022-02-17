@@ -45,7 +45,7 @@ RETURN gds.alpha.graph(
     sourceNode: Node,
     targetNode: Node,
     nodesConfig: Map,
-    relationshipProperties: Map
+    relationshipConfig: Map
 ) YIELD
     graphName: String,
     nodeCount: Integer,
@@ -56,12 +56,12 @@ RETURN gds.alpha.graph(
 .Parameters
 [opts="header",cols="1,1,8"]
 |===
-| Name                    | Optional | Description
-| graphName               | no       | The name under which the graph is stored in the catalog.
-| sourceNode              | no       | The source node of the relationship. Must not be null.
-| targetNode              | no       | The target node of the relationship. The targetNode can be null (for example due to an `OPTIONAL MATCH`), in which case the source node is projected as an unconnected node.
-| nodesConfig             | yes      | Properties and Labels configuration for the source and target nodes.
-| relationshipProperties  | yes      | Properties to project on to the relationship.
+| Name               | Optional | Description
+| graphName          | no       | The name under which the graph is stored in the catalog.
+| sourceNode         | no       | The source node of the relationship. Must not be null.
+| targetNode         | yes      | The target node of the relationship. The targetNode can be null (for example due to an `OPTIONAL MATCH`), in which case the source node is projected as an unconnected node.
+| nodesConfig        | yes      | Properties and Labels configuration for the source and target nodes.
+| relationshipConfig | yes      | Properties and Type configuration for the relationship.
 |===
 
 .Results
@@ -176,18 +176,18 @@ WITH gds.alpha.graph(
   source,
   target,
   {
-    sourceNodeLabels: labels(n),
-    targetNodeLabel: labels(m)
+    sourceNodeLabels: labels(source),
+    targetNodeLabels: labels(target)
   },
   {
     relationshipType: type(r)
   }
-) as g
+) AS g
 RETURN g.graphName AS graph , g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 .Results
-[opts="header", cols="1,3m,1m,1m"]
+[opts="header", cols="1,1m,1m"]
 |===
 | graph             | nodes  | rels
 | "personsAndBooks" | 5      | 6
@@ -207,15 +207,13 @@ The value for `sourceNodeLabels` or `targetNodeLabels` can be one of the followi
 |===
 
 
-The value for `relationshipType` can be one of the following:
+The value for `relationshipType` must be a `String`:
 
 .relationshipType key
 [opts="header", cols="1,1,1m"]
 |===
 | type           | example            | description
 | String         | `type(r)` or `'A'` | Associate that type with the relationship
-| Boolean        | `true`             | Associate the original type with the relationship; same as `type(r)`
-| Boolean        | `false`            | Don't load any type information for the relationship; same as if `relationshipType` was missing
 |===
 
 
@@ -315,7 +313,7 @@ WITH gds.alpha.graph(
   source,
   target,
   null,
-  r { .numberOfPages }
+  { properties: r { .numberOfPages } }
 ) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
@@ -375,7 +373,7 @@ Alternatively, we can aggregate the parallel relationship by using the https://n
 ----
 MATCH (source)-[r:READ]->(target)
 WITH source, target, count(r) AS numberOfReads
-WITH gds.alpha.graph('readCount', source, target, null, { numberOfReads: numberOfReads }) AS g
+WITH gds.alpha.graph('readCount', source, target, null, { properties: { numberOfReads: numberOfReads } }) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
@@ -428,7 +426,7 @@ For graphs with relationship properties we can also use other aggregations docum
 ----
 MATCH (source)-[r:READ]->(target)
 WITH source, target, sum(r.numberOfPages) AS numberOfPages
-WITH gds.alpha.graph('readSums', source, target, null, { numberOfPages: numberOfPages }) AS g
+WITH gds.alpha.graph('readSums', source, target, null, { properties: { numberOfPages: numberOfPages } }) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
@@ -482,7 +480,7 @@ The following examples will demonstrate how to filter out `READ` relationships i
 ----
 MATCH (source) OPTIONAL MATCH (source)-[r:READ]->(target)
 WHERE r.numberOfPages IS NOT NULL
-WITH gds.alpha.graph('existingNumberOfPages', source, target, null, r { .numberOfPages }) AS g
+WITH gds.alpha.graph('existingNumberOfPages', source, target, null, { properties: r { .numberOfPages } }) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
