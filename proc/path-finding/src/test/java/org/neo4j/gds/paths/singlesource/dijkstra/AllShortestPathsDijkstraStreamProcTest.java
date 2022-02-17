@@ -17,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.singlesource.deltastepping;
+package org.neo4j.gds.paths.singlesource.dijkstra;
 
 import org.neo4j.gds.paths.singlesource.AllShortestPathsStreamProcTest;
-import org.neo4j.gds.paths.singlesource.delta.AllShortestPathsDeltaStreamProc;
 
-class AllShortestPathsDeltaStreamProcTest extends AllShortestPathsStreamProcTest {
+class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsStreamProcTest {
     @Override
     public Class<?> getProcedureClazz() {
-        return AllShortestPathsDeltaStreamProc.class;
+        return AllShortestPathsDijkstraStreamProc.class;
     }
 
     @Override
     public String getProcedureName() {
-        return "gds.allShortestPaths.delta";
+        return "gds.allShortestPaths.dijkstra";
     }
 }

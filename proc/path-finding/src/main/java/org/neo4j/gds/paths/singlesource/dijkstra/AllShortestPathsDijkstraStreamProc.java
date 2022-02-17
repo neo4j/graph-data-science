@@ -35,34 +35,34 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.singlesource.dijkstra.DijkstraStreamSpec.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.gds.paths.singlesource.dijkstra.AllShortestPathsDijkstraStreamSpec.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsDijkstraStreamProc extends BaseProc {
 
-    @Procedure(name = "gds.allShortestPaths.delta.stream", mode = READ)
+    @Procedure(name = "gds.allShortestPaths.dijkstra.stream", mode = READ)
     @Description(DIJKSTRA_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var deltaStreamSpec = new DijkstraStreamSpec();
+        var deltaStreamSpec = new AllShortestPathsDijkstraStreamSpec();
         var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraStreamConfig>();
 
         return new ProcedureExecutor<>(
             deltaStreamSpec,
             pipelineSpec,
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration, false, false);
     }
 
-    @Procedure(name = "gds.allShortestPaths.delta.stream.estimate", mode = READ)
+    @Procedure(name = "gds.allShortestPaths.dijkstra.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var deltaStreamSpec = new DijkstraStreamSpec();
+        var deltaStreamSpec = new AllShortestPathsDijkstraStreamSpec();
         var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraStreamConfig>();
 
         return new MemoryEstimationExecutor<>(

@@ -35,7 +35,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.singlesource.delta.DeltaSteppingStreamSpec.DELTA_DESCRIPTION;
+import static org.neo4j.gds.paths.singlesource.delta.AllShortestPathsDeltaSteppingStreamSpec.DELTA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsDeltaStreamProc extends BaseProc {
@@ -46,7 +46,7 @@ public class AllShortestPathsDeltaStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var deltaSteppingStreamSpec = new DeltaSteppingStreamSpec();
+        var deltaSteppingStreamSpec = new AllShortestPathsDeltaSteppingStreamSpec();
         var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig>();
 
         return new ProcedureExecutor<>(
@@ -62,7 +62,7 @@ public class AllShortestPathsDeltaStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var deltaSteppingStreamSpec = new DeltaSteppingStreamSpec();
+        var deltaSteppingStreamSpec = new AllShortestPathsDeltaSteppingStreamSpec();
         var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig>();
 
         return new MemoryEstimationExecutor<>(

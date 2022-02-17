@@ -23,40 +23,40 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.paths.ShortestPathWriteResultConsumer;
+import org.neo4j.gds.paths.MutateResult;
+import org.neo4j.gds.paths.ShortestPathMutateResultConsumer;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
-import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
+import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.allShortestPaths.dijkstra.write", description = DijkstraWriteSpec.DIJKSTRA_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class DijkstraWriteSpec implements AlgorithmSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>, DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraWriteConfig>> {
+@GdsCallable(name = "gds.allShortestPaths.dijkstra.mutate", description = AllShortestPathsDijkstraMutateSpec.DIJKSTRA_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+public class AllShortestPathsDijkstraMutateSpec implements AlgorithmSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraMutateConfig, Stream<MutateResult>, DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraMutateConfig>> {
     static final String DIJKSTRA_DESCRIPTION = "The Dijkstra shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
 
     @Override
     public String name() {
-        return "gds.allShortestPaths.dijkstra.write";
+        return "gds.allShortestPaths.dijkstra.mutate";
     }
 
     @Override
-    public DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraWriteConfig> algorithmFactory() {
+    public DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraMutateConfig> algorithmFactory() {
         return new DijkstraFactory.AllShortestPathsDijkstraFactory<>();
     }
 
     @Override
-    public NewConfigFunction<AllShortestPathsDijkstraWriteConfig> newConfigFunction() {
-        return (username, configuration) -> AllShortestPathsDijkstraWriteConfig.of(configuration);
+    public NewConfigFunction<AllShortestPathsDijkstraMutateConfig> newConfigFunction() {
+        return (username, configuration) -> AllShortestPathsDijkstraMutateConfig.of(configuration);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
-        return new ShortestPathWriteResultConsumer<>();
+    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDijkstraMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+        return new ShortestPathMutateResultConsumer<>();
     }
 }

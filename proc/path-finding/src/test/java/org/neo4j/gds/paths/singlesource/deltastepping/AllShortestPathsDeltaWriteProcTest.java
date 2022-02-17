@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.paths.singlesource.deltastepping;
 
-import org.neo4j.gds.paths.singlesource.AllShortestPathsStreamProcTest;
-import org.neo4j.gds.paths.singlesource.delta.AllShortestPathsDeltaStreamProc;
+import org.neo4j.gds.paths.singlesource.AllShortestPathsWriteProcTest;
+import org.neo4j.gds.paths.singlesource.delta.AllShortestPathsDeltaWriteProc;
 
-class AllShortestPathsDeltaStreamProcTest extends AllShortestPathsStreamProcTest {
+class AllShortestPathsDeltaWriteProcTest extends AllShortestPathsWriteProcTest {
     @Override
     public Class<?> getProcedureClazz() {
-        return AllShortestPathsDeltaStreamProc.class;
+        return AllShortestPathsDeltaWriteProc.class;
     }
 
     @Override

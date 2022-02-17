@@ -69,6 +69,6 @@ public class ShortestPathDijkstraWriteProc extends ShortestPathWriteProc<Dijkstr
 
     @Override
     public GraphAlgorithmFactory<Dijkstra, ShortestPathDijkstraWriteConfig> algorithmFactory() {
-        return DijkstraFactory.sourceTarget();
+        return new DijkstraFactory.SourceTargetDijkstraFactory<>();
     }
 }

@@ -270,7 +270,7 @@ final class DijkstraTest {
                 .targetNode(idFunction.of("f"))
                 .build();
 
-            var progressTask = DijkstraFactory.sourceTarget().progressTask(graph, config);
+            var progressTask = new DijkstraFactory.SourceTargetDijkstraFactory<>().progressTask(graph, config);
             var testLog = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 

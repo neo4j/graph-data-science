@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.singlesource.delta;
+package org.neo4j.gds.paths.singlesource.dijkstra;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -25,38 +25,38 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathWriteResultConsumer;
 import org.neo4j.gds.paths.delta.DeltaStepping;
-import org.neo4j.gds.paths.delta.DeltaSteppingFactory;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
+import org.neo4j.gds.paths.dijkstra.Dijkstra;
+import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
-import static org.neo4j.gds.paths.singlesource.delta.DeltaSteppingWriteSpec.DELTA_DESCRIPTION;
 
-@GdsCallable(name = "gds.allShortestPaths.delta.write", description = DELTA_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class DeltaSteppingWriteSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>, DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig>> {
-    static final String DELTA_DESCRIPTION = "The Delta Stepping shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
+@GdsCallable(name = "gds.allShortestPaths.dijkstra.write", description = AllShortestPathsDijkstraWriteSpec.DIJKSTRA_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+public class AllShortestPathsDijkstraWriteSpec implements AlgorithmSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>, DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraWriteConfig>> {
+    static final String DIJKSTRA_DESCRIPTION = "The Dijkstra shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
 
     @Override
     public String name() {
-        return "gds.allShortestPaths.delta.write";
+        return "gds.allShortestPaths.dijkstra.write";
     }
 
     @Override
-    public DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig> algorithmFactory() {
-        return new DeltaSteppingFactory<>();
+    public DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraWriteConfig> algorithmFactory() {
+        return new DijkstraFactory.AllShortestPathsDijkstraFactory<>();
     }
 
     @Override
-    public NewConfigFunction<AllShortestPathsDeltaWriteConfig> newConfigFunction() {
-        return (username, configuration) -> AllShortestPathsDeltaWriteConfig.of(configuration);
+    public NewConfigFunction<AllShortestPathsDijkstraWriteConfig> newConfigFunction() {
+        return (username, configuration) -> AllShortestPathsDijkstraWriteConfig.of(configuration);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
         return new ShortestPathWriteResultConsumer<>();
     }
 }

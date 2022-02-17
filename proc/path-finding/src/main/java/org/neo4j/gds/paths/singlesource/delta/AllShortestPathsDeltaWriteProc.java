@@ -20,6 +20,10 @@
 package org.neo4j.gds.paths.singlesource.delta;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.RelationshipStreamExporter;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
@@ -28,6 +32,7 @@ import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,11 +40,14 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.singlesource.delta.DeltaSteppingWriteSpec.DELTA_DESCRIPTION;
+import static org.neo4j.gds.paths.singlesource.delta.AllShortestPathsDeltaSteppingWriteSpec.DELTA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class AllShortestPathsDeltaWriteProc extends BaseProc {
+
+    @Context
+    public RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder;
 
     @Procedure(name = "gds.allShortestPaths.delta.write", mode = WRITE)
     @Description(DELTA_DESCRIPTION)
@@ -47,7 +55,7 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var writeSpec = new DeltaSteppingWriteSpec();
+        var writeSpec = new AllShortestPathsDeltaSteppingWriteSpec();
         var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig>();
 
         return new ProcedureExecutor<>(
@@ -63,7 +71,7 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var writeSpec = new DeltaSteppingWriteSpec();
+        var writeSpec = new AllShortestPathsDeltaSteppingWriteSpec();
         var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig>();
 
         return new MemoryEstimationExecutor<>(
@@ -71,5 +79,22 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
             pipelineSpec,
             executionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Override
+    public ExecutionContext executionContext() {
+        return ImmutableExecutionContext
+            .builder()
+            .api(api)
+            .log(log)
+            .procedureTransaction(procedureTransaction)
+            .transaction(transaction)
+            .callContext(callContext)
+            .allocationTracker(allocationTracker)
+            .userLogRegistryFactory(userLogRegistryFactory)
+            .taskRegistryFactory(taskRegistryFactory)
+            .username(username())
+            .relationshipStreamExporterBuilder(relationshipStreamExporterBuilder)
+            .build();
     }
 }

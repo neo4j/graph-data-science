@@ -35,7 +35,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.singlesource.dijkstra.DijkstraMutateSpec.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.gds.paths.singlesource.dijkstra.AllShortestPathsDijkstraMutateSpec.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsDijkstraMutateProc extends BaseProc {
@@ -46,14 +46,14 @@ public class AllShortestPathsDijkstraMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var mutateSpec = new DijkstraMutateSpec();
+        var mutateSpec = new AllShortestPathsDijkstraMutateSpec();
         var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraMutateConfig>();
 
         return new ProcedureExecutor<>(
             mutateSpec,
             pipelineSpec,
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration, false, false);
     }
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.mutate.estimate", mode = READ)
@@ -62,7 +62,7 @@ public class AllShortestPathsDijkstraMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var mutateSpec = new DijkstraMutateSpec();
+        var mutateSpec = new AllShortestPathsDijkstraMutateSpec();
         var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraMutateConfig>();
 
         return new MemoryEstimationExecutor<>(
