@@ -345,7 +345,7 @@ Let us now <<catalog-graph-stream-single-node-property-example, stream node prop
 .Stream node properties:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperties('myGraph', 'weightedCommunity')
+CALL gds.graph.streamNodeProperty('myGraph', 'weightedCommunity')
 YIELD nodeId, propertyValue
 RETURN gds.util.asNode(nodeId).name as name, propertyValue AS weightedCommunity
 ----
