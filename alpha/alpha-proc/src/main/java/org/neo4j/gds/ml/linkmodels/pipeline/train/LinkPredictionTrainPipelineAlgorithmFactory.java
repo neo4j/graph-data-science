@@ -91,6 +91,6 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             configuration.username()
         );
 
-        return LinkPredictionTrainPipelineExecutor.estimate(pipeline, configuration);
+        return LinkPredictionTrainPipelineExecutor.estimate(modelCatalog, pipeline, configuration);
     }
 }

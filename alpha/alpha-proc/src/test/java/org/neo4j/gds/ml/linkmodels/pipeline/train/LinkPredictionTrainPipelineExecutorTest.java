@@ -42,6 +42,7 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -442,6 +443,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .build();
         pipeline.setSplitConfig(splitConfig);
         var actualEstimation = LinkPredictionTrainPipelineExecutor.estimate(
+            new OpenModelCatalog(),
             pipeline,
             config
         ).estimate(pipeline.splitConfig().expectedGraphDimensions(100, 1_000), config.concurrency());

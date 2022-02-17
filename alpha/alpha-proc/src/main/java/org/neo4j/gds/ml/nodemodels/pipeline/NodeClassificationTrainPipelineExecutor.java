@@ -71,24 +71,22 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         NodeClassificationPipelineTrainConfig configuration,
         ModelCatalog modelCatalog
     ) {
-        var nodePropertyStepEstimations = pipeline
-            .nodePropertySteps()
-            .stream()
-            .map(step -> step.estimate(modelCatalog, configuration.nodeLabels(), configuration.relationshipTypes()))
-            .collect(Collectors.toList());
+        MemoryEstimation nodePropertyStepsEstimation = PipelineExecutor.estimateNodePropertySteps(
+            modelCatalog,
+            pipeline.nodePropertySteps(),
+            configuration.nodeLabels(),
+            configuration.relationshipTypes()
+        );
 
         var trainingEstimation = MemoryEstimations
             .builder()
             .add("Pipeline Train", NodeClassificationTrain.estimate(innerConfig(pipeline, configuration)))
             .build();
 
-        return MemoryEstimations.builder()
-            .max("Pipeline executor", List.of(
-                    MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations),
-                    trainingEstimation
-                )
-            )
-            .build();
+        return MemoryEstimations.maxEstimation(
+            "Pipeline executor",
+            List.of(nodePropertyStepsEstimation, trainingEstimation)
+        );
     }
 
     @Override

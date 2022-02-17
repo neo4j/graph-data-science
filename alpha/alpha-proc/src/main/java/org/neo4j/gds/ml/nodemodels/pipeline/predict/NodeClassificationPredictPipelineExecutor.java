@@ -40,7 +40,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainCon
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     NodeClassificationPredictPipelineBaseConfig,
@@ -72,11 +71,12 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         var classCount = model.customInfo().classes().size();
         var featureCount = model.data().weights().data().totalSize();
 
-        var nodePropertyStepEstimations = pipeline
-            .nodePropertySteps()
-            .stream()
-            .map(step -> step.estimate(modelCatalog, configuration.nodeLabels(), configuration.relationshipTypes()))
-            .collect(Collectors.toList());
+        MemoryEstimation nodePropertyStepEstimation = PipelineExecutor.estimateNodePropertySteps(
+            modelCatalog,
+            pipeline.nodePropertySteps(),
+            configuration.nodeLabels(),
+            configuration.relationshipTypes()
+        );
 
         var predictionEstimation = MemoryEstimations.builder().add(
             "Pipeline Predict",
@@ -88,12 +88,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
             )
         ).build();
 
-        return MemoryEstimations.builder()
-            .max(List.of(
-                MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations),
-                predictionEstimation
-            ))
-            .build();
+        return MemoryEstimations.maxEstimation(List.of(nodePropertyStepEstimation, predictionEstimation));
     }
 
     @Override

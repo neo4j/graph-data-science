@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -69,25 +70,14 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
         );
     }
 
-    public static MemoryEstimation estimate(LinkPredictionPipeline pipeline, LinkPredictionTrainConfig configuration) {
+    public static MemoryEstimation estimate(ModelCatalog modelCatalog, LinkPredictionPipeline pipeline, LinkPredictionTrainConfig configuration) {
         var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.relationshipTypes());
 
-        var nodePropertyStepEstimations = pipeline
-            .nodePropertySteps()
-            .stream()
-            .map(step -> step.estimate(
-                configuration.nodeLabels(),
-                List.of(pipeline.splitConfig().featureInputRelationshipType())
-            ))
-            .collect(Collectors.toList());
-
-        // NOTE: Theoretically we clean the feature dataset after the node property steps have run, but we never account for this
-        // in the memory estimation.
-
-        // NOTE: This has the drawback, that we disregard the sizes of the mutate-properties, but it's a better approximation than adding all together.
-        MemoryEstimation maxOverNodePropertySteps = MemoryEstimations.maxEstimation(
-            "NodeProperty Steps",
-            nodePropertyStepEstimations
+        MemoryEstimation maxOverNodePropertySteps = PipelineExecutor.estimateNodePropertySteps(
+            modelCatalog,
+            pipeline.nodePropertySteps(),
+            configuration.nodeLabels(),
+            List.of(pipeline.splitConfig().featureInputRelationshipType())
         );
 
         MemoryEstimation trainingEstimation = MemoryEstimations
