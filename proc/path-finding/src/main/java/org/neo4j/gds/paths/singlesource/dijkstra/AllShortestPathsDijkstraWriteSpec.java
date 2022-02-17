@@ -35,9 +35,8 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.allShortestPaths.dijkstra.write", description = AllShortestPathsDijkstraWriteSpec.DIJKSTRA_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+@GdsCallable(name = "gds.allShortestPaths.dijkstra.write", description = Dijkstra.DESCRIPTION_SOURCE_TARGET, executionMode = WRITE_RELATIONSHIP)
 public class AllShortestPathsDijkstraWriteSpec implements AlgorithmSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>, DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraWriteConfig>> {
-    static final String DIJKSTRA_DESCRIPTION = "The Dijkstra shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
 
     @Override
     public String name() {

@@ -34,9 +34,8 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.allShortestPaths.delta.mutate", description = AllShortestPathsDeltaSteppingMutateSpec.DELTA_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.allShortestPaths.delta.mutate", description = DeltaStepping.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class AllShortestPathsDeltaSteppingMutateSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaMutateConfig, Stream<MutateResult>, DeltaSteppingFactory<AllShortestPathsDeltaMutateConfig>> {
-    static final String DELTA_DESCRIPTION = "The Delta Stepping shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
 
     @Override
     public String name() {

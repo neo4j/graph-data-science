@@ -40,7 +40,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.singlesource.delta.AllShortestPathsDeltaSteppingWriteSpec.DELTA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -50,7 +49,7 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
     public RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder;
 
     @Procedure(name = "gds.allShortestPaths.delta.write", mode = WRITE)
-    @Description(DELTA_DESCRIPTION)
+    @Description(DeltaStepping.DESCRIPTION)
     public Stream<StandardWriteRelationshipsResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

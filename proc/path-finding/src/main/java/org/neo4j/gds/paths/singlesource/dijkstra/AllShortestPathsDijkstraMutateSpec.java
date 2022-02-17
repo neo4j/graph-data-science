@@ -35,9 +35,8 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.allShortestPaths.dijkstra.mutate", description = AllShortestPathsDijkstraMutateSpec.DIJKSTRA_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.allShortestPaths.dijkstra.mutate", description = Dijkstra.DESCRIPTION_SOURCE_TARGET, executionMode = MUTATE_RELATIONSHIP)
 public class AllShortestPathsDijkstraMutateSpec implements AlgorithmSpec<Dijkstra, DijkstraResult, AllShortestPathsDijkstraMutateConfig, Stream<MutateResult>, DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraMutateConfig>> {
-    static final String DIJKSTRA_DESCRIPTION = "The Dijkstra shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
 
     @Override
     public String name() {

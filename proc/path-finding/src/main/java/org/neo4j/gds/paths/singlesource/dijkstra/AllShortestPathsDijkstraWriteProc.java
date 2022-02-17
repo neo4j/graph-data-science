@@ -40,7 +40,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.singlesource.dijkstra.AllShortestPathsDijkstraWriteSpec.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -50,7 +49,7 @@ public class AllShortestPathsDijkstraWriteProc extends BaseProc {
     public RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder;
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.write", mode = WRITE)
-    @Description(DIJKSTRA_DESCRIPTION)
+    @Description(Dijkstra.DESCRIPTION_SOURCE_TARGET)
     public Stream<StandardWriteRelationshipsResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

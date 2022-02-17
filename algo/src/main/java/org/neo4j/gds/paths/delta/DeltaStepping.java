@@ -34,7 +34,6 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
@@ -52,6 +51,8 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.paths.delta.TentativeDistances.NO_PREDECESSOR;
 
 public final class DeltaStepping extends Algorithm<DijkstraResult> {
+    public static final String DESCRIPTION = "The Delta Stepping shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph. " +
+                                             "The computation is run multi-threaded";
 
     private static final int NO_BIN = Integer.MAX_VALUE;
     private static final int BIN_SIZE_THRESHOLD = 1000;

@@ -33,12 +33,9 @@ import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
-import static org.neo4j.gds.paths.singlesource.delta.AllShortestPathsDeltaSteppingWriteSpec.DELTA_DESCRIPTION;
 
-@GdsCallable(name = "gds.allShortestPaths.delta.write", description = DELTA_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+@GdsCallable(name = "gds.allShortestPaths.delta.write", description = DeltaStepping.DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class AllShortestPathsDeltaSteppingWriteSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>, DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig>> {
-    static final String DELTA_DESCRIPTION = "The Delta Stepping shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
-
     @Override
     public String name() {
         return "gds.allShortestPaths.delta.write";

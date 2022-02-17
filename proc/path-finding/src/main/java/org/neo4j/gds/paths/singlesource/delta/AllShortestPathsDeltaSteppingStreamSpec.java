@@ -33,11 +33,9 @@ import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.paths.singlesource.delta.AllShortestPathsDeltaSteppingStreamSpec.DELTA_DESCRIPTION;
 
-@GdsCallable(name = "gds.allShortestPaths.delta.stream", description = DELTA_DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.allShortestPaths.delta.stream", description = DeltaStepping.DESCRIPTION, executionMode = STREAM)
 public class AllShortestPathsDeltaSteppingStreamSpec implements AlgorithmSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStreamConfig, Stream<StreamResult>, DeltaSteppingFactory<AllShortestPathsDeltaStreamConfig>> {
-    static final String DELTA_DESCRIPTION = "The Delta Stepping shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
 
     @Override
     public String name() {

@@ -35,13 +35,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.singlesource.dijkstra.AllShortestPathsDijkstraStreamSpec.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsDijkstraStreamProc extends BaseProc {
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.stream", mode = READ)
-    @Description(DIJKSTRA_DESCRIPTION)
+    @Description(Dijkstra.DESCRIPTION_SOURCE_TARGET)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

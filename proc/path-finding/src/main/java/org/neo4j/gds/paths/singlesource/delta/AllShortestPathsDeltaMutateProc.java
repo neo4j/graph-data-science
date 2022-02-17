@@ -35,13 +35,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.singlesource.delta.AllShortestPathsDeltaSteppingMutateSpec.DELTA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsDeltaMutateProc extends BaseProc {
 
     @Procedure(name = "gds.allShortestPaths.delta.mutate", mode = READ)
-    @Description(DELTA_DESCRIPTION)
+    @Description(DeltaStepping.DESCRIPTION)
     public Stream<MutateResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
