@@ -177,7 +177,7 @@ public interface TentativeDistances {
                 return distances.get(nodeId);
             }
 
-            var witness = predecessors.compareAndExchange(nodeId, currentPredecessor, -predecessor);
+            var witness = predecessors.compareAndExchange(nodeId, currentPredecessor, -predecessor - 1);
 
             // CAX failed
             if (witness != currentPredecessor) {
