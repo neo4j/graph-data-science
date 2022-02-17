@@ -232,6 +232,13 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.allShortestPaths.dijkstra.write",
         "gds.allShortestPaths.dijkstra.write.estimate",
 
+        "gds.allShortestPaths.delta.stream",
+        "gds.allShortestPaths.delta.stream.estimate",
+        "gds.allShortestPaths.delta.mutate",
+        "gds.allShortestPaths.delta.mutate.estimate",
+        "gds.allShortestPaths.delta.write",
+        "gds.allShortestPaths.delta.write.estimate",
+
         "gds.betweenness.mutate",
         "gds.betweenness.mutate.estimate",
         "gds.betweenness.stats",
