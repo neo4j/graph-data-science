@@ -34,6 +34,7 @@ public interface PathResult {
         .costs(0)
         .build();
 
+    @Value.Auxiliary
     long index();
 
     long sourceNode();

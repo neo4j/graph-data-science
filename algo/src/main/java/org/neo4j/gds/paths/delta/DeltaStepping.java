@@ -19,30 +19,40 @@
  */
 package org.neo4j.gds.paths.delta;
 
+import com.carrotsearch.hppc.DoubleArrayDeque;
+import com.carrotsearch.hppc.LongArrayDeque;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.carrotsearch.hppc.procedures.LongProcedure;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.DoublePageCreator;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
+import org.neo4j.gds.paths.ImmutablePathResult;
+import org.neo4j.gds.paths.PathResult;
+import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
-public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> {
+import static org.neo4j.gds.paths.delta.TentativeDistances.NO_PREDECESSOR;
 
-    private static final double DIST_INF = Double.MAX_VALUE;
+public final class DeltaStepping extends Algorithm<DijkstraResult> {
+
     private static final int NO_BIN = Integer.MAX_VALUE;
-
     private static final int BIN_SIZE_THRESHOLD = 1000;
 
     private final Graph graph;
@@ -51,15 +61,36 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
     private final int concurrency;
 
     private final HugeLongArray frontier;
-    private final HugeAtomicDoubleArray distances;
+    private final TentativeDistances distances;
 
     private final ExecutorService executorService;
 
-    public DeltaStepping(
+    public static DeltaStepping of(
+        Graph graph,
+        AllShortestPathsBaseConfig config,
+        double delta,
+        ExecutorService executorService,
+        ProgressTracker progressTracker,
+        AllocationTracker allocationTracker
+    ) {
+        return new DeltaStepping(
+            graph,
+            graph.toMappedNodeId(config.sourceNode()),
+            delta,
+            config.concurrency(),
+            true,
+            executorService,
+            progressTracker,
+            allocationTracker
+        );
+    }
+
+    private DeltaStepping(
         Graph graph,
         long startNode,
         double delta,
         int concurrency,
+        boolean storePredecessors,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
@@ -72,15 +103,23 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
         this.executorService = executorService;
 
         this.frontier = HugeLongArray.newArray(graph.relationshipCount(), allocationTracker);
-        this.distances = HugeAtomicDoubleArray.newArray(
-            graph.nodeCount(),
-            DoublePageCreator.of(concurrency, index -> DIST_INF),
-            allocationTracker
-        );
+        if (storePredecessors) {
+            this.distances = TentativeDistances.distanceAndPredecessors(
+                graph.nodeCount(),
+                concurrency,
+                allocationTracker
+            );
+        } else {
+            this.distances = TentativeDistances.distanceOnly(
+                graph.nodeCount(),
+                concurrency,
+                allocationTracker
+            );
+        }
     }
 
     @Override
-    public DeltaSteppingResult compute() {
+    public DijkstraResult compute() {
         int iteration = 0;
         int currentBin = 0;
 
@@ -88,7 +127,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
         var frontierSize = new AtomicLong(1);
 
         this.frontier.set(currentBin, startNode);
-        this.distances.set(startNode, 0);
+        this.distances.set(startNode, -1, 0);
 
         var relaxTasks = IntStream
             .range(0, concurrency)
@@ -123,7 +162,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
             frontierIndex.set(0);
         }
 
-        return ImmutableDeltaSteppingResult.of(iteration, distances);
+        return new DijkstraResult(pathResults(distances, startNode, concurrency));
     }
 
     @Override
@@ -139,7 +178,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
     private static class DeltaSteppingTask implements Runnable {
         private final Graph graph;
         private final HugeLongArray frontier;
-        private final HugeAtomicDoubleArray distances;
+        private final TentativeDistances distances;
         private final double delta;
         private int binIndex;
         private final AtomicLong frontierIndex;
@@ -156,7 +195,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
         DeltaSteppingTask(
             Graph graph,
             HugeLongArray frontier,
-            HugeAtomicDoubleArray distances,
+            TentativeDistances distances,
             double delta,
             AtomicLong frontierIndex
         ) {
@@ -208,7 +247,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
 
                 for (long idx = offset; idx < limit; idx++) {
                     var nodeId = frontier.get(idx);
-                    if (distances.get(nodeId) >= delta * binIndex) {
+                    if (distances.distance(nodeId) >= delta * binIndex) {
                         relaxNode(nodeId);
                     }
                 }
@@ -228,11 +267,11 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
 
         private void relaxNode(long nodeId) {
             graph.forEachRelationship(nodeId, 1.0, (sourceNodeId, targetNodeId, weight) -> {
-                var oldDist = distances.get(targetNodeId);
-                var newDist = distances.get(sourceNodeId) + weight;
+                var oldDist = distances.distance(targetNodeId);
+                var newDist = distances.distance(sourceNodeId) + weight;
 
                 while (Double.compare(newDist, oldDist) < 0) {
-                    var witness = distances.compareAndExchange(targetNodeId, oldDist, newDist);
+                    var witness = distances.compareAndExchange(targetNodeId, oldDist, newDist, sourceNodeId);
 
                     if (Double.compare(witness, oldDist) == 0) {
                         int destBin = (int) (newDist / delta);
@@ -270,11 +309,81 @@ public class DeltaStepping extends Algorithm<DeltaStepping.DeltaSteppingResult> 
         }
     }
 
-    @ValueClass
-    public interface DeltaSteppingResult {
+    private static Stream<PathResult> pathResults(
+        TentativeDistances tentativeDistances,
+        long sourceNode,
+        int concurrency
+    ) {
+        assert tentativeDistances.predecessors().isPresent();
+        var distances = tentativeDistances.distances();
+        var predecessors = tentativeDistances.predecessors().get();
 
-        int iterations();
+        var pathIndex = new AtomicLong(0L);
 
-        HugeAtomicDoubleArray distances();
+        var partitions = PartitionUtils.rangePartition(
+            concurrency,
+            predecessors.size(),
+            partition -> partition,
+            Optional.empty()
+        );
+
+        return ParallelUtil.parallelStream(
+            partitions.stream(),
+            concurrency,
+            parallelStream -> parallelStream.flatMap(partition -> {
+                var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
+                var pathResultBuilder = ImmutablePathResult.builder().sourceNode(sourceNode);
+
+                return LongStream
+                    .range(partition.startNode(), partition.startNode() + partition.nodeCount())
+                    .filter(target -> predecessors.get(target) != NO_PREDECESSOR)
+                    .mapToObj(targetNode -> pathResult(
+                        pathResultBuilder,
+                        localPathIndex.getAndIncrement(),
+                        sourceNode,
+                        targetNode,
+                        distances,
+                        predecessors
+                    ));
+            })
+        );
+    }
+
+    private static final long[] EMPTY_ARRAY = new long[0];
+
+    private static PathResult pathResult(
+        ImmutablePathResult.Builder pathResultBuilder,
+        long pathIndex,
+        long sourceNode,
+        long targetNode,
+        HugeAtomicDoubleArray distances,
+        HugeAtomicLongArray predecessors
+    ) {
+        // TODO: use LongArrayList and then ArrayUtils.reverse
+        var pathNodeIds = new LongArrayDeque();
+        var costs = new DoubleArrayDeque();
+
+        // We backtrack until we reach the source node.
+        var lastNode = targetNode;
+
+        while (true) {
+            pathNodeIds.addFirst(lastNode);
+            costs.addFirst(distances.get(lastNode));
+
+            // Break if we reach the end by hitting the source node.
+            if (lastNode == sourceNode) {
+                break;
+            }
+
+            lastNode = predecessors.get(lastNode);
+        }
+
+        return pathResultBuilder
+            .index(pathIndex)
+            .targetNode(targetNode)
+            .nodeIds(pathNodeIds.toArray())
+            .relationshipIds(EMPTY_ARRAY)
+            .costs(costs.toArray())
+            .build();
     }
 }
