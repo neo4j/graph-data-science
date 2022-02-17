@@ -120,7 +120,7 @@ public class HugeGraph implements CSRGraph {
         GraphSchema schema,
         Map<String, NodeProperties> nodeProperties,
         Relationships.Topology topology,
-        Optional<Relationships.Properties> maybeProperties,
+        Optional<Relationships.Properties> maybeRelationshipProperty,
         AllocationTracker allocationTracker
     ) {
         return new HugeGraph(
@@ -129,9 +129,9 @@ public class HugeGraph implements CSRGraph {
             nodeProperties,
             topology.elementCount(),
             topology.adjacencyList(),
-            maybeProperties.isPresent(),
-            maybeProperties.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN),
-            maybeProperties.map(Relationships.Properties::propertiesList).orElse(null),
+            maybeRelationshipProperty.isPresent(),
+            maybeRelationshipProperty.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN),
+            maybeRelationshipProperty.map(Relationships.Properties::propertiesList).orElse(null),
             topology.orientation(),
             topology.isMultiGraph(),
             allocationTracker
@@ -145,8 +145,8 @@ public class HugeGraph implements CSRGraph {
         long relationshipCount,
         @NotNull AdjacencyList adjacency,
         boolean hasRelationshipProperty,
-        double defaultPropertyValue,
-        @Nullable AdjacencyProperties properties,
+        double defaultRelationshipPropertyValue,
+        @Nullable AdjacencyProperties relationshipProperty,
         Orientation orientation,
         boolean isMultiGraph,
         AllocationTracker allocationTracker
@@ -158,12 +158,12 @@ public class HugeGraph implements CSRGraph {
         this.nodeProperties = nodeProperties;
         this.relationshipCount = relationshipCount;
         this.adjacency = adjacency;
-        this.defaultPropertyValue = defaultPropertyValue;
-        this.properties = properties;
+        this.defaultPropertyValue = defaultRelationshipPropertyValue;
+        this.properties = relationshipProperty;
         this.orientation = orientation;
         this.hasRelationshipProperty = hasRelationshipProperty;
         this.adjacencyCursorCache = adjacency.rawAdjacencyCursor();
-        this.propertyCursorCache = properties != null ? properties.rawPropertyCursor() : null;
+        this.propertyCursorCache = relationshipProperty != null ? relationshipProperty.rawPropertyCursor() : null;
     }
 
     @Override
