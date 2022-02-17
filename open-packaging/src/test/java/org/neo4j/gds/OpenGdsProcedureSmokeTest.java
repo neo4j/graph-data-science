@@ -99,6 +99,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.ml.pipeline.linkPrediction.predict.mutate",
         "gds.alpha.ml.pipeline.linkPrediction.predict.stream",
         "gds.alpha.ml.pipeline.linkPrediction.train",
+        "gds.alpha.ml.pipeline.linkPrediction.train.estimate",
 
         "gds.alpha.ml.pipeline.nodeClassification.selectFeatures",
         "gds.alpha.ml.pipeline.nodeClassification.addNodeProperty",
