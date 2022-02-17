@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import static java.util.function.Predicate.not;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringJoining.join;
 
@@ -44,7 +45,7 @@ public final class CanonicalAdjacencyMatrix {
             String sortedLabels = g
                 .nodeLabels(nodeId)
                 .stream()
-                .filter(label -> label != NodeLabel.ALL_NODES)
+                .filter(not(NodeLabel.ALL_NODES::equals))
                 .map(NodeLabel::name)
                 .sorted()
                 .collect(Collectors.joining(":"));
