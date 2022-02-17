@@ -121,6 +121,13 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.eigenvector.stream.estimate`
 | `gds.eigenvector.stats`
 | `gds.eigenvector.stats.estimate`
+.6+<.^| <<algorithms-delta-single-source, All Shortest Paths Delta-Stepping>>
+| `gds.allShortestPaths.delta.stream`
+| `gds.allShortestPaths.delta.stream.estimate`
+| `gds.allShortestPaths.delta.write`
+| `gds.allShortestPaths.delta.write.estimate`
+| `gds.allShortestPaths.delta.mutate`
+| `gds.allShortestPaths.delta.mutate.estimate`
 .6+<.^| <<algorithms-dijkstra-source-target, Shortest Path Dijkstra>>
 | `gds.shortestPath.dijkstra.stream`
 | `gds.shortestPath.dijkstra.stream.estimate`
@@ -128,13 +135,6 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.shortestPath.dijkstra.write.estimate`
 | `gds.shortestPath.dijkstra.mutate`
 | `gds.shortestPath.dijkstra.mutate.estimate`
-.6+<.^| <<algorithms-dijkstra-single-source, All Shortest Paths Delta Stepping>>
-| `gds.allShortestPaths.delta.stream`
-| `gds.allShortestPaths.delta.stream.estimate`
-| `gds.allShortestPaths.delta.write`
-| `gds.allShortestPaths.delta.write.estimate`
-| `gds.allShortestPaths.delta.mutate`
-| `gds.allShortestPaths.delta.mutate.estimate`
 .6+<.^| <<algorithms-dijkstra-single-source, All Shortest Paths Dijkstra>>
 | `gds.allShortestPaths.dijkstra.stream`
 | `gds.allShortestPaths.dijkstra.stream.estimate`
