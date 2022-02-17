@@ -21,6 +21,7 @@ package org.neo4j.gds.compat.dev;
 
 import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractTransactionIdStore;
+import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.storageengine.api.ClosedTransactionMetadata;
 
 public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvider {
@@ -29,6 +30,37 @@ public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvid
     @Override
     public ClosedTransactionMetadata getLastClosedTransaction() {
         return this.transactionIdStore.getLastClosedTransaction();
+    }
+
+    @Override
+    public void transactionClosed(
+        long transactionId,
+        long logVersion,
+        long byteOffset,
+        int checksum,
+        long commitTimestamp,
+        CursorContext cursorContext
+    ) {
+        this.transactionIdStore.transactionClosed(transactionId, logVersion, byteOffset, cursorContext);
+    }
+
+    @Override
+    public void resetLastClosedTransaction(
+        long transactionId,
+        long logVersion,
+        long byteOffset,
+        boolean missingLogs,
+        int checksum,
+        long commitTimestamp,
+        CursorContext cursorContext
+    ) {
+        this.transactionIdStore.resetLastClosedTransaction(
+            transactionId,
+            logVersion,
+            byteOffset,
+            missingLogs,
+            cursorContext
+        );
     }
 
     @Override

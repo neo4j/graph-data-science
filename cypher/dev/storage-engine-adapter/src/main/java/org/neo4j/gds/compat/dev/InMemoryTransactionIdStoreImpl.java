@@ -28,7 +28,37 @@ public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
 
     public ClosedTransactionMetadata getLastClosedTransaction() {
         long[] metaData = this.closedTransactionId.get();
-        return new ClosedTransactionMetadata(metaData[0], new LogPosition(metaData[1], metaData[2]));
+        return new ClosedTransactionMetadata(
+            metaData[0],
+            new LogPosition(metaData[1], metaData[2]),
+            (int) metaData[3],
+            metaData[4]
+        );
+    }
+
+    @Override
+    public void transactionClosed(
+        long transactionId,
+        long logVersion,
+        long byteOffset,
+        int checksum,
+        long commitTimestamp,
+        CursorContext cursorContext
+    ) {
+        this.closedTransactionId.offer(transactionId, new long[]{logVersion, byteOffset, checksum, commitTimestamp});
+    }
+
+    @Override
+    public void resetLastClosedTransaction(
+        long transactionId,
+        long logVersion,
+        long byteOffset,
+        boolean missingLogs,
+        int checksum,
+        long commitTimestamp,
+        CursorContext cursorContext
+    ) {
+        this.closedTransactionId.set(transactionId, new long[]{logVersion, byteOffset, checksum, commitTimestamp});
     }
 
     @Override

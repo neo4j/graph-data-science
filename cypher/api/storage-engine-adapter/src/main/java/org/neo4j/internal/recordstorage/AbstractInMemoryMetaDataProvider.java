@@ -140,26 +140,6 @@ public abstract class AbstractInMemoryMetaDataProvider implements MetadataProvid
     }
 
     @Override
-    public void transactionClosed(
-        long transactionId, long logVersion, long byteOffset, CursorContext cursorContext
-    ) {
-        this.transactionIdStore().transactionClosed(transactionId, logVersion, byteOffset, cursorContext);
-    }
-
-    @Override
-    public void resetLastClosedTransaction(
-        long transactionId, long logVersion, long byteOffset, boolean missingLogs, CursorContext cursorContext
-    ) {
-        this.transactionIdStore().resetLastClosedTransaction(
-            transactionId,
-            logVersion,
-            byteOffset,
-            missingLogs,
-            cursorContext
-        );
-    }
-
-    @Override
     public void flush(CursorContext cursorContext) {
         this.transactionIdStore().flush(cursorContext);
     }
