@@ -303,6 +303,73 @@ final class DeltaSteppingTest {
         }
     }
 
+    @GdlExtension
+    @Nested
+    @TestInstance(value = TestInstance.Lifecycle.PER_CLASS)
+    class Graph3 {
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:A)" +
+            ", (b:B)" +
+            ", (c:C)" +
+            ", (d:D)" +
+            ", (e:E)" +
+            ", (f:F)" +
+
+            ", (a)-[:TYPE]->(b)" +
+            ", (a)-[:TYPE]->(c)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (b)-[:TYPE]->(d)" +
+            ", (c)-[:TYPE]->(e)" +
+            ", (d)-[:TYPE]->(f)" +
+            ", (e)-[:TYPE]->(d)";
+
+        @Inject
+        Graph graph;
+
+        @Inject
+        IdFunction idFunction;
+
+        @ParameterizedTest
+        @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
+        void singleSource(double delta, int concurrency, LongSupplier idSupplier) {
+            var graphFactory = GdlFactory
+                .builder()
+                .gdlGraph(DB_CYPHER)
+                .nodeIdFunction(idSupplier)
+                .build();
+
+            var graph = graphFactory.build().getUnion();
+
+            IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graphFactory.nodeId(variable));
+
+            var expected = Set.of(
+                expected(idFunction, 0, new double[]{0.0}, "a"),
+                expected(idFunction, 1, new double[]{0.0, 1.0}, "a", "b"),
+                expected(idFunction, 2, new double[]{0.0, 1.0}, "a", "c"),
+                expected(idFunction, 2, new double[]{0.0, 1.0, 2.0}, "a", "b", "d"),
+                expected(idFunction, 3, new double[]{0.0, 1.0, 2.0}, "a", "c", "e"),
+                expected(idFunction, 5, new double[]{0.0, 1.0, 2.0, 3.0}, "a", "b", "d", "f")
+            );
+
+            var sourceNode = graphFactory.nodeId("a");
+
+            var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
+                .concurrency(concurrency)
+                .sourceNode(sourceNode)
+                .delta(delta)
+                .build();
+
+            var paths = DeltaStepping
+                .of(graph, config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
+                .compute()
+                .pathSet();
+
+            assertEquals(expected, paths);
+        }
+    }
+
     static class IncrementingIdSupplier implements LongSupplier {
         private long offset;
 
