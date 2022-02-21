@@ -53,7 +53,7 @@ import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 import java.util.List;
 
-final class ClosenessCentralityProc {
+public final class ClosenessCentralityProc {
 
     static final String DESCRIPTION =
         "Closeness centrality is a way of detecting nodes that are " +
