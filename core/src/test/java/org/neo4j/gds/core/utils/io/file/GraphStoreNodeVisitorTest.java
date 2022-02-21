@@ -117,8 +117,8 @@ class GraphStoreNodeVisitorTest {
             nodeSchema,
             nodeProperties,
             RelationshipType.ALL_RELATIONSHIPS,
-            relationships,
-            AllocationTracker.empty());
+            relationships
+        );
         assertGraphEquals(graph, actualGraph);
     }
 }

@@ -623,8 +623,7 @@ public class CSRGraphStore implements GraphStore {
             graphSchema,
             filteredNodeProperties,
             topology,
-            properties,
-            allocationTracker
+            properties
         );
 
         return filteredNodes.isPresent()

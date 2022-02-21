@@ -137,12 +137,11 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var splitResult = splitter.split(huuuuugeDenseGraph, 0.9);
         var graph = GraphFactory.create(
             huuuuugeDenseGraph.idMap(),
-            splitResult.remainingRels(),
-            AllocationTracker.empty()
+            splitResult.remainingRels()
         );
         var nestedSplit = splitter.split(graph, huuuuugeDenseGraph, 0.9);
         Relationships nestedHoldout = nestedSplit.selectedRels();
-        HugeGraph nestedHoldoutGraph = GraphFactory.create(graph, nestedHoldout, AllocationTracker.empty());
+        HugeGraph nestedHoldoutGraph = GraphFactory.create(graph, nestedHoldout);
         nestedHoldoutGraph.forEachNode(nodeId -> {
             nestedHoldoutGraph.forEachRelationship(nodeId, Double.NaN, (src, trg, val) -> {
                 if (Double.compare(val, NEGATIVE) == 0) {
@@ -260,8 +259,8 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         if (r1.topology().elementCount() != r2.topology().elementCount()) {
             return false;
         }
-        var g1 = GraphFactory.create(mapping, r1, AllocationTracker.empty());
-        var g2 = GraphFactory.create(mapping, r2, AllocationTracker.empty());
+        var g1 = GraphFactory.create(mapping, r1);
+        var g2 = GraphFactory.create(mapping, r2);
         var equalSoFar = new AtomicBoolean(true);
         g1.forEachNode(nodeId -> {
             g1.forEachRelationship(nodeId, fallbackValue, (source, target, val) -> {

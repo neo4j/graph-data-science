@@ -64,8 +64,7 @@ class HugeGraphCursorReuseTest {
             baseGraph.schema(),
             Map.of(),
             mockTopology,
-            Optional.empty(),
-            AllocationTracker.empty()
+            Optional.empty()
         );
 
         mockGraph.forEachNode(nodeId -> {

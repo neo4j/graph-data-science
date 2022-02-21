@@ -142,14 +142,12 @@ public final class RandomGraphGenerator {
                 nodeProperties.nodeSchema(),
                 nodeProperties.nodeProperties(),
                 relationshipType,
-                relationshipsBuilder.build(),
-                allocationTracker
+                relationshipsBuilder.build()
             );
         } else {
             return GraphFactory.create(
                 idMap,
-                relationshipsBuilder.build(),
-                allocationTracker
+                relationshipsBuilder.build()
             );
         }
     }

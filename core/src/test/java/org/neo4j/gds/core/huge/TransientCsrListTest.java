@@ -224,7 +224,7 @@ class TransientCsrListTest {
 
             var rels = relsBuilder.build();
 
-            var graph = GraphFactory.create(nodes.idMap(), rels, allocationTracker);
+            var graph = GraphFactory.create(nodes.idMap(), rels);
 
             assertThat(graph.nodeCount()).isEqualTo(nodeCount);
 
