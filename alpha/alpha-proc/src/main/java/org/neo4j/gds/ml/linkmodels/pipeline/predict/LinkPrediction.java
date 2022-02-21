@@ -70,7 +70,7 @@ public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
     }
 
     private LinkPredictionResult predict() {
-        assert 2 * linkFeatureExtractor.featureDimension() == modelData
+        assert linkFeatureExtractor.featureDimension() == modelData
             .weights()
             .data()
             .totalSize() : "Model must contain a weight for each feature.";

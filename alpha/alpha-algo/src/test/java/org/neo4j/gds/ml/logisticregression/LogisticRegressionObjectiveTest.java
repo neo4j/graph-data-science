@@ -145,7 +145,7 @@ class LogisticRegressionObjectiveTest {
         " 10,   1, false,  808",
         " 10,   1, true, 1_000",
         "100,   1, true, 6_760",
-        " 10, 100, true, 9_716",
+        " 10, 100, true, 9_712",
     })
     void shouldEstimateMemoryUsage(int batchSize, int featureDim, boolean useBias, long expected) {
         var memoryUsageInBytes = LogisticRegressionObjective.sizeOfBatchInBytes(batchSize, featureDim, useBias);

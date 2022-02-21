@@ -34,6 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class LogisticRegressionTrainerTest {
 
+    private static final HugeLongArray FOUR_CLASSES = HugeLongArray.of(2, 0, 0, 2, 7, -75);
+
     @Test
     void withBias() {
         var trainer = new LogisticRegressionTrainer(
@@ -50,26 +52,25 @@ class LogisticRegressionTrainerTest {
                 features[i][j] = ((double) i) / (j + 1);
             }
         }
-        var classifier = trainer.train(new TestFeatures(features), HugeLongArray.of(2, 0, 0, 2, 7, -75));
+        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
         assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().value() != 0D);
-        assertThat(classifier.data().weights().data().dimensions()).containsExactly(4, 3);
+        assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 3);
         assertThat(classifier.data().weights().data().data()).containsExactly(
             new double[]{
-                0.0306168925, 0.0306168891, 0.0306168857,
-                0.0306168925, 0.0306168891, 0.0306168857,
-                0.0315877663, 0.0315877652, 0.0315877641,
-                -0.0312343505, -0.031234349, -0.031234349
+                0.00199977923, 0.00199977903, 0.00199977883,
+                0.00199977923, 0.00199977903, 0.00199977883,
+                0.00199992845, 0.00199992838, 0.00199992831
             },
-            Offset.offset(1e-9)
+            Offset.offset(1e-11)
         );
     }
 
     @Test
     void concurrently() {
         HugeLongArray labels = HugeLongArray.newArray(20_000);
-        labels.setAll(i -> i%4);
+        labels.setAll(i -> i % 4);
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(labels),
             4,
@@ -84,16 +85,16 @@ class LogisticRegressionTrainerTest {
                 features[i][j] = ((double) i) / (j + 1);
             }
         }
-        var classifier = trainer.train(new TestFeatures(features), HugeLongArray.of(2, 0, 0, 2, 7, -75));
+        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
         assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().value() != 0D);
+        assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 3);
         assertThat(classifier.data().weights().data().data()).containsExactly(
             new double[]{
-                0.0921466861, 0.0921466834, 0.0921466806,
-                0.0921466861, 0.0921466834, 0.0921466806,
-                -0.0921466861, -0.092146683, -0.0921466806,
-                -0.0921466861, -0.0921466834, -0.092146680
+                0.0938383655, 0.0938383627, 0.0938383600,
+                0.0938383655, 0.0938383627, 0.0938383600,
+                -0.091255531, -0.0912555285, -0.0912555257
             },
             Offset.offset(1e-9)
         );
@@ -115,20 +116,20 @@ class LogisticRegressionTrainerTest {
                 features[i][j] = ((double) i) / (j + 1);
             }
         }
-        var classifier = trainer.train(new TestFeatures(features), HugeLongArray.of(2, 0, 0, 2, 7, -75));
+        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
         assertThat(classifier.data().bias()).isEmpty();
-        assertThat(classifier.data().weights().data().dimensions()).containsExactly(4, 5);
-        assertThat(classifier.data().weights().data().data()).containsExactly(
-            new double[]{
-                0.039060120, 0.039060115, 0.039060111, 0.039060106, 0.039060101,
-                0.039060120, 0.039060115, 0.039060111, 0.039060106, 0.039060101,
-                0.041842096, 0.041842094, 0.041842093, 0.041842091, 0.041842090,
-                -0.040879166, -0.040879165, -0.040879164, -0.040879163, -0.040879162
-            },
-            Offset.offset(1e-9)
-        );
+        assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 5);
+        assertThat(classifier.data().weights().data().data())
+            .containsExactly(
+                new double[]{
+                    0.001999766, 0.001999766, 0.001999766, 0.001999766, 0.001999766,
+                    0.001999766, 0.001999766, 0.001999766, 0.001999766, 0.001999766,
+                    0.001999924, 0.001999924, 0.001999924, 0.001999924, 0.001999924
+                },
+                Offset.offset(1e-9)
+            );
     }
 
     @Test
@@ -147,17 +148,16 @@ class LogisticRegressionTrainerTest {
                 features[i][j] = ((double) i + 1) / (j + 1);
             }
         }
-        var classifier = trainer.train(new TestFeatures(features), HugeLongArray.of(2, 0, 0, 2, 7, -75));
+        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
         assertThat(classifier.data().bias()).isNotEmpty();
-        assertThat(classifier.data().weights().data().dimensions()).containsExactly(4, 3);
+        assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 3);
         assertThat(classifier.data().weights().data().data()).containsExactly(
             new double[]{
-                0.0017972116, 0.0011842635, 7.8040244627E-4,
-                0.0017972116, 0.0011842635, 7.8040244627E-4,
-                0.0017972116, 0.0011842635, 7.8040244627E-4,
-                -0.0019790847, -0.0019186863, -0.0017972116
+                0.001799698, 0.001187329, 0.000781799,
+                0.001799698, 0.001187329, 0.000781799,
+                0.001799698, 0.001187329, 0.000781799
             },
             Offset.offset(1e-9)
         );
@@ -180,19 +180,18 @@ class LogisticRegressionTrainerTest {
                 features[i][j] = Math.pow(-1, i) * factor * ((double) i + 1) / (j + 1);
             }
         }
-        var classifier = trainer.train(new TestFeatures(features), HugeLongArray.of(2, 0, 0, 2, 7, -75));
+        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
         assertThat(classifier.data().bias()).isNotEmpty();
-        assertThat(classifier.data().weights().data().dimensions()).containsExactly(4, 3);
+        assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 3);
         assertThat(classifier.data().weights().data().data()).containsExactly(
             new double[]{
-                -0.0019999999, -0.0019414807, -0.0019414806,
-                9.4736841915E-4, 4.4049618270E-4, 4.4049602108E-4,
-                0.0019999999, 0.0018227464411596237, 0.0018227464,
-                -9.4736841915E-4, -5.3836991394E-4, -5.3836986256E-4
+                -0.000947368419, -0.001058125018, -0.001058125004,
+                0.000947368419, 0.000305467914, 0.000305467728,
+                0.001999999995, 0.001752452950, 0.001752452926
             },
-            Offset.offset(1e-9)
+            Offset.offset(1e-12)
         );
     }
 

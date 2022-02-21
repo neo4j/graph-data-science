@@ -112,7 +112,8 @@ public final class LogisticRegressionTrainer implements Trainer {
                 classIdMap.toMapped(labels.get(i));
             }
 
-            var weights = Weights.ofMatrix(classIdMap.size(), numberOfLinkFeatures);
+            // this is an optimization where "virtually" add a weight of 0.0 for the last class
+            var weights = Weights.ofMatrix(classIdMap.size() - 1, numberOfLinkFeatures);
 
             var bias = useBias
                 ? Optional.of(Weights.ofScalar(0))

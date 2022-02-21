@@ -29,10 +29,10 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ConstantScale;
-import org.neo4j.gds.ml.core.functions.CrossEntropyLoss;
 import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.ml.core.functions.ReducedCrossEntropyLoss;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -109,9 +109,13 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
     @Override
     public Variable<Scalar> loss(Batch batch, long trainSize) {
         var batchLabels = batchLabelVector(batch, classifier.classIdMap());
-        var predictions = classifier.predictionsVariable(batch, features);
-        var unpenalizedLoss = new CrossEntropyLoss(
+        var batchFeatures = LogisticRegressionClassifier.batchFeatureMatrix(batch, features);
+        var predictions = classifier.predictionsVariable(batchFeatures);
+        var unpenalizedLoss = new ReducedCrossEntropyLoss(
             predictions,
+            classifier.data().weights(),
+            classifier.data().bias(),
+            batchFeatures,
             batchLabels
         );
         var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData().weights()), batch.size() * penalty / trainSize);

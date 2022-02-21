@@ -22,13 +22,12 @@ package org.neo4j.gds.ml.logisticregression;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.ListBatch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.EWiseAddMatrixScalar;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.ml.core.functions.Softmax;
+import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer.LogisticRegressionData;
@@ -59,12 +58,11 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
     public double[] predictProbabilities(long id, Trainer.Features features) {
         var batch = new ListBatch(List.of(id));
         ComputationContext ctx = new ComputationContext();
-        return ctx.forward(predictionsVariable(batch, features)).data();
+        return ctx.forward(predictionsVariable(batchFeatureMatrix(batch, features))).data();
     }
 
-    Variable<Matrix> predictionsVariable(Batch batch, Trainer.Features features) {
+    ReducedSoftmax predictionsVariable(Constant<Matrix> batchFeatures) {
         var weights = data.weights();
-        var batchFeatures = batchFeatureMatrix(batch, features);
         var weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.of(
             batchFeatures,
             weights
@@ -72,7 +70,7 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
         var softmaxInput = data.bias().isPresent()
             ? new EWiseAddMatrixScalar(weightedFeatures, data.bias().get())
             : weightedFeatures;
-        return new Softmax(softmaxInput);
+        return new ReducedSoftmax(softmaxInput);
     }
 
     static Constant<Matrix> batchFeatureMatrix(Batch batch, Trainer.Features features) {
