@@ -69,6 +69,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -525,6 +526,7 @@ public final class CypherAggregation extends BaseProc {
 }
 
 final class LazyIdMapBuilder implements PartialIdMap {
+    private final AtomicBoolean isEmpty = new AtomicBoolean(true);
     private final NodesBuilder nodesBuilder;
 
     LazyIdMapBuilder(AllocationTracker allocationTracker) {
@@ -546,6 +548,7 @@ final class LazyIdMapBuilder implements PartialIdMap {
         Map<String, Value> properties,
         @Nullable NodeLabel[] nodeLabels
     ) {
+        isEmpty.lazySet(false);
 
         if (properties.isEmpty()) {
             this.nodesBuilder.addNode(nodeId, nodeLabels);
@@ -562,7 +565,9 @@ final class LazyIdMapBuilder implements PartialIdMap {
 
     @Override
     public OptionalLong rootNodeCount() {
-        return OptionalLong.of(this.nodesBuilder.importedNodes());
+        return isEmpty.getAcquire()
+            ? OptionalLong.empty()
+            : OptionalLong.of(this.nodesBuilder.importedNodes());
     }
 
     NodesBuilder.IdMapAndProperties build() {
