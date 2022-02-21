@@ -47,7 +47,6 @@ import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -83,7 +82,10 @@ public abstract class BaseProc {
     @Context
     public Username username = Username.EMPTY_USERNAME;
 
-    private Optional<ModelCatalog> modelCatalog = Optional.empty();
+    // Do not access this directly as it could lead to NullPointerExceptions,
+    // instead use org.neo4j.gds.BaseProc.modelCatalog for access
+    @Context
+    public ModelCatalog internalModelCatalog;
 
     protected BaseProc() {
         if (allocationTracker == null) {
@@ -173,7 +175,7 @@ public abstract class BaseProc {
         return ImmutableExecutionContext
             .builder()
             .api(api)
-            .modelCatalog(modelCatalog.orElse(null))
+            .modelCatalog(internalModelCatalog)
             .log(log)
             .procedureTransaction(procedureTransaction)
             .transaction(transaction)
@@ -186,22 +188,15 @@ public abstract class BaseProc {
     }
 
     public ModelCatalog modelCatalog() {
-        if (modelCatalog.isPresent()) {
-            return modelCatalog.get();
-        }
-
-        if (api == null) {
+        if (internalModelCatalog == null) {
             // you need to set the ModelCatalog if Neo4j is not present (org.neo4j.gds.BaseProc.setModelCatalog).
             throw new IllegalStateException("ModelCatalog could not be retrieved. Please report the error.");
         }
 
-        var resolvedCatalog = GraphDatabaseApiProxy.resolveDependency(api, ModelCatalog.class);
-        setModelCatalog(resolvedCatalog);
-
-        return resolvedCatalog;
+        return internalModelCatalog;
     }
 
     public void setModelCatalog(ModelCatalog modelCatalog) {
-        this.modelCatalog = Optional.of(modelCatalog);
+        this.internalModelCatalog = modelCatalog;
     }
 }
