@@ -75,7 +75,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CypherAggregation extends BaseProc {
 
-    @UserAggregationFunction(name = "gds.alpha.graph")
+    @UserAggregationFunction(name = "gds.alpha.graph.project")
     @Description("Creates a named graph in the catalog for use by algorithms.")
     public GraphAggregator projectFromCypherAggregation() {
 

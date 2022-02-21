@@ -415,8 +415,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
     );
 
     private static final List<String> AGGREGATION_FUNCTIONS = List.of(
-        "gds.alpha.graph",
-
+        "gds.alpha.graph.project",
         "gds.alpha.similarity.asVector"
     );
 

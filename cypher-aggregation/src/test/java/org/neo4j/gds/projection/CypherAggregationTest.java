@@ -88,7 +88,7 @@ class CypherAggregationTest extends BaseProcTest {
     @Test
     void testOptionalMatch() {
         assertCypherResult(
-            "MATCH (s:A) OPTIONAL MATCH (s)-[:REL]->(t:A) WITH gds.alpha.graph('g', s, t) AS g RETURN" +
+            "MATCH (s:A) OPTIONAL MATCH (s)-[:REL]->(t:A) WITH gds.alpha.graph.project('g', s, t) AS g RETURN" +
             " g.graphName AS graphName," +
             " g.projectMillis AS projectMillis," +
             " g.nodeCount AS nodeCount," +
@@ -114,7 +114,7 @@ class CypherAggregationTest extends BaseProcTest {
 
     @Test
     void testMatch() {
-        runQuery("MATCH (s:A)-[:REL]->(t:A) RETURN gds.alpha.graph('g', s, t)");
+        runQuery("MATCH (s:A)-[:REL]->(t:A) RETURN gds.alpha.graph.project('g', s, t)");
 
         assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
         var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
@@ -136,7 +136,7 @@ class CypherAggregationTest extends BaseProcTest {
 
         @Test
         void testLargerGraphSize() {
-            runQuery("MATCH (s:Label) OPTIONAL MATCH (s)-[:TYPE]->(t:Label) RETURN gds.alpha.graph('g', s, t)");
+            runQuery("MATCH (s:Label) OPTIONAL MATCH (s)-[:TYPE]->(t:Label) RETURN gds.alpha.graph.project('g', s, t)");
             assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
             var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
             assertThat(graph.nodeCount()).isEqualTo(10000);
@@ -147,7 +147,7 @@ class CypherAggregationTest extends BaseProcTest {
     void testNodeMapping() {
         runQuery(
             "MATCH (s:B)-[:REL]->(t:B) RETURN " +
-            "gds.alpha.graph('g', s, t)");
+            "gds.alpha.graph.project('g', s, t)");
 
         assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
         var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
@@ -167,7 +167,7 @@ class CypherAggregationTest extends BaseProcTest {
     @ValueSource(strings = {"labels(s)", "['A', 'B']"})
     void testNodeLabels(String labels) {
         runQuery("MATCH (s) WHERE s:A or s:B " +
-                 "RETURN gds.alpha.graph('g', s, null, { sourceNodeLabels: " + labels + " })");
+                 "RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: " + labels + " })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A", "B");
@@ -176,7 +176,7 @@ class CypherAggregationTest extends BaseProcTest {
     @Test
     void testEmptyNodeLabel() {
         runQuery("MATCH (s)" +
-                 "RETURN gds.alpha.graph('g', s, null, { sourceNodeLabels: labels(s) })");
+                 "RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: labels(s) })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
         assertThat(graphStore.nodeCount()).isEqualTo(16);
@@ -188,7 +188,7 @@ class CypherAggregationTest extends BaseProcTest {
     @Test
     void testDirectLabelMapping() {
         runQuery("MATCH (s)" +
-                 "RETURN gds.alpha.graph('g', s, null, { sourceNodeLabels: true })");
+                 "RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: true })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
         assertThat(graphStore.nodeLabels())
@@ -204,7 +204,7 @@ class CypherAggregationTest extends BaseProcTest {
     })
     void testWithoutLabelInformation(String nodeConfig) {
         runQuery("MATCH (s)" +
-                 "RETURN gds.alpha.graph('g', s, null" + nodeConfig + ")");
+                 "RETURN gds.alpha.graph.project('g', s, null" + nodeConfig + ")");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("__ALL__");
@@ -214,7 +214,7 @@ class CypherAggregationTest extends BaseProcTest {
     @ValueSource(strings = {"labels(s)[0]", "'A'"})
     void testSingleNodeLabel(String label) {
         runQuery("MATCH (s:A)" +
-                 "RETURN gds.alpha.graph('g', s, null, { sourceNodeLabels: " + label + " })");
+                 "RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: " + label + " })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A");
@@ -223,7 +223,7 @@ class CypherAggregationTest extends BaseProcTest {
     @Test
     void testPropertiesOnEmptyNodes() {
         runQuery("MATCH (s)" +
-                 "RETURN gds.alpha.graph('g', s, null, { sourceNodeProperties: s { .foo } })");
+                 "RETURN gds.alpha.graph.project('g', s, null, { sourceNodeProperties: s { .foo } })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
         var graph = graphStore.getUnion();
@@ -241,7 +241,7 @@ class CypherAggregationTest extends BaseProcTest {
     void testNodeProperties() {
         runQuery(
             "MATCH (s:B)-[:REL]->(t:B) RETURN " +
-            "gds.alpha.graph('g', s, t, {" +
+            "gds.alpha.graph.project('g', s, t, {" +
             "   sourceNodeProperties: s {.prop1, another_prop: coalesce(s.prop2, 84.0), doubles: coalesce(s.prop3, [13.37, 42.0]), longs: coalesce(s.prop4, [42]) }," +
             "   targetNodeProperties: t {.prop1, another_prop: coalesce(t.prop2, 84.0), doubles: coalesce(t.prop3, [13.37, 42.0]), longs: coalesce(t.prop4, [42]) }" +
             "})");
@@ -291,7 +291,7 @@ class CypherAggregationTest extends BaseProcTest {
     void testRelationshipType(String type) {
         runQuery(
             "MATCH (s:B)-[r:REL]->(t:B) RETURN " +
-            "gds.alpha.graph('g', s, t, null," +
+            "gds.alpha.graph.project('g', s, t, null," +
             "   { relationshipType: " + type + " }" +
             ")");
 
@@ -307,7 +307,7 @@ class CypherAggregationTest extends BaseProcTest {
     @Test
     void shouldNotFailOnMissingProperty() {
         var query = "MATCH (s:B)-[:REL]->(t:B) " +
-                    "WITH gds.alpha.graph('g', s, t, {" +
+                    "WITH gds.alpha.graph.project('g', s, t, {" +
                     "   sourceNodeProperties: s { .prop2 }, " +
                     "   targetNodeProperties: t { .prop2 }" +
                     "}) AS g " +
@@ -319,7 +319,7 @@ class CypherAggregationTest extends BaseProcTest {
     void testSingleRelationshipProperties() {
         runQuery(
             "MATCH (s:B)-[r:REL]->(t:B) RETURN " +
-            "gds.alpha.graph('g', s, t, null," +
+            "gds.alpha.graph.project('g', s, t, null," +
             "   { properties: r {.prop} }" +
             ")");
 
@@ -356,7 +356,7 @@ class CypherAggregationTest extends BaseProcTest {
     void testMultipleRelationshipProperties() {
         runQuery(
             "MATCH (s:B)-[r:REL]->(t:B) RETURN " +
-            "gds.alpha.graph('g', s, t, null, " +
+            "gds.alpha.graph.project('g', s, t, null, " +
             "   { properties: r {.prop, prop_by_another_name: r.prop} }" +
             ")");
 
@@ -402,7 +402,7 @@ class CypherAggregationTest extends BaseProcTest {
         runQuery(
             "MATCH (s:B { prop1: 42 })-[r:REL]->(t:B { prop1: 43 }) " +
             "WITH s, t, avg(r.prop) AS average, sum(r.prop) AS sum, max(r.prop) AS max, min(r.prop) AS min " +
-            "RETURN gds.alpha.graph('g', s, t, null," +
+            "RETURN gds.alpha.graph.project('g', s, t, null," +
             "   { properties: {average: average, sum: sum, max: max, min: min} }" +
             ")"
         );
@@ -448,7 +448,7 @@ class CypherAggregationTest extends BaseProcTest {
     void testPipelinePseudoAnonymous() {
         assertCypherResult(
             "MATCH (s:A)-[:REL]->(t:A) " +
-            "WITH gds.alpha.graph('g', s, t) AS g " +
+            "WITH gds.alpha.graph.project('g', s, t) AS g " +
             "CALL gds.wcc.stream(g.graphName) YIELD nodeId, componentId " +
             "RETURN count(DISTINCT componentId) as numberOfComponents",
             List.of(Map.of("numberOfComponents", 2L))
@@ -458,7 +458,7 @@ class CypherAggregationTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource({"42, Long", "13.37, Double"})
     void testInvalidLabel(String label, String type) {
-        assertThatThrownBy(() -> runQuery("MATCH (s) RETURN gds.alpha.graph('g', s, null, { sourceNodeLabels: " + label + " })"))
+        assertThatThrownBy(() -> runQuery("MATCH (s) RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: " + label + " })"))
             .getRootCause()
             .hasMessage(
                 "The value of `sourceNodeLabels` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `" + type + "`."
@@ -468,7 +468,7 @@ class CypherAggregationTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource({"42, Long", "13.37, Double", "true, Boolean", "\"A\", String"})
     void testInvalidProperties(String properties, String type) {
-        assertThatThrownBy(() -> runQuery("MATCH (s) RETURN gds.alpha.graph('g', s, null, { sourceNodeProperties: " + properties + " })"))
+        assertThatThrownBy(() -> runQuery("MATCH (s) RETURN gds.alpha.graph.project('g', s, null, { sourceNodeProperties: " + properties + " })"))
             .getRootCause()
             .hasMessage(
                 "The value of `sourceNodeProperties` must be a `Map of Property Values`, but was `" + type + "`."

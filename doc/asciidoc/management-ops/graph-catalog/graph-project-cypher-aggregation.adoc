@@ -40,7 +40,7 @@ In addition, the optional `sourceNodeProperties`, `targetNodeProperties`, and `r
 --
 [source, cypher, role=noplay]
 ----
-RETURN gds.alpha.graph(
+RETURN gds.alpha.graph.project(
     graphName: String,
     sourceNode: Node,
     targetNode: Node,
@@ -117,7 +117,7 @@ We are going to start with demonstrating how to load a simple graph by projectin
 [source, cypher, role=noplay]
 ----
 MATCH (source:Person)-[r:KNOWS]->(target:Person)
-WITH gds.alpha.graph('persons', source, target) AS g
+WITH gds.alpha.graph.project('persons', source, target) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
@@ -141,7 +141,7 @@ To demonstrate we are projecting all nodes, where some might be connected with t
 [source, cypher, role=noplay]
 ----
 MATCH (source) OPTIONAL MATCH (source)-[r:KNOWS]->(target)
-WITH gds.alpha.graph('persons', source, target) AS g
+WITH gds.alpha.graph.project('persons', source, target) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
@@ -171,7 +171,7 @@ MATCH (source)
 WHERE source:Person OR source:Book
 OPTIONAL MATCH (source)-[r:KNOWS|READ]->(target)
 WHERE target:Person OR target:Book
-WITH gds.alpha.graph(
+WITH gds.alpha.graph.project(
   'personsAndBooks',
   source,
   target,
@@ -246,7 +246,7 @@ The properties for the target node are specified as `targetNodeProperties` key i
 ----
 MATCH (source)-[r:KNOWS|READ]->(target)
 WHERE source:Book OR source:Person
-WITH gds.alpha.graph(
+WITH gds.alpha.graph.project(
   'graphWithProperties',
   source,
   target,
@@ -308,7 +308,7 @@ If we only want to project relationship properties and not any node properties o
 [source, cypher, role=noplay]
 ----
 MATCH (source)-[r:READ]->(target)
-WITH gds.alpha.graph(
+WITH gds.alpha.graph.project(
   'readWithProperties',
   source,
   target,
@@ -373,7 +373,7 @@ Alternatively, we can aggregate the parallel relationship by using the https://n
 ----
 MATCH (source)-[r:READ]->(target)
 WITH source, target, count(r) AS numberOfReads
-WITH gds.alpha.graph('readCount', source, target, null, { properties: { numberOfReads: numberOfReads } }) AS g
+WITH gds.alpha.graph.project('readCount', source, target, null, { properties: { numberOfReads: numberOfReads } }) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
@@ -426,7 +426,7 @@ For graphs with relationship properties we can also use other aggregations docum
 ----
 MATCH (source)-[r:READ]->(target)
 WITH source, target, sum(r.numberOfPages) AS numberOfPages
-WITH gds.alpha.graph('readSums', source, target, null, { properties: { numberOfPages: numberOfPages } }) AS g
+WITH gds.alpha.graph.project('readSums', source, target, null, { properties: { numberOfPages: numberOfPages } }) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
@@ -480,7 +480,7 @@ The following examples will demonstrate how to filter out `READ` relationships i
 ----
 MATCH (source) OPTIONAL MATCH (source)-[r:READ]->(target)
 WHERE r.numberOfPages IS NOT NULL
-WITH gds.alpha.graph('existingNumberOfPages', source, target, null, { properties: r { .numberOfPages } }) AS g
+WITH gds.alpha.graph.project('existingNumberOfPages', source, target, null, { properties: r { .numberOfPages } }) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----

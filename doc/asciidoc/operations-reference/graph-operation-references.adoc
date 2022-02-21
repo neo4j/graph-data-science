@@ -13,7 +13,7 @@
 | `gds.graph.project.estimate`
 | `gds.graph.project.cypher`
 | `gds.graph.project.cypher.estimate`
-| `gds.alpha.graph`
+| `gds.alpha.graph.project`
 .4+<.^|<<catalog-graph-project, Deprecated: Create Graph>>
 | `gds.graph.create`
 | `gds.graph.create.estimate`

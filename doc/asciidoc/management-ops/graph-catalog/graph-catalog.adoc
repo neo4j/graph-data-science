@@ -29,7 +29,7 @@ This chapter explains the available graph catalog operations.
 | Name                                                                          | Description
 | <<catalog-graph-project, gds.graph.project>>                                  | Adds a graph to the catalog using Native projection.
 | <<catalog-graph-project-cypher, gds.graph.project.cypher>>                    | Adds a graph to the catalog using Cypher projection.
-| <<catalog-graph-project-cypher-aggregation, gds.alpha.graph>>                 | Adds a graph to the catalog using Cypher Aggregation.
+| <<catalog-graph-project-cypher-aggregation, gds.alpha.graph.project>>         | Adds a graph to the catalog using Cypher Aggregation.
 | <<catalog-graph-project-subgraph, gds.beta.graph.project.subgraph>>           | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
 | <<catalog-graph-list, gds.graph.list>>                                        | Prints information about graphs that are currently stored in the catalog.
 | <<catalog-graph-exists, gds.graph.exists>>                                    | Checks if a named graph is stored in the catalog.
