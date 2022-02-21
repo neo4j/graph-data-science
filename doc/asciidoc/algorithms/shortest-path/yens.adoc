@@ -1,5 +1,5 @@
 [[algorithms-yens]]
-= Yen's algorithm
+= Yen's algorithm Shortest Path
 :entity: source-target-pair
 :result: shortest path
 :algorithm: Yen's

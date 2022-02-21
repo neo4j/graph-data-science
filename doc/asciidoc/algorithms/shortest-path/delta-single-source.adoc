@@ -1,14 +1,14 @@
-[[algorithms-dijkstra-single-source]]
-= Dijkstra Single-Source Shortest Path
+[[algorithms-delta-single-source]]
+= Delta-Stepping Single-Source Shortest Path
 :entity: source-target-pair
 :result: shortest path
-:algorithm: Dijkstra
+:algorithm: Delta-Stepping
 :source-target: false
-:procedure-name: pass:q[gds.allShortestPaths.dijkstra]
+:procedure-name: pass:q[gds.allShortestPaths.delta]
 
 [abstract]
 --
-This section describes the Dijkstra Shortest Path algorithm in the Neo4j Graph Data Science library.
+This section describes the Delta-Stepping Shortest Path algorithm in the Neo4j Graph Data Science library.
 --
 
 :directed:
@@ -18,32 +18,50 @@ This section describes the Dijkstra Shortest Path algorithm in the Neo4j Graph D
 include::../shared/algorithm-traits.adoc[]
 
 
-[[algorithms-dijkstra-single-source-intro]]
+[[algorithms-delta-single-source-intro]]
 == Introduction
 
-The Dijkstra Shortest Path algorithm computes the shortest path between nodes.
+The Delta-Stepping Shortest Path algorithm computes all shortest paths between a source node and all reachable nodes in the graph.
 The algorithm supports weighted graphs with positive relationship weights.
-The Dijkstra Single-Source algorithm computes the shortest paths between a source node and all nodes reachable from that node.
-To compute the shortest path between a source and a target node, <<algorithms-dijkstra-source-target, Dijkstra Source-Target>> can be used.
+To compute the shortest path between a source and a single target node, <<algorithms-dijkstra-source-target, Dijkstra Source-Target>> can be used.
 
-The GDS implementation is based on the http://www-m3.ma.tum.de/twiki/pub/MN0506/WebHome/dijkstra.pdf[original description] and uses a binary heap as priority queue.
-The implementation is also used for the <<algorithms-astar, A*>> and <<algorithms-yens, Yen's>> algorithms.
-The algorithm implementation is executed using a single thread.
-Altering the concurrency configuration has no effect.
+In contrast to <<algorithms-dijkstra-single-source, Dijkstra Single-Source>>, the Delta-Stepping algorithm is a distance correcting algorithm.
+This property allows it to traverse the graph in parallel.
+The algorithm is guaranteed to always find the shortest path between a source node and a target node.
+However, if multiple shortest paths exist between two nodes, the algorithm is not guaranteed to return the same path in each computation.
+
+The GDS implementation is based on [1] and incorporates the bucket fusion optimization discussed in [2].
+The algorithm implementation is executed using multiple threads which can be defined in the procedure configuration.
+
+For more information on this algorithm, see:
+
+1. https://dl.acm.org/doi/10.1016/S0196-6774%2803%2900076-2[Ulrich Meyer and Peter Sanders. "δ-stepping: a parallelizable shortest path algorithm."^]
+2. https://arxiv.org/abs/1911.07260[Yunming Zhang, Ajay Brahmakshatriya, Xinyi Chen, Laxman Dhulipala, Shoaib Kamil, Saman Amarasinghe, and Julian Shun. "Optimizing ordered graph algorithms with GraphIt."^]
 
 
-[[algorithms-dijkstra-single-source-syntax]]
+[[algorithms-delta-single-source-syntax]]
 == Syntax
 
 include::path-syntax.adoc[]
 
 
-[[algorithms-dijkstra-single-source-examples]]
+=== Delta
+
+The `delta` parameter defines a range which is used to group nodes with the same tentative distance to the start node.
+The ranges are also called buckets.
+In each iteration of the algorithm, the non-empty bucket with the smallest tentative distance is processed in parallel.
+The `delta` parameter is the main tuning knob for the algorithm and controls the workload that can be processed in parallel.
+Generally, for power-law graphs, where many nodes can be reached within a few hops, a small delta (e.g. `2`) is recommended.
+For high-diameter graphs, e.g. transport networks, a high delta value (e.g. `10000`) is recommended.
+Note, that the value might vary depending on the graph topology and the value range of relationship properties.
+
+
+[[algorithms-delta-single-source-examples]]
 == Examples
 
 :algorithm-name: {algorithm}
 :graph-description: transport network
-:image-file: dijkstra.svg
+:image-file: delta.svg
 include::../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
@@ -88,7 +106,7 @@ CALL gds.graph.project(
 In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.
 
 
-[[algorithms-dijkstra-single-source-examples-memory-estimation]]
+[[algorithms-delta-single-source-examples-memory-estimation]]
 === Memory Estimation
 
 :mode: write
@@ -100,7 +118,7 @@ include::../shared/examples-estimate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'})
-CALL gds.allShortestPaths.dijkstra.write.estimate('myGraph', {
+CALL gds.allShortestPaths.delta.write.estimate('myGraph', {
     sourceNode: source,
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH'
@@ -113,12 +131,12 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 6         | 9                 | 696      | 696      | "696 Bytes"
+| 6         | 9                 | 368      | 576      | "[368 Bytes \... 576 Bytes]"
 |===
 --
 
 
-[[algorithms-dijkstra-single-source-examples-stream]]
+[[algorithms-delta-single-source-examples-stream]]
 === Stream
 
 :!stream-details:
@@ -130,9 +148,10 @@ include::../shared/examples-stream-intro.adoc[]]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'})
-CALL gds.allShortestPaths.dijkstra.stream('myGraph', {
+CALL gds.allShortestPaths.delta.stream('myGraph', {
     sourceNode: source,
-    relationshipWeightProperty: 'cost'
+    relationshipWeightProperty: 'cost',
+    delta: 3.0
 })
 YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
 RETURN
@@ -161,11 +180,11 @@ ORDER BY index
 
 The result shows the total cost of the shortest path between node `A` and all other reachable nodes in the graph.
 It also shows ordered lists of node ids that were traversed to find the shortest paths as well as the accumulated costs of the visited nodes.
-This can be verified in the <<algorithms-dijkstra-single-source-examples, example graph>>.
+This can be verified in the <<algorithms-delta-single-source-examples, example graph>>.
 Cypher Path objects can be returned by the `path` return field.
 The Path objects contain the node objects and virtual relationships which have a `cost` property.
 
-[[algorithms-dijkstra-single-source-examples-mutate]]
+[[algorithms-delta-single-source-examples-mutate]]
 === Mutate
 
 include::path-examples-mutate-intro.adoc[]
@@ -176,7 +195,7 @@ include::path-examples-mutate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'})
-CALL gds.allShortestPaths.dijkstra.mutate('myGraph', {
+CALL gds.allShortestPaths.delta.mutate('myGraph', {
     sourceNode: source,
     relationshipWeightProperty: 'cost',
     mutateRelationshipType: 'PATH'
@@ -202,7 +221,7 @@ The relationships produced are always directed, even if the input graph is undir
 ====
 
 
-[[algorithms-dijkstra-single-source-examples-write]]
+[[algorithms-delta-single-source-examples-write]]
 === Write
 
 include::path-examples-write-intro.adoc[]
@@ -213,7 +232,7 @@ include::path-examples-write-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'})
-CALL gds.allShortestPaths.dijkstra.write('myGraph', {
+CALL gds.allShortestPaths.delta.write('myGraph', {
     sourceNode: source,
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH',

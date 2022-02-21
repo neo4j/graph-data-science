@@ -1,5 +1,5 @@
 [[algorithms-astar]]
-= A*
+= A* Shortest Path
 :entity: source-target-pair
 :result: shortest path
 :algorithm: A*

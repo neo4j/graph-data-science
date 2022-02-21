@@ -6,14 +6,15 @@
 This chapter provides explanations and examples for each of the path finding algorithms in the Neo4j Graph Data Science library.
 --
 
-Path finding algorithms find the shortest path between two or more nodes or evaluate the availability and quality of paths.
+Path finding algorithms find the path between two or more nodes or evaluate the availability and quality of paths.
 The Neo4j GDS library includes the following path finding algorithms, grouped by quality tier:
 
 * Production-quality
-** <<algorithms-dijkstra-source-target, Dijkstra Source-Target>>
-** <<algorithms-dijkstra-single-source, Dijkstra Single-Source>>
-** <<algorithms-astar, A*>>
-** <<algorithms-yens, Yen's algorithm>>
+** <<algorithms-delta-single-source, Delta-Stepping Single-Source Shortest Path>>
+** <<algorithms-dijkstra-source-target, Dijkstra Source-Target Shortest Path>>
+** <<algorithms-dijkstra-single-source, Dijkstra Single-Source Shortest Path>>
+** <<algorithms-astar, A* Shortest Path>>
+** <<algorithms-yens, Yen's Shortest Path>>
 * Beta
 ** <<beta-algorithms-random-walk, Random Walk>>
 * Alpha
@@ -21,6 +22,8 @@ The Neo4j GDS library includes the following path finding algorithms, grouped by
 ** <<alpha-algorithm-all-pairs-shortest-path, All Pairs Shortest Path>>
 ** <<algorithms-bfs, Breadth First Search>>
 ** <<algorithms-dfs, Depth First Search>>
+
+include::shortest-path/delta-single-source.adoc[leveloffset=+1]
 
 include::shortest-path/dijkstra-source-target.adoc[leveloffset=+1]
 

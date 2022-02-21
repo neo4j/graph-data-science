@@ -217,6 +217,9 @@
 
         <d:tocentry linkend="algorithms-path-finding">
             <?dbhtml filename="algorithms/pathfinding/index.html"?>
+            <d:tocentry linkend="algorithms-delta-single-source">
+                <?dbhtml filename="algorithms/delta-single-source/index.html"?>
+            </d:tocentry>
             <d:tocentry linkend="algorithms-dijkstra-source-target">
                 <?dbhtml filename="algorithms/dijkstra-source-target/index.html"?>
             </d:tocentry>

@@ -31,6 +31,6 @@ public interface AllShortestPathsDeltaBaseConfig extends AllShortestPathsBaseCon
     @Configuration.DoubleRange(min = 0, minInclusive = false)
     @Value.Default
     default double delta() {
-        return 5.0;
+        return 2.0;
     }
 }
