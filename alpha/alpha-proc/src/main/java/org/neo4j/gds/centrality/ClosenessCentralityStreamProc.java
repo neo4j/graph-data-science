@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.centrality;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.StreamProc;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.impl.closeness.ClosenessCentralityConfig;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.impl.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,31 +40,46 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.closeness.stream", description = DESCRIPTION, executionMode = STREAM)
-public class ClosenessCentralityStreamProc extends ClosenessCentralityProc<MSClosenessCentrality.Result> {
+public class ClosenessCentralityStreamProc extends StreamProc<MSClosenessCentrality, MSClosenessCentrality, MSClosenessCentrality.Result, ClosenessCentralityStreamConfig> {
 
-    @Procedure(name = "gds.alpha.closeness.stream", mode = READ)
+    @Procedure(value = "gds.alpha.closeness.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MSClosenessCentrality.Result> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
-        return computationResultConsumer().consume(computationResult, executionContext());
+        var computationResult = compute(
+            graphName,
+            configuration
+        );
+        return stream(computationResult);
+    }
+
+
+    @Override
+    protected MSClosenessCentrality.Result streamResult(
+        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+    ) {
+        return new MSClosenessCentrality.Result(originalNodeId, nodeProperties.doubleValue(internalNodeId));
     }
 
     @Override
-    public ComputationResultConsumer<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig, Stream<MSClosenessCentrality.Result>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            MSClosenessCentrality algorithm = computationResult.algorithm();
-            Graph graph = computationResult.graph();
+    protected NodeProperties nodeProperties(ComputationResult<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityStreamConfig> computationResult) {
+        return ClosenessCentralityProc.nodeProperties(computationResult);
+    }
 
-            if (graph.isEmpty()) {
-                graph.release();
-                return Stream.empty();
-            }
+    @Override
+    protected ClosenessCentralityStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return ClosenessCentralityStreamConfig.of(config);
+    }
 
-            graph.release();
-            return algorithm.resultStream();
-        };
+    @Override
+    public ValidationConfiguration<ClosenessCentralityStreamConfig> validationConfig() {
+        return ClosenessCentralityProc.getValidationConfig();
+    }
+
+    @Override
+    public GraphAlgorithmFactory<MSClosenessCentrality, ClosenessCentralityStreamConfig> algorithmFactory() {
+        return ClosenessCentralityProc.algorithmFactory();
     }
 }
