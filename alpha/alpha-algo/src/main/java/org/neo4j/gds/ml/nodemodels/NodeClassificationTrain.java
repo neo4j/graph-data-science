@@ -28,7 +28,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -74,7 +73,6 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
     private final NodeClassificationTrainConfig config;
     private final HugeLongArray targets;
     private final HugeLongArray nodeIds;
-    private final AllocationTracker allocationTracker;
     private final List<Metric> metrics;
     private final StatsMap trainStats;
     private final StatsMap validationStats;
@@ -186,15 +184,14 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
     public static NodeClassificationTrain create(
         Graph graph,
         NodeClassificationTrainConfig config,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
-        var targetsAndClasses = computeGlobalTargetsAndClasses(targetNodeProperty, graph.nodeCount(), allocationTracker);
+        var targetsAndClasses = computeGlobalTargetsAndClasses(targetNodeProperty, graph.nodeCount());
         var targets = targetsAndClasses.getOne();
         var classCounts = targetsAndClasses.getTwo();
         var metrics = createMetrics(config, classCounts);
-        var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
+        var nodeIds = HugeLongArray.newArray(graph.nodeCount());
         nodeIds.setAll(i -> i);
         var trainStats = StatsMap.create(metrics);
         var validationStats = StatsMap.create(metrics);
@@ -207,14 +204,16 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
             nodeIds,
             trainStats,
             validationStats,
-            allocationTracker,
             progressTracker
         );
     }
 
-    private static Pair<HugeLongArray, Multiset<Long>> computeGlobalTargetsAndClasses(NodeProperties targetNodeProperty, long nodeCount, AllocationTracker allocationTracker) {
+    private static Pair<HugeLongArray, Multiset<Long>> computeGlobalTargetsAndClasses(
+        NodeProperties targetNodeProperty,
+        long nodeCount
+    ) {
         var classCounts = new Multiset<Long>();
-        var targets = HugeLongArray.newArray(nodeCount, allocationTracker);
+        var targets = HugeLongArray.newArray(nodeCount);
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             targets.set(nodeId, targetNodeProperty.longValue(nodeId));
             classCounts.add(targetNodeProperty.longValue(nodeId));
@@ -238,7 +237,6 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         HugeLongArray nodeIds,
         StatsMap trainStats,
         StatsMap validationStats,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
@@ -249,9 +247,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         this.nodeIds = nodeIds;
         this.trainStats = trainStats;
         this.validationStats = validationStats;
-        this.allocationTracker = allocationTracker;
         this.metricComputer = new ClassificationMetricComputer(
-            allocationTracker,
             metrics,
             classCounts,
             graph,
@@ -270,7 +266,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
 
         progressTracker.beginSubTask();
         ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
-        var outerSplit = new FractionSplitter(allocationTracker).split(nodeIds, 1 - config.holdoutFraction());
+        var outerSplit = new FractionSplitter().split(nodeIds, 1 - config.holdoutFraction());
         var innerSplits = new StratifiedKFoldSplitter(
             config.validationFolds(),
             ReadOnlyHugeLongArray.of(outerSplit.trainSet()),

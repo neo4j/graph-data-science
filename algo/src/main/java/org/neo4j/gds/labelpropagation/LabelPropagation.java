@@ -29,7 +29,6 @@ import org.neo4j.gds.core.loading.NullPropertyMap.LongNullPropertyMap;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -44,7 +43,6 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     private final long nodeCount;
-    private final AllocationTracker allocationTracker;
     private final NodeProperties nodeProperties;
     private final NodeProperties nodeWeights;
     private final LabelPropagationBaseConfig config;
@@ -61,15 +59,13 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         Graph graph,
         LabelPropagationBaseConfig config,
         ExecutorService executor,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.config = config;
         this.executor = executor;
-        this.allocationTracker = allocationTracker;
         this.batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
 
         NodeProperties seedProperty;
@@ -119,7 +115,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         progressTracker.beginSubTask();
 
         if (labels == null || labels.size() != nodeCount) {
-            labels = HugeLongArray.newArray(nodeCount, allocationTracker);
+            labels = HugeLongArray.newArray(nodeCount);
         }
 
         ranIterations = 0L;

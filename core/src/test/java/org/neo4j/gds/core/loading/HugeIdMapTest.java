@@ -102,7 +102,7 @@ class HugeIdMapTest {
     void shouldStoreCorrectHighestNeoId() {
         int length = 1337;
         int highestNeoId = length - 1;
-        var hugeIdMapBuilder = HugeIdMapBuilder.of(length, AllocationTracker.empty());
+        var hugeIdMapBuilder = HugeIdMapBuilder.of(length);
         var emptyLabelInformationBuilder = LabelInformation.emptyBuilder(AllocationTracker.empty());
         var hugeIdMap = HugeIdMapBuilderOps.build(
             hugeIdMapBuilder.array(),

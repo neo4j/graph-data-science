@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.paged;
 
 import com.carrotsearch.hppc.BitMixer;
 import com.carrotsearch.hppc.Containers;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -32,8 +31,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * store more than 2B values
  */
 public final class HugeLongLongDoubleMap {
-
-    private final AllocationTracker allocationTracker;
 
     private HugeLongArray keys1;
     private HugeLongArray keys2;
@@ -51,15 +48,14 @@ public final class HugeLongLongDoubleMap {
     /**
      * New instance with sane defaults.
      */
-    public HugeLongLongDoubleMap(AllocationTracker allocationTracker) {
-        this(DEFAULT_EXPECTED_ELEMENTS, allocationTracker);
+    public HugeLongLongDoubleMap() {
+        this(DEFAULT_EXPECTED_ELEMENTS);
     }
 
     /**
      * New instance with sane defaults.
      */
-    public HugeLongLongDoubleMap(long expectedElements, AllocationTracker allocationTracker) {
-        this.allocationTracker = allocationTracker;
+    public HugeLongLongDoubleMap(long expectedElements) {
         initialBuffers(expectedElements);
     }
 
@@ -188,11 +184,9 @@ public final class HugeLongLongDoubleMap {
     }
 
     public void release() {
-        long released = 0L;
-        released += keys1.release();
-        released += keys2.release();
-        released += values.release();
-        allocationTracker.remove(released);
+        keys1.release();
+        keys2.release();
+        values.release();
 
         keysCursor.close();
 
@@ -271,9 +265,9 @@ public final class HugeLongLongDoubleMap {
         HugeLongArray prevKeys2 = this.keys2;
         HugeDoubleArray prevValues = this.values;
         try {
-            this.keys1 = HugeLongArray.newArray(arraySize, allocationTracker);
-            this.keys2 = HugeLongArray.newArray(arraySize, allocationTracker);
-            this.values = HugeDoubleArray.newArray(arraySize, allocationTracker);
+            this.keys1 = HugeLongArray.newArray(arraySize);
+            this.keys2 = HugeLongArray.newArray(arraySize);
+            this.values = HugeDoubleArray.newArray(arraySize);
             keysCursor = CloseableThreadLocal.withInitial(keys1::newCursor);
         } catch (OutOfMemoryError e) {
             this.keys1 = prevKeys1;
@@ -359,11 +353,9 @@ public final class HugeLongLongDoubleMap {
         // Rehash old keys, including the pending key.
         rehash(prevKeys1, prevKeys2, prevValues);
 
-        long released = 0L;
-        released += prevKeys1.release();
-        released += prevKeys2.release();
-        released += prevValues.release();
-        allocationTracker.remove(released);
+        prevKeys1.release();
+        prevKeys2.release();
+        prevValues.release();
     }
 
 

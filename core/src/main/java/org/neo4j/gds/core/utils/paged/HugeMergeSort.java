@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.paged;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.concurrent.CountedCompleter;
 
@@ -29,8 +28,8 @@ public final class HugeMergeSort {
 
     private static final int SEQUENTIAL_THRESHOLD = 100;
 
-    public static void sort(HugeLongArray array, int concurrency, AllocationTracker allocationTracker) {
-        var temp = HugeLongArray.newArray(array.size(), allocationTracker);
+    public static void sort(HugeLongArray array, int concurrency) {
+        var temp = HugeLongArray.newArray(array.size());
         var forkJoinPool = Pools.createForkJoinPool(concurrency);
         try {
             forkJoinPool.invoke(new MergeSortTask(null, array, temp, 0, array.size() - 1));

@@ -191,7 +191,7 @@ public class HugeIdMap implements IdMap {
         long nodeId = -1L;
         long cursor = 0L;
         long newNodeCount = unionBitSet.cardinality();
-        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, allocationTracker);
+        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount);
 
         while ((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
             newGraphIds.set(cursor, nodeId);

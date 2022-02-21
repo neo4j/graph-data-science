@@ -107,7 +107,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
     public NodeClassificationResult compute() {
         progressTracker.beginSubTask();
         var predictedProbabilities = initProbabilities();
-        var predictedClasses = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
+        var predictedClasses = HugeLongArray.newArray(graph.nodeCount());
         var consumer = new NodeClassificationPredictConsumer(
             graph,
             IDENTITY,

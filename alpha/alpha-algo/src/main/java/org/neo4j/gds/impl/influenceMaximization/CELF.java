@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.results.InfluenceMaximizationResult;
@@ -45,7 +44,6 @@ public class CELF extends Algorithm<CELF> {
     private final ArrayList<Runnable> tasks;
     private final LongDoubleScatterMap seedSetNodes;
     private final HugeLongPriorityQueue spreads;
-    private final AllocationTracker allocationTracker;
     private final ExecutorService executorService;
 
     private double gain;
@@ -61,8 +59,7 @@ public class CELF extends Algorithm<CELF> {
         double propagationProbability,
         int monteCarloSimulations,
         ExecutorService executorService,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
@@ -74,7 +71,6 @@ public class CELF extends Algorithm<CELF> {
 
         this.executorService = executorService;
         this.concurrency = concurrency;
-        this.allocationTracker = allocationTracker;
         this.tasks = new ArrayList<>();
 
         seedSetNodes = new LongDoubleScatterMap(seedSetCount);
@@ -103,8 +99,7 @@ public class CELF extends Algorithm<CELF> {
         for (int i = 0; i < concurrency; i++) {
             var runner = new IndependentCascadeRunner(graph, spreads, globalNodeProgress,
                 propagationProbability,
-                monteCarloSimulations,
-                allocationTracker
+                monteCarloSimulations
             );
             runner.setSeedSetNodes(new long[0]);
             tasks.add(runner);
@@ -126,8 +121,7 @@ public class CELF extends Algorithm<CELF> {
             graph,
             propagationProbability,
             monteCarloSimulations,
-            spreads,
-            allocationTracker
+            spreads
         );
 
         for (long i = 0; i < seedSetCount - 1; i++) {

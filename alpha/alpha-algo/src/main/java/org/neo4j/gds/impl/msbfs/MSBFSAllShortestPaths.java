@@ -20,7 +20,6 @@
 package org.neo4j.gds.impl.msbfs;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.BlockingQueue;
@@ -41,18 +40,16 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
 
     private Graph graph;
     private BlockingQueue<AllShortestPathsStream.Result> resultQueue;
-    private final AllocationTracker allocationTracker;
     private final int concurrency;
     private final ExecutorService executorService;
 
     public MSBFSAllShortestPaths(
-            Graph graph,
-            AllocationTracker allocationTracker,
-            int concurrency,
-            ExecutorService executorService) {
+        Graph graph,
+        int concurrency,
+        ExecutorService executorService
+    ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
-        this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.resultQueue = new LinkedBlockingQueue<>(); // TODO limit size?
@@ -116,8 +113,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
                             }
                         }
                         progressTracker.logProgress();
-                    },
-                allocationTracker
+                    }
             ).run(concurrency, executorService);
 
             resultQueue.add(AllShortestPathsStream.DONE);

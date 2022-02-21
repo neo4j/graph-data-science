@@ -56,8 +56,7 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
             graph,
             configuration,
             Pools.DEFAULT,
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
     }
 

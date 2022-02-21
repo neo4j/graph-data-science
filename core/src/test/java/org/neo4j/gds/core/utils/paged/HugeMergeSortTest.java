@@ -60,14 +60,14 @@ class HugeMergeSortTest {
     void sortArray(long size, int concurrency, boolean useSingleArray) {
         var allocationTracker = AllocationTracker.empty();
         var array = useSingleArray
-            ? HugeLongArray.newSingleArray((int) size, allocationTracker)
-            : HugeLongArray.newPagedArray(size, allocationTracker);
+            ? HugeLongArray.newSingleArray((int) size)
+            : HugeLongArray.newPagedArray(size);
         var longs = new Random().longs(size).toArray();
         for (int i = 0; i < size; i++) {
             array.set(i, longs[i]);
         }
 
-        HugeMergeSort.sort(array, concurrency, allocationTracker);
+        HugeMergeSort.sort(array, concurrency);
 
         Arrays.sort(longs);
         for (int i = 0; i < array.size(); i++) {

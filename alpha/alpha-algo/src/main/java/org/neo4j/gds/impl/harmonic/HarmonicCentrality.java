@@ -33,7 +33,6 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
 
     private final int concurrency;
     private final long nodeCount;
-    private final AllocationTracker allocationTracker;
     private final ExecutorService executorService;
     private final HugeAtomicDoubleArray inverseFarness;
 
@@ -48,7 +47,6 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.inverseFarness = HugeAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
@@ -67,8 +65,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
         MultiSourceBFS.aggregatedNeighborProcessing(
             graph,
             graph,
-            consumer,
-            allocationTracker
+            consumer
         ).run(concurrency, executorService);
 
         progressTracker.endSubTask();

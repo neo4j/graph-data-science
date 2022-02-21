@@ -20,7 +20,6 @@
 package org.neo4j.gds.nodeproperties;
 
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.mem.BitUtil;
@@ -33,17 +32,16 @@ public class ConsecutiveLongNodeProperties implements LongNodeProperties {
 
     public ConsecutiveLongNodeProperties(
         LongNodeProperties longNodeProperties,
-        long nodeCount,
-        AllocationTracker allocationTracker
+        long nodeCount
     ) {
         var nextConsecutiveId = -1L;
 
         var setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(
             nodeCount,
             MAPPING_SIZE_QUOTIENT
-        ), allocationTracker);
+        ));
 
-        this.communities = HugeLongArray.newArray(nodeCount, allocationTracker);
+        this.communities = HugeLongArray.newArray(nodeCount);
 
         for (var nodeId = 0; nodeId < nodeCount; nodeId++) {
             var setId = longNodeProperties.longValue(nodeId);

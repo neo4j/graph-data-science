@@ -22,7 +22,6 @@ package org.neo4j.gds.paths.astar;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongDoubleMap;
@@ -48,8 +47,7 @@ public final class AStar extends Algorithm<DijkstraResult> {
     public static AStar sourceTarget(
         Graph graph,
         ShortestPathAStarBaseConfig config,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         var latitudeProperty = config.latitudeProperty();
         var longitudeProperty = config.longitudeProperty();
@@ -71,10 +69,10 @@ public final class AStar extends Algorithm<DijkstraResult> {
         var longitudeProperties = graph.nodeProperties(longitudeProperty);
         var targetNode = graph.toMappedNodeId(config.targetNode());
 
-        var heuristic = new HaversineHeuristic(latitudeProperties, longitudeProperties, targetNode, allocationTracker);
+        var heuristic = new HaversineHeuristic(latitudeProperties, longitudeProperties, targetNode);
 
         // Init dijkstra algorithm for computing shortest paths
-        var dijkstra = Dijkstra.sourceTarget(graph, config, Optional.of(heuristic), progressTracker, allocationTracker);
+        var dijkstra = Dijkstra.sourceTarget(graph, config, Optional.of(heuristic), progressTracker);
         return new AStar(dijkstra);
     }
 
@@ -113,14 +111,13 @@ public final class AStar extends Algorithm<DijkstraResult> {
         HaversineHeuristic(
             NodeProperties latitudeProperties,
             NodeProperties longitudeProperties,
-            long targetNode,
-            AllocationTracker allocationTracker
+            long targetNode
         ) {
             this.latitudeProperties = latitudeProperties;
             this.longitudeProperties = longitudeProperties;
             this.targetLatitude = latitudeProperties.doubleValue(targetNode);
             this.targetLongitude = longitudeProperties.doubleValue(targetNode);
-            this.distanceCache = new HugeLongDoubleMap(allocationTracker);
+            this.distanceCache = new HugeLongDoubleMap();
         }
 
         @Override

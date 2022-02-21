@@ -111,7 +111,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         this.pipeline.splitConfig().validateMinNumNodesInSplitSets(graph);
 
         var innerModel = NodeClassificationTrain
-            .create(graph, innerConfig(pipeline, config), executionContext.allocationTracker(), progressTracker)
+            .create(graph, innerConfig(pipeline, config), progressTracker)
             .compute();
         var innerInfo = innerModel.customInfo();
 

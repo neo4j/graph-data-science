@@ -138,7 +138,7 @@ class WeightedPageRankPregelAlgoTest {
 
         HugeDoubleArray nodeValues = pregelJob.run().nodeValues().doubleProperties(PAGE_RANK);
 
-        HugeDoubleArray expectedValues = HugeDoubleArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        HugeDoubleArray expectedValues = HugeDoubleArray.newArray(graph.nodeCount());
 
         // normalize expected
         expected.forEach((node, value) -> {
@@ -148,7 +148,7 @@ class WeightedPageRankPregelAlgoTest {
 
         // normalize actual values
         double total = nodeValues.stream().sum();
-        HugeDoubleArray actualValues = HugeDoubleArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        HugeDoubleArray actualValues = HugeDoubleArray.newArray(graph.nodeCount());
         actualValues.setAll(node -> nodeValues.get(node) / total);
 
         graph.forEachNode(node -> {

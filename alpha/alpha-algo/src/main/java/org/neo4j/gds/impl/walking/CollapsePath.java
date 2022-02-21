@@ -101,7 +101,6 @@ public class CollapsePath extends Algorithm<Relationships> {
                     localGraphs,
                     traversalConsumer,
                     config.allowSelfLoops(),
-                    allocationTracker,
                     startNodes
                 );
 
@@ -126,7 +125,6 @@ public class CollapsePath extends Algorithm<Relationships> {
             Graph[] graphs,
             BfsConsumer perNodeAction,
             boolean allowSelfLoops,
-            AllocationTracker allocationTracker,
             long[] startNodes
         ) {
             return new MultiSourceBFS(
@@ -135,7 +133,6 @@ public class CollapsePath extends Algorithm<Relationships> {
                 new TraversalToEdgeMSBFSStrategy(graphs, perNodeAction),
                 false,
                 allowSelfLoops,
-                allocationTracker,
                 startNodes
             );
         }

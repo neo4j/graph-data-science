@@ -142,7 +142,7 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
         this.concurrency = concurrency;
         this.executorService = executorService;
 
-        this.frontier = HugeLongArray.newArray(graph.relationshipCount(), allocationTracker);
+        this.frontier = HugeLongArray.newArray(graph.relationshipCount());
         if (storePredecessors) {
             this.distances = TentativeDistances.distanceAndPredecessors(
                 graph.nodeCount(),

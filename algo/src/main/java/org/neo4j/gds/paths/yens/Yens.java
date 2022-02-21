@@ -25,7 +25,6 @@ import com.carrotsearch.hppc.LongScatterSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -61,8 +60,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
     public static Yens sourceTarget(
         Graph graph,
         ShortestPathYensBaseConfig config,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         // If the input graph is a multi-graph, we need to track
         // parallel relationships. This is necessary since shortest
@@ -73,7 +71,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
             .trackRelationships(graph.isMultiGraph())
             .build();
         // Init dijkstra algorithm for computing shortest paths
-        var dijkstra = Dijkstra.sourceTarget(graph, newConfig, Optional.empty(), progressTracker, allocationTracker);
+        var dijkstra = Dijkstra.sourceTarget(graph, newConfig, Optional.empty(), progressTracker);
         return new Yens(graph, dijkstra, newConfig, progressTracker);
     }
 

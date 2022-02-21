@@ -157,7 +157,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
     }
 
     private DegreeFunction computeDegree(TaskFunction taskFunction) {
-        var degrees = HugeDoubleArray.newArray(graph.nodeCount(), allocationTracker);
+        var degrees = HugeDoubleArray.newArray(graph.nodeCount());
         var tasks = PartitionUtils.degreePartition(
             graph,
             config.concurrency(),

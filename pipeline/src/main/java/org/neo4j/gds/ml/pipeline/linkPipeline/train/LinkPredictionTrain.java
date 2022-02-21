@@ -115,8 +115,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             trainGraph,
             pipeline.featureSteps(),
             trainConfig.concurrency(),
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
         var trainRelationshipIds = new ReadOnlyHugeLongIdentityArray(trainData.size());
         progressTracker.endSubTask("extract train features");
@@ -204,8 +203,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             validationGraph,
             pipeline.featureSteps(),
             trainConfig.concurrency(),
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
         progressTracker.endSubTask("extract test features");
 

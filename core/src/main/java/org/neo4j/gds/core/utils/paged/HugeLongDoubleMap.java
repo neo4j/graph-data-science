@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.paged;
 
 import com.carrotsearch.hppc.BitMixer;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.BitUtil;
@@ -38,8 +37,6 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
         .perNode("keys", HugeLongArray::memoryEstimation)
         .perNode("values", HugeDoubleArray::memoryEstimation)
         .build();
-
-    private final AllocationTracker allocationTracker;
 
     private HugeLongArray keys;
     private HugeDoubleArray values;
@@ -60,15 +57,14 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
     /**
      * New instance with sane defaults.
      */
-    public HugeLongDoubleMap(AllocationTracker allocationTracker) {
-        this(DEFAULT_EXPECTED_ELEMENTS, allocationTracker);
+    public HugeLongDoubleMap() {
+        this(DEFAULT_EXPECTED_ELEMENTS);
     }
 
     /**
      * New instance with sane defaults.
      */
-    public HugeLongDoubleMap(long expectedElements, AllocationTracker allocationTracker) {
-        this.allocationTracker = allocationTracker;
+    public HugeLongDoubleMap(long expectedElements) {
         initialBuffers(expectedElements);
     }
 
@@ -176,10 +172,8 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
     }
 
     public void release() {
-        long released = 0L;
-        released += keys.release();
-        released += values.release();
-        allocationTracker.remove(released);
+        keys.release();
+        values.release();
 
         keys = null;
         values = null;
@@ -233,8 +227,8 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
         HugeLongArray prevKeys = this.keys;
         HugeDoubleArray prevValues = this.values;
         try {
-            this.keys = HugeLongArray.newArray(arraySize, allocationTracker);
-            this.values = HugeDoubleArray.newArray(arraySize, allocationTracker);
+            this.keys = HugeLongArray.newArray(arraySize);
+            this.values = HugeDoubleArray.newArray(arraySize);
             keysCursor = keys.newCursor();
             entries = new EntryIterator();
         } catch (OutOfMemoryError e) {
@@ -297,10 +291,8 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
         // Rehash old keys, including the pending key.
         rehash(prevKeys, prevValues);
 
-        long released = 0L;
-        released += prevKeys.release();
-        released += prevValues.release();
-        allocationTracker.remove(released);
+        prevKeys.release();
+        prevValues.release();
     }
 
 

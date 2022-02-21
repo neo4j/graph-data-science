@@ -82,8 +82,7 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
                     configuration.propagationProbability(),
                     configuration.monteCarloSimulations(),
                     Pools.DEFAULT,
-                    configuration.concurrency(),
-                    allocationTracker
+                    configuration.concurrency()
                 );
             }
         };

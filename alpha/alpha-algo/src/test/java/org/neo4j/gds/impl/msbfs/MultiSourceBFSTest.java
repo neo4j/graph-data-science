@@ -33,7 +33,6 @@ import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.DirectIdMap;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.graphbuilder.DefaultBuilder;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 
@@ -84,7 +83,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                     graph,
                     (i, d, s) -> bfsConsumerMock.accept(i + 1, d, toList(s, x -> x + 1)),
                     (i, p, d, s) -> bfsWithPredecessorConsumerMock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
-                    AllocationTracker.empty(),
                     0, 1
                 );
 
@@ -126,7 +124,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                 graph,
                 graph,
                 (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
-                AllocationTracker.empty(),
                 0, 1
             );
 
@@ -149,8 +146,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             MultiSourceBFS msbfs = MultiSourceBFS.predecessorProcessing(
                 graph,
                 (i, d, s) -> {},
-                (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
-                AllocationTracker.empty()
+                (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1))
             );
 
             msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
@@ -201,8 +197,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
                 graph,
                 graph,
-                (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
-                AllocationTracker.empty()
+                (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1))
             );
 
             msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
@@ -250,8 +245,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                                         d
                                 );
                                 assertTrue(seen.add(Tuples.pair(i, d)), message);
-                            },
-                            AllocationTracker.empty()
+                            }
                     );
                     msbfs.run(1, null);
                 });
@@ -275,8 +269,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                                         seen[(int) s.next()][(int) i] += 1;
                                     }
                                 }
-                            },
-                            AllocationTracker.empty()
+                            }
                     );
                     msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
                 });
@@ -322,8 +315,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                                 }
 
                                 assertEquals(expectedSize, s.size());
-                            },
-                            AllocationTracker.empty()
+                            }
                     );
                     // run sequentially to guarantee order
                     msbfs.run(1, null);
@@ -376,8 +368,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                         }
                     }
                 },
-                AllocationTracker.empty(),
-                sources);
+            sources);
         msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
 
         for (int i = 0; i < seen.length; i++) {

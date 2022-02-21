@@ -173,7 +173,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private void initSeeding() {
-        this.currentCommunities = HugeLongArray.newArray(nodeCount, allocationTracker);
+        this.currentCommunities = HugeLongArray.newArray(nodeCount);
 
         if (seedProperty == null) {
             return;
@@ -181,7 +181,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         long maxSeedCommunity = seedProperty.getMaxLongPropertyValue().orElse(0L);
 
-        HugeLongLongMap communityMapping = new HugeLongLongMap(nodeCount, allocationTracker);
+        HugeLongLongMap communityMapping = new HugeLongLongMap(nodeCount);
         long nextAvailableInternalCommunityId = -1;
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
@@ -198,7 +198,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             currentCommunities.set(nodeId, communityMapping.getOrDefault(seedCommunity, -1));
         }
 
-        this.reverseSeedCommunityMapping = HugeLongArray.newArray(communityMapping.size(), allocationTracker);
+        this.reverseSeedCommunityMapping = HugeLongArray.newArray(communityMapping.size());
 
         for (LongLongCursor entry : communityMapping) {
             reverseSeedCommunityMapping.set(entry.value, entry.key);
@@ -206,9 +206,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private void init() {
-        this.nextCommunities = HugeLongArray.newArray(nodeCount, allocationTracker);
-        this.cumulativeNodeWeights = HugeDoubleArray.newArray(nodeCount, allocationTracker);
-        this.nodeCommunityInfluences = HugeDoubleArray.newArray(nodeCount, allocationTracker);
+        this.nextCommunities = HugeLongArray.newArray(nodeCount);
+        this.cumulativeNodeWeights = HugeDoubleArray.newArray(nodeCount);
+        this.nodeCommunityInfluences = HugeDoubleArray.newArray(nodeCount);
         this.communityWeights = HugeAtomicDoubleArray.newArray(nodeCount, allocationTracker);
         this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, allocationTracker);
 

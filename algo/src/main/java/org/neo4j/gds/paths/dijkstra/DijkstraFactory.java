@@ -72,8 +72,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
                 graph,
                 configuration,
                 Optional.empty(),
-                progressTracker,
-                allocationTracker
+                progressTracker
             );
         }
     }
@@ -90,8 +89,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
                 graph,
                 configuration,
                 Optional.empty(),
-                progressTracker,
-                allocationTracker
+                progressTracker
             );
         }
     }

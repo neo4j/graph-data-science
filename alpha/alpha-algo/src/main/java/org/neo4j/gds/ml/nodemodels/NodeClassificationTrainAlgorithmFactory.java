@@ -36,7 +36,7 @@ public class NodeClassificationTrainAlgorithmFactory extends GraphAlgorithmFacto
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        return NodeClassificationTrain.create(graph, configuration, allocationTracker, progressTracker);
+        return NodeClassificationTrain.create(graph, configuration, progressTracker);
     }
 
     @Override

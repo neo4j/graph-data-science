@@ -37,7 +37,7 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
         AllocationTracker allocationTracker
     ) {
         return nodeCount.or(() -> maxOriginalId.map(maxId -> maxId + 1))
-            .map(capacity -> (IdMapBuilder) HugeIdMapBuilder.of(capacity, allocationTracker))
+            .map(capacity -> (IdMapBuilder) HugeIdMapBuilder.of(capacity))
             .orElseGet(() -> GrowingHugeIdMapBuilder.of(allocationTracker));
     }
 

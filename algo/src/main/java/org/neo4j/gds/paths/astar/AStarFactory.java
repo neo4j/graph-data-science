@@ -52,6 +52,6 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> extends Gr
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        return AStar.sourceTarget(graph, configuration, progressTracker, allocationTracker);
+        return AStar.sourceTarget(graph, configuration, progressTracker);
     }
 }

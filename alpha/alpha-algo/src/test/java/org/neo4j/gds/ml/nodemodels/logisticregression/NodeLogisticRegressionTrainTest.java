@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -62,7 +61,7 @@ class NodeLogisticRegressionTrainTest {
             CypherMapWrapper.create(Map.of("penalty", NO_PENALTY))
         );
 
-        var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        var nodeIds = HugeLongArray.newArray(graph.nodeCount());
         nodeIds.setAll(i -> i);
         var algo = new NodeLogisticRegressionTrain(
             graph,
@@ -101,7 +100,7 @@ class NodeLogisticRegressionTrainTest {
             ))
         );
 
-        var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        var nodeIds = HugeLongArray.newArray(graph.nodeCount());
         nodeIds.setAll(i -> i);
         var algo = new NodeLogisticRegressionTrain(
             graph,
@@ -148,7 +147,7 @@ class NodeLogisticRegressionTrainTest {
             ))
         );
 
-        var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        var nodeIds = HugeLongArray.newArray(graph.nodeCount());
         nodeIds.setAll(i -> i);
         var algo = new NodeLogisticRegressionTrain(
             graph,

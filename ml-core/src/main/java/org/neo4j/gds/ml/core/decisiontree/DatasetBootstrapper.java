@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.core.decisiontree;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -32,15 +31,14 @@ final class DatasetBootstrapper {
     static HugeLongArray bootstrap(
         final Random random,
         double numFeatureVectorsRatio,
-        final HugeByteArray cachedBootstrappedDataset,
-        AllocationTracker allocationTracker
+        final HugeByteArray cachedBootstrappedDataset
     ) {
         assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
         assert cachedBootstrappedDataset.size() > 0;
 
         final long totalNumFeatureVectors = cachedBootstrappedDataset.size();
         final long numVectors = (long) Math.ceil(numFeatureVectorsRatio * totalNumFeatureVectors);
-        final var bootstrappedVectors = HugeLongArray.newArray(numVectors, allocationTracker);
+        final var bootstrappedVectors = HugeLongArray.newArray(numVectors);
 
         for (long i = 0; i < numVectors; i++) {
             long j = randomNonNegativeLong(random, 0, totalNumFeatureVectors);

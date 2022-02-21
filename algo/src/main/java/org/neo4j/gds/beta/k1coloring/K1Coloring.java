@@ -24,7 +24,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -66,7 +65,6 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
     private final Graph graph;
     private final long nodeCount;
     private final ExecutorService executor;
-    private final AllocationTracker allocationTracker;
     private final int minBatchSize;
     private final int concurrency;
 
@@ -85,15 +83,13 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
         int minBatchSize,
         int concurrency,
         ExecutorService executor,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.minBatchSize = minBatchSize;
         this.concurrency = concurrency;
         this.executor = executor;
-        this.allocationTracker = allocationTracker;
 
         this.nodeCount = graph.nodeCount();
         this.maxIterations = maxIterations;
@@ -139,7 +135,7 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
     public HugeLongArray compute() {
         progressTracker.beginSubTask();
 
-        colors = HugeLongArray.newArray(nodeCount, allocationTracker);
+        colors = HugeLongArray.newArray(nodeCount);
         colors.setAll((nodeId) -> ColoringStep.INITIAL_FORBIDDEN_COLORS);
 
         ranIterations = 0L;

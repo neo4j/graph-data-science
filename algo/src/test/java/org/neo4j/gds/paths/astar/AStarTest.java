@@ -29,7 +29,6 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -141,7 +140,7 @@ class AStarTest {
             .build();
 
         var path = AStar
-            .sourceTarget(graph, config, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
+            .sourceTarget(graph, config, ProgressTracker.NULL_TRACKER)
             .compute()
             .findFirst()
             .get();
@@ -161,7 +160,7 @@ class AStarTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
-        AStar.sourceTarget(graph, config, progressTracker, AllocationTracker.empty())
+        AStar.sourceTarget(graph, config, progressTracker)
             .compute()
             .pathSet();
 

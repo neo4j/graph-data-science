@@ -22,7 +22,6 @@ package org.neo4j.gds.core.utils.paged;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.constraints.LongRange;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -34,7 +33,7 @@ class HugeLongTriangularMatrixTest {
             @ForAll @LongRange(min = 0, max = 999) long y,
             @ForAll @LongRange(min = 0, max = 10000) long v) {
         if (x <= y) {
-            HugeLongTriangularMatrix array = new HugeLongTriangularMatrix(1000, AllocationTracker.empty());
+            HugeLongTriangularMatrix array = new HugeLongTriangularMatrix(1000);
             array.set(x, y, v);
             assertEquals(v, array.get(x, y));
         }

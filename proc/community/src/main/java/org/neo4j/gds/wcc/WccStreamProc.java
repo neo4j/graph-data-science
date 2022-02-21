@@ -92,7 +92,7 @@ public class WccStreamProc extends StreamProc<
         LongNodeProperties simpleNodeProperties = dss.asNodeProperties();
 
         return computationResult.config().consecutiveIds()
-            ? new ConsecutiveLongNodeProperties(simpleNodeProperties, computationResult.graph().nodeCount(), allocationTracker())
+            ? new ConsecutiveLongNodeProperties(simpleNodeProperties, computationResult.graph().nodeCount())
             : simpleNodeProperties;
     }
 

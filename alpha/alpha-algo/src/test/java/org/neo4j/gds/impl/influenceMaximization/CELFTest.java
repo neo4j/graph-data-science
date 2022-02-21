@@ -27,7 +27,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -91,7 +90,7 @@ final class CELFTest {
 
     @Test
     void testSpreadFirstGraph() {
-        CELF celf = new CELF(graph, 10, 0.2, 10, Pools.DEFAULT, 2, AllocationTracker.empty());
+        CELF celf = new CELF(graph, 10, 0.2, 10, Pools.DEFAULT, 2);
         celf.compute();
 
         assertThat(celf.getNodeSpread(idFunction.of("a"))).isEqualTo(2.2);

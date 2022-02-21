@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -91,7 +90,7 @@ final class GreedyTest {
 
     @Test
     void testSpread() {
-        Greedy greedy = new Greedy(graph, 10, 0.2, 10, Pools.DEFAULT, 2, AllocationTracker.empty());
+        Greedy greedy = new Greedy(graph, 10, 0.2, 10, Pools.DEFAULT, 2);
         greedy.compute();
 
         assertThat(greedy.getNodeSpread(idFunction.of("a"))).isEqualTo(2.2);

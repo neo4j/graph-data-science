@@ -153,7 +153,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      */
     @Override
     public final HugeLongArray copyOf(final long newLength, final AllocationTracker allocationTracker) {
-        HugeLongArray copy = HugeLongArray.newArray(newLength, allocationTracker);
+        HugeLongArray copy = HugeLongArray.newArray(newLength);
         this.copyTo(copy, newLength);
         return copy;
     }
@@ -219,11 +219,11 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
-    public static HugeLongArray newArray(long size, AllocationTracker allocationTracker) {
+    public static HugeLongArray newArray(long size) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return SingleHugeLongArray.of(size, allocationTracker);
+            return SingleHugeLongArray.of(size);
         }
-        return PagedHugeLongArray.of(size, allocationTracker);
+        return PagedHugeLongArray.of(size);
     }
 
     public static long memoryEstimation(long size) {
@@ -257,22 +257,21 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
     }
 
     /* test-only */
-    static HugeLongArray newPagedArray(long size, AllocationTracker allocationTracker) {
-        return PagedHugeLongArray.of(size, allocationTracker);
+    static HugeLongArray newPagedArray(long size) {
+        return PagedHugeLongArray.of(size);
     }
 
     /* test-only */
-    static HugeLongArray newSingleArray(int size, AllocationTracker allocationTracker) {
-        return SingleHugeLongArray.of(size, allocationTracker);
+    static HugeLongArray newSingleArray(int size) {
+        return SingleHugeLongArray.of(size);
     }
 
     private static final class SingleHugeLongArray extends HugeLongArray {
 
-        private static HugeLongArray of(long size, AllocationTracker allocationTracker) {
+        private static HugeLongArray of(long size) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             long[] page = new long[intSize];
-            allocationTracker.add(MemoryUsage.sizeOfLongArray(intSize));
 
             return new SingleHugeLongArray(intSize, page);
         }
@@ -404,7 +403,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
 
     private static final class PagedHugeLongArray extends HugeLongArray {
 
-        private static HugeLongArray of(long size, AllocationTracker allocationTracker) {
+        private static HugeLongArray of(long size) {
             int numPages = HugeArrays.numberOfPages(size);
             long[][] pages = new long[numPages][];
 
@@ -415,7 +414,6 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
             pages[numPages - 1] = new long[lastPageSize];
 
             var memoryUsed = memoryUsed(pages, size);
-            allocationTracker.add(memoryUsed);
 
             return new PagedHugeLongArray(size, pages, memoryUsed);
         }

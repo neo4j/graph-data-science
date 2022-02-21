@@ -71,7 +71,7 @@ interface RandomWalkProbabilities {
             this.positiveSamplingFactor = positiveSamplingFactor;
             this.negativeSamplingExponent = negativeSamplingExponent;
 
-            this.nodeFrequencies = HugeLongArray.newArray(nodeCount, allocationTracker);
+            this.nodeFrequencies = HugeLongArray.newArray(nodeCount);
             this.sampleCount = new MutableLong(0);
         }
 
@@ -98,7 +98,7 @@ interface RandomWalkProbabilities {
         }
 
         private HugeDoubleArray computePositiveSamplingProbabilities() {
-            var centerProbabilities = HugeDoubleArray.newArray(nodeCount, allocationTracker);
+            var centerProbabilities = HugeDoubleArray.newArray(nodeCount);
             var sum = sampleCount.getValue();
 
             ParallelUtil.parallelStreamConsume(
@@ -117,7 +117,7 @@ interface RandomWalkProbabilities {
         }
 
         private HugeLongArray computeNegativeSamplingDistribution() {
-            var contextDistribution = HugeLongArray.newArray(nodeCount, allocationTracker);
+            var contextDistribution = HugeLongArray.newArray(nodeCount);
             long sum = 0;
             for (var i = 0L; i < nodeCount; i++) {
                 sum += Math.pow(nodeFrequencies.get(i), negativeSamplingExponent);

@@ -35,7 +35,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -91,8 +90,7 @@ class LabelPropagationTest {
             graph,
             ImmutableLabelPropagationStreamConfig.builder().maxIterations(1).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         assertArrayEquals(
             new long[]{
@@ -118,8 +116,7 @@ class LabelPropagationTest {
                 .maxIterations(1)
                 .build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         assertArrayEquals(
@@ -156,8 +153,7 @@ class LabelPropagationTest {
             graph,
             DEFAULT_CONFIG,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         lp.withBatchSize(batchSize);
         lp.compute();
@@ -247,8 +243,7 @@ class LabelPropagationTest {
             graph,
             DEFAULT_CONFIG,
             Pools.DEFAULT,
-            testTracker,
-            AllocationTracker.empty()
+            testTracker
         );
 
         lp.compute();

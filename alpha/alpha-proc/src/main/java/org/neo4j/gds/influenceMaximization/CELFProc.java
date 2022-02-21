@@ -82,8 +82,7 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
                     configuration.propagationProbability(),
                     configuration.monteCarloSimulations(),
                     Pools.DEFAULT,
-                    configuration.concurrency(),
-                    allocationTracker
+                    configuration.concurrency()
                 );
             }
         };

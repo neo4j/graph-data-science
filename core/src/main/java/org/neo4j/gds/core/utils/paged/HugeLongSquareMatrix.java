@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-
 public class HugeLongSquareMatrix extends HugeLongMatrix {
 
-    public HugeLongSquareMatrix(long order, AllocationTracker allocationTracker) {
-        super(order, order, allocationTracker);
+    public HugeLongSquareMatrix(long order) {
+        super(order, order);
     }
 }
