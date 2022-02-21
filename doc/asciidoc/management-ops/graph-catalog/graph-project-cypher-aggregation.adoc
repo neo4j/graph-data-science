@@ -44,9 +44,8 @@ RETURN gds.alpha.graph(
     graphName: String,
     sourceNode: Node,
     targetNode: Node,
-    sourceNodeProperties: Map,
-    targetNodeProperties: Map,
-    relationshipProperties: Map
+    nodesConfig: Map,
+    relationshipConfig: Map
 ) YIELD
     graphName: String,
     nodeCount: Integer,
@@ -57,13 +56,12 @@ RETURN gds.alpha.graph(
 .Parameters
 [opts="header",cols="1,1,8"]
 |===
-| Name                    | Optional | Description
-| graphName               | no       | The name under which the graph is stored in the catalog.
-| sourceNode              | no       | The source node of the relationship. Must not be null.
-| targetNode              | no       | The target node of the relationship. The targetNode can be null (for example due to an `OPTIONAL MATCH`), in which case the source node is projected as an unconnected node.
-| sourceNodeProperties    | yes      | Properties to project on to the source node.
-| targetNodeProperties    | yes      | Properties to project on to the target node.
-| relationshipProperties  | yes      | Properties to project on to the relationship.
+| Name               | Optional | Description
+| graphName          | no       | The name under which the graph is stored in the catalog.
+| sourceNode         | no       | The source node of the relationship. Must not be null.
+| targetNode         | yes      | The target node of the relationship. The targetNode can be null (for example due to an `OPTIONAL MATCH`), in which case the source node is projected as an unconnected node.
+| nodesConfig        | yes      | Properties and Labels configuration for the source and target nodes.
+| relationshipConfig | yes      | Properties and Type configuration for the relationship.
 |===
 
 .Results
@@ -161,7 +159,62 @@ RETURN
 
 A multi-graph is a graph with multiple node labels and relationship types.
 
-At its current state, Cypher Aggregation does not support graphs with multiple node labels or relationship types.
+To retain the label when we load multiple node labels, we can add a `sourceNodeLabels` key and a `targetNodeLabels` key to the fourth `nodesConfig` parameter.
+-- To retain the type information when we load multiple relationship types, we can add a `relationshipType` key to the fifth `relationshipConfig` parameter.
+
+[role=query-example]
+--
+.Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
+[source, cypher, role=noplay]
+----
+MATCH (source)
+WHERE source:Person OR source:Book
+OPTIONAL MATCH (source)-[r:KNOWS|READ]->(target)
+WHERE target:Person OR target:Book
+WITH gds.alpha.graph(
+  'personsAndBooks',
+  source,
+  target,
+  {
+    sourceNodeLabels: labels(source),
+    targetNodeLabels: labels(target)
+  },
+  {
+    relationshipType: type(r)
+  }
+) AS g
+RETURN g.graphName AS graph , g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1m,1m"]
+|===
+| graph             | nodes  | rels
+| "personsAndBooks" | 5      | 6
+|===
+--
+
+The value for `sourceNodeLabels` or `targetNodeLabels` can be one of the following:
+
+.*NodeLabels key
+[opts="header", cols="1,1,1m"]
+|===
+| type           | example                     | description
+| List of String | `labels(s)` or `['A', 'B']` | Associate all labels in that list with the source or target node
+| String         | `'A'`                       | Associate that label with the source or target node
+| Boolean        | `true`                      | Associate all labels of the source or target node; same as `labels(s)`
+| Boolean        | `false`                     | Don't load any label information for the source or target node; same as if `nodeLabels` was missing
+|===
+
+
+The value for `relationshipType` must be a `String`:
+
+.relationshipType key
+[opts="header", cols="1,1,1m"]
+|===
+| type           | example            | description
+| String         | `type(r)` or `'A'` | Associate that type with the relationship
+|===
 
 
 === Relationship orientation
@@ -183,6 +236,9 @@ These algorithms can not be used with a graph projected by a Cypher Aggregation.
 To load node properties, we add a map of all properties for the source and target nodes.
 Thereby, we use the Cypher function https://neo4j.com/docs/cypher-manual/current/functions/scalar/#functions-coalesce[_coalesce()_] function to specify the default value, if the node does not have the property.
 
+The properties for the source node are specified as `sourceNodeProperties` key in the fourth `nodesConfig` parameter.
+The properties for the target node are specified as `targetNodeProperties` key in the fourth `nodesConfig` parameter.
+
 [role=query-example, group=cypher-aggregation-node-properties]
 --
 .Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
@@ -194,8 +250,10 @@ WITH gds.alpha.graph(
   'graphWithProperties',
   source,
   target,
-  source { age: coalesce(source.age, 18), price: coalesce(source.price, 5.0), .ratings },
-  target { age: coalesce(target.age, 18), price: coalesce(target.price, 5.0), .ratings }
+  {
+    sourceNodeProperties: source { age: coalesce(source.age, 18), price: coalesce(source.price, 5.0), .ratings },
+    targetNodeProperties: target { age: coalesce(target.age, 18), price: coalesce(target.price, 5.0), .ratings }
+  }
 ) as g
 RETURN g.graphName AS graph , g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
@@ -241,8 +299,8 @@ We can see, that the price was projected with the Hobbit having the default pric
 [[cypher-aggregation-relationship-properties]]
 === Relationship properties
 
-Analogous to node properties, we can project relationship properties using the sixth parameter.
-If we only want to project relationship properties and not any node properties, we must provide two `null` values for the sourceNodeProperties and targetNodeProperties parameters respectively.
+Analogous to node properties, we can project relationship properties using the fifth parameter.
+If we only want to project relationship properties and not any node properties or labels, we must provide a `null` value for the nodesConfig parameter.
 
 [role=query-example, group=cypher-aggregation-rel-properties]
 --
@@ -255,8 +313,7 @@ WITH gds.alpha.graph(
   source,
   target,
   null,
-  null,
-  r { .numberOfPages }
+  { properties: r { .numberOfPages } }
 ) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
@@ -316,7 +373,7 @@ Alternatively, we can aggregate the parallel relationship by using the https://n
 ----
 MATCH (source)-[r:READ]->(target)
 WITH source, target, count(r) AS numberOfReads
-WITH gds.alpha.graph('readCount', source, target, null, null, { numberOfReads: numberOfReads }) AS g
+WITH gds.alpha.graph('readCount', source, target, null, { properties: { numberOfReads: numberOfReads } }) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
@@ -369,7 +426,7 @@ For graphs with relationship properties we can also use other aggregations docum
 ----
 MATCH (source)-[r:READ]->(target)
 WITH source, target, sum(r.numberOfPages) AS numberOfPages
-WITH gds.alpha.graph('readSums', source, target, null, null, { numberOfPages: numberOfPages }) AS g
+WITH gds.alpha.graph('readSums', source, target, null, { properties: { numberOfPages: numberOfPages } }) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
@@ -423,7 +480,7 @@ The following examples will demonstrate how to filter out `READ` relationships i
 ----
 MATCH (source) OPTIONAL MATCH (source)-[r:READ]->(target)
 WHERE r.numberOfPages IS NOT NULL
-WITH gds.alpha.graph('existingNumberOfPages', source, target, null, null, r { .numberOfPages }) AS g
+WITH gds.alpha.graph('existingNumberOfPages', source, target, null, { properties: r { .numberOfPages } }) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
