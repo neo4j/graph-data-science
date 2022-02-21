@@ -31,7 +31,6 @@ import org.neo4j.gds.influenceMaximization.CELFProc;
 import org.neo4j.gds.influenceMaximization.GreedyProc;
 import org.neo4j.gds.scc.SccStreamProc;
 import org.neo4j.gds.scc.SccWriteProc;
-import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc;
 import org.neo4j.gds.shortestpaths.AllShortestPathsProc;
 import org.neo4j.gds.spanningtree.KSpanningTreeMaxProc;
 import org.neo4j.gds.spanningtree.KSpanningTreeMinProc;
@@ -59,7 +58,6 @@ class EmptyGraphProcTest extends BaseProcTest {
             KSpanningTreeMinProc.class,
             SpanningTreeProcMax.class,
             SpanningTreeProcMin.class,
-            ShortestPathDeltaSteppingProc.class,
             SccStreamProc.class,
             SccWriteProc.class,
             TriangleProc.class,
