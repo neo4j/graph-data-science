@@ -19,16 +19,20 @@
  */
 package org.neo4j.gds.centrality;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.NodePropertyExporter;
-import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.WriteProc;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.impl.closeness.ClosenessCentralityConfig;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.impl.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
+import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -41,58 +45,99 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.alpha.closeness.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class ClosenessCentralityWriteProc extends ClosenessCentralityProc<CentralityScore.Stats> {
+public class ClosenessCentralityWriteProc extends WriteProc<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityWriteProc.WriteResult, ClosenessCentralityWriteConfig> {
 
     @Procedure(value = "gds.alpha.closeness.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<CentralityScore.Stats> write(
+    public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
-        return computationResultConsumer().consume(computationResult, executionContext());
+        return write(compute(graphName, configuration));
     }
 
     @Override
-    public ComputationResultConsumer<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig, Stream<CentralityScore.Stats>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            MSClosenessCentrality algorithm = computationResult.algorithm();
-            ClosenessCentralityConfig config = computationResult.config();
-            Graph graph = computationResult.graph();
+    protected ClosenessCentralityWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return ClosenessCentralityWriteConfig.of(config);
+    }
 
-            AbstractCentralityResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder(callContext, config.concurrency());
+    @Override
+    public ValidationConfiguration<ClosenessCentralityWriteConfig> validationConfig() {
+        return ClosenessCentralityProc.getValidationConfig();
+    }
 
-            builder.withNodeCount(graph.nodeCount())
-                .withConfig(config)
-                .withComputeMillis(computationResult.computeMillis())
-                .withPreProcessingMillis(computationResult.preProcessingMillis());
+    @Override
+    public GraphAlgorithmFactory<MSClosenessCentrality, ClosenessCentralityWriteConfig> algorithmFactory() {
+        return ClosenessCentralityProc.algorithmFactory();
+    }
 
-            if (graph.isEmpty()) {
-                graph.release();
-                return Stream.of(builder.build());
+    @Override
+    protected NodeProperties nodeProperties(ComputationResult<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityWriteConfig> computationResult) {
+        return ClosenessCentralityProc.nodeProperties(computationResult);
+    }
+
+    @Override
+    protected AbstractResultBuilder<WriteResult> resultBuilder(
+        ComputationResult<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityWriteConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
+        return ClosenessCentralityProc.resultBuilder(
+            new WriteResult.Builder(callContext, computeResult.config().concurrency()).withWriteProperty(computeResult
+                .config()
+                .writeProperty()),
+            computeResult
+        ).withNodeCount(computeResult.graph().nodeCount());
+    }
+
+    @SuppressWarnings("unused")
+    public static final class WriteResult extends CentralityScore.Stats {
+
+        public final long nodePropertiesWritten;
+        public final long postProcessingMillis;
+
+        WriteResult(
+            long nodes,
+            long nodePropertiesWritten,
+            long preProcessingMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long writeMillis,
+            String writeProperty,
+            @Nullable Map<String, Object> centralityDistribution,
+            Map<String, Object> config
+        ) {
+
+            super(nodes, preProcessingMillis, computeMillis, writeMillis, writeProperty, centralityDistribution);
+            this.nodePropertiesWritten = nodePropertiesWritten;
+            this.postProcessingMillis = postProcessingMillis;
+        }
+
+        static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
+            public String writeProperty;
+
+            protected Builder(ProcedureCallContext callContext, int concurrency) {
+                super(callContext, concurrency);
             }
 
-            builder.withCentralityFunction(algorithm.getCentrality()::get);
+            public Builder withWriteProperty(String writeProperty) {
+                this.writeProperty = writeProperty;
+                return this;
+            }
 
-            try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
-                var writeConcurrency = computationResult.config().writeConcurrency();
-                var progressTracker = new TaskProgressTracker(
-                    NodePropertyExporter.baseTask("ClosenessCentrality", graph.nodeCount()),
-                    log,
-                    writeConcurrency,
-                    taskRegistryFactory
+            @Override
+            public WriteResult buildResult() {
+                return new WriteResult(
+                    nodeCount,
+                    nodePropertiesWritten,
+                    preProcessingMillis,
+                    computeMillis,
+                    postProcessingMillis,
+                    writeMillis,
+                    writeProperty,
+                    centralityHistogram,
+                    config.toMap()
                 );
-                var exporter = nodePropertyExporterBuilder
-                    .withIdMap(graph)
-                    .withTerminationFlag(algorithm.getTerminationFlag())
-                    .withProgressTracker(progressTracker)
-                    .parallel(Pools.DEFAULT, writeConcurrency)
-                    .build();
-                algorithm.export(config.writeProperty(), exporter, progressTracker);
             }
-
-            graph.release();
-            return Stream.of(builder.build());
-        };
+        }
     }
 }

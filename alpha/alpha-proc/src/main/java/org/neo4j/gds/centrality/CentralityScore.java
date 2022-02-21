@@ -38,7 +38,7 @@ class CentralityScore {
 
     // TODO: return number of relationships as well
     //  the Graph API doesn't expose this value yet
-    public static final class Stats {
+    public static class Stats {
         public final long nodes, preProcessingMillis, computeMillis, writeMillis;
         public final String writeProperty;
         public final Map<String, Object> centralityDistribution;
