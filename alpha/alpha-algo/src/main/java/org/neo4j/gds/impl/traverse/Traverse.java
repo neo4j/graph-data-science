@@ -149,7 +149,7 @@ public final class Traverse extends Algorithm<Traverse> {
                     }
                     break;
             }
-
+            // For disconnected graphs or early termination, this will not reach 100
             progressTracker.logProgress(graph.degree(node));
 
             graph.forEachRelationship(
