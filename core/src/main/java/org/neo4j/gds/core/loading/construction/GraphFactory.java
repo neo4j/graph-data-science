@@ -299,7 +299,7 @@ public final class GraphFactory {
         return initRelationshipsBuilder().nodes(idMap).allocationTracker(allocationTracker).build().build();
     }
 
-    public static HugeGraph create(IdMap idMap, Relationships relationships, AllocationTracker allocationTracker) {
+    public static HugeGraph create(IdMap idMap, Relationships relationships) {
         var nodeSchemaBuilder = NodeSchema.builder();
         idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
         return create(
@@ -307,8 +307,7 @@ public final class GraphFactory {
             nodeSchemaBuilder.build(),
             Collections.emptyMap(),
             RelationshipType.of("REL"),
-            relationships,
-            allocationTracker
+            relationships
         );
     }
 
@@ -317,8 +316,7 @@ public final class GraphFactory {
         NodeSchema nodeSchema,
         Map<String, NodeProperties> nodeProperties,
         RelationshipType relationshipType,
-        Relationships relationships,
-        AllocationTracker allocationTracker
+        Relationships relationships
     ) {
         var relationshipSchemaBuilder = RelationshipSchema.builder();
         if (relationships.properties().isPresent()) {
@@ -335,8 +333,7 @@ public final class GraphFactory {
             GraphSchema.of(nodeSchema, relationshipSchemaBuilder.build()),
             nodeProperties,
             relationships.topology(),
-            relationships.properties(),
-            allocationTracker
+            relationships.properties()
         );
     }
 }

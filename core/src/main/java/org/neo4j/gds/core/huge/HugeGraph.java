@@ -39,7 +39,6 @@ import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Collection;
 import java.util.Map;
@@ -92,7 +91,7 @@ public class HugeGraph implements CSRGraph {
     static final double NO_PROPERTY_VALUE = Double.NaN;
 
     protected final IdMap idMap;
-    protected final AllocationTracker allocationTracker;
+
     protected final GraphSchema schema;
 
     protected final Map<String, NodeProperties> nodeProperties;
@@ -120,8 +119,7 @@ public class HugeGraph implements CSRGraph {
         GraphSchema schema,
         Map<String, NodeProperties> nodeProperties,
         Relationships.Topology topology,
-        Optional<Relationships.Properties> maybeRelationshipProperty,
-        AllocationTracker allocationTracker
+        Optional<Relationships.Properties> maybeRelationshipProperty
     ) {
         return new HugeGraph(
             nodes,
@@ -133,8 +131,7 @@ public class HugeGraph implements CSRGraph {
             maybeRelationshipProperty.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN),
             maybeRelationshipProperty.map(Relationships.Properties::propertiesList).orElse(null),
             topology.orientation(),
-            topology.isMultiGraph(),
-            allocationTracker
+            topology.isMultiGraph()
         );
     }
 
@@ -148,13 +145,11 @@ public class HugeGraph implements CSRGraph {
         double defaultRelationshipPropertyValue,
         @Nullable AdjacencyProperties relationshipProperty,
         Orientation orientation,
-        boolean isMultiGraph,
-        AllocationTracker allocationTracker
+        boolean isMultiGraph
     ) {
         this.idMap = idMap;
         this.schema = schema;
         this.isMultiGraph = isMultiGraph;
-        this.allocationTracker = allocationTracker;
         this.nodeProperties = nodeProperties;
         this.relationshipCount = relationshipCount;
         this.adjacency = adjacency;
@@ -368,8 +363,7 @@ public class HugeGraph implements CSRGraph {
             defaultPropertyValue,
             properties,
             orientation,
-            isMultiGraph,
-            allocationTracker
+            isMultiGraph
         );
     }
 
@@ -441,7 +435,7 @@ public class HugeGraph implements CSRGraph {
     public void releaseProperties() {
         if (canRelease) {
             for (NodeProperties idMap : nodeProperties.values()) {
-                allocationTracker.remove(idMap.release());
+                idMap.release();
             }
         }
     }
