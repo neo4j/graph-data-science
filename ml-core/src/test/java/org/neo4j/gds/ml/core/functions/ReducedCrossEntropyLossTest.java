@@ -57,9 +57,13 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
 
         // verify that the predictions are updated in the context
         var expectedPredictions = useBias ? new double[] {
-            0.4472428, 0.4327679, 0.5096824, 0.3245332, 0.3771114, 0.4207929
+            0.4472428, 0.4327679, 0.1199891,
+            0.5096824, 0.3245332, 0.1657843,
+            0.3771114, 0.4207929, 0.2020955
         } : new double[] {
-            0.4244404, 0.4107036, 0.4744641, 0.3021084, 0.3458198, 0.3858767
+            0.4244404, 0.4107036, 0.1648559,
+            0.4744641, 0.3021084, 0.2234273,
+            0.3458198, 0.3858767, 0.2683033
         };
         assertThat(ctx.data(predictions).data()).containsExactly(
             expectedPredictions,
@@ -68,8 +72,8 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
 
         double expectedLoss = -1.0 / 3.0 * (
             log(expectedPredictions[1]) +
-            log(expectedPredictions[2]) +
-            log(1 - expectedPredictions[4] - expectedPredictions[5])
+            log(expectedPredictions[3]) +
+            log(1 - expectedPredictions[6] - expectedPredictions[7])
         );
         assertThat(lossValue).isCloseTo(expectedLoss, Offset.offset(1e-6));
     }

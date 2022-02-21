@@ -29,7 +29,6 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 import static org.neo4j.gds.ml.core.Dimensions.scalar;
 
@@ -42,14 +41,14 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
 
     private final ReducedSoftmax predictions;
     private final Variable<Matrix> weights;
-    private final Optional<Variable<Scalar>> bias;
+    private final Optional<Weights<Scalar>> bias;
     private final Variable<Matrix> features;
     private final Variable<Vector> labels;
 
     public ReducedCrossEntropyLoss(
         ReducedSoftmax predictions,
         Variable<Matrix> weights,
-        Optional<Variable<Scalar>> bias,
+        Optional<Weights<Scalar>> bias,
         Variable<Matrix> features,
         Variable<Vector> labels
     ) {
@@ -69,17 +68,6 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
         return Scalar.sizeInBytes();
     }
 
-    private double predictedProbabilityForClass(Matrix predictionsMatrix, int classIdx, int row) {
-        if (classIdx == predictionsMatrix.cols()) {
-            // the virtual class
-            return 1 - IntStream
-                .range(0, predictionsMatrix.cols())
-                .mapToDouble(c -> predictionsMatrix.dataAt(row, c))
-                .sum();
-        }
-        return predictionsMatrix.dataAt(row, classIdx);
-    }
-
     @Override
     public Scalar apply(ComputationContext ctx) {
         var predictionsMatrix = ctx.forward(predictions);
@@ -88,7 +76,7 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
         double result = 0;
         for (int row = 0; row < labelsVector.totalSize(); row++) {
             var trueClass = (int) labelsVector.dataAt(row);
-            var predictedProbabilityForTrueClass = predictedProbabilityForClass(predictionsMatrix, trueClass, row);
+            var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row, trueClass);
             if (predictedProbabilityForTrueClass > 0) {
                 result += Math.log(predictedProbabilityForTrueClass);
             }
@@ -106,12 +94,12 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
             var featureMatrix = ctx.data(features);
             var gradient = weightsMatrix.createWithSameDimensions();
             int featureCount = weightsMatrix.cols();
-            int weightRows = weightsMatrix.rows();
+            int reducedClassCount = weightsMatrix.rows();
 
             for (int row = 0; row < numberOfExamples; row++) {
                 int trueClass = (int) labelsVector.dataAt(row);
-                for (int classIdx = 0; classIdx < weightRows; classIdx++) {
-                    double predictedClassProbability = predictedProbabilityForClass(predMatrix, classIdx, row);
+                for (int classIdx = 0; classIdx < reducedClassCount; classIdx++) {
+                    double predictedClassProbability = predMatrix.dataAt(row, classIdx);
                     var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
                     var errorPerExample = (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
                     for (int feature = 0; feature < featureCount; feature++) {
@@ -125,7 +113,7 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
             for (int row = 0; row < numberOfExamples; row++) {
                 int trueClass = (int) labelsVector.dataAt(row);
                 for (int classIdx = 0; classIdx < weights.dimension(0); classIdx++) {
-                    double predictedClassProbability = predictedProbabilityForClass(predMatrix, classIdx, row);
+                    double predictedClassProbability = predMatrix.dataAt(row, classIdx);
                     var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
                     var errorPerExample = (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
                     gradient.addDataAt(0, errorPerExample);

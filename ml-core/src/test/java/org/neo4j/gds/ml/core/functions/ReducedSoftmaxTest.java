@@ -25,8 +25,6 @@ import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
-import java.util.Arrays;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ReducedSoftmaxTest implements FiniteDifferenceTest {
@@ -41,9 +39,14 @@ class ReducedSoftmaxTest implements FiniteDifferenceTest {
 
         var result = softmax.apply(ctx);
 
-        assertThat(Arrays.stream(result.data())).allMatch(d -> d < 1.0);
-        double actual = result.aggregateSum();
-        assertThat(actual).isCloseTo(2.0, Offset.offset(1e-10));
+        var expected = new Matrix(new double[]{
+            0.0, 1.0,
+            0.0, 1.0,
+            1.0, 0.0,
+            1.0, 0.0
+        }, 4, 2);
+
+        assertThat(result).matches(matrix -> matrix.equals(expected, 1e-8));
     }
 
     @Test
@@ -62,26 +65,33 @@ class ReducedSoftmaxTest implements FiniteDifferenceTest {
         var result = ctx.forward(softmax);
 
         var expected = new Matrix(new double[]{
-            0.054825408857653565 + 0.09039181775844467 + 0.006713723746217652 + 0.0998984082186269 + 0.7381549425213091,
-            1.0 / 6, 1.0 / 6, 1.0 / 6, 1.0 / 6, 1.0 / 6,
-            0.054825408857653565, 0.09039181775844467, 0.006713723746217652, 0.0998984082186269, 0.7381549425213091,
-        }, 3, 5);
-
+            0.054825408857653565, 0.09039181775844467, 0.006713723746217652, 0.0998984082186269, 0.7381549425213091, 0.01001569889774817,
+            1.0 / 6, 1.0 / 6, 1.0 / 6, 1.0 / 6, 1.0 / 6, 1.0/6,
+            0.054825408857653565, 0.09039181775844467, 0.006713723746217652, 0.0998984082186269, 0.7381549425213091, 0.01001569889774817
+        }, 3, 6);
         assertThat(result).matches(matrix -> matrix.equals(expected, 1e-8));
+        for (int row = 0; row < result.rows(); row++) {
+            var sum = 0.0;
+            for (int col = 0; col < result.cols(); col++) {
+                sum += result.dataAt(row, col);
+            }
+            assertThat(sum).isEqualTo(1.0, Offset.offset(1e-9));
+        }
+
     }
 
     @Test
     void computesGradientCorrectly() {
         var matrixConstant = Constant.matrix(
             new double[]{
-                13.37, 13.37, 13.37, 13.37, 13.37//, 13.37
+                13.37, 13.37, 13.37, 13.37, 13.37, 13.37
             },
-            1, 5
+            1, 6
         );
         var weights = new Weights<>(
             new Matrix(
                 new double[]{
-                    0.6, 1.1, -1.5, 1.2, 3.2//, -1.1
+                    0.6, 1.1, -1.5, 1.2, 3.2
                 },
                 1, 5
             )
@@ -91,5 +101,4 @@ class ReducedSoftmaxTest implements FiniteDifferenceTest {
 
         finiteDifferenceShouldApproximateGradient(weights, loss);
     }
-
 }
