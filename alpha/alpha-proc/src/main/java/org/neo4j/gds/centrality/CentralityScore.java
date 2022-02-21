@@ -20,6 +20,7 @@
 package org.neo4j.gds.centrality;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -78,4 +79,46 @@ class CentralityScore {
             }
         }
     }
+
+    public static class MutateStats {
+        public final long nodes, preProcessingMillis, computeMillis, mutateMillis;
+        public final String mutateProperty;
+        public final Map<String, Object> centralityDistribution;
+
+        public MutateStats(
+            long nodes,
+            long preProcessingMillis,
+            long computeMillis,
+            long mutateMillis,
+            String mutateProperty,
+            @Nullable Map<String, Object> centralityDistribution
+        ) {
+            this.nodes = nodes;
+            this.preProcessingMillis = preProcessingMillis;
+            this.computeMillis = computeMillis;
+            this.mutateMillis = mutateMillis;
+            this.mutateProperty = mutateProperty;
+            this.centralityDistribution = centralityDistribution;
+        }
+
+        public static final class Builder extends AbstractCentralityResultBuilder<CentralityScore.MutateStats> {
+
+            public Builder(ProcedureCallContext callContext, int concurrency) {
+                super(callContext, concurrency);
+            }
+
+            public CentralityScore.MutateStats buildResult() {
+
+                return new CentralityScore.MutateStats(
+                    nodeCount,
+                    preProcessingMillis,
+                    computeMillis,
+                    writeMillis,
+                    config instanceof MutatePropertyConfig ? ((MutatePropertyConfig) config).mutateProperty() : "",
+                    centralityHistogram
+                );
+            }
+        }
+    }
 }
+
