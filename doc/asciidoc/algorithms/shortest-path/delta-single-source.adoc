@@ -150,7 +150,8 @@ include::../shared/examples-stream-intro.adoc[]]
 MATCH (source:Location {name: 'A'})
 CALL gds.allShortestPaths.delta.stream('myGraph', {
     sourceNode: source,
-    relationshipWeightProperty: 'cost'
+    relationshipWeightProperty: 'cost',
+    delta: 3.0
 })
 YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
 RETURN
