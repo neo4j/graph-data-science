@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.core.ComputationContext;
@@ -38,14 +37,17 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void shouldApplyCorrectly(boolean withBias) {
+    void shouldApplyCorrectly(boolean useBias) {
         var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0, 0.1, 0.54, 0.12, 0.81, 0.7}, 2, 4));
         var features = Constant.matrix(
             new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71, 0.29, -0.52, 0.12, -0.92, 0.6, -0.11},
             3,
             4
         );
-        var predictions = new ReducedSoftmax(new MatrixMultiplyWithTransposedSecondOperand(features, weights));
+        var weightedFeatures = new MatrixMultiplyWithTransposedSecondOperand(features, weights);
+        var bias = new Weights<>(new Scalar(0.37));
+        var affineVariable = new EWiseAddMatrixScalar(weightedFeatures, bias);
+        var predictions = new ReducedSoftmax(useBias ? affineVariable : weightedFeatures);
         var labels = Constant.vector(new double[]{1.0, 0.0, 2.0});
 
         var loss = new ReducedCrossEntropyLoss(predictions, weights, Optional.empty(), features, labels);
@@ -54,50 +56,50 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
         double lossValue = ctx.forward(loss).value();
 
         // verify that the predictions are updated in the context
+        var expectedPredictions = useBias ? new double[] {
+            0.4472428, 0.4327679, 0.5096824, 0.3245332, 0.3771114, 0.4207929
+        } : new double[] {
+            0.4244404, 0.4107036, 0.4744641, 0.3021084, 0.3458198, 0.3858767
+        };
         assertThat(ctx.data(predictions).data()).containsExactly(
-            new double[]{0.4244404, 0.4107036, 0.4744641, 0.3021084, 0.3458198, 0.3858767},
+            expectedPredictions,
             Offset.offset(1e-7)
         );
 
-        double expectedValue = -1.0 / 3.0 * (log(0.4107036) + log(0.4744641) + log(1 - 0.3458198 - 0.3858767));
-        assertThat(lossValue).isCloseTo(expectedValue, Offset.offset(1e-6));
+        double expectedLoss = -1.0 / 3.0 * (
+            log(expectedPredictions[1]) +
+            log(expectedPredictions[2]) +
+            log(1 - expectedPredictions[4] - expectedPredictions[5])
+        );
+        assertThat(lossValue).isCloseTo(expectedLoss, Offset.offset(1e-6));
     }
 
-    @Test
-    void shouldComputeGradientCorrectly() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldComputeGradientCorrectly(boolean useBias) {
         var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0, 0.1, 0.54, 0.12, 0.81, 0.7}, 2, 4));
         var features = Constant.matrix(
             new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71, 0.29, -0.52, 0.12, -0.92, 0.6, -0.11},
             3,
             4
         );
-        var predictions = new ReducedSoftmax(new MatrixMultiplyWithTransposedSecondOperand(features, weights));
-        var labels = Constant.vector(new double[]{1.0, 0.0, 2.0});
 
-        var loss = new ReducedCrossEntropyLoss(predictions, weights, Optional.empty(), features, labels);
-
-        finiteDifferenceShouldApproximateGradient(weights, loss);
-    }
-
-    @Test
-    void shouldComputeGradientCorrectlyWithBias() {
-        var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0, 0.1, 0.54, 0.12, 0.81, 0.7}, 2, 4));
+        var weightedFeatures = new MatrixMultiplyWithTransposedSecondOperand(features, weights);
         var bias = new Weights<>(new Scalar(0.37));
-        var features = Constant.matrix(
-            new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71, 0.29, -0.52, 0.12, -0.92, 0.6, -0.11},
-            3,
-            4
-        );
-        var affineVariable = new EWiseAddMatrixScalar(
-            new MatrixMultiplyWithTransposedSecondOperand(features, weights),
-            bias
-        );
-        var predictions = new ReducedSoftmax(affineVariable);
+        var affineVariable = new EWiseAddMatrixScalar(weightedFeatures, bias);
+
+        var predictions = new ReducedSoftmax(useBias ? affineVariable : weightedFeatures);
         var labels = Constant.vector(new double[]{1.0, 0.0, 2.0});
 
-        var loss = new ReducedCrossEntropyLoss(predictions, weights, Optional.of(bias), features, labels);
+        var loss = new ReducedCrossEntropyLoss(
+            predictions,
+            weights,
+            useBias ? Optional.of(bias) : Optional.empty(),
+            features,
+            labels
+        );
 
-        finiteDifferenceShouldApproximateGradient(List.of(weights, bias), loss);
+        finiteDifferenceShouldApproximateGradient(useBias ? List.of(bias, weights) : List.of(weights), loss);
     }
 
     @Override
