@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -63,7 +64,7 @@ class GdlFactoryTest {
         Graph graph = fromGdl("(a:A),(b:B1:B2),(c)");
         assertThat(graph.nodeCount()).isEqualTo(3);
         assertThat(graph.relationshipCount()).isEqualTo(0);
-        var expectedLabels = Set.of("A", "B1", "B2").stream()
+        var expectedLabels = Stream.of("A", "B1", "B2", "__ALL__")
             .map(NodeLabel::new)
             .collect(Collectors.toSet());
         assertThat(graph.availableNodeLabels()).isEqualTo(expectedLabels);
