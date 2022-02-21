@@ -24,6 +24,8 @@ The Neo4j GDS library includes the following path finding algorithms, grouped by
 ** <<algorithms-bfs, Breadth First Search>>
 ** <<algorithms-dfs, Depth First Search>>
 
+include::shortest-path/delta-single-source.adoc[leveloffset=+1]
+
 include::shortest-path/dijkstra-source-target.adoc[leveloffset=+1]
 
 include::shortest-path/dijkstra-single-source.adoc[leveloffset=+1]
