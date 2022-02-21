@@ -129,8 +129,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.sllpa.write",
         "gds.alpha.sllpa.write.estimate",
 
-        "gds.alpha.shortestPath.deltaStepping.write",
-        "gds.alpha.shortestPath.deltaStepping.stream",
         "gds.alpha.similarity.cosine.write",
         "gds.alpha.similarity.cosine.stream",
         "gds.alpha.similarity.cosine.stats",
