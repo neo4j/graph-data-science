@@ -19,14 +19,19 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.AlgoConfigParser;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -60,8 +65,8 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     }
 
     @Override
-    public MemoryEstimation estimate() {
-        var algoSpec = callableDefinition.algorithmSpec();
+    public MemoryEstimation estimate(ModelCatalog modelCatalog) {
+        var algoSpec = getAlgorithmSpec(modelCatalog);
         var algoConfig = new AlgoConfigParser<>("", algoSpec.newConfigFunction()).processInput(config);
 
         try {
@@ -87,11 +92,19 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         configCopy.put("nodeLabels", nodeLabelStrings);
         configCopy.put("relationshipTypes", relTypeStrings);
 
+        var algorithmSpec = getAlgorithmSpec(executionContext.modelCatalog());
+
         new ProcedureExecutor<>(
-            callableDefinition.algorithmSpec(),
+            algorithmSpec,
             new ProcedureExecutorSpec<>(),
             executionContext
         ).compute(graphName, configCopy, false, false);
+    }
+
+    private AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>> getAlgorithmSpec(ModelCatalog modelCatalog) {
+        return callableDefinition
+            .algorithmSpec()
+            .withModelCatalog(modelCatalog);
     }
 
     @Override

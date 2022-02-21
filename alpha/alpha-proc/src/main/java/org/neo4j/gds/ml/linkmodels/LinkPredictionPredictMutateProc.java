@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
@@ -31,6 +32,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -38,7 +40,6 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -55,9 +56,6 @@ import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.ml.linkPrediction.predict.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateProc.MutateResult, LinkPredictionPredictMutateConfig> {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.mutate", mode = Mode.READ)
     @Description(DESCRIPTION)
@@ -83,13 +81,21 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
     }
 
     @Override
+    public AlgorithmSpec<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, LinkPredictionPredict, LinkPredictionPredictMutateConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.setModelCatalog(modelCatalog);
+        return this;
+    }
+
+    @Override
     protected LinkPredictionPredictMutateConfig newConfig(String username, CypherMapWrapper config) {
         return LinkPredictionPredictMutateConfig.of(username, config);
     }
 
     @Override
     public GraphAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictMutateConfig> algorithmFactory() {
-        return new LinkPredictionPredictFactory<>(modelCatalog);
+        return new LinkPredictionPredictFactory<>(modelCatalog());
     }
 
     @Override

@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -34,7 +36,6 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -59,8 +60,6 @@ public class NodeClassificationPipelineWriteProc
     NodeClassificationPipelineWriteProc.WriteResult,
     NodeClassificationPredictPipelineWriteConfig>
 {
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.write", mode = Mode.WRITE)
     @Description(PREDICT_DESCRIPTION)
@@ -104,6 +103,14 @@ public class NodeClassificationPipelineWriteProc
                 );
             }
         };
+    }
+
+    @Override
+    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationResult, NodeClassificationPredictPipelineWriteConfig, Stream<WriteResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.setModelCatalog(modelCatalog);
+        return this;
     }
 
     @Override
@@ -153,7 +160,7 @@ public class NodeClassificationPipelineWriteProc
 
     @Override
     public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig> algorithmFactory() {
-        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog);
+        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog());
     }
 
     @SuppressWarnings("unused")

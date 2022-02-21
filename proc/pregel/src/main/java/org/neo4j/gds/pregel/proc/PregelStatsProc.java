@@ -28,5 +28,4 @@ public abstract class PregelStatsProc<
     ALGO extends Algorithm<PregelResult>,
     CONFIG extends PregelProcedureConfig>
     extends StatsProc<ALGO, PregelResult, PregelStatsResult, CONFIG> {
-
 }

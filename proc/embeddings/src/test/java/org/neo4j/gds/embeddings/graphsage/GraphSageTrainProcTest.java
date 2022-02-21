@@ -258,7 +258,6 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         modelCatalog.set(model);
 
         TestProcedureRunner.applyOnProcedure(db, GraphSageTrainProc.class, proc -> {
-            proc.modelCatalog = modelCatalog;
             assertThatThrownBy(() -> proc.train(GraphSageBaseProcTest.graphName, trainConfigParams))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Model with name `%s` already exists.", GraphSageBaseProcTest.modelName);

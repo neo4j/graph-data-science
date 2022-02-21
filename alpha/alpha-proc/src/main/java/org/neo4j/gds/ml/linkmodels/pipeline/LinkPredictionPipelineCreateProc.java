@@ -23,10 +23,8 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -38,9 +36,6 @@ import static org.neo4j.procedure.Mode.READ;
 
 @SuppressWarnings("immutables:subtype")
 public class LinkPredictionPipelineCreateProc extends BaseProc {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.create", mode = READ)
     @Description("Creates a link prediction pipeline in the model catalog.")
@@ -57,7 +52,7 @@ public class LinkPredictionPipelineCreateProc extends BaseProc {
             new LinkPredictionPipeline()
         );
 
-        modelCatalog.set(model);
+        modelCatalog().set(model);
 
         return Stream.of(new PipelineInfoResult(pipelineName, model.customInfo()));
     }

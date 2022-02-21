@@ -40,9 +40,12 @@ import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIP
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.localClusteringCoefficient.stream", description = DESCRIPTION, executionMode = STREAM)
-public class LocalClusteringCoefficientStreamProc
-    extends StreamProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result,
-    LocalClusteringCoefficientStreamProc.Result, LocalClusteringCoefficientStreamConfig> {
+public class LocalClusteringCoefficientStreamProc extends StreamProc<
+    LocalClusteringCoefficient,
+    LocalClusteringCoefficient.Result,
+    LocalClusteringCoefficientStreamProc.Result,
+    LocalClusteringCoefficientStreamConfig
+    > {
 
     @Procedure(name = "gds.localClusteringCoefficient.stream", mode = READ)
     @Description(DESCRIPTION)

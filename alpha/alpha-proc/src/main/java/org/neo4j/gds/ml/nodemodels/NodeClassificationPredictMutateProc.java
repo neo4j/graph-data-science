@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -33,7 +35,6 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -48,9 +49,6 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.alpha.ml.nodeClassification.predict.mutate", description = "Predicts classes for all nodes based on a previously trained model", executionMode = MUTATE_NODE_PROPERTY)
 public class NodeClassificationPredictMutateProc extends MutatePropertyProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationMutateConfig> {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.mutate", mode = Mode.READ)
     @Description("Predicts classes for all nodes based on a previously trained model")
@@ -81,7 +79,15 @@ public class NodeClassificationPredictMutateProc extends MutatePropertyProc<Node
 
     @Override
     public ValidationConfiguration<NodeClassificationMutateConfig> validationConfig() {
-        return NodeClassificationCompanion.getValidationConfig(modelCatalog);
+        return NodeClassificationCompanion.getValidationConfig(modelCatalog());
+    }
+
+    @Override
+    public AlgorithmSpec<NodeClassificationPredict, NodeClassificationResult, NodeClassificationMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, NodeClassificationPredict, NodeClassificationMutateConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.setModelCatalog(modelCatalog);
+        return this;
     }
 
     @Override
@@ -91,7 +97,7 @@ public class NodeClassificationPredictMutateProc extends MutatePropertyProc<Node
 
     @Override
     public GraphAlgorithmFactory<NodeClassificationPredict, NodeClassificationMutateConfig> algorithmFactory() {
-        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
+        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog());
     }
 
     @Override

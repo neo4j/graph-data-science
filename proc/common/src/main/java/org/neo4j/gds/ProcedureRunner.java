@@ -31,27 +31,11 @@ import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.function.Consumer;
 
 public final class ProcedureRunner {
 
     private ProcedureRunner() {}
-
-    public static <P extends BaseProc> P instantiateProcedureFromCaller(BaseProc caller, Class<P> procedureClass) {
-        return ProcedureRunner.instantiateProcedure(
-            caller.api,
-            procedureClass,
-            caller.callContext,
-            caller.log,
-            caller.taskRegistryFactory,
-            EmptyUserLogRegistryFactory.INSTANCE,
-            caller.allocationTracker,
-            caller.procedureTransaction,
-            caller.username
-        );
-    }
 
     public static <P extends BaseProc> P instantiateProcedure(
         GraphDatabaseAPI graphDb,
@@ -80,23 +64,9 @@ public final class ProcedureRunner {
         proc.taskRegistryFactory = taskRegistryFactory;
         proc.userLogRegistryFactory = userLogRegistryFactory;
         proc.username = username;
-
-        var maybeModelCatalogField = Arrays.stream(procClass.getFields())
-            .filter(field -> ModelCatalog.class.isAssignableFrom(field.getType()))
-            .findFirst();
-
-        maybeModelCatalogField.ifPresent(field -> injectModelCatalog(proc, field));
+        proc.internalModelCatalog = GraphDatabaseApiProxy.resolveDependency(proc.api, ModelCatalog.class);
 
         return proc;
-    }
-
-    private static void injectModelCatalog(BaseProc procInstance, Field field) {
-        try {
-            var modelCatalog = GraphDatabaseApiProxy.resolveDependency(procInstance.api, ModelCatalog.class);
-            field.set(procInstance, modelCatalog);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static <P extends BaseProc> P applyOnProcedure(

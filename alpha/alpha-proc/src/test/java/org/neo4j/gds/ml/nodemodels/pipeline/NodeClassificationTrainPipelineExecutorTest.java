@@ -343,7 +343,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             .metrics(List.of(MetricSpecification.parse("F1_WEIGHTED")))
             .build();
 
-        var memoryEstimation = NodeClassificationTrainPipelineExecutor.estimate(pipeline, config);
+        var memoryEstimation = NodeClassificationTrainPipelineExecutor.estimate(pipeline, config, modelCatalog);
         assertMemoryEstimation(
             () -> memoryEstimation,
             graphStore.nodeCount(),

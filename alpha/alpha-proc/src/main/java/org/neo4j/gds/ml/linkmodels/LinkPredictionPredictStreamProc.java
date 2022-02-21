@@ -20,15 +20,16 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -43,9 +44,6 @@ import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.ml.linkPrediction.predict.stream", description = DESCRIPTION, executionMode = STREAM)
 public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictStreamConfig, LinkPredictionPredictStreamProc.Result> {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.stream", mode = Mode.READ)
     @Description(DESCRIPTION)
@@ -72,13 +70,21 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     }
 
     @Override
+    public AlgorithmSpec<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictStreamConfig, Stream<Result>, AlgorithmFactory<?, LinkPredictionPredict, LinkPredictionPredictStreamConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.setModelCatalog(modelCatalog);
+        return this;
+    }
+
+    @Override
     protected LinkPredictionPredictStreamConfig newConfig(String username, CypherMapWrapper config) {
         return LinkPredictionPredictStreamConfig.of(username, config);
     }
 
     @Override
     public GraphAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictStreamConfig> algorithmFactory() {
-        return new LinkPredictionPredictFactory<>(modelCatalog);
+        return new LinkPredictionPredictFactory<>(modelCatalog());
     }
 
     @Override

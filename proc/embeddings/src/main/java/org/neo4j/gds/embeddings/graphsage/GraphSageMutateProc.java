@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
@@ -27,13 +28,13 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -52,9 +53,6 @@ import static org.neo4j.procedure.Mode.READ;
 @GdsCallable(name = "gds.beta.graphSage.mutate", description = GRAPHSAGE_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage.GraphSageResult, GraphSageMutateProc.MutateResult, GraphSageMutateConfig> {
 
-    @Context
-    public ModelCatalog modelCatalog;
-
     @Procedure(value = "gds.beta.graphSage.mutate", mode = Mode.READ)
     @Description(GRAPHSAGE_DESCRIPTION)
     public Stream<MutateResult> mutate(
@@ -63,7 +61,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     ) {
         injectRelationshipWeightPropertyFromModel(
             getActualConfig(graphName, configuration),
-            modelCatalog,
+            modelCatalog(),
             username.username()
         );
 
@@ -82,7 +80,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     ) {
         injectRelationshipWeightPropertyFromModel(
             getActualConfig(graphNameOrConfiguration, algoConfiguration),
-            modelCatalog,
+            modelCatalog(),
             username.username()
         );
 
@@ -104,7 +102,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
 
     @Override
     public ValidationConfiguration<GraphSageMutateConfig> validationConfig() {
-        return GraphSageCompanion.getValidationConfig(modelCatalog, username());
+        return GraphSageCompanion.getValidationConfig(modelCatalog(), username());
     }
 
     @Override
@@ -114,7 +112,15 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
 
     @Override
     public GraphAlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
-        return new GraphSageAlgorithmFactory<>(modelCatalog);
+        return new GraphSageAlgorithmFactory<>(modelCatalog());
+    }
+
+    @Override
+    public AlgorithmSpec<GraphSage, GraphSage.GraphSageResult, GraphSageMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, GraphSage, GraphSageMutateConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.setModelCatalog(modelCatalog);
+        return this;
     }
 
     @SuppressWarnings("unused")

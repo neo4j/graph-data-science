@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -65,7 +64,8 @@ class ProcedureRunnerTest extends BaseTest {
             .filter(field -> field.isAnnotationPresent(Context.class))
             .map(Field::getType)
             // KernelTransaction is computed from Transaction
-            .filter(paramType -> paramType != KernelTransaction.class)
+            // ModelCatalog is resolved from GraphDatabaseAPI
+            .filter(paramType -> paramType != KernelTransaction.class && paramType != ModelCatalog.class)
             .collect(Collectors.toList());
 
         var parameterTypes = Arrays.asList(instantiateProcedureMethod.getParameterTypes());
@@ -81,18 +81,6 @@ class ProcedureRunnerTest extends BaseTest {
                 )
             )
             .isEmpty();
-    }
-
-    @Test
-    void shouldInjectModelCatalog() {
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
-            var baseProc = new TestProc();
-            baseProc.api = db;
-            baseProc.procedureTransaction = tx;
-            var trainProcInstance = ProcedureRunner.instantiateProcedureFromCaller(baseProc, TrainTestProc.class);
-
-            assertThat(trainProcInstance.modelCatalog).isEqualTo(modelCatalog);
-        });
     }
 
     @Test
@@ -122,14 +110,9 @@ class ProcedureRunnerTest extends BaseTest {
                     assertThat(proc.taskRegistryFactory).isEqualTo(taskRegistryFactory);
                     assertThat(proc.username).isEqualTo(username);
                     assertThat(proc.allocationTracker).isEqualTo(allocationTracker);
+                    assertThat(proc.modelCatalog()).isEqualTo(modelCatalog);
                 }
             );
         }
-    }
-
-    public static class TrainTestProc extends BaseProc {
-
-        @Context
-        public ModelCatalog modelCatalog;
     }
 }

@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -45,6 +46,9 @@ public interface ExecutionContext {
 
     @Nullable
     GraphDatabaseAPI api();
+
+    @Nullable
+    ModelCatalog modelCatalog();
 
     @Nullable
     Log log();
@@ -90,6 +94,11 @@ public interface ExecutionContext {
     ExecutionContext EMPTY = new ExecutionContext() {
         @Override
         public @Nullable GraphDatabaseAPI api() {
+            return null;
+        }
+
+        @Override
+        public @Nullable ModelCatalog modelCatalog() {
             return null;
         }
 

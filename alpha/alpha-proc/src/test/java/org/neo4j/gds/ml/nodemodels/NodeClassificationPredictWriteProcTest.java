@@ -114,7 +114,6 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
                         proc.procedureTransaction
                     )
                 );
-                proc.modelCatalog = modelCatalog;
 
                 func.accept(proc);
             }

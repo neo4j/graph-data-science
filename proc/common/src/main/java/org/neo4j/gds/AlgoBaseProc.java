@@ -108,15 +108,8 @@ public abstract class AlgoBaseProc<
     }
 
     @Override
-    public abstract AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory();
-
-    @Override
     public ValidationConfiguration<CONFIG> validationConfig() {
         return ValidationConfiguration.empty();
-    }
-
-    protected Validator<CONFIG> validator() {
-        return new Validator<>(validationConfig());
     }
 
     private ProcedureExecutor<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>> procedureExecutor() {

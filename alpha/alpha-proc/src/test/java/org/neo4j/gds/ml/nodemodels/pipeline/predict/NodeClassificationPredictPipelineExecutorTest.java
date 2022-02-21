@@ -317,7 +317,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .username("user")
             .build();
 
-        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config);
+        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, modelCatalog);
         assertMemoryEstimation(
             () -> memoryEstimation,
             graphStore.nodeCount(),

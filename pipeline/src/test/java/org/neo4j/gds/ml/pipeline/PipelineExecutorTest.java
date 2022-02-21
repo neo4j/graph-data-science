@@ -28,6 +28,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -221,7 +222,7 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public MemoryEstimation estimate() {
+        public MemoryEstimation estimate(ModelCatalog modelCatalog) {
             throw new MemoryEstimationNotImplementedException();
         }
 
@@ -258,7 +259,7 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public MemoryEstimation estimate() {
+        public MemoryEstimation estimate(ModelCatalog modelCatalog) {
             throw new MemoryEstimationNotImplementedException();
         }
 

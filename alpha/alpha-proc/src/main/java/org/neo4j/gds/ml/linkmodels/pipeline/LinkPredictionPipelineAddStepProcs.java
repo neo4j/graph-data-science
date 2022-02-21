@@ -21,11 +21,9 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfigurationImpl;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,9 +40,6 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPipelineAddStepProcs extends BaseProc {
 
-    @Context
-    public ModelCatalog modelCatalog;
-
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.addNodeProperty", mode = READ)
     @Description("Add a node property step to an existing link prediction pipeline.")
     public Stream<PipelineInfoResult> addNodeProperty(
@@ -52,7 +47,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         @Name("procedureName") String taskName,
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
-        var pipeline = getLPPipeline(modelCatalog, pipelineName, username());
+        var pipeline = getLPPipeline(modelCatalog(), pipelineName, username());
         validateRelationshipProperty(pipeline, procedureConfig);
 
         pipeline.addNodePropertyStep(createNodePropertyStep(executionContext().username(), taskName, procedureConfig));
@@ -67,7 +62,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         @Name("featureType") String featureType,
         @Name("configuration") Map<String, Object> config
     ) {
-        var pipeline = getLPPipeline(modelCatalog, pipelineName, username());
+        var pipeline = getLPPipeline(modelCatalog(), pipelineName, username());
 
         var parsedConfig = new LinkFeatureStepConfigurationImpl(CypherMapWrapper.create(config));
 

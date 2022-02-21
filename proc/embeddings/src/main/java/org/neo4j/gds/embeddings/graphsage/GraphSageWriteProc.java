@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
@@ -27,13 +28,13 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -51,16 +52,13 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 @GdsCallable(name = "gds.beta.graphSage.mutate", description = GRAPHSAGE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSageResult, GraphSageWriteProc.GraphSageWriteResult, GraphSageWriteConfig> {
 
-    @Context
-    public ModelCatalog modelCatalog;
-
     @Procedure(name = "gds.beta.graphSage.write", mode = Mode.WRITE)
     @Description(GRAPHSAGE_DESCRIPTION)
     public Stream<GraphSageWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphName, configuration), modelCatalog, username.username());
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphName, configuration), modelCatalog(), username.username());
 
         return write(compute(graphName, configuration));
     }
@@ -71,14 +69,22 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfiguration, algoConfiguration), modelCatalog, username.username());
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfiguration, algoConfiguration), modelCatalog(), username.username());
 
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
     public ValidationConfiguration<GraphSageWriteConfig> validationConfig() {
-        return GraphSageCompanion.getValidationConfig(modelCatalog, username());
+        return GraphSageCompanion.getValidationConfig(modelCatalog(), username());
+    }
+
+    @Override
+    public AlgorithmSpec<GraphSage, GraphSage.GraphSageResult, GraphSageWriteConfig, Stream<GraphSageWriteResult>, AlgorithmFactory<?, GraphSage, GraphSageWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.setModelCatalog(modelCatalog);
+        return this;
     }
 
     @Override
@@ -88,7 +94,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
 
     @Override
     public GraphAlgorithmFactory<GraphSage, GraphSageWriteConfig> algorithmFactory() {
-        return new GraphSageAlgorithmFactory<>(modelCatalog);
+        return new GraphSageAlgorithmFactory<>(modelCatalog());
     }
 
     @Override

@@ -22,6 +22,7 @@ package org.neo4j.gds.executor;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 
 public interface AlgorithmSpec<
@@ -41,5 +42,9 @@ public interface AlgorithmSpec<
 
     default ValidationConfiguration<CONFIG> validationConfig() {
         return ValidationConfiguration.empty();
+    }
+
+    default AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ALGO_FACTORY> withModelCatalog(ModelCatalog modelCatalog) {
+        return this;
     }
 }

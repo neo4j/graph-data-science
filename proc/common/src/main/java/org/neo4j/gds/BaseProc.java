@@ -27,6 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -80,6 +81,11 @@ public abstract class BaseProc {
 
     @Context
     public Username username = Username.EMPTY_USERNAME;
+
+    // Do not access this directly as it could lead to NullPointerExceptions,
+    // instead use org.neo4j.gds.BaseProc.modelCatalog for access
+    @Context
+    public ModelCatalog internalModelCatalog;
 
     protected BaseProc() {
         if (allocationTracker == null) {
@@ -169,6 +175,7 @@ public abstract class BaseProc {
         return ImmutableExecutionContext
             .builder()
             .api(api)
+            .modelCatalog(internalModelCatalog)
             .log(log)
             .procedureTransaction(procedureTransaction)
             .transaction(transaction)
@@ -178,5 +185,18 @@ public abstract class BaseProc {
             .taskRegistryFactory(taskRegistryFactory)
             .username(username())
             .build();
+    }
+
+    public ModelCatalog modelCatalog() {
+        if (internalModelCatalog == null) {
+            // you need to set the ModelCatalog if Neo4j is not present (org.neo4j.gds.BaseProc.setModelCatalog).
+            throw new IllegalStateException("ModelCatalog could not be retrieved. Please report the error.");
+        }
+
+        return internalModelCatalog;
+    }
+
+    public void setModelCatalog(ModelCatalog modelCatalog) {
+        this.internalModelCatalog = modelCatalog;
     }
 }

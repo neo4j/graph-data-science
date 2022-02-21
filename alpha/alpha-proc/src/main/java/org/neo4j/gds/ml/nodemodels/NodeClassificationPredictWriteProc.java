@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -32,7 +34,6 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -48,9 +49,6 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.alpha.ml.nodeClassification.predict.write", description = "Predicts classes for all nodes based on a previously trained model", executionMode = WRITE_NODE_PROPERTY)
 public class NodeClassificationPredictWriteProc extends WriteProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteProc.Result, NodeClassificationPredictWriteConfig> {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.write", mode = WRITE)
     @Description("Predicts classes for all nodes based on a previously trained model")
@@ -103,7 +101,15 @@ public class NodeClassificationPredictWriteProc extends WriteProc<NodeClassifica
 
     @Override
     public ValidationConfiguration<NodeClassificationPredictWriteConfig> validationConfig() {
-        return NodeClassificationCompanion.getValidationConfig(modelCatalog);
+        return NodeClassificationCompanion.getValidationConfig(modelCatalog());
+    }
+
+    @Override
+    public AlgorithmSpec<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig, Stream<Result>, AlgorithmFactory<?, NodeClassificationPredict, NodeClassificationPredictWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.setModelCatalog(modelCatalog);
+        return this;
     }
 
     @Override
@@ -113,7 +119,7 @@ public class NodeClassificationPredictWriteProc extends WriteProc<NodeClassifica
 
     @Override
     public GraphAlgorithmFactory<NodeClassificationPredict, NodeClassificationPredictWriteConfig> algorithmFactory() {
-        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
+        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog());
     }
 
     @Override

@@ -19,17 +19,18 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteStreamOfRelationshipsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -44,9 +45,6 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.alpha.ml.linkPrediction.predict.write", description = DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsProc<LinkPredictionPredict, ExhaustiveLinkPredictionResult, StandardWriteRelationshipsResult, LinkPredictionPredictWriteConfig> {
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.write", mode = WRITE)
     @Description(DESCRIPTION)
@@ -72,13 +70,21 @@ public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsPr
     }
 
     @Override
+    public AlgorithmSpec<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictWriteConfig, Stream<StandardWriteRelationshipsResult>, AlgorithmFactory<?, LinkPredictionPredict, LinkPredictionPredictWriteConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.setModelCatalog(modelCatalog);
+        return this;
+    }
+
+    @Override
     protected LinkPredictionPredictWriteConfig newConfig(String username, CypherMapWrapper config) {
         return LinkPredictionPredictWriteConfig.of(username, config);
     }
 
     @Override
     public GraphAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictWriteConfig> algorithmFactory() {
-        return new LinkPredictionPredictFactory<>(modelCatalog);
+        return new LinkPredictionPredictFactory<>(modelCatalog());
     }
 
     @Override

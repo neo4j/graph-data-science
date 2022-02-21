@@ -23,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
+import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineStreamProc;
@@ -104,7 +106,9 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
             NodeClassificationPipelineConfigureParamsProc.class,
             NodeClassificationPipelineTrainProc.class,
             NodeClassificationPipelineStreamProc.class,
-            WccMutateProc.class
+            WccMutateProc.class,
+            GraphSageTrainProc.class,
+            GraphSageMutateProc.class
         );
         registerFunctions(AsNodeFunc.class);
         runQuery(GRAPH);
@@ -161,6 +165,50 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
                 Map.of("name", "1_hidden", "predictedClass", 1L, "probabilities", listOfSize(3)),
                 Map.of("name", "2_hidden", "predictedClass", 2L, "probabilities", listOfSize(3))
             )
+        );
+    }
+
+    @Test
+    void testWithGraphSage() {
+        runQuery(
+            "CALL gds.graph.project('g', ['N', 'Hidden'], {T: {properties: 'w'}}, {nodeProperties: ['a', 'b', 'class']})");
+
+        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.create('p')");
+
+        // train GS model (not as a nodeProperty step as it does not produce a node property)
+        runQuery(
+            "CALL gds.beta.graphSage.train('g', {" +
+            "    modelName: 'gsModel'," +
+            "    embeddingDimension: 32," +
+            "    sampleSizes: [2]," +
+            "    epochs: 1," +
+            "    maxIterations: 1," +
+            "    aggregator: 'MEAN'," +
+            "    featureProperties: $features," +
+            "    randomSeed: 99" +
+            "  }" +
+            ")", Map.of("features", List.of("a", "b")));
+
+        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty('p', 'gds.beta.graphSage', {" +
+                 "  modelName: 'gsModel',   " +
+                 "  mutateProperty: 'embedding'" +
+                 "})");
+
+        // let's try both list and single string syntaxes
+        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures('p', 'embedding')");
+
+        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.train('g', {" +
+                 " nodeLabels: ['N']," +
+                 " pipeline: 'p'," +
+                 " modelName: 'model'," +
+                 " targetProperty: 'class'," +
+                 " metrics: ['F1_WEIGHTED']," +
+                 " randomSeed: 2" +
+                 "})");
+
+        assertCypherResult(
+            "CALL gds.beta.model.list() YIELD modelInfo RETURN count(*) AS modelCount",
+            List.of(Map.of("modelCount", 3L))
         );
     }
 

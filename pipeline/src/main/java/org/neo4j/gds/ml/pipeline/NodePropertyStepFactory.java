@@ -32,11 +32,14 @@ import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodePropertyStepFactory {
+public final class NodePropertyStepFactory {
+
     private static final List<String> RESERVED_CONFIG_KEYS = List.of(
         AlgoBaseConfig.NODE_LABELS_KEY,
         AlgoBaseConfig.RELATIONSHIP_TYPES_KEY
     );
+
+    private NodePropertyStepFactory() {}
 
     public static NodePropertyStep createNodePropertyStep(
         String username,
