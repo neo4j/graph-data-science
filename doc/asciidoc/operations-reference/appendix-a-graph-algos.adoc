@@ -253,9 +253,6 @@ include::../algorithms/algorithm-tiers.adoc[]
 .2+<.^|<<algorithms-strongly-connected-components, Strongly Connected Components>>
 | `gds.alpha.scc.stream`
 | `gds.alpha.scc.write`
-.2+<.^|<<alpha-algorithms-single-source-shortest-path, Single Source Shortest Path>>
-| `gds.alpha.shortestPath.deltaStepping.write`
-| `gds.alpha.shortestPath.deltaStepping.stream`
 .2+<.^|<<algorithms-scale-properties, Scale Properties>>
 | `gds.alpha.scaleProperties.mutate`
 | `gds.alpha.scaleProperties.stream`

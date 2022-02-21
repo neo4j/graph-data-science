@@ -233,9 +233,6 @@
             <d:tocentry linkend="alpha-algorithms-minimum-weight-spanning-tree">
                 <?dbhtml filename="alpha-algorithms/minimum-weight-spanning-tree/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="alpha-algorithms-single-source-shortest-path">
-                <?dbhtml filename="alpha-algorithms/single-source-shortest-path/index.html"?>
-            </d:tocentry>
             <d:tocentry linkend="alpha-algorithm-all-pairs-shortest-path">
                 <?dbhtml filename="alpha-algorithms/all-pairs-shortest-path/index.html"?>
             </d:tocentry>
