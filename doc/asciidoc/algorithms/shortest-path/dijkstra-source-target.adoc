@@ -1,5 +1,5 @@
 [[algorithms-dijkstra-source-target]]
-= Dijkstra Source-Target
+= Dijkstra Source-Target Shortest Path
 :entity: source-target-pair
 :result: shortest path
 :algorithm: Dijkstra

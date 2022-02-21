@@ -1,5 +1,5 @@
 [[algorithms-delta-single-source]]
-= Delta-Stepping Single-Source
+= Delta-Stepping Single-Source Shortest Path
 :entity: source-target-pair
 :result: shortest path
 :algorithm: Delta-Stepping
