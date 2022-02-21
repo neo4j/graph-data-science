@@ -40,7 +40,7 @@ CALL gds.graph.drop(
 |===
 | Name          | Type      | Optional             | Description
 | graphName     | String    | no                   | The name under which the graph is stored in the catalog.
-| failIfMissing | Boolean   | true                 | By default, the library will raise an error when trying to remove a non-existing graph. When set to `false`, the procedure returns empty result.
+| failIfMissing | Boolean   | true                 | By default, the library will raise an error when trying to remove a non-existing graph. When set to `false`, the procedure returns an empty result.
 | dbName        | String    | active database name | Then name of the database that was used to project the graph. When empty, the current database is used.
 | username      | String    | active user          | The name of the user who projected the graph. Can only be used by GDS administrator.
 |===
