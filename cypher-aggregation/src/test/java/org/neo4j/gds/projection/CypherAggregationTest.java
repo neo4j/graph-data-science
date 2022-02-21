@@ -307,7 +307,10 @@ class CypherAggregationTest extends BaseProcTest {
     @Test
     void shouldNotFailOnMissingProperty() {
         var query = "MATCH (s:B)-[:REL]->(t:B) " +
-                    "WITH gds.alpha.graph('g', s, t, s { .prop2 }, t { .prop2 }) AS g " +
+                    "WITH gds.alpha.graph('g', s, t, {" +
+                    "   sourceNodeProperties: s { .prop2 }, " +
+                    "   targetNodeProperties: t { .prop2 }" +
+                    "}) AS g " +
                     "RETURN g.graphName";
         assertThatCode(() -> runQuery(query)).doesNotThrowAnyException();
     }
