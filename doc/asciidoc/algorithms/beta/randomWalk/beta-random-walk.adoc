@@ -112,6 +112,9 @@ CALL gds.graph.project(
 );
 ----
 
+
+=== Without specified source nodes
+
 [role=query-example]
 --
 .Run the RandomWalk algorithm on `myGraph`
@@ -144,6 +147,9 @@ RETURN nodeIds, [node IN nodes(path) | node.name ] AS pages
 | [7, 3, 0] | [Site D, Links, Home]
 |===
 --
+
+
+=== With specified source nodes
 
 [role=query-example]
 --
