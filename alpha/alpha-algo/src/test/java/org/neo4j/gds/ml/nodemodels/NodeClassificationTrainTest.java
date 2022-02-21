@@ -405,7 +405,7 @@ class NodeClassificationTrainTest {
     @NotNull
     private static ThrowingExtractor<String, String, RuntimeException> removingLastThreeDigitsOfPrecision() {
         return msg -> msg.replaceAll(
-            "(NCTrain :: SelectBestModel :: Model Candidate [1-2] of 2 :: Split 1 of 2 :: Training :: Epoch 2 :: Loss: 0\\.\\d+)\\d\\d\\d",
+            "(NCTrain :: SelectBestModel :: Model Candidate \\d of 2 :: Split \\d of 2 :: Training :: Epoch \\d :: Loss: 0\\.\\d+)\\d\\d\\d",
             "$1"
         );
     }
