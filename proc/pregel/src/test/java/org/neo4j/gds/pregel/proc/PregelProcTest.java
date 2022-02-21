@@ -336,13 +336,6 @@ public class PregelProcTest extends BaseProcTest {
                 }
             };
         }
-
-        @Override
-        public AlgorithmSpec<CompositeTestAlgorithm, PregelResult, TestPregelConfig, Stream<PregelMutateResult>, AlgorithmFactory<?, CompositeTestAlgorithm, TestPregelConfig>> withModelCatalog(
-            ModelCatalog modelCatalog
-        ) {
-            return this;
-        }
     }
 
     public static class WriteProc extends PregelWriteProc<CompositeTestAlgorithm, TestPregelConfig> {
@@ -485,13 +478,6 @@ public class PregelProcTest extends BaseProcTest {
                     return Pregel.progressTask(graph, config);
                 }
             };
-        }
-
-        @Override
-        public AlgorithmSpec<CompositeTestAlgorithm, PregelResult, TestPregelConfig, Stream<PregelStreamResult>, AlgorithmFactory<?, CompositeTestAlgorithm, TestPregelConfig>> withModelCatalog(
-            ModelCatalog modelCatalog
-        ) {
-            return this;
         }
     }
 

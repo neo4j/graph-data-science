@@ -19,15 +19,12 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -73,13 +70,6 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
     @Override
     public GraphAlgorithmFactory<K1Coloring, K1ColoringMutateConfig> algorithmFactory() {
         return new K1ColoringFactory<>();
-    }
-
-    @Override
-    public AlgorithmSpec<K1Coloring, HugeLongArray, K1ColoringMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, K1Coloring, K1ColoringMutateConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     @Override

@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds.spanningtree;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -34,7 +32,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.NodePropertyExporter;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.impl.spanningTrees.KSpanningTree;
 import org.neo4j.gds.impl.spanningTrees.Prim;
@@ -86,13 +83,6 @@ public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTr
                 );
             }
         };
-    }
-
-    @Override
-    public AlgorithmSpec<KSpanningTree, SpanningTree, KSpanningTreeConfig, Stream<Prim.Result>, AlgorithmFactory<?, KSpanningTree, KSpanningTreeConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     @Override

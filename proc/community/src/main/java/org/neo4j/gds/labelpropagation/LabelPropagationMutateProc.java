@@ -19,14 +19,11 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -73,13 +70,6 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
     @Override
     public GraphAlgorithmFactory<LabelPropagation, LabelPropagationMutateConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
-    }
-
-    @Override
-    public AlgorithmSpec<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, LabelPropagation, LabelPropagationMutateConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     @Override

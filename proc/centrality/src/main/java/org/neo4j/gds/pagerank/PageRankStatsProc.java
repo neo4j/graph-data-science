@@ -20,12 +20,9 @@
 package org.neo4j.gds.pagerank;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -84,17 +81,6 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
     @Override
     public ValidationConfiguration<PageRankStatsConfig> validationConfig() {
         return PageRankProc.getValidationConfig(log);
-    }
-
-    @Override
-    public AlgorithmSpec<
-        PageRankAlgorithm,
-        PageRankResult,
-        PageRankStatsConfig,
-        Stream<StatsResult>,
-        AlgorithmFactory<?, PageRankAlgorithm, PageRankStatsConfig>
-        > withModelCatalog(ModelCatalog modelCatalog) {
-        return this;
     }
 
     @Override

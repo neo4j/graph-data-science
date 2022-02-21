@@ -19,14 +19,11 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -93,13 +90,6 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     @Override
     public GraphAlgorithmFactory<LabelPropagation, LabelPropagationWriteConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
-    }
-
-    @Override
-    public AlgorithmSpec<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig, Stream<WriteResult>, AlgorithmFactory<?, LabelPropagation, LabelPropagationWriteConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     @SuppressWarnings("unused")

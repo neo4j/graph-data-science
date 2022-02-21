@@ -20,13 +20,10 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -86,13 +83,6 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
     @Override
     public GraphAlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory() {
         return new WccAlgorithmFactory<>();
-    }
-
-    @Override
-    public AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, Wcc, WccMutateConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     @Override

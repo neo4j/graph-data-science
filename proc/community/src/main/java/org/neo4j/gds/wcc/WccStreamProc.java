@@ -19,15 +19,12 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
@@ -80,13 +77,6 @@ public class WccStreamProc extends StreamProc<
     @Override
     public GraphAlgorithmFactory<Wcc, WccStreamConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
-    }
-
-    @Override
-    public AlgorithmSpec<Wcc, DisjointSetStruct, WccStreamConfig, Stream<StreamResult>, AlgorithmFactory<?, Wcc, WccStreamConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     @Override

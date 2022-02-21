@@ -19,14 +19,11 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
@@ -92,16 +89,5 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
     @Override
     protected NodeProperties nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStreamConfig> computationResult) {
         return PageRankProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    public AlgorithmSpec<
-        PageRankAlgorithm,
-        PageRankResult,
-        PageRankStreamConfig,
-        Stream<CentralityStreamResult>,
-        AlgorithmFactory<?, PageRankAlgorithm, PageRankStreamConfig>
-        > withModelCatalog(ModelCatalog modelCatalog) {
-        return this;
     }
 }

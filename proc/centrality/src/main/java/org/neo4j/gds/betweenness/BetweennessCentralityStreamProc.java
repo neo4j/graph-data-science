@@ -19,15 +19,12 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
@@ -88,17 +85,6 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     @Override
     public ValidationConfiguration<BetweennessCentralityStreamConfig> validationConfig() {
         return BetweennessCentralityProc.getValidationConfig();
-    }
-
-    @Override
-    public AlgorithmSpec<
-        BetweennessCentrality,
-        HugeAtomicDoubleArray,
-        BetweennessCentralityStreamConfig,
-        Stream<CentralityStreamResult>,
-        AlgorithmFactory<?, BetweennessCentrality, BetweennessCentralityStreamConfig>
-        > withModelCatalog(ModelCatalog modelCatalog) {
-        return this;
     }
 
     @Override

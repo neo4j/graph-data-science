@@ -19,13 +19,10 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
@@ -69,13 +66,6 @@ public class TriangleCountStreamProc
     @Override
     public ValidationConfiguration<TriangleCountStreamConfig> validationConfig() {
         return TriangleCountCompanion.getValidationConfig();
-    }
-
-    @Override
-    public AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig, Stream<Result>, AlgorithmFactory<?, IntersectingTriangleCount, TriangleCountStreamConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     @Override

@@ -20,14 +20,11 @@
 package org.neo4j.gds.betweenness;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -98,17 +95,6 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
             callContext,
             computeResult.config().concurrency()
         ), computeResult);
-    }
-
-    @Override
-    public AlgorithmSpec<
-        BetweennessCentrality,
-        HugeAtomicDoubleArray,
-        BetweennessCentralityStatsConfig,
-        Stream<StatsResult>,
-        AlgorithmFactory<?, BetweennessCentrality, BetweennessCentralityStatsConfig>
-        > withModelCatalog(ModelCatalog modelCatalog) {
-        return this;
     }
 
     @SuppressWarnings("unused")

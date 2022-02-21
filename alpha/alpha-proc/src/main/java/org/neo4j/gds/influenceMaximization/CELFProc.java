@@ -20,15 +20,12 @@
 package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.influenceMaximization.CELF;
@@ -90,17 +87,6 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
                 );
             }
         };
-    }
-
-    @Override
-    public AlgorithmSpec<
-        CELF,
-        CELF,
-        InfluenceMaximizationConfig,
-        Stream<InfluenceMaximizationResult>,
-        AlgorithmFactory<?, CELF, InfluenceMaximizationConfig>
-        > withModelCatalog(ModelCatalog modelCatalog) {
-        return this;
     }
 
     @Override

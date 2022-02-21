@@ -19,13 +19,10 @@
  */
 package org.neo4j.gds.similarity.ann;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm;
 import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfig;
 import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfigImpl;
@@ -42,11 +39,8 @@ import org.neo4j.gds.impl.similarity.JaccardConfig;
 import org.neo4j.gds.impl.similarity.PearsonAlgorithm;
 import org.neo4j.gds.impl.similarity.PearsonConfig;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithm;
-import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.gds.impl.similarity.SimilarityInput;
 import org.neo4j.gds.similarity.AlphaSimilarityProc;
-
-import java.util.stream.Stream;
 
 public abstract class ApproxNearestNeighborsProc<PROC_RESULT> extends AlphaSimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ApproximateNearestNeighborsConfig, PROC_RESULT> {
 
@@ -81,18 +75,6 @@ public abstract class ApproxNearestNeighborsProc<PROC_RESULT> extends AlphaSimil
     @Override
     protected String taskName() {
         return "ApproximateNearestNeighbors";
-    }
-
-    @Override
-    public AlgorithmSpec<
-        ApproxNearestNeighborsAlgorithm<SimilarityInput>,
-        SimilarityAlgorithmResult,
-        ApproximateNearestNeighborsConfig,
-        Stream<PROC_RESULT>,
-        AlgorithmFactory<?, ApproxNearestNeighborsAlgorithm<SimilarityInput>, ApproximateNearestNeighborsConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     SimilarityAlgorithm<?, ? extends SimilarityInput> similarityAlgorithm(ApproximateNearestNeighborsConfig config) {

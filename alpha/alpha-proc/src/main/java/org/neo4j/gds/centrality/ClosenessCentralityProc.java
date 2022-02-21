@@ -19,20 +19,15 @@
  */
 package org.neo4j.gds.centrality;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.impl.closeness.ClosenessCentralityConfig;
 import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
-
-import java.util.stream.Stream;
 
 public abstract class ClosenessCentralityProc<PROC_RESULT> extends NodePropertiesWriter<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig, PROC_RESULT> {
 
@@ -71,12 +66,5 @@ public abstract class ClosenessCentralityProc<PROC_RESULT> extends NodePropertie
                 );
             }
         };
-    }
-
-    @Override
-    public AlgorithmSpec<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig, Stream<PROC_RESULT>, AlgorithmFactory<?, MSClosenessCentrality, ClosenessCentralityConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 }

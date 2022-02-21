@@ -19,16 +19,13 @@
  */
 package org.neo4j.gds.walking;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -132,13 +129,6 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     @Override
     public GraphStoreAlgorithmFactory<CollapsePath, CollapsePathConfig> algorithmFactory() {
         return new CollapsePathAlgorithmFactory();
-    }
-
-    @Override
-    public AlgorithmSpec<CollapsePath, Relationships, CollapsePathConfig, Stream<MutateResult>, AlgorithmFactory<?, CollapsePath, CollapsePathConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     @Override

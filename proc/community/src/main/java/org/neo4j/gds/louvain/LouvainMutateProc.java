@@ -19,14 +19,11 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -75,13 +72,6 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
     @Override
     public GraphAlgorithmFactory<Louvain, LouvainMutateConfig> algorithmFactory() {
         return new LouvainFactory<>();
-    }
-
-    @Override
-    public AlgorithmSpec<Louvain, Louvain, LouvainMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, Louvain, LouvainMutateConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     @Override

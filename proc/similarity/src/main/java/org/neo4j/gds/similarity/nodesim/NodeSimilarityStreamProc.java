@@ -19,14 +19,11 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
@@ -72,13 +69,6 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
     @Override
     public GraphAlgorithmFactory<NodeSimilarity, NodeSimilarityStreamConfig> algorithmFactory() {
         return new NodeSimilarityFactory<>();
-    }
-
-    @Override
-    public AlgorithmSpec<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig, Stream<SimilarityResult>, AlgorithmFactory<?, NodeSimilarity, NodeSimilarityStreamConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     @Override

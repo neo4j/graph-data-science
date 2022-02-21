@@ -19,13 +19,10 @@
  */
 package org.neo4j.gds.conductance;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.conductance.Conductance;
 import org.neo4j.gds.impl.conductance.ConductanceStreamConfig;
@@ -72,13 +69,6 @@ public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.R
     @Override
     public GraphAlgorithmFactory<Conductance, ConductanceStreamConfig> algorithmFactory() {
         return ConductanceProc.algorithmFactory();
-    }
-
-    @Override
-    public AlgorithmSpec<Conductance, Conductance.Result, ConductanceStreamConfig, Stream<StreamResult>, AlgorithmFactory<?, Conductance, ConductanceStreamConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     @Override

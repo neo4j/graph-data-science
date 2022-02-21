@@ -20,10 +20,7 @@
 package org.neo4j.gds.traverse;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.impl.traverse.Traverse;
 import org.neo4j.gds.impl.traverse.TraverseConfig;
@@ -57,12 +54,5 @@ public abstract class TraverseProc extends AlgoBaseProc<Traverse, Traverse, Trav
                 PathFactory.create(transaction.internalTransaction(), nodeList, NEXT)
             ));
         };
-    }
-
-    @Override
-    public AlgorithmSpec<Traverse, Traverse, TraverseConfig, Stream<WalkResult>, AlgorithmFactory<?, Traverse, TraverseConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 }

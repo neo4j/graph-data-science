@@ -21,16 +21,13 @@ package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ProcConfigParser;
@@ -178,13 +175,6 @@ public abstract class AlphaSimilarityProc
 
     static void removeGraph(String username, NamedDatabaseId databaseId) {
         GraphStoreCatalog.remove(CatalogRequest.of(username, databaseId), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {}, true);
-    }
-
-    @Override
-    public AlgorithmSpec<ALGO, SimilarityAlgorithmResult, CONFIG, Stream<PROC_RESULT>, AlgorithmFactory<?, ALGO, CONFIG>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     private Stream<AlphaSimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {

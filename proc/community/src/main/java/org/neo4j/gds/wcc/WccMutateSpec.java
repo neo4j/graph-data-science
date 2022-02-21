@@ -21,7 +21,6 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer.MutateNodePropertyListFunction;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -56,13 +55,6 @@ public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccM
     @Override
     public NewConfigFunction<WccMutateConfig> newConfigFunction() {
         return (__, config) -> WccMutateConfig.of(config);
-    }
-
-    @Override
-    public AlgorithmSpec<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>, WccAlgorithmFactory<WccMutateConfig>> withModelCatalog(
-        ModelCatalog modelCatalog
-    ) {
-        return this;
     }
 
     @Override
