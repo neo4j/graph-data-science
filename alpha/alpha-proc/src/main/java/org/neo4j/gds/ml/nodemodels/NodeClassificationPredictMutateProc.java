@@ -79,14 +79,14 @@ public class NodeClassificationPredictMutateProc extends MutatePropertyProc<Node
 
     @Override
     public ValidationConfiguration<NodeClassificationMutateConfig> validationConfig() {
-        return NodeClassificationCompanion.getValidationConfig(modelCatalog);
+        return NodeClassificationCompanion.getValidationConfig(modelCatalog());
     }
 
     @Override
     public AlgorithmSpec<NodeClassificationPredict, NodeClassificationResult, NodeClassificationMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, NodeClassificationPredict, NodeClassificationMutateConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 
@@ -97,7 +97,7 @@ public class NodeClassificationPredictMutateProc extends MutatePropertyProc<Node
 
     @Override
     public GraphAlgorithmFactory<NodeClassificationPredict, NodeClassificationMutateConfig> algorithmFactory() {
-        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
+        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog());
     }
 
     @Override

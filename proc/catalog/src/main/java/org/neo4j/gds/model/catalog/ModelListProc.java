@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.model.catalog;
 
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -34,6 +35,7 @@ public class ModelListProc extends ModelCatalogProc {
     @Procedure(name = "gds.beta.model.list", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelCatalogResult> list(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
+        ModelCatalog modelCatalog = modelCatalog();
         if (modelName == null || modelName.equals(NO_VALUE)) {
             var models = modelCatalog.list(username());
             return models.stream().map(ModelCatalogResult::new);

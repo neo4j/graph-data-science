@@ -59,7 +59,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphName, configuration), modelCatalog, username.username());
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphName, configuration), modelCatalog(), username.username());
 
         return stream(compute(graphName, configuration));
     }
@@ -70,7 +70,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfiguration, algoConfiguration), modelCatalog, username.username());
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfiguration, algoConfiguration), modelCatalog(), username.username());
 
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
@@ -95,14 +95,14 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
 
     @Override
     public ValidationConfiguration<GraphSageStreamConfig> validationConfig() {
-        return GraphSageCompanion.getValidationConfig(modelCatalog, username());
+        return GraphSageCompanion.getValidationConfig(modelCatalog(), username());
     }
 
     @Override
     public AlgorithmSpec<GraphSage, GraphSage.GraphSageResult, GraphSageStreamConfig, Stream<GraphSageStreamResult>, AlgorithmFactory<?, GraphSage, GraphSageStreamConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 
@@ -113,7 +113,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
 
     @Override
     public GraphAlgorithmFactory<GraphSage, GraphSageStreamConfig> algorithmFactory() {
-        return new GraphSageAlgorithmFactory<>(modelCatalog);
+        return new GraphSageAlgorithmFactory<>(modelCatalog());
     }
 
     @Override

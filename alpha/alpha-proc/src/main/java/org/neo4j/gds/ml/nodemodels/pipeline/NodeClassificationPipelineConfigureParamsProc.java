@@ -42,7 +42,7 @@ public class NodeClassificationPipelineConfigureParamsProc extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name("parameterSpace") List<Map<String, Object>> parameterSpace
     ) {
-        var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(modelCatalog, pipelineName, username());
+        var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(modelCatalog(), pipelineName, username());
 
         List<NodeLogisticRegressionTrainCoreConfig> trainConfigs = parameterSpace
             .stream()

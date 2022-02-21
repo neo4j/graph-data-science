@@ -58,7 +58,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphName, configuration), modelCatalog, username.username());
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphName, configuration), modelCatalog(), username.username());
 
         return write(compute(graphName, configuration));
     }
@@ -69,21 +69,21 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfiguration, algoConfiguration), modelCatalog, username.username());
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfiguration, algoConfiguration), modelCatalog(), username.username());
 
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
     public ValidationConfiguration<GraphSageWriteConfig> validationConfig() {
-        return GraphSageCompanion.getValidationConfig(modelCatalog, username());
+        return GraphSageCompanion.getValidationConfig(modelCatalog(), username());
     }
 
     @Override
     public AlgorithmSpec<GraphSage, GraphSage.GraphSageResult, GraphSageWriteConfig, Stream<GraphSageWriteResult>, AlgorithmFactory<?, GraphSage, GraphSageWriteConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 
@@ -94,7 +94,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
 
     @Override
     public GraphAlgorithmFactory<GraphSage, GraphSageWriteConfig> algorithmFactory() {
-        return new GraphSageAlgorithmFactory<>(modelCatalog);
+        return new GraphSageAlgorithmFactory<>(modelCatalog());
     }
 
     @Override

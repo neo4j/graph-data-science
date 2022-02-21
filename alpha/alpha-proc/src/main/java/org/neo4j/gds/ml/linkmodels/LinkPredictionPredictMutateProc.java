@@ -84,7 +84,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
     public AlgorithmSpec<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, LinkPredictionPredict, LinkPredictionPredictMutateConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 
@@ -95,7 +95,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
 
     @Override
     public GraphAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictMutateConfig> algorithmFactory() {
-        return new LinkPredictionPredictFactory<>(modelCatalog);
+        return new LinkPredictionPredictFactory<>(modelCatalog());
     }
 
     @Override

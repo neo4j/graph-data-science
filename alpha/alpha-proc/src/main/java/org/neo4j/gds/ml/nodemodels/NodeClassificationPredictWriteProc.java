@@ -101,14 +101,14 @@ public class NodeClassificationPredictWriteProc extends WriteProc<NodeClassifica
 
     @Override
     public ValidationConfiguration<NodeClassificationPredictWriteConfig> validationConfig() {
-        return NodeClassificationCompanion.getValidationConfig(modelCatalog);
+        return NodeClassificationCompanion.getValidationConfig(modelCatalog());
     }
 
     @Override
     public AlgorithmSpec<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig, Stream<Result>, AlgorithmFactory<?, NodeClassificationPredict, NodeClassificationPredictWriteConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 
@@ -119,7 +119,7 @@ public class NodeClassificationPredictWriteProc extends WriteProc<NodeClassifica
 
     @Override
     public GraphAlgorithmFactory<NodeClassificationPredict, NodeClassificationPredictWriteConfig> algorithmFactory() {
-        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
+        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog());
     }
 
     @Override

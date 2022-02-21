@@ -52,7 +52,7 @@ public class LinkPredictionPipelineCreateProc extends BaseProc {
             new LinkPredictionPipeline()
         );
 
-        modelCatalog.set(model);
+        modelCatalog().set(model);
 
         return Stream.of(new PipelineInfoResult(pipelineName, model.customInfo()));
     }

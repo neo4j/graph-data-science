@@ -129,14 +129,14 @@ public class NodeClassificationPipelineStreamProc
     @Override
     public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig> algorithmFactory()
     {
-        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog);
+        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog());
     }
 
     @Override
     public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationResult, NodeClassificationPredictPipelineStreamConfig, Stream<NodeClassificationStreamResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 }

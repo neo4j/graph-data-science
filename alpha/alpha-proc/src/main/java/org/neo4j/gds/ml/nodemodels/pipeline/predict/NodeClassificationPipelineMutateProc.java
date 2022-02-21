@@ -87,7 +87,7 @@ public class NodeClassificationPipelineMutateProc
     public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationResult, NodeClassificationPredictPipelineMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 
@@ -138,7 +138,7 @@ public class NodeClassificationPipelineMutateProc
 
     @Override
     public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig> algorithmFactory() {
-        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog);
+        return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog());
     }
 
     @SuppressWarnings("unused")

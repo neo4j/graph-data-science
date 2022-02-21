@@ -21,7 +21,6 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.Username;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -64,7 +63,6 @@ public final class ProcedureRunner {
         proc.taskRegistryFactory = taskRegistryFactory;
         proc.userLogRegistryFactory = userLogRegistryFactory;
         proc.username = username;
-        proc.modelCatalog = GraphDatabaseApiProxy.resolveDependency(proc.api, ModelCatalog.class);
 
         return proc;
     }

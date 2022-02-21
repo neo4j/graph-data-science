@@ -55,7 +55,7 @@ public abstract class TrainProc<
     @Override
     public ComputationResultConsumer<ALGO, ALGO_RESULT, TRAIN_CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            modelCatalog.set(extractModel(computationResult.result()));
+            modelCatalog().set(extractModel(computationResult.result()));
             return Stream.of(constructProcResult(computationResult));
         };
     }
@@ -70,7 +70,7 @@ public abstract class TrainProc<
             @Override
             public List<BeforeLoadValidation<TRAIN_CONFIG>> beforeLoadValidations() {
                 return List.of(
-                   new TrainingConfigValidation<>(modelCatalog, username(), modelType())
+                   new TrainingConfigValidation<>(modelCatalog(), username(), modelType())
                 );
             }
         };
@@ -80,7 +80,7 @@ public abstract class TrainProc<
     public AlgorithmSpec<ALGO, ALGO_RESULT, TRAIN_CONFIG, Stream<PROC_RESULT>, AlgorithmFactory<?, ALGO, TRAIN_CONFIG>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 

@@ -61,7 +61,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     ) {
         injectRelationshipWeightPropertyFromModel(
             getActualConfig(graphName, configuration),
-            modelCatalog,
+            modelCatalog(),
             username.username()
         );
 
@@ -80,7 +80,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     ) {
         injectRelationshipWeightPropertyFromModel(
             getActualConfig(graphNameOrConfiguration, algoConfiguration),
-            modelCatalog,
+            modelCatalog(),
             username.username()
         );
 
@@ -102,7 +102,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
 
     @Override
     public ValidationConfiguration<GraphSageMutateConfig> validationConfig() {
-        return GraphSageCompanion.getValidationConfig(modelCatalog, username());
+        return GraphSageCompanion.getValidationConfig(modelCatalog(), username());
     }
 
     @Override
@@ -112,14 +112,14 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
 
     @Override
     public GraphAlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
-        return new GraphSageAlgorithmFactory<>(modelCatalog);
+        return new GraphSageAlgorithmFactory<>(modelCatalog());
     }
 
     @Override
     public AlgorithmSpec<GraphSage, GraphSage.GraphSageResult, GraphSageMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, GraphSage, GraphSageMutateConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 

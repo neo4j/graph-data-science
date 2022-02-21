@@ -36,7 +36,7 @@ public class NodeClassificationPipelineConfigureSplitProc extends BaseProc {
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.configureSplit", mode = READ)
     @Description("Configures the split of the node classification pipeline.")
     public Stream<PipelineInfoResult> configureSplit(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
-        var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(modelCatalog, pipelineName, username());
+        var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(modelCatalog(), pipelineName, username());
 
         var cypherConfig = CypherMapWrapper.create(configMap);
         var config = NodeClassificationSplitConfig.of(cypherConfig);

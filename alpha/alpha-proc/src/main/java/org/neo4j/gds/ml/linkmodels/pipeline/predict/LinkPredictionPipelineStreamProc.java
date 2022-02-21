@@ -69,7 +69,7 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
 
     @Override
     public GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineStreamConfig> algorithmFactory() {
-        return new LinkPredictionPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog);
+        return new LinkPredictionPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog());
     }
 
     @Override
@@ -95,7 +95,7 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     public AlgorithmSpec<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig, Stream<Result>, AlgorithmFactory<?, LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineStreamConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 

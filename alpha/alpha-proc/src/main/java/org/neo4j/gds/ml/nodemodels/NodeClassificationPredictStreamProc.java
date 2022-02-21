@@ -104,14 +104,14 @@ public class NodeClassificationPredictStreamProc extends StreamProc<NodeClassifi
 
     @Override
     public ValidationConfiguration<NodeClassificationStreamConfig> validationConfig() {
-        return NodeClassificationCompanion.getValidationConfig(modelCatalog);
+        return NodeClassificationCompanion.getValidationConfig(modelCatalog());
     }
 
     @Override
     public AlgorithmSpec<NodeClassificationPredict, NodeClassificationResult, NodeClassificationStreamConfig, Stream<NodeClassificationStreamResult>, AlgorithmFactory<?, NodeClassificationPredict, NodeClassificationStreamConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 
@@ -123,7 +123,7 @@ public class NodeClassificationPredictStreamProc extends StreamProc<NodeClassifi
 
     @Override
     public GraphAlgorithmFactory<NodeClassificationPredict, NodeClassificationStreamConfig> algorithmFactory() {
-        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
+        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog());
     }
 
     @Override

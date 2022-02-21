@@ -73,7 +73,7 @@ public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsPr
     public AlgorithmSpec<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictWriteConfig, Stream<StandardWriteRelationshipsResult>, AlgorithmFactory<?, LinkPredictionPredict, LinkPredictionPredictWriteConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 
@@ -84,7 +84,7 @@ public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsPr
 
     @Override
     public GraphAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictWriteConfig> algorithmFactory() {
-        return new LinkPredictionPredictFactory<>(modelCatalog);
+        return new LinkPredictionPredictFactory<>(modelCatalog());
     }
 
     @Override

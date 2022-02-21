@@ -47,7 +47,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         @Name("procedureName") String taskName,
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
-        var pipeline = getLPPipeline(modelCatalog, pipelineName, username());
+        var pipeline = getLPPipeline(modelCatalog(), pipelineName, username());
         validateRelationshipProperty(pipeline, procedureConfig);
 
         pipeline.addNodePropertyStep(createNodePropertyStep(executionContext().username(), taskName, procedureConfig));
@@ -62,7 +62,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         @Name("featureType") String featureType,
         @Name("configuration") Map<String, Object> config
     ) {
-        var pipeline = getLPPipeline(modelCatalog, pipelineName, username());
+        var pipeline = getLPPipeline(modelCatalog(), pipelineName, username());
 
         var parsedConfig = new LinkFeatureStepConfigurationImpl(CypherMapWrapper.create(config));
 

@@ -73,7 +73,7 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     public AlgorithmSpec<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictStreamConfig, Stream<Result>, AlgorithmFactory<?, LinkPredictionPredict, LinkPredictionPredictStreamConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
-        this.modelCatalog = modelCatalog;
+        this.setModelCatalog(modelCatalog);
         return this;
     }
 
@@ -84,7 +84,7 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
 
     @Override
     public GraphAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictStreamConfig> algorithmFactory() {
-        return new LinkPredictionPredictFactory<>(modelCatalog);
+        return new LinkPredictionPredictFactory<>(modelCatalog());
     }
 
     @Override
