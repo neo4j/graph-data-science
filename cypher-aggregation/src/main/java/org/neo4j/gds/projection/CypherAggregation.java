@@ -170,6 +170,23 @@ public final class CypherAggregation extends BaseProc {
             RelationshipType relationshipType = null;
 
             if (relationshipConfig != null) {
+                if (this.relationshipPropertySchemas == null) {
+                    this.relationshipPropertySchemas = new ArrayList<>();
+
+                    // We need to do this before extracting the `relationshipProperties`, because
+                    // we remove the original entry from the map during converting; also we remove null keys
+                    // so we could not create a schema entry for properties that are absent on the current relationship
+                    var relationshipPropertyKeys = relationshipConfig.get("properties");
+                    if (relationshipPropertyKeys instanceof Map) {
+                        for (var propertyKey : ((Map<?, ?>) relationshipPropertyKeys).keySet()) {
+                            this.relationshipPropertySchemas.add(RelationshipPropertySchema.of(
+                                String.valueOf(propertyKey),
+                                ValueType.DOUBLE
+                            ));
+                        }
+                    }
+                }
+
                 relationshipProperties = propertiesConfig("properties", relationshipConfig);
                 relationshipType = typeConfig("relationshipType", relationshipConfig);
 
@@ -178,22 +195,6 @@ public final class CypherAggregation extends BaseProc {
                         "properties",
                         "relationshipType"
                     ));
-                }
-
-                if (this.relationshipPropertySchemas == null) {
-                    this.relationshipPropertySchemas = new ArrayList<>();
-
-                    // Cannot use `relationshipProperties` as that one is missing the keys for missing (i.e. null) properties
-                    // cast is safe because the propertiesConfig above does a type validation
-                    var relationshipPropertyKeys = ((Map<?, ?>) relationshipConfig.get("properties"));
-                    if (relationshipPropertyKeys != null) {
-                        for (var propertyKey : relationshipPropertyKeys.keySet()) {
-                            this.relationshipPropertySchemas.add(RelationshipPropertySchema.of(
-                                String.valueOf(propertyKey),
-                                ValueType.DOUBLE
-                            ));
-                        }
-                    }
                 }
             }
 
