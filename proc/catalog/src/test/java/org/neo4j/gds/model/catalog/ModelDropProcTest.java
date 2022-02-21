@@ -27,6 +27,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
@@ -94,5 +95,10 @@ class ModelDropProcTest extends ModelProcBaseTest {
             map("modelName", modelName),
             formatWithLocale("Model with name `%s` does not exist.", modelName)
         );
+    }
+
+    @Test
+    void failSilentlyOnDroppingNonExistingModel() {
+        assertCypherResult("CALL gds.beta.model.drop('foo', false)", List.of());
     }
 }

@@ -12,7 +12,7 @@ If we no longer need a trained model and want to free up memory, we can remove t
 .Remove a model from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.model.drop(modelName: String)
+CALL gds.beta.model.drop(modelName: String, failIfMissing: Boolean)
 YIELD
     modelInfo: Map,
     trainConfig: Map,
@@ -26,8 +26,9 @@ YIELD
 .Parameters
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name          | Type   | Default | Optional | Description
-| modelName     | String | n/a     | no       | The name of a model stored in the catalog.
+| Name          | Type      | Default | Optional | Description
+| modelName     | String    | n/a     | no       | The name of a model stored in the catalog.
+| failIfMissing | Boolean   | true    | yes      | By default, the library will raise an error when trying to remove a non-existing model. When set to `false`, the procedure returns an empty result.
 |===
 
 include::shared/model-info-result.adoc[]

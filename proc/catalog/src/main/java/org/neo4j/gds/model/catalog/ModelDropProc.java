@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.model.catalog;
 
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -38,11 +39,20 @@ public class ModelDropProc extends ModelCatalogProc {
 
     @Procedure(name = "gds.beta.model.drop", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<ModelCatalogResult> drop(@Name(value = "modelName") String modelName) {
+    public Stream<ModelCatalogResult> drop(
+        @Name(value = "modelName") String modelName,
+        @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
+    ) {
         validateModelName(modelName);
 
-        var model = modelCatalog.dropOrThrow(username(), modelName);
+        Model<?, ?, ?> model;
 
-        return Stream.of(new ModelCatalogResult(model));
+        if (failIfMissing) {
+            model = modelCatalog.dropOrThrow(username(), modelName);
+        } else {
+            model = modelCatalog.drop(username(), modelName);
+        }
+
+        return Stream.ofNullable(model).map(ModelCatalogResult::new);
     }
 }
