@@ -31,6 +31,7 @@ import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -41,6 +42,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -94,7 +96,13 @@ class ClosenessCentralityProcTest extends BaseProcTest {
             .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
             .close();
 
-        registerProcedures(ClosenessCentralityWriteProc.class, ClosenessCentralityStreamProc.class, GraphProjectProc.class);
+        registerProcedures(
+            ClosenessCentralityWriteProc.class,
+            ClosenessCentralityStreamProc.class,
+            ClosenessCentralityMutateProc.class,
+            GraphStreamNodePropertiesProc.class,
+            GraphProjectProc.class
+        );
     }
 
     @Test
@@ -128,15 +136,52 @@ class ClosenessCentralityProcTest extends BaseProcTest {
             assertEquals(1.0, (Double) centralityDistribution.get("max"), 1e-2);
         });
 
-        runQueryWithRowConsumer("MATCH (n) WHERE exists(n.centrality) RETURN id(n) AS id, n.centrality AS centrality", row -> {
-            consumer.accept(
-                row.getNumber("id").longValue(),
-                row.getNumber("centrality").doubleValue()
-            );
-        });
+        runQueryWithRowConsumer(
+            "MATCH (n) WHERE exists(n.centrality) RETURN id(n) AS id, n.centrality AS centrality",
+            row -> {
+                consumer.accept(
+                    row.getNumber("id").longValue(),
+                    row.getNumber("centrality").doubleValue()
+                );
+            }
+        );
 
         verifyMock();
     }
+
+    @Test
+    void testClosenessMutate() {
+        String query = gdsCypher()
+            .mutateMode()
+            .yields();
+
+        runQueryWithRowConsumer(query, row -> {
+            assertNotEquals(-1L, row.getNumber("mutateMillis"));
+            assertNotEquals(-1L, row.getNumber("preProcessingMillis"));
+            assertNotEquals(-1L, row.getNumber("computeMillis"));
+            assertNotEquals(-1L, row.getNumber("nodes"));
+            Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
+            assertNotNull(centralityDistribution);
+            assertEquals(1.0, (Double) centralityDistribution.get("max"), 1e-2);
+        });
+
+        assertCypherResult(
+            "MATCH (n) WHERE exists(n.centrality) RETURN count(n) AS count ", List.of(Map.of("count", 0L)));
+
+        String mutateTestQuery = "CALL gds.graph.streamNodeProperties('graph',['centrality']) YIELD nodeId, propertyValue";
+        runQueryWithRowConsumer(
+            mutateTestQuery,
+            row -> {
+                consumer.accept(
+                    row.getNumber("nodeId").longValue(),
+                    row.getNumber("propertyValue").doubleValue()
+                );
+            }
+        );
+
+        verifyMock();
+    }
+
 
     @Test
     void testProgressTracking() {
