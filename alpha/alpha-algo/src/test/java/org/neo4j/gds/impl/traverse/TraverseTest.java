@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,9 +37,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
 
 /**
@@ -271,15 +272,20 @@ class TraverseTest {
         List<AtomicLong> progresses = progressTracker.getProgresses();
         assertEquals(1, progresses.size());
         assertEquals(naturalGraph.relationshipCount(), progresses.get(0).get());
+        var messagesInOrder = testLog.getMessages(INFO);
 
-        assertTrue(testLog.containsMessage(TestLog.INFO, ":: Start"));
-        assertTrue(testLog.containsMessage(TestLog.INFO, "BFS 25%"));  //a-> b,a->c | 2 = 2/8 = 0.25
-        assertTrue(testLog.containsMessage(TestLog.INFO, "BFS 37%"));  //b-> d      |+1 = 3/8 = 0.375
-        assertTrue(testLog.containsMessage(TestLog.INFO, "BFS 50%"));  //c-> d      |+1 = 4/8 = 0.5
-        assertTrue(testLog.containsMessage(TestLog.INFO, "BFS 75%"));  //d-> e,d->f |+2 = 6/8 = 0.75
-        assertTrue(testLog.containsMessage(TestLog.INFO, "BFS 87%"));  //e->g       |+1 = 7/8 = 0.87
-        assertTrue(testLog.containsMessage(TestLog.INFO, "BFS 100%")); //f->g       |+1 = 8/8 = 1.00
-        assertTrue(testLog.containsMessage(TestLog.INFO, ":: Finished"));
+        assertThat(messagesInOrder)
+            .extracting(removingThreadId())
+            .containsSequence(
+                "BFS :: Start",
+                "BFS 25%",  //a-> b,a->c | 2 = 2/8 = 0.25
+                "BFS 37%",  //b-> d      |+1 = 3/8 = 0.375
+                "BFS 50%",  //c-> d      |+1 = 4/8 = 0.5
+                "BFS 75%",  //d-> e,d->f |+2 = 6/8 = 0.75
+                "BFS 87%",  //e->g       |+1 = 7/8 = 0.87
+                "BFS 100%", //f->g       |+1 = 8/8 = 1.00
+                "BFS :: Finished"
+            );
 
 
     }
