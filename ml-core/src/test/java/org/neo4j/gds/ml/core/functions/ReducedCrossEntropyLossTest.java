@@ -48,7 +48,7 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
         var predictions = new ReducedSoftmax(new MatrixMultiplyWithTransposedSecondOperand(features, weights));
         var labels = Constant.vector(new double[]{1.0, 0.0, 2.0});
 
-        var loss = new ReducedCrossEntropyLoss(weights, predictions, features, labels, Optional.empty());
+        var loss = new ReducedCrossEntropyLoss(predictions, weights, Optional.empty(), features, labels);
         var ctx = new ComputationContext();
 
         double lossValue = ctx.forward(loss).value();
@@ -74,7 +74,7 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
         var predictions = new ReducedSoftmax(new MatrixMultiplyWithTransposedSecondOperand(features, weights));
         var labels = Constant.vector(new double[]{1.0, 0.0, 2.0});
 
-        var loss = new ReducedCrossEntropyLoss(weights, predictions, features, labels, Optional.empty());
+        var loss = new ReducedCrossEntropyLoss(predictions, weights, Optional.empty(), features, labels);
 
         finiteDifferenceShouldApproximateGradient(weights, loss);
     }
@@ -95,7 +95,7 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
         var predictions = new ReducedSoftmax(affineVariable);
         var labels = Constant.vector(new double[]{1.0, 0.0, 2.0});
 
-        var loss = new ReducedCrossEntropyLoss(weights, predictions, features, labels, Optional.of(bias));
+        var loss = new ReducedCrossEntropyLoss(predictions, weights, Optional.of(bias), features, labels);
 
         finiteDifferenceShouldApproximateGradient(List.of(weights, bias), loss);
     }
