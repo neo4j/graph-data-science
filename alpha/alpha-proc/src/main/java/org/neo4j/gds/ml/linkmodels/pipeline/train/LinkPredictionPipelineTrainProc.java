@@ -56,8 +56,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> config
     ) {
-        // TODO: this will go away once node property steps do not rely on this method
-        config.put("graphName", graphName);
+        PipelineCompanion.prepareTrainConfig(graphName, config);
         return trainAndStoreModelWithResult(compute(graphName, config));
     }
 
@@ -78,7 +77,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
 
     @Override
     public GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory() {
-        return new LinkPredictionTrainPipelineAlgorithmFactory(executionContext(), modelCatalog);
+        return new LinkPredictionTrainPipelineAlgorithmFactory(executionContext(), modelCatalog());
     }
 
     @Override
