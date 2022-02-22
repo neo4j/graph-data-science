@@ -231,7 +231,8 @@ include::../algorithms/algorithm-tiers.adoc[]
 .2+<.^|<<algorithms-bfs, Breadth First Search>>
 | `gds.alpha.bfs.stream`
 | `gds.alpha.bfs.stream.estimate`
-.4+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
+.5+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
+| `gds.alpha.closeness.mutate`
 | `gds.alpha.closeness.stream`
 | `gds.alpha.closeness.write`
 | `gds.alpha.closeness.harmonic.stream`
