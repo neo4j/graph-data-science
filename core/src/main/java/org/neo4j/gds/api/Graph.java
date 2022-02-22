@@ -75,5 +75,10 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
     @Override
     Graph concurrentCopy();
 
+    /**
+     * If this graph is created using a node label filter, this will return a NodeFilteredGraph that represents the node set used in this graph.
+     * Be aware that it is not guaranteed to contain all relationships of the graph.
+     * Otherwise, it will return an empty Optional.
+     */
     Optional<NodeFilteredGraph> asNodeFilteredGraph();
 }
