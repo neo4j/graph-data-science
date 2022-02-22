@@ -44,6 +44,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -195,7 +196,9 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             var predictedLinks = predictionResult.stream().collect(Collectors.toList());
             assertThat(predictedLinks).hasSize(5);
 
-            assertThat(predictedLinks).containsAll(expectedLinks);
+            assertThat(predictedLinks)
+                .usingElementComparator(compareWithPrecision(1e-10))
+                .containsAll(expectedLinks);
         }
     }
 
@@ -256,5 +259,16 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
         assertThat(actualEstimate.memoryUsage().toString()).isEqualTo("[23 KiB ... 42 KiB]");
+    }
+
+    private Comparator<PredictedLink> compareWithPrecision(double precision) {
+        return (o1, o2) -> {
+            boolean sourceEq = o1.sourceId() == o2.sourceId();
+            boolean targetEq = o1.targetId() == o2.targetId();
+            boolean probEq = Math.abs(o1.probability() - o2.probability()) < precision;
+            if (sourceEq && targetEq && probEq) {
+                return 0;
+            } else return -1;
+        };
     }
 }
