@@ -356,7 +356,7 @@ class GraphStoreTest extends BaseTest {
             ),
             Arguments.of(
                 "filterNodesMultipleRelationships",
-                List.of(RelationshipType.of("T1") , RelationshipType.of("T2")),
+                List.of(RelationshipType.of("T1"), RelationshipType.of("T2")),
                 singletonList(NodeLabel.of("B")),
                 true
             ),
@@ -368,7 +368,7 @@ class GraphStoreTest extends BaseTest {
             ),
             Arguments.of(
                 "doNotfilterNodesMultipleRelationships",
-                List.of(RelationshipType.of("T1") , RelationshipType.of("T2")),
+                List.of(RelationshipType.of("T1"), RelationshipType.of("T2")),
                 List.of(NodeLabel.of("A"), NodeLabel.of("B")),
                 false
             )
