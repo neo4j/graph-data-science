@@ -367,9 +367,9 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         LinkPredictionPipeline pipeline,
         LinkPredictionTrainConfig trainConfig
     ) {
-        // This estimation assumes the given graph dimensions used to compute the MemoryTree to contain the expected set
-        // sizes for the test and train relationshipTypes. That is, the graph dimension input needs to have the test and
-        // train relationship types as well as their relationship counts.
+        // For the computation of the MemoryTree, this estimation assumes the given input graph dimensions to contain
+        // the expected set sizes for the test and train relationshipTypes. That is, the graph dimensions input needs to
+        // have the test and train relationship types as well as their relationship counts.
 
         var splitConfig = pipeline.splitConfig();
 
