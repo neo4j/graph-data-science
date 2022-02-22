@@ -43,6 +43,11 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ClosenessCentralityMutateProc extends MutatePropertyProc<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityMutateProc.MutateResult, ClosenessCentralityMutateConfig> {
 
+    @Override
+    public String name() {
+        return "ClosenessCentrality";
+    }
+
     @Procedure(value = "gds.alpha.closeness.mutate", mode = READ)
     @Description(ClosenessCentralityProc.DESCRIPTION)
     public Stream<MutateResult> mutate(
