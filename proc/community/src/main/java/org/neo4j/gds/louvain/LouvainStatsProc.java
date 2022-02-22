@@ -22,7 +22,6 @@ package org.neo4j.gds.louvain;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -71,7 +70,7 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
         ExecutionContext executionContext
     ) {
         return LouvainProc.resultBuilder(
-            new StatsResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
+            new StatsResult.Builder(callContext, computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -116,8 +115,8 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
 
         static class Builder extends LouvainProc.LouvainResultBuilder<StatsResult> {
 
-            Builder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
-                super(context, concurrency, allocationTracker);
+            Builder(ProcedureCallContext context, int concurrency) {
+                super(context, concurrency);
             }
 
             @Override

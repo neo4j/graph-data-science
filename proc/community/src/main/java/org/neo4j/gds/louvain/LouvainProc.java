@@ -22,7 +22,6 @@ package org.neo4j.gds.louvain;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -37,8 +36,7 @@ final class LouvainProc {
 
     static <CONFIG extends LouvainBaseConfig> NodeProperties nodeProperties(
         ComputationResult<Louvain, Louvain, CONFIG> computationResult,
-        String resultProperty,
-        AllocationTracker allocationTracker
+        String resultProperty
     ) {
         var config = computationResult.config();
         var includeIntermediateCommunities = config.includeIntermediateCommunities();
@@ -48,8 +46,7 @@ final class LouvainProc {
                 computationResult.config(),
                 resultProperty,
                 computationResult.result().finalDendrogram().asNodeProperties(),
-                () -> computationResult.graphStore().nodeProperty(config.seedProperty()),
-                allocationTracker
+                () -> computationResult.graphStore().nodeProperty(config.seedProperty())
             );
         } else {
             var size = computationResult.graph().nodeCount();
@@ -91,10 +88,9 @@ final class LouvainProc {
 
         LouvainResultBuilder(
             ProcedureCallContext context,
-            int concurrency,
-            AllocationTracker allocationTracker
+            int concurrency
         ) {
-            super(context, concurrency, allocationTracker);
+            super(context, concurrency);
         }
 
         LouvainResultBuilder<PROC_RESULT> withLevels(long levels) {

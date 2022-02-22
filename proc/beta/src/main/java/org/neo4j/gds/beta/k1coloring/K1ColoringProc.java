@@ -20,7 +20,6 @@
 package org.neo4j.gds.beta.k1coloring;
 
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
@@ -58,10 +57,9 @@ final class K1ColoringProc {
 
         K1ColoringResultBuilder(
             ProcedureCallContext callContext,
-            int concurrency,
-            AllocationTracker allocationTracker
+            int concurrency
         ) {
-            super(callContext, concurrency, allocationTracker);
+            super(callContext, concurrency);
         }
 
         K1ColoringResultBuilder<PROC_RESULT> withColorCount(long colorCount) {

@@ -23,7 +23,6 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -76,8 +75,7 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
     protected NodeProperties nodeProperties(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig> computationResult) {
         return LabelPropagationProc.nodeProperties(
             computationResult,
-            computationResult.config().mutateProperty(),
-            allocationTracker()
+            computationResult.config().mutateProperty()
         );
     }
 
@@ -87,7 +85,7 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
         ExecutionContext executionContext
     ) {
         return LabelPropagationProc.resultBuilder(
-            new MutateResult.Builder(executionContext.callContext(), computeResult.config().concurrency(), allocationTracker()),
+            new MutateResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -126,8 +124,8 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
 
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<MutateResult> {
 
-            Builder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
-                super(context, concurrency, allocationTracker);
+            Builder(ProcedureCallContext context, int concurrency) {
+                super(context, concurrency);
             }
 
             @Override

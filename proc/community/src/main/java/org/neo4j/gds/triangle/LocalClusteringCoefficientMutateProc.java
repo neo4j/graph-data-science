@@ -23,7 +23,6 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -93,8 +92,7 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
         return LocalClusteringCoefficientCompanion.resultBuilder(
             new LocalClusteringCoefficientMutateBuilder(
                 executionContext.callContext(),
-                computeResult.config().concurrency(),
-                executionContext.allocationTracker()
+                computeResult.config().concurrency()
             ),
             computeResult
         );
@@ -131,10 +129,9 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
 
         LocalClusteringCoefficientMutateBuilder(
             ProcedureCallContext callContext,
-            int concurrency,
-            AllocationTracker allocationTracker
+            int concurrency
         ) {
-            super(callContext, concurrency, allocationTracker);
+            super(callContext, concurrency);
         }
 
         @Override

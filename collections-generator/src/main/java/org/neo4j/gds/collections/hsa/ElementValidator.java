@@ -34,7 +34,6 @@ import static org.neo4j.gds.collections.ValidatorUtils.doesNotThrow;
 import static org.neo4j.gds.collections.ValidatorUtils.hasNoParameters;
 import static org.neo4j.gds.collections.ValidatorUtils.hasParameterCount;
 import static org.neo4j.gds.collections.ValidatorUtils.hasSingleLongParameter;
-import static org.neo4j.gds.collections.ValidatorUtils.hasTypeAtIndex;
 import static org.neo4j.gds.collections.ValidatorUtils.hasTypeKindAtIndex;
 import static org.neo4j.gds.collections.ValidatorUtils.isAbstract;
 import static org.neo4j.gds.collections.ValidatorUtils.isNotGeneric;
@@ -46,7 +45,6 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
     private final Types typeUtils;
     private final Messager messager;
     private final BuilderValidator validator;
-    private final TypeMirror longConsumerType;
     private final TypeMirror drainingIteratorType;
 
     private TypeElement builderType;
@@ -54,14 +52,12 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
     ElementValidator(
         Types typeUtils,
         TypeMirror rootType,
-        TypeMirror longConsumerType,
         TypeMirror drainingIteratorType,
         boolean isArrayType,
         Messager messager
     ) {
         super(false);
         this.typeUtils = typeUtils;
-        this.longConsumerType = longConsumerType;
         this.drainingIteratorType = drainingIteratorType;
         this.messager = messager;
         this.validator = new BuilderValidator(rootType, isArrayType, messager);
@@ -97,14 +93,14 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                 return validateDrainingIterator(e, elementType);
             case "builder":
                 switch (e.getParameters().size()) {
-                    case 2:
+                    case 1:
                         return validateBuilderMethod(e, elementType);
-                    case 3:
+                    case 2:
                         return validateBuilderWithInitialCapacityMethod(e, elementType);
                     default:
                         messager.printMessage(
                             Diagnostic.Kind.ERROR,
-                            "method has wrong number of parameters, expected one of " + List.of(2, 3),
+                            "method has wrong number of parameters, expected one of " + List.of(1, 2),
                             e
                         );
                 }
@@ -155,17 +151,15 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
     private boolean validateBuilderMethod(ExecutableElement e, TypeMirror elementType) {
         return doesNotThrow(e, messager)
                && isStatic(e, messager)
-               && hasParameterCount(e, 2, messager)
-               && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
-               && hasTypeAtIndex(typeUtils, e, 1, longConsumerType, messager);
+               && hasParameterCount(e, 1, messager)
+               && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager);
     }
 
     private boolean validateBuilderWithInitialCapacityMethod(ExecutableElement e, TypeMirror elementType) {
         return doesNotThrow(e, messager)
                && isStatic(e, messager)
-               && hasParameterCount(e, 3, messager)
+               && hasParameterCount(e, 2, messager)
                && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
-               && hasTypeKindAtIndex(e, 1, TypeKind.LONG, messager)
-               && hasTypeAtIndex(typeUtils, e, 2, longConsumerType, messager);
+               && hasTypeKindAtIndex(e, 1, TypeKind.LONG, messager);
     }
 }

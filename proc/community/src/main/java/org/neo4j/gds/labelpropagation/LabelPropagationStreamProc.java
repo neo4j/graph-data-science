@@ -79,8 +79,7 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
     protected NodeProperties nodeProperties(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult) {
         return LabelPropagationProc.nodeProperties(
             computationResult,
-            UUID.randomUUID().toString(),
-            allocationTracker()
+            UUID.randomUUID().toString()
         );
     }
 

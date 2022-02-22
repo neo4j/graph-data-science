@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.collections;
 
-import java.util.function.LongConsumer;
-
 /**
  * A long-indexable version of a primitive double array ({@code double[]}) that
  * can contain more than 2bn. elements.
@@ -61,8 +59,8 @@ public interface HugeSparseDoubleArray {
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static HugeSparseDoubleArray.Builder builder(double defaultValue, LongConsumer trackAllocation) {
-        return builder(defaultValue, 0, trackAllocation);
+    static HugeSparseDoubleArray.Builder builder(double defaultValue) {
+        return builder(defaultValue, 0);
     }
 
     /**
@@ -70,10 +68,9 @@ public interface HugeSparseDoubleArray {
      */
     static HugeSparseDoubleArray.Builder builder(
         double defaultValue,
-        long initialCapacity,
-        LongConsumer trackAllocation
+        long initialCapacity
     ) {
-        return new HugeSparseDoubleArraySon.GrowingBuilder(defaultValue, initialCapacity, trackAllocation);
+        return new HugeSparseDoubleArraySon.GrowingBuilder(defaultValue, initialCapacity);
     }
 
     interface Builder {

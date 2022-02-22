@@ -64,8 +64,7 @@ public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccM
                 computationResult.config().mutateProperty(),
                 WccProc.nodeProperties(
                     computationResult,
-                    computationResult.config().mutateProperty(),
-                    allocationTracker
+                    computationResult.config().mutateProperty()
                 )
             )
         );

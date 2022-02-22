@@ -239,7 +239,6 @@ final class NodesFilter {
             case FLOAT_ARRAY:
                 var floatArrayNodePropertiesBuilder = new FloatArrayNodePropertiesBuilder(
                     DefaultValue.forFloatArray(),
-                    allocationTracker,
                     concurrency
                 );
 
@@ -254,7 +253,6 @@ final class NodesFilter {
             case LONG_ARRAY:
                 var longArrayNodePropertiesBuilder = new LongArrayNodePropertiesBuilder(
                     DefaultValue.forFloatArray(),
-                    allocationTracker,
                     concurrency
                 );
 

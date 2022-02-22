@@ -72,8 +72,8 @@ public final class HugeIdMapBuilder implements IdMapBuilder {
     ) {
         adders.close();
         return checkDuplicateIds
-            ? HugeIdMapBuilderOps.buildChecked(this.array(), this.size(), labelInformationBuilder, highestNodeId, concurrency, allocationTracker)
-            : HugeIdMapBuilderOps.build(this.array(), this.size(), labelInformationBuilder, highestNodeId, concurrency, allocationTracker);
+            ? HugeIdMapBuilderOps.buildChecked(this.array(), this.size(), labelInformationBuilder, highestNodeId, concurrency)
+            : HugeIdMapBuilderOps.build(this.array(), this.size(), labelInformationBuilder, highestNodeId, concurrency);
     }
 
     public HugeLongArray array() {

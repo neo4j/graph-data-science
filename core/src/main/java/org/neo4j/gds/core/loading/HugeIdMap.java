@@ -27,7 +27,6 @@ import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -64,7 +63,6 @@ public class HugeIdMap implements IdMap {
 
     private final long nodeCount;
     private final long highestNeoId;
-    private final AllocationTracker allocationTracker;
 
     private final LabelInformation labelInformation;
 
@@ -83,15 +81,13 @@ public class HugeIdMap implements IdMap {
         HugeSparseLongArray nodeToGraphIds,
         LabelInformation labelInformation,
         long nodeCount,
-        long highestNeoId,
-        AllocationTracker allocationTracker
+        long highestNeoId
     ) {
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
         this.labelInformation = labelInformation;
         this.nodeCount = nodeCount;
         this.highestNeoId = highestNeoId;
-        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -202,8 +198,7 @@ public class HugeIdMap implements IdMap {
             newNodeCount,
             nodeToGraphIds.capacity(),
             concurrency,
-            HugeIdMapBuilderOps.add(newGraphIds),
-            allocationTracker
+            HugeIdMapBuilderOps.add(newGraphIds)
         );
 
         LabelInformation newLabelInformation = labelInformation.filter(nodeLabels);
@@ -214,8 +209,7 @@ public class HugeIdMap implements IdMap {
             newNodeToGraphIds,
             newLabelInformation,
             newNodeCount,
-            highestNeoId,
-            allocationTracker
+            highestNeoId
         );
     }
 
@@ -229,10 +223,9 @@ public class HugeIdMap implements IdMap {
             HugeSparseLongArray nodeToGraphIds,
             LabelInformation filteredLabelInformation,
             long nodeCount,
-            long highestNeoId,
-            AllocationTracker allocationTracker
+            long highestNeoId
         ) {
-            super(graphIds, nodeToGraphIds, filteredLabelInformation, nodeCount, highestNeoId, allocationTracker);
+            super(graphIds, nodeToGraphIds, filteredLabelInformation, nodeCount, highestNeoId);
             this.rootIdMap = rootIdMap;
         }
 

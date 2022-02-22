@@ -25,7 +25,6 @@ import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
 import org.neo4j.gds.collections.HugeSparseFloatArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
@@ -37,14 +36,15 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
 
     private final HugeSparseFloatArrayArray.Builder builder;
     private final float[] defaultValue;
-    private final AllocationTracker allocationTracker;
     private final int concurrency;
 
-    public FloatArrayNodePropertiesBuilder(DefaultValue defaultValue, AllocationTracker allocationTracker, int concurrency) {
-        this.allocationTracker = allocationTracker;
+    public FloatArrayNodePropertiesBuilder(
+        DefaultValue defaultValue,
+        int concurrency
+    ) {
         this.concurrency = concurrency;
         this.defaultValue = defaultValue.floatArrayValue();
-        this.builder = HugeSparseFloatArrayArray.builder(this.defaultValue, allocationTracker::add);
+        this.builder = HugeSparseFloatArrayArray.builder(this.defaultValue);
     }
 
     public void set(long neoNodeId, float[] value) {
@@ -66,8 +66,7 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseFloatArrayArray.builder(
-            defaultValue,
-            allocationTracker::add
+            defaultValue
         );
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();

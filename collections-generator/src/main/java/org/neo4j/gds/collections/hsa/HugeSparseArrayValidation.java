@@ -35,7 +35,6 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.util.Optional;
-import java.util.function.LongConsumer;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 
@@ -62,13 +61,11 @@ final class HugeSparseArrayValidation implements CollectionStep.Validation<HugeS
         }
 
         var pageShift = (int) getAnnotationValue(annotationMirror, "pageShift").getValue();
-        var longConsumerType = elementUtils.getTypeElement(LongConsumer.class.getName()).asType();
         var drainingIteratorType = elementUtils.getTypeElement("org.neo4j.gds.collections.DrainingIterator").asType();
 
         var elementValidator = new ElementValidator(
             typeUtils,
             element.asType(),
-            longConsumerType,
             drainingIteratorType,
             isArrayType,
             this.messager

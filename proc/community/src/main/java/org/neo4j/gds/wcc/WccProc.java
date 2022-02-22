@@ -23,7 +23,6 @@ import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
@@ -47,8 +46,7 @@ final class WccProc {
 
     static <CONFIG extends WccBaseConfig> NodeProperties nodeProperties(
         ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult,
-        String resultProperty,
-        AllocationTracker allocationTracker
+        String resultProperty
     ) {
         var config = computationResult.config();
 
@@ -56,8 +54,7 @@ final class WccProc {
             config,
             resultProperty,
             computationResult.result().asNodeProperties(),
-            () -> computationResult.graphStore().nodeProperty(config.seedProperty()),
-            allocationTracker
+            () -> computationResult.graphStore().nodeProperty(config.seedProperty())
         );
     }
 }

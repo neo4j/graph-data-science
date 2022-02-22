@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.collections;
 
-import java.util.function.LongConsumer;
-
 /**
  * A long-indexable version of a primitive float array ({@code float[]}) that
  * can contain more than 2bn. elements.
@@ -61,15 +59,15 @@ public interface HugeSparseFloatArray {
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static Builder builder(float defaultValue, LongConsumer trackAllocation) {
-        return new HugeSparseFloatArraySon.GrowingBuilder(defaultValue, 0, trackAllocation);
+    static Builder builder(float defaultValue) {
+        return new HugeSparseFloatArraySon.GrowingBuilder(defaultValue, 0);
     }
 
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static Builder builder(float defaultValue, long initialCapacity, LongConsumer trackAllocation) {
-        return new HugeSparseFloatArraySon.GrowingBuilder(defaultValue, initialCapacity, trackAllocation);
+    static Builder builder(float defaultValue, long initialCapacity) {
+        return new HugeSparseFloatArraySon.GrowingBuilder(defaultValue, initialCapacity);
     }
 
     interface Builder {

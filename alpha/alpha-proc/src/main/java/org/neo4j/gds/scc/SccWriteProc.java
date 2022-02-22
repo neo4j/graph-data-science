@@ -24,7 +24,6 @@ import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
@@ -65,13 +64,11 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
             SccAlgorithm algorithm = computationResult.algorithm();
             HugeLongArray components = computationResult.result();
             SccConfig config = computationResult.config();
-            AllocationTracker allocationTracker = allocationTracker();
             Graph graph = computationResult.graph();
 
             AbstractResultBuilder<SccResult> writeBuilder = new SccResultBuilder(
                 callContext,
-                config.concurrency(),
-                allocationTracker
+                config.concurrency()
             )
                 .buildCommunityCount(true)
                 .buildHistogram(true)
@@ -85,8 +82,6 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
                 graph.release();
                 return Stream.of(writeBuilder.build());
             }
-
-            log.info("Scc: overall memory usage: %s", allocationTracker.getUsageString());
 
             try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
                 var progressTracker = new TaskProgressTracker(
@@ -196,8 +191,8 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
 
     public static final class SccResultBuilder extends AbstractCommunityResultBuilder<SccResult> {
 
-        SccResultBuilder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
-            super(context, concurrency, allocationTracker);
+        SccResultBuilder(ProcedureCallContext context, int concurrency) {
+            super(context, concurrency);
         }
 
         @Override

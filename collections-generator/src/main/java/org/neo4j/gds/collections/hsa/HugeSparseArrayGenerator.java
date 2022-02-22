@@ -39,7 +39,6 @@ import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.LongConsumer;
 
 import static org.neo4j.gds.collections.EqualityUtils.DEFAULT_VALUES;
 import static org.neo4j.gds.collections.EqualityUtils.isEqual;
@@ -100,8 +99,7 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
             valueType,
             pageSize,
             pageShift,
-            pageMask,
-            pageSizeInBytes
+            pageMask
         ));
 
         return builder.build();
@@ -270,8 +268,7 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
             TypeName valueType,
             FieldSpec pageSize,
             FieldSpec pageShift,
-            FieldSpec pageMask,
-            FieldSpec pageSizeInBytes
+            FieldSpec pageMask
         ) {
             var builder = TypeSpec.classBuilder("GrowingBuilder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -281,14 +278,12 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
             var pageLock = newPageLockField();
             var defaultValue = defaultValueField(valueType);
             var pages = pagesField(valueType);
-            var trackAllocation = trackAllocationField();
             var initialCapacitySpec = initialCapacitySpec();
 
             builder.addField(arrayHandle);
             builder.addField(pageLock);
             builder.addField(defaultValue);
             builder.addField(pages);
-            builder.addField(trackAllocation);
 
             builder.addMethod(constructor(
                 valueType,
@@ -296,7 +291,6 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
                 pageShift,
                 pageLock,
                 defaultValue,
-                trackAllocation,
                 initialCapacitySpec
             ));
 
@@ -317,9 +311,7 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
                 pageLock,
                 pages,
                 pageSize,
-                defaultValue,
-                trackAllocation,
-                pageSizeInBytes
+                defaultValue
             ));
 
             return builder.build();
@@ -328,13 +320,6 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
         private static FieldSpec newPageLockField() {
             return FieldSpec
                 .builder(ReentrantLock.class, "newPageLock")
-                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                .build();
-        }
-
-        private static FieldSpec trackAllocationField() {
-            return FieldSpec
-                .builder(LongConsumer.class, "trackAllocation")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .build();
         }
@@ -369,18 +354,15 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
             FieldSpec pageShift,
             FieldSpec pageLock,
             FieldSpec defaultValue,
-            FieldSpec trackAllocation,
             ParameterSpec initialCapacity
         ) {
             return MethodSpec.constructorBuilder()
                 .addParameter(valueType, defaultValue.name)
                 .addParameter(long.class, "initialCapacity")
-                .addParameter(LongConsumer.class, "trackAllocation")
                 .addStatement("int pageCount = $T.pageIndex($N, $N)", PAGE_UTIL, initialCapacity, pageShift)
                 .addStatement("this.$N = new $T(pageCount)", pages, pages.type)
                 .addStatement("this.$N = $N", defaultValue, defaultValue)
                 .addStatement("this.$N = new $T(true)", pageLock, pageLock.type)
-                .addStatement("this.$N = trackAllocation", trackAllocation)
                 .build();
         }
 
@@ -574,9 +556,7 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
             FieldSpec pageLock,
             FieldSpec pages,
             FieldSpec pageSize,
-            FieldSpec defaultValue,
-            FieldSpec trackAllocation,
-            FieldSpec pageSizeInBytes
+            FieldSpec defaultValue
         ) {
             final CodeBlock pageAssignmentBlock;
 
@@ -595,7 +575,6 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
                 .beginControlFlow("if (page != null)")
                 .addStatement("return page")
                 .endControlFlow()
-                .addStatement("$N.accept($N)", trackAllocation, pageSizeInBytes)
                 .addStatement(pageAssignmentBlock);
 
             // The following is an optimization applicable for primitive

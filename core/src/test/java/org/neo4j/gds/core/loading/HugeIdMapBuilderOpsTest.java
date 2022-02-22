@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,8 +32,7 @@ class HugeIdMapBuilderOpsTest {
             1,
             nodeId,
             1,
-            builder -> (start, end) -> builder.set(nodeId, 0L),
-            AllocationTracker.empty()
+            builder -> (start, end) -> builder.set(nodeId, 0L)
         );
 
         assertTrue(hugeSparseLongArray.contains(nodeId));

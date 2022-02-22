@@ -21,7 +21,6 @@ package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -36,8 +35,7 @@ final class LabelPropagationProc {
 
     static <CONFIG extends LabelPropagationBaseConfig> NodeProperties nodeProperties(
         ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult,
-        String resultProperty,
-        AllocationTracker allocationTracker
+        String resultProperty
     ) {
         var config = computationResult.config();
 
@@ -45,8 +43,7 @@ final class LabelPropagationProc {
             config,
             resultProperty,
             computationResult.result().labels().asNodeProperties(),
-            () -> computationResult.graphStore().nodeProperty(config.seedProperty()),
-            allocationTracker
+            () -> computationResult.graphStore().nodeProperty(config.seedProperty())
         );
     }
 
@@ -68,8 +65,8 @@ final class LabelPropagationProc {
 
         boolean didConverge;
 
-        LabelPropagationResultBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker allocationTracker) {
-            super(callContext, concurrency, allocationTracker);
+        LabelPropagationResultBuilder(ProcedureCallContext callContext, int concurrency) {
+            super(callContext, concurrency);
         }
 
         LabelPropagationResultBuilder<PROC_RESULT> ranIterations(long iterations) {

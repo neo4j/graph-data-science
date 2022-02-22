@@ -72,7 +72,7 @@ final class HugeSparseArrayTestGenerator implements CollectionStep.Generator<Hug
     private static CodeBlock newBuilder(TypeName elementType, String defaultValue) {
         return CodeBlock.builder()
             .addStatement(
-                "var builder = $T.builder($L, (__) -> {})",
+                "var builder = $T.builder($L)",
                 elementType,
                 defaultValue
             )

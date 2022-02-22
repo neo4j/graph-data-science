@@ -26,7 +26,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.BiLongConsumer;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -39,8 +38,7 @@ public final class HugeIdMapBuilderOps {
         long nodeCount,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         if (highestNodeId == NodesBuilder.UNKNOWN_MAX_ID) {
             highestNodeId = graphIds.asNodeProperties().getMaxLongPropertyValue().orElse(NodesBuilder.UNKNOWN_MAX_ID);
@@ -50,8 +48,7 @@ public final class HugeIdMapBuilderOps {
             nodeCount,
             highestNodeId,
             concurrency,
-            add(graphIds),
-            allocationTracker
+            add(graphIds)
         );
 
         var labelInformation = labelInformationBuilder.build(nodeCount, nodeToGraphIds::get);
@@ -61,8 +58,7 @@ public final class HugeIdMapBuilderOps {
             nodeToGraphIds,
             labelInformation,
             nodeCount,
-            highestNodeId,
-            allocationTracker
+            highestNodeId
         );
     }
 
@@ -71,15 +67,13 @@ public final class HugeIdMapBuilderOps {
         long nodeCount,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) throws DuplicateNodeIdException {
         HugeSparseLongArray nodeToGraphIds = buildSparseIdMap(
             nodeCount,
             highestNodeId,
             concurrency,
-            addChecked(graphIds),
-            allocationTracker
+            addChecked(graphIds)
         );
 
         var labelInformation = labelInformationBuilder.build(nodeCount, nodeToGraphIds::get);
@@ -89,8 +83,7 @@ public final class HugeIdMapBuilderOps {
             nodeToGraphIds,
             labelInformation,
             nodeCount,
-            highestNodeId,
-            allocationTracker
+            highestNodeId
         );
     }
 
@@ -99,15 +92,13 @@ public final class HugeIdMapBuilderOps {
         long nodeCount,
         long highestNodeId,
         int concurrency,
-        Function<HugeSparseLongArray.Builder, BiLongConsumer> nodeAdder,
-        AllocationTracker allocationTracker
+        Function<HugeSparseLongArray.Builder, BiLongConsumer> nodeAdder
     ) {
         HugeSparseLongArray.Builder idMapBuilder = HugeSparseLongArray.builder(
             IdMap.NOT_FOUND,
             // We need to allocate space for `highestNode + 1` since we
             // need to be able to store a node with `id = highestNodeId`.
-            highestNodeId + 1,
-            allocationTracker::add
+            highestNodeId + 1
         );
         ParallelUtil.readParallel(concurrency, nodeCount, Pools.DEFAULT, nodeAdder.apply(idMapBuilder));
         return idMapBuilder.build();

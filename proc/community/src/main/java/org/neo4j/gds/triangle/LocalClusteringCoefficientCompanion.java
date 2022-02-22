@@ -23,7 +23,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
@@ -88,8 +87,8 @@ final class LocalClusteringCoefficientCompanion {
 
         double averageClusteringCoefficient = 0;
 
-        ResultBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker allocationTracker) {
-            super(callContext, concurrency, allocationTracker);
+        ResultBuilder(ProcedureCallContext callContext, int concurrency) {
+            super(callContext, concurrency);
         }
 
         ResultBuilder<PROC_RESULT> withAverageClusteringCoefficient(double averageClusteringCoefficient) {

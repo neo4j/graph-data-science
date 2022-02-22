@@ -29,7 +29,6 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
 import org.neo4j.gds.nodeproperties.LongIfChangedNodeProperties;
 import org.neo4j.gds.result.CommunityStatistics;
@@ -46,8 +45,7 @@ public final class CommunityProcCompanion {
         CONFIG config,
         String resultProperty,
         LongNodeProperties nodeProperties,
-        Supplier<NodeProperty> seedPropertySupplier,
-        AllocationTracker allocationTracker
+        Supplier<NodeProperty> seedPropertySupplier
     ) {
 
         var consecutiveIds = config.consecutiveIds();
@@ -71,13 +69,13 @@ public final class CommunityProcCompanion {
             var finalResult = result;
             result = ((CommunitySizeConfig) config)
                 .minCommunitySize()
-                .map(size -> applySizeFilter(finalResult, size, config.concurrency(), allocationTracker))
+                .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
                 .orElse(result);
         } else if (config instanceof ComponentSizeConfig) {
             var finalResult = result;
             result = ((ComponentSizeConfig) config)
                 .minComponentSize()
-                .map(size -> applySizeFilter(finalResult, size, config.concurrency(), allocationTracker))
+                .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
                 .orElse(result);
         }
 
@@ -87,15 +85,13 @@ public final class CommunityProcCompanion {
     private static LongNodeProperties applySizeFilter(
         LongNodeProperties nodeProperties,
         long size,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         var communitySizes = CommunityStatistics.communitySizes(
             nodeProperties.size(),
             nodeProperties::longValue,
             Pools.DEFAULT,
-            concurrency,
-            allocationTracker
+            concurrency
         );
         return new CommunitySizeFilter(nodeProperties, communitySizes, size);
     }

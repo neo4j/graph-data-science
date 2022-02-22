@@ -23,7 +23,6 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -77,7 +76,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
         ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        WriteResult.Builder builder = new WriteResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker());
+        WriteResult.Builder builder = new WriteResult.Builder(callContext, computeResult.config().concurrency());
         return K1ColoringProc.resultBuilder(builder, computeResult, callContext);
     }
 
@@ -140,10 +139,9 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
 
             Builder(
                 ProcedureCallContext context,
-                int concurrency,
-                AllocationTracker allocationTracker
+                int concurrency
             ) {
-                super(context, concurrency, allocationTracker);
+                super(context, concurrency);
             }
 
             @Override

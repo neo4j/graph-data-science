@@ -21,7 +21,6 @@ package org.neo4j.gds.beta.modularity;
 
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
@@ -64,10 +63,9 @@ final class ModularityOptimizationProc {
 
         ModularityOptimizationResultBuilder(
             ProcedureCallContext callContext,
-            int concurrency,
-            AllocationTracker allocationTracker
+            int concurrency
         ) {
-            super(callContext, concurrency, allocationTracker);
+            super(callContext, concurrency);
         }
 
         ModularityOptimizationResultBuilder<PROC_RESULT> withRanIterations(long ranIterations) {

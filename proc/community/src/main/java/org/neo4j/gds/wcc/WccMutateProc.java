@@ -125,7 +125,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
                 int concurrency,
                 AllocationTracker allocationTracker
             ) {
-                super(context, concurrency, allocationTracker);
+                super(context, concurrency);
             }
 
             @Override

@@ -22,7 +22,6 @@ package org.neo4j.gds.labelpropagation;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -68,7 +67,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
         ExecutionContext executionContext
     ) {
         return LabelPropagationProc.resultBuilder(
-            new StatsResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
+            new StatsResult.Builder(callContext, computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -110,8 +109,8 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
 
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<StatsResult> {
 
-            Builder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
-                super(context, concurrency, allocationTracker);
+            Builder(ProcedureCallContext context, int concurrency) {
+                super(context, concurrency);
             }
 
             @Override

@@ -23,7 +23,6 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -77,8 +76,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
         return LocalClusteringCoefficientCompanion.resultBuilder(
             new LocalClusteringCoefficientStatsBuilder(
                 callContext,
-                computeResult.config().concurrency(),
-                allocationTracker()
+                computeResult.config().concurrency()
             ),
             computeResult
         );
@@ -118,10 +116,9 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
 
         LocalClusteringCoefficientStatsBuilder(
             ProcedureCallContext callContext,
-            int concurrency,
-            AllocationTracker allocationTracker
+            int concurrency
         ) {
-            super(callContext, concurrency, allocationTracker);
+            super(callContext, concurrency);
         }
 
         @Override

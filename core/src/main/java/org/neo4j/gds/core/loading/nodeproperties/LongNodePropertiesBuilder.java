@@ -80,7 +80,7 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         int concurrency
     ) {
         var defaultLongValue = defaultValue.longValue();
-        var builder = HugeSparseLongArray.builder(defaultLongValue, allocationTracker::add);
+        var builder = HugeSparseLongArray.builder(defaultLongValue);
         return new LongNodePropertiesBuilder(builder, defaultLongValue, concurrency, allocationTracker);
     }
 
@@ -105,8 +105,7 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseLongArray.builder(
-            defaultValue,
-            allocationTracker::add
+            defaultValue
         );
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();

@@ -137,8 +137,7 @@ final class ConductanceTest {
             orientation == Orientation.NATURAL ? naturalGraph : undirectedGraph,
             Pools.DEFAULT,
             config,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         var result = conductance.compute();

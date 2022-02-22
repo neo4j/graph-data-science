@@ -71,8 +71,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         this.allocationTracker = allocationTracker;
         this.maxValue = Double.NEGATIVE_INFINITY;
         this.builder = HugeSparseDoubleArray.builder(
-            this.defaultValue,
-            allocationTracker::add
+            this.defaultValue
         );
     }
 
@@ -97,8 +96,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseDoubleArray.builder(
-            defaultValue,
-            allocationTracker::add
+            defaultValue
         );
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();

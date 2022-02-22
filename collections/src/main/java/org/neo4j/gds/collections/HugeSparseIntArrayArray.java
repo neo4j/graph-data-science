@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.collections;
 
-import java.util.function.LongConsumer;
-
 /**
  * A long-indexable version of an array of primitive int arrays ({@code
  * int[][]}) that can contain more than 2bn. elements.
@@ -61,15 +59,15 @@ public interface HugeSparseIntArrayArray {
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static Builder builder(int[] defaultValue, LongConsumer trackAllocation) {
-        return builder(defaultValue, 0, trackAllocation);
+    static Builder builder(int[] defaultValue) {
+        return builder(defaultValue, 0);
     }
 
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static Builder builder(int[] defaultValue, long initialCapacity, LongConsumer trackAllocation) {
-        return new HugeSparseIntArrayArraySon.GrowingBuilder(defaultValue, initialCapacity, trackAllocation);
+    static Builder builder(int[] defaultValue, long initialCapacity) {
+        return new HugeSparseIntArrayArraySon.GrowingBuilder(defaultValue, initialCapacity);
     }
 
     interface Builder {

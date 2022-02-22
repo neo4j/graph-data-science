@@ -38,8 +38,8 @@ class NativeFactoryTest {
 
     @Test
     void memoryEstimationBitMapDisabled() {
-        var expectedMinUsage = 3400612744L;
-        var expectedMaxUsage = 4600799536L;
+        var expectedMinUsage = 3400612736L;
+        var expectedMaxUsage = 4600799528L;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
             .relCountUpperBound(500_000_000L)
@@ -77,7 +77,7 @@ class NativeFactoryTest {
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
             .estimate(dimensions, 1);
 
-        assertEquals(12_056_534_408L, estimate.memoryUsage().min);
-        assertEquals(13_667_147_144L, estimate.memoryUsage().max);
+        assertEquals(12_056_534_400L, estimate.memoryUsage().min);
+        assertEquals(13_667_147_136L, estimate.memoryUsage().max);
     }
 }

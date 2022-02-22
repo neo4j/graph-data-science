@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.collections;
 
-import java.util.function.LongConsumer;
-
 /**
  * A long-indexable version of a primitive byte array ({@code byte[]}) that can
  * contain more than 2bn. elements.
@@ -61,15 +59,15 @@ public interface HugeSparseByteArray {
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static Builder builder(byte defaultValue, LongConsumer trackAllocation) {
-        return builder(defaultValue, 0, trackAllocation);
+    static Builder builder(byte defaultValue) {
+        return builder(defaultValue, 0);
     }
 
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
-    static Builder builder(byte defaultValue, long initialCapacity, LongConsumer trackAllocation) {
-        return new HugeSparseByteArraySon.GrowingBuilder(defaultValue, initialCapacity, trackAllocation);
+    static Builder builder(byte defaultValue, long initialCapacity) {
+        return new HugeSparseByteArraySon.GrowingBuilder(defaultValue, initialCapacity);
     }
 
     interface Builder {

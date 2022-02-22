@@ -23,7 +23,6 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -66,8 +65,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     protected NodeProperties nodeProperties(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult) {
         return LabelPropagationProc.nodeProperties(
             computationResult,
-            computationResult.config().writeProperty(),
-            allocationTracker()
+            computationResult.config().writeProperty()
         );
     }
 
@@ -77,7 +75,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
         ExecutionContext executionContext
     ) {
         return LabelPropagationProc.resultBuilder(
-            new WriteResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
+            new WriteResult.Builder(callContext, computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -127,8 +125,8 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
 
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<WriteResult> {
 
-            Builder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
-                super(context, concurrency, allocationTracker);
+            Builder(ProcedureCallContext context, int concurrency) {
+                super(context, concurrency);
             }
 
             @Override

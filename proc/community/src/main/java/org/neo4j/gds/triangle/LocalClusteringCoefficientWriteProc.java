@@ -23,7 +23,6 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -94,8 +93,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
         return LocalClusteringCoefficientCompanion.resultBuilder(
             new LocalClusteringCoefficientWriteResultBuilder(
                 callContext,
-                computeResult.config().concurrency(),
-                allocationTracker()
+                computeResult.config().concurrency()
             ),
             computeResult
         );
@@ -127,10 +125,9 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
 
         LocalClusteringCoefficientWriteResultBuilder(
             ProcedureCallContext callContext,
-            int concurrency,
-            AllocationTracker allocationTracker
+            int concurrency
         ) {
-            super(callContext, concurrency, allocationTracker);
+            super(callContext, concurrency);
         }
 
         @Override

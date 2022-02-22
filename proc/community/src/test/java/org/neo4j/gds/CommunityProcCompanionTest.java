@@ -30,7 +30,6 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
 import org.neo4j.gds.nodeproperties.LongIfChangedNodeProperties;
 
@@ -48,8 +47,7 @@ class CommunityProcCompanionTest {
             config,
             "result",
             nonConsecutiveIds,
-            () -> { throw new UnsupportedOperationException("Not implemented"); },
-            AllocationTracker.empty()
+            () -> { throw new UnsupportedOperationException("Not implemented"); }
         );
 
         assertThat(result).isInstanceOf(ConsecutiveLongNodeProperties.class);
@@ -68,8 +66,7 @@ class CommunityProcCompanionTest {
             config,
             "result",
             inputProperties,
-            () -> { throw new UnsupportedOperationException("Not implemented"); },
-            AllocationTracker.empty()
+            () -> { throw new UnsupportedOperationException("Not implemented"); }
         );
 
         assertThat(result).isEqualTo(inputProperties);
@@ -86,8 +83,7 @@ class CommunityProcCompanionTest {
             config,
             "seed",
             inputProperties,
-            () -> seedProperty,
-            AllocationTracker.empty()
+            () -> seedProperty
         );
 
         assertThat(result).isInstanceOf(LongIfChangedNodeProperties.class);
@@ -107,8 +103,7 @@ class CommunityProcCompanionTest {
             config,
             "seed",
             inputProperties,
-            () -> { throw new UnsupportedOperationException("Not implemented"); },
-            AllocationTracker.empty()
+            () -> { throw new UnsupportedOperationException("Not implemented"); }
         );
 
         for (long i = 0L; i < result.size(); i++) {

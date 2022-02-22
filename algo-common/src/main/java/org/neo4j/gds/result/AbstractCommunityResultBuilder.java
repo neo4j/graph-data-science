@@ -23,7 +23,6 @@ import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
@@ -39,7 +38,6 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
 
     private final ExecutorService executorService;
     private final int concurrency;
-    private final AllocationTracker allocationTracker;
     protected boolean buildHistogram;
     protected boolean buildCommunityCount;
 
@@ -54,17 +52,15 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
 
     protected AbstractCommunityResultBuilder(
         ProcedureCallContext callContext,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
-        this(callContext, Pools.DEFAULT, concurrency, allocationTracker);
+        this(callContext, Pools.DEFAULT, concurrency);
     }
 
     protected AbstractCommunityResultBuilder(
         ProcedureCallContext callContext,
         ExecutorService executorService,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         this.buildHistogram = callContext
             .outputFields()
@@ -74,7 +70,6 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
             .anyMatch(s -> s.equalsIgnoreCase("communityCount") || s.equalsIgnoreCase("componentCount"));
         this.executorService = executorService;
         this.concurrency = concurrency;
-        this.allocationTracker = allocationTracker;
     }
 
     protected abstract WRITE_RESULT buildResult();
@@ -94,16 +89,14 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
                     nodeCount,
                     communityFunction,
                     executorService,
-                    concurrency,
-                    allocationTracker
+                    concurrency
                 ));
             } else if (buildCommunityCount || buildHistogram) {
                 var communityCountAndHistogram = communityCountAndHistogram(
                     nodeCount,
                     communityFunction,
                     executorService,
-                    concurrency,
-                    allocationTracker
+                    concurrency
                 );
                 maybeCommunityCount = OptionalLong.of(communityCountAndHistogram.componentCount());
                 maybeCommunityHistogram = Optional.of(communityCountAndHistogram.histogram());

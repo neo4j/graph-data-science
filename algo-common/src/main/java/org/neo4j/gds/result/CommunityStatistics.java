@@ -28,7 +28,6 @@ import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
@@ -44,10 +43,9 @@ public final class CommunityStatistics {
         long nodeCount,
         LongUnaryOperator communityFunction,
         ExecutorService executorService,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
-        var componentSizeBuilder = HugeSparseLongArray.builder(EMPTY_COMMUNITY, allocationTracker::add);
+        var componentSizeBuilder = HugeSparseLongArray.builder(EMPTY_COMMUNITY);
 
         if (concurrency == 1) {
             // For one thread, we can just iterate through the node space
@@ -87,15 +85,13 @@ public final class CommunityStatistics {
         long nodeCount,
         LongUnaryOperator communityFunction,
         ExecutorService executorService,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         var communitySizes = communitySizes(
             nodeCount,
             communityFunction,
             executorService,
-            concurrency,
-            allocationTracker
+            concurrency
         );
         return communityCount(communitySizes, executorService, concurrency);
     }
@@ -128,15 +124,13 @@ public final class CommunityStatistics {
         long nodeCount,
         LongUnaryOperator communityFunction,
         ExecutorService executorService,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         var communitySizes = communitySizes(
             nodeCount,
             communityFunction,
             executorService,
-            concurrency,
-            allocationTracker
+            concurrency
         );
         return communityCountAndHistogram(communitySizes, executorService, concurrency);
     }

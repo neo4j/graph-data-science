@@ -45,7 +45,7 @@ public class ConductanceFactory<CONFIG extends ConductanceConfig> extends GraphA
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        return new Conductance(graph, Pools.DEFAULT, configuration, progressTracker, allocationTracker);
+        return new Conductance(graph, Pools.DEFAULT, configuration, progressTracker);
     }
 
     @Override

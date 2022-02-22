@@ -28,7 +28,6 @@ import org.neo4j.gds.collections.HugeSparseDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.AtomicDoubleArray;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -47,7 +46,6 @@ public class Conductance extends Algorithm<Conductance.Result> {
     private Graph graph;
     private final ExecutorService executor;
     private final ConductanceConfig config;
-    private final AllocationTracker allocationTracker;
     private final WeightTransformer weightTransformer;
     private final NodeProperties communityProperties;
 
@@ -55,14 +53,12 @@ public class Conductance extends Algorithm<Conductance.Result> {
         Graph graph,
         ExecutorService executor,
         ConductanceConfig config,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.executor = executor;
         this.config = config;
-        this.allocationTracker = allocationTracker;
         this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
         this.communityProperties = graph.nodeProperties(config.communityProperty());
     }
@@ -175,13 +171,11 @@ public class Conductance extends Algorithm<Conductance.Result> {
 
         var internalCountsBuilder = HugeSparseDoubleArray.builder(
             Double.NaN,
-            maxCommunityId,
-            allocationTracker::add
+            maxCommunityId
         );
         var externalCountsBuilder = HugeSparseDoubleArray.builder(
             Double.NaN,
-            maxCommunityId,
-            allocationTracker::add
+            maxCommunityId
         );
 
         var tasks = ParallelUtil.tasks(config.concurrency(), index -> () -> {
@@ -232,8 +226,7 @@ public class Conductance extends Algorithm<Conductance.Result> {
 
         var conductancesBuilder = HugeSparseDoubleArray.builder(
             Double.NaN,
-            maxCommunityId,
-            allocationTracker::add
+            maxCommunityId
         );
         var globalConductanceSum = new AtomicDoubleArray(1);
         var globalValidCommunities = new AtomicLong();
@@ -280,12 +273,10 @@ public class Conductance extends Algorithm<Conductance.Result> {
         private HugeSparseDoubleArray internalCounts;
         private HugeSparseDoubleArray externalCounts;
         private final HugeSparseDoubleArray.Builder internalCountsBuilder = HugeSparseDoubleArray.builder(
-            Double.NaN,
-            allocationTracker::add
+            Double.NaN
         );
         private final HugeSparseDoubleArray.Builder externalCountsBuilder = HugeSparseDoubleArray.builder(
-            Double.NaN,
-            allocationTracker::add
+            Double.NaN
         );
         private final Partition partition;
 

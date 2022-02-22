@@ -49,8 +49,7 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
         this.concurrency = concurrency;
         this.defaultValue = defaultValue.doubleArrayValue();
         this.builder = HugeSparseDoubleArrayArray.builder(
-            this.defaultValue,
-            allocationTracker::add
+            this.defaultValue
         );
     }
 
@@ -73,8 +72,7 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseDoubleArrayArray.builder(
-            defaultValue,
-            allocationTracker::add
+            defaultValue
         );
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();

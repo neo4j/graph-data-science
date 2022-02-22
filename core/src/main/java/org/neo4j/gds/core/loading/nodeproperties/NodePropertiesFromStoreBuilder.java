@@ -120,9 +120,9 @@ public final class NodePropertiesFromStoreBuilder {
             case DOUBLE_ARRAY:
                 return new DoubleArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
             case FLOAT_ARRAY:
-                return new FloatArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
+                return new FloatArrayNodePropertiesBuilder(defaultValue, concurrency);
             case LONG_ARRAY:
-                return new LongArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
+                return new LongArrayNodePropertiesBuilder(defaultValue, concurrency);
             default:
                 throw new UnsupportedOperationException(formatWithLocale(
                     "Loading of values of type %s is currently not supported",

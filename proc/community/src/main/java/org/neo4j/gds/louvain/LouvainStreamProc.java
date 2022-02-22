@@ -96,7 +96,7 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {
-        return LouvainProc.nodeProperties(computationResult, UUID.randomUUID().toString(), allocationTracker());
+        return LouvainProc.nodeProperties(computationResult, UUID.randomUUID().toString());
     }
 
     @Override

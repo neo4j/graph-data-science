@@ -115,7 +115,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
                 int concurrency,
                 AllocationTracker allocationTracker
             ) {
-                super(context, concurrency, allocationTracker);
+                super(context, concurrency);
             }
 
             @Override
