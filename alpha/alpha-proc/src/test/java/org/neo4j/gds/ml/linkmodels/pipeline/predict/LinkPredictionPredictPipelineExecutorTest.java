@@ -40,7 +40,6 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -170,7 +169,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var pipeline = new LinkPredictionPipeline();
             pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
-                ExecutionContext.EMPTY.username(),
                 "degree",
                 Map.of("mutateProperty", "degree")
             ));
@@ -219,7 +217,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var pipeline = new LinkPredictionPipeline();
             pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
-                ExecutionContext.EMPTY.username(),
                 "degree",
                 Map.of("mutateProperty", "degree")
             ));

@@ -24,7 +24,6 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -73,7 +72,6 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         var pipeline = new NodeClassificationPipeline();
 
         pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
-            ExecutionContext.EMPTY.username(),
             "degree",
             Map.of("mutateProperty", "degree")
         ));

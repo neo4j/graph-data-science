@@ -40,11 +40,7 @@ public final class NodeClassificationPipelineAddSteps {
     ) {
         var pipeline = getNCPipeline(modelCatalog, pipelineName, username);
 
-        pipeline.addNodePropertyStep(createNodePropertyStep(
-            caller.executionContext().username(),
-            taskName,
-            procedureConfig
-        ));
+        pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
 
         return new PipelineInfoResult(pipelineName, pipeline);
     }

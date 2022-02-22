@@ -38,7 +38,6 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -120,7 +119,6 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     void trainsAModel() {
         var pipeline = insertPipelineIntoCatalog();
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
-            ExecutionContext.EMPTY.username(),
             "pageRank",
             Map.of("mutateProperty", "pr")
         ));
@@ -318,12 +316,10 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     void shouldEstimateMemory() {
         var pipeline = insertPipelineIntoCatalog();
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
-            ExecutionContext.EMPTY.username(),
             "pageRank",
             Map.of("mutateProperty", "pr")
         ));
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
-            "bestUser",
             "wcc",
             Map.of("mutateProperty", "myNewProp", "threshold", 0.42F, "relationshipWeightProperty", "weight")
         ));

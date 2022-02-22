@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.executor.AlgoConfigParser;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallableFinder;
@@ -42,7 +43,6 @@ public final class NodePropertyStepFactory {
     private NodePropertyStepFactory() {}
 
     public static NodePropertyStep createNodePropertyStep(
-        String username,
         String taskName,
         Map<String, Object> configMap
     ) {
@@ -64,17 +64,13 @@ public final class NodePropertyStepFactory {
 
         validateReservedConfigKeys(configMap);
 
-        AlgoBaseConfig config = parseConfig(
-            username,
-            gdsCallableDefinition,
-            configMap
-        );
+        // validate user-input is valid
+        tryParsingConfig(gdsCallableDefinition, configMap);
 
         return new NodePropertyStep(gdsCallableDefinition, configMap);
     }
 
-    private static AlgoBaseConfig parseConfig(
-        String username,
+    private static AlgoBaseConfig tryParsingConfig(
         GdsCallableFinder.GdsCallableDefinition callableDefinition,
         Map<String, Object> configuration
     ) {
@@ -82,7 +78,8 @@ public final class NodePropertyStepFactory {
             .algorithmSpec()
             .newConfigFunction();
 
-        return new AlgoConfigParser<>(username, newConfigFunction).processInput(configuration);
+        // passing the EMPTY_USERNAME as we only try to check if the given configuration itself is valid
+        return new AlgoConfigParser<>(Username.EMPTY_USERNAME.username(), newConfigFunction).processInput(configuration);
     }
 
     private static void validateReservedConfigKeys(Map<String, Object> procedureConfig) {

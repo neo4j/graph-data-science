@@ -47,7 +47,6 @@ import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -330,7 +329,6 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.setTrainingParameterSpace(List.of(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))));
 
         pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
-            ExecutionContext.EMPTY.username(),
             "degree",
             Map.of("mutateProperty", "degree")
         ));
