@@ -34,6 +34,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 
 import java.util.List;
@@ -70,7 +71,7 @@ class LinkPredictionSimilarityComputerTest {
                 2
             )),
             Weights.ofScalar(0),
-            LinkPrediction.makeLabelIdMap()
+            LinkPredictionTrain.makeClassIdMap()
         );
         var lpSimComputer = new LinkPredictionSimilarityComputer(
             linkFeatureExtractor,

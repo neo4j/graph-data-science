@@ -22,12 +22,10 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer.LogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
-import org.neo4j.gds.ml.splitting.EdgeSplitter;
 
 public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
 
@@ -35,13 +33,6 @@ public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
     private final LinkFeatureExtractor linkFeatureExtractor;
     private final Graph graph;
     protected final int concurrency;
-
-    static LocalIdMap makeLabelIdMap() {
-        var idMap = new LocalIdMap();
-        idMap.toMapped((long) EdgeSplitter.NEGATIVE);
-        idMap.toMapped((long) EdgeSplitter.POSITIVE);
-        return idMap;
-    }
 
     LinkPrediction(
         LogisticRegressionData modelData,

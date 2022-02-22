@@ -52,6 +52,7 @@ import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.test.TestProc;
 
@@ -132,7 +133,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                         3
                     )),
                 Weights.ofScalar(0),
-                LinkPrediction.makeLabelIdMap()
+                LinkPredictionTrain.makeClassIdMap()
             );
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
@@ -183,7 +184,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                         4
                     )),
                 Weights.ofScalar(0),
-                LinkPrediction.makeLabelIdMap()
+                LinkPredictionTrain.makeClassIdMap()
             );
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
@@ -232,7 +233,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                         4
                     )),
                 Weights.ofScalar(0),
-                LinkPrediction.makeLabelIdMap()
+                LinkPredictionTrain.makeClassIdMap()
             );
 
             modelCatalog.set(Model.of(

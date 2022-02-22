@@ -46,6 +46,7 @@ public final class LogisticRegressionTrainer implements Trainer {
     private final LinkLogisticRegressionTrainConfig trainConfig;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
+    private final Optional<LocalIdMap> classIdMap;
     private final int concurrency;
 
     public static MemoryEstimation estimate(LinkLogisticRegressionTrainConfig llrConfig, MemoryRange linkFeatureDimension) {
@@ -70,16 +71,28 @@ public final class LogisticRegressionTrainer implements Trainer {
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
+        this(trainSet, concurrency, trainConfig, terminationFlag, progressTracker, Optional.empty());
+    }
+
+    public LogisticRegressionTrainer(
+        ReadOnlyHugeLongArray trainSet,
+        int concurrency,
+        LinkLogisticRegressionTrainConfig trainConfig,
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker,
+        Optional<LocalIdMap> classIdMap
+    ) {
         this.trainSet = trainSet;
         this.trainConfig = trainConfig;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.concurrency = concurrency;
+        this.classIdMap = classIdMap;
     }
 
     @Override
     public LogisticRegressionClassifier train(Features features, HugeLongArray labels) {
-        var data = LogisticRegressionData.of(features.get(0).length, labels, trainConfig.useBiasFeature());
+        var data = LogisticRegressionData.of(features.get(0).length, labels, trainConfig.useBiasFeature(), classIdMap);
         var classifier = new LogisticRegressionClassifier(data);
         var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);
         var training = new Training(trainConfig, progressTracker, features.size(), terminationFlag);
@@ -107,19 +120,26 @@ public final class LogisticRegressionTrainer implements Trainer {
         LocalIdMap classIdMap();
 
         static LogisticRegressionData of(int numberOfLinkFeatures, HugeLongArray labels, boolean useBias) {
-            var classIdMap = new LocalIdMap();
-            for (long i = 0; i < labels.size(); i++) {
-                classIdMap.toMapped(labels.get(i));
-            }
+            return of(numberOfLinkFeatures, labels, useBias, Optional.empty());
+        }
+
+        static LogisticRegressionData of(int numberOfLinkFeatures, HugeLongArray labels, boolean useBias, Optional<LocalIdMap> classIdMap) {
+            var presentClassIdMap = classIdMap.orElseGet(() -> {
+                var idMap = new LocalIdMap();
+                for (long i = 0; i < labels.size(); i++) {
+                    idMap.toMapped(labels.get(i));
+                }
+                return idMap;
+            });
 
             // this is an optimization where "virtually" add a weight of 0.0 for the last class
-            var weights = Weights.ofMatrix(classIdMap.size() - 1, numberOfLinkFeatures);
+            var weights = Weights.ofMatrix(presentClassIdMap.size() - 1, numberOfLinkFeatures);
 
             var bias = useBias
                 ? Optional.of(Weights.ofScalar(0))
                 : Optional.<Weights<Scalar>>empty();
 
-            return ImmutableLogisticRegressionData.builder().weights(weights).classIdMap(classIdMap).bias(bias).build();
+            return ImmutableLogisticRegressionData.builder().weights(weights).classIdMap(presentClassIdMap).bias(bias).build();
         }
     }
 }

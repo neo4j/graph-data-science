@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 
 import java.util.List;
@@ -97,7 +98,7 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
                 weights.length
             )),
             Weights.ofScalar(0),
-            LinkPrediction.makeLabelIdMap()
+            LinkPredictionTrain.makeClassIdMap()
         );
 
         modelCatalog.set(Model.of(

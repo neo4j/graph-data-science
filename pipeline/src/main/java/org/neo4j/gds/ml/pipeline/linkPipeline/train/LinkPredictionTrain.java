@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
@@ -50,6 +51,7 @@ import org.neo4j.gds.ml.nodemodels.StatsMap;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
+import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
@@ -58,6 +60,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -75,7 +78,15 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     private final Graph validationGraph;
     private final LinkPredictionPipeline pipeline;
     private final LinkPredictionTrainConfig trainConfig;
+    private final LocalIdMap classIdMap;
     private final AllocationTracker allocationTracker;
+
+    public static LocalIdMap makeClassIdMap() {
+        var idMap = new LocalIdMap();
+        idMap.toMapped((long) EdgeSplitter.NEGATIVE);
+        idMap.toMapped((long) EdgeSplitter.POSITIVE);
+        return idMap;
+    }
 
     public LinkPredictionTrain(
         Graph trainGraph,
@@ -90,6 +101,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         this.pipeline = pipeline;
         this.trainConfig = trainConfig;
         this.allocationTracker = AllocationTracker.empty();
+        this.classIdMap = makeClassIdMap();
     }
 
     public static Task progressTask() {
@@ -163,7 +175,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             trainConfig.concurrency(),
             modelConfig,
             terminationFlag,
-            customProgressTracker
+            customProgressTracker,
+            Optional.of(classIdMap)
         ).train(featureAndLabels.features(), featureAndLabels.labels());
     }
 

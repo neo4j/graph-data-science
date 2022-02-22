@@ -41,6 +41,7 @@ import org.neo4j.gds.ml.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 
 import java.util.List;
@@ -98,7 +99,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                     WEIGHTS.length
                 )),
             Weights.ofScalar(0),
-            LinkPrediction.makeLabelIdMap()
+            LinkPredictionTrain.makeClassIdMap()
         );
 
         var linkPrediction = new ApproximateLinkPrediction(
@@ -161,7 +162,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 weights.length
             )),
             Weights.ofScalar(0),
-            LinkPrediction.makeLabelIdMap()
+            LinkPredictionTrain.makeClassIdMap()
         );
 
         var expectedLinks = List.of(
@@ -212,7 +213,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                     WEIGHTS.length
                 )),
             Weights.ofScalar(0),
-            LinkPrediction.makeLabelIdMap()
+            LinkPredictionTrain.makeClassIdMap()
         );
 
         var linkPrediction = new ApproximateLinkPrediction(

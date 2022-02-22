@@ -41,6 +41,7 @@ import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 
 import java.util.List;
 import java.util.Map;
@@ -99,7 +100,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
                     WEIGHTS.length
                 )),
             Weights.ofScalar(0),
-            LinkPrediction.makeLabelIdMap()
+            LinkPredictionTrain.makeClassIdMap()
         );
 
         var graph = graphStore.getGraph(
@@ -158,7 +159,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
                     WEIGHTS.length
                 )),
             Weights.ofScalar(0),
-            LinkPrediction.makeLabelIdMap()
+            LinkPredictionTrain.makeClassIdMap()
         );
 
         var graph = graphStore.getGraph(
