@@ -18,13 +18,15 @@ The simplest way is to do a <<graph-project-native-syntax, native projection>>:
 
 [source,python]
 ----
-G = gds.graph.project(
+G, res = gds.graph.project(
     "my-graph",                 #  Graph name
     ["MyLabel", "YourLabel"],   #  Node projection
     "MY_REL_TYPE",              #  Relationship projection
     concurrency=4               #  Configuration parameters
 )
 ----
+
+where `G` is a `Graph` object, and `res` is a `dict[str, any]` containing metadata from the underlying procedure call.
 
 Note that all projection syntax variants are supported by way of specifying a Python `dict` or `list` for the node and relationship projection arguments.
 To specify configuration parameters corresponding to the keys of the procedure's `configuration` map, we give named keyword arguments, like for `concurrency=4` above.
@@ -89,7 +91,7 @@ For example, to run the WCC on a graph `G`, and then drop the graph, do the foll
 
 [source,python]
 ----
-G = gds.graph.project(...)
+G, _ = gds.graph.project(...)
 
 res = gds.wcc.stream(G)
 

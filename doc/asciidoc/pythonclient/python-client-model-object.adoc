@@ -19,8 +19,10 @@ Supposing we have a graph `G` that have an integer node property "price", we cou
 
 [source,python]
 ----
-model = gds.beta.graphSage.train(G, modelName="my-model", featureProperties=["price"])
+model, res = gds.beta.graphSage.train(G, modelName="my-model", featureProperties=["price"])
 ----
+
+where `model` is the model object, and `res` is a `dict[str, any]` containing metadata from the underlying procedure call.
 
 Similarly, we can also get model objects from training <<python-client-pipelines, machine learning pipelines>>.
 

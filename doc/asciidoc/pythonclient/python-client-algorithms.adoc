@@ -21,7 +21,7 @@ For example, to run the WCC and FastRP algorithms on a graph `G`, we could do th
 
 [source,python]
 ----
-G = gds.graph.project(...)
+G, _ = gds.graph.project(...)
 
 wcc_res = gds.wcc.mutate(
     G,                          #  Graph object

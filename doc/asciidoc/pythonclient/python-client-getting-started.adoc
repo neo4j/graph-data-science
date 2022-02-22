@@ -90,7 +90,7 @@ gds.run_cypher(
 
 # Project the graph into the GDS Graph Catalog
 # We call the object representing the projected graph `G_office`
-G_office = gds.graph.project("neo4j-offices", "City", "FLY_TO")
+G_office, _ = gds.graph.project("neo4j-offices", "City", "FLY_TO")
 
 # Run the mutate mode of the PageRank algorithm
 _ = gds.pageRank.mutate(G_office, tolerance=0.5, mutateProperty="rank")
@@ -121,7 +121,7 @@ There are some general principles for how the Cypher API maps to the Python clie
 +
 Some notable exceptions to this are:
 
-** Procedures instantiating <<python-client-graph-object, graph objects>> and <<python-client-model-object, model objects>>.
+** Procedures instantiating <<python-client-graph-object, graph objects>> and <<python-client-model-object, model objects>> have two return values: a graph or model object, and a row of metadata from the underlying procedure call.
 ** Any methods on <<python-client-pipelines, pipeline>>, <<python-client-graph-object, graph>> or <<python-client-model-object, model>> objects (native to the Python client) mapping to Cypher procedures.
 ** `gds.version()` which returns a string.
 * Method calls corresponding to Cypher functions (preceded by `RETURN` in the docs) will simply return the value the function returns.
