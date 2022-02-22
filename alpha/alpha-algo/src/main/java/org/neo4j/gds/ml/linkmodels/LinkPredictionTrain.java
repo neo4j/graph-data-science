@@ -23,7 +23,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -65,7 +64,6 @@ public class LinkPredictionTrain
     private final Graph trainGraph;
     private final Graph testGraph;
     private final LinkPredictionTrainConfig config;
-    private final AllocationTracker allocationTracker;
     private final List<FeatureExtractor> trainExtractors;
     private final List<FeatureExtractor> testExtractors;
 
@@ -94,7 +92,6 @@ public class LinkPredictionTrain
         this.trainExtractors = FeatureExtraction.propertyExtractors(trainGraph, config.featureProperties());
         this.testExtractors = FeatureExtraction.propertyExtractors(testGraph, config.featureProperties());
         this.config = config;
-        this.allocationTracker = AllocationTracker.empty();
     }
 
     @Override
@@ -102,7 +99,7 @@ public class LinkPredictionTrain
 
         progressTracker.beginSubTask();
         // init and shuffle node ids
-        var nodeIds = HugeLongArray.newArray(trainGraph.nodeCount(), allocationTracker);
+        var nodeIds = HugeLongArray.newArray(trainGraph.nodeCount());
         nodeIds.setAll(i -> i);
         ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
 

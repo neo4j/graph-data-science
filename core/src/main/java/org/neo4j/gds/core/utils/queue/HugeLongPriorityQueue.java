@@ -22,7 +22,6 @@ package org.neo4j.gds.core.utils.queue;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
@@ -78,8 +77,8 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         }
         this.capacity = capacity;
         this.costKeys = new BitSet(capacity);
-        this.heap = HugeLongArray.newArray(heapSize, AllocationTracker.empty());
-        this.costValues = HugeDoubleArray.newArray(capacity, AllocationTracker.empty());
+        this.heap = HugeLongArray.newArray(heapSize);
+        this.costValues = HugeDoubleArray.newArray(capacity);
     }
 
     /**

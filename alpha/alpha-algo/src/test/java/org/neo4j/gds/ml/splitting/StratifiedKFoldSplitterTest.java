@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
@@ -54,7 +53,7 @@ class StratifiedKFoldSplitterTest {
         var nodeIdsList = LongStream.range(0, nodeCount).boxed()
             .collect(Collectors.toList());
         Collections.shuffle(nodeIdsList, rnd);
-        var nodeIds = HugeLongArray.newArray(nodeIdsList.size(), AllocationTracker.empty());
+        var nodeIds = HugeLongArray.newArray(nodeIdsList.size());
         nodeIds.setAll(i -> nodeIdsList.get((int) i));
 
         // generate non-consecutive classes
@@ -63,7 +62,7 @@ class StratifiedKFoldSplitterTest {
         for (int i = 0; i < classCount; i++) {
             distinctTargets[i] = rnd.nextLong();
         }
-        var targets = HugeLongArray.newArray(nodeCount, AllocationTracker.empty());
+        var targets = HugeLongArray.newArray(nodeCount);
         targets.setAll(i -> {
             var classOffset = rnd.nextInt(classCount);
             return distinctTargets[classOffset];

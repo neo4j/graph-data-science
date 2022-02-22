@@ -69,10 +69,10 @@ public class SccAlgorithm extends Algorithm<HugeLongArray> {
         super(progressTracker);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
-        this.index = HugeLongArray.newArray(nodeCount, allocationTracker);
+        this.index = HugeLongArray.newArray(nodeCount);
         this.stack = new PagedLongStack(nodeCount, allocationTracker);
         this.boundaries = new PagedLongStack(nodeCount, allocationTracker);
-        this.connectedComponents = HugeLongArray.newArray(nodeCount, allocationTracker);
+        this.connectedComponents = HugeLongArray.newArray(nodeCount);
         this.visited = new BitSet(nodeCount);
         this.todo = new PagedLongStack(nodeCount, allocationTracker);
     }

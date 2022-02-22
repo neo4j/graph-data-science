@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import static io.qala.datagen.RandomShortApi.integer;
@@ -80,8 +79,7 @@ final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongAr
     @Test
     void shouldBinarySearchInASinglePageArray() {
         var array = HugeLongArray.newSingleArray(
-            10,
-            AllocationTracker.empty()
+            10
         );
         for (int i = 0; i < 10; i++) {
             array.set(i, i);
@@ -95,8 +93,7 @@ final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongAr
     @Test
     void shouldBinarySearchInAPagedArray() {
         var array = HugeLongArray.newPagedArray(
-            HugeArrays.PAGE_SIZE * 3,
-            AllocationTracker.empty()
+            HugeArrays.PAGE_SIZE * 3
         );
         for (int i = 0; i < HugeArrays.PAGE_SIZE * 3; i++) {
             array.set(i, i);
@@ -109,12 +106,12 @@ final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongAr
 
     @Override
     HugeLongArray singleArray(final int size) {
-        return HugeLongArray.newSingleArray(size, AllocationTracker.empty());
+        return HugeLongArray.newSingleArray(size);
     }
 
     @Override
     HugeLongArray pagedArray(final int size) {
-        return HugeLongArray.newPagedArray(size, AllocationTracker.empty());
+        return HugeLongArray.newPagedArray(size);
     }
 
     @Override

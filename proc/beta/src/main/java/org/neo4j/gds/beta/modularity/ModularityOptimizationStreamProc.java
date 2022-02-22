@@ -72,7 +72,7 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
     protected NodeProperties nodeProperties(
         ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationStreamConfig> computationResult
     ) {
-        return ModularityOptimizationProc.nodeProperties(computationResult, allocationTracker());
+        return ModularityOptimizationProc.nodeProperties(computationResult);
     }
 
     @Override

@@ -182,7 +182,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @Test
     void oneCommunityFromHugeMap() {
-        HugeLongLongMap communitySizeMap = new HugeLongLongMap(AllocationTracker.empty());
+        HugeLongLongMap communitySizeMap = new HugeLongLongMap();
         communitySizeMap.addTo(1, 4);
 
         final Histogram histogram = new Histogram(5);

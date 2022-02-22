@@ -61,8 +61,7 @@ public final class CommunityProcCompanion {
         } else if (consecutiveIds && !isIncremental) {
             result = new ConsecutiveLongNodeProperties(
                 nodeProperties,
-                nodeProperties.size(),
-                allocationTracker
+                nodeProperties.size()
             );
         } else {
             result = nodeProperties;

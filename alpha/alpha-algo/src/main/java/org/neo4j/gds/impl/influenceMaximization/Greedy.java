@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.results.InfluenceMaximizationResult;
@@ -42,7 +41,6 @@ public class Greedy extends Algorithm<Greedy> {
 
     private final ExecutorService executorService;
     private final int concurrency;
-    private final AllocationTracker allocationTracker;
     private final ArrayList<IndependentCascadeRunner> tasks;
 
     private final LongDoubleScatterMap seedSetNodes;
@@ -60,8 +58,7 @@ public class Greedy extends Algorithm<Greedy> {
         double propagationProbability,
         int monteCarloSimulations,
         ExecutorService executorService,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
@@ -73,7 +70,6 @@ public class Greedy extends Algorithm<Greedy> {
 
         this.executorService = executorService;
         this.concurrency = concurrency;
-        this.allocationTracker = allocationTracker;
 
         this.seedSetNodes = new LongDoubleScatterMap(this.seedSetCount);
         this.spreads = new HugeLongPriorityQueue(nodeCount) {
@@ -129,8 +125,7 @@ public class Greedy extends Algorithm<Greedy> {
                 spreads,
                 globalNodeProgress,
                 propagationProbability,
-                monteCarloSimulations,
-                allocationTracker
+                monteCarloSimulations
             ));
         }
         return tasks;

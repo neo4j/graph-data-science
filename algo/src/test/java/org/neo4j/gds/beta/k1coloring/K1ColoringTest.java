@@ -77,8 +77,7 @@ class K1ColoringTest {
             DEFAULT_BATCH_SIZE,
             1,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         k1Coloring.compute();
@@ -123,8 +122,7 @@ class K1ColoringTest {
             DEFAULT_BATCH_SIZE,
             8,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         k1Coloring.compute();
@@ -187,8 +185,7 @@ class K1ColoringTest {
             DEFAULT_BATCH_SIZE,
             8,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         k1Coloring.compute();
@@ -224,8 +221,7 @@ class K1ColoringTest {
             DEFAULT_BATCH_SIZE,
             config.concurrency(),
             Pools.DEFAULT,
-            progressTracker,
-            AllocationTracker.empty()
+            progressTracker
         );
 
         k1Coloring.compute();

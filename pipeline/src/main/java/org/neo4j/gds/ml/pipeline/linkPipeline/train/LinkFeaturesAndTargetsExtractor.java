@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -66,21 +65,20 @@ final class LinkFeaturesAndTargetsExtractor {
         Graph graph,
         List<LinkFeatureStep> featureSteps,
         int concurrency,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         progressTracker.setVolume(graph.relationshipCount() * 2);
         var features = LinkFeatureExtractor.extractFeatures(graph, featureSteps, concurrency, progressTracker);
 
-        var targets = extractTargets(graph, features.size(), progressTracker, allocationTracker);
+        var targets = extractTargets(graph, features.size(), progressTracker);
 
         return ImmutableFeaturesAndTargets.of(features, targets);
     }
 
     private static HugeDoubleArray extractTargets(
-        Graph graph, long numberOfTargets, ProgressTracker progressTracker, AllocationTracker allocationTracker
+        Graph graph, long numberOfTargets, ProgressTracker progressTracker
     ) {
-        var globalTargets = HugeDoubleArray.newArray(numberOfTargets, allocationTracker);
+        var globalTargets = HugeDoubleArray.newArray(numberOfTargets);
         var relationshipIdx = new MutableLong();
         graph.forEachNode(nodeId -> {
             graph.forEachRelationship(nodeId, -10, (src, trg, weight) -> {

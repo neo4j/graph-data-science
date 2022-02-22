@@ -108,12 +108,12 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
             this.predecessors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, allocationTracker);
             this.predecessorsCursor = predecessors.newCursor();
-            this.backwardNodes = HugeLongArrayStack.newStack(nodeCount, allocationTracker);
+            this.backwardNodes = HugeLongArrayStack.newStack(nodeCount);
             // TODO: make queue growable
-            this.forwardNodes = HugeLongArrayQueue.newQueue(nodeCount, allocationTracker);
+            this.forwardNodes = HugeLongArrayQueue.newQueue(nodeCount);
 
-            this.sigma = HugeLongArray.newArray(nodeCount, allocationTracker);
-            this.delta = HugeDoubleArray.newArray(nodeCount, allocationTracker);
+            this.sigma = HugeLongArray.newArray(nodeCount);
+            this.delta = HugeDoubleArray.newArray(nodeCount);
             this.distance = HugeIntArray.newArray(nodeCount, allocationTracker);
         }
 

@@ -21,7 +21,6 @@ package org.neo4j.gds.impl.approxmaxkcut;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -200,7 +199,7 @@ class PlaceNodesRandomly {
         }
 
         private HugeLongArray shuffle(long minInclusive, long length) {
-            HugeLongArray elements = HugeLongArray.newArray(length, AllocationTracker.empty());
+            HugeLongArray elements = HugeLongArray.newArray(length);
 
             for (long i = 0; i < length; i++) {
                 long nextToAdd = minInclusive + i;

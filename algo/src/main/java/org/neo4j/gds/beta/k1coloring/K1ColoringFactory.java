@@ -57,8 +57,7 @@ public class K1ColoringFactory<T extends K1ColoringConfig> extends GraphAlgorith
             configuration.batchSize(),
             configuration.concurrency(),
             Pools.DEFAULT,
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
     }
 

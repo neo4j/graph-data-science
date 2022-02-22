@@ -104,7 +104,7 @@ class OriginalToFilteredNodePropertiesTest {
             Optional.empty()
         );
 
-        var propertyArray = HugeLongArray.newArray(1, AllocationTracker.empty());
+        var propertyArray = HugeLongArray.newArray(1);
         propertyArray.setAll((i) -> 42L);
 
         var filteredNodeProperties = new OriginalToFilteredNodeProperties(

@@ -287,13 +287,13 @@ public final class RandomGraphGenerator {
         switch (propertyProducer.propertyType()) {
             case LONG:
                 return generateProperties(
-                    HugeLongArray.newArray(nodeCount, allocationTracker),
+                    HugeLongArray.newArray(nodeCount),
                     (PropertyProducer<long[]>) propertyProducer,
                     HugeLongArray::asNodeProperties
                 );
             case DOUBLE:
                 return generateProperties(
-                    HugeDoubleArray.newArray(nodeCount, allocationTracker),
+                    HugeDoubleArray.newArray(nodeCount),
                     (PropertyProducer<double[]>) propertyProducer,
                     HugeDoubleArray::asNodeProperties
                 );

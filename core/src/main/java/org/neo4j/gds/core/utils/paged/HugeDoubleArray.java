@@ -136,7 +136,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      */
     @Override
     public final HugeDoubleArray copyOf(final long newLength, final AllocationTracker allocationTracker) {
-        HugeDoubleArray copy = HugeDoubleArray.newArray(newLength, allocationTracker);
+        HugeDoubleArray copy = HugeDoubleArray.newArray(newLength);
         this.copyTo(copy, newLength);
         return copy;
     }
@@ -200,11 +200,11 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
-    public static HugeDoubleArray newArray(long size, AllocationTracker allocationTracker) {
+    public static HugeDoubleArray newArray(long size) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return SingleHugeDoubleArray.of(size, allocationTracker);
+            return SingleHugeDoubleArray.of(size);
         }
-        return PagedHugeDoubleArray.of(size, allocationTracker);
+        return PagedHugeDoubleArray.of(size);
     }
 
     public static long memoryEstimation(long size) {
@@ -230,22 +230,21 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
     }
 
     /* test-only */
-    static HugeDoubleArray newPagedArray(long size, AllocationTracker allocationTracker) {
-        return PagedHugeDoubleArray.of(size, allocationTracker);
+    static HugeDoubleArray newPagedArray(long size) {
+        return PagedHugeDoubleArray.of(size);
     }
 
     /* test-only */
-    static HugeDoubleArray newSingleArray(int size, AllocationTracker allocationTracker) {
-        return SingleHugeDoubleArray.of(size, allocationTracker);
+    static HugeDoubleArray newSingleArray(int size) {
+        return SingleHugeDoubleArray.of(size);
     }
 
     private static final class SingleHugeDoubleArray extends HugeDoubleArray {
 
-        private static HugeDoubleArray of(long size, AllocationTracker allocationTracker) {
+        private static HugeDoubleArray of(long size) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             double[] page = new double[intSize];
-            allocationTracker.add(sizeOfDoubleArray(intSize));
 
             return new SingleHugeDoubleArray(intSize, page);
         }
@@ -360,7 +359,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
 
     private static final class PagedHugeDoubleArray extends HugeDoubleArray {
 
-        private static HugeDoubleArray of(long size, AllocationTracker allocationTracker) {
+        private static HugeDoubleArray of(long size) {
             int numPages = numberOfPages(size);
             double[][] pages = new double[numPages][];
 
@@ -373,7 +372,6 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
             final int lastPageSize = exclusiveIndexOfPage(size);
             pages[numPages - 1] = new double[lastPageSize];
             memoryUsed += sizeOfDoubleArray(lastPageSize);
-            allocationTracker.add(memoryUsed);
 
             return new PagedHugeDoubleArray(size, pages, memoryUsed);
         }

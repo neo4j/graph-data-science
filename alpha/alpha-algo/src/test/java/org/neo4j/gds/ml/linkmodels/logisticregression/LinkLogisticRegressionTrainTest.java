@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -71,7 +70,7 @@ class LinkLogisticRegressionTrainTest {
         );
 
         var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
-        var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        var trainSet = HugeLongArray.newArray(graph.nodeCount());
         trainSet.setAll(i -> i);
         var linearRegression = new LinkLogisticRegressionTrain(
             graph,
@@ -103,7 +102,7 @@ class LinkLogisticRegressionTrainTest {
 
         var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
 
-        var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        var trainSet = HugeLongArray.newArray(graph.nodeCount());
         trainSet.setAll(i -> i);
         var linearRegression = new LinkLogisticRegressionTrain(graph,
             trainSet,

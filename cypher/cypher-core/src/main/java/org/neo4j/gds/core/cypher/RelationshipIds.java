@@ -23,7 +23,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.token.TokenHolders;
@@ -138,7 +137,7 @@ public final class RelationshipIds {
     }
 
     private static HugeLongArray computeAccumulatedOffsets(Graph graph) {
-        var offsets = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        var offsets = HugeLongArray.newArray(graph.nodeCount());
 
         long offset = 0L;
         for (long i = 0; i < offsets.size(); i++) {

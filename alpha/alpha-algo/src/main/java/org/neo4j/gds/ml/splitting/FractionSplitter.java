@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -27,8 +26,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import java.util.function.Function;
 
 public class FractionSplitter {
-
-    private final AllocationTracker allocationTracker;
 
     public static MemoryEstimation estimate(double trainFraction) {
         return MemoryEstimations.builder(FractionSplitter.class)
@@ -41,10 +38,6 @@ public class FractionSplitter {
         return (long) (nodeCount * trainFraction);
     }
 
-    public FractionSplitter(AllocationTracker allocationTracker) {
-        this.allocationTracker = allocationTracker;
-    }
-
     public TrainingExamplesSplit split(HugeLongArray ids, double trainFraction) {
         long trainSize = trainSize(ids.size(), trainFraction);
         long testSize = ids.size() - trainSize;
@@ -54,7 +47,7 @@ public class FractionSplitter {
     }
 
     private HugeLongArray initHLA(long size, Function<Long, Long> transform) {
-        var array = HugeLongArray.newArray(size, allocationTracker);
+        var array = HugeLongArray.newArray(size);
         array.setAll(transform::apply);
         return array;
     }

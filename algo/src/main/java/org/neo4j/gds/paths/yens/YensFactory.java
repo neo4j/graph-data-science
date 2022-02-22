@@ -65,6 +65,6 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends Grap
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        return Yens.sourceTarget(graph, configuration, progressTracker, allocationTracker);
+        return Yens.sourceTarget(graph, configuration, progressTracker);
     }
 }

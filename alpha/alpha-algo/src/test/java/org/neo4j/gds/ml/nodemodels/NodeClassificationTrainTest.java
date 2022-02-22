@@ -97,7 +97,6 @@ class NodeClassificationTrainTest {
         var ncTrain = NodeClassificationTrain.create(
             graph,
             config,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -142,7 +141,6 @@ class NodeClassificationTrainTest {
         var bananasTrain = NodeClassificationTrain.create(
             graph,
             bananasConfig,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -156,7 +154,6 @@ class NodeClassificationTrainTest {
         var arrayPropertyTrain = NodeClassificationTrain.create(
             graph,
             arrayPropertyConfig,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 

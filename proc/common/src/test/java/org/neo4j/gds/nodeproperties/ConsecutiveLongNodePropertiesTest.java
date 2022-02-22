@@ -21,7 +21,6 @@ package org.neo4j.gds.nodeproperties;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,8 +42,7 @@ class ConsecutiveLongNodePropertiesTest {
 
         var consecutiveIds = new ConsecutiveLongNodeProperties(
             nonConsecutiveIds,
-            10,
-            AllocationTracker.empty()
+            10
         );
 
         assertThat(consecutiveIds.size()).isEqualTo(10);

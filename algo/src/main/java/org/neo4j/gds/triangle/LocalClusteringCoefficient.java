@@ -86,7 +86,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         progressTracker.beginSubTask();
 
         long nodeCount = graph.nodeCount();
-        localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount, allocationTracker);
+        localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount);
 
         ThreadLocal<Graph> concurrentGraphCopy = ThreadLocal.withInitial(() -> graph.concurrentCopy());
         DoubleAdder localClusteringCoefficientSum = new DoubleAdder();

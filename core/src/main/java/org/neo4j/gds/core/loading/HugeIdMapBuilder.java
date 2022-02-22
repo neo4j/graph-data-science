@@ -34,8 +34,8 @@ public final class HugeIdMapBuilder implements IdMapBuilder {
     private final AtomicLong allocationIndex;
     private final CloseableThreadLocal<BulkAdder> adders;
 
-    public static HugeIdMapBuilder of(long capacity, AllocationTracker allocationTracker) {
-        HugeLongArray array = HugeLongArray.newArray(capacity, allocationTracker);
+    public static HugeIdMapBuilder of(long capacity) {
+        HugeLongArray array = HugeLongArray.newArray(capacity);
         return new HugeIdMapBuilder(array, capacity);
     }
 

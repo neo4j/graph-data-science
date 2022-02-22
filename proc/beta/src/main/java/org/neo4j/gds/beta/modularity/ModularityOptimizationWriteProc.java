@@ -75,7 +75,7 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computationResult) {
-        return ModularityOptimizationProc.nodeProperties(computationResult, allocationTracker());
+        return ModularityOptimizationProc.nodeProperties(computationResult);
     }
 
     @Override

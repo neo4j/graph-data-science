@@ -77,7 +77,7 @@ class LinkLogisticRegressionObjectiveTest {
 
     @BeforeEach
     void setup() {
-        var targets = HugeDoubleArray.newArray(graph.relationshipCount(), AllocationTracker.empty());
+        var targets = HugeDoubleArray.newArray(graph.relationshipCount());
         targets.setAll(idx -> (idx < 2) ? 1 : 0);
 
         // L2 Norm features for node properties a,b

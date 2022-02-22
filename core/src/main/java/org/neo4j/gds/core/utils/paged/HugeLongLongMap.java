@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.paged;
 
 import com.carrotsearch.hppc.BitMixer;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.BitUtil;
@@ -43,8 +42,6 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
             .perNode("values", HugeLongArray::memoryEstimation)
             .build();
 
-    private final AllocationTracker allocationTracker;
-
     private HugeLongArray keys;
     private HugeLongArray values;
     private HugeCursor<long[]> keysCursor;
@@ -64,15 +61,14 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
     /**
      * New instance with sane defaults.
      */
-    public HugeLongLongMap(AllocationTracker allocationTracker) {
-        this(DEFAULT_EXPECTED_ELEMENTS, allocationTracker);
+    public HugeLongLongMap() {
+        this(DEFAULT_EXPECTED_ELEMENTS);
     }
 
     /**
      * New instance with sane defaults.
      */
-    public HugeLongLongMap(long expectedElements, AllocationTracker allocationTracker) {
-        this.allocationTracker = allocationTracker;
+    public HugeLongLongMap(long expectedElements) {
         initialBuffers(expectedElements);
     }
 
@@ -212,10 +208,8 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
     }
 
     public void release() {
-        long released = 0L;
-        released += keys.release();
-        released += values.release();
-        allocationTracker.remove(released);
+        keys.release();
+        values.release();
 
         keys = null;
         values = null;
@@ -224,7 +218,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
     }
 
     private void initialBuffers(long expectedElements) {
-        allocateBuffers(minBufferSize(expectedElements), allocationTracker);
+        allocateBuffers(minBufferSize(expectedElements));
     }
 
     @Override
@@ -262,15 +256,15 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
      * Allocate new internal buffers. This method attempts to allocate
      * and assign internal buffers atomically (either allocations succeed or not).
      */
-    private void allocateBuffers(long arraySize, AllocationTracker allocationTracker) {
+    private void allocateBuffers(long arraySize) {
         assert BitUtil.isPowerOfTwo(arraySize);
 
         // Ensure no change is done if we hit an OOM.
         HugeLongArray prevKeys = this.keys;
         HugeLongArray prevValues = this.values;
         try {
-            this.keys = HugeLongArray.newArray(arraySize, allocationTracker);
-            this.values = HugeLongArray.newArray(arraySize, allocationTracker);
+            this.keys = HugeLongArray.newArray(arraySize);
+            this.values = HugeLongArray.newArray(arraySize);
             keysCursor = keys.newCursor();
             entries = new EntryIterator();
         } catch (OutOfMemoryError e) {
@@ -324,7 +318,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         // Try to allocate new buffers first. If we OOM, we leave in a consistent state.
         final HugeLongArray prevKeys = this.keys;
         final HugeLongArray prevValues = this.values;
-        allocateBuffers(nextBufferSize(mask + 1), allocationTracker);
+        allocateBuffers(nextBufferSize(mask + 1));
         assert this.keys.size() > prevKeys.size();
 
         // We have succeeded at allocating new data so insert the pending key/value at
@@ -335,10 +329,8 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         // Rehash old keys, including the pending key.
         rehash(prevKeys, prevValues);
 
-        long released = 0L;
-        released += prevKeys.release();
-        released += prevValues.release();
-        allocationTracker.remove(released);
+        prevKeys.release();
+        prevValues.release();
     }
 
 

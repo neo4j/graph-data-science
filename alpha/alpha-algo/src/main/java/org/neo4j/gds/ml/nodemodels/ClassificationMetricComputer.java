@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.Predictor;
@@ -36,7 +35,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ClassificationMetricComputer implements MetricComputer {
-    private final AllocationTracker allocationTracker;
     private final List<Metric> metrics;
     private final Multiset<Long> classCounts;
     private final Graph graph;
@@ -45,7 +43,6 @@ public class ClassificationMetricComputer implements MetricComputer {
     private final TerminationFlag terminationFlag;
 
     public ClassificationMetricComputer(
-        AllocationTracker allocationTracker,
         List<Metric> metrics,
         Multiset<Long> classCounts,
         Graph graph,
@@ -53,7 +50,6 @@ public class ClassificationMetricComputer implements MetricComputer {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        this.allocationTracker = allocationTracker;
         this.metrics = metrics;
         this.classCounts = classCounts;
         this.graph = graph;
@@ -66,7 +62,7 @@ public class ClassificationMetricComputer implements MetricComputer {
     public Map<Metric, Double> computeMetrics(
         HugeLongArray evaluationSet, Predictor<Matrix, ?> predictor
     ) {
-        var predictedClasses = HugeLongArray.newArray(evaluationSet.size(), allocationTracker);
+        var predictedClasses = HugeLongArray.newArray(evaluationSet.size());
 
         // consume from queue which contains local nodeIds, i.e. indices into evaluationSet
         // the consumer internally remaps to original nodeIds before prediction
@@ -91,7 +87,7 @@ public class ClassificationMetricComputer implements MetricComputer {
     }
 
     private HugeLongArray makeLocalTargets(HugeLongArray nodeIds) {
-        var targets = HugeLongArray.newArray(nodeIds.size(), allocationTracker);
+        var targets = HugeLongArray.newArray(nodeIds.size());
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
 
         targets.setAll(i -> targetNodeProperty.longValue(nodeIds.get(i)));

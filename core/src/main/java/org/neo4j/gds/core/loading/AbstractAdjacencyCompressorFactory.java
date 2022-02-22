@@ -67,8 +67,8 @@ abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> im
     public void init() {
         var nodeCount = this.nodeCountSupplier.getAsLong();
         this.adjacencyDegrees = HugeIntArray.newArray(nodeCount, this.allocationTracker);
-        this.adjacencyOffsets = HugeLongArray.newArray(nodeCount, this.allocationTracker);
-        this.propertyOffsets = HugeLongArray.newArray(nodeCount, this.allocationTracker);
+        this.adjacencyOffsets = HugeLongArray.newArray(nodeCount);
+        this.propertyOffsets = HugeLongArray.newArray(nodeCount);
     }
 
     @Override

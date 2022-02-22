@@ -21,7 +21,6 @@ package org.neo4j.gds.impl.influenceMaximization;
 
 import org.bouncycastle.util.Arrays;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,7 +31,6 @@ class IndependentCascadeRunner implements Runnable {
     private final AtomicLong globalNodeProgress;
     private final double propagationProbability;
     private final int monteCarloSimulations;
-    private final AllocationTracker allocationTracker;
     private long[] seedSetNodes;
 
     IndependentCascadeRunner(
@@ -40,15 +38,13 @@ class IndependentCascadeRunner implements Runnable {
         HugeLongPriorityQueue spreads,
         AtomicLong globalNodeProgress,
         double propagationProbability,
-        int monteCarloSimulations,
-        AllocationTracker allocationTracker
+        int monteCarloSimulations
     ) {
         this.graph = graph;
         this.spreads = spreads;
         this.globalNodeProgress = globalNodeProgress;
         this.propagationProbability = propagationProbability;
         this.monteCarloSimulations = monteCarloSimulations;
-        this.allocationTracker = allocationTracker;
     }
 
     void setSeedSetNodes(long[] seedSetNodes) {
@@ -61,8 +57,7 @@ class IndependentCascadeRunner implements Runnable {
             graph,
             propagationProbability,
             monteCarloSimulations,
-            spreads,
-            allocationTracker
+            spreads
         );
 
         var candidateNode = 0L;

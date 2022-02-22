@@ -88,7 +88,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         {
             HugeLongArray activeFeatureVectors;
             if (Double.compare(numFeatureVectorsRatio, 0.0d) == 0) {
-                var allVectors = HugeLongArray.newArray(allFeatureVectors.size(), allocationTracker);
+                var allVectors = HugeLongArray.newArray(allFeatureVectors.size());
                 allVectors.setAll(i -> i);
                 bootstrappedDataset.fill((byte) 1);
                 activeFeatureVectors = allVectors;
@@ -96,8 +96,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
                 activeFeatureVectors = DatasetBootstrapper.bootstrap(
                     random,
                     numFeatureVectorsRatio,
-                    bootstrappedDataset,
-                    allocationTracker
+                    bootstrappedDataset
                 );
             }
             root = splitAndPush(stack, activeFeatureVectors, activeFeatureVectors.size(), 1);
@@ -201,12 +200,12 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         double bestLoss = Double.MAX_VALUE;
 
         var childGroups = ImmutableGroups.of(
-            HugeLongArray.newArray(groupSize, allocationTracker),
-            HugeLongArray.newArray(groupSize, allocationTracker)
+            HugeLongArray.newArray(groupSize),
+            HugeLongArray.newArray(groupSize)
         );
         var bestChildGroups = ImmutableGroups.of(
-            HugeLongArray.newArray(groupSize, allocationTracker),
-            HugeLongArray.newArray(groupSize, allocationTracker)
+            HugeLongArray.newArray(groupSize),
+            HugeLongArray.newArray(groupSize)
         );
         var bestGroupSizes = ImmutableGroupSizes.of(-1, -1);
 

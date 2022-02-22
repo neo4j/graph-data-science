@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.splitting;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,8 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FractionSplitterTest {
     @Test
     void shouldGiveEmptySets() {
-        var fractionSplitter = new FractionSplitter(AllocationTracker.empty());
-        var split = fractionSplitter.split(HugeLongArray.newArray(0, AllocationTracker.empty()), 0.5);
+        var fractionSplitter = new FractionSplitter();
+        var split = fractionSplitter.split(HugeLongArray.newArray(0), 0.5);
         assertThat(split.trainSet().toArray()).isEmpty();
         assertThat(split.testSet().toArray()).isEmpty();
     }
@@ -39,7 +38,7 @@ class FractionSplitterTest {
     @Test
     void shouldGiveCorrectFractionConsecutiveIds() {
         double fraction = 0.65;
-        var fractionSplitter = new FractionSplitter(AllocationTracker.empty());
+        var fractionSplitter = new FractionSplitter();
         var split = fractionSplitter.split(HugeLongArray.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), fraction);
         assertThat(split.trainSet().toArray()).containsExactly(0, 1, 2, 3, 4, 5);
         assertThat(split.testSet().toArray()).containsExactly(6, 7, 8, 9);
@@ -48,7 +47,7 @@ class FractionSplitterTest {
     @Test
     void shouldGiveCorrectIdsForGeneralInput() {
         HugeLongArray input = HugeLongArray.of(4, 2, 1, 3, 3, 7);
-        var fractionSplitter = new FractionSplitter(AllocationTracker.empty());
+        var fractionSplitter = new FractionSplitter();
         var split = fractionSplitter.split(input, 0.6);
 
         assertThat(split.trainSet().toArray()).containsExactly(4, 2, 1);

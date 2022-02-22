@@ -19,17 +19,15 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-
 public class HugeDoubleTriangularMatrix {
 
     private final HugeDoubleArray array;
     private final long order;
 
-    public HugeDoubleTriangularMatrix(long order, AllocationTracker allocationTracker) {
+    public HugeDoubleTriangularMatrix(long order) {
         long size = Math.multiplyExact(order, order + 1) / 2;
         this.order = order;
-        this.array = HugeDoubleArray.newArray(size, allocationTracker);
+        this.array = HugeDoubleArray.newArray(size);
     }
 
     public void set(long x, long y, double v) {

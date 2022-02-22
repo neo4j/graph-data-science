@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-
 import static org.neo4j.gds.core.utils.paged.HugeMatrices.triangularIndex;
 
 public class HugeLongTriangularMatrix {
@@ -28,10 +26,10 @@ public class HugeLongTriangularMatrix {
     private final HugeLongArray array;
     private final long order;
 
-    public HugeLongTriangularMatrix(long order, AllocationTracker allocationTracker) {
+    public HugeLongTriangularMatrix(long order) {
         long size = Math.multiplyExact(order, order + 1) / 2;
         this.order = order;
-        this.array = HugeLongArray.newArray(size, allocationTracker);
+        this.array = HugeLongArray.newArray(size);
     }
 
     public void set(long x, long y, long v) {

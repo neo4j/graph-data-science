@@ -83,12 +83,12 @@ class GiniIndexTest {
             hugeLabels.set(i, allLabels[i]);
         }
 
-        var leftGroup = HugeLongArray.newArray(groups[0].length, AllocationTracker.empty());
+        var leftGroup = HugeLongArray.newArray(groups[0].length);
         for (int i = 0; i < groups[0].length; i++) {
             leftGroup.set(i, groups[0][i]);
         }
 
-        var rightGroup = HugeLongArray.newArray(groups[1].length, AllocationTracker.empty());
+        var rightGroup = HugeLongArray.newArray(groups[1].length);
         for (int i = 0; i < groups[1].length; i++) {
             rightGroup.set(i, groups[1][i]);
         }

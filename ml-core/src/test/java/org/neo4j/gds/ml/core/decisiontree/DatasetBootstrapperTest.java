@@ -40,8 +40,7 @@ class DatasetBootstrapperTest {
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             RANDOM,
             0.5,
-            cachedBootstrappedDataset,
-            AllocationTracker.empty()
+            cachedBootstrappedDataset
         );
 
         assertThat(bootstrappedVectors.size()).isEqualTo(10L);
@@ -56,8 +55,7 @@ class DatasetBootstrapperTest {
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             RANDOM,
             0.5,
-            cachedBootstrappedDataset,
-            AllocationTracker.empty()
+            cachedBootstrappedDataset
         );
 
         for (long i = 0; i < cachedBootstrappedDataset.size(); i++) {
@@ -87,8 +85,7 @@ class DatasetBootstrapperTest {
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             RANDOM,
             0.5,
-            cachedBootstrappedDataset,
-            AllocationTracker.empty()
+            cachedBootstrappedDataset
         );
 
         for (long i = 0; i < bootstrappedVectors.size(); i++) {
@@ -108,8 +105,7 @@ class DatasetBootstrapperTest {
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             random,
             1.0,
-            cachedBootstrappedDataset,
-            AllocationTracker.empty()
+            cachedBootstrappedDataset
         );
 
         assertThat(bootstrappedVectors.get(0)).isEqualTo(0);

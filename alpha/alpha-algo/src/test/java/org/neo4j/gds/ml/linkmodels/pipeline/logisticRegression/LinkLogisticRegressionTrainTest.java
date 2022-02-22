@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.collections.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -64,7 +63,7 @@ class LinkLogisticRegressionTrainTest {
 
     @BeforeEach
     void setup() {
-        this.targets = HugeDoubleArray.newArray(graph.relationshipCount(), AllocationTracker.empty());
+        this.targets = HugeDoubleArray.newArray(graph.relationshipCount());
         targets.setAll(idx -> (idx < 2) ? 1 : 0);
 
         trainSet = new ReadOnlyHugeLongIdentityArray(graph.relationshipCount());

@@ -19,16 +19,14 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-
 public final class HugeLongArrayStack {
 
     private final HugeLongArray array;
     private final long capacity;
     private long size;
 
-    public static HugeLongArrayStack newStack(long capacity, AllocationTracker allocationTracker) {
-        return new HugeLongArrayStack(HugeLongArray.newArray(capacity, allocationTracker));
+    public static HugeLongArrayStack newStack(long capacity) {
+        return new HugeLongArrayStack(HugeLongArray.newArray(capacity));
     }
 
     private HugeLongArrayStack(HugeLongArray array) {

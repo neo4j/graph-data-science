@@ -25,7 +25,6 @@ import com.carrotsearch.hppc.LongArrayDeque;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
@@ -81,8 +80,7 @@ public final class Dijkstra extends Algorithm<DijkstraResult> {
         Graph graph,
         ShortestPathBaseConfig config,
         Optional<HeuristicFunction> heuristicFunction,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         long sourceNode = graph.toMappedNodeId(config.sourceNode());
         long targetNode = graph.toMappedNodeId(config.targetNode());
@@ -93,8 +91,7 @@ public final class Dijkstra extends Algorithm<DijkstraResult> {
             node -> node == targetNode ? EMIT_AND_STOP : CONTINUE,
             config.trackRelationships(),
             heuristicFunction,
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
     }
 
@@ -105,16 +102,14 @@ public final class Dijkstra extends Algorithm<DijkstraResult> {
         Graph graph,
         AllShortestPathsBaseConfig config,
         Optional<HeuristicFunction> heuristicFunction,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         return new Dijkstra(graph,
             graph.toMappedNodeId(config.sourceNode()),
             node -> EMIT_AND_CONTINUE,
             config.trackRelationships(),
             heuristicFunction,
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
     }
 
@@ -136,8 +131,7 @@ public final class Dijkstra extends Algorithm<DijkstraResult> {
         TraversalPredicate traversalPredicate,
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -148,8 +142,8 @@ public final class Dijkstra extends Algorithm<DijkstraResult> {
         this.queue = heuristicFunction
             .map(fn -> minPriorityQueue(graph.nodeCount(), fn))
             .orElseGet(() -> HugeLongPriorityQueue.min(graph.nodeCount()));
-        this.predecessors = new HugeLongLongMap(allocationTracker);
-        this.relationships = trackRelationships ? new HugeLongLongMap(allocationTracker) : null;
+        this.predecessors = new HugeLongLongMap();
+        this.relationships = trackRelationships ? new HugeLongLongMap() : null;
         this.visited = new BitSet();
         this.pathIndex = 0L;
     }

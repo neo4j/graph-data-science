@@ -24,7 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -107,18 +106,17 @@ public final class MultiSourceBFS implements Runnable {
      * To finalize initialization, one must call:
      * {@link MultiSourceBFS#initAggregatedNeighborProcessing}.
      */
-    public static MultiSourceBFS aggregatedNeighborProcessing(Graph graph, AllocationTracker allocationTracker) {
-        return new MultiSourceBFS(graph, graph, null, false, false, allocationTracker);
+    public static MultiSourceBFS aggregatedNeighborProcessing(Graph graph) {
+        return new MultiSourceBFS(graph, graph, null, false, false);
     }
 
     public static MultiSourceBFS aggregatedNeighborProcessing(
         IdMap nodeIds,
         RelationshipIterator relationships,
         BfsConsumer perNodeAction,
-        AllocationTracker allocationTracker,
         long... startNodes
     ) {
-        return new MultiSourceBFS(nodeIds, relationships, new ANPStrategy(perNodeAction), false, false, allocationTracker, startNodes);
+        return new MultiSourceBFS(nodeIds, relationships, new ANPStrategy(perNodeAction), false, false, startNodes);
     }
 
     /**
@@ -131,15 +129,14 @@ public final class MultiSourceBFS implements Runnable {
      * To finalize initialization, one must call:
      * {@link MultiSourceBFS#initPredecessorProcessing}.
      */
-    public static MultiSourceBFS predecessorProcessing(Graph graph, AllocationTracker allocationTracker) {
-        return new MultiSourceBFS(graph, graph, null, true, false, allocationTracker);
+    public static MultiSourceBFS predecessorProcessing(Graph graph) {
+        return new MultiSourceBFS(graph, graph, null, true, false);
     }
 
     public static MultiSourceBFS predecessorProcessing(
         Graph graph,
         BfsConsumer perNodeAction,
         BfsWithPredecessorConsumer perNeighborAction,
-        AllocationTracker allocationTracker,
         long... startNodes
     ) {
         return new MultiSourceBFS(
@@ -148,7 +145,6 @@ public final class MultiSourceBFS implements Runnable {
             new PredecessorStrategy(perNodeAction, perNeighborAction),
             true,
             false,
-            allocationTracker,
             startNodes
         );
     }
@@ -193,7 +189,6 @@ public final class MultiSourceBFS implements Runnable {
         ExecutionStrategy strategy,
         boolean initSeenNext,
         boolean allowStartNodeTraversal,
-        AllocationTracker allocationTracker,
         long... startNodes
     ) {
         this.nodeIds = nodeIds;
@@ -205,10 +200,10 @@ public final class MultiSourceBFS implements Runnable {
             Arrays.sort(this.startNodes);
         }
         this.nodeCount = nodeIds.nodeCount();
-        this.visits = new LocalHugeLongArray(nodeCount, allocationTracker);
-        this.visitsNext = new LocalHugeLongArray(nodeCount, allocationTracker);
-        this.seens = new LocalHugeLongArray(nodeCount, allocationTracker);
-        this.seensNext = initSeenNext ? new LocalHugeLongArray(nodeCount, allocationTracker) : null;
+        this.visits = new LocalHugeLongArray(nodeCount);
+        this.visitsNext = new LocalHugeLongArray(nodeCount);
+        this.seens = new LocalHugeLongArray(nodeCount);
+        this.seensNext = initSeenNext ? new LocalHugeLongArray(nodeCount) : null;
     }
 
     private MultiSourceBFS(
@@ -524,8 +519,8 @@ public final class MultiSourceBFS implements Runnable {
     }
 
     private static final class LocalHugeLongArray extends CloseableThreadLocal<HugeLongArray> {
-        private LocalHugeLongArray(final long size, final AllocationTracker allocationTracker) {
-            super(() -> HugeLongArray.newArray(size, allocationTracker));
+        private LocalHugeLongArray(final long size) {
+            super(() -> HugeLongArray.newArray(size));
         }
 
         @Override

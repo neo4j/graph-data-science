@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-
 public class HugeLongMatrix {
 
     private final HugeLongArray array;
@@ -28,10 +26,10 @@ public class HugeLongMatrix {
     private final long rows;
     private final long cols;
 
-    public HugeLongMatrix(long rows, long cols, AllocationTracker allocationTracker) {
+    public HugeLongMatrix(long rows, long cols) {
         this.rows = rows;
         this.cols = cols;
-        this.array = HugeLongArray.newArray(Math.multiplyExact(rows, cols), allocationTracker);
+        this.array = HugeLongArray.newArray(Math.multiplyExact(rows, cols));
     }
 
     public void set(long x, long y, long v) {

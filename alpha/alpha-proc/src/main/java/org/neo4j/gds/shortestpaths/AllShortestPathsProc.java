@@ -89,7 +89,6 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
                 } else {
                     return new MSBFSAllShortestPaths(
                         graph,
-                        allocationTracker,
                         configuration.concurrency(),
                         Pools.DEFAULT
                     );

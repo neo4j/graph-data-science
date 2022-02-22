@@ -73,7 +73,7 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
     }
 
     public HugeDoubleArray getCentrality() {
-        final HugeDoubleArray cc = HugeDoubleArray.newArray(nodeCount, allocationTracker);
+        final HugeDoubleArray cc = HugeDoubleArray.newArray(nodeCount);
         for (int i = 0; i < nodeCount; i++) {
             cc.set(i, centrality(farness.get(i),
                     component.get(i),
@@ -129,7 +129,7 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
         };
 
         MultiSourceBFS
-            .aggregatedNeighborProcessing(graph, graph, consumer, allocationTracker)
+            .aggregatedNeighborProcessing(graph, graph, consumer)
             .run(concurrency, executorService);
 
         progressTracker.endSubTask();

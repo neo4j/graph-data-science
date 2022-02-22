@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.splitting;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -47,7 +46,6 @@ import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
  * each bucket contains roughly the same number of nodes with that class.
  */
 public class StratifiedKFoldSplitter {
-    private final AllocationTracker allocationTracker;
     private final int k;
     private final ReadOnlyHugeLongArray ids;
     private final ReadOnlyHugeLongArray targets;
@@ -88,7 +86,6 @@ public class StratifiedKFoldSplitter {
         this.k = k;
         this.ids = ids;
         this.targets = targets;
-        this.allocationTracker = AllocationTracker.empty();
         this.random = createRandomDataGenerator(randomSeed);
     }
 
@@ -136,8 +133,8 @@ public class StratifiedKFoldSplitter {
         for (int fold = 0; fold < k; fold++) {
             // make the first buckets larger when nodeCount is not divisible by k
             var testSize = fold < nodeCount % k ? baseBucketSize + 1 : baseBucketSize;
-            testSets[fold] = HugeLongArray.newArray(testSize, allocationTracker);
-            trainSets[fold] = HugeLongArray.newArray(nodeCount - testSize, allocationTracker);
+            testSets[fold] = HugeLongArray.newArray(testSize);
+            trainSets[fold] = HugeLongArray.newArray(nodeCount - testSize);
         }
     }
 

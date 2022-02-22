@@ -98,7 +98,7 @@ public final class Louvain extends Algorithm<Louvain> {
             modularityOptimization.release();
 
             modularities[ranLevels] = modularityOptimization.getModularity();
-            dendrograms[ranLevels] = HugeLongArray.newArray(rootGraph.nodeCount(), allocationTracker);
+            dendrograms[ranLevels] = HugeLongArray.newArray(rootGraph.nodeCount());
             long maxCommunityId = buildDendrogram(workingGraph, ranLevels, modularityOptimization);
 
             workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);

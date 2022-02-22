@@ -21,7 +21,6 @@ package org.neo4j.gds.impl.influenceMaximization;
 
 import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
@@ -45,8 +44,7 @@ final class IndependentCascade {
         Graph graph,
         double propagationProbability,
         long monteCarloSimulations,
-        HugeLongPriorityQueue spreads,
-        AllocationTracker allocationTracker
+        HugeLongPriorityQueue spreads
     ) {
         this.graph = graph.concurrentCopy();
         this.propagationProbability = propagationProbability;
@@ -54,7 +52,7 @@ final class IndependentCascade {
         this.spreads = spreads;
 
         this.active = new LongScatterSet();
-        this.newActive = HugeLongArrayStack.newStack(graph.nodeCount(), allocationTracker);
+        this.newActive = HugeLongArrayStack.newStack(graph.nodeCount());
 
         this.rand = new Random();
     }

@@ -187,7 +187,7 @@ public abstract class NodeValue {
     private static Object initArray(Element element, long nodeCount, int concurrency, AllocationTracker allocationTracker) {
         switch (element.propertyType()) {
             case DOUBLE:
-                var doubleNodeValues = HugeDoubleArray.newArray(nodeCount, allocationTracker);
+                var doubleNodeValues = HugeDoubleArray.newArray(nodeCount);
                 ParallelUtil.parallelStreamConsume(
                     LongStream.range(0, nodeCount),
                     concurrency,
@@ -198,7 +198,7 @@ public abstract class NodeValue {
                 );
                 return doubleNodeValues;
             case LONG:
-                var longNodeValues = HugeLongArray.newArray(nodeCount, allocationTracker);
+                var longNodeValues = HugeLongArray.newArray(nodeCount);
                 ParallelUtil.parallelStreamConsume(
                     LongStream.range(0, nodeCount),
                     concurrency,
