@@ -126,11 +126,11 @@ class NodeClassificationIntegrationTest extends BaseProcTest {
 
         assertCypherResult(predictedClasses, List.of(
             Map.of("name", "0_1", "predictedClass", 0L, "probabilities", hasSize(3)),
-            Map.of("name", "0_2", "predictedClass", 0L, "probabilities", hasSize(3)),
+            Map.of("name", "0_2", "predictedClass", 1L, "probabilities", hasSize(3)),
             Map.of("name", "0_3", "predictedClass", 1L, "probabilities", hasSize(3)),
-            Map.of("name", "0_4", "predictedClass", 0L, "probabilities", hasSize(3)),
+            Map.of("name", "0_4", "predictedClass", 2L, "probabilities", hasSize(3)),
             Map.of("name", "0_5", "predictedClass", 2L, "probabilities", hasSize(3)),
-            Map.of("name", "0_hidden", "predictedClass", 0L, "probabilities", hasSize(3)),
+            Map.of("name", "0_hidden", "predictedClass", 1L, "probabilities", hasSize(3)),
             Map.of("name", "1_1", "predictedClass", 1L, "probabilities", hasSize(3)),
             Map.of("name", "1_10", "predictedClass", 1L, "probabilities", hasSize(3)),
             Map.of("name", "1_2", "predictedClass", 1L, "probabilities", hasSize(3)),

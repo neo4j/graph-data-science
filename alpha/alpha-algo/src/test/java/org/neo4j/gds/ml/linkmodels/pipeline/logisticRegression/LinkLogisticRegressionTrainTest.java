@@ -117,10 +117,10 @@ class LinkLogisticRegressionTrainTest {
 
         var result = linearRegression.compute();
 
-        var expected = new Matrix(new double[]{0.09659737489561905, -0.09546107129698361}, 1, 2);
-        assertThat(result.weights().data()).matches(matrix -> matrix.equals(expected, 1e-8));
+        var expected = new double[]{0.09648023, -0.08356053};
+        assertThat(result.weights().data().data()).hasSize(2).containsExactly(expected, Offset.offset(1e-8));
 
-        var expectedBias = 0.027877045803993247;
+        var expectedBias = 0.00785629;
         assertThat(result.bias().get().data().value()).isCloseTo(expectedBias, Offset.offset(1e-8));
     }
 

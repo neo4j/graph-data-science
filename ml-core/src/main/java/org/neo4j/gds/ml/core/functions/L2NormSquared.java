@@ -41,29 +41,19 @@ public class L2NormSquared extends SingleParentVariable<Matrix, Scalar> {
         var rows = parentMatrix.rows();
         var cols = parentMatrix.cols();
 
-        var biasColumnIndex = cols - 1;
-        double l2NormWithoutBias = 0;
+        double l2Norm = 0;
         for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < biasColumnIndex; col++) {
+            for (int col = 0; col < cols; col++) {
                 var value = parentMatrix.dataAt(row * cols + col);
-                l2NormWithoutBias += (value * value);
+                l2Norm += (value * value);
             }
         }
 
-        return new Scalar(l2NormWithoutBias);
+        return new Scalar(l2Norm);
     }
 
     @Override
     public Matrix gradientForParent(ComputationContext ctx) {
-        var result = ctx.data(parent).copy();
-        var rows = result.rows();
-        var cols = result.cols();
-        var biasColumnIndex = cols - 1;
-
-        for (int row = 0; row < rows; row++) {
-            result.setDataAt(row * cols + biasColumnIndex, 0);
-        }
-
-        return result.scalarMultiply(2 * ctx.gradient(this).value());
+        return ctx.data(parent).copy().scalarMultiply(2 * ctx.gradient(this).value());
     }
 }

@@ -106,7 +106,7 @@ class LinkLogisticRegressionObjectiveTest {
             sigmoid(0.2 * 1.0 - 0.3 * 3.61 + 0.5)
         };
         var expectedTotalCEL = -Math.log(pred[0]) - Math.log(1 - pred[1]) - Math.log(1 - pred[2]) - Math.log(pred[3]);
-        var expectedPenalty = Math.pow(0.2, 2) + Math.pow(0.3, 2);
+        var expectedPenalty = Math.pow(0.2, 2) + Math.pow(0.3, 2) + Math.pow(0.5, 2);
 
         assertThat(ctx.forward(loss).value())
             .isCloseTo(expectedPenalty + expectedTotalCEL / 4, Offset.offset(1e-7));
