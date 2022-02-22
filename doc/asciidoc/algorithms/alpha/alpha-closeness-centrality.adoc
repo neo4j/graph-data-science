@@ -79,9 +79,47 @@ In practice, a variation on the original formula is used so that we don't run in
 
 [[algorithms-closeness-centrality-syntax]]
 == Syntax
+[.include-with-mutate]
+======
+.The following will run the algorithm and mutate the in-memory graph.
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.closeness.mutate(
+  graphName: string,
+  configuration: map
+)
+YIELD nodes, preProcessingMillis, computeMillis, mutateMillis, centralityDistribution
+----
 
+.Parameters
+[opts="header",cols="1,1,1,1,5"]
+|===
+| Name                          | Type    | Default                | Optional | Description
+| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
+Also provides the default value for 'readConcurrency' and 'mutateConcurrency'.
+| readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| mutateConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for mutating the in-memory graph.
+| mutateProperty                 | string  | 'centrality'           | yes      | The node property in the GDS graph to which the centrality is written.
+| improved                      | boolean | false                  | yes      | Denotes whether the Wasserman-Faust formula is used.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| nodes                  | int       | The number of nodes considered.
+| preProcessingMillis    | int       | Milliseconds for preprocessing the data.
+| computeMillis          | int       | Milliseconds for running the algorithm.
+| mutateMillis            | int       | Milliseconds for mutating the GDS graph.
+| mutateProperty          | string    | The node property updated in the GDS graph.
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+|===
+
+======
+[.include-with-write]
+======
 .The following will run the algorithm and write back results:
-[source, cypher, role=noplay]
+[source,cypher,role=noplay]
 ----
 CALL gds.alpha.closeness.write(
   graphName: string,
@@ -113,10 +151,12 @@ Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | writeProperty          | string    | The property name written back to.
 | centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
 |===
+======
 
-
+[.include-with-stream]
+======
 .The following will run the algorithm and stream results:
-[source, cypher, role=noplay]
+[source,cypher,role=noplay]
 ----
 CALL gds.alpha.closeness.stream(
   graphName: string,
@@ -129,7 +169,7 @@ YIELD nodeId, centrality
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                          | Type    | Default                | Optional | Description
-| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm.Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
 
@@ -141,6 +181,7 @@ YIELD nodeId, centrality
 | centrality | float | Closeness centrality score
 |===
 
+======
 
 [[algorithms-closeness-centrality-sample]]
 == Closeness Centrality algorithm sample
