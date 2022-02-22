@@ -82,6 +82,29 @@ class GraphStoreTest extends BaseTest {
         ", (b)-[:T1 {property1: 33}]->(c)" +
         ", (c)-[:T1 {property1: 33}]->(b)";
 
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("graphsForNodeFilterChecking")
+    void testAsNodeFilteredGraph(
+       String desc,
+       List<RelationshipType> relTypes,
+       List<NodeLabel> nodeLabels,
+       boolean expectedIsPresent
+    ) {
+        GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(db)
+            .graphName("myGraph")
+            .addNodeProjection(NodeProjection.of("A"))
+            .addNodeProjection(NodeProjection.of("B"))
+            .relationshipProjections(relationshipProjections())
+            .build();
+
+        GraphStore graphStore = graphLoader.graphStore();
+        var graph = graphStore.getGraph(nodeLabels, relTypes, Optional.empty());
+
+        assertThat(graph.asNodeFilteredGraph().isPresent()).isEqualTo(expectedIsPresent);
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("validRelationshipFilterParameters")
     void testFilteringGraphsByRelationships(
@@ -319,6 +342,35 @@ class GraphStoreTest extends BaseTest {
                 singletonList(RelationshipType.of("T1")),
                 Optional.of("property1"),
                 "(a:A), (b:B), (a)-[T1 {property1: 42.0}]->(b)"
+            )
+        );
+    }
+
+    static Stream<Arguments> graphsForNodeFilterChecking() {
+        return Stream.of(
+            Arguments.of(
+                "filterNodesSingleRelationship",
+                singletonList(RelationshipType.of("T1")),
+                singletonList(NodeLabel.of("A")),
+                true
+            ),
+            Arguments.of(
+                "filterNodesMultipleRelationships",
+                List.of(RelationshipType.of("T1"), RelationshipType.of("T2")),
+                singletonList(NodeLabel.of("B")),
+                true
+            ),
+            Arguments.of(
+                "doNotfilterNodesSingleRelationship",
+                singletonList(RelationshipType.of("T1")),
+                List.of(NodeLabel.of("A"), NodeLabel.of("B")),
+                false
+            ),
+            Arguments.of(
+                "doNotfilterNodesMultipleRelationships",
+                List.of(RelationshipType.of("T1"), RelationshipType.of("T2")),
+                List.of(NodeLabel.of("A"), NodeLabel.of("B")),
+                false
             )
         );
     }

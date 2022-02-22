@@ -50,13 +50,17 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
         runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
         GraphStoreCatalog.removeAllLoadedGraphs();
 
-        runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
+        runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (:B), (a1)-[:REL1]->(a2), (a2)-[:REL2]->(b)");
         String graphName = "myGraph";
 
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
             .api(graphDb())
             .graphName(graphName)
             .addNodeLabels("A", "B");
+
+        if (!requiresUndirected()) {
+            storeLoaderBuilder.addRelationshipTypes("REL1", "REL2");
+        }
 
         relationshipProjections().projections().forEach((relationshipType, projection)->
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
@@ -70,7 +74,7 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
                 .forEach(mutateMethod -> {
                     CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
                         "nodeLabels",
-                        Collections.singletonList("A")
+                        Collections.singletonList("B")
                     );
 
                     Map<String, Object> config = createMinimalConfig(filterConfig).toMap();
@@ -90,7 +94,7 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
 
         runQuery(graphDb(), graphWriteQuery, Map.of("graph", graphName, "property", mutateProperty()));
 
-        String checkNeo4jGraphNegativeQuery = formatWithLocale("MATCH (n:B) RETURN n.%s AS property", mutateProperty());
+        String checkNeo4jGraphNegativeQuery = formatWithLocale("MATCH (n:A) RETURN n.%s AS property", mutateProperty());
 
         runQueryWithRowConsumer(
             graphDb(),
@@ -99,7 +103,7 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
             ((transaction, resultRow) -> assertNull(resultRow.get("property")))
         );
 
-        String checkNeo4jGraphPositiveQuery = formatWithLocale("MATCH (n:A) RETURN n.%s AS property", mutateProperty());
+        String checkNeo4jGraphPositiveQuery = formatWithLocale("MATCH (n:B) RETURN n.%s AS property", mutateProperty());
 
         runQueryWithRowConsumer(
             graphDb(),

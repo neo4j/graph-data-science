@@ -85,6 +85,11 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
     }
 
     @Override
+    public boolean requiresUndirected() {
+        return true;
+    }
+
+    @Override
     public String relationshipQuery() {
         return ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
     }

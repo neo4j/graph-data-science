@@ -130,6 +130,11 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     }
 
     @Override
+    public boolean requiresUndirected() {
+        return true;
+    }
+
+    @Override
     public String relationshipQuery() {
         return ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
     }
