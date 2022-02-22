@@ -110,6 +110,7 @@ Also provides the default value for 'readConcurrency' and 'mutateConcurrency'.
 | nodes                  | int       | The number of nodes considered.
 | preProcessingMillis    | int       | Milliseconds for preprocessing the data.
 | computeMillis          | int       | Milliseconds for running the algorithm.
+| postProcessingMillis   | int       | Milliseconds for computing the centrality distribution.
 | mutateMillis            | int       | Milliseconds for mutating the GDS graph.
 | mutateProperty          | string    | The node property updated in the GDS graph.
 | centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
@@ -147,6 +148,7 @@ Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | nodes                  | int       | The number of nodes considered.
 | preProcessingMillis    | int       | Milliseconds for preprocessing the data.
 | computeMillis          | int       | Milliseconds for running the algorithm.
+| postProcessingMillis   | int       | Milliseconds for computing the centrality distribution.
 | writeMillis            | int       | Milliseconds for writing result data back.
 | writeProperty          | string    | The property name written back to.
 | centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
