@@ -405,6 +405,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         return RelationshipProjections.ALL;
     }
 
+    default boolean requiresUndirected() {
+        return false;
+    }
+
     default String relationshipQuery() {
         return ALL_RELATIONSHIPS_QUERY;
     }
