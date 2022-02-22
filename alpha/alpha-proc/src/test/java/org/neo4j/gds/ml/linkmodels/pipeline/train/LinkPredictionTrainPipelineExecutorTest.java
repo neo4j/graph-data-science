@@ -193,7 +193,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrain.MODEL_TYPE);
             assertThat(actualModel.trainConfig()).isEqualTo(config);
             // length of the linkFeatures
-            assertThat(logisticRegressionData.weights().data().totalSize()).isEqualTo(12);
+            assertThat(logisticRegressionData.weights().data().totalSize()).isEqualTo(6);
 
             var customInfo = actualModel.customInfo();
             assertThat(result.modelSelectionStatistics().validationStats().get(LinkMetric.AUCPR))

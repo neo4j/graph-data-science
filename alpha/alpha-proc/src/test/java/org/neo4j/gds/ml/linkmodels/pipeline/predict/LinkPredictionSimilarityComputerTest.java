@@ -65,8 +65,8 @@ class LinkPredictionSimilarityComputerTest {
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, linkFeatureSteps);
         var modelData = ImmutableLogisticRegressionData.of(
             new Weights<>(new Matrix(
-                new double[]{0, 0, 1, 0.0001},
-                2,
+                new double[]{-1, -0.0001},
+                1,
                 2
             )),
             Weights.ofScalar(0),

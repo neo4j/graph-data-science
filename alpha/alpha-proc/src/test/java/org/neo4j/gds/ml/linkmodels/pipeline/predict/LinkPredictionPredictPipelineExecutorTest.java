@@ -127,8 +127,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var modelData = ImmutableLogisticRegressionData.of(
                 new Weights<>(
                     new Matrix(
-                        new double[]{0, 0, 0, -2.0, -1.0, 3.0},
-                        2,
+                        new double[]{2.0, 1.0, -3.0},
+                        1,
                         3
                     )),
                 Weights.ofScalar(0),
@@ -178,8 +178,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var modelData = ImmutableLogisticRegressionData.of(
                 new Weights<>(
                     new Matrix(
-                        new double[]{0, 0, 0, 0, -2.0, -1.0, 3.0, 1.0},
-                        2,
+                        new double[]{2.0, 1.0, -3.0, -1.0},
+                        1,
                         4
                     )),
                 Weights.ofScalar(0),
@@ -227,8 +227,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var modelData = ImmutableLogisticRegressionData.of(
                 new Weights<>(
                     new Matrix(
-                        new double[]{0, 0, 0, 0, -2.0, -1.0, 3.0, 1.0},
-                        2,
+                        new double[]{2.0, 1.0, -3.0, -1.0},
+                        1,
                         4
                     )),
                 Weights.ofScalar(0),

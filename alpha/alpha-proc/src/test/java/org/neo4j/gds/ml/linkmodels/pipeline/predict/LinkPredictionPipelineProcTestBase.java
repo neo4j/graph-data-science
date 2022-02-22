@@ -86,15 +86,15 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
     }
 
     private void withModelInCatalog() {
-        var weights = new double[]{0, 0, 0, -2.0, -1.0, 3.0};
+        var weights = new double[]{2.0, 1.0, -3.0};
         var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
         var modelData = ImmutableLogisticRegressionData.of(
             new Weights<>(new Matrix(
                 weights,
-                2,
-                weights.length / 2
+                1,
+                weights.length
             )),
             Weights.ofScalar(0),
             LinkPrediction.makeLabelIdMap()

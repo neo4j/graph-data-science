@@ -64,7 +64,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                         ", (n1)-[:T]->(n3)" +
                         ", (n2)-[:T]->(n4)";
 
-    private static final double[] WEIGHTS = new double[]{0, 0, 0, -2.0, -1.0, 3.0};
+    private static final double[] WEIGHTS = new double[]{2.0, 1.0, -3.0};
 
     private Graph graph;
 
@@ -94,8 +94,8 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
-                    2,
-                    WEIGHTS.length / 2
+                    1,
+                    WEIGHTS.length
                 )),
             Weights.ofScalar(0),
             LinkPrediction.makeLabelIdMap()
@@ -132,16 +132,16 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         assertThat(predictedLinks.size()).isLessThanOrEqualTo((int) (topK * graph.nodeCount()));
 
         var expectedLinks = List.of(
-            PredictedLink.of(0, 4, 0.4975000208331247),
-            PredictedLink.of(1, 0, 0.1150667320455497),
-            PredictedLink.of(2, 0, 2.0547103309367367E-4),
-            PredictedLink.of(3, 0, 0.002472623156634774),
-            PredictedLink.of(4, 0, 0.4975000208331247),
-            PredictedLink.of(0, 1, 0.1150667320455497),
-            PredictedLink.of(1, 4, 0.11815697780926944),
-            PredictedLink.of(2, 3, 2.8102286050198606E-9),
-            PredictedLink.of(3, 2, 2.8102286050198606E-9),
-            PredictedLink.of(4, 1, 0.11815697780926944)
+            PredictedLink.of(0, 4, 0.49750002083312506),
+            PredictedLink.of(0, 1, 0.1150667320455498),
+            PredictedLink.of(1, 4, 0.11815697780926955),
+            PredictedLink.of(1, 0, 0.1150667320455498),
+            PredictedLink.of(2, 0, 2.054710330936739E-4),
+            PredictedLink.of(2, 3, 2.810228605019864E-9),
+            PredictedLink.of(3, 0, 0.0024726231566347765),
+            PredictedLink.of(3, 2, 2.810228605019864E-9),
+            PredictedLink.of(4, 0, 0.49750002083312506),
+            PredictedLink.of(4, 1, 0.11815697780926955)
         );
 
         assertThat(predictedLinks)
@@ -152,13 +152,13 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
     @Test
     void shouldPredictTwice() {
-        double[] weights = {0, 0, 0, -2.0, -1.0, 3.0};
+        double[] weights = {2.0, 1.0, -3.0};
 
         var modelData = ImmutableLogisticRegressionData.of(
             new Weights<>(new Matrix(
                 weights,
-                2,
-                weights.length / 2
+                1,
+                weights.length
             )),
             Weights.ofScalar(0),
             LinkPrediction.makeLabelIdMap()
@@ -208,8 +208,8 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
-                    2,
-                    WEIGHTS.length / 2
+                    1,
+                    WEIGHTS.length
                 )),
             Weights.ofScalar(0),
             LinkPrediction.makeLabelIdMap()
