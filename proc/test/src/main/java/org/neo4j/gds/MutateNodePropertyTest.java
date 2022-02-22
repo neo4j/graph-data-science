@@ -50,14 +50,17 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
         runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
         GraphStoreCatalog.removeAllLoadedGraphs();
 
-        runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL1]->(a2), (a2)-[:REL2]->(b)");
+        runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (:B), (a1)-[:REL1]->(a2), (a2)-[:REL2]->(b)");
         String graphName = "myGraph";
 
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
             .api(graphDb())
             .graphName(graphName)
-            .addNodeLabels("A", "B")
-            .addRelationshipTypes("REL1", "REL2");
+            .addNodeLabels("A", "B");
+
+        if (!requiresUndirected()) {
+            storeLoaderBuilder.addRelationshipTypes("REL1", "REL2");
+        }
 
         relationshipProjections().projections().forEach((relationshipType, projection)->
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
