@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -81,11 +82,13 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     }
 
     public static MemoryEstimation estimate(
+        ModelCatalog modelCatalog,
         LinkPredictionPipeline pipeline,
         LinkPredictionPredictPipelineBaseConfig configuration,
         int linkFeatureDimension
     ) {
         MemoryEstimation maxOverNodePropertySteps = PipelineExecutor.estimateNodePropertySteps(
+            modelCatalog,
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),
             configuration.relationshipTypes()

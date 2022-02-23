@@ -102,6 +102,11 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
         var linkPredictionPipeline = model.customInfo().trainingPipeline();
         var linkFeatureDimension = model.data().weights().data().totalSize();
 
-        return LinkPredictionPredictPipelineExecutor.estimate(linkPredictionPipeline, configuration, linkFeatureDimension);
+        return LinkPredictionPredictPipelineExecutor.estimate(
+            modelCatalog,
+            linkPredictionPipeline,
+            configuration,
+            linkFeatureDimension
+        );
     }
 }
