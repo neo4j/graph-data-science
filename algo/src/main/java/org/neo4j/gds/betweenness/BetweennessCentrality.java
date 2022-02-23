@@ -106,7 +106,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
         private BCTask(AllocationTracker allocationTracker) {
             this.localRelationshipIterator = graph.concurrentCopy();
 
-            this.predecessors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, allocationTracker);
+            this.predecessors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
             this.predecessorsCursor = predecessors.newCursor();
             this.backwardNodes = HugeLongArrayStack.newStack(nodeCount);
             // TODO: make queue growable

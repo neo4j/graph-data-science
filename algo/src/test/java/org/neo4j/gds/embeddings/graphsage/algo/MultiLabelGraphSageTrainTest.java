@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
@@ -99,8 +98,7 @@ class MultiLabelGraphSageTrainTest {
             graph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         // should not fail
         multiLabelGraphSageTrain.compute();
@@ -118,8 +116,7 @@ class MultiLabelGraphSageTrainTest {
             graph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         // should not fail
         var model = multiLabelGraphSageTrain.compute();
@@ -145,8 +142,7 @@ class MultiLabelGraphSageTrainTest {
             graph,
             graphSageTrainConfig,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         var model = graphSageTrain.compute();
@@ -187,8 +183,7 @@ class MultiLabelGraphSageTrainTest {
             unequalGraph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -211,8 +206,7 @@ class MultiLabelGraphSageTrainTest {
             graph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(multiLabelGraphSageTrain::compute)

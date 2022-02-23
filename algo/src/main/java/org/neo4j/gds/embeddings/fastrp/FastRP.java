@@ -25,7 +25,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -96,10 +95,9 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         Graph graph,
         FastRPBaseConfig config,
         List<FeatureExtractor> featureExtractors,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
-        this(graph, config, featureExtractors, progressTracker, allocationTracker, config.randomSeed());
+        this(graph, config, featureExtractors, progressTracker, config.randomSeed());
     }
 
     public FastRP(
@@ -107,7 +105,6 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         FastRPBaseConfig config,
         List<FeatureExtractor> featureExtractors,
         ProgressTracker progressTracker,
-        AllocationTracker allocationTracker,
         Optional<Long> randomSeed
     ) {
         super(progressTracker);
@@ -120,11 +117,9 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         this.minBatchSize = config.minBatchSize();
 
         this.propertyVectors = new float[inputDimension][config.propertyDimension()];
-        this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount(), allocationTracker);
-        this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount(), allocationTracker);
-        this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount(), allocationTracker);
-        // Each of the above arrays will contain a float array of size `embeddingDimension` for each node.
-        allocationTracker.add(3 * graph.nodeCount() * MemoryUsage.sizeOfFloatArray(config.embeddingDimension()));
+        this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount());
+        this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount());
+        this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount());
 
         this.embeddingDimension = config.embeddingDimension();
         this.baseEmbeddingDimension = config.embeddingDimension() - config.propertyDimension();

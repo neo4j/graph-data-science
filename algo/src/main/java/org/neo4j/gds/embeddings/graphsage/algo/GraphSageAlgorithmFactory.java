@@ -77,7 +77,6 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             model,
             configuration,
             executorService,
-            allocationTracker,
             progressTracker
         );
     }

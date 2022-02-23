@@ -332,8 +332,8 @@ class KnnTest {
     void testReverseEmptyList() {
         var nodeCount = 42;
 
-        var neighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, AllocationTracker.empty());
-        var reverseNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, AllocationTracker.empty());
+        var neighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
+        var reverseNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         // no old elements, don't add something to the reverse neighbors
         Knn.reverseNeighbors(0, neighbors, reverseNeighbors);
@@ -347,8 +347,8 @@ class KnnTest {
     void testReverseAllAsNeighbor() {
         var nodeCount = 42;
 
-        var neighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, AllocationTracker.empty());
-        var reverseNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, AllocationTracker.empty());
+        var neighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
+        var reverseNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         // 0 is neighboring every other node
         var neighborsFrom0 = LongArrayList.from(LongStream.range(1, nodeCount).toArray());
@@ -374,8 +374,8 @@ class KnnTest {
     void testReverseSingleNeighbors() {
         var nodeCount = 42;
 
-        var neighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, AllocationTracker.empty());
-        var reverseNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, AllocationTracker.empty());
+        var neighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
+        var reverseNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         // every node other than 0 has 0 as neighbor
         neighbors.setAll(nodeId -> nodeId == 0 ? null : LongArrayList.from(0));

@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.extension.GdlExtension;
@@ -109,7 +108,7 @@ class LinkLogisticRegressionObjectiveTest {
     void shouldComputeCorrectFeatures(Batch batch, Tensor<?> expected) {
         var featureCount = 2;
 
-        var allFeatures = HugeObjectArray.newArray(double[].class, 10, AllocationTracker.empty());
+        var allFeatures = HugeObjectArray.newArray(double[].class, 10);
 
 
         allFeatures.setAll(idx -> {

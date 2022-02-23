@@ -228,18 +228,16 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
     abstract Class<T> elementClass();
 
     /**
-     * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
-     * The tracker is no longer referenced, as the arrays do not dynamically change their size.
+     * Creates a new array of the given size.
      */
     public static <T> HugeObjectArray<T> newArray(
         Class<T> componentClass,
-        long size,
-        AllocationTracker allocationTracker
+        long size
     ) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return SingleHugeObjectArray.of(componentClass, size, allocationTracker);
+            return SingleHugeObjectArray.of(componentClass, size);
         }
-        return PagedHugeObjectArray.of(componentClass, size, allocationTracker);
+        return PagedHugeObjectArray.of(componentClass, size);
     }
 
     @SafeVarargs
@@ -250,19 +248,17 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
     /* test-only */
     static <T> HugeObjectArray<T> newPagedArray(
         Class<T> componentClass,
-        long size,
-        AllocationTracker allocationTracker
+        long size
     ) {
-        return PagedHugeObjectArray.of(componentClass, size, allocationTracker);
+        return PagedHugeObjectArray.of(componentClass, size);
     }
 
     /* test-only */
     static <T> HugeObjectArray<T> newSingleArray(
         Class<T> componentClass,
-        int size,
-        AllocationTracker allocationTracker
+        int size
     ) {
-        return SingleHugeObjectArray.of(componentClass, size, allocationTracker);
+        return SingleHugeObjectArray.of(componentClass, size);
     }
 
     public static long memoryEstimation(long arraySize, long objectSize) {
@@ -319,14 +315,12 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
 
         private static <T> HugeObjectArray<T> of(
             Class<T> componentClass,
-            long size,
-            AllocationTracker allocationTracker
+            long size
         ) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             //noinspection unchecked
             T[] page = (T[]) Array.newInstance(componentClass, intSize);
-            allocationTracker.add(sizeOfObjectArray(intSize));
 
             return new SingleHugeObjectArray<>(intSize, page);
         }
@@ -408,7 +402,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         @Override
         public HugeObjectArray<T> copyOf(long newLength, AllocationTracker allocationTracker) {
             Class<T> tCls = (Class<T>) page.getClass().getComponentType();
-            HugeObjectArray<T> copy = HugeObjectArray.newArray(tCls, newLength, allocationTracker);
+            HugeObjectArray<T> copy = HugeObjectArray.newArray(tCls, newLength);
             this.copyTo(copy, newLength);
             return copy;
         }
@@ -458,8 +452,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         @SuppressWarnings("unchecked")
         private static <T> HugeObjectArray<T> of(
             Class<T> componentClass,
-            long size,
-            AllocationTracker allocationTracker
+            long size
         ) {
             int numPages = numberOfPages(size);
             T[][] pages = (T[][]) Array.newInstance(componentClass, numPages, PAGE_SIZE);
@@ -470,7 +463,6 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
             final int lastPageSize = exclusiveIndexOfPage(size);
             pages[numPages - 1] = (T[]) Array.newInstance(componentClass, lastPageSize);
             memoryUsed += sizeOfObjectArray(lastPageSize);
-            allocationTracker.add(memoryUsed);
 
             return new PagedHugeObjectArray<>(size, pages, memoryUsed);
         }
@@ -577,7 +569,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         @Override
         public HugeObjectArray<T> copyOf(long newLength, AllocationTracker allocationTracker) {
             Class<T> tCls = (Class<T>) pages.getClass().getComponentType().getComponentType();
-            HugeObjectArray<T> copy = HugeObjectArray.newArray(tCls, newLength, allocationTracker);
+            HugeObjectArray<T> copy = HugeObjectArray.newArray(tCls, newLength);
             this.copyTo(copy, newLength);
             return copy;
         }

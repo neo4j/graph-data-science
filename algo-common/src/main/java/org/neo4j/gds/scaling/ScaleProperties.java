@@ -25,7 +25,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -49,25 +48,22 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
 
     private final Graph graph;
     private final ScalePropertiesBaseConfig config;
-    private final AllocationTracker allocationTracker;
     private final ExecutorService executor;
 
     public ScaleProperties(
         Graph graph,
         ScalePropertiesBaseConfig config,
-        AllocationTracker allocationTracker,
         ExecutorService executor
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.config = config;
-        this.allocationTracker = allocationTracker;
         this.executor = executor;
     }
 
     @Override
     public Result compute() {
-        var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), allocationTracker);
+        var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount());
 
         // Create a Scaler for each input property
         // Array properties are unrolled into multiple scalers

@@ -42,8 +42,8 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
         var currentTails = HugeAtomicLongArray.newArray(nodeCount, allocationTracker);
         var prevTails = HugeAtomicLongArray.newArray(nodeCount, allocationTracker);
 
-        var currentQueues = HugeObjectArray.newArray(double[].class, nodeCount, allocationTracker);
-        var prevQueues = HugeObjectArray.newArray(double[].class, nodeCount, allocationTracker);
+        var currentQueues = HugeObjectArray.newArray(double[].class, nodeCount);
+        var prevQueues = HugeObjectArray.newArray(double[].class, nodeCount);
 
         var referenceCounts = HugeAtomicLongArray.newArray(nodeCount, allocationTracker);
 

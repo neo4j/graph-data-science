@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -40,7 +39,6 @@ public class GraphSageEmbeddingsGenerator {
     private final FeatureFunction featureFunction;
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
-    private final AllocationTracker allocationTracker;
 
     public GraphSageEmbeddingsGenerator(
         Layer[] layers,
@@ -49,8 +47,7 @@ public class GraphSageEmbeddingsGenerator {
         boolean isWeighted,
         FeatureFunction featureFunction,
         ExecutorService executor,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         this.layers = layers;
         this.batchSize = batchSize;
@@ -59,7 +56,6 @@ public class GraphSageEmbeddingsGenerator {
         this.featureFunction = featureFunction;
         this.executor = executor;
         this.progressTracker = progressTracker;
-        this.allocationTracker = allocationTracker;
     }
 
     public HugeObjectArray<double[]> makeEmbeddings(
@@ -68,8 +64,7 @@ public class GraphSageEmbeddingsGenerator {
     ) {
         HugeObjectArray<double[]> result = HugeObjectArray.newArray(
             double[].class,
-            graph.nodeCount(),
-            allocationTracker
+            graph.nodeCount()
         );
 
         progressTracker.beginSubTask();

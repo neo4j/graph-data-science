@@ -62,7 +62,6 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
                 .builder()
                 .progressTracker(progressTracker)
                 .executor(Pools.DEFAULT)
-                .allocationTracker(allocationTracker)
                 .build()
         );
     }

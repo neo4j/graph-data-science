@@ -24,7 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -42,7 +41,7 @@ class NodeValueTest {
         var schema = new PregelSchema.Builder()
             .add(key1, ValueType.DOUBLE)
             .build();
-        var nodeValues = NodeValue.of(schema, 10, 4, AllocationTracker.empty());
+        var nodeValues = NodeValue.of(schema, 10, 4);
         assertThat(nodeValues).isInstanceOf(NodeValue.SingleNodeValue.class);
         assertEquals(nodeValues.doubleProperties(key1).size(), 10);
     }
@@ -55,7 +54,7 @@ class NodeValueTest {
             .add(key1, ValueType.DOUBLE)
             .add(key2, ValueType.LONG)
             .build();
-        var nodeValues = NodeValue.of(schema, 10, 4, AllocationTracker.empty());
+        var nodeValues = NodeValue.of(schema, 10, 4);
         assertThat(nodeValues).isInstanceOf(NodeValue.CompositeNodeValue.class);
         assertEquals(nodeValues.doubleProperties(key1).size(), 10);
         assertEquals(nodeValues.longProperties(key2).size(), 10);
@@ -65,7 +64,7 @@ class NodeValueTest {
     @MethodSource("org.neo4j.gds.beta.pregel.NodeValueTest#validPropertyTypeAndGetters")
     void testThrowWhenAccessingUnknownProperty(ValueType valueType, BiConsumer<NodeValue, String> valueConsumer) {
         var schema = new PregelSchema.Builder().add("KEY", valueType).build();
-        var nodeValues = NodeValue.of(schema, 10, 4, AllocationTracker.empty());
+        var nodeValues = NodeValue.of(schema, 10, 4);
         assertThat(nodeValues).isInstanceOf(NodeValue.SingleNodeValue.class);
 
         assertThatThrownBy(() -> valueConsumer.accept(nodeValues, "DOES_NOT_EXIST"))
@@ -77,7 +76,7 @@ class NodeValueTest {
     @MethodSource("org.neo4j.gds.beta.pregel.NodeValueTest#invalidPropertyTypeAndGetters")
     void testThrowWhenAccessingPropertyOfWrongType(ValueType valueType, BiConsumer<NodeValue, String> valueConsumer) {
         var schema = new PregelSchema.Builder().add("KEY", valueType).build();
-        var nodeValues = NodeValue.of(schema, 10, 4, AllocationTracker.empty());
+        var nodeValues = NodeValue.of(schema, 10, 4);
         assertThat(nodeValues).isInstanceOf(NodeValue.SingleNodeValue.class);
 
         assertThatThrownBy(() -> valueConsumer.accept(nodeValues, "KEY"))

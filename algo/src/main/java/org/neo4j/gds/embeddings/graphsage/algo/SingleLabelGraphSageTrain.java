@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -36,20 +35,17 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
     private final Graph graph;
     private final GraphSageTrainConfig config;
     private final ExecutorService executor;
-    private final AllocationTracker allocationTracker;
 
     public SingleLabelGraphSageTrain(
         Graph graph,
         GraphSageTrainConfig config,
         ExecutorService executor,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
         this.executor = executor;
-        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -58,7 +54,7 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
 
         GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(
             graph,
-            initializeSingleLabelFeatures(graph, config, allocationTracker)
+            initializeSingleLabelFeatures(graph, config)
         );
 
         return Model.of(

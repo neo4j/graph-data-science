@@ -51,8 +51,7 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
             graph,
             configuration,
             featureExtractors,
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
     }
 

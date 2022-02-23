@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
@@ -133,19 +132,19 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
 
     static <T> Stream<HugeObjectArray<T>> arraysForTest(Class<T> type) {
         return Stream.of(
-            HugeObjectArray.newSingleArray(type, NODE_COUNT, AllocationTracker.empty()),
-            HugeObjectArray.newPagedArray(type, NODE_COUNT, AllocationTracker.empty())
+            HugeObjectArray.newSingleArray(type, NODE_COUNT),
+            HugeObjectArray.newPagedArray(type, NODE_COUNT)
         );
     }
 
     @Override
     HugeObjectArray<String> singleArray(final int size) {
-        return HugeObjectArray.newSingleArray(String.class, size, AllocationTracker.empty());
+        return HugeObjectArray.newSingleArray(String.class, size);
     }
 
     @Override
     HugeObjectArray<String> pagedArray(final int size) {
-        return HugeObjectArray.newPagedArray(String.class, size, AllocationTracker.empty());
+        return HugeObjectArray.newPagedArray(String.class, size);
     }
 
     @Override

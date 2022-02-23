@@ -23,7 +23,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageEmbeddingsGenerator;
@@ -45,14 +44,12 @@ public class GraphSage extends Algorithm<GraphSage.GraphSageResult> {
     private final GraphSageBaseConfig config;
     private final Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model;
     private final ExecutorService executor;
-    private final AllocationTracker allocationTracker;
 
     public GraphSage(
         Graph graph,
         Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model,
         GraphSageBaseConfig config,
         ExecutorService executor,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
@@ -60,7 +57,6 @@ public class GraphSage extends Algorithm<GraphSage.GraphSageResult> {
         this.config = config;
         this.model = model;
         this.executor = executor;
-        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -73,8 +69,7 @@ public class GraphSage extends Algorithm<GraphSage.GraphSageResult> {
             model.trainConfig().isWeighted(),
             model.data().featureFunction(),
             executor,
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
 
         GraphSageTrainConfig trainConfig = model.trainConfig();
@@ -82,9 +77,9 @@ public class GraphSage extends Algorithm<GraphSage.GraphSageResult> {
         var features = trainConfig.isMultiLabel() ?
             initializeMultiLabelFeatures(
                 graph,
-                GraphSageHelper.multiLabelFeatureExtractors(graph, trainConfig), allocationTracker
+                GraphSageHelper.multiLabelFeatureExtractors(graph, trainConfig)
             )
-            : initializeSingleLabelFeatures(graph, trainConfig, allocationTracker);
+            : initializeSingleLabelFeatures(graph, trainConfig);
 
         HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(
             graph,

@@ -46,8 +46,7 @@ class ClassificationDecisionTreeTest {
     private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES, AllocationTracker.empty());
     private final HugeObjectArray<double[]> allFeatureVectors = HugeObjectArray.newArray(
         double[].class,
-        NUM_SAMPLES,
-        AllocationTracker.empty()
+        NUM_SAMPLES
     );
     private GiniIndex giniIndexLoss;
 

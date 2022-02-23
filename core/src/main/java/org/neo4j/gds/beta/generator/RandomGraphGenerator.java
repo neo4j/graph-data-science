@@ -299,19 +299,19 @@ public final class RandomGraphGenerator {
                 );
             case DOUBLE_ARRAY:
                 return generateProperties(
-                    HugeObjectArray.newArray(double[].class, nodeCount, allocationTracker),
+                    HugeObjectArray.newArray(double[].class, nodeCount),
                     (PropertyProducer<double[][]>) propertyProducer,
                     HugeObjectArray::asNodeProperties
                 );
             case FLOAT_ARRAY:
                 return generateProperties(
-                    HugeObjectArray.newArray(float[].class, nodeCount, allocationTracker),
+                    HugeObjectArray.newArray(float[].class, nodeCount),
                     (PropertyProducer<float[][]>) propertyProducer,
                     HugeObjectArray::asNodeProperties
                 );
             case LONG_ARRAY:
                 return generateProperties(
-                    HugeObjectArray.newArray(long[].class, nodeCount, allocationTracker),
+                    HugeObjectArray.newArray(long[].class, nodeCount),
                     (PropertyProducer<long[][]>) propertyProducer,
                     HugeObjectArray::asNodeProperties
                 );

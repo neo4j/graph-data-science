@@ -158,7 +158,7 @@ public class Knn extends Algorithm<Knn.Result> {
             return null;
         }
 
-        var neighbors = HugeObjectArray.newArray(NeighborList.class, graph.nodeCount(), this.context.allocationTracker());
+        var neighbors = HugeObjectArray.newArray(NeighborList.class, graph.nodeCount());
 
         var randomNeighborGenerators = PartitionUtils.rangePartition(
             config.concurrency(),
@@ -214,15 +214,14 @@ public class Knn extends Algorithm<Knn.Result> {
             return NeighborList.NOT_INSERTED;
         }
 
-        var allocationTracker = this.context.allocationTracker();
         var concurrency = this.config.concurrency();
         var executor = this.context.executor();
 
         var sampledK = this.config.sampledK(nodeCount);
 
         // TODO: init in ctor and reuse - benchmark against new allocations
-        var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, allocationTracker);
-        var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, allocationTracker);
+        var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
+        var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         progressTracker.beginSubTask();
         ParallelUtil.readParallel(concurrency, nodeCount, executor, new SplitOldAndNewNeighbors(
@@ -236,8 +235,8 @@ public class Knn extends Algorithm<Knn.Result> {
         progressTracker.endSubTask();
 
         // TODO: init in ctor and reuse - benchmark against new allocations
-        var reverseOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, allocationTracker);
-        var reverseNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, allocationTracker);
+        var reverseOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
+        var reverseNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         progressTracker.beginSubTask();
         reverseOldAndNewNeighbors(

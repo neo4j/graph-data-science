@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -94,7 +93,6 @@ public class FastRPGdlTest {
             arrayConfig,
             FeatureExtraction.propertyExtractors(graph, properties),
             ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty(),
             Optional.of(123L)
         );
         return fastRPArray.compute().embeddings();

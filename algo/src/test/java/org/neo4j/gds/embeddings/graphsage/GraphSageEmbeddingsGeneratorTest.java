@@ -26,7 +26,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.CSRGraphStore;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
@@ -70,7 +69,7 @@ class GraphSageEmbeddingsGeneratorTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var features = GraphSageHelper.initializeSingleLabelFeatures(graph, config, AllocationTracker.empty());
+        var features = GraphSageHelper.initializeSingleLabelFeatures(graph, config);
 
         var trainModel = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
 
@@ -83,8 +82,7 @@ class GraphSageEmbeddingsGeneratorTest {
             config.isWeighted(),
             new SingleLabelFeatureFunction(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(graph, features);
@@ -110,8 +108,7 @@ class GraphSageEmbeddingsGeneratorTest {
             graph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         var model = trainer.compute();
@@ -123,15 +120,13 @@ class GraphSageEmbeddingsGeneratorTest {
             config.isWeighted(),
             model.data().featureFunction(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         var embeddings = embeddingsGenerator.makeEmbeddings(
             graph,
             GraphSageHelper.initializeMultiLabelFeatures(graph,
-                GraphSageHelper.multiLabelFeatureExtractors(graph, config),
-                AllocationTracker.empty()
+                GraphSageHelper.multiLabelFeatureExtractors(graph, config)
             )
         );
 
@@ -165,8 +160,7 @@ class GraphSageEmbeddingsGeneratorTest {
             filteredGraph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         var model = trainer.compute();
@@ -178,13 +172,12 @@ class GraphSageEmbeddingsGeneratorTest {
             config.isWeighted(),
             model.data().featureFunction(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         var embeddings = embeddingsGenerator.makeEmbeddings(
             filteredGraph,
-            GraphSageHelper.initializeSingleLabelFeatures(filteredGraph, config, AllocationTracker.empty())
+            GraphSageHelper.initializeSingleLabelFeatures(filteredGraph, config)
         );
 
         assertThat(embeddings)

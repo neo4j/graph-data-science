@@ -64,8 +64,8 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
         }
 
         return configuration.isMultiLabel()
-        ? new MultiLabelGraphSageTrain(graph, configuration, executorService, progressTracker, allocationTracker)
-        : new SingleLabelGraphSageTrain(graph, configuration, executorService, progressTracker, allocationTracker);
+        ? new MultiLabelGraphSageTrain(graph, configuration, executorService, progressTracker)
+        : new SingleLabelGraphSageTrain(graph, configuration, executorService, progressTracker);
     }
 
     @Override

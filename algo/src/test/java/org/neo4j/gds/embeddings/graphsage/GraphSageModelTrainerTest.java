@@ -90,7 +90,7 @@ class GraphSageModelTrainerTest {
     @BeforeEach
     void setUp() {
         long nodeCount = graph.nodeCount();
-        features = HugeObjectArray.newArray(double[].class, nodeCount, AllocationTracker.empty());
+        features = HugeObjectArray.newArray(double[].class, nodeCount);
 
         Random random = new Random(19L);
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
@@ -229,7 +229,7 @@ class GraphSageModelTrainerTest {
 
     @Test
     void shouldTrainModelWithArrayProperties() {
-        var arrayFeatures = HugeObjectArray.newArray(double[].class, arrayGraph.nodeCount(), AllocationTracker.empty());
+        var arrayFeatures = HugeObjectArray.newArray(double[].class, arrayGraph.nodeCount());
         LongStream
             .range(0, arrayGraph.nodeCount())
             .forEach(n -> arrayFeatures.set(n, arrayGraph.nodeProperties("features").doubleArrayValue(n)));

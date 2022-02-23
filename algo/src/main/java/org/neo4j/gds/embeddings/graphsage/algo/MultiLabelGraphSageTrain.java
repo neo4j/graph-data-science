@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
@@ -46,20 +45,17 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     private final Graph graph;
     private final GraphSageTrainConfig config;
     private final ExecutorService executor;
-    private final AllocationTracker allocationTracker;
 
     public MultiLabelGraphSageTrain(
         Graph graph,
         GraphSageTrainConfig config,
         ExecutorService executor,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
         this.executor = executor;
-        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -78,7 +74,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
 
         var trainResult = trainer.train(
             graph,
-            initializeMultiLabelFeatures(graph, multiLabelFeatureExtractors, allocationTracker)
+            initializeMultiLabelFeatures(graph, multiLabelFeatureExtractors)
         );
 
         return Model.of(

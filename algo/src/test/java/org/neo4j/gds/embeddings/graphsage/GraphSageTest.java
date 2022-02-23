@@ -102,7 +102,7 @@ class GraphSageTest {
             .build().generate();
 
         long nodeCount = graph.nodeCount();
-        features = HugeObjectArray.newArray(double[].class, nodeCount, AllocationTracker.empty());
+        features = HugeObjectArray.newArray(double[].class, nodeCount);
 
         Random random = new Random();
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
@@ -126,8 +126,7 @@ class GraphSageTest {
             orphanGraph,
             trainConfig,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         var model = trainAlgo.compute();
         modelCatalog.set(model);
@@ -161,7 +160,7 @@ class GraphSageTest {
             .concurrency(1)
             .build();
 
-        var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty());
+        var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
         var model = graphSageTrain.compute();
 
 
@@ -186,7 +185,7 @@ class GraphSageTest {
             .batchSize(2)
             .build();
 
-        var graphSage = new GraphSage(trainGraph, model, streamConfig, Pools.DEFAULT, AllocationTracker.empty(), ProgressTracker.NULL_TRACKER);
+        var graphSage = new GraphSage(trainGraph, model, streamConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
 
         assertThat(graphSage.compute().embeddings().size()).isEqualTo(predictNodeCount);
     }

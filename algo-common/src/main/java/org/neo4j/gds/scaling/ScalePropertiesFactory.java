@@ -48,7 +48,6 @@ public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConf
         return new ScaleProperties(
             graph,
             configuration,
-            allocationTracker,
             Pools.DEFAULT
         );
     }

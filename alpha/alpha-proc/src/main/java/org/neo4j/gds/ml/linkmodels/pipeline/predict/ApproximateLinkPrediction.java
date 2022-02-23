@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -82,7 +81,6 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             new LinkPredictionSimilarityComputer.LinkFilterFactory(graph),
             ImmutableKnnContext.of(
                 Pools.DEFAULT,
-                AllocationTracker.empty(),
                 progressTracker
             )
         ).compute();

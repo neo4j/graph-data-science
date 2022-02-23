@@ -26,7 +26,6 @@ import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -63,7 +62,7 @@ class ScalePropertiesTest {
             .scaler(ScalarScaler.Variant.MINMAX)
             .concurrency(1)
             .build();
-        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
+        var algo = new ScaleProperties(graph, config, Pools.DEFAULT);
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
@@ -82,7 +81,7 @@ class ScalePropertiesTest {
             .scaler(ScalarScaler.Variant.MINMAX)
             .concurrency(1)
             .build();
-        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
+        var algo = new ScaleProperties(graph, config, Pools.DEFAULT);
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
@@ -113,14 +112,12 @@ class ScalePropertiesTest {
         var parallelResult = new ScaleProperties(
             bigGraph,
             config.concurrency(4).build(),
-            AllocationTracker.empty(),
             Pools.DEFAULT
         ).compute().scaledProperties();
 
         var expected = new ScaleProperties(
             bigGraph,
             config.concurrency(1).build(),
-            AllocationTracker.empty(),
             Pools.DEFAULT
         ).compute().scaledProperties();
 
@@ -134,7 +131,7 @@ class ScalePropertiesTest {
             .scaler(ScalarScaler.Variant.MINMAX)
             .build();
 
-        var actual = new ScaleProperties(graph, arrayConfig, AllocationTracker.empty(), Pools.DEFAULT)
+        var actual = new ScaleProperties(graph, arrayConfig, Pools.DEFAULT)
             .compute()
             .scaledProperties();
 
@@ -143,7 +140,7 @@ class ScalePropertiesTest {
             .scaler(ScalarScaler.Variant.MINMAX)
             .build();
 
-        var expected = new ScaleProperties(graph, singlePropConfig, AllocationTracker.empty(), Pools.DEFAULT)
+        var expected = new ScaleProperties(graph, singlePropConfig, Pools.DEFAULT)
             .compute()
             .scaledProperties();
 
@@ -159,9 +156,9 @@ class ScalePropertiesTest {
         var longArrayBConfig = baseConfigBuilder.nodeProperties(List.of("longArrayB")).build();
         var doubleArrayBConfig = baseConfigBuilder.nodeProperties(List.of("floatArrayB")).build();
 
-        var expected = new ScaleProperties(graph, bConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
-        var actualLong = new ScaleProperties(graph, longArrayBConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
-        var actualDouble = new ScaleProperties(graph, doubleArrayBConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
+        var expected = new ScaleProperties(graph, bConfig, Pools.DEFAULT).compute().scaledProperties();
+        var actualLong = new ScaleProperties(graph, longArrayBConfig, Pools.DEFAULT).compute().scaledProperties();
+        var actualDouble = new ScaleProperties(graph, doubleArrayBConfig, Pools.DEFAULT).compute().scaledProperties();
 
         LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualLong.get(id)));
         LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualDouble.get(id)));
@@ -173,7 +170,7 @@ class ScalePropertiesTest {
         var config = baseConfigBuilder.nodeProperties(List.of("doubleArray")).build();
 
         var expected = new double[][]{new double[]{0.0}, new double[]{0.2499999722444236}, new double[]{.5}, new double[]{0.7500000277555764}, new double[]{1.0}};
-        var actual = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
+        var actual = new ScaleProperties(graph, config, Pools.DEFAULT).compute().scaledProperties();
 
         IntStream.range(0, (int) graph.nodeCount()).forEach(id -> assertArrayEquals(expected[id], actual.get(id)));
     }
@@ -185,7 +182,7 @@ class ScalePropertiesTest {
             .scaler(ScalarScaler.Variant.MINMAX)
             .build();
 
-        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
+        var algo = new ScaleProperties(graph, config, Pools.DEFAULT);
         var error = assertThrows(IllegalArgumentException.class, algo::compute);
 
         assertThat(error.getMessage(), containsString(
@@ -200,7 +197,7 @@ class ScalePropertiesTest {
             .scaler(ScalarScaler.Variant.MINMAX)
             .build();
 
-        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
+        var algo = new ScaleProperties(graph, config, Pools.DEFAULT);
         var error = assertThrows(IllegalArgumentException.class, algo::compute);
 
         assertThat(error.getMessage(), containsString(
@@ -215,7 +212,7 @@ class ScalePropertiesTest {
             .scaler(ScalarScaler.Variant.MINMAX)
             .build();
 
-        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
+        var algo = new ScaleProperties(graph, config, Pools.DEFAULT);
         var error = assertThrows(IllegalArgumentException.class, algo::compute);
 
         assertThat(error.getMessage(), containsString("Node property `IMAGINARY_PROP` not found in graph"));

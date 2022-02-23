@@ -116,7 +116,6 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
             config.concurrency(),
             config.includePredictedProbabilities(),
             pipeline.featureProperties(),
-            executionContext.allocationTracker(),
             progressTracker
         );
         return innerAlgo.compute();

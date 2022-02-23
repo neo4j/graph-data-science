@@ -102,14 +102,13 @@ class FastRPTest extends AlgoTestBase {
             graph,
             DEFAULT_CONFIG,
             defaultFeatureExtractors(graph),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         fastRP.initDegreePartition();
         fastRP.initPropertyVectors();
         fastRP.initRandomVectors();
-        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 2, AllocationTracker.empty());
+        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 2);
         fastRP.currentEmbedding(-1).copyTo(randomVectors, 2);
         fastRP.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = fastRP.embeddings();
@@ -135,14 +134,13 @@ class FastRPTest extends AlgoTestBase {
             graph,
             DEFAULT_CONFIG,
             defaultFeatureExtractors(graph),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         fastRP.initDegreePartition();
         fastRP.initPropertyVectors();
         fastRP.initRandomVectors();
-        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());
+        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3);
         fastRP.currentEmbedding(-1).copyTo(randomVectors, 3);
         fastRP.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = fastRP.embeddings();
@@ -181,8 +179,7 @@ class FastRPTest extends AlgoTestBase {
             graph,
             config,
             defaultFeatureExtractors(graph),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         fastRP.initDegreePartition();
@@ -241,8 +238,7 @@ class FastRPTest extends AlgoTestBase {
             graph,
             DEFAULT_CONFIG,
             defaultFeatureExtractors(graph),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         fastRP.initPropertyVectors();
@@ -305,8 +301,7 @@ class FastRPTest extends AlgoTestBase {
             graph,
             configBuilder.concurrency(4).build(),
             defaultFeatureExtractors(graph),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         concurrentFastRP.compute();
@@ -316,8 +311,7 @@ class FastRPTest extends AlgoTestBase {
             graph,
             configBuilder.concurrency(1).build(),
             defaultFeatureExtractors(graph),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         sequentialFastRP.compute();
@@ -352,14 +346,13 @@ class FastRPTest extends AlgoTestBase {
             graph,
             weightedConfig,
             defaultFeatureExtractors(graph),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         fastRP.initDegreePartition();
         fastRP.initPropertyVectors();
         fastRP.initRandomVectors();
-        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());
+        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3);
         fastRP.currentEmbedding(-1).copyTo(randomVectors, 3);
         fastRP.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = fastRP.embeddings();
@@ -391,8 +384,7 @@ class FastRPTest extends AlgoTestBase {
                 .addIterationWeight(1.0D)
                 .build(),
             List.of(),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         fastRP.initPropertyVectors();
@@ -445,8 +437,7 @@ class FastRPTest extends AlgoTestBase {
                 .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
                 .build(),
             List.of(),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         var embeddings = fastRP.embeddings();
@@ -572,8 +563,7 @@ class FastRPTest extends AlgoTestBase {
                     .addFeatureProperty("prop")
                     .build(),
                 FeatureExtraction.propertyExtractors(graph, List.of("prop")),
-                ProgressTracker.NULL_TRACKER,
-                AllocationTracker.empty()
+                ProgressTracker.NULL_TRACKER
             );
 
             assertThatThrownBy(fastRP::initRandomVectors)
@@ -600,8 +590,7 @@ class FastRPTest extends AlgoTestBase {
                 graph,
                 weightedConfig,
                 List.of(),
-                ProgressTracker.NULL_TRACKER,
-                AllocationTracker.empty()
+                ProgressTracker.NULL_TRACKER
             );
 
             assertThatThrownBy(fastRP::compute)
@@ -625,4 +614,3 @@ class FastRPTest extends AlgoTestBase {
     }
 
 }
-

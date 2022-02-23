@@ -74,8 +74,7 @@ class Node2VecModelTest {
             config,
             walks,
             probabilitiesBuilder.build(),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         node2VecModel.train();
@@ -170,8 +169,7 @@ class Node2VecModelTest {
             config,
             walks,
             probabilitiesBuilder.build(),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         node2VecModel.train();
@@ -181,8 +179,7 @@ class Node2VecModelTest {
             config,
             walks,
             probabilitiesBuilder.build(),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         
         otherNode2VecModel.train();

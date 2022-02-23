@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -47,7 +46,6 @@ public class Node2VecModel {
     private final CompressedRandomWalks walks;
     private final RandomWalkProbabilities randomWalkProbabilities;
     private final ProgressTracker progressTracker;
-    private final AllocationTracker allocationTracker;
 
     public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
         var vectorMemoryEstimation = MemoryUsage.sizeOfFloatArray(config.embeddingDimension());
@@ -69,15 +67,13 @@ public class Node2VecModel {
         Node2VecBaseConfig config,
         CompressedRandomWalks walks,
         RandomWalkProbabilities randomWalkProbabilities,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         this.config = config;
         this.walks = walks;
         this.randomWalkProbabilities = randomWalkProbabilities;
         this.progressTracker = progressTracker;
         this.negativeSamples = new NegativeSampleProducer(randomWalkProbabilities.negativeSamplingDistribution());
-        this.allocationTracker = allocationTracker;
 
         var random = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
 
@@ -135,8 +131,7 @@ public class Node2VecModel {
     private HugeObjectArray<FloatVector> initializeEmbeddings(long nodeCount, int embeddingDimensions, SplittableRandom random) {
         HugeObjectArray<FloatVector> embeddings = HugeObjectArray.newArray(
             FloatVector.class,
-            nodeCount,
-            allocationTracker
+            nodeCount
         );
 
         for (var i = 0L; i < nodeCount; i++) {

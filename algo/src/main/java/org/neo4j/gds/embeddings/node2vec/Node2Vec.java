@@ -85,8 +85,7 @@ public class Node2Vec extends Algorithm<HugeObjectArray<FloatVector>> {
             config,
             walks,
             probabilitiesBuilder.build(),
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
 
         node2VecModel.train();

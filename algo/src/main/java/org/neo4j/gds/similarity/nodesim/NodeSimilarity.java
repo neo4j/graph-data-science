@@ -149,9 +149,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private void prepare() {
         progressTracker.beginSubTask();
 
-        vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), allocationTracker);
+        vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount());
         if (weighted) {
-            weights = HugeObjectArray.newArray(double[].class, graph.nodeCount(), allocationTracker);
+            weights = HugeObjectArray.newArray(double[].class, graph.nodeCount());
         }
 
         DegreeComputer degreeComputer = new DegreeComputer();
@@ -221,8 +221,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         progressTracker.beginSubTask(calculateWorkload());
 
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator,
-            allocationTracker
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator
         );
         loggableAndTerminatableNodeStream()
             .forEach(node1 -> {
@@ -246,8 +245,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         progressTracker.beginSubTask(calculateWorkload());
 
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator,
-            allocationTracker
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator
         );
         ParallelUtil.parallelStreamConsume(
             loggableAndTerminatableNodeStream(),

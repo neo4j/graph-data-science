@@ -111,7 +111,6 @@ class NodeClassificationPredictTest {
             1,
             true,
             featureProperties,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         ).compute();
 
@@ -167,7 +166,6 @@ class NodeClassificationPredictTest {
             1,
             true,
             featureProperties,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         ).compute();
 

@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -55,12 +54,12 @@ public abstract class NodeValue {
             .collect(Collectors.toMap(Element::propertyKey, Element::propertyType));
     }
 
-    static NodeValue of(PregelSchema schema, long nodeCount, int concurrency, AllocationTracker allocationTracker) {
+    static NodeValue of(PregelSchema schema, long nodeCount, int concurrency) {
         var properties = schema.elements()
             .stream()
             .collect(Collectors.toMap(
                 Element::propertyKey,
-                element -> initArray(element, nodeCount, concurrency, allocationTracker)
+                element -> initArray(element, nodeCount, concurrency)
             ));
 
         if (properties.size() == 1) {
@@ -184,7 +183,7 @@ public abstract class NodeValue {
         }
     }
 
-    private static Object initArray(Element element, long nodeCount, int concurrency, AllocationTracker allocationTracker) {
+    private static Object initArray(Element element, long nodeCount, int concurrency) {
         switch (element.propertyType()) {
             case DOUBLE:
                 var doubleNodeValues = HugeDoubleArray.newArray(nodeCount);
@@ -209,9 +208,9 @@ public abstract class NodeValue {
                 );
                 return longNodeValues;
             case LONG_ARRAY:
-                return HugeObjectArray.newArray(long[].class, nodeCount, allocationTracker);
+                return HugeObjectArray.newArray(long[].class, nodeCount);
             case DOUBLE_ARRAY:
-                return HugeObjectArray.newArray(double[].class, nodeCount, allocationTracker);
+                return HugeObjectArray.newArray(double[].class, nodeCount);
             default:
                 throw new IllegalArgumentException(StringFormatting.formatWithLocale(
                     "Unsupported value type: %s",

@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
@@ -68,7 +67,7 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
     @Test
     void shouldConcatenateFeaturesHOA() {
         var featureExtractors = FeatureExtraction.propertyExtractors(validGraph, List.of("a", "b"));
-        var features = HugeObjectArray.newArray(double[].class, 4, AllocationTracker.empty());
+        var features = HugeObjectArray.newArray(double[].class, 4);
         FeatureExtraction.extract(validGraph, featureExtractors, features);
         assertThat(features.get(0)).contains(
             new double[]{ 2.0, 1.0, 1.2 },
@@ -91,7 +90,7 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
     @Test
     void shouldConcatenateFeaturesHOAWithDegreeFeature() {
         var featureExtractors = new ArrayList<>(FeatureExtraction.propertyExtractors(validGraph, List.of("a", "b")));
-        var features = HugeObjectArray.newArray(double[].class, 4, AllocationTracker.empty());
+        var features = HugeObjectArray.newArray(double[].class, 4);
         FeatureExtraction.extract(validGraph, featureExtractors, features);
         assertThat(features.get(0)).contains(
             new double[]{ 2.0, 1.0, 1.2 },

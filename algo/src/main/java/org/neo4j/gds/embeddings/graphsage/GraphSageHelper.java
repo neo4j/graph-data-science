@@ -24,7 +24,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -229,10 +228,9 @@ public final class GraphSageHelper {
 
     public static HugeObjectArray<double[]> initializeSingleLabelFeatures(
         Graph graph,
-        GraphSageTrainConfig config,
-        AllocationTracker allocationTracker
+        GraphSageTrainConfig config
     ) {
-        var features = HugeObjectArray.newArray(double[].class, graph.nodeCount(), allocationTracker);
+        var features = HugeObjectArray.newArray(double[].class, graph.nodeCount());
         var extractors = featureExtractors(graph, config);
 
         return FeatureExtraction.extract(graph, extractors, features);
@@ -271,10 +269,9 @@ public final class GraphSageHelper {
 
     public static HugeObjectArray<double[]> initializeMultiLabelFeatures(
         Graph graph,
-        MultiLabelFeatureExtractors multiLabelFeatureExtractors,
-        AllocationTracker allocationTracker
+        MultiLabelFeatureExtractors multiLabelFeatureExtractors
     ) {
-        var features = HugeObjectArray.newArray(double[].class, graph.nodeCount(), allocationTracker);
+        var features = HugeObjectArray.newArray(double[].class, graph.nodeCount());
         var featureConsumer = new HugeObjectArrayFeatureConsumer(features);
         graph.forEachNode(nodeId -> {
             var nodeLabel = labelOf(graph, nodeId);

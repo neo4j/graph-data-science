@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -76,8 +75,7 @@ public final class LinkFeatureExtractor {
 
         var linkFeatures = HugeObjectArray.newArray(
             double[].class,
-            graph.relationshipCount(),
-            AllocationTracker.empty()
+            graph.relationshipCount()
         );
 
         var partitions = PartitionUtils.degreePartition(

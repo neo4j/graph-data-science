@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.knn;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -115,7 +116,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
             graph,
             concurrency,
             context.executor(),
-            context.allocationTracker()
+            AllocationTracker.empty()
         ).build(result.streamSimilarityResult());
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);
     }

@@ -22,18 +22,13 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
-import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 
 public class AllocationTrackerProcTest extends BaseProcTest {
@@ -54,26 +49,6 @@ public class AllocationTrackerProcTest extends BaseProcTest {
     void setUp() throws Exception {
         runQuery(DB_CYPHER);
         registerProcedures(GraphProjectProc.class, FastRPStreamProc.class, AllocationTrackingTestProc.class);
-    }
-
-    @Test
-    void shouldFailOnMemoryLimitExceeded() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        String cypher = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("fastRP")
-            .streamMode()
-            .addParameter("embeddingDimension", 1024)
-            .yields();
-        USE_KERNEL_TRACKER.enableAndRun(
-            () -> {
-                var exception = rootCause(assertThrows(
-                    QueryExecutionException.class,
-                    () -> runQuery(cypher)
-                ));
-                assertThat(exception.getClass().getSimpleName()).isEqualTo(EXCEPTION_NAME);
-                assertThat(exception.getMessage()).startsWith("The allocation of an extra");
-            }
-        );
     }
 
     @Test

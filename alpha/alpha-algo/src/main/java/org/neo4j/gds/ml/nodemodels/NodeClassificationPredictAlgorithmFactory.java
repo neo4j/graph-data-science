@@ -66,7 +66,6 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
             configuration.concurrency(),
             configuration.includePredictedProbabilities(),
             featureProperties,
-            allocationTracker,
             progressTracker
         );
     }

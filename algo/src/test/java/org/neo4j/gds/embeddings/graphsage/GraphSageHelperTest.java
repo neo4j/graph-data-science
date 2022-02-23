@@ -26,7 +26,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
@@ -62,8 +61,8 @@ class GraphSageHelperTest {
         var multiLabelFeatureExtractors = GraphSageHelper.multiLabelFeatureExtractors(graph, config);
         var actual = config.isMultiLabel() ? GraphSageHelper.initializeMultiLabelFeatures(
             graph,
-            multiLabelFeatureExtractors, AllocationTracker.empty()
-        ) : GraphSageHelper.initializeSingleLabelFeatures(graph, config, AllocationTracker.empty());
+            multiLabelFeatureExtractors
+        ) : GraphSageHelper.initializeSingleLabelFeatures(graph, config);
 
         assertEquals(expected.size(), actual.size());
         for(int i = 0; i < actual.size(); i++) {
@@ -81,8 +80,7 @@ class GraphSageHelperTest {
             .build();
         var exception = assertThrows(IllegalArgumentException.class, () ->
             GraphSageHelper.initializeMultiLabelFeatures(graph,
-                GraphSageHelper.multiLabelFeatureExtractors(graph, config),
-                AllocationTracker.empty()
+                GraphSageHelper.multiLabelFeatureExtractors(graph, config)
             )
         );
         assertThat(exception).hasMessage(
@@ -93,8 +91,7 @@ class GraphSageHelperTest {
     static Stream<Arguments> parameters() {
         var singleLabelProperties = HugeObjectArray.newArray(
             double[].class,
-            20,
-            AllocationTracker.empty()
+            20
         );
         singleLabelProperties.fill(new double[]{5.0});
 
@@ -151,7 +148,7 @@ class GraphSageHelperTest {
                 .featureProperties(List.of("a", "b"))
                 .build();
 
-            GraphSageHelper.initializeSingleLabelFeatures(graph, graphSageTrainConfig, AllocationTracker.empty());
+            GraphSageHelper.initializeSingleLabelFeatures(graph, graphSageTrainConfig);
         }
     }
 
@@ -178,8 +175,7 @@ class GraphSageHelperTest {
 
             var features = GraphSageHelper.initializeSingleLabelFeatures(
                 validGraph,
-                graphSageTrainConfig,
-                AllocationTracker.empty()
+                graphSageTrainConfig
             );
             //TODO: check where rounding error is coming from
             assertThat(features.get(validIdFunction.of("a"))).contains(new double[] {1.4, -1.1, 2.5}, Offset.offset(1e-6));
@@ -212,8 +208,8 @@ class GraphSageHelperTest {
             assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> GraphSageHelper.initializeSingleLabelFeatures(
                     graph,
-                    graphSageTrainConfig,
-                    AllocationTracker.empty()))
+                    graphSageTrainConfig
+                ))
                 .withMessageContaining(
                     formatWithLocale("Missing node property for property key `prop` on node with id `%s`.", idFunction.of("b"))
                 );
@@ -237,9 +233,9 @@ class GraphSageHelperTest {
                 .featureProperties(Set.of("dummyProp", "numEmployees", "rating"))
                 .build();
 
-            var actual = GraphSageHelper.initializeSingleLabelFeatures(graph, config, AllocationTracker.empty());
+            var actual = GraphSageHelper.initializeSingleLabelFeatures(graph, config);
 
-            var expected = HugeObjectArray.newArray(double[].class, 3, AllocationTracker.empty());
+            var expected = HugeObjectArray.newArray(double[].class, 3);
             expected.setAll(i -> new double[] {5.0, 2.0, 7.0});
 
             assertEquals(expected.size(), actual.size());

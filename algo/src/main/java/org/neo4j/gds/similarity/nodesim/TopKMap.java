@@ -22,7 +22,6 @@ package org.neo4j.gds.similarity.nodesim;
 import com.carrotsearch.hppc.AbstractIterator;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.SetBitsIterable;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -56,12 +55,11 @@ public class TopKMap {
         long items,
         BitSet nodeFilter,
         int topK,
-        Comparator<SimilarityResult> comparator,
-        AllocationTracker allocationTracker
+        Comparator<SimilarityResult> comparator
     ) {
         this.nodeFilter = nodeFilter;
         int boundedTopK = (int) Math.min(topK, items);
-        topKLists = HugeObjectArray.newArray(TopKList.class, items, allocationTracker);
+        topKLists = HugeObjectArray.newArray(TopKList.class, items);
         topKLists.setAll(node1 -> nodeFilter.get(node1)
             ? new TopKList(comparator.equals(SimilarityResult.ASCENDING)
                 ? BoundedLongPriorityQueue.min(boundedTopK)

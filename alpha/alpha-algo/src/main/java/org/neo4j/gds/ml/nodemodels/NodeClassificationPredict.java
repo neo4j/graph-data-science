@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.nodemodels;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -46,7 +45,6 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
     private final int concurrency;
     private final boolean produceProbabilities;
     private final List<String> featureProperties;
-    private final AllocationTracker allocationTracker;
 
     public NodeClassificationPredict(
         NodeLogisticRegressionPredictor predictor,
@@ -55,7 +53,6 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
         int concurrency,
         boolean produceProbabilities,
         List<String> featureProperties,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
@@ -65,7 +62,6 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
         this.batchSize = batchSize;
         this.produceProbabilities = produceProbabilities;
         this.featureProperties = featureProperties;
-        this.allocationTracker = allocationTracker;
     }
 
     public static MemoryEstimation memoryEstimation(boolean produceProbabilities, int batchSize, int featureCount, int classCount) {
@@ -134,8 +130,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
             var numberOfClasses = data.classIdMap().originalIds().length;
             var predictions = HugeObjectArray.newArray(
                 double[].class,
-                graph.nodeCount(),
-                allocationTracker
+                graph.nodeCount()
             );
             predictions.setAll(i -> new double[numberOfClasses]);
             return predictions;

@@ -45,7 +45,7 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     public static PrimitiveAsyncDoubleQueues of(long nodeCount, int initialQueueCapacity, AllocationTracker allocationTracker) {
         var heads = HugeIntArray.newArray(nodeCount, allocationTracker);
         var tails = HugeAtomicLongArray.newArray(nodeCount, allocationTracker);
-        var queues = HugeObjectArray.newArray(double[].class, nodeCount, allocationTracker);
+        var queues = HugeObjectArray.newArray(double[].class, nodeCount);
         var referenceCounts = HugeAtomicLongArray.newArray(nodeCount, allocationTracker);
 
         var capacity = Math.max(initialQueueCapacity, MIN_CAPACITY);
