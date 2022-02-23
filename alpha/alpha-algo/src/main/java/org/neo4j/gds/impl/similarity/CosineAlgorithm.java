@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.impl.similarity;
 
-import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 public class CosineAlgorithm extends WeightedSimilarityAlgorithm<CosineAlgorithm> {
@@ -36,12 +35,7 @@ public class CosineAlgorithm extends WeightedSimilarityAlgorithm<CosineAlgorithm
     ) {
         boolean bidirectional = sourceIndexIds.length == 0 && targetIndexIds.length == 0;
         return skipValue == null ?
-            (decoder, s, t, cutoff) -> s.cosineSquares(decoder, cutoff, t, bidirectional) :
-            (decoder, s, t, cutoff) -> s.cosineSquaresSkip(decoder, cutoff, t, skipValue, bidirectional);
-    }
-
-    @Override
-    SimilarityResult modifyResult(SimilarityResult result) {
-        return result.squareRooted();
+            (decoder, s, t, cutoff) -> s.cosines(decoder, cutoff, t, bidirectional) :
+            (decoder, s, t, cutoff) -> s.cosinesSkip(decoder, cutoff, t, skipValue, bidirectional);
     }
 }
