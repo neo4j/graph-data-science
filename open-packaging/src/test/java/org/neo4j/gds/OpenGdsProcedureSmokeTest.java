@@ -84,13 +84,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.ml.linkPrediction.train",
         "gds.alpha.ml.linkPrediction.train.estimate",
 
-        "gds.alpha.ml.nodeClassification.predict.mutate",
-        "gds.alpha.ml.nodeClassification.predict.mutate.estimate",
-        "gds.alpha.ml.nodeClassification.predict.stream",
-        "gds.alpha.ml.nodeClassification.predict.stream.estimate",
-        "gds.alpha.ml.nodeClassification.predict.write",
-        "gds.alpha.ml.nodeClassification.predict.write.estimate",
-
         "gds.alpha.ml.pipeline.linkPrediction.addFeature",
         "gds.alpha.ml.pipeline.linkPrediction.addNodeProperty",
         "gds.alpha.ml.pipeline.linkPrediction.configureParams",
@@ -150,8 +143,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.triangles",
         "gds.alpha.ml.ann.write",
         "gds.alpha.ml.ann.stream",
-        "gds.alpha.ml.nodeClassification.train",
-        "gds.alpha.ml.nodeClassification.train.estimate",
         "gds.alpha.ml.splitRelationships.mutate",
         "gds.alpha.influenceMaximization.greedy.stream",
         "gds.alpha.influenceMaximization.celf.stream",

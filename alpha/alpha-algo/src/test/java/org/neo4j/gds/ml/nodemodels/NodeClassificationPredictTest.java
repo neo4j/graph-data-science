@@ -237,9 +237,9 @@ class NodeClassificationPredictTest {
         var log = Neo4jProxy.testLog();
         var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory<>(modelCatalog).build(
             graph,
-            ImmutableNodeClassificationMutateConfig.builder()
-                .mutateProperty("foo")
+            ImmutableNodeClassificationPredictConfig.builder()
                 .modelName(modelName)
+                .includePredictedProbabilities(false)
                 .concurrency(1)
                 .build(),
             AllocationTracker.empty(),
