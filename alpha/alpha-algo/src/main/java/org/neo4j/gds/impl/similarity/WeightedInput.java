@@ -157,40 +157,6 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         return new SimilarityResult(id, other.id, itemCount, other.itemCount, intersection, cosineSquares, bidirectional, false);
     }
 
-    public SimilarityResult cosineSquaresSkip(RleDecoder decoder, double similarityCutoff, WeightedInput other, double skipValue, boolean bidirectional) {
-        double[] thisWeights = weights;
-        double[] otherWeights = other.weights;
-        if (decoder != null) {
-            decoder.reset(weights, other.weights);
-            thisWeights = decoder.item1();
-            otherWeights = decoder.item2();
-        }
-
-        int len = Math.min(thisWeights.length, otherWeights.length);
-        double cosineSquares = Intersections.cosineSquareSkip(thisWeights, otherWeights, len, skipValue);
-        long intersection = 0;
-
-        if (similarityCutoff >= 0D && (cosineSquares == 0 || cosineSquares < similarityCutoff)) return null;
-        return new SimilarityResult(id, other.id, itemCount, other.itemCount, intersection, cosineSquares, bidirectional, false);
-    }
-
-    public SimilarityResult cosineSquares(RleDecoder decoder, double similarityCutoff, WeightedInput other, boolean bidirectional) {
-        double[] thisWeights = weights;
-        double[] otherWeights = other.weights;
-        if (decoder != null) {
-            decoder.reset(weights, other.weights);
-            thisWeights = decoder.item1();
-            otherWeights = decoder.item2();
-        }
-
-        int len = Math.min(thisWeights.length, otherWeights.length);
-        double cosineSquares = Intersections.cosineSquare(thisWeights, otherWeights, len);
-        long intersection = 0;
-
-        if (similarityCutoff >= 0D && (cosineSquares == 0 || cosineSquares < similarityCutoff)) return null;
-        return new SimilarityResult(id, other.id, itemCount, other.itemCount, intersection, cosineSquares, bidirectional, false);
-    }
-
     public SimilarityResult cosines(RleDecoder decoder, double similarityCutoff, WeightedInput other, boolean bidirectional) {
         double[] thisWeights = weights;
         double[] otherWeights = other.weights;
