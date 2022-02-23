@@ -36,12 +36,12 @@ Below is a description of the methods on such objects:
 |===
 | Name                    | Arguments              | Return type            | Description
 | addNodeProperty         | procedure_name: str, +
-                            config: **kwargs       | None                   | <<algorithms-ml-nodeclassification-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+                            config: **kwargs       | dict[str, any]         | <<algorithms-ml-nodeclassification-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
 | selectFeatures          | node_properties: +
-                            Union[str, list[str]]  | None                   | <<algorithms-ml-nodeclassification-adding-features, Select node properties to be used as features>>.
-| configureSplit          | config: **kwargs       | None                   | <<algorithms-ml-nodeclassification-configure-splits, Configure the train-test dataset split>>.
+                            Union[str, list[str]]  | dict[str, any]         | <<algorithms-ml-nodeclassification-adding-features, Select node properties to be used as features>>.
+| configureSplit          | config: **kwargs       | dict[str, any]         | <<algorithms-ml-nodeclassification-configure-splits, Configure the train-test dataset split>>.
 | configureParams         | parameter_space: +
-                            list[dict[str, any]]   | None                   | <<algorithms-ml-nodeclassification-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
+                            list[dict[str, any]]   | dict[str, any]         | <<algorithms-ml-nodeclassification-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
 | train                   | G: Graph, +
                             config: **kwargs       | NCPredictionPipeline, +
                                                              dict[str, any] | <<algorithms-ml-nodeclassification-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
@@ -164,12 +164,12 @@ Below is a description of the methods on such objects:
 |===
 | Name                | Arguments              | Return type             | Description
 | addNodeProperty     | procedure_name: str, +
-                        config: **kwargs       | None                    | <<algorithms-ml-linkprediction-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+                        config: **kwargs       | dict[str, any]          | <<algorithms-ml-linkprediction-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
 | addFeature          | feature_type: str, +
-                        config: **kwargs       | None                    | <<algorithms-ml-linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
-| configureSplit      | config: **kwargs       | None                    | <<algorithms-ml-linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
+                        config: **kwargs       | dict[str, any]          | <<algorithms-ml-linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
+| configureSplit      | config: **kwargs       | dict[str, any]          | <<algorithms-ml-linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
 | configureParams     | parameter_space: +
-                        list[dict[str, any]]   | None                    | <<algorithms-ml-linkprediction-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
+                        list[dict[str, any]]   | dict[str, any]          | <<algorithms-ml-linkprediction-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
 | train               | G: Graph, +
                         config: **kwargs       | LPPredictionPipeline, +
                                                  dict[str, any]          | <<algorithms-ml-linkprediction-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
