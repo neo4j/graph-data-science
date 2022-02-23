@@ -135,6 +135,25 @@ public final class Intersections {
         return dotProduct * dotProduct / xLength / yLength;
     }
 
+    public static double cosineSkip(double[] vector1, double[] vector2, int len, double skipValue) {
+        double dotProduct = 0D;
+        double xLength = 0D;
+        double yLength = 0D;
+        for (int i = 0; i < len; i++) {
+            double weight1 = vector1[i];
+            if (shouldSkip(weight1, skipValue)) continue;
+            double weight2 = vector2[i];
+            if (shouldSkip(weight2, skipValue)) continue;
+
+            dotProduct += weight1 * weight2;
+            xLength += weight1 * weight1;
+            yLength += weight2 * weight2;
+        }
+
+        if (xLength == 0D || yLength == 0D) return 0D;
+        return dotProduct / Math.sqrt(xLength * yLength);
+    }
+
     public static double cosineSquareSkip(double[] vector1, double[] vector2, int len, double skipValue) {
         double dotProduct = 0D;
         double xLength = 0D;
