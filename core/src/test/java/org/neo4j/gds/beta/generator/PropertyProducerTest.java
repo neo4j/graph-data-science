@@ -126,4 +126,23 @@ class PropertyProducerTest {
                 }
             });
     }
+
+    @Test
+    void testRandomDoubleArrayPropertyProducer() {
+        var producer = PropertyProducer.randomDoubleArray("foo", 7, 0.0D, 1.0D);
+        assertThat(producer)
+            .returns("foo", PropertyProducer::getPropertyName)
+            .returns(ValueType.DOUBLE_ARRAY, PropertyProducer::propertyType)
+            .satisfies(p -> {
+                var random = new Random();
+                double[][] value = {{}};
+                p.setProperty(value, 0, random);
+                var actual = value[0];
+                assertThat(actual.length).isEqualTo(7);
+                for (double l : actual) {
+                    assertThat(l).isGreaterThanOrEqualTo(0.0D);
+                    assertThat(l).isLessThanOrEqualTo(1.0D);
+                }
+            });
+    }
 }

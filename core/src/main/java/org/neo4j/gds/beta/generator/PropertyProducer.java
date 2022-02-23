@@ -46,6 +46,10 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         return new RandomLongArrayProducer(propertyName, length, min, max);
     }
 
+    static PropertyProducer<double[][]> randomDoubleArray(String propertyName, int length, double min, double max) {
+        return new RandomDoubleArrayProducer(propertyName, length, min, max);
+    }
+
     String getPropertyName();
 
     ValueType propertyType();
@@ -294,6 +298,69 @@ public interface PropertyProducer<PROPERTY_SLICE> {
                 }
             }
             longs[index] = value;
+        }
+    }
+
+    class RandomDoubleArrayProducer implements PropertyProducer<double[][]> {
+        private final String propertyName;
+        private final int length;
+        private final double min;
+        private final double max;
+
+        RandomDoubleArrayProducer(String propertyName, int length, double min, double max) {
+            this.propertyName = propertyName;
+            this.length = length;
+            this.min = min;
+            this.max = max;
+
+            if (max <= min) {
+                throw new IllegalArgumentException("Max value must be greater than min value");
+            }
+        }
+
+        @Override
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+        @Override
+        public ValueType propertyType() {
+            return ValueType.DOUBLE_ARRAY;
+        }
+
+        @Override
+        public void setProperty(double[][] embeddings, int index, Random random) {
+            var value = new double[length];
+            for (int i = 0; i < length; i++) {
+                value[i] = min + (random.nextDouble() * (max - min));
+            }
+            embeddings[index] = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            RandomDoubleArrayProducer random = (RandomDoubleArrayProducer) o;
+            return random.length == length &&
+                   Double.compare(random.min, min) == 0 &&
+                   Double.compare(random.max, max) == 0 &&
+                   Objects.equals(propertyName, random.propertyName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(propertyName, length, min, max);
+        }
+
+        @Override
+        public String toString() {
+            return "RandomDoubleProducer{" +
+                   "propertyName='" + propertyName + '\'' +
+                   ", length=" + length +
+                   ", min=" + min +
+                   ", max=" + max +
+                   '}';
         }
     }
 
