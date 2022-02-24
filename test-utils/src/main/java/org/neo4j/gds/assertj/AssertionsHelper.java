@@ -89,7 +89,7 @@ public final class AssertionsHelper {
         );
     }
 
-    public static Matcher<Map<? extends String, ? extends Matcher<?>>> hasEntry(String key, Object value) {
+    public static Matcher<Map<? extends String, ?>> hasEntry(String key, Object value) {
         return IsMapContaining.hasEntry(equalTo(key), equalTo(value));
     }
 }
