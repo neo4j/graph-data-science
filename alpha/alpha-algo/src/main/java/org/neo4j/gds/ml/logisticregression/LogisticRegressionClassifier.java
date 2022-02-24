@@ -50,11 +50,6 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
     }
 
     @Override
-    public long predict(long id, Trainer.Features features) {
-        return 0;
-    }
-
-    @Override
     public double[] predictProbabilities(long id, Trainer.Features features) {
         var batch = new ListBatch(List.of(id));
         ComputationContext ctx = new ComputationContext();

@@ -34,8 +34,6 @@ public interface Trainer {
 
         LocalIdMap classIdMap();
 
-        long predict(long id, Features features);
-
         double[] predictProbabilities(long id, Features features);
 
         ClassifierData data();
