@@ -306,8 +306,7 @@ public final class CypherAggregation extends BaseProc {
                 .orientation(Orientation.NATURAL)
                 .aggregation(Aggregation.NONE)
                 // TODO: concurrency from config
-                .concurrency(4)
-                .allocationTracker(this.allocationTracker);
+                .concurrency(4);
 
             if (this.relationshipPropertySchemas != null) {
                 for (var ignored : this.relationshipPropertySchemas) {

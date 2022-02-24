@@ -147,14 +147,14 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             }
             tempVisitedRelationships = ANNUtils.initializeRoaringBitmaps(inputSize);
 
-            RelationshipImporter importer = RelationshipImporter.of(nodes.idMap(), executor, allocationTracker);
+            RelationshipImporter importer = RelationshipImporter.of(nodes.idMap(), executor);
             importer.consume(topKConsumers);
             Graph graph = importer
                 .buildGraphStore(api.databaseId(), nodes.idMap(), annConfig.concurrency(), allocationTracker)
                 .getUnion();
 
-            RelationshipImporter oldImporter = RelationshipImporter.of(nodes.idMap(), executor, allocationTracker);
-            RelationshipImporter newImporter = RelationshipImporter.of(nodes.idMap(), executor, allocationTracker);
+            RelationshipImporter oldImporter = RelationshipImporter.of(nodes.idMap(), executor);
+            RelationshipImporter newImporter = RelationshipImporter.of(nodes.idMap(), executor);
 
             Collection<Runnable> setupTasks = setupTasks(
                 sampleSize,
@@ -588,19 +588,17 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             );
         }
 
-        static RelationshipImporter of(IdMap idMap, ExecutorService executorService, AllocationTracker allocationTracker) {
+        static RelationshipImporter of(IdMap idMap, ExecutorService executorService) {
             RelationshipsBuilder outImporter = GraphFactory.initRelationshipsBuilder()
                 .nodes(idMap)
                 .orientation(Orientation.NATURAL)
                 .executorService(executorService)
-                .allocationTracker(allocationTracker)
                 .build();
 
             RelationshipsBuilder inImporter = GraphFactory.initRelationshipsBuilder()
                 .nodes(idMap)
                 .orientation(Orientation.REVERSE)
                 .executorService(executorService)
-                .allocationTracker(allocationTracker)
                 .build();
 
             return ImmutableRelationshipImporter.of(outImporter, inImporter);

@@ -29,7 +29,6 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.ImmutablePropertyConfig;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -82,7 +81,6 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         Map<String, RelationshipsBuilder> relationshipBuildersByType;
         int concurrency;
         IdMap nodes;
-        AllocationTracker allocationTracker;
 
         Builder withRelationshipBuildersToTypeResultMap(Map<String, RelationshipsBuilder> relationshipBuildersByType) {
             this.relationshipBuildersByType = relationshipBuildersByType;
@@ -99,8 +97,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
             return this;
         }
 
-        Builder withAllocationTracker(AllocationTracker allocationTracker) {
-            this.allocationTracker = allocationTracker;
+        Builder withAllocationTracker() {
             return this;
         }
 
@@ -114,8 +111,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
             Supplier<RelationshipsBuilderBuilder> relationshipBuilderSupplier = () -> GraphFactory
                 .initRelationshipsBuilder()
                 .concurrency(concurrency)
-                .nodes(nodes)
-                .allocationTracker(allocationTracker);
+                .nodes(nodes);
             return new GraphStoreRelationshipVisitor(
                 relationshipSchema,
                 relationshipBuilderSupplier,

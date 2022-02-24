@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -319,7 +318,7 @@ class PositiveSampleProducerTest {
     }
 
     private static CompressedRandomWalks createCompressedRandomWalks(long[]... walksInput) {
-        var walks = new CompressedRandomWalks(walksInput.length, AllocationTracker.empty());
+        var walks = new CompressedRandomWalks(walksInput.length);
         for (long[] walk : walksInput) {
             walks.add(walk);
         }
@@ -327,7 +326,7 @@ class PositiveSampleProducerTest {
     }
 
     private static CompressedRandomWalks createCompressedRandomWalks(long count, WalkSupplier walkSupplier) {
-        var walks = new CompressedRandomWalks(count, AllocationTracker.empty());
+        var walks = new CompressedRandomWalks(count);
         for (long i = 0; i < count; i++) {
             walks.add(walkSupplier.getWalk(i));
         }

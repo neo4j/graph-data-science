@@ -56,7 +56,7 @@ public abstract class IntPriorityQueue {
             // 1-based not 0-based.  heap[0] is unused.
             heapSize = initialCapacity + 1;
         }
-        this.heap = HugeIntArray.newArray(HugeArrays.oversize(heapSize, Integer.BYTES), AllocationTracker.empty());
+        this.heap = HugeIntArray.newArray(HugeArrays.oversize(heapSize, Integer.BYTES));
     }
 
     /**

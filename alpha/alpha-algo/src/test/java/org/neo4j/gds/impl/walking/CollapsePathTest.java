@@ -30,7 +30,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.List;
 import java.util.Optional;
@@ -125,8 +124,7 @@ class CollapsePathTest {
         Relationships relationships = new CollapsePath(
             new Graph[]{tookRel, tookRel},
             config,
-            Pools.DEFAULT,
-            AllocationTracker.empty()
+            Pools.DEFAULT
 
         ).compute();
 
@@ -148,8 +146,7 @@ class CollapsePathTest {
         Relationships relationships = new CollapsePath(
             new Graph[]{tookRel, tookRel},
             config,
-            Pools.DEFAULT,
-            AllocationTracker.empty()
+            Pools.DEFAULT
 
         ).compute();
 
@@ -169,8 +166,7 @@ class CollapsePathTest {
         Relationships relationships = new CollapsePath(
             new Graph[]{tookGraph, takenByGraph},
             config,
-            Pools.DEFAULT,
-            AllocationTracker.empty()
+            Pools.DEFAULT
         ).compute();
 
         assertResultGraph(tookGraphStore, relationships, EXPECTED_WITHOUT_LOOPS);

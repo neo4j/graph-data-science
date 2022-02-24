@@ -21,27 +21,23 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.core.huge.CompressedAdjacencyList;
 import org.neo4j.gds.core.huge.UncompressedAdjacencyList;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 public final class CompressedAdjacencyListBuilderFactory implements AdjacencyListBuilderFactory<byte[], CompressedAdjacencyList, long[], UncompressedAdjacencyList> {
 
-    public static CompressedAdjacencyListBuilderFactory of(AllocationTracker allocationTracker) {
-        return new CompressedAdjacencyListBuilderFactory(allocationTracker);
+    public static CompressedAdjacencyListBuilderFactory of() {
+        return new CompressedAdjacencyListBuilderFactory();
     }
 
-    private final AllocationTracker allocationTracker;
-
-    private CompressedAdjacencyListBuilderFactory(AllocationTracker allocationTracker) {
-        this.allocationTracker = allocationTracker;
+    private CompressedAdjacencyListBuilderFactory() {
     }
 
     @Override
     public CompressedAdjacencyListBuilder newAdjacencyListBuilder() {
-        return new CompressedAdjacencyListBuilder(allocationTracker);
+        return new CompressedAdjacencyListBuilder();
     }
 
     @Override
     public UncompressedAdjacencyListBuilder newAdjacencyPropertiesBuilder() {
-        return new UncompressedAdjacencyListBuilder(allocationTracker);
+        return new UncompressedAdjacencyListBuilder();
     }
 }

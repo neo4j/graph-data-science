@@ -29,7 +29,6 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.HashSet;
 import java.util.List;
@@ -98,7 +97,6 @@ public abstract class EdgeSplitter {
             )
             .concurrency(1)
             .executorService(Pools.DEFAULT)
-            .allocationTracker(AllocationTracker.empty())
             .build();
     }
 

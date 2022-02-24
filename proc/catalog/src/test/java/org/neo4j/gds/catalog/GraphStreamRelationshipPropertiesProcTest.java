@@ -36,7 +36,6 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.values.storable.NumberType;
 
@@ -183,7 +182,6 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             .nodes(graphStore.nodes())
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);
@@ -264,7 +262,6 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             .nodes(graphStore.nodes())
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);

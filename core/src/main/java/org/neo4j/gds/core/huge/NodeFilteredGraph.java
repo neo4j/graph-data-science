@@ -36,7 +36,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -56,11 +55,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     private long relationshipCount;
     private final HugeIntArray degreeCache;
 
-    public NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap, AllocationTracker allocationTracker) {
+    public NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap) {
         super(originalGraph);
         this.relationshipCount = -1;
         this.filteredIdMap = filteredIdMap;
-        this.degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount(), allocationTracker);
+        this.degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount());
 
         degreeCache.fill(NO_DEGREE);
     }

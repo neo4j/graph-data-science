@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeArrays;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
@@ -38,7 +37,7 @@ class CompressedRandomWalksTest {
 
     @Test
     void shouldAddAndReadWalks() {
-        var compressedRandomWalks = new CompressedRandomWalks(10, AllocationTracker.empty());
+        var compressedRandomWalks = new CompressedRandomWalks(10);
 
         var walks = IntStream.range(0, 7).mapToObj(walkIndex -> {
             var walk = new long[walkIndex];
@@ -56,7 +55,7 @@ class CompressedRandomWalksTest {
 
     @Test
     void shouldFailIfIteratorRangeIsTooLarge() {
-        var compressedRandomWalks = new CompressedRandomWalks(10, AllocationTracker.empty());
+        var compressedRandomWalks = new CompressedRandomWalks(10);
 
         compressedRandomWalks.add(0L, 1L);
 
@@ -84,7 +83,7 @@ class CompressedRandomWalksTest {
             GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.set(2);
             var pageSize = HugeArrays.PAGE_SIZE;
 
-            var compressedRandomWalks = new CompressedRandomWalks(pageSize + 1, AllocationTracker.empty());
+            var compressedRandomWalks = new CompressedRandomWalks(pageSize + 1);
 
             long[] walk = new long[]{0, 1, 2};
             for (int i = 0; i < pageSize; i++) {

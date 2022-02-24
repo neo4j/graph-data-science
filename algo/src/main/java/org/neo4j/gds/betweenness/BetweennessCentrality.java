@@ -78,7 +78,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
     public HugeAtomicDoubleArray compute() {
         progressTracker.beginSubTask();
         nodeQueue.set(0);
-        ParallelUtil.run(ParallelUtil.tasks(concurrency, () -> new BCTask(allocationTracker)), executorService);
+        ParallelUtil.run(ParallelUtil.tasks(concurrency, () -> new BCTask()), executorService);
         progressTracker.endSubTask();
         return centrality;
     }
@@ -103,7 +103,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
         private final HugeLongArray sigma;
         private final HugeIntArray distance;
 
-        private BCTask(AllocationTracker allocationTracker) {
+        private BCTask() {
             this.localRelationshipIterator = graph.concurrentCopy();
 
             this.predecessors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
@@ -114,7 +114,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
             this.sigma = HugeLongArray.newArray(nodeCount);
             this.delta = HugeDoubleArray.newArray(nodeCount);
-            this.distance = HugeIntArray.newArray(nodeCount, allocationTracker);
+            this.distance = HugeIntArray.newArray(nodeCount);
         }
 
         @Override

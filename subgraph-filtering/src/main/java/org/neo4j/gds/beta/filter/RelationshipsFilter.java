@@ -35,7 +35,6 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -69,8 +68,7 @@ final class RelationshipsFilter {
         IdMap outputNodes,
         int concurrency,
         ExecutorService executorService,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>();
         Map<RelationshipType, RelationshipPropertyStore> relPropertyStores = new HashMap<>();
@@ -88,8 +86,7 @@ final class RelationshipsFilter {
                 relType,
                 concurrency,
                 executorService,
-                progressTracker,
-                allocationTracker
+                progressTracker
             );
 
             // Drop relationship types that have been completely filtered out.
@@ -144,8 +141,7 @@ final class RelationshipsFilter {
         RelationshipType relType,
         int concurrency,
         ExecutorService executorService,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         var propertyKeys = new ArrayList<>(graphStore.relationshipPropertyKeys(relType));
 
@@ -157,7 +153,6 @@ final class RelationshipsFilter {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(outputNodes)
             .concurrency(concurrency)
-            .allocationTracker(allocationTracker)
             .addAllPropertyConfigs(propertyConfigs)
             .build();
 

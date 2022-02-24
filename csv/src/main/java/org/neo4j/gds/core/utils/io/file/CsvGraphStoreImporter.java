@@ -136,7 +136,7 @@ public final class CsvGraphStoreImporter {
 
     private void importGraph(FileInput fileInput) {
         var nodes = importNodes(fileInput);
-        importRelationships(fileInput, nodes, AllocationTracker.empty());
+        importRelationships(fileInput, nodes);
     }
 
     private IdMap importNodes(
@@ -178,7 +178,7 @@ public final class CsvGraphStoreImporter {
         return idMapAndProperties.idMap();
     }
 
-    private void importRelationships(FileInput fileInput, IdMap nodes, AllocationTracker allocationTracker) {
+    private void importRelationships(FileInput fileInput, IdMap nodes) {
         progressTracker.beginSubTask();
         ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipSchema = fileInput.relationshipSchema();
@@ -186,7 +186,7 @@ public final class CsvGraphStoreImporter {
             .withRelationshipSchema(relationshipSchema)
             .withNodes(nodes)
             .withConcurrency(concurrency)
-            .withAllocationTracker(allocationTracker)
+            .withAllocationTracker()
             .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType);
 
         var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();

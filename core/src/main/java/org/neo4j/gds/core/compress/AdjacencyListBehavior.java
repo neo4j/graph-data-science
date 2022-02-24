@@ -28,7 +28,6 @@ import org.neo4j.gds.core.loading.CompressedAdjacencyListBuilderFactory;
 import org.neo4j.gds.core.loading.DeltaVarLongCompressor;
 import org.neo4j.gds.core.loading.RawCompressor;
 import org.neo4j.gds.core.loading.UncompressedAdjacencyListBuilderFactory;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
@@ -41,56 +40,30 @@ import java.util.stream.Stream;
  */
 public interface AdjacencyListBehavior {
 
-    AdjacencyCompressorFactory create(
-        LongSupplier nodeCountSupplier,
-        PropertyMappings propertyMappings,
-        Aggregation[] aggregations,
-        boolean noAggregation,
-        AllocationTracker allocationTracker
-    );
-
-    default AdjacencyCompressorFactory create(
-        LongSupplier nodeCountSupplier,
-        PropertyMappings propertyMappings,
-        Aggregation[] aggregations,
-        AllocationTracker allocationTracker
-    ) {
-        return create(
-            nodeCountSupplier,
-            propertyMappings,
-            aggregations,
-            Stream.of(aggregations).allMatch(aggregation -> aggregation == Aggregation.NONE),
-            allocationTracker
-        );
-    }
-
     static AdjacencyCompressorFactory asConfigured(
         LongSupplier nodeCountSupplier,
         PropertyMappings propertyMappings,
-        Aggregation[] aggregations,
-        AllocationTracker allocationTracker
+        Aggregation[] aggregations
     ) {
         var noAggregation = Stream.of(aggregations).allMatch(aggregation -> aggregation == Aggregation.NONE);
 
         return GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
-            ? uncompressed(nodeCountSupplier, propertyMappings, aggregations, noAggregation, allocationTracker)
-            : compressed(nodeCountSupplier, propertyMappings, aggregations, noAggregation, allocationTracker);
+            ? uncompressed(nodeCountSupplier, propertyMappings, aggregations, noAggregation)
+            : compressed(nodeCountSupplier, propertyMappings, aggregations, noAggregation);
     }
 
     static AdjacencyCompressorFactory compressed(
         LongSupplier nodeCountSupplier,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
-        boolean noAggregation,
-        AllocationTracker allocationTracker
+        boolean noAggregation
     ) {
         return DeltaVarLongCompressor.factory(
             nodeCountSupplier,
-            CompressedAdjacencyListBuilderFactory.of(allocationTracker),
+            CompressedAdjacencyListBuilderFactory.of(),
             propertyMappings,
             aggregations,
-            noAggregation,
-            allocationTracker
+            noAggregation
         );
     }
 
@@ -98,16 +71,14 @@ public interface AdjacencyListBehavior {
         LongSupplier nodeCountSupplier,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
-        boolean noAggregation,
-        AllocationTracker allocationTracker
+        boolean noAggregation
     ) {
         return RawCompressor.factory(
             nodeCountSupplier,
-            UncompressedAdjacencyListBuilderFactory.of(allocationTracker),
+            UncompressedAdjacencyListBuilderFactory.of(),
             propertyMappings,
             aggregations,
-            noAggregation,
-            allocationTracker
+            noAggregation
         );
     }
 

@@ -21,7 +21,6 @@ package org.neo4j.gds.beta.pregel;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.stream.IntStream;
 
@@ -32,12 +31,12 @@ class PrimitiveAsyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
 
     @Override
     PrimitiveAsyncDoubleQueues getQueue(long nodeCount, int initialCapacity) {
-        return PrimitiveAsyncDoubleQueues.of(nodeCount, initialCapacity, AllocationTracker.empty());
+        return PrimitiveAsyncDoubleQueues.of(nodeCount, initialCapacity);
     }
 
     @Test
     void isEmpty() {
-        var queues = PrimitiveAsyncDoubleQueues.of(1, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1);
         assertThat(queues.isEmpty(0)).isTrue();
 
         queues.push(0, 42);
@@ -49,7 +48,7 @@ class PrimitiveAsyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
 
     @Test
     void isEmptyFullArray() {
-        var queues = PrimitiveAsyncDoubleQueues.of(1, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1);
 
         for (int i = 0; i < 42; i++) {
             queues.push(0, i);
@@ -66,7 +65,7 @@ class PrimitiveAsyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
     void isEmptyWorksAfterGrowing() {
         var initialCapacity = 50;
         var insertedElements = initialCapacity + 10;
-        var queues = PrimitiveAsyncDoubleQueues.of(1, initialCapacity, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, initialCapacity);
 
         for (int i = 0; i < insertedElements; i++) {
             queues.push(0, 42);
@@ -83,7 +82,7 @@ class PrimitiveAsyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
 
     @Test
     void pop() {
-        var queues = PrimitiveAsyncDoubleQueues.of(1, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1);
         queues.push(0, 42.0D);
         assertThat(queues.pop(0)).isEqualTo(42.0D);
 
@@ -95,7 +94,7 @@ class PrimitiveAsyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
 
     @Test
     void compactEmptyQueue() {
-        var queues = PrimitiveAsyncDoubleQueues.of(1, 50, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, 50);
 
         var minFillSize = Math.ceil(50 * COMPACT_THRESHOLD);
         for (int i = 0; i < minFillSize; i++) {
@@ -113,7 +112,7 @@ class PrimitiveAsyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
 
     @Test
     void compactNoneEmptyQueue() {
-        var queues = PrimitiveAsyncDoubleQueues.of(1, 50, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, 50);
 
         var minFillSize = Math.ceil(50*COMPACT_THRESHOLD);
 
@@ -142,7 +141,7 @@ class PrimitiveAsyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
 
     @Test
     void compactOnlyIfAboveThresholdNoneEmptyQueue() {
-        var queues = PrimitiveAsyncDoubleQueues.of(1, 50, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, 50);
 
         var compactThreshold = Math.round(Math.floor(50*COMPACT_THRESHOLD)) - 1;
 

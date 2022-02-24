@@ -108,7 +108,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
                         .nodeCountSupplier(dimensions::nodeCount)
                         .importSizing(sizing)
                         .validateRelationships(graphProjectConfig.validateRelationships())
-                        .allocationTracker(allocationTracker)
                         .build();
 
                     return ImmutableSingleTypeRelationshipImportContext.builder()

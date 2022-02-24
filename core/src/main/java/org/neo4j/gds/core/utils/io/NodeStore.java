@@ -23,7 +23,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 
 import java.util.HashMap;
@@ -104,8 +103,7 @@ public class NodeStore {
 
     static NodeStore of(
         GraphStore graphStore,
-        Map<String, LongFunction<Object>> additionalProperties,
-        AllocationTracker allocationTracker
+        Map<String, LongFunction<Object>> additionalProperties
     ) {
         HugeIntArray labelCounts = null;
 
@@ -114,7 +112,7 @@ public class NodeStore {
 
         boolean hasNodeLabels = !graphStore.schema().nodeSchema().containsOnlyAllNodesLabel();
         if (hasNodeLabels) {
-            labelCounts = HugeIntArray.newArray(graphStore.nodeCount(), allocationTracker);
+            labelCounts = HugeIntArray.newArray(graphStore.nodeCount());
             labelCounts.setAll(i -> {
                 int labelCount = 0;
                 for (var nodeLabel : nodeLabels.availableNodeLabels()) {

@@ -73,7 +73,7 @@ public class Node2Vec extends Algorithm<HugeObjectArray<FloatVector>> {
             config.concurrency(),
             allocationTracker
         );
-        var walks = new CompressedRandomWalks(graph.nodeCount() * config.walksPerNode(), allocationTracker);
+        var walks = new CompressedRandomWalks(graph.nodeCount() * config.walksPerNode());
 
         randomWalk.compute().forEach(walk -> {
             probabilitiesBuilder.registerWalk(walk);

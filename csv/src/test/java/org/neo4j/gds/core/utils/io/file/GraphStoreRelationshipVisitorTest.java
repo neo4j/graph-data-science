@@ -74,8 +74,7 @@ class GraphStoreRelationshipVisitorTest {
         Supplier<RelationshipsBuilderBuilder> relationshipBuilderSupplier = () -> GraphFactory
             .initRelationshipsBuilder()
             .concurrency(1)
-            .nodes(graph)
-            .allocationTracker(AllocationTracker.empty());
+            .nodes(graph);
         var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipBuilderSupplier, relationshipBuildersByType);
 
         var relationshipTypeR = RelationshipType.of("R");
@@ -100,7 +99,7 @@ class GraphStoreRelationshipVisitorTest {
             .withNodes(multiplePropsGraph)
             .withRelationshipSchema(multiplePropsGraph.schema().relationshipSchema())
             .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType)
-            .withAllocationTracker(AllocationTracker.empty())
+            .withAllocationTracker()
             .withConcurrency(1)
             .build();
 

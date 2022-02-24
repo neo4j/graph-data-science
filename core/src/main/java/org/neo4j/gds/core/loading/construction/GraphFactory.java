@@ -48,7 +48,6 @@ import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -211,8 +210,7 @@ public final class GraphFactory {
         Optional<Boolean> preAggregate,
         Optional<Boolean> validateRelationships,
         Optional<Integer> concurrency,
-        Optional<ExecutorService> executorService,
-        AllocationTracker allocationTracker
+        Optional<ExecutorService> executorService
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
@@ -273,7 +271,6 @@ public final class GraphFactory {
             .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
             .importSizing(importSizing)
             .validateRelationships(validateRelationships.orElse(false))
-            .allocationTracker(allocationTracker)
             .build();
 
         return new RelationshipsBuilder(
@@ -289,8 +286,8 @@ public final class GraphFactory {
         );
     }
 
-    public static Relationships emptyRelationships(IdMap idMap, AllocationTracker allocationTracker) {
-        return initRelationshipsBuilder().nodes(idMap).allocationTracker(allocationTracker).build().build();
+    public static Relationships emptyRelationships(IdMap idMap) {
+        return initRelationshipsBuilder().nodes(idMap).build().build();
     }
 
     public static HugeGraph create(IdMap idMap, Relationships relationships) {

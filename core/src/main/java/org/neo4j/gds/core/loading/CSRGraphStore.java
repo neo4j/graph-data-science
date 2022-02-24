@@ -109,7 +109,7 @@ public class CSRGraphStore implements GraphStore {
     ) {
         // A graph store must contain at least one topology, even if it is empty.
         var topologies = relationships.isEmpty()
-            ? Map.of(RelationshipType.ALL_RELATIONSHIPS, GraphFactory.emptyRelationships(nodes, allocationTracker).topology())
+            ? Map.of(RelationshipType.ALL_RELATIONSHIPS, GraphFactory.emptyRelationships(nodes).topology())
             : relationships;
 
         return new CSRGraphStore(
@@ -627,7 +627,7 @@ public class CSRGraphStore implements GraphStore {
         );
 
         return filteredNodes.isPresent()
-            ? new NodeFilteredGraph(initialGraph, filteredNodes.get(), allocationTracker)
+            ? new NodeFilteredGraph(initialGraph, filteredNodes.get())
             : initialGraph;
     }
 

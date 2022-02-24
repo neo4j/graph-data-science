@@ -204,7 +204,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipsAndProper
                 .propertyConfigs(propertyConfigs)
                 .orientation(Orientation.NATURAL)
                 .validateRelationships(cypherConfig.validateRelationships())
-                .allocationTracker(loadingContext.allocationTracker())
                 .build();
         }
     }

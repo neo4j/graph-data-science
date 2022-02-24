@@ -65,7 +65,6 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
             .nodes(computationResult.graph())
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .orientation(Orientation.NATURAL)
-            .allocationTracker(executionContext.allocationTracker())
             .build();
 
         Relationships relationships;

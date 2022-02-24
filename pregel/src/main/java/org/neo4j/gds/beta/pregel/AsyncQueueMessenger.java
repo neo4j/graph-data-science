@@ -19,15 +19,14 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 class AsyncQueueMessenger implements Messenger<PrimitiveAsyncDoubleQueues.Iterator> {
 
     private final PrimitiveAsyncDoubleQueues queues;
 
-    AsyncQueueMessenger(long nodeCount, AllocationTracker allocationTracker) {
-        this.queues = PrimitiveAsyncDoubleQueues.of(nodeCount, allocationTracker);
+    AsyncQueueMessenger(long nodeCount) {
+        this.queues = PrimitiveAsyncDoubleQueues.of(nodeCount);
     }
 
     static MemoryEstimation memoryEstimation() {

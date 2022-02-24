@@ -126,8 +126,7 @@ public class RandomGraphGeneratorBuilder {
             maybeRelationshipPropertyProducer,
             aggregation,
             orientation,
-            allowSelfLoops,
-            allocationTracker
+            allowSelfLoops
         );
     }
 
