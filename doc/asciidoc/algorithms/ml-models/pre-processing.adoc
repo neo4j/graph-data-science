@@ -9,5 +9,4 @@ In GDS some options include:
 * <<algorithms-node-embeddings, Node embeddings>>
 * <<algorithms-centrality, Centrality algorithms>>
 * <<algorithms-auxiliary, Auxiliary algorithms>>
-** Of special interest are <<algorithms-scale-properties, Scale Properties>> and
-** <<algorithms-split-relationships, Split Relationships>> for <<algorithms-ml-linkprediction, Link Prediction>>.
+** Of special interest is <<algorithms-scale-properties, Scale Properties>>

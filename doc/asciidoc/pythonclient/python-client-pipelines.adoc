@@ -232,9 +232,9 @@ In addition to inheriting the methods common to all <<python-client-model-object
 |===
 | Name           | Arguments        | Return type          | Description
 | predict_mutate | G: Graph, +
-                   config: **kwargs | dict[str, any]       | <<algorithms-ml-linkprediction-examples-mutate, Predict links between non-neighboring nodes of the input graph and mutate graph with predictions>>.
+                   config: **kwargs | dict[str, any]       | <<algorithms-link-prediction-pipelines-predict-examples-mutate, Predict links between non-neighboring nodes of the input graph and mutate graph with predictions>>.
 | predict_stream | G: Graph, +
-                   config: **kwargs | list[dict[str, any]] | <<algorithms-ml-linkprediction-examples-stream, Predict links between non-neighboring nodes of the input graph and stream the results>>.
+                   config: **kwargs | list[dict[str, any]] | <<algorithms-link-prediction-pipelines-predict-examples-stream, Predict links between non-neighboring nodes of the input graph and stream the results>>.
 | metrics        | -                | dict[str, any]       | Returns values for the metrics used when training, for this particular model.
 |===
 

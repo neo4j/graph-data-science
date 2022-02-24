@@ -98,7 +98,6 @@
 *** xref:algorithms/ml-models/pre-processing/index.adoc[]
 *** xref:algorithms/ml-models/models-tuning/index.adoc[]
 *** xref:algorithms/ml-models/nodeclassification-pipelines/index.adoc[]
-*** xref:algorithms/ml-models/linkprediction/index.adoc[]
 *** xref:algorithms/ml-models/linkprediction-pipelines/index.adoc[]
 ** xref:algorithms/auxiliary/index.adoc[]
 *** xref:alpha-algorithms/graph-generation/index.adoc[]
