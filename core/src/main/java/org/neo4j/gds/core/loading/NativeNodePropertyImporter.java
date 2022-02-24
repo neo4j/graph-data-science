@@ -175,8 +175,7 @@ public final class NativeNodePropertyImporter {
         public NativeNodePropertyImporter build() {
             var nodePropertyBuilders = BuildersByLabel.create(
                 propertyMappings,
-                concurrency,
-                allocationTracker
+                concurrency
             );
             var buildersByLabelIdAndPropertyId = BuildersByLabelIdAndPropertyId.create(
                 nodePropertyBuilders,
@@ -193,15 +192,13 @@ public final class NativeNodePropertyImporter {
 
         static BuildersByLabel create(
             Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
-            int concurrency,
-            AllocationTracker allocationTracker
+            int concurrency
         ) {
             var instance = new BuildersByLabel();
             for (var entry : propertyMappingsByLabel.entrySet()) {
                 var label = entry.getKey();
                 for (var propertyMapping : entry.getValue()) {
                     var builder = NodePropertiesFromStoreBuilder.of(
-                        allocationTracker,
                         propertyMapping.defaultValue(),
                         concurrency
                     );

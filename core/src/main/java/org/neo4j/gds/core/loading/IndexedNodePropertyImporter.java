@@ -31,7 +31,6 @@ import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.core.utils.StatementAction;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
@@ -73,8 +72,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         IdMap idMap,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
-        @Nullable ExecutorService executorService,
-        AllocationTracker allocationTracker
+        @Nullable ExecutorService executorService
     ) {
         this(
             concurrency,
@@ -89,7 +87,6 @@ public final class IndexedNodePropertyImporter extends StatementAction {
             executorService,
             index.schema().getPropertyId(),
             NodePropertiesFromStoreBuilder.of(
-                allocationTracker,
                 mapping.defaultValue(),
                 concurrency
             )

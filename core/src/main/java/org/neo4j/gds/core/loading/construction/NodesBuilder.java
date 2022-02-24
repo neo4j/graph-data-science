@@ -251,7 +251,7 @@ public final class NodesBuilder {
         if (!propertyBuildersByPropertyKey.containsKey(propertyKey)) {
             propertyBuildersByPropertyKey.put(
                 propertyKey,
-                NodePropertiesFromStoreBuilder.of(allocationTracker, NO_PROPERTY_VALUE, concurrency)
+                NodePropertiesFromStoreBuilder.of(NO_PROPERTY_VALUE, concurrency)
             );
         }
         return propertyBuildersByPropertyKey.get(propertyKey);

@@ -228,8 +228,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
                         idMap,
                         progressTracker,
                         terminationFlag,
-                        executorService,
-                        allocationTracker
+                        executorService
                     ))
                 ).collect(Collectors.toList());
 
