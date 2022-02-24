@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 
 import java.util.Map;
 
@@ -50,7 +49,7 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
-            LinkLogisticRegressionTrainConfig.defaultConfig(),
+            LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
@@ -84,7 +83,7 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(labels),
             4,
-            LinkLogisticRegressionTrainConfig.defaultConfig(),
+            LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
@@ -116,7 +115,7 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
-            LinkLogisticRegressionTrainConfig.of(Map.of("useBiasFeature", false)),
+            LogisticRegressionTrainConfig.of(Map.of("useBiasFeature", false)),
             fourClassIdMap(),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
@@ -149,7 +148,7 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
-            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 100, "maxEpochs", 100)),
+            LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "maxEpochs", 100)),
             fourClassIdMap(),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
@@ -181,7 +180,7 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
-            LinkLogisticRegressionTrainConfig.defaultConfig(),
+            LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER

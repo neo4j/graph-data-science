@@ -41,7 +41,7 @@ import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.nodemodels.BestMetricData;
 import org.neo4j.gds.ml.nodemodels.BestModelStats;
@@ -163,7 +163,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     private Trainer.Classifier trainModel(
         FeaturesAndLabels featureAndLabels,
         ReadOnlyHugeLongArray trainSet,
-        LinkLogisticRegressionTrainConfig modelConfig,
+        LogisticRegressionTrainConfig modelConfig,
         ProgressTracker customProgressTracker
     ) {
         return new LogisticRegressionTrainer(
@@ -266,8 +266,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     }
 
     private static BestModelStats findBestModelStats(
-        List<ModelStats<LinkLogisticRegressionTrainConfig>> metricStatsForModels,
-        LinkLogisticRegressionTrainConfig bestParams
+        List<ModelStats<LogisticRegressionTrainConfig>> metricStatsForModels,
+        LogisticRegressionTrainConfig bestParams
     ) {
         return metricStatsForModels.stream()
             .filter(metricStatsForModel -> metricStatsForModel.params() == bestParams)
@@ -289,8 +289,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         return splitter.splits();
     }
 
-    private static Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> initStatsMap() {
-        var statsMap = new HashMap<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>>();
+    private static Map<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>> initStatsMap() {
+        var statsMap = new HashMap<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>>();
         statsMap.put(LinkMetric.AUCPR, new ArrayList<>());
         return statsMap;
     }
@@ -298,23 +298,23 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     @ValueClass
     public interface ModelSelectResult {
 
-        LinkLogisticRegressionTrainConfig bestParameters();
+        LogisticRegressionTrainConfig bestParameters();
 
-        Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> trainStats();
+        Map<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>> trainStats();
 
-        Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> validationStats();
+        Map<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>> validationStats();
 
         static LinkPredictionTrain.ModelSelectResult of(
-            LinkLogisticRegressionTrainConfig bestConfig,
-            Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> trainStats,
-            Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> validationStats
+            LogisticRegressionTrainConfig bestConfig,
+            Map<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>> trainStats,
+            Map<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>> validationStats
         ) {
             return ImmutableModelSelectResult.of(bestConfig, trainStats, validationStats);
         }
 
         @Value.Derived
         default Map<String, Object> toMap() {
-            Function<Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>>, Map<String, Object>> statsConverter = stats ->
+            Function<Map<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>>, Map<String, Object>> statsConverter = stats ->
                 stats.entrySet().stream().collect(Collectors.toMap(
                     entry -> entry.getKey().name(),
                     value -> value.getValue().stream().map(ModelStats::toMap)
@@ -346,7 +346,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     }
 
     private Model<Trainer.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
-        LinkLogisticRegressionTrainConfig bestParameters,
+        LogisticRegressionTrainConfig bestParameters,
         Trainer.ClassifierData classifierData,
         Map<LinkMetric, BestMetricData> winnerMetrics
     ) {

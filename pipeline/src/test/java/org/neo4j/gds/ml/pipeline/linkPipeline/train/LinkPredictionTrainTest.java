@@ -35,7 +35,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
@@ -129,7 +129,7 @@ class LinkPredictionTrainTest {
                 Map.<String, Object>of("batchSize", 10),
                 Map.<String, Object>of("batchSize", 100L)
             )
-            .map(LinkLogisticRegressionTrainConfig::of)
+            .map(LogisticRegressionTrainConfig::of)
             .collect(Collectors.toList());
 
         return Stream.of(
@@ -166,7 +166,7 @@ class LinkPredictionTrainTest {
 
         assertThat(customInfo.bestParameters())
             .usingRecursiveComparison()
-            .isEqualTo(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
+            .isEqualTo(LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
     }
 
     @Test
@@ -255,7 +255,7 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("paramsForEstimationsWithParamSpace")
-    void estimateWithParameterSpace(String desc, List<LinkLogisticRegressionTrainConfig> parameterSpace, MemoryRange expectedRange) {
+    void estimateWithParameterSpace(String desc, List<LogisticRegressionTrainConfig> parameterSpace, MemoryRange expectedRange) {
         var trainConfig = LinkPredictionTrainConfig
             .builder()
             .modelName("DUMMY")
@@ -326,8 +326,8 @@ class LinkPredictionTrainTest {
             .build());
 
         pipeline.setTrainingParameterSpace(List.of(
-            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)),
-            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 100, "patience", 5, "tolerance", 0.00001))
+            LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)),
+            LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "patience", 5, "tolerance", 0.00001))
         ));
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));

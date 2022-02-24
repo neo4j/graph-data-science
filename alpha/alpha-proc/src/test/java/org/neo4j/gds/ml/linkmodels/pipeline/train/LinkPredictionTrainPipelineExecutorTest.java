@@ -52,7 +52,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
@@ -160,8 +160,8 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .build());
 
         pipeline.setTrainingParameterSpace(List.of(
-            LinkLogisticRegressionTrainConfig.of(Map.of("patience", 5, "tolerance", 0.00001, "penalty", 100)),
-            LinkLogisticRegressionTrainConfig.of(Map.of("patience", 5, "tolerance", 0.00001, "penalty", 1))
+            LogisticRegressionTrainConfig.of(Map.of("patience", 5, "tolerance", 0.00001, "penalty", 100)),
+            LogisticRegressionTrainConfig.of(Map.of("patience", 5, "tolerance", 0.00001, "penalty", 1))
         ));
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
@@ -204,7 +204,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
             assertThat(customInfo.bestParameters())
                 .usingRecursiveComparison()
-                .isEqualTo(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
+                .isEqualTo(LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
         });
     }
 
@@ -327,7 +327,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .testFraction(0.2)
             .build());
 
-        pipeline.setTrainingParameterSpace(List.of(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))));
+        pipeline.setTrainingParameterSpace(List.of(LogisticRegressionTrainConfig.of(Map.of("penalty", 1))));
 
         pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
             ExecutionContext.EMPTY.username(),

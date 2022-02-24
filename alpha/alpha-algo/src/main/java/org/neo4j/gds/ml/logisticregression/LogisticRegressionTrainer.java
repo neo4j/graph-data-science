@@ -35,7 +35,6 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -43,13 +42,13 @@ import java.util.function.Supplier;
 public final class LogisticRegressionTrainer implements Trainer {
 
     private final ReadOnlyHugeLongArray trainSet;
-    private final LinkLogisticRegressionTrainConfig trainConfig;
+    private final LogisticRegressionTrainConfig trainConfig;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final LocalIdMap classIdMap;
     private final int concurrency;
 
-    public static MemoryEstimation estimate(LinkLogisticRegressionTrainConfig llrConfig, MemoryRange linkFeatureDimension) {
+    public static MemoryEstimation estimate(LogisticRegressionTrainConfig llrConfig, MemoryRange linkFeatureDimension) {
         return MemoryEstimations.builder("train model")
             .add("model data", LogisticRegressionData.memoryEstimation(linkFeatureDimension))
             .add("update weights", Training.memoryEstimation(linkFeatureDimension, 1, 1))
@@ -67,7 +66,7 @@ public final class LogisticRegressionTrainer implements Trainer {
     public LogisticRegressionTrainer(
         ReadOnlyHugeLongArray trainSet,
         int concurrency,
-        LinkLogisticRegressionTrainConfig trainConfig,
+        LogisticRegressionTrainConfig trainConfig,
         LocalIdMap classIdMap,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker

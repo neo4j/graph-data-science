@@ -24,7 +24,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPredictPipelineBaseConfig;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer.LogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
@@ -42,7 +42,7 @@ public final class LinkPredictionPipelineCompanion {
     public static final String ESTIMATE_PREDICT_DESCRIPTION = "Estimates memory for predicting links based on a previously trained pipeline model";
     public static final String PIPELINE_MODEL_TYPE = "Link prediction training pipeline";
     static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(
-        LinkLogisticRegressionTrainConfig.defaultConfig().toMap()
+        LogisticRegressionTrainConfig.defaultConfig().toMap()
     );
 
     private LinkPredictionPipelineCompanion() {}
