@@ -44,7 +44,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     > {
     private final LogisticRegressionData logisticRegressionData;
 
-    LinkPredictionPredictPipelineExecutor(
+    public LinkPredictionPredictPipelineExecutor(
         LinkPredictionPipeline pipeline,
         LogisticRegressionData logisticRegressionData,
         LinkPredictionPredictPipelineBaseConfig config,
