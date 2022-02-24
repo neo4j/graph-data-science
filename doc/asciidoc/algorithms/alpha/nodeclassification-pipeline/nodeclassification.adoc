@@ -39,7 +39,7 @@ The classification pipeline can be used to predict the class of previously unsee
 In addition to the predicted class for each node, the predicted probability for each class may also be retained on the nodes.
 The order of the probabilities matches the order of the classes registered in the model.
 
-NOTE: <<algorithms-node-classification-pipelines-predict, Classification> can only be done with a trained classification pipeline (not with a training pipeline).
+NOTE: <<algorithms-node-classification-pipelines-predict, Classification>> can only be done with a trained classification pipeline (not with a training pipeline).
 
 The rest of this page is divided as follows:
 
