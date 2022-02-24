@@ -121,8 +121,8 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
             }
             return gradient;
         } else {
-            // assume feature and label variables do not require gradient
-            return ctx.data(parent).createWithSameDimensions();
+            throw new IllegalStateException(
+                "The gradient should only be computed for the bias and the weights parents, but got " + parent.render());
         }
     }
 }

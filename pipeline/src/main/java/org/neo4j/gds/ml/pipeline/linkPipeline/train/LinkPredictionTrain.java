@@ -27,7 +27,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.collections.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -66,7 +65,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
-import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndTargetsExtractor.extractFeaturesAndLabels;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndLabelsExtractor.extractFeaturesAndLabels;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionEvaluationMetricComputer.computeMetric;
 
 public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
@@ -78,7 +77,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     private final LinkPredictionPipeline pipeline;
     private final LinkPredictionTrainConfig trainConfig;
     private final LocalIdMap classIdMap;
-    private final AllocationTracker allocationTracker;
 
     public static LocalIdMap makeClassIdMap() {
         var idMap = new LocalIdMap();
@@ -99,7 +97,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         this.validationGraph = validationGraph;
         this.pipeline = pipeline;
         this.trainConfig = trainConfig;
-        this.allocationTracker = AllocationTracker.empty();
         this.classIdMap = makeClassIdMap();
     }
 
@@ -139,7 +136,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         // train best model on the entire training graph
         progressTracker.beginSubTask("train best model");
-        var classifier = trainModel(trainData, trainRelationshipIds, bestParameters);
+        var classifier = trainModel(trainData, trainRelationshipIds, bestParameters, progressTracker);
         progressTracker.endSubTask("train best model");
 
         // evaluate the best model on the training and test graphs
@@ -177,13 +174,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             terminationFlag,
             customProgressTracker
         ).train(featureAndLabels.features(), featureAndLabels.labels());
-    }
-
-    private Trainer.Classifier trainModel(
-        FeaturesAndLabels featureAndLabels,
-        ReadOnlyHugeLongArray trainSet,
-        LinkLogisticRegressionTrainConfig modelConfig) {
-        return trainModel(featureAndLabels, trainSet, modelConfig, progressTracker);
     }
 
     private LinkPredictionTrain.ModelSelectResult modelSelect(
@@ -288,12 +278,12 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
     private List<TrainingExamplesSplit> trainValidationSplits(
         ReadOnlyHugeLongArray trainRelationshipIds,
-        HugeLongArray actualTargets
+        HugeLongArray actualLabels
     ) {
         var splitter = new StratifiedKFoldSplitter(
             pipeline.splitConfig().validationFolds(),
             trainRelationshipIds,
-            ReadOnlyHugeLongArray.of(actualTargets),
+            ReadOnlyHugeLongArray.of(actualLabels),
             trainConfig.randomSeed()
         );
         return splitter.splits();
@@ -396,15 +386,15 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         int numberOfMetrics = trainConfig.metrics().size();
         return builder
-            // After the training, the training features and targets are no longer accessed.
+            // After the training, the training features and labels are no longer accessed.
             // As the lifetimes of training and test data is non-overlapping, we assume the max is sufficient.
-            .max("Features and targets", List.of(
-                LinkFeaturesAndTargetsExtractor.estimate(
+            .max("Features and labels", List.of(
+                LinkFeaturesAndLabelsExtractor.estimate(
                     fudgedLinkFeatureDim,
                     relCounts -> relCounts.get(RelationshipType.of(splitConfig.trainRelationshipType())),
                     "Train"
                 ),
-                LinkFeaturesAndTargetsExtractor.estimate(
+                LinkFeaturesAndLabelsExtractor.estimate(
                     fudgedLinkFeatureDim,
                     relCounts -> relCounts.get(RelationshipType.of(splitConfig.testRelationshipType())),
                     "Test"
