@@ -26,6 +26,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.Trainer;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 
 import java.util.Map;
@@ -36,12 +37,21 @@ class LogisticRegressionTrainerTest {
 
     private static final HugeLongArray FOUR_CLASSES = HugeLongArray.of(2, 0, 0, 2, 7, -75);
 
+    private static LocalIdMap fourClassIdMap() {
+        var idMap = new LocalIdMap();
+        for (long i = 0; i < FOUR_CLASSES.size(); i++) {
+            idMap.toMapped(FOUR_CLASSES.get(i));
+        }
+        return idMap;
+    }
+
     @Test
     void withBias() {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
             LinkLogisticRegressionTrainConfig.defaultConfig(),
+            fourClassIdMap(),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -75,6 +85,7 @@ class LogisticRegressionTrainerTest {
             ReadOnlyHugeLongArray.of(labels),
             4,
             LinkLogisticRegressionTrainConfig.defaultConfig(),
+            fourClassIdMap(),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -106,6 +117,7 @@ class LogisticRegressionTrainerTest {
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
             LinkLogisticRegressionTrainConfig.of(Map.of("useBiasFeature", false)),
+            fourClassIdMap(),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -138,6 +150,7 @@ class LogisticRegressionTrainerTest {
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
             LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 100, "maxEpochs", 100)),
+            fourClassIdMap(),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -169,6 +182,7 @@ class LogisticRegressionTrainerTest {
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
             LinkLogisticRegressionTrainConfig.defaultConfig(),
+            fourClassIdMap(),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
