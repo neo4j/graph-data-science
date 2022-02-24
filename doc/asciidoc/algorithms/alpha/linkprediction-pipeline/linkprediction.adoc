@@ -49,6 +49,7 @@ The rest of this page is divided as follows:
 * <<algorithms-ml-linkprediction-pipelines-train, Training the pipeline>>
 * <<algorithms-link-prediction-pipelines-predict, Applying a trained model for prediction>>
 
+
 [[algorithms-ml-linkprediction-creating-a-pipeline]]
 == Creating a pipeline
 
@@ -56,6 +57,7 @@ The first step of building a new pipeline is to create one using `gds.alpha.ml.p
 This stores a trainable model object in the model catalog of type `Link prediction training pipeline`.
 This represents a configurable pipeline that can later be invoked for training, which in turn creates a trained pipeline.
 The latter is also a model which is stored in the catalog with type `Link prediction pipeline`.
+
 
 === Syntax
 
@@ -85,6 +87,7 @@ YIELD
 include::pipelineInfoResult.adoc[]
 --
 
+
 === Example
 
 [role=query-example,group=lp]
@@ -107,6 +110,7 @@ CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')
 
 This shows that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
 
+
 [[algorithms-ml-linkprediction-adding-node-properties]]
 == Adding node properties
 
@@ -118,6 +122,7 @@ The name of the procedure that should be added can be a fully qualified GDS proc
 The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
 
 For example, <<algorithms-ml-models-preprocessing, pre-processing algorithms>> can be used as node property steps.
+
 
 === Syntax
 
@@ -147,6 +152,7 @@ YIELD
 | procedureName             | String  | The name of the procedure to be added to the pipeline.
 | procedureConfiguration    | Map     | The configuration of the procedure, excluding `graphName`, `nodeLabels` and `relationshipTypes`.
 |===
+
 
 include::pipelineInfoResult.adoc[]
 --
@@ -189,6 +195,7 @@ The order of the features in the link feature vector follows the order of the fe
 Like with node property steps, the feature steps are also executed both at <<algorithms-ml-linkprediction-pipelines-train, training>> and <<algorithms-link-prediction-pipelines-predict, prediction>> time.
 The supported methods for obtaining features are described <<algorithms-ml-linkprediction-supported-features, below>>.
 
+
 === Syntax
 
 [.pipeline-add-feature-syntax]
@@ -228,6 +235,7 @@ YIELD
 include::pipelineInfoResult.adoc[]
 --
 
+
 [[algorithms-ml-linkprediction-supported-features]]
 === Supported feature types
 
@@ -245,6 +253,7 @@ The supported types of features can then be described as follows:
 | HADAMARD               | image:equations/linkprediction/linkprediction4.svg[f equals vector of s1 dot t1 comma s2 dot t2 comma dot dot dot comma s d dot t d]
 | COSINE                 | image:equations/linkprediction/linkprediction5.svg[f equals sum of i from 1 to d of s i t i divided by square root of sum of i from 1 to d of s i squared times square root of sum of i from 1 to d of t i squared]
 |===
+
 
 === Example
 
@@ -268,6 +277,7 @@ CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
 When executing the pipeline, the `nodeProperties` must be either present in the input graph, or created by a previous node property step.
 For example, the `embedding` property could be created by the previous example, and we expect `numberOfPosts` to already be present in the in-memory graph used as input, at train and predict time.
 --
+
 
 [[algorithms-ml-linkprediction-configure-splits]]
 == Configuring the relationship splits
@@ -303,6 +313,7 @@ The `train` and `test` relationship sets are used for:
 
 However, they are not used by the algorithms run in the node property steps.
 The reason for this is that otherwise the model would use the prediction target (existence of a relationship) as a feature.
+
 
 === Syntax
 
@@ -344,6 +355,7 @@ YIELD
 include::pipelineInfoResult.adoc[]
 --
 
+
 === Example
 
 [role=query-example,group=lp]
@@ -381,6 +393,7 @@ The allowed model parameters are listed in the table <<linkprediction-pipelines-
 
 If `configureParams` is not used, then a single model with defaults for all the model parameters is used.
 The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
+
 
 === Syntax
 
@@ -425,6 +438,7 @@ YIELD
 
 include::pipelineInfoResult.adoc[]
 --
+
 
 === Example
 
