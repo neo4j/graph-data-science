@@ -15,7 +15,7 @@ These graphs are internally managed and exist only for the duration of the train
 . Split the training instances using stratified k-fold cross-validation.
 The number of folds `k` can be configured using `validationFolds` in `gds.alpha.ml.pipeline.linkPrediction.configureSplit`.
 . Train each model candidate given by the <<algorithms-ml-linkprediction-configure-model-parameters,parameter space>> for each of the folds and evaluate the model on the respective validation set.
-The training process uses a logistic regression algorithm, and the evaluation uses the <<algorithms-ml-metrics, AUCPR metric>>.
+The training process uses a logistic regression algorithm, and the evaluation uses the <<algorithms-ml-linkprediction-pipelines-metrics, AUCPR metric>>.
 . Declare as winner the model with the highest average metric across the folds.
 . Re-train the winning model on the whole training set and evaluate it on both the `train` and `test` sets.
 In order to evaluate on the `test` set, the feature pipeline is first applied again as for the `train` set.
@@ -25,6 +25,7 @@ NOTE: The above steps describe what the procedure does logically.
 The actual steps as well as their ordering in the implementation may differ.
 
 NOTE: A step can only use node properties that are already present in the input graph or produced by steps, which were added before.
+
 
 === Syntax
 
@@ -51,7 +52,7 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 | Name                                                          | Type              | Default | Optional | Description
 | modelName                                                     | String            | n/a     | no       | The name of the model to train, must not exist in the Model Catalog.
 | pipeline                                                      | String            | n/a     | no       | The name of the pipeline to execute.
-| negativeClassWeight                                           | Float             | 1.0     | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1.
+| negativeClassWeight                                           | Float             | 1.0     | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1. More details <<algorithms-ml-linkprediction-pipelines-classimbalance, here>>.
 | randomSeed                                                    | Integer           | n/a     | yes      | Seed for the random number generator used during training.
 | <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']   | yes      | Filter the named graph using the given node labels.
 | <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']   | yes      | Filter the named graph using the given relationship types.
@@ -204,7 +205,7 @@ RETURN
 |===
 
 We can see the model configuration with `tolerance = 0.001` (and defaults filled for remaining parameters) was selected, and has a score of `0.76` on the test set.
-The score computed as the <<algorithms-ml-metrics, AUCPR>> metric, which is in the range [0, 1].
+The score computed as the <<algorithms-ml-linkprediction-pipelines-metrics, AUCPR>> metric, which is in the range [0, 1].
 A model which gives higher score to all links than non-links will have a score of 1.0, and a model that assigns random scores will on average have a score of 0.5.
 
 --

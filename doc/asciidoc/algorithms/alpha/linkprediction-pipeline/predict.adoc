@@ -22,6 +22,7 @@ Finally, the configured `topN` predictions are stored back to the projected grap
 It is necessary that the predict graph contains the properties that the pipeline requires and that the used array properties have the same dimensions as in the train graph.
 If the predict and train graphs are distinct, it is also beneficial that they have similar origins and semantics, so that the model is able to generalize well.
 
+
 === Syntax
 
 .Link Prediction syntax per mode
@@ -79,6 +80,7 @@ include::specific-predict-configuration.adoc[]
 |===
 ======
 
+
 [.include-with-stream]
 ======
 .Run Link Prediction in stream mode on a named graph:
@@ -110,6 +112,7 @@ include::specific-predict-configuration.adoc[]
 |===
 ======
 ====
+
 
 [[algorithms-link-prediction-pipelines-predict-examples]]
 === Example
