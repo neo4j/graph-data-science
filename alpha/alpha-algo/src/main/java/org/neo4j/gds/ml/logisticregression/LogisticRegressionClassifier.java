@@ -23,7 +23,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.batch.ListBatch;
+import org.neo4j.gds.ml.core.batch.SingletonBatch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.EWiseAddMatrixScalar;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
@@ -31,8 +31,6 @@ import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer.LogisticRegressionData;
-
-import java.util.List;
 
 public class LogisticRegressionClassifier implements Trainer.Classifier {
 
@@ -51,7 +49,7 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
 
     @Override
     public double[] predictProbabilities(long id, Trainer.Features features) {
-        var batch = new ListBatch(List.of(id));
+        var batch = new SingletonBatch(id);
         ComputationContext ctx = new ComputationContext();
         return ctx.forward(predictionsVariable(batchFeatureMatrix(batch, features))).data();
     }
