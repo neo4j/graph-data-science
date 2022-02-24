@@ -38,7 +38,6 @@ import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.RawValues;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
@@ -69,7 +68,6 @@ public final class NodesBuilder {
 
     private final long maxOriginalId;
     private final int concurrency;
-    private final AllocationTracker allocationTracker;
 
     private int nextLabelId;
     private final ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping;
@@ -96,8 +94,7 @@ public final class NodesBuilder {
         IdMapBuilder idMapBuilder,
         boolean hasLabelInformation,
         boolean hasProperties,
-        boolean deduplicateIds,
-        AllocationTracker allocationTracker
+        boolean deduplicateIds
     ) {
         this.maxOriginalId = maxOriginalId;
         this.concurrency = concurrency;
@@ -105,7 +102,6 @@ public final class NodesBuilder {
         this.idMapBuilder = idMapBuilder;
         this.labelInformationBuilder = LabelInformation.builder(maxOriginalId + 1);
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
-        this.allocationTracker = allocationTracker;
         this.nextLabelId = 0;
         this.lock = new ReentrantLock(true);
         this.buildersByLabelTokenAndPropertyToken = buildersByLabelTokenAndPropertyKey;
@@ -195,8 +191,7 @@ public final class NodesBuilder {
             labelInformationBuilder,
             highestNeoId,
             concurrency,
-            checkDuplicateIds,
-            allocationTracker
+            checkDuplicateIds
         );
 
         Optional<Map<NodeLabel, Map<String, NodeProperties>>> nodeProperties = Optional.empty();

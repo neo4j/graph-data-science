@@ -39,7 +39,6 @@ import org.neo4j.gds.core.loading.nodeproperties.FloatArrayNodePropertiesBuilder
 import org.neo4j.gds.core.loading.nodeproperties.InnerNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.LongArrayNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.LongNodePropertiesBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -66,8 +65,7 @@ final class NodesFilter {
         Expression expression,
         int concurrency,
         ExecutorService executorService,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         var inputNodes = graphStore.nodes();
 
@@ -75,7 +73,6 @@ final class NodesFilter {
             .concurrency(concurrency)
             .maxOriginalId(inputNodes.highestNeoId())
             .hasLabelInformation(!graphStore.nodeLabels().isEmpty())
-            .allocationTracker(allocationTracker)
             .build();
 
         var partitions = PartitionUtils
@@ -151,8 +148,6 @@ final class NodesFilter {
         var builder = NodePropertyStore.builder();
         var filteredNodeCount = filteredIdMap.nodeCount();
         var inputMapping = inputGraphStore.nodes();
-
-        var allocationTracker = AllocationTracker.empty();
 
         propertyKeys.forEach(propertyKey -> {
             var nodeProperties = inputGraphStore.nodePropertyValues(nodeLabel, propertyKey);

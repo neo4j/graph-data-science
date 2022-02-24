@@ -194,7 +194,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .maxOriginalId(dimensions.highestPossibleNodeCount() - 1)
             .hasLabelInformation(true)
             .concurrency(1)
-            .allocationTracker(loadingContext.allocationTracker())
             .build();
 
         gdlHandler.getVertices().forEach(vertex -> nodesBuilder.addNode(

@@ -111,7 +111,6 @@ public final class RandomGraphGenerator {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(nodeCount)
             .hasLabelInformation(maybeNodeLabelProducer.isPresent())
-            .allocationTracker(allocationTracker)
             .build();
 
         if (maybeNodeLabelProducer.isPresent()) {

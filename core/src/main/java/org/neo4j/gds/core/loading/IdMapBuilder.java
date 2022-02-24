@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 public interface IdMapBuilder {
 
@@ -29,7 +28,6 @@ public interface IdMapBuilder {
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,
-        boolean checkDuplicateIds,
-        AllocationTracker allocationTracker
+        boolean checkDuplicateIds
     );
 }

@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 import java.util.concurrent.Phaser;
@@ -34,7 +33,7 @@ class HugeLongArrayBuilderTest {
 
     @Test
     void shouldInsertIdsInSinglePage() {
-        var idMapBuilder =  HugeLongArrayBuilder.newBuilder(AllocationTracker.empty());
+        var idMapBuilder =  HugeLongArrayBuilder.newBuilder();
         var allocator = new HugeLongArrayBuilder.Allocator();
         idMapBuilder.allocate(0, 2, allocator);
         allocator.insert(new long[]{ 42, 1337 });
@@ -47,7 +46,7 @@ class HugeLongArrayBuilderTest {
 
     @Test
     void multipleInsertsShouldAddConsecutively() {
-        var idMapBuilder = HugeLongArrayBuilder.newBuilder(AllocationTracker.empty());
+        var idMapBuilder = HugeLongArrayBuilder.newBuilder();
         var allocator = new HugeLongArrayBuilder.Allocator();
 
         idMapBuilder.allocate(0, 2, allocator);
@@ -67,7 +66,7 @@ class HugeLongArrayBuilderTest {
 
     @Test
     void multipleInsertsAcrossMultiplePages() {
-        var idMapBuilder = HugeLongArrayBuilder.newBuilder(AllocationTracker.empty());
+        var idMapBuilder = HugeLongArrayBuilder.newBuilder();
         var allocator = new HugeLongArrayBuilder.Allocator();
 
         idMapBuilder.allocate(0, 2, allocator);
@@ -95,7 +94,7 @@ class HugeLongArrayBuilderTest {
 
     @Test
     void shouldInsertAllocationSizeFromPartialBatch() {
-        var idMapBuilder = HugeLongArrayBuilder.newBuilder(AllocationTracker.empty());
+        var idMapBuilder = HugeLongArrayBuilder.newBuilder();
         var values = LongStream.range(0, 42).map(__ -> 42).toArray();
 
         var allocator = new HugeLongArrayBuilder.Allocator();
@@ -108,7 +107,7 @@ class HugeLongArrayBuilderTest {
 
     @Test
     void multipleInsertsAreThreadSafe() throws InterruptedException {
-        var idMapBuilder = HugeLongArrayBuilder.newBuilder(AllocationTracker.empty());
+        var idMapBuilder = HugeLongArrayBuilder.newBuilder();
 
         var phaser = new Phaser(3);
         var startIndex = new AtomicLong();

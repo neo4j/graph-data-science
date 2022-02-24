@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.core.loading.IdMapAllocator;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -29,8 +28,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class HugeLongArrayBuilder {
-
-    private final AllocationTracker allocationTracker;
 
     private long[][] pages;
     private final Lock lock;
@@ -45,12 +42,11 @@ public class HugeLongArrayBuilder {
         }
     }
 
-    public static HugeLongArrayBuilder newBuilder(AllocationTracker allocationTracker) {
-        return new HugeLongArrayBuilder(allocationTracker);
+    public static HugeLongArrayBuilder newBuilder() {
+        return new HugeLongArrayBuilder();
     }
 
-    HugeLongArrayBuilder(AllocationTracker allocationTracker) {
-        this.allocationTracker = allocationTracker;
+    HugeLongArrayBuilder() {
         this.pages = new long[0][0];
         this.lock = new ReentrantLock();
     }

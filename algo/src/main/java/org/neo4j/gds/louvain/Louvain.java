@@ -191,7 +191,6 @@ public final class Louvain extends Algorithm<Louvain> {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(maxCommunityId)
             .concurrency(config.concurrency())
-            .allocationTracker(allocationTracker)
             .build();
 
         assertRunning();

@@ -107,7 +107,7 @@ public final class CsvGraphStoreImporter {
         progressTracker.beginSubTask();
         try {
             graphStoreBuilder.allocationTracker(allocationTracker);
-            importGraph(fileInput, allocationTracker);
+            importGraph(fileInput);
             return ImmutableUserGraphStore.of(fileInput.userName(), graphStoreBuilder.build());
         } finally {
             progressTracker.endSubTask();
@@ -134,14 +134,13 @@ public final class CsvGraphStoreImporter {
         return new TaskProgressTracker(task, log, concurrency, taskRegistryFactory);
     }
 
-    private void importGraph(FileInput fileInput, AllocationTracker allocationTracker) {
-        var nodes = importNodes(fileInput, allocationTracker);
+    private void importGraph(FileInput fileInput) {
+        var nodes = importNodes(fileInput);
         importRelationships(fileInput, nodes, AllocationTracker.empty());
     }
 
     private IdMap importNodes(
-        FileInput fileInput,
-        AllocationTracker allocationTracker
+        FileInput fileInput
     ) {
         progressTracker.beginSubTask();
         NodeSchema nodeSchema = fileInput.nodeSchema();
@@ -154,7 +153,6 @@ public final class CsvGraphStoreImporter {
             .concurrency(concurrency)
             .nodeCount(graphInfo.nodeCount())
             .deduplicateIds(false)
-            .allocationTracker(allocationTracker)
             .build();
         nodeVisitorBuilder.withNodeSchema(nodeSchema);
         nodeVisitorBuilder.withNodesBuilder(nodesBuilder);

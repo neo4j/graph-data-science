@@ -35,7 +35,6 @@ import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.extension.GdlSupportExtension;
 import org.neo4j.gds.extension.IdFunction;
@@ -368,7 +367,6 @@ public final class TestSupport {
             .initNodesBuilder()
             .nodeCount(nodeCount)
             .maxOriginalId(nodeCount - 1)
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         for (long i = 0; i < nodeCount; i++) {
@@ -383,7 +381,6 @@ public final class TestSupport {
             .initNodesBuilder()
             .nodeCount(originalIds.length)
             .maxOriginalId(Arrays.stream(originalIds).max().orElse(0))
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         Arrays.stream(originalIds).forEach(builder::addNode);

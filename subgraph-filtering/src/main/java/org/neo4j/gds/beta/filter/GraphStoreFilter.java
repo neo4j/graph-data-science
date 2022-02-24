@@ -94,8 +94,7 @@ public final class GraphStoreFilter {
                 expressions.nodeExpression(),
                 config.concurrency(),
                 executorService,
-                progressTracker,
-                allocationTracker
+                progressTracker
             );
 
             var filteredRelationships = RelationshipsFilter.filterRelationships(

@@ -74,8 +74,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             .idMapBehavior()
             .create(
                 Optional.of(dimensions.highestPossibleNodeCount()),
-                Optional.of(dimensions.nodeCount()),
-                loadingContext.allocationTracker()
+                Optional.of(dimensions.nodeCount())
             );
 
         var labelInformationBuilder =
@@ -179,8 +178,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             labelInformationBuilder,
             Math.max(dimensions.highestPossibleNodeCount() - 1, 0),
             concurrency,
-            false,
-            allocationTracker
+            false
         );
 
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter == null

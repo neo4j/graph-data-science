@@ -118,7 +118,6 @@ class SimilarityGraphBuilderTest {
             .concurrency(4)
             .hasLabelInformation(true)
             .maxOriginalId(3)
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         nodesBuilder.addNode(0, NodeLabel.of("A"));

@@ -93,7 +93,6 @@ class GraphStoreNodeVisitorTest {
             .concurrency(1)
             .maxOriginalId(graphStore.nodeCount())
             .nodeCount(graph.nodeCount())
-            .allocationTracker(AllocationTracker.empty())
             .build();
         GraphStoreNodeVisitor nodeVisitor = new GraphStoreNodeVisitor(nodeSchema, nodesBuilder);
         graph.forEachNode(nodeId -> {

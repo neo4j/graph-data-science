@@ -164,7 +164,7 @@ public final class CypherAggregation extends BaseProc {
             }
 
             if (this.idMapBuilder == null) {
-                this.idMapBuilder = new LazyIdMapBuilder(this.allocationTracker);
+                this.idMapBuilder = new LazyIdMapBuilder();
             }
 
             Map<String, Value> relationshipProperties = null;
@@ -529,13 +529,12 @@ final class LazyIdMapBuilder implements PartialIdMap {
     private final AtomicBoolean isEmpty = new AtomicBoolean(true);
     private final NodesBuilder nodesBuilder;
 
-    LazyIdMapBuilder(AllocationTracker allocationTracker) {
+    LazyIdMapBuilder() {
         this.nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
             .hasLabelInformation(true)
             .hasProperties(true)
             .deduplicateIds(true)
-            .allocationTracker(allocationTracker)
             .build();
     }
 

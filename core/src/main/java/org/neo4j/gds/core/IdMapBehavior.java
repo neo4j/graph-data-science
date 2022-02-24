@@ -20,7 +20,6 @@
 package org.neo4j.gds.core;
 
 import org.neo4j.gds.core.loading.IdMapBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 import java.util.Optional;
@@ -28,8 +27,7 @@ import java.util.Optional;
 public interface IdMapBehavior {
     IdMapBuilder create(
         Optional<Long> maxOriginalId,
-        Optional<Long> nodeCount,
-        AllocationTracker allocationTracker
+        Optional<Long> nodeCount
     );
 
     MemoryEstimation memoryEstimation();

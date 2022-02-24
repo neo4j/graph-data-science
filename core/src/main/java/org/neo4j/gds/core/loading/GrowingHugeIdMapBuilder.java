@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
@@ -34,8 +33,8 @@ public final class GrowingHugeIdMapBuilder implements IdMapBuilder {
     private final AtomicLong allocationIndex;
     private final AutoCloseableThreadLocal<HugeLongArrayBuilder.Allocator> allocators;
 
-    public static GrowingHugeIdMapBuilder of(AllocationTracker allocationTracker) {
-        HugeLongArrayBuilder array = HugeLongArrayBuilder.newBuilder(allocationTracker);
+    public static GrowingHugeIdMapBuilder of() {
+        HugeLongArrayBuilder array = HugeLongArrayBuilder.newBuilder();
         return new GrowingHugeIdMapBuilder(array);
     }
 
@@ -60,8 +59,7 @@ public final class GrowingHugeIdMapBuilder implements IdMapBuilder {
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,
-        boolean checkDuplicateIds,
-        AllocationTracker allocationTracker
+        boolean checkDuplicateIds
     ) {
         allocators.close();
         return checkDuplicateIds

@@ -189,13 +189,11 @@ class TransientCsrListTest {
     void shouldWorkWithVeryDenseNodes(TestMethodRunner runner, long firstDegree, long secondDegree) {
         runner.run(() -> {
             int nodeCount = 1_000_000;
-            var allocationTracker = AllocationTracker.empty();
 
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .nodeCount(nodeCount)
                 .maxOriginalId(nodeCount)
                 .hasLabelInformation(false)
-                .allocationTracker(allocationTracker)
                 .build();
 
             for (int i = 0; i < nodeCount; i++) {
@@ -207,7 +205,7 @@ class TransientCsrListTest {
             var relsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(nodes.idMap())
                 .orientation(Orientation.UNDIRECTED)
-                .allocationTracker(allocationTracker)
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             for (int i = 1; i <= firstDegree; i++) {
@@ -264,7 +262,6 @@ class TransientCsrListTest {
         long sourceNodeId = targets[0];
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(targets[targets.length - 1])
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         for (long target : targets) {

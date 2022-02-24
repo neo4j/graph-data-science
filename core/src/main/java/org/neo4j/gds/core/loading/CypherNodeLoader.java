@@ -70,7 +70,6 @@ class CypherNodeLoader extends CypherRecordLoader<IdMapAndProperties> {
             .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
             .hasLabelInformation(hasLabelInformation)
             .hasProperties(!propertyColumns.isEmpty())
-            .allocationTracker(loadingContext.allocationTracker())
             .build();
 
         NodeRowVisitor visitor = new NodeRowVisitor(nodesBuilder, propertyColumns, hasLabelInformation, progressTracker);
