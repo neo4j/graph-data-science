@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.core.randomforest;
 
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
@@ -38,20 +37,17 @@ public class ClassificationRandomForestPredict {
     private final int[] classes;
     private final Map<Integer, Integer> classToIdx;
     private final int concurrency;
-    private final AllocationTracker allocationTracker;
 
     public ClassificationRandomForestPredict(
         DecisionTreePredict<Integer>[] decisionTrees,
         int[] classes,
         Map<Integer, Integer> classToIdx,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         this.decisionTrees = decisionTrees;
         this.classes = classes;
         this.concurrency = concurrency;
         this.classToIdx = classToIdx;
-        this.allocationTracker = allocationTracker;
     }
 
     public int predict(final double[] features) {
@@ -89,8 +85,7 @@ public class ClassificationRandomForestPredict {
         final var totalNumVectors = allFeatureVectors.size();
         final var numClasses = classes.length;
         final var predictions = HugeAtomicLongArray.newArray(
-            classes.length * bootstrappedDatasets[0].size(),
-            allocationTracker
+            classes.length * bootstrappedDatasets[0].size()
         );
 
         var predictionTasks = ParallelUtil.tasks(decisionTrees.length, index -> () -> {

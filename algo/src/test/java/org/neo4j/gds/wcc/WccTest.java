@@ -230,79 +230,79 @@ class WccTest {
         GraphDimensions dimensions0 = ImmutableGraphDimensions.builder().nodeCount(0).build();
 
         assertEquals(
-            MemoryRange.of(128),
+            MemoryRange.of(120),
             Wcc.memoryEstimation(false).estimate(dimensions0, 1).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(168),
+            MemoryRange.of(160),
             Wcc.memoryEstimation(true).estimate(dimensions0, 1).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(128),
+            MemoryRange.of(120),
             Wcc.memoryEstimation(false).estimate(dimensions0, 8).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(168),
+            MemoryRange.of(160),
             Wcc.memoryEstimation(true).estimate(dimensions0, 8).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(128),
+            MemoryRange.of(120),
             Wcc.memoryEstimation(false).estimate(dimensions0, 64).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(168),
+            MemoryRange.of(160),
             Wcc.memoryEstimation(true).estimate(dimensions0, 64).memoryUsage()
         );
 
         GraphDimensions dimensions100 = ImmutableGraphDimensions.builder().nodeCount(100).build();
         assertEquals(
-            MemoryRange.of(928),
+            MemoryRange.of(920),
             Wcc.memoryEstimation(false).estimate(dimensions100, 1).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(1768),
+            MemoryRange.of(1760),
             Wcc.memoryEstimation(true).estimate(dimensions100, 1).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(928),
+            MemoryRange.of(920),
             Wcc.memoryEstimation(false).estimate(dimensions100, 8).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(1768),
+            MemoryRange.of(1760),
             Wcc.memoryEstimation(true).estimate(dimensions100, 8).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(928),
+            MemoryRange.of(920),
             Wcc.memoryEstimation(false).estimate(dimensions100, 64).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(1768),
+            MemoryRange.of(1760),
             Wcc.memoryEstimation(true).estimate(dimensions100, 64).memoryUsage()
         );
 
         GraphDimensions dimensions100B = ImmutableGraphDimensions.builder().nodeCount(100_000_000_000L).build();
         assertEquals(
-            MemoryRange.of(800_122_070_456L),
+            MemoryRange.of(800_122_070_448L),
             Wcc.memoryEstimation(false).estimate(dimensions100B, 1).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(1_600_244_140_824L),
+            MemoryRange.of(1_600_244_140_816L),
             Wcc.memoryEstimation(true).estimate(dimensions100B, 1).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(800_122_070_456L),
+            MemoryRange.of(800_122_070_448L),
             Wcc.memoryEstimation(false).estimate(dimensions100B, 8).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(1_600_244_140_824L),
+            MemoryRange.of(1_600_244_140_816L),
             Wcc.memoryEstimation(true).estimate(dimensions100B, 8).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(800_122_070_456L),
+            MemoryRange.of(800_122_070_448L),
             Wcc.memoryEstimation(false).estimate(dimensions100B, 64).memoryUsage()
         );
         assertEquals(
-            MemoryRange.of(1_600_244_140_824L),
+            MemoryRange.of(1_600_244_140_816L),
             Wcc.memoryEstimation(true).estimate(dimensions100B, 64).memoryUsage()
         );
     }
@@ -340,8 +340,7 @@ class WccTest {
             Pools.DEFAULT,
             communitySize() / concurrency,
             config,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute();
     }
 

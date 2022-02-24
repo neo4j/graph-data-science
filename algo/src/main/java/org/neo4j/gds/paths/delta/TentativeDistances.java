@@ -87,8 +87,7 @@ public interface TentativeDistances {
 
         var predecessors = HugeAtomicLongArray.newArray(
             size,
-            LongPageCreator.of(concurrency, index -> NO_PREDECESSOR),
-            allocationTracker
+            LongPageCreator.of(concurrency, index -> NO_PREDECESSOR)
         );
 
         return new DistanceAndPredecessor(predecessors, distances);

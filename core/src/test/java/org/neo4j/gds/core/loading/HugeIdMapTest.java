@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 
@@ -103,7 +102,7 @@ class HugeIdMapTest {
         int length = 1337;
         int highestNeoId = length - 1;
         var hugeIdMapBuilder = HugeIdMapBuilder.of(length);
-        var emptyLabelInformationBuilder = LabelInformation.emptyBuilder(AllocationTracker.empty());
+        var emptyLabelInformationBuilder = LabelInformation.emptyBuilder();
         var hugeIdMap = HugeIdMapBuilderOps.build(
             hugeIdMapBuilder.array(),
             length,

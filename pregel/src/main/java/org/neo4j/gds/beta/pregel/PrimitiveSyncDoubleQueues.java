@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
@@ -34,18 +33,18 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
     private HugeObjectArray<double[]> prevQueues;
     private HugeAtomicLongArray prevTails;
 
-    public static PrimitiveSyncDoubleQueues of(long nodeCount, AllocationTracker allocationTracker) {
-        return of(nodeCount, MIN_CAPACITY, allocationTracker);
+    public static PrimitiveSyncDoubleQueues of(long nodeCount) {
+        return of(nodeCount, MIN_CAPACITY);
     }
 
-    public static PrimitiveSyncDoubleQueues of(long nodeCount, int initialQueueCapacity, AllocationTracker allocationTracker) {
-        var currentTails = HugeAtomicLongArray.newArray(nodeCount, allocationTracker);
-        var prevTails = HugeAtomicLongArray.newArray(nodeCount, allocationTracker);
+    public static PrimitiveSyncDoubleQueues of(long nodeCount, int initialQueueCapacity) {
+        var currentTails = HugeAtomicLongArray.newArray(nodeCount);
+        var prevTails = HugeAtomicLongArray.newArray(nodeCount);
 
         var currentQueues = HugeObjectArray.newArray(double[].class, nodeCount);
         var prevQueues = HugeObjectArray.newArray(double[].class, nodeCount);
 
-        var referenceCounts = HugeAtomicLongArray.newArray(nodeCount, allocationTracker);
+        var referenceCounts = HugeAtomicLongArray.newArray(nodeCount);
 
         var capacity = Math.max(initialQueueCapacity, MIN_CAPACITY);
         currentQueues.setAll(value -> new double[capacity]);

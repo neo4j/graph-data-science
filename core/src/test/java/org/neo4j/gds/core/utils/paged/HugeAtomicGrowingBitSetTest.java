@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,14 +27,14 @@ class HugeAtomicGrowingBitSetTest {
 
     @Test
     void testGrowEmpty() {
-        var atomicBitSet = HugeAtomicGrowingBitSet.create(0, AllocationTracker.empty());
+        var atomicBitSet = HugeAtomicGrowingBitSet.create(0);
         atomicBitSet.set(0);
         assertThat(atomicBitSet.get(0)).isTrue();
     }
 
     @Test
     void testGrow() {
-        var atomicBitSet = HugeAtomicGrowingBitSet.create(42, AllocationTracker.empty());
+        var atomicBitSet = HugeAtomicGrowingBitSet.create(42);
 
         assertThat(atomicBitSet.size()).isEqualTo(42);
         atomicBitSet.set(42);

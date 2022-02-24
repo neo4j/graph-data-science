@@ -22,7 +22,6 @@ package org.neo4j.gds.core.utils.paged;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.function.ThrowingConsumer;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.opentest4j.AssertionFailedError;
 
@@ -463,19 +462,19 @@ final class HugeAtomicLongArrayTest {
     }
 
     private HugeAtomicLongArray singleArray(final int size) {
-        return HugeAtomicLongArray.newSingleArray(size, LongPageCreator.passThrough(1), AllocationTracker.empty());
+        return HugeAtomicLongArray.newSingleArray(size, LongPageCreator.passThrough(1));
     }
 
     private HugeAtomicLongArray singleArray(final int size, final LongPageCreator pageFiller) {
-        return HugeAtomicLongArray.newSingleArray(size, pageFiller, AllocationTracker.empty());
+        return HugeAtomicLongArray.newSingleArray(size, pageFiller);
     }
 
     private HugeAtomicLongArray pagedArray(final int size) {
-        return HugeAtomicLongArray.newPagedArray(size, LongPageCreator.passThrough(1), AllocationTracker.empty());
+        return HugeAtomicLongArray.newPagedArray(size, LongPageCreator.passThrough(1));
     }
 
     private HugeAtomicLongArray pagedArray(final int size, final LongPageCreator pageFiller) {
-        return HugeAtomicLongArray.newPagedArray(size, pageFiller, AllocationTracker.empty());
+        return HugeAtomicLongArray.newPagedArray(size, pageFiller);
     }
 
     /**

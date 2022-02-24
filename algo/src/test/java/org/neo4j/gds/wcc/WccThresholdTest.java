@@ -24,7 +24,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -82,8 +81,7 @@ class WccThresholdTest {
             Pools.DEFAULT,
             DEFAULT_BATCH_SIZE,
             wccConfig,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute();
 
         long[] communityData = new long[(int) graph.nodeCount()];

@@ -110,7 +110,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
         ParallelUtil.runWithConcurrency(this.concurrency, tasks, Pools.DEFAULT);
 
         return ImmutableClassificationRandomForestTrainResult.of(
-            new ClassificationRandomForestPredict(decisionTrees, classes, classToIdx, concurrency, allocationTracker),
+            new ClassificationRandomForestPredict(decisionTrees, classes, classToIdx, concurrency),
             bootstrappedDatasets
         );
     }

@@ -24,7 +24,6 @@ import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 
 import java.util.Collection;
@@ -143,61 +142,56 @@ public final class LabelInformation {
         boolean accept(NodeLabel nodeLabel, BitSet bitSet);
     }
 
-    public static Builder emptyBuilder(AllocationTracker allocationTracker) {
-        return Builder.of(allocationTracker);
+    public static Builder emptyBuilder() {
+        return Builder.of();
     }
 
-    public static Builder builder(long expectedCapacity, AllocationTracker allocationTracker) {
-        return Builder.of(expectedCapacity, allocationTracker);
+    public static Builder builder(long expectedCapacity) {
+        return Builder.of(expectedCapacity);
     }
 
     public static Builder builder(
         long expectedCapacity,
-        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
-        AllocationTracker allocationTracker
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
     ) {
-        return Builder.of(expectedCapacity, labelTokenNodeLabelMapping, allocationTracker);
+        return Builder.of(expectedCapacity, labelTokenNodeLabelMapping);
     }
 
     public static final class Builder {
         private final long expectedCapacity;
         final Map<NodeLabel, HugeAtomicGrowingBitSet> labelInformation;
         private final List<NodeLabel> starNodeLabelMappings;
-        private final AllocationTracker allocationTracker;
 
         private Builder(
             long expectedCapacity,
             Map<NodeLabel, HugeAtomicGrowingBitSet> labelInformation,
-            List<NodeLabel> starNodeLabelMappings,
-            AllocationTracker allocationTracker
+            List<NodeLabel> starNodeLabelMappings
         ) {
             this.expectedCapacity = expectedCapacity;
             this.labelInformation = labelInformation;
             this.starNodeLabelMappings = starNodeLabelMappings;
-            this.allocationTracker = allocationTracker;
         }
 
-        static Builder of(AllocationTracker allocationTracker) {
-            return of(0, allocationTracker);
+        static Builder of() {
+            return of(0);
         }
 
-        static Builder of(long expectedCapacity, AllocationTracker allocationTracker) {
-            return new Builder(expectedCapacity, new ConcurrentHashMap<>(), List.of(), allocationTracker);
+        static Builder of(long expectedCapacity) {
+            return new Builder(expectedCapacity, new ConcurrentHashMap<>(), List.of());
         }
 
         static Builder of(
             long expectedCapacity,
-            IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
-            AllocationTracker allocationTracker
+            IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
         ) {
             var starNodeLabelMappings = labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, List.of());
 
             var nodeLabelBitSetMap = prepareLabelMap(
                 labelTokenNodeLabelMapping,
-                () -> HugeAtomicGrowingBitSet.create(expectedCapacity, allocationTracker)
+                () -> HugeAtomicGrowingBitSet.create(expectedCapacity)
             );
 
-            return new Builder(expectedCapacity, nodeLabelBitSetMap, starNodeLabelMappings, allocationTracker);
+            return new Builder(expectedCapacity, nodeLabelBitSetMap, starNodeLabelMappings);
         }
 
         private static <T> Map<NodeLabel, T> prepareLabelMap(
@@ -221,7 +215,7 @@ public final class LabelInformation {
             labelInformation
                 .computeIfAbsent(
                     nodeLabel,
-                    (ignored) -> HugeAtomicGrowingBitSet.create(expectedCapacity, allocationTracker)
+                    (ignored) -> HugeAtomicGrowingBitSet.create(expectedCapacity)
                 ).set(nodeId);
         }
 

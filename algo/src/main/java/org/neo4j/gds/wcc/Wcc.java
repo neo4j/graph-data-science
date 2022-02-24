@@ -29,7 +29,6 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -81,7 +80,6 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
     private final WccBaseConfig config;
     private final NodeProperties initialComponents;
     private final ExecutorService executor;
-    private final AllocationTracker allocationTracker;
     private final long nodeCount;
     private final long batchSize;
     private final int threadSize;
@@ -100,8 +98,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
         ExecutorService executor,
         int minBatchSize,
         WccBaseConfig config,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -110,7 +107,6 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
             ? graph.nodeProperties(config.seedProperty())
             : null;
         this.executor = executor;
-        this.allocationTracker = allocationTracker;
         this.nodeCount = graph.nodeCount();
         this.batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
@@ -138,8 +134,8 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
         long nodeCount = graph.nodeCount();
 
         DisjointSetStruct dss = config.isIncremental()
-            ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, allocationTracker, config.concurrency())
-            : new HugeAtomicDisjointSetStruct(nodeCount, allocationTracker, config.concurrency());
+            ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, config.concurrency())
+            : new HugeAtomicDisjointSetStruct(nodeCount, config.concurrency());
 
         if (graph.isUndirected() && !config.hasThreshold()) {
             computeUndirected(dss);

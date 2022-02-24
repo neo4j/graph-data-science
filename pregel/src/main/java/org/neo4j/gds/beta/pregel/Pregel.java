@@ -139,7 +139,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             ? new ReducingMessenger(graph, config, reducer.get(), allocationTracker)
             : config.isAsynchronous()
                 ? new AsyncQueueMessenger(graph.nodeCount(), allocationTracker)
-                : new SyncQueueMessenger(graph.nodeCount(), allocationTracker);
+                : new SyncQueueMessenger(graph.nodeCount());
 
         this.computer = PregelComputer.<CONFIG>builder()
             .graph(graph)
@@ -147,7 +147,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .config(config)
             .nodeValues(nodeValues)
             .messenger(messenger)
-            .voteBits(HugeAtomicBitSet.create(graph.nodeCount(), allocationTracker))
+            .voteBits(HugeAtomicBitSet.create(graph.nodeCount()))
             .executorService(config.useForkJoin()
                 ? Pools.createForkJoinPool(config.concurrency())
                 : executor)

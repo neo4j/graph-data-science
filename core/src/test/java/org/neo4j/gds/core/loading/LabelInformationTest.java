@@ -22,7 +22,6 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Collection;
 import java.util.List;
@@ -56,7 +55,7 @@ class LabelInformationTest {
 
         tokenLabelsMap.put(0, List.of(label));
 
-        var builder = LabelInformation.builder(nodeCount, tokenLabelsMap, AllocationTracker.empty());
+        var builder = LabelInformation.builder(nodeCount, tokenLabelsMap);
 
         for (var nodeId : nodeIds) {
             builder.addNodeIdToLabel(label, nodeId);

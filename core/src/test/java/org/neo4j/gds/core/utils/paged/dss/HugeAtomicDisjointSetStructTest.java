@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds.core.utils.paged.dss;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-
 class HugeAtomicDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     DisjointSetStruct newSet(int capacity) {
-        return new HugeAtomicDisjointSetStruct(capacity, AllocationTracker.empty(), 4);
+        return new HugeAtomicDisjointSetStruct(capacity, 4);
     }
 }

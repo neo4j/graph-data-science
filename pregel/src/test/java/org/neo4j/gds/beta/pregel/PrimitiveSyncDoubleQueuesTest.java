@@ -21,7 +21,6 @@ package org.neo4j.gds.beta.pregel;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -32,7 +31,7 @@ class PrimitiveSyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
 
     @Override
     PrimitiveSyncDoubleQueues getQueue(long nodeCount, int initialCapacity) {
-        return PrimitiveSyncDoubleQueues.of(nodeCount, initialCapacity, AllocationTracker.empty());
+        return PrimitiveSyncDoubleQueues.of(nodeCount, initialCapacity);
     }
 
     @Test

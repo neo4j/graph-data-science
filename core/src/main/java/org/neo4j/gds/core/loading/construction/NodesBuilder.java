@@ -103,7 +103,7 @@ public final class NodesBuilder {
         this.concurrency = concurrency;
         this.elementIdentifierLabelTokenMapping = elementIdentifierLabelTokenMapping;
         this.idMapBuilder = idMapBuilder;
-        this.labelInformationBuilder = LabelInformation.builder(maxOriginalId + 1, allocationTracker);
+        this.labelInformationBuilder = LabelInformation.builder(maxOriginalId + 1);
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.allocationTracker = allocationTracker;
         this.nextLabelId = 0;
@@ -124,7 +124,7 @@ public final class NodesBuilder {
         BiFunction<Integer, String, NodePropertiesFromStoreBuilder> propertyBuilderFn = buildersByLabelTokenAndPropertyKey.isEmpty()
             ? this::getOrCreatePropertyBuilder
             : this::getPropertyBuilder;
-        LongPredicate seenNodeIdPredicate = seenNodesPredicate(deduplicateIds, maxOriginalId, allocationTracker);
+        LongPredicate seenNodeIdPredicate = seenNodesPredicate(deduplicateIds, maxOriginalId);
         long highestPossibleNodeCount = maxOriginalId == UNKNOWN_MAX_ID
             ? Long.MAX_VALUE
             : maxOriginalId + 1;
@@ -145,15 +145,14 @@ public final class NodesBuilder {
 
     private static LongPredicate seenNodesPredicate(
         boolean deduplicateIds,
-        long maxOriginalId,
-        AllocationTracker allocationTracker
+        long maxOriginalId
     ) {
         if (deduplicateIds) {
             if (maxOriginalId == UNKNOWN_MAX_ID) {
-                var seenIds = HugeAtomicGrowingBitSet.create(0, allocationTracker);
+                var seenIds = HugeAtomicGrowingBitSet.create(0);
                 return seenIds::getAndSet;
             } else {
-                var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, allocationTracker);
+                var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1);
                 return seenIds::getAndSet;
             }
         } else {

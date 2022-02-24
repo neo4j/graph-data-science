@@ -81,8 +81,8 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         var labelInformationBuilder =
             graphProjectConfig.nodeProjections().allProjections().size() == 1
             && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
-                ? LabelInformation.emptyBuilder(allocationTracker)
-                : LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping, allocationTracker);
+                ? LabelInformation.emptyBuilder()
+                : LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping);
 
         var propertyMappings = IndexPropertyMappings.prepareProperties(
             graphProjectConfig,

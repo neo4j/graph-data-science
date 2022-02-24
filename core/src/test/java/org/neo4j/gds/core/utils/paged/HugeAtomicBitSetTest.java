@@ -318,7 +318,7 @@ class HugeAtomicBitSetTest {
     static Stream<HabsSupplier> suppliers() {
         return Stream.of(
             (size, tracker) -> {
-                var habs = HugeAtomicBitSet.create(size, tracker);
+                var habs = HugeAtomicBitSet.create(size);
                 return new HabsOps() {
                     @Override
                     public boolean get(long index) {
@@ -389,7 +389,7 @@ class HugeAtomicBitSetTest {
                 };
             },
             (size, tracker) -> {
-                var habs = HugeAtomicGrowingBitSet.create(size, tracker);
+                var habs = HugeAtomicGrowingBitSet.create(size);
                 return new HabsOps() {
                     @Override
                     public boolean get(long index) {

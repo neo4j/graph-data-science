@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.HugeArrays;
 
@@ -36,29 +35,25 @@ public final class HugeAtomicGrowingBitSet {
     private int remainder;
 
     private final Lock growLock = new ReentrantLock(true);
-    private final AllocationTracker allocationTracker;
 
-    public static HugeAtomicGrowingBitSet create(long size, AllocationTracker allocationTracker) {
+    public static HugeAtomicGrowingBitSet create(long size) {
         var wordsSize = BitUtil.ceilDiv(size, NUM_BITS);
         int remainder = (int) (size % NUM_BITS);
         return new HugeAtomicGrowingBitSet(
-            HugeAtomicLongArray.newArray(wordsSize, allocationTracker),
+            HugeAtomicLongArray.newArray(wordsSize),
             size,
-            remainder,
-            allocationTracker
+            remainder
         );
     }
 
     private HugeAtomicGrowingBitSet(
         HugeAtomicLongArray bits,
         long numBits,
-        int remainder,
-        AllocationTracker allocationTracker
+        int remainder
     ) {
         this.bits = bits;
         this.numBits = numBits;
         this.remainder = remainder;
-        this.allocationTracker = allocationTracker;
     }
 
     /**
@@ -178,7 +173,7 @@ public final class HugeAtomicGrowingBitSet {
             var newNumBits = HugeArrays.oversize(minNumBits, Long.BYTES);
             var wordsSize = BitUtil.ceilDiv(newNumBits, NUM_BITS);
             int remainder = (int) (newNumBits % NUM_BITS);
-            var newBits = HugeAtomicLongArray.newArray(wordsSize, allocationTracker);
+            var newBits = HugeAtomicLongArray.newArray(wordsSize);
 
             this.bits.copyTo(newBits, this.bits.size());
             this.bits = newBits;

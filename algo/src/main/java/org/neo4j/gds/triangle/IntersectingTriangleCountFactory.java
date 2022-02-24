@@ -51,7 +51,6 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
             graph,
             configuration,
             Pools.DEFAULT,
-            allocationTracker,
             progressTracker
         );
     }

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -58,7 +57,7 @@ class UndirectedUnionTaskTest {
 
     @Test
     void shouldNotUnionNodesInSkipComponent() {
-        var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), AllocationTracker.empty(), 2);
+        var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), 2);
         var partition = Partition.of(0, graph.nodeCount());
 
         var task = new Wcc.UndirectedUnionTask(
@@ -87,7 +86,7 @@ class UndirectedUnionTaskTest {
 
     @Test
     void shouldSkipTheFirstTwoElements() {
-        var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), AllocationTracker.empty(), 2);
+        var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), 2);
         var partition = Partition.of(0, graph.nodeCount());
 
         var task = new Wcc.UndirectedUnionTask(

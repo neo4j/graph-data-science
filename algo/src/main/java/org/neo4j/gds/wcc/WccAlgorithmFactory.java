@@ -55,8 +55,7 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Gra
             Pools.DEFAULT,
             ParallelUtil.DEFAULT_BATCH_SIZE,
             configuration,
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
     }
 

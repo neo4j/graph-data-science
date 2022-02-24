@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 
@@ -38,10 +37,10 @@ public final class HugeAtomicBitSet {
         return HugeAtomicLongArray.memoryEstimation(wordsSize) + MemoryUsage.sizeOfInstance(HugeAtomicBitSet.class);
     }
 
-    public static HugeAtomicBitSet create(long size, AllocationTracker allocationTracker) {
+    public static HugeAtomicBitSet create(long size) {
         var wordsSize = BitUtil.ceilDiv(size, NUM_BITS);
         int remainder = (int) (size % NUM_BITS);
-        return new HugeAtomicBitSet(HugeAtomicLongArray.newArray(wordsSize, allocationTracker), size, remainder);
+        return new HugeAtomicBitSet(HugeAtomicLongArray.newArray(wordsSize), size, remainder);
     }
 
     private HugeAtomicBitSet(HugeAtomicLongArray bits, long numBits, int remainder) {
