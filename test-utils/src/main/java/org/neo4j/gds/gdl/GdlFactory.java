@@ -230,7 +230,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
                 propertyBuilders.computeIfAbsent(PropertyMapping.of(propertyKey), (key) ->
                     NodePropertiesFromStoreBuilder.of(
-                        loadingContext.allocationTracker(),
                         DefaultValue.DEFAULT,
                         1
                     )).set(vertex.getId(), Values.of(propertyValue));

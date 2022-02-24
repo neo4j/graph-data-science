@@ -160,7 +160,6 @@ final class NodesFilter {
 
             NodePropertiesBuilder<?> nodePropertiesBuilder = getPropertiesBuilder(
                 inputMapping,
-                allocationTracker,
                 nodeProperties,
                 concurrency
             );
@@ -186,7 +185,6 @@ final class NodesFilter {
 
     private static NodePropertiesBuilder<?> getPropertiesBuilder(
         IdMap idMap,
-        AllocationTracker allocationTracker,
         NodeProperties inputNodeProperties,
         int concurrency
     ) {
@@ -196,7 +194,6 @@ final class NodesFilter {
             case LONG:
                 var longNodePropertiesBuilder = LongNodePropertiesBuilder.of(
                     DefaultValue.forLong(),
-                    allocationTracker,
                     concurrency
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, longNodePropertiesBuilder) {
@@ -211,7 +208,6 @@ final class NodesFilter {
             case DOUBLE:
                 var doubleNodePropertiesBuilder = new DoubleNodePropertiesBuilder(
                     DefaultValue.forDouble(),
-                    allocationTracker,
                     concurrency
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, doubleNodePropertiesBuilder) {
@@ -225,7 +221,6 @@ final class NodesFilter {
             case DOUBLE_ARRAY:
                 var doubleArrayNodePropertiesBuilder = new DoubleArrayNodePropertiesBuilder(
                     DefaultValue.forDoubleArray(),
-                    allocationTracker,
                     concurrency
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, doubleArrayNodePropertiesBuilder) {

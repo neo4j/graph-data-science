@@ -25,7 +25,6 @@ import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.collections.HugeSparseDoubleArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
@@ -37,15 +36,12 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
 
     private final HugeSparseDoubleArrayArray.Builder builder;
     private final double[] defaultValue;
-    private final AllocationTracker allocationTracker;
     private final int concurrency;
 
     public DoubleArrayNodePropertiesBuilder(
         DefaultValue defaultValue,
-        AllocationTracker allocationTracker,
         int concurrency
     ) {
-        this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
         this.defaultValue = defaultValue.doubleArrayValue();
         this.builder = HugeSparseDoubleArrayArray.builder(

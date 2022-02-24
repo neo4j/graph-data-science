@@ -25,7 +25,6 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.collections.HugeSparseCollections;
 import org.neo4j.gds.core.loading.ValueConverter;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.values.storable.Value;
@@ -55,26 +54,22 @@ public final class NodePropertiesFromStoreBuilder {
     }
 
     public static NodePropertiesFromStoreBuilder of(
-        AllocationTracker allocationTracker,
         DefaultValue defaultValue,
         int concurrency
     ) {
-        return new NodePropertiesFromStoreBuilder(defaultValue, allocationTracker, concurrency);
+        return new NodePropertiesFromStoreBuilder(defaultValue, concurrency);
     }
 
     private final DefaultValue defaultValue;
-    private final AllocationTracker allocationTracker;
     private final int concurrency;
     private final AtomicReference<InnerNodePropertiesBuilder> innerBuilder;
     private final LongAdder size;
 
     private NodePropertiesFromStoreBuilder(
         DefaultValue defaultValue,
-        AllocationTracker allocationTracker,
         int concurrency
     ) {
         this.defaultValue = defaultValue;
-        this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
         this.innerBuilder = new AtomicReference<>();
         this.size = new LongAdder();
@@ -114,11 +109,11 @@ public final class NodePropertiesFromStoreBuilder {
     private InnerNodePropertiesBuilder newInnerBuilder(ValueType valueType) {
         switch (valueType) {
             case LONG:
-                return LongNodePropertiesBuilder.of(defaultValue, allocationTracker, concurrency);
+                return LongNodePropertiesBuilder.of(defaultValue, concurrency);
             case DOUBLE:
-                return new DoubleNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
+                return new DoubleNodePropertiesBuilder(defaultValue, concurrency);
             case DOUBLE_ARRAY:
-                return new DoubleArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
+                return new DoubleArrayNodePropertiesBuilder(defaultValue, concurrency);
             case FLOAT_ARRAY:
                 return new FloatArrayNodePropertiesBuilder(defaultValue, concurrency);
             case LONG_ARRAY:

@@ -22,7 +22,6 @@ package org.neo4j.gds.core.loading.nodeproperties;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.idMap;
@@ -43,7 +42,6 @@ public class LongNodePropertiesBuilderTest {
 
         var builder = LongNodePropertiesBuilder.of(
             defaultValue,
-            AllocationTracker.empty(),
             ConcurrencyConfig.DEFAULT_CONCURRENCY
         );
 

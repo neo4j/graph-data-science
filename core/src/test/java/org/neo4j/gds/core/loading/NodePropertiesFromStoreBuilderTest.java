@@ -29,7 +29,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -58,7 +57,6 @@ final class NodePropertiesFromStoreBuilderTest {
     void testEmptyDoubleProperties() {
         var nodeCount = 100_000;
         var properties = NodePropertiesFromStoreBuilder.of(
-            AllocationTracker.empty(),
             DefaultValue.of(42.0D),
             1
         ).build(idMap(nodeCount));
@@ -72,7 +70,6 @@ final class NodePropertiesFromStoreBuilderTest {
     void testEmptyLongProperties() {
         var nodeCount = 100_000;
         var properties = NodePropertiesFromStoreBuilder.of(
-            AllocationTracker.empty(),
             DefaultValue.of(42L),
             1
         ).build(idMap(nodeCount));
@@ -252,7 +249,6 @@ final class NodePropertiesFromStoreBuilderTest {
         var nodeCount = 100;
 
         var builder = NodePropertiesFromStoreBuilder.of(
-            AllocationTracker.empty(),
             DefaultValue.DEFAULT,
             1
         );
@@ -272,7 +268,6 @@ final class NodePropertiesFromStoreBuilderTest {
         var pool = Executors.newFixedThreadPool(2);
         var nodeSize = 100_000;
         var builder = NodePropertiesFromStoreBuilder.of(
-            AllocationTracker.empty(),
             DefaultValue.of(Double.NaN),
             1
         );
@@ -322,7 +317,6 @@ final class NodePropertiesFromStoreBuilderTest {
 
     static NodeProperties createNodeProperties(long size, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
         var builder = NodePropertiesFromStoreBuilder.of(
-            AllocationTracker.empty(),
             DefaultValue.of(defaultValue),
             1
         );

@@ -26,7 +26,6 @@ import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
@@ -44,7 +43,6 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     private volatile long maxValue;
 
     private static final VarHandle MAX_VALUE;
-    protected final AllocationTracker allocationTracker;
     private final HugeSparseLongArray.Builder builder;
     private final long defaultValue;
     private final int concurrency;
@@ -64,24 +62,21 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     private LongNodePropertiesBuilder(
         HugeSparseLongArray.Builder builder,
         long defaultValue,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         this.builder = builder;
         this.defaultValue = defaultValue;
         this.concurrency = concurrency;
-        this.allocationTracker = allocationTracker;
         this.maxValue = Long.MIN_VALUE;
     }
 
     public static LongNodePropertiesBuilder of(
         DefaultValue defaultValue,
-        AllocationTracker allocationTracker,
         int concurrency
     ) {
         var defaultLongValue = defaultValue.longValue();
         var builder = HugeSparseLongArray.builder(defaultLongValue);
-        return new LongNodePropertiesBuilder(builder, defaultLongValue, concurrency, allocationTracker);
+        return new LongNodePropertiesBuilder(builder, defaultLongValue, concurrency);
     }
 
     @Override
