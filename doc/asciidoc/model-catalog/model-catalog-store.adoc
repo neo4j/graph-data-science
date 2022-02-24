@@ -25,14 +25,8 @@ The `gds.model.store_location` parameter must be configured for this feature.
 *Models that can be stored*
 
 * <<algorithms-embeddings-graph-sage,GraphSAGE model>>
-* <<algorithms-ml-nodeclassification,Node Classification model>>
-* <<algorithms-ml-linkprediction,Link Prediction model>>
-
-
-*Models that cannot be stored*
-
-* <<algorithms-ml-linkprediction-pipelines, Link prediction training pipeline>>
-* <<algorithms-ml-linkprediction-pipelines-train, Link prediction pipeline>>
+* <<algorithms-ml-nodeclassification-pipelines, Node Classification model>>
+* <<algorithms-ml-linkprediction-pipelines, Link Prediction model>>
 
 
 === Syntax

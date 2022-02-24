@@ -14,10 +14,9 @@ To help with working with the ML models, there are additional guides for pre-pro
 * <<algorithms-ml-models-preprocessing, Pre-processing>>
 * <<algorithms-ml-models-tuning, Tuning parameters for training>>
 
-The Neo4j GDS library includes the following machine learning models, grouped by quality tier:
+The Neo4j GDS library includes the following algorithms to train and apply machine learning models, grouped by quality tier:
 
 * Alpha
-** <<algorithms-ml-nodeclassification, Node Classification>>
 ** <<algorithms-ml-nodeclassification-pipelines, Node Classification Pipelines>>
 ** <<algorithms-ml-linkprediction, Link Prediction>>
 ** <<algorithms-ml-linkprediction-pipelines, Link Prediction Pipelines>>

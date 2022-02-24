@@ -1,7 +1,7 @@
 [[algorithms-ml-models-tuning]]
 = Tuning parameters
 
-Both <<algorithms-ml-nodeclassification, Node Classification>> and <<algorithms-ml-linkprediction, Link Prediction>> have training parameters that can be tuned automatically given a set of allowed values.
+Both <<algorithms-ml-nodeclassification-pipelines, Node Classification Pipelines>> and <<algorithms-ml-linkprediction-pipelines, Link Prediction Pipelines>> have training parameters that can be tuned automatically given a set of allowed values.
 The parameters `maxEpochs`, `tolerance` and `patience` control for how long the training will run until termination.
 These parameters give ways to limit a computational budget. In general, higher `maxEpochs` and `patience` and lower `tolerance` lead to longer training but higher quality models.
 It is however well-known that restricting the computational budget can serve the purpose of regularization and mitigate overfitting.
