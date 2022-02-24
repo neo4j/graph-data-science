@@ -22,7 +22,7 @@ The Neo4j GDS library includes the following similarity algorithms, grouped by q
 
 include::node-similarity/node-similarity.adoc[leveloffset=+1]
 
-include::beta/knn.adoc[leveloffset=+1]
+include::knn/knn.adoc[leveloffset=+1]
 
 include::alpha/alpha-similarity-jaccard.adoc[leveloffset=+1]
 
