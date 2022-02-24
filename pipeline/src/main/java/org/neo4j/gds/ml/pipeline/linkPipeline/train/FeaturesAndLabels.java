@@ -20,14 +20,14 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.ml.Trainer;
 
 @ValueClass
-interface FeaturesAndTargets {
-    HugeObjectArray<double[]> features();
+interface FeaturesAndLabels {
+    Trainer.Features features();
 
-    HugeDoubleArray targets();
+    HugeLongArray labels();
 
     default long size() {
         return features().size();

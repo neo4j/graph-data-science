@@ -38,9 +38,10 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
+import org.neo4j.gds.ml.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
                         ", (n1)-[:T]->(n3)" +
                         ", (n2)-[:T]->(n4)";
 
-    private static final double[] WEIGHTS = new double[]{-2.0, -1.0, 3.0};
+    private static final double[] WEIGHTS = new double[]{2.0, 1.0, -3.0};
 
     private GraphStore graphStore;
 
@@ -91,14 +92,15 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
     void shouldPredictWithTopN(int topN, int concurrency) {
         var featureStep = new L2FeatureStep(List.of("a", "b", "c"));
 
-        var modelData = ImmutableLinkLogisticRegressionData.of(
+        var modelData = ImmutableLogisticRegressionData.of(
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
                     1,
                     WEIGHTS.length
                 )),
-            Weights.ofScalar(0)
+            Weights.ofScalar(0),
+            LinkPredictionTrain.makeClassIdMap()
         );
 
         var graph = graphStore.getGraph(
@@ -131,12 +133,13 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
 
         var expectedLinks = List.of(
             PredictedLink.of(0, 4, 0.49750002083312506),
-            PredictedLink.of(1, 4, 0.11815697780926958),
-            PredictedLink.of(0, 1, 0.11506673204554983),
-            PredictedLink.of(0, 3, 0.0024726231566347774),
-            PredictedLink.of(0, 2, 2.0547103309367397E-4),
-            PredictedLink.of(2, 3, 2.810228605019867E-9)
+            PredictedLink.of(1, 4, 0.11815697780926955),
+            PredictedLink.of(0, 1, 0.1150667320455498),
+            PredictedLink.of(0, 3, 0.0024726231566347765),
+            PredictedLink.of(0, 2, 2.054710330936739E-4),
+            PredictedLink.of(2, 3, 2.810228605019864E-9)
         );
+
         var endIndex = Math.min(topN, expectedLinks.size());
         assertThat(predictedLinks).containsExactly(expectedLinks
             .subList(0, endIndex)
@@ -148,14 +151,15 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
     void shouldPredictWithThreshold(int expectedPredictions, double threshold) {
         var featureStep = new L2FeatureStep(List.of("a", "b", "c"));
 
-        var modelData = ImmutableLinkLogisticRegressionData.of(
+        var modelData = ImmutableLogisticRegressionData.of(
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
                     1,
                     WEIGHTS.length
                 )),
-            Weights.ofScalar(0)
+            Weights.ofScalar(0),
+            LinkPredictionTrain.makeClassIdMap()
         );
 
         var graph = graphStore.getGraph(

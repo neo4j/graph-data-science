@@ -35,11 +35,12 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 
 import java.util.List;
@@ -86,17 +87,18 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
     }
 
     private void withModelInCatalog() {
-        var weights = new double[]{-2.0, -1.0, 3.0};
+        var weights = new double[]{2.0, 1.0, -3.0};
         var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
-        var modelData = ImmutableLinkLogisticRegressionData.of(
+        var modelData = ImmutableLogisticRegressionData.of(
             new Weights<>(new Matrix(
                 weights,
                 1,
                 weights.length
             )),
-            Weights.ofScalar(0)
+            Weights.ofScalar(0),
+            LinkPredictionTrain.makeClassIdMap()
         );
 
         modelCatalog.set(Model.of(

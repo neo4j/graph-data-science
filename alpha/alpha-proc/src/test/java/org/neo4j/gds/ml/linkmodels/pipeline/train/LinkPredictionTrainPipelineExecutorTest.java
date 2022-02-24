@@ -53,6 +53,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
@@ -60,6 +61,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.ImmutableLinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
@@ -81,21 +83,21 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     @Neo4jGraph
     private static final String GRAPH =
         "CREATE " +
-        "(a:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
-        "(b:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
-        "(c:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
-        "(d:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
-        "(e:N {noise: 42, z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
-        "(f:N {noise: 42, z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
-        "(g:N {noise: 42, z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
-        "(h:N {noise: 42, z: 200, array: [-1.0,-2.0,3.0,4.0,5.0]}), " +
-        "(i:N {noise: 42, z: 200, array: [-1.0,-2.0,3.0,4.0,5.0]}), " +
-        "(j:N {noise: 42, z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
-        "(k:N {noise: 42, z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
-        "(l:N {noise: 42, z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
-        "(m:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
-        "(n:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
-        "(o:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
+        "(a:N {scalar: 0, array: [-1.0, -2.0, 1.0, 1.0, 3.0]}), " +
+        "(b:N {scalar: 4, array: [2.0, 1.0, -2.0, 2.0, 1.0]}), " +
+        "(c:N {scalar: 0, array: [-3.0, 4.0, 3.0, 3.0, 2.0]}), " +
+        "(d:N {scalar: 3, array: [1.0, 3.0, 1.0, -1.0, -1.0]}), " +
+        "(e:N {scalar: 1, array: [-2.0, 1.0, 2.0, 1.0, -1.0]}), " +
+        "(f:N {scalar: 0, array: [-1.0, -3.0, 1.0, 2.0, 2.0]}), " +
+        "(g:N {scalar: 1, array: [3.0, 1.0, -3.0, 3.0, 1.0]}), " +
+        "(h:N {scalar: 3, array: [-1.0, 3.0, 2.0, 1.0, -3.0]}), " +
+        "(i:N {scalar: 3, array: [4.0, 1.0, 1.0, 2.0, 1.0]}), " +
+        "(j:N {scalar: 4, array: [1.0, -4.0, 2.0, -2.0, 2.0]}), " +
+        "(k:N {scalar: 0, array: [2.0, 1.0, 3.0, 1.0, 1.0]}), " +
+        "(l:N {scalar: 1, array: [-1.0, 3.0, -2.0, 3.0, -2.0]}), " +
+        "(m:N {scalar: 0, array: [4.0, 4.0, 1.0, 1.0, 1.0]}), " +
+        "(n:N {scalar: 3, array: [1.0, -2.0, 3.0, 2.0, 3.0]}), " +
+        "(o:N {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), " +
         "" +
         "(a)-[:REL]->(b), " +
         "(a)-[:REL]->(c), " +
@@ -113,7 +115,6 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         "(e)-[:REL]->(g), " +
         "(j)-[:REL]->(l), " +
         "(m)-[:REL]->(o)";
-
 
     public static final String GRAPH_NAME = "g";
     public static final NodeLabel NODE_LABEL = NodeLabel.of("N");
@@ -133,7 +134,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .graphProject()
             .withNodeLabel("N")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
-            .withNodeProperties(List.of("noise", "z", "array"), DefaultValue.DEFAULT)
+            .withNodeProperties(List.of("scalar", "array"), DefaultValue.DEFAULT)
             .yields();
 
         runQuery(createQuery);
@@ -159,11 +160,11 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .build());
 
         pipeline.setTrainingParameterSpace(List.of(
-            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
-            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))
+            LinkLogisticRegressionTrainConfig.of(Map.of("patience", 5, "tolerance", 0.00001, "penalty", 100)),
+            LinkLogisticRegressionTrainConfig.of(Map.of("patience", 5, "tolerance", 0.00001, "penalty", 1))
         ));
 
-        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 
         var config = LinkPredictionTrainConfig
             .builder()
@@ -185,13 +186,14 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             ).compute();
 
             var actualModel = result.model();
+            var logisticRegressionData = (LogisticRegressionTrainer.LogisticRegressionData) actualModel.data();
 
             assertThat(actualModel.name()).isEqualTo("model");
 
             assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrain.MODEL_TYPE);
             assertThat(actualModel.trainConfig()).isEqualTo(config);
             // length of the linkFeatures
-            assertThat(actualModel.data().weights().data().totalSize()).isEqualTo(7);
+            assertThat(logisticRegressionData.weights().data().totalSize()).isEqualTo(6);
 
             var customInfo = actualModel.customInfo();
             assertThat(result.modelSelectionStatistics().validationStats().get(LinkMetric.AUCPR))
@@ -202,7 +204,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
             assertThat(customInfo.bestParameters())
                 .usingRecursiveComparison()
-                .isEqualTo(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1)));
+                .isEqualTo(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
         });
     }
 
@@ -210,7 +212,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     void validateLinkFeatureSteps() {
         var pipeline = new LinkPredictionPipeline();
         pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder().testFraction(0.5).trainFraction(0.5).validationFolds(2).build());
-        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "no-property", "no-prop-2")));
+        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("scalar", "no-property", "no-prop-2")));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("other-no-property")));
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -332,7 +334,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             "degree",
             Map.of("mutateProperty", "degree")
         ));
-        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array", "degree")));
+        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("scalar", "array", "degree")));
 
         var config = LinkPredictionTrainConfig
             .builder()
@@ -439,7 +441,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         );
 
         return Stream.of(
-            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(71_080, 2_082_040)),
+            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(71_056, 2_082_016)),
             Arguments.of("only FastRP", List.of(fastRP), MemoryRange.of(6_204_288)),
             Arguments.of("Both", List.of(degreeCentr, fastRP), MemoryRange.of(6_204_288))
         );

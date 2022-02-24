@@ -37,12 +37,14 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
+import org.neo4j.gds.ml.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -64,7 +66,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                         ", (n1)-[:T]->(n3)" +
                         ", (n2)-[:T]->(n4)";
 
-    private static final double[] WEIGHTS = new double[]{-2.0, -1.0, 3.0};
+    private static final double[] WEIGHTS = new double[]{2.0, 1.0, -3.0};
 
     private Graph graph;
 
@@ -90,14 +92,15 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource(value = {"1, 44, 1", "2, 59, 1"})
     void shouldPredictWithTopK(int topK, long expectedLinksConsidered, int ranIterations) {
-        var modelData = ImmutableLinkLogisticRegressionData.of(
+        var modelData = ImmutableLogisticRegressionData.of(
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
                     1,
                     WEIGHTS.length
                 )),
-            Weights.ofScalar(0)
+            Weights.ofScalar(0),
+            LinkPredictionTrain.makeClassIdMap()
         );
 
         var linkPrediction = new ApproximateLinkPrediction(
@@ -132,18 +135,15 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
         var expectedLinks = List.of(
             PredictedLink.of(0, 4, 0.49750002083312506),
-            PredictedLink.of(0, 3, 0.0024726231566347774),
-            PredictedLink.of(0, 1, 0.11506673204554983),
-            PredictedLink.of(1, 0, 0.11506673204554983),
-            PredictedLink.of(1, 4, 0.11815697780926958),
-            PredictedLink.of(1, 2, 0.0953494648991095),
-            PredictedLink.of(2, 1, 0.0953494648991095),
-            PredictedLink.of(2, 3, 2.810228605019867E-9),
-            PredictedLink.of(2, 0, 2.0547103309367397E-4),
-            PredictedLink.of(3, 0, 0.0024726231566347774),
-            PredictedLink.of(3, 2, 2.810228605019867E-9),
+            PredictedLink.of(0, 1, 0.1150667320455498),
+            PredictedLink.of(1, 4, 0.11815697780926955),
+            PredictedLink.of(1, 0, 0.1150667320455498),
+            PredictedLink.of(2, 0, 2.054710330936739E-4),
+            PredictedLink.of(2, 3, 2.810228605019864E-9),
+            PredictedLink.of(3, 0, 0.0024726231566347765),
+            PredictedLink.of(3, 2, 2.810228605019864E-9),
             PredictedLink.of(4, 0, 0.49750002083312506),
-            PredictedLink.of(4, 1, 0.11815697780926958)
+            PredictedLink.of(4, 1, 0.11815697780926955)
         );
 
         assertThat(predictedLinks)
@@ -154,23 +154,24 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
     @Test
     void shouldPredictTwice() {
-        double[] weights = {-2.0, -1.0, 3.0};
+        double[] weights = {2.0, 1.0, -3.0};
 
-        var modelData = ImmutableLinkLogisticRegressionData.of(
+        var modelData = ImmutableLogisticRegressionData.of(
             new Weights<>(new Matrix(
                 weights,
                 1,
                 weights.length
             )),
-            Weights.ofScalar(0)
+            Weights.ofScalar(0),
+            LinkPredictionTrain.makeClassIdMap()
         );
 
         var expectedLinks = List.of(
-            PredictedLink.of(0, 4, 0.49750002083312506),
-            PredictedLink.of(1, 0, 0.11506673204554983),
-            PredictedLink.of(2, 0, 2.0547103309367397E-4),
-            PredictedLink.of(3, 0, 0.0024726231566347774),
-            PredictedLink.of(4, 0, 0.49750002083312506)
+            PredictedLink.of(0, 4, 0.4975000208331247),
+            PredictedLink.of(1, 0, 0.1150667320455497),
+            PredictedLink.of(2, 0, 2.0547103309367367E-4),
+            PredictedLink.of(3, 0, 0.002472623156634774),
+            PredictedLink.of(4, 0, 0.4975000208331247)
         );
 
         for (int i = 0; i < 2; i++) {
@@ -195,7 +196,9 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             var predictedLinks = predictionResult.stream().collect(Collectors.toList());
             assertThat(predictedLinks).hasSize(5);
 
-            assertThat(predictedLinks).containsAll(expectedLinks);
+            assertThat(predictedLinks)
+                .usingElementComparator(compareWithPrecision(1e-10))
+                .containsAll(expectedLinks);
         }
     }
 
@@ -205,14 +208,15 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
-        var modelData = ImmutableLinkLogisticRegressionData.of(
+        var modelData = ImmutableLogisticRegressionData.of(
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
                     1,
                     WEIGHTS.length
                 )),
-            Weights.ofScalar(0)
+            Weights.ofScalar(0),
+            LinkPredictionTrain.makeClassIdMap()
         );
 
         var linkPrediction = new ApproximateLinkPrediction(
@@ -255,5 +259,16 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
         assertThat(actualEstimate.memoryUsage().toString()).isEqualTo("[23 KiB ... 42 KiB]");
+    }
+
+    private Comparator<PredictedLink> compareWithPrecision(double precision) {
+        return (o1, o2) -> {
+            boolean sourceEq = o1.sourceId() == o2.sourceId();
+            boolean targetEq = o1.targetId() == o2.targetId();
+            boolean probEq = Math.abs(o1.probability() - o2.probability()) < precision;
+            if (sourceEq && targetEq && probEq) {
+                return 0;
+            } else return -1;
+        };
     }
 }

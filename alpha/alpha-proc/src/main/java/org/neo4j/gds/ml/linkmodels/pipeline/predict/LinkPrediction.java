@@ -23,19 +23,19 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer.LogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 
 public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
 
-    private final LinkLogisticRegressionData modelData;
+    private final LogisticRegressionData modelData;
     private final LinkFeatureExtractor linkFeatureExtractor;
     private final Graph graph;
     protected final int concurrency;
 
     LinkPrediction(
-        LinkLogisticRegressionData modelData,
+        LogisticRegressionData modelData,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
         int concurrency,
@@ -66,7 +66,7 @@ public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
             .data()
             .totalSize() : "Model must contain a weight for each feature.";
 
-        var predictor = new LinkLogisticRegressionPredictor(modelData);
+        var predictor = new LogisticRegressionClassifier(modelData);
 
         var linkPredictionSimilarityComputer = new LinkPredictionSimilarityComputer(
             linkFeatureExtractor,

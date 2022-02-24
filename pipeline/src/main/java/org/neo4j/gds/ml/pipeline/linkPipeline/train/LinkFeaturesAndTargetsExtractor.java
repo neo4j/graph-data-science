@@ -26,11 +26,13 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
+import org.neo4j.gds.ml.splitting.EdgeSplitter;
 
 import java.util.List;
 import java.util.Map;
@@ -61,7 +63,7 @@ final class LinkFeaturesAndTargetsExtractor {
             ).build();
     }
 
-    static FeaturesAndTargets extractFeaturesAndTargets(
+    static FeaturesAndLabels extractFeaturesAndLabels(
         Graph graph,
         List<LinkFeatureStep> featureSteps,
         int concurrency,
@@ -70,22 +72,22 @@ final class LinkFeaturesAndTargetsExtractor {
         progressTracker.setVolume(graph.relationshipCount() * 2);
         var features = LinkFeatureExtractor.extractFeatures(graph, featureSteps, concurrency, progressTracker);
 
-        var targets = extractTargets(graph, features.size(), progressTracker);
+        var labels = extractLabels(graph, features.size(), progressTracker);
 
-        return ImmutableFeaturesAndTargets.of(features, targets);
+        return ImmutableFeaturesAndLabels.of(features, labels);
     }
 
-    private static HugeDoubleArray extractTargets(
+    private static HugeLongArray extractLabels(
         Graph graph, long numberOfTargets, ProgressTracker progressTracker
     ) {
-        var globalTargets = HugeDoubleArray.newArray(numberOfTargets);
+        var globalLabels = HugeLongArray.newArray(numberOfTargets);
         var relationshipIdx = new MutableLong();
         graph.forEachNode(nodeId -> {
             graph.forEachRelationship(nodeId, -10, (src, trg, weight) -> {
-                if (weight == 0.0D || weight == 1.0D) {
-                    globalTargets.set(relationshipIdx.getAndIncrement(), weight);
+                if (weight == EdgeSplitter.NEGATIVE || weight == EdgeSplitter.POSITIVE) {
+                    globalLabels.set(relationshipIdx.getAndIncrement(), (long) weight);
                 } else {
-                    throw new IllegalArgumentException(formatWithLocale("Target should be either `1` or `0`. But got %f for relationship (%d, %d)",
+                    throw new IllegalArgumentException(formatWithLocale("Label should be either `1` or `0`. But got %f for relationship (%d, %d)",
                         weight,
                         src,
                         trg
@@ -96,6 +98,6 @@ final class LinkFeaturesAndTargetsExtractor {
             progressTracker.logProgress(graph.degree(nodeId));
             return true;
         });
-        return globalTargets;
+        return globalLabels;
     }
 }

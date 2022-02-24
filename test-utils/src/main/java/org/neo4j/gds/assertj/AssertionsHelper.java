@@ -27,12 +27,15 @@ import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.MapAssert;
+import org.hamcrest.Matcher;
+import org.hamcrest.collection.IsMapContaining;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 public final class AssertionsHelper {
 
@@ -84,5 +87,9 @@ public final class AssertionsHelper {
             assertThat(actualValue)
                 .asList()
         );
+    }
+
+    public static Matcher<Map<? extends String, ?>> hasEntry(String key, Object value) {
+        return IsMapContaining.hasEntry(equalTo(key), equalTo(value));
     }
 }

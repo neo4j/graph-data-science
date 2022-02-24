@@ -17,22 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
+package org.neo4j.gds.ml.logisticregression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LinkLogisticRegressionPredictorTest {
-
-    private static final double[] WEIGHTS = new double[]{.5, .6, .7, .8};
+class LogisticRegressionClassifierTest {
 
     private static Stream<Arguments> inputs() {
         return Stream.of(
@@ -51,14 +50,21 @@ class LinkLogisticRegressionPredictorTest {
     @MethodSource("inputs")
     @ParameterizedTest
     void computesProbability(double[] features, double expectedResult) {
-        var modelData = ImmutableLinkLogisticRegressionData.of(
-            new Weights<>(new Matrix(WEIGHTS, 1, WEIGHTS.length)),
-            Weights.ofScalar(0)
+        var classIdMap = new LocalIdMap();
+        classIdMap.toMapped(0L);
+        classIdMap.toMapped(1L);
+        var modelData = ImmutableLogisticRegressionData.of(
+            new Weights<>(new Matrix(new double[]{-0.5, -0.6, -0.7, -0.8}, 1, 4)),
+            Weights.ofScalar(0),
+            classIdMap
         );
 
-        var predictor = new LinkLogisticRegressionPredictor(modelData);
+        var predictor = new LogisticRegressionClassifier(modelData);
 
-        var result = predictor.predictedProbability(features);
+        var result = predictor.predictProbabilities(
+            0,
+            new LogisticRegressionTrainerTest.TestFeatures(new double[][] {features})
+        )[1];
 
         assertThat(result).isCloseTo(expectedResult, Offset.offset(1e-8));
     }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -26,13 +27,14 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionSimilarityComputer.LinkFilterFactory;
+import org.neo4j.gds.ml.logisticregression.ImmutableLogisticRegressionData;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 
 import java.util.List;
@@ -62,22 +64,23 @@ class LinkPredictionSimilarityComputerTest {
             new HadamardFeatureStep(List.of("prop1"))
         );
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, linkFeatureSteps);
-        var modelData = ImmutableLinkLogisticRegressionData.of(
+        var modelData = ImmutableLogisticRegressionData.of(
             new Weights<>(new Matrix(
-                new double[]{1, 0.0001},
+                new double[]{-1, -0.0001},
                 1,
                 2
             )),
-            Weights.ofScalar(0)
+            Weights.ofScalar(0),
+            LinkPredictionTrain.makeClassIdMap()
         );
         var lpSimComputer = new LinkPredictionSimilarityComputer(
             linkFeatureExtractor,
-            new LinkLogisticRegressionPredictor(modelData)
+            new LogisticRegressionClassifier(modelData)
         );
         assertThat(lpSimComputer.similarity(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"))).isEqualTo(
-            0.5099986668799655);
+            0.5099986668799655, Offset.offset(1e-9));
         assertThat(lpSimComputer.similarity(graph.toMappedNodeId("a"), graph.toMappedNodeId("c"))).isEqualTo(
-            0.7098853299317623);
+            0.7098853299317623, Offset.offset(1e-9));
     }
 
     @Test
