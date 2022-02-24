@@ -205,7 +205,7 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
             this.properties = HugeObjectArray.newArray(long[].class, nodeProperties.size());
             this.properties.setAll(i -> {
                 var value = nodeProperties.longArrayValue(i).clone();
-                Arrays.sort(value);
+                Arrays.parallelSort(value);
                 return value;
             });
         }
