@@ -49,7 +49,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     private static final int MIN_BATCH_SIZE = 100;
     private final NodeLogisticRegressionData modelData;
 
-    NodeClassificationPredictPipelineExecutor(
+    public NodeClassificationPredictPipelineExecutor(
         NodeClassificationPipeline pipeline,
         NodeClassificationPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
