@@ -15,8 +15,11 @@ This section describes Node classification pipelines in the Neo4j Graph Data Sci
 == Introduction
 
 Node Classification is a common machine learning task applied to graphs: training models to classify nodes.
-The GDS library also provides a standalone version of <<algorithms-ml-nodeclassification,Node Classification>>.
-Here we describe Node Classification Pipelines, which facilitate an end-to-end workflow, from features extraction to node classification.
+Concretely, Node Classification models are used to predict the classes of unlabeled nodes as a node properties based on other node properties.
+The property representing the class of the node is referred to as the target property.
+GDS supports both binary and multi-class node classification.
+
+In GDS, we have Node Classification pipelines which offer an end-to-end workflow, from features extraction to node classification.
 There are two kinds of pipelines: training pipelines and classification pipelines, both of which reside in the <<model-catalog-ops, model catalog>>.
 When a training pipeline is executed, a classification pipeline is created and stored in the model catalog.
 
@@ -28,20 +31,15 @@ A training pipeline is a sequence of two phases:
 One can <<algorithms-ml-nodeclassification-adding-node-properties,configure>> which steps should be included above.
 The steps execute GDS algorithms that create new node properties.
 After configuring the node property steps, one can <<algorithms-ml-nodeclassification-adding-features,select>> a subset of node properties to be used as features.
-The training phase (II) proceeds in a manner akin to the standalone version of <<algorithms-ml-nodeclassification,Node Classification>>, where it can train multiple models, select the best one, and report relevant performance metrics.
+The training phase (II) trains multiple model candidates using cross-validation, selects the best one, and reports relevant performance metrics.
 
 After <<algorithms-ml-nodeclassification-pipelines-train, training the pipeline>>, a classification pipeline is created.
 This new pipeline inherits the node property steps and feature configuration from the training pipeline and uses them to generate the relevant features for classifying unlabeled nodes.
+The classification pipeline can be used to predict the value of the `target` property (class) of previously unseen nodes.
+In addition to the predicted class for each node, the predicted probability for each class may also be retained on the nodes.
+The order of the probabilities matches the order of the classes registered in the model.
 
 NOTE: <<algorithms-node-classification-pipelines-predict, Classification> can only be done with a trained classification pipeline (not with a training pipeline).
-
-
-The motivation for using pipelines:
-
-* easier to get splits right and prevent data leakage
-* ensuring that the same feature creation steps are applied at classification and train time
-* applying the trained model with a single procedure call
-* persisting the pipeline as a whole
 
 The rest of this page is divided as follows:
 
