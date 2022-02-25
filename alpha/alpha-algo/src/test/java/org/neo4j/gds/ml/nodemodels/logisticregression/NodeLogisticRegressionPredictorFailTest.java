@@ -38,7 +38,7 @@ public class NodeLogisticRegressionPredictorFailTest extends FeatureExtractionBa
         var weights = new Weights<>(Matrix.create(0.0, 5, 4));
         var classIdMap = new LocalIdMap();
         var featureProperties = List.of("a", "b");
-        var modelData = ImmutableNodeLogisticRegressionData.of(weights, classIdMap);
+        var modelData = ImmutableNodeLogisticRegressionData.builder().weights(weights).classIdMap(classIdMap).build();
         var predictor = new NodeLogisticRegressionPredictor(modelData, featureProperties);
         var batch = new LazyBatch(0, 4, 4);
         predictor.predict(graph, batch);

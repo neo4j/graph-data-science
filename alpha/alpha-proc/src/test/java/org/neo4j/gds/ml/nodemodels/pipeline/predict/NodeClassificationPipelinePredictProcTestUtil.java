@@ -123,15 +123,16 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         var idMap = new LocalIdMap();
         idMap.toMapped(0);
         idMap.toMapped(1);
-        return ImmutableNodeLogisticRegressionData.of(
-            new Weights<>(
+        return ImmutableNodeLogisticRegressionData.builder()
+            .weights(new Weights<>(
                 new Matrix(
                     weights,
                     2,
                     weights.length / 2
-                )),
-            idMap
-        );
+                ))
+            )
+            .classIdMap(idMap)
+            .build();
     }
 
     static Stream<Arguments> graphNameOrConfigurations() {

@@ -32,6 +32,7 @@ import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
 import org.neo4j.gds.ml.core.functions.Softmax;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 
 public class LogisticRegressionClassifier implements Trainer.Classifier {
 
@@ -41,6 +42,15 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
         LogisticRegressionData data
     ) {
         this.data = data;
+    }
+
+    //TODO: remove me with NodeLogisticRegressionData
+    public LogisticRegressionClassifier(NodeLogisticRegressionData data) {
+        this(convertModelData(data));
+    }
+
+    private static LogisticRegressionData convertModelData(NodeLogisticRegressionData modelData) {
+        return LogisticRegressionData.create(modelData.weights(), modelData.bias(), modelData.classIdMap());
     }
 
     @Override
