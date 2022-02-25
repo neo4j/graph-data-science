@@ -26,29 +26,24 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.core.functions.Constant;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer.LogisticRegressionData;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@GdlExtension
 class LogisticRegressionObjectiveTest {
 
     private static Stream<Arguments> featureBatches() {
@@ -58,50 +53,36 @@ class LogisticRegressionObjectiveTest {
         );
     }
 
-    @GdlGraph
-    private static final String DB_QUERY =
-        "CREATE " +
-        "  (n1:N {a: 2.0, b: 1.2})" +
-        ", (n2:N {a: 1.3, b: 0.5})" +
-        ", (n3:N {a: 0.0, b: 2.8})" +
-        ", (n4:N {a: 1.0, b: 0.9})" +
-        ", (n5:N {a: 1.0, b: 0.9})" +
-        ", (n1)-[:T {label: 1.0}]->(n2)" +
-        ", (n3)-[:T {label: 1.0}]->(n4)" +
-        ", (n1)-[:T {label: 0.0}]->(n3)" +
-        ", (n2)-[:T {label: 0.0}]->(n4)";
-
-    @Inject
-    private Graph graph;
-
     private LogisticRegressionObjective objective;
-    private final List<String> features = List.of("a", "b");
 
     @BeforeEach
     void setup() {
-        var labels = HugeLongArray.newArray(graph.relationshipCount());
-        labels.setAll(idx -> (idx < 2) ? 1 : 0);
-
-        // L2 Norm features for node properties a,b
-        var linkFeatures = HugeObjectArray.of(
+        var features = HugeObjectArray.of(
             new double[]{Math.pow(0.7, 2), Math.pow(0.7, 2)},
             new double[]{Math.pow(-1, 2), Math.pow(1.7, 2)},
             new double[]{Math.pow(1, 2), Math.pow(-1.6, 2)},
             new double[]{Math.pow(0.3, 2), Math.pow(-0.4, 2)}
         );
 
-        var classifier = new LogisticRegressionClassifier(LogisticRegressionData.of(features.size(), labels, true));
+        var labels = HugeLongArray.newArray(features.size());
+        labels.setAll(idx -> (idx < 2) ? 1 : 0);
+        var idMap = new LocalIdMap();
+        for (long i = 0; i < labels.size(); i++) {
+            idMap.toMapped(labels.get(i));
+        }
+
+        var classifier = new LogisticRegressionClassifier(LogisticRegressionData.of(2, true, idMap));
         this.objective = new LogisticRegressionObjective(
             classifier,
             1.0,
-            Trainer.Features.wrap(linkFeatures),
+            Trainer.Features.wrap(features),
             labels
         );
     }
 
     @Test
     void makeTargets() {
-        var batch = new LazyBatch(1, 2, graph.relationshipCount());
+        var batch = new LazyBatch(1, 2, 4);
         var batchedTargets = objective.batchLabelVector(batch, objective.modelData().classIdMap());
 
         // original labels are 1.0, 0.0 , but these are local ids. since nodeId 0 has label 1.0, this maps to 0.0.
@@ -130,8 +111,8 @@ class LogisticRegressionObjectiveTest {
 
     @Test
     void loss() {
-        var allRelsBatch = new LazyBatch(0, (int) graph.relationshipCount(), graph.relationshipCount());
-        var loss = objective.loss(allRelsBatch, graph.relationshipCount());
+        var batch = new LazyBatch(0, 4, 4);
+        var loss = objective.loss(batch, 4);
 
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();

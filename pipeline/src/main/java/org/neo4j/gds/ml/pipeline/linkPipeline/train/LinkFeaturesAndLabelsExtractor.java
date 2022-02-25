@@ -40,9 +40,9 @@ import java.util.function.ToLongFunction;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-final class LinkFeaturesAndTargetsExtractor {
+final class LinkFeaturesAndLabelsExtractor {
 
-    private LinkFeaturesAndTargetsExtractor() {}
+    private LinkFeaturesAndLabelsExtractor() {}
 
     static MemoryEstimation estimate(
         MemoryRange fudgedLinkFeatureDim,
