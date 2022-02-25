@@ -296,16 +296,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 .2+<.^|<<alpha-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbours>>
 | `gds.alpha.ml.ann.stream`
 | `gds.alpha.ml.ann.write`
-.8+<.^| <<algorithms-ml-linkprediction, Link Prediction>>
-| `gds.alpha.ml.linkPrediction.predict.mutate`
-| `gds.alpha.ml.linkPrediction.predict.mutate.estimate`
-| `gds.alpha.ml.linkPrediction.predict.stream`
-| `gds.alpha.ml.linkPrediction.predict.stream.estimate`
-| `gds.alpha.ml.linkPrediction.predict.write`
-| `gds.alpha.ml.linkPrediction.predict.write.estimate`
-| `gds.alpha.ml.linkPrediction.train`
-| `gds.alpha.ml.linkPrediction.train.estimate`
-.11+<.^| <<algorithms-ml-linkprediction, Link Prediction Pipeline>>
+.11+<.^| <<algorithms-ml-linkprediction-pipelines, Link Prediction Pipeline>>
 | `gds.alpha.ml.pipeline.linkPrediction.create`
 | `gds.alpha.ml.pipeline.linkPrediction.addNodeProperty`
 | `gds.alpha.ml.pipeline.linkPrediction.addFeature`

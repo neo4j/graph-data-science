@@ -75,15 +75,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.hits.write",
         "gds.alpha.hits.write.estimate",
 
-        "gds.alpha.ml.linkPrediction.predict.mutate",
-        "gds.alpha.ml.linkPrediction.predict.mutate.estimate",
-        "gds.alpha.ml.linkPrediction.predict.stream",
-        "gds.alpha.ml.linkPrediction.predict.stream.estimate",
-        "gds.alpha.ml.linkPrediction.predict.write",
-        "gds.alpha.ml.linkPrediction.predict.write.estimate",
-        "gds.alpha.ml.linkPrediction.train",
-        "gds.alpha.ml.linkPrediction.train.estimate",
-
         "gds.alpha.ml.pipeline.linkPrediction.addFeature",
         "gds.alpha.ml.pipeline.linkPrediction.addNodeProperty",
         "gds.alpha.ml.pipeline.linkPrediction.configureParams",
