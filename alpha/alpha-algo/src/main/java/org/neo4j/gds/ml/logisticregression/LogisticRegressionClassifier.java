@@ -22,12 +22,14 @@ package org.neo4j.gds.ml.logisticregression;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.SingletonBatch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.EWiseAddMatrixScalar;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
+import org.neo4j.gds.ml.core.functions.Softmax;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
@@ -53,7 +55,7 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
         return ctx.forward(predictionsVariable(batchFeatureMatrix(batch, features))).data();
     }
 
-    ReducedSoftmax predictionsVariable(Constant<Matrix> batchFeatures) {
+    Variable<Matrix> predictionsVariable(Constant<Matrix> batchFeatures) {
         var weights = data.weights();
         var weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.of(
             batchFeatures,
@@ -62,7 +64,9 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
         var softmaxInput = data.bias().isPresent()
             ? new EWiseAddMatrixScalar(weightedFeatures, data.bias().get())
             : weightedFeatures;
-        return new ReducedSoftmax(softmaxInput);
+        return weights.data().rows() == numberOfClasses()
+            ? new Softmax(softmaxInput)
+            : new ReducedSoftmax(softmaxInput);
     }
 
     static Constant<Matrix> batchFeatureMatrix(Batch batch, Trainer.Features features) {

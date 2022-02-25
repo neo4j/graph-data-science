@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.Map;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -158,10 +159,11 @@ class LogisticRegressionTrainerTest {
             ProgressTracker.NULL_TRACKER
         );
 
+        var random = new Random(42L);
         double[][] features = new double[5][5];
         for (int i = 0; i < features.length; i++) {
             for (int j = 0; j < features[i].length; j++) {
-                features[i][j] = ((double) i) / (j + 1);
+                features[i][j] = random.nextDouble();
             }
         }
         var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
@@ -172,10 +174,11 @@ class LogisticRegressionTrainerTest {
         assertThat(classifier.data().weights().data().data())
             .containsExactly(
                 new double[]{
-                    0.059906731262955704, 0.05990672786615244, 0.05990672446934952, 0.05990672107254702, 0.05990671767574492,
-                    0.059906731262955704, 0.059906727866152434, 0.05990672446934951, 0.05990672107254702, 0.05990671767574492,
-                    0.06257710759125375, 0.06257710592417495, 0.06257710425709619, 0.06257710259001756, 0.06257710092293897,
-                    -0.05930114848368565, -0.05930114677572412, -0.05930114506776269, -0.05930114335980138, -0.059301141651840146
+                    0.07112165177005575, 0.07282159911961641, 0.07299361494706944, -0.08118839640670544, 0.0738451516049731,
+                    0.07250321634094545, 0.06926188286299505, 0.07036007869555168, 0.07155818423783798, 0.071881927159593,
+                    -0.070415705597294, 0.09351752899399764, -0.06700072894326915, 0.07646075088422129, -0.07382078874569262,
+                    -0.07247742154547929, -0.07244736978411997, -0.07254489591102062, -0.07245099306947704, -0.07250321395784994
+
                 },
                 Offset.offset(1e-9)
             );
