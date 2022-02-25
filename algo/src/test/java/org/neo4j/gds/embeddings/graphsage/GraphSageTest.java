@@ -98,7 +98,6 @@ class GraphSageTest {
             .aggregation(Aggregation.SINGLE)
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.empty())
             .build().generate();
 
         long nodeCount = graph.nodeCount();
@@ -174,7 +173,6 @@ class GraphSageTest {
             .aggregation(Aggregation.SINGLE)
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 

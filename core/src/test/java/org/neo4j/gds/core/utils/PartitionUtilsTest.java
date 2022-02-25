@@ -28,7 +28,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -137,7 +136,6 @@ class PartitionUtilsTest {
             .nodeCount(DEFAULT_BATCH_SIZE)
             .averageDegree(concurrency)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 

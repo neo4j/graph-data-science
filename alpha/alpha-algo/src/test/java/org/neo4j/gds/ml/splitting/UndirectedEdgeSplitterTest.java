@@ -30,7 +30,6 @@ import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -129,7 +128,6 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .aggregation(Aggregation.SINGLE)
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 
@@ -166,7 +164,6 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .aggregation(Aggregation.SINGLE)
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 
@@ -197,7 +194,6 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .aggregation(Aggregation.SINGLE)
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 

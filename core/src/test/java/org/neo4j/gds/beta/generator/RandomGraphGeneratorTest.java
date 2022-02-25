@@ -31,7 +31,6 @@ import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
@@ -401,7 +400,6 @@ class RandomGraphGeneratorTest {
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
             .seed(seed)
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         RandomGraphGenerator otherRandomGenerator = RandomGraphGenerator.builder()
@@ -409,7 +407,6 @@ class RandomGraphGeneratorTest {
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
             .seed(seed)
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         HugeGraph graph1 = randomGraphGenerator.generate();
@@ -425,7 +422,6 @@ class RandomGraphGeneratorTest {
             .averageDegree(4)
             .seed(42L)
             .aggregation(Aggregation.SINGLE)
-            .allocationTracker(AllocationTracker.empty())
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .orientation(Orientation.UNDIRECTED)

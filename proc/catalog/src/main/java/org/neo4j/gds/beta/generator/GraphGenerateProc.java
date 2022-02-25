@@ -118,8 +118,7 @@ public final class GraphGenerateProc extends BaseProc {
             .relationshipType(config.relationshipType())
             .aggregation(config.aggregation())
             .orientation(config.orientation())
-            .allowSelfLoops(AllowSelfLoops.of(config.allowSelfLoops()))
-            .allocationTracker(allocationTracker());
+            .allowSelfLoops(AllowSelfLoops.of(config.allowSelfLoops()));
        if (config.relationshipSeed() != null) {
            builder.seed(config.relationshipSeed());
        }

@@ -406,7 +406,6 @@ class LouvainTest {
             .nodeCount(100_000)
             .averageDegree(10)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 

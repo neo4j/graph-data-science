@@ -34,7 +34,6 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.UnionGraph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -98,7 +97,6 @@ class K1ColoringTest {
             .averageDegree(5)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .seed(seed)
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         RandomGraphGenerator inGenerator = RandomGraphGenerator.builder()
@@ -109,7 +107,6 @@ class K1ColoringTest {
             .aggregation(Aggregation.NONE)
             .orientation(Orientation.REVERSE)
             .allowSelfLoops(AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         var naturalGraph = outGenerator.generate();
@@ -174,7 +171,6 @@ class K1ColoringTest {
             .nodeCount(100_000)
             .averageDegree(10)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         Graph graph = generator.generate();
@@ -199,7 +195,6 @@ class K1ColoringTest {
             .nodeCount(100)
             .averageDegree(10)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .allocationTracker(AllocationTracker.empty())
             .seed(42L)
             .build()
             .generate();
@@ -212,7 +207,7 @@ class K1ColoringTest {
             .build();
 
         var progressTask = new K1ColoringFactory<>().progressTask(graph, config);
-        var log = Neo4jProxy.testLog();;
+        var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         var k1Coloring = new K1Coloring(

@@ -24,7 +24,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +42,6 @@ public class RandomGraphGeneratorBuilder {
     private Aggregation aggregation = Aggregation.NONE;
     private Orientation orientation = Orientation.NATURAL;
     private RandomGraphGeneratorConfig.AllowSelfLoops allowSelfLoops = RandomGraphGeneratorConfig.AllowSelfLoops.NO;
-    private AllocationTracker allocationTracker = AllocationTracker.empty();
     private RelationshipType relationshipType = RelationshipType.of("REL");
 
     public RandomGraphGeneratorBuilder nodeCount(long nodeCount) {
@@ -108,11 +106,6 @@ public class RandomGraphGeneratorBuilder {
         return this;
     }
 
-    public RandomGraphGeneratorBuilder allocationTracker(AllocationTracker allocationTracker) {
-        this.allocationTracker = allocationTracker;
-        return this;
-    }
-
     public RandomGraphGenerator build() {
         validate();
         return new RandomGraphGenerator(
@@ -139,9 +132,6 @@ public class RandomGraphGeneratorBuilder {
         }
         if (relationshipDistribution == null) {
             throw new IllegalArgumentException("Must provide a RelationshipDistribution");
-        }
-        if (allocationTracker == null) {
-            throw new IllegalArgumentException("Must provide a AllocationTracker");
         }
     }
 }

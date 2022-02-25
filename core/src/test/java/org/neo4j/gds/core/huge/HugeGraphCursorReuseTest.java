@@ -28,7 +28,6 @@ import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
 import java.util.Optional;
@@ -44,7 +43,6 @@ class HugeGraphCursorReuseTest {
             .nodeCount(100)
             .averageDegree(5)
             .relationshipDistribution(RelationshipDistribution.RANDOM)
-            .allocationTracker(AllocationTracker.empty())
             .orientation(Orientation.NATURAL)
             .build()
             .generate();

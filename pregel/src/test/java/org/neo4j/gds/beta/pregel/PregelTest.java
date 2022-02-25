@@ -120,7 +120,6 @@ class PregelTest {
             .averageDegree(10)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .seed(42L)
-            .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 
@@ -181,7 +180,6 @@ class PregelTest {
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .seed(1337L)
-            .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 
@@ -233,7 +231,6 @@ class PregelTest {
             .averageDegree(10)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .seed(42L)
-            .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 

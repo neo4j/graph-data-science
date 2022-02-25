@@ -52,7 +52,6 @@ class NodeSimilarityTerminationTest extends AlgoTestBase {
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
-            .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 
