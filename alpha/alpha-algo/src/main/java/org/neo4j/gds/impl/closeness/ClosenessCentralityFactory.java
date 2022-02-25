@@ -31,13 +31,13 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 public class ClosenessCentralityFactory<CONFIG extends ClosenessCentralityConfig> extends GraphAlgorithmFactory<MSClosenessCentrality, CONFIG> {
     @Override
     public MSClosenessCentrality build(
-        Graph graphOrGraphStore,
+        Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         return new MSClosenessCentrality(
-            graphOrGraphStore,
+            graph,
             configuration.concurrency(),
             configuration.improved(),
             allocationTracker,
