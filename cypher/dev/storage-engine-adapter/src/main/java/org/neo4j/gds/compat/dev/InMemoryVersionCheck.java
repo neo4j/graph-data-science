@@ -20,6 +20,12 @@
 package org.neo4j.gds.compat.dev;
 
 import org.neo4j.internal.recordstorage.AbstractInMemoryVersionCheck;
+import org.neo4j.io.pagecache.context.CursorContext;
 
 public class InMemoryVersionCheck extends AbstractInMemoryVersionCheck {
+
+    @Override
+    public String getLatestAvailableVersion(String formatFamily, CursorContext cursorContext) {
+        return configuredVersion();
+    }
 }
