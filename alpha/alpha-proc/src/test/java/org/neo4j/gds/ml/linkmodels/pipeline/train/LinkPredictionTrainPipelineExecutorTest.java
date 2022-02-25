@@ -427,13 +427,11 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     static Stream<Arguments> estimationsForDiffNodeSteps() {
         var degreeCentr = NodePropertyStepFactory.createNodePropertyStep(
-            ExecutionContext.EMPTY.username(),
             "degree",
             Map.of("mutateProperty", "degree")
         );
 
         var fastRP = NodePropertyStepFactory.createNodePropertyStep(
-            ExecutionContext.EMPTY.username(),
             "fastRP",
             Map.of("mutateProperty", "fastRP", "embeddingDimension", 512)
         );
