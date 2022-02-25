@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.core.decisiontree;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 
 import java.util.Random;
@@ -33,10 +32,7 @@ class DatasetBootstrapperTest {
 
     @Test
     void shouldSampleCorrectNumElements() {
-        var cachedBootstrappedDataset = HugeByteArray.newArray(
-            20,
-            AllocationTracker.empty()
-        );
+        var cachedBootstrappedDataset = HugeByteArray.newArray(20);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             RANDOM,
             0.5,
@@ -48,10 +44,7 @@ class DatasetBootstrapperTest {
 
     @Test
     void shouldSampleConsistentlyWithCache() {
-        var cachedBootstrappedDataset = HugeByteArray.newArray(
-            20,
-            AllocationTracker.empty()
-        );
+        var cachedBootstrappedDataset = HugeByteArray.newArray(20);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             RANDOM,
             0.5,
@@ -78,10 +71,7 @@ class DatasetBootstrapperTest {
 
     @Test
     void shouldSampleCorrectInterval() {
-        var cachedBootstrappedDataset = HugeByteArray.newArray(
-            20,
-            AllocationTracker.empty()
-        );
+        var cachedBootstrappedDataset = HugeByteArray.newArray(20);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             RANDOM,
             0.5,
@@ -98,10 +88,7 @@ class DatasetBootstrapperTest {
     @Test
     void shouldSampleWithReplacement() {
         var random = new Random(1337);
-        var cachedBootstrappedDataset = HugeByteArray.newArray(
-            4,
-            AllocationTracker.empty()
-        );
+        var cachedBootstrappedDataset = HugeByteArray.newArray(4);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             random,
             1.0,

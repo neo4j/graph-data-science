@@ -24,7 +24,6 @@ import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.gds.core.utils.ArrayUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -140,7 +139,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      * {@inheritDoc}
      */
     @Override
-    public abstract HugeObjectArray<T> copyOf(final long newLength, final AllocationTracker allocationTracker);
+    public abstract HugeObjectArray<T> copyOf(final long newLength);
 
     /**
      * {@inheritDoc}
@@ -400,7 +399,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         }
 
         @Override
-        public HugeObjectArray<T> copyOf(long newLength, AllocationTracker allocationTracker) {
+        public HugeObjectArray<T> copyOf(long newLength) {
             Class<T> tCls = (Class<T>) page.getClass().getComponentType();
             HugeObjectArray<T> copy = HugeObjectArray.newArray(tCls, newLength);
             this.copyTo(copy, newLength);
@@ -567,7 +566,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         }
 
         @Override
-        public HugeObjectArray<T> copyOf(long newLength, AllocationTracker allocationTracker) {
+        public HugeObjectArray<T> copyOf(long newLength) {
             Class<T> tCls = (Class<T>) pages.getClass().getComponentType().getComponentType();
             HugeObjectArray<T> copy = HugeObjectArray.newArray(tCls, newLength);
             this.copyTo(copy, newLength);

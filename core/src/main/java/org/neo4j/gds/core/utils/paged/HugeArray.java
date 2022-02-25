@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.function.LongFunction;
 
@@ -36,7 +35,7 @@ public abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, S
     /**
      * Creates a copy of the given array. The behavior is identical to {@link java.util.Arrays#copyOf(int[], int)}.
      */
-    public abstract Self copyOf(long newLength, AllocationTracker allocationTracker);
+    public abstract Self copyOf(long newLength);
 
     /**
      * Returns the length of this array.

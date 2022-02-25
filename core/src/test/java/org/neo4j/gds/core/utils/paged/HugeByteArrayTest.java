@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import static io.qala.datagen.RandomShortApi.integer;
@@ -86,12 +85,12 @@ final class HugeByteArrayTest extends HugeArrayTestBase<byte[], Byte, HugeByteAr
 
     @Override
     HugeByteArray singleArray(final int size) {
-        return HugeByteArray.newSingleArray(size, AllocationTracker.empty());
+        return HugeByteArray.newSingleArray(size);
     }
 
     @Override
     HugeByteArray pagedArray(final int size) {
-        return HugeByteArray.newPagedArray(size, AllocationTracker.empty());
+        return HugeByteArray.newPagedArray(size);
     }
 
     @Override

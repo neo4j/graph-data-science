@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.utils.ArrayUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 import java.util.function.LongFunction;
@@ -151,7 +150,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      * {@inheritDoc}
      */
     @Override
-    public final HugeIntArray copyOf(final long newLength, final AllocationTracker allocationTracker) {
+    public final HugeIntArray copyOf(final long newLength) {
         HugeIntArray copy = HugeIntArray.newArray(newLength);
         this.copyTo(copy, newLength);
         return copy;

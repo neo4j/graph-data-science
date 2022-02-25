@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
@@ -93,7 +92,6 @@ class ClassificationDecisionTreeTest {
         int minSize
     ) {
         var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
-            AllocationTracker.empty(),
             giniIndexLoss,
             allFeatureVectors,
             maxDepth,
@@ -114,7 +112,6 @@ class ClassificationDecisionTreeTest {
     @Test
     void indexSamplingShouldWork() {
         var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
-            AllocationTracker.empty(),
             giniIndexLoss,
             allFeatureVectors,
             1,
@@ -142,7 +139,6 @@ class ClassificationDecisionTreeTest {
     @Test
     void vectorSamplingShouldWork() {
         var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
-            AllocationTracker.empty(),
             giniIndexLoss,
             allFeatureVectors,
             1,
