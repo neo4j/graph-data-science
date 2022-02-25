@@ -47,9 +47,9 @@ public interface LogisticRegressionData extends Trainer.ClassifierData {
     Optional<Weights<Scalar>> bias();
     LocalIdMap classIdMap();
 
-    static LogisticRegressionData of(int numberOfLinkFeatures, boolean useBias, LocalIdMap classIdMap) {
+    static LogisticRegressionData withReducedClassCount(int featureCount, boolean useBias, LocalIdMap classIdMap) {
         // this is an optimization where "virtually" add a weight of 0.0 for the last class
-        var weights = Weights.ofMatrix(classIdMap.size() - 1, numberOfLinkFeatures);
+        var weights = Weights.ofMatrix(classIdMap.size() - 1, featureCount);
 
         var bias = useBias
             ? Optional.of(Weights.ofScalar(0))

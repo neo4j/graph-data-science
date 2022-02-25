@@ -70,7 +70,7 @@ class LogisticRegressionObjectiveTest {
             idMap.toMapped(labels.get(i));
         }
 
-        var classifier = new LogisticRegressionClassifier(LogisticRegressionData.of(2, true, idMap));
+        var classifier = new LogisticRegressionClassifier(LogisticRegressionData.withReducedClassCount(2, true, idMap));
         this.objective = new LogisticRegressionObjective(
             classifier,
             1.0,
