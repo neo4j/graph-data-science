@@ -124,6 +124,7 @@ class ClosenessCentralityProcTest extends BaseProcTest {
     void testClosenessWrite() {
         String query = gdsCypher()
             .writeMode()
+            .addParameter("writeProperty", "centrality")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
@@ -153,6 +154,7 @@ class ClosenessCentralityProcTest extends BaseProcTest {
     void testClosenessMutate() {
         String query = gdsCypher()
             .mutateMode()
+            .addParameter("mutateProperty", "centrality")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {

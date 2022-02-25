@@ -114,6 +114,7 @@ class EmptyGraphProcTest extends BaseProcTest {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.closeness")
             .writeMode()
+            .addParameter("writeProperty", "irrelevant")
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
     }

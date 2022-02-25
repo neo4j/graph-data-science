@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.impl.closeness;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
@@ -29,11 +28,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface ClosenessCentralityWriteConfig extends ClosenessCentralityConfig, WritePropertyConfig {
-
-    @Value.Default
-    default String writeProperty() {
-        return "centrality";
-    }
 
     static ClosenessCentralityWriteConfig of(CypherMapWrapper config) {
         return new ClosenessCentralityWriteConfigImpl(config);
