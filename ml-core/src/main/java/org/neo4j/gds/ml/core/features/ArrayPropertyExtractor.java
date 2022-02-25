@@ -60,6 +60,17 @@ public class ArrayPropertyExtractor implements ArrayFeatureExtractor {
                 dimension
             ));
         }
+        //TODO: this is slower than before. we should consider property validation to beginning of predict and train
+        for (double val : propertyValue) {
+            if (Double.isNaN(val)) {
+                throw new IllegalArgumentException(
+                    formatWithLocale("Node with ID %d has invalid feature property value NaN for property %s",
+                        graph.toOriginalNodeId(nodeId),
+                        propertyKey
+                    )
+                );
+            }
+        }
         return propertyValue;
     }
 }
