@@ -30,7 +30,6 @@ import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand
 import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer.LogisticRegressionData;
 
 public class LogisticRegressionClassifier implements Trainer.Classifier {
 

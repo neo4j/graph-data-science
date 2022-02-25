@@ -52,8 +52,8 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
@@ -186,7 +186,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             ).compute();
 
             var actualModel = result.model();
-            var logisticRegressionData = (LogisticRegressionTrainer.LogisticRegressionData) actualModel.data();
+            var logisticRegressionData = (LogisticRegressionData) actualModel.data();
 
             assertThat(actualModel.name()).isEqualTo("model");
 

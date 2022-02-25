@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.logisticregression;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -31,12 +30,8 @@ import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
-import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Scalar;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public final class LogisticRegressionTrainer implements Trainer {
@@ -92,31 +87,4 @@ public final class LogisticRegressionTrainer implements Trainer {
         return classifier;
     }
 
-    @ValueClass
-    public interface LogisticRegressionData extends ClassifierData {
-        static MemoryEstimation memoryEstimation(MemoryRange linkFeatureDimension) {
-            return MemoryEstimations.builder(LogisticRegressionData.class)
-                .fixed("weights", linkFeatureDimension.apply(featureDim -> Weights.sizeInBytes(
-                    1,
-                    Math.toIntExact(featureDim)
-                )))
-                .fixed("bias", Weights.sizeInBytes(1, 1))
-                .build();
-        }
-
-        Weights<Matrix> weights();
-        Optional<Weights<Scalar>> bias();
-        LocalIdMap classIdMap();
-
-        static LogisticRegressionData of(int numberOfLinkFeatures, boolean useBias, LocalIdMap classIdMap) {
-            // this is an optimization where "virtually" add a weight of 0.0 for the last class
-            var weights = Weights.ofMatrix(classIdMap.size() - 1, numberOfLinkFeatures);
-
-            var bias = useBias
-                ? Optional.of(Weights.ofScalar(0))
-                : Optional.<Weights<Scalar>>empty();
-
-            return ImmutableLogisticRegressionData.builder().weights(weights).classIdMap(classIdMap).bias(bias).build();
-        }
-    }
 }

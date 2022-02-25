@@ -35,8 +35,8 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
@@ -154,7 +154,7 @@ class LinkPredictionTrainTest {
         assertThat(actualModel.trainConfig()).isEqualTo(trainConfig);
         // length of the linkFeatures
         assertThat(actualModel.data())
-            .asInstanceOf(InstanceOfAssertFactories.type(LogisticRegressionTrainer.LogisticRegressionData.class))
+            .asInstanceOf(InstanceOfAssertFactories.type(LogisticRegressionData.class))
             .extracting(llrData -> llrData.weights().data().totalSize())
             .isEqualTo(6);
 
@@ -175,10 +175,10 @@ class LinkPredictionTrainTest {
 
         LinkPredictionTrainConfig trainConfig = trainingConfig(modelName);
 
-        var modelData = ((LogisticRegressionTrainer.LogisticRegressionData) runLinkPrediction(trainConfig)
+        var modelData = ((LogisticRegressionData) runLinkPrediction(trainConfig)
             .model()
             .data());
-        var modelDataRepeated = ((LogisticRegressionTrainer.LogisticRegressionData) runLinkPrediction(trainConfig)
+        var modelDataRepeated = ((LogisticRegressionData) runLinkPrediction(trainConfig)
             .model()
             .data());
 

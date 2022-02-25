@@ -43,7 +43,7 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import java.util.List;
 import java.util.Optional;
 
-public class LogisticRegressionObjective implements Objective<LogisticRegressionTrainer.LogisticRegressionData> {
+public class LogisticRegressionObjective implements Objective<LogisticRegressionData> {
     private final LogisticRegressionClassifier classifier;
     private final double penalty;
     private final Trainer.Features features;
@@ -123,7 +123,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
     }
 
     @Override
-    public LogisticRegressionTrainer.LogisticRegressionData modelData() {
+    public LogisticRegressionData modelData() {
         return classifier.data();
     }
 
