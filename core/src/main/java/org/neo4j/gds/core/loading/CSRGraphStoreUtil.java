@@ -34,7 +34,6 @@ import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 
@@ -55,8 +54,7 @@ public final class CSRGraphStoreUtil {
         HugeGraph graph,
         String relationshipTypeString,
         Optional<String> relationshipProperty,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         Relationships relationships = graph.relationships();
 
@@ -77,8 +75,7 @@ public final class CSRGraphStoreUtil {
             nodeProperties,
             topology,
             relationshipProperties,
-            concurrency,
-            allocationTracker
+            concurrency
         );
     }
 

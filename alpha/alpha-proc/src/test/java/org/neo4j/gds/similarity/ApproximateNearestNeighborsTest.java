@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoTestBase;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm;
 import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfig;
@@ -86,8 +85,7 @@ class ApproximateNearestNeighborsTest extends AlgoTestBase {
             db,
             Neo4jProxy.testLog(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         SimilarityAlgorithmResult result = ann.compute();

@@ -35,7 +35,6 @@ import org.neo4j.gds.core.loading.IdMapAndProperties;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -70,7 +69,6 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
     private final AtomicInteger actualIterations;
     private final Random random;
     private final ExecutorService executor;
-    private final AllocationTracker allocationTracker;
 
     public ApproxNearestNeighborsAlgorithm(
         ApproximateNearestNeighborsConfig config,
@@ -78,15 +76,13 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         GraphDatabaseAPI api,
         Log log,
         ExecutorService executor,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(config, api, progressTracker);
         this.annConfig = config;
         this.algorithm = algorithm;
         this.log = log;
         this.executor = executor;
-        this.allocationTracker = allocationTracker;
 
         this.nodeQueue = new AtomicLong();
         this.actualIterations = new AtomicInteger();
@@ -150,7 +146,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             RelationshipImporter importer = RelationshipImporter.of(nodes.idMap(), executor);
             importer.consume(topKConsumers);
             Graph graph = importer
-                .buildGraphStore(api.databaseId(), nodes.idMap(), annConfig.concurrency(), allocationTracker)
+                .buildGraphStore(api.databaseId(), nodes.idMap(), annConfig.concurrency())
                 .getUnion();
 
             RelationshipImporter oldImporter = RelationshipImporter.of(nodes.idMap(), executor);
@@ -170,14 +166,12 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             GraphStore oldGraphStore = oldImporter.buildGraphStore(
                 api.databaseId(),
                 nodes.idMap(),
-                annConfig.concurrency(),
-                allocationTracker
+                annConfig.concurrency()
             );
             GraphStore newGraphStore = newImporter.buildGraphStore(
                 api.databaseId(),
                 nodes.idMap(),
-                annConfig.concurrency(),
-                allocationTracker
+                annConfig.concurrency()
             );
 
             Collection<NeighborhoodTask> computeTasks = computeTasks(
@@ -567,8 +561,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         default GraphStore buildGraphStore(
             NamedDatabaseId databaseId,
             IdMap idMap,
-            int concurrency,
-            AllocationTracker allocationTracker
+            int concurrency
         ) {
             Relationships outRelationships = outImporter().build();
             Relationships inRelationships = inImporter().build();
@@ -583,8 +576,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 Collections.emptyMap(),
                 topology,
                 Collections.emptyMap(),
-                concurrency,
-                allocationTracker
+                concurrency
             );
         }
 

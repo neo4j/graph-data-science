@@ -223,7 +223,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             progressTracker.beginSubTask();
             IdMapAndProperties nodes = loadNodes(concurrency);
             RelationshipsAndProperties relationships = loadRelationships(nodes.idMap(), concurrency);
-            CSRGraphStore graphStore = createGraphStore(nodes, relationships, allocationTracker);
+            CSRGraphStore graphStore = createGraphStore(nodes, relationships);
 
             logLoadingSummary(graphStore, Optional.of(allocationTracker));
 

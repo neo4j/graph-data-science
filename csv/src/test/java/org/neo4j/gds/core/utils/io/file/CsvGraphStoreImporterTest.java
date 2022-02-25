@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 
 import java.net.URISyntaxException;
@@ -43,7 +42,7 @@ class CsvGraphStoreImporterTest {
     void shouldImportProperties(int concurrency) throws URISyntaxException {
 
         var exporter = CsvGraphStoreImporter.create(concurrency, importPath(), Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
-        var userGraphStore = exporter.run(AllocationTracker.empty());
+        var userGraphStore = exporter.run();
 
         var graphStore = userGraphStore.graphStore();
 
@@ -71,7 +70,7 @@ class CsvGraphStoreImporterTest {
     void shouldLogProgress() throws URISyntaxException {
         var log = Neo4jProxy.testLog();
         var exporter = CsvGraphStoreImporter.create(1, importPath(), log, EmptyTaskRegistryFactory.INSTANCE);
-        exporter.run(AllocationTracker.empty());
+        exporter.run();
 
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Start");
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Import nodes :: Start");

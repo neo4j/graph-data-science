@@ -36,7 +36,6 @@ import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -101,12 +100,11 @@ public final class CsvGraphStoreImporter {
         this.taskRegistryFactory = taskRegistryFactory;
     }
 
-    public UserGraphStore run(AllocationTracker allocationTracker) {
+    public UserGraphStore run() {
         var fileInput = new FileInput(importPath);
         this.progressTracker = createProgressTracker(fileInput);
         progressTracker.beginSubTask();
         try {
-            graphStoreBuilder.allocationTracker(allocationTracker);
             importGraph(fileInput);
             return ImmutableUserGraphStore.of(fileInput.userName(), graphStoreBuilder.build());
         } finally {

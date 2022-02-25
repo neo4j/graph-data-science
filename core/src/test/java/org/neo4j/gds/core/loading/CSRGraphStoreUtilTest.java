@@ -28,7 +28,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.util.Optional;
@@ -69,8 +68,7 @@ class CSRGraphStoreUtilTest {
             (HugeGraph) graph,
             "REL1",
             Optional.of("prop1"),
-            1,
-            AllocationTracker.empty()
+            1
         );
 
         assertGraphEquals(graphStore.getUnion(), convertedGraphStore.getUnion());

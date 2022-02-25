@@ -43,8 +43,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
 
     protected CSRGraphStore createGraphStore(
         IdMapAndProperties idMapAndProperties,
-        RelationshipsAndProperties relationshipsAndProperties,
-        AllocationTracker allocationTracker
+        RelationshipsAndProperties relationshipsAndProperties
     ) {
         return CSRGraphStore.of(
             loadingContext.api().databaseId(),
@@ -52,8 +51,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             idMapAndProperties.properties(),
             relationshipsAndProperties.relationships(),
             relationshipsAndProperties.properties(),
-            graphProjectConfig.readConcurrency(),
-            allocationTracker
+            graphProjectConfig.readConcurrency()
         );
     }
 

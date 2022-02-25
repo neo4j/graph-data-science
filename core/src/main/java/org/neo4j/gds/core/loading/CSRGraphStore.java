@@ -51,7 +51,6 @@ import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.TimeUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -93,8 +92,6 @@ public class CSRGraphStore implements GraphStore {
 
     private final Set<Graph> createdGraphs;
 
-    private final AllocationTracker allocationTracker;
-
     private ZonedDateTime modificationTime;
 
     @Builder.Factory
@@ -104,8 +101,7 @@ public class CSRGraphStore implements GraphStore {
         Map<NodeLabel, NodePropertyStore> nodePropertyStores,
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         // A graph store must contain at least one topology, even if it is empty.
         var topologies = relationships.isEmpty()
@@ -118,8 +114,7 @@ public class CSRGraphStore implements GraphStore {
             nodePropertyStores,
             topologies,
             relationshipPropertyStores,
-            concurrency,
-            allocationTracker
+            concurrency
         );
     }
 
@@ -129,8 +124,7 @@ public class CSRGraphStore implements GraphStore {
         Map<NodeLabel, NodePropertyStore> nodeProperties,
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         this.databaseId = databaseId;
         this.nodes = nodes;
@@ -143,7 +137,6 @@ public class CSRGraphStore implements GraphStore {
         this.concurrency = concurrency;
         this.createdGraphs = new HashSet<>();
         this.modificationTime = TimeUtil.now();
-        this.allocationTracker = allocationTracker;
     }
 
     @Override

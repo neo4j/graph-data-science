@@ -99,8 +99,7 @@ public final class GraphGenerateProc extends BaseProc {
                 graph,
                 config.relationshipType().name,
                 relationshipProperty,
-                config.readConcurrency(),
-                allocationTracker()
+                config.readConcurrency()
             );
 
             stats.nodes = graphStore.nodeCount();
