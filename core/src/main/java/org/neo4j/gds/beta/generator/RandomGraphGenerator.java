@@ -35,7 +35,6 @@ import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -56,7 +55,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class RandomGraphGenerator {
 
-    private final AllocationTracker allocationTracker;
     private final long nodeCount;
     private final long averageDegree;
     private final Random random;
@@ -81,15 +79,13 @@ public final class RandomGraphGenerator {
         Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer,
         Aggregation aggregation,
         Orientation orientation,
-        AllowSelfLoops allowSelfLoops,
-        AllocationTracker allocationTracker
+        AllowSelfLoops allowSelfLoops
     ) {
         this.relationshipType = relationshipType;
         this.relationshipDistribution = relationshipDistribution;
         this.maybeNodeLabelProducer = maybeNodeLabelProducer;
         this.nodePropertyProducers = nodePropertyProducers;
         this.maybeRelationshipPropertyProducer = maybeRelationshipPropertyProducer;
-        this.allocationTracker = allocationTracker;
         this.nodeCount = nodeCount;
         this.averageDegree = averageDegree;
         this.aggregation = aggregation;
@@ -128,7 +124,6 @@ public final class RandomGraphGenerator {
                 : List.of()
             )
             .aggregation(aggregation)
-            .allocationTracker(allocationTracker)
             .build();
 
         generateRelationships(relationshipsBuilder);

@@ -20,15 +20,11 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.collections.PageUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArrayElements;
 
 /**
  * "Bump" refers to the implementation in that there is a local allocator that is able to do a fast-path allocation
@@ -53,14 +49,11 @@ public final class BumpAllocator<PAGE> {
 
     private final Factory<PAGE> pageFactory;
     private final ReentrantLock growLock;
-    private final AllocationTracker allocationTracker;
 
-    BumpAllocator(AllocationTracker allocationTracker, Factory<PAGE> pageFactory) {
+    BumpAllocator(Factory<PAGE> pageFactory) {
         this.pageFactory = pageFactory;
-        this.allocationTracker = allocationTracker;
         this.growLock = new ReentrantLock(true);
         this.pages = pageFactory.newEmptyPages();
-        allocationTracker.add(sizeOfObjectArray(0));
     }
 
     static {
@@ -97,12 +90,7 @@ public final class BumpAllocator<PAGE> {
         // overwritten by another thread during `grow()`.
         growLock.lock();
         try {
-            allocationTracker.add(pageFactory.memorySizeOfPage(page));
-            var pages = this.pages;
-            if (pages[pageIndex] != null) {
-                allocationTracker.remove(pageFactory.memorySizeOfPage(PAGE_SIZE));
-            }
-            pages[pageIndex] = page;
+            this.pages[pageIndex] = page;
         } finally {
             growLock.unlock();
         }
@@ -136,14 +124,12 @@ public final class BumpAllocator<PAGE> {
      */
     private void setPages(int newNumPages, int skipPage) {
         PAGE[] currentPages = this.pages;
-        allocationTracker.add(sizeOfObjectArrayElements(newNumPages - currentPages.length));
 
         PAGE[] newPages = Arrays.copyOf(currentPages, newNumPages);
 
         for (int i = currentPages.length; i < newNumPages; i++) {
             // Create new page for default sized pages
             if (i != skipPage) {
-                allocationTracker.add(pageFactory.memorySizeOfPage(PAGE_SIZE));
                 newPages[i] = pageFactory.newPage(PAGE_SIZE);
             }
         }
@@ -158,12 +144,6 @@ public final class BumpAllocator<PAGE> {
         PAGE copyOfPage(PAGE page, int length);
 
         int lengthOfPage(PAGE page);
-
-        default long memorySizeOfPage(PAGE page) {
-            return memorySizeOfPage(lengthOfPage(page));
-        }
-
-        long memorySizeOfPage(int length);
     }
 
     public static final class LocalAllocator<PAGE> {

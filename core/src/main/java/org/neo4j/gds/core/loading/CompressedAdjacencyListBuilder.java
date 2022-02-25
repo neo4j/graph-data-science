@@ -20,20 +20,17 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.core.huge.CompressedAdjacencyList;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfByteArray;
-
 public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilder<byte[], CompressedAdjacencyList> {
 
     private final BumpAllocator<byte[]> builder;
 
-    CompressedAdjacencyListBuilder(AllocationTracker allocationTracker) {
-        this.builder = new BumpAllocator<>(allocationTracker, Factory.INSTANCE);
+    CompressedAdjacencyListBuilder() {
+        this.builder = new BumpAllocator<>(Factory.INSTANCE);
     }
 
     @Override
@@ -69,11 +66,6 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
         @Override
         public int lengthOfPage(byte[] bytes) {
             return bytes.length;
-        }
-
-        @Override
-        public long memorySizeOfPage(int length) {
-            return sizeOfByteArray(length);
         }
     }
 

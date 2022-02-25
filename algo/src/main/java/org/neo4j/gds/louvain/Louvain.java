@@ -210,7 +210,6 @@ public final class Louvain extends Algorithm<Louvain> {
             .addPropertyConfig(Aggregation.SUM, DefaultValue.forDouble())
             .preAggregate(true)
             .executorService(executorService)
-            .allocationTracker(allocationTracker)
             .build();
 
         var relationshipCreators = PartitionUtils.rangePartition(

@@ -23,7 +23,6 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.utils.RawValues;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -41,7 +40,6 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
 
     private final AdjacencyBuffer adjacencyBuffer;
     private final RelationshipsBatchBuffer relationshipsBatchBuffer;
-    private final AllocationTracker allocationTracker;
 
     final PropertyReader propertyReader;
 
@@ -50,8 +48,7 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         AdjacencyBuffer adjacencyBuffer,
         RelationshipsBatchBuffer relationshipsBatchBuffer,
         SingleTypeRelationshipImporter.ImportMetaData importMetaData,
-        PropertyReader propertyReader,
-        AllocationTracker allocationTracker
+        PropertyReader propertyReader
     ) {
         var orientation = importMetaData.projection().orientation();
         var loadProperties = importMetaData.projection().properties().hasMappings();
@@ -61,28 +58,25 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
                 ? new UndirectedWithProperties(
                 adjacencyBuffer,
                 relationshipsBatchBuffer,
-                propertyReader,
-                allocationTracker
+                propertyReader
             )
-                : new Undirected(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
+                : new Undirected(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         } else if (orientation == Orientation.NATURAL) {
             return loadProperties
                 ? new NaturalWithProperties(
                 adjacencyBuffer,
                 relationshipsBatchBuffer,
-                propertyReader,
-                allocationTracker
+                propertyReader
             )
-                : new Natural(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
+                : new Natural(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         } else if (orientation == Orientation.REVERSE) {
             return loadProperties
                 ? new ReverseWithProperties(
                 adjacencyBuffer,
                 relationshipsBatchBuffer,
-                propertyReader,
-                allocationTracker
+                propertyReader
             )
-                : new Reverse(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
+                : new Reverse(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         } else {
             throw new IllegalArgumentException(formatWithLocale("Unexpected orientation: %s", orientation));
         }
@@ -91,13 +85,11 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
     private ThreadLocalSingleTypeRelationshipImporter(
         AdjacencyBuffer adjacencyBuffer,
         RelationshipsBatchBuffer relationshipsBatchBuffer,
-        PropertyReader propertyReader,
-        AllocationTracker allocationTracker
+        PropertyReader propertyReader
     ) {
         this.adjacencyBuffer = adjacencyBuffer;
         this.relationshipsBatchBuffer = relationshipsBatchBuffer;
         this.propertyReader = propertyReader;
-        this.allocationTracker = allocationTracker;
     }
 
     public abstract long importRelationships();
@@ -159,10 +151,9 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         private Undirected(
             AdjacencyBuffer adjacencyBuffer,
             RelationshipsBatchBuffer relationshipsBatchBuffer,
-            PropertyReader propertyReader,
-            AllocationTracker allocationTracker
+            PropertyReader propertyReader
         ) {
-            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
+            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         }
 
         @Override
@@ -180,10 +171,9 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         private UndirectedWithProperties(
             AdjacencyBuffer adjacencyBuffer,
             RelationshipsBatchBuffer relationshipsBatchBuffer,
-            PropertyReader propertyReader,
-            AllocationTracker allocationTracker
+            PropertyReader propertyReader
         ) {
-            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
+            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         }
 
         @Override
@@ -222,10 +212,9 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         private Natural(
             AdjacencyBuffer adjacencyBuffer,
             RelationshipsBatchBuffer relationshipsBatchBuffer,
-            PropertyReader propertyReader,
-            AllocationTracker allocationTracker
+            PropertyReader propertyReader
         ) {
-            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
+            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         }
 
         @Override
@@ -245,10 +234,9 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         private NaturalWithProperties(
             AdjacencyBuffer adjacencyBuffer,
             RelationshipsBatchBuffer relationshipsBatchBuffer,
-            PropertyReader propertyReader,
-            AllocationTracker allocationTracker
+            PropertyReader propertyReader
         ) {
-            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
+            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         }
 
         @Override
@@ -274,10 +262,9 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         private Reverse(
             AdjacencyBuffer adjacencyBuffer,
             RelationshipsBatchBuffer relationshipsBatchBuffer,
-            PropertyReader propertyReader,
-            AllocationTracker allocationTracker
+            PropertyReader propertyReader
         ) {
-            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
+            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         }
 
         @Override
@@ -297,10 +284,9 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         private ReverseWithProperties(
             AdjacencyBuffer adjacencyBuffer,
             RelationshipsBatchBuffer relationshipsBatchBuffer,
-            PropertyReader propertyReader,
-            AllocationTracker allocationTracker
+            PropertyReader propertyReader
         ) {
-            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader, allocationTracker);
+            super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         }
 
         @Override

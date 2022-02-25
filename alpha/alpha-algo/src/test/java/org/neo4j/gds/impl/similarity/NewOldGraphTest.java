@@ -44,7 +44,7 @@ class NewOldGraphTest {
 
     @Test
     void allRelationshipsNewByDefault() {
-        RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT, ALLOCATION_TRACKER);
+        RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT);
         importer.addRelationshipFromOriginalId(0, 1);
         importer.addRelationshipFromOriginalId(0, 2);
         importer.addRelationshipFromOriginalId(0, 3);
@@ -67,7 +67,7 @@ class NewOldGraphTest {
 
     @Test
     void newShouldFilterVisitedRelationships() {
-        RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT, ALLOCATION_TRACKER);
+        RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT);
         importer.addRelationshipFromOriginalId(0, 1);
         importer.addRelationshipFromOriginalId(0, 2);
         importer.addRelationshipFromOriginalId(0, 3);
@@ -91,7 +91,7 @@ class NewOldGraphTest {
 
     @Test
     void oldShouldReturnVisitedRelationships() {
-        RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT, ALLOCATION_TRACKER);
+        RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT);
         importer.addRelationshipFromOriginalId(0, 1);
         importer.addRelationshipFromOriginalId(0, 2);
         importer.addRelationshipFromOriginalId(0, 3);

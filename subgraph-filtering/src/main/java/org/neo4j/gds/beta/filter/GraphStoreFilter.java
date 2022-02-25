@@ -104,8 +104,7 @@ public final class GraphStoreFilter {
                 filteredNodes.idMap(),
                 config.concurrency(),
                 executorService,
-                progressTracker,
-                allocationTracker
+                progressTracker
             );
 
             return CSRGraphStore.of(

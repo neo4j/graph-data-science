@@ -26,7 +26,6 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.huge.DirectIdMap;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,15 +53,13 @@ public abstract class AdjacencyListBuilderBaseTest {
         var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
             () -> nodeCount,
             PropertyMappings.of(),
-            importMetaData.aggregations(),
-            AllocationTracker.empty()
+            importMetaData.aggregations()
         );
 
         AdjacencyBuffer adjacencyBuffer = new AdjacencyBufferBuilder()
             .adjacencyCompressorFactory(adjacencyCompressorFactory)
             .importMetaData(importMetaData)
             .importSizing(ImportSizing.of(1, nodeCount))
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         DirectIdMap idMap = new DirectIdMap(nodeCount);
@@ -78,8 +75,7 @@ public abstract class AdjacencyListBuilderBaseTest {
             adjacencyBuffer,
             relationshipsBatchBuffer,
             importMetaData,
-            null,
-            AllocationTracker.empty()
+            null
         );
         importer.importRelationships();
 

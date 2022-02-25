@@ -20,7 +20,6 @@
 package org.neo4j.gds.beta.pregel;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
@@ -38,12 +37,15 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     private final HugeIntArray heads;
     private final HugeCursor<double[][]> queuesCursor;
 
-    public static PrimitiveAsyncDoubleQueues of(long nodeCount, AllocationTracker allocationTracker) {
-        return of(nodeCount, MIN_CAPACITY, allocationTracker);
+    public static PrimitiveAsyncDoubleQueues of(long nodeCount) {
+        return of(nodeCount, MIN_CAPACITY);
     }
 
-    public static PrimitiveAsyncDoubleQueues of(long nodeCount, int initialQueueCapacity, AllocationTracker allocationTracker) {
-        var heads = HugeIntArray.newArray(nodeCount, allocationTracker);
+    public static PrimitiveAsyncDoubleQueues of(
+        long nodeCount,
+        int initialQueueCapacity
+    ) {
+        var heads = HugeIntArray.newArray(nodeCount);
         var tails = HugeAtomicLongArray.newArray(nodeCount);
         var queues = HugeObjectArray.newArray(double[].class, nodeCount);
         var referenceCounts = HugeAtomicLongArray.newArray(nodeCount);

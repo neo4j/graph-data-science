@@ -33,7 +33,6 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;
@@ -205,7 +204,6 @@ class TransientCsrListTest {
             var relsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(nodes.idMap())
                 .orientation(Orientation.UNDIRECTED)
-                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             for (int i = 1; i <= firstDegree; i++) {
@@ -273,7 +271,6 @@ class TransientCsrListTest {
             .nodes(idMap)
             .concurrency(1)
             .executorService(Pools.DEFAULT)
-            .allocationTracker(AllocationTracker.empty())
             .build();
 
         for (long target : targets) {

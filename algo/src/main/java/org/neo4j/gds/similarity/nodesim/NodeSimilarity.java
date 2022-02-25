@@ -139,8 +139,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             similarityGraph = new SimilarityGraphBuilder(
                 graph,
                 config.concurrency(),
-                executorService,
-                allocationTracker
+                executorService
             ).build(similarities);
         }
         return new SimilarityGraphResult(similarityGraph, nodesToCompare, isTopKGraph);

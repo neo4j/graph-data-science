@@ -25,7 +25,6 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.compress.ImmutableAdjacencyListsWithProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -39,7 +38,6 @@ abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> im
     final AdjacencyListBuilder<PROPERTY_PAGE, ? extends AdjacencyProperties>[] propertyBuilders;
     final boolean noAggregation;
     final Aggregation[] aggregations;
-    final AllocationTracker allocationTracker;
     final LongAdder relationshipCounter;
 
     HugeIntArray adjacencyDegrees;
@@ -51,8 +49,7 @@ abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> im
         AdjacencyListBuilder<TARGET_PAGE, ? extends AdjacencyList> adjacencyBuilder,
         AdjacencyListBuilder<PROPERTY_PAGE, ? extends AdjacencyProperties>[] propertyBuilders,
         boolean noAggregation,
-        Aggregation[] aggregations,
-        AllocationTracker allocationTracker
+        Aggregation[] aggregations
     ) {
         this.adjacencyBuilder = adjacencyBuilder;
         this.propertyBuilders = propertyBuilders;
@@ -60,13 +57,12 @@ abstract class AbstractAdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> im
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
         this.relationshipCounter = new LongAdder();
-        this.allocationTracker = allocationTracker;
     }
 
     @Override
     public void init() {
         var nodeCount = this.nodeCountSupplier.getAsLong();
-        this.adjacencyDegrees = HugeIntArray.newArray(nodeCount, this.allocationTracker);
+        this.adjacencyDegrees = HugeIntArray.newArray(nodeCount);
         this.adjacencyOffsets = HugeLongArray.newArray(nodeCount);
         this.propertyOffsets = HugeLongArray.newArray(nodeCount);
     }

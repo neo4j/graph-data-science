@@ -201,8 +201,7 @@ class Node2VecModelTest {
         Random random
     ) {
         var walks = new CompressedRandomWalks(
-            numberOfClusters * clusterSize * numberOfWalks,
-            AllocationTracker.empty()
+            numberOfClusters * clusterSize * numberOfWalks
         );
 
         for (long clusterId = 0; clusterId < numberOfClusters; clusterId++) {

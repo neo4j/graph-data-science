@@ -67,7 +67,7 @@ class CsvGraphStoreImporterIntegrationTest {
     @ValueSource(ints = {1, 4})
     void shouldImportProperties(int concurrency) {
 
-        GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run(AllocationTracker.empty());
+        GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run();
 
         var importer = CsvGraphStoreImporter.create(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run(AllocationTracker.empty());
@@ -81,7 +81,7 @@ class CsvGraphStoreImporterIntegrationTest {
     void shouldImportGraphWithNoLabels() {
         var graphStore = GdlFactory.of("()-[]->()").build();
 
-        GraphStoreToFileExporter.csv(graphStore, exportConfig(4), graphLocation).run(AllocationTracker.empty());
+        GraphStoreToFileExporter.csv(graphStore, exportConfig(4), graphLocation).run();
 
         var importer = CsvGraphStoreImporter.create(4, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run(AllocationTracker.empty());

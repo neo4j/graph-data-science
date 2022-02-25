@@ -161,7 +161,6 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
                 .preAggregate(false)
                 .concurrency(1)
                 .executorService(Pools.DEFAULT)
-                .allocationTracker(allocationTracker())
                 .build();
 
             IdMap idMap = computationResult.graph();

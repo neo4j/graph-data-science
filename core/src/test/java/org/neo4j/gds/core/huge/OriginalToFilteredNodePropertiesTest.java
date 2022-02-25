@@ -29,7 +29,6 @@ import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.huge.FilteredNodeProperties.OriginalToFilteredNodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -63,7 +62,7 @@ class OriginalToFilteredNodePropertiesTest {
     void testDoubleArray() {
         var filteredNodeProperties = new OriginalToFilteredNodeProperties(
             graph.nodeProperties("doubleArray"),
-            new NodeFilteredGraph(graph, graph, AllocationTracker.empty())
+            new NodeFilteredGraph(graph, graph)
         );
 
         assertThat(filteredNodeProperties.doubleArrayValue(idFunction.of("a"))).containsExactly(1D);
@@ -77,7 +76,7 @@ class OriginalToFilteredNodePropertiesTest {
     void testLongArray() {
         var filteredNodeProperties = new OriginalToFilteredNodeProperties(
             graph.nodeProperties("longArray"),
-            new NodeFilteredGraph(graph, graph, AllocationTracker.empty())
+            new NodeFilteredGraph(graph, graph)
         );
 
         assertThat(filteredNodeProperties.longArrayValue(idFunction.of("a"))).containsExactly(1L);
@@ -88,7 +87,7 @@ class OriginalToFilteredNodePropertiesTest {
     void testFloatArray() {
         var filteredNodeProperties = new OriginalToFilteredNodeProperties(
             graph.nodeProperties("floatArray"),
-            new NodeFilteredGraph(graph, graph, AllocationTracker.empty())
+            new NodeFilteredGraph(graph, graph)
         );
 
         assertThat(filteredNodeProperties.floatArrayValue(idFunction.of("a"))).containsExactly(1.0F);

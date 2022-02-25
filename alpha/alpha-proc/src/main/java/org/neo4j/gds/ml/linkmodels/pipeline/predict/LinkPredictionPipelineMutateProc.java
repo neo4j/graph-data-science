@@ -123,7 +123,6 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
                     .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
                     .concurrency(concurrency)
                     .executorService(Pools.DEFAULT)
-                    .allocationTracker(allocationTracker())
                     .build();
 
                 var resultWithHistogramBuilder = (MutateResult.Builder) resultBuilder;

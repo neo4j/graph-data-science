@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.io;
 
 import org.neo4j.common.Validator;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.api.GraphStore;
 
 import java.io.IOException;
@@ -53,9 +52,9 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
     protected abstract void export(GraphStoreInput graphStoreInput);
 
-    public ImportedProperties run(AllocationTracker allocationTracker) {
+    public ImportedProperties run() {
         var metaDataStore = MetaDataStore.of(graphStore);
-        var nodeStore = NodeStore.of(graphStore, neoNodeProperties, allocationTracker);
+        var nodeStore = NodeStore.of(graphStore, neoNodeProperties);
         var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
         var graphStoreInput = new GraphStoreInput(
             metaDataStore,

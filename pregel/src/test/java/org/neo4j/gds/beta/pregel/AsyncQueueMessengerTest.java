@@ -20,7 +20,6 @@
 package org.neo4j.gds.beta.pregel;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,7 +29,7 @@ class AsyncQueueMessengerTest {
 
     @Test
     void allowMultipleCallsToHasNext() {
-        var queues = PrimitiveAsyncDoubleQueues.of(1, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1);
         queues.push(0, 42.0);
 
         var messageIterator = new PrimitiveAsyncDoubleQueues.Iterator(queues);

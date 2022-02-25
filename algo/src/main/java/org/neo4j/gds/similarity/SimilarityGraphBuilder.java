@@ -28,7 +28,6 @@ import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
@@ -73,17 +72,14 @@ public class SimilarityGraphBuilder {
     private final IdMap idMap;
     private final int concurrency;
     private final ExecutorService executorService;
-    private final AllocationTracker allocationTracker;
 
     public SimilarityGraphBuilder(
         IdMap idMap,
         int concurrency,
-        ExecutorService executorService,
-        AllocationTracker allocationTracker
+        ExecutorService executorService
     ) {
         this.concurrency = concurrency;
         this.executorService = executorService;
-        this.allocationTracker = allocationTracker;
         this.idMap = idMap;
     }
 
@@ -94,7 +90,6 @@ public class SimilarityGraphBuilder {
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(concurrency)
             .executorService(executorService)
-            .allocationTracker(allocationTracker)
             .build();
 
         ParallelUtil.parallelStreamConsume(

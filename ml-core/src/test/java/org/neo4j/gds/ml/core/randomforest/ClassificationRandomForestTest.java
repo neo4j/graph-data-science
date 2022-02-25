@@ -41,7 +41,7 @@ public class ClassificationRandomForestTest {
         42, 1
     );
 
-    private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES, AllocationTracker.empty());
+    private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES);
     private final HugeObjectArray<double[]> allFeatureVectors = HugeObjectArray.newArray(
         double[].class,
         NUM_SAMPLES

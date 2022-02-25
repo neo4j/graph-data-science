@@ -28,7 +28,6 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
@@ -40,7 +39,6 @@ import java.util.concurrent.atomic.LongAdder;
 
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.preAggregate;
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
@@ -112,23 +110,15 @@ public final class AdjacencyBuffer {
     public static AdjacencyBuffer of(
         SingleTypeRelationshipImporter.ImportMetaData importMetaData,
         AdjacencyCompressorFactory adjacencyCompressorFactory,
-        ImportSizing importSizing,
-        AllocationTracker allocationTracker
+        ImportSizing importSizing
     ) {
         var numPages = importSizing.numberOfPages();
         var pageSize = importSizing.pageSize();
 
-        var sizeOfLongPage = sizeOfLongArray(pageSize.orElse(numPages));
-        var sizeOfObjectPage = sizeOfObjectArray(pageSize.orElse(numPages));
-
-        allocationTracker.add(sizeOfObjectArray(numPages) << 2);
         ThreadLocalRelationshipsBuilder[] localBuilders = new ThreadLocalRelationshipsBuilder[numPages];
         ChunkedAdjacencyLists[] compressedAdjacencyLists = new ChunkedAdjacencyLists[numPages];
 
         for (int page = 0; page < numPages; page++) {
-            allocationTracker.add(sizeOfObjectPage);
-            allocationTracker.add(sizeOfObjectPage);
-            allocationTracker.add(sizeOfLongPage);
             compressedAdjacencyLists[page] = ChunkedAdjacencyLists.of(
                 importMetaData.propertyKeyIds().length,
                 pageSize.orElse(0)

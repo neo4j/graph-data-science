@@ -81,7 +81,7 @@ public class GraphStoreExportProc extends BaseProc {
                 );
 
                 var start = System.nanoTime();
-                var importedProperties = exporter.run(allocationTracker());
+                var importedProperties = exporter.run();
                 var end = System.nanoTime();
 
                 return new DatabaseExportResult(
@@ -122,8 +122,7 @@ public class GraphStoreExportProc extends BaseProc {
             exportLocation(neo4jConfig, exportConfig),
             exportConfig,
             neoNodeProperties(exportConfig, graphStore),
-            log,
-            allocationTracker()
+            log
         );
 
         return Stream.of(new FileExportResult(

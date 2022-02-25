@@ -31,7 +31,6 @@ import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
@@ -49,27 +48,23 @@ public final class SingleTypeRelationshipImporter {
     private final AdjacencyBuffer adjacencyBuffer;
     // TODO: move to importmetadata
     private final boolean validateRelationships;
-    private final AllocationTracker allocationTracker;
 
     @org.immutables.builder.Builder.Factory
     public static SingleTypeRelationshipImporter of(
         ImportMetaData importMetaData,
         LongSupplier nodeCountSupplier,
         boolean validateRelationships,
-        ImportSizing importSizing,
-        AllocationTracker allocationTracker
+        ImportSizing importSizing
     ) {
         var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
             nodeCountSupplier,
             importMetaData.projection().properties(),
-            importMetaData.aggregations(),
-            allocationTracker
+            importMetaData.aggregations()
         );
 
         var adjacencyBuffer = new AdjacencyBufferBuilder()
             .importMetaData(importMetaData)
             .importSizing(importSizing)
-            .allocationTracker(allocationTracker)
             .adjacencyCompressorFactory(adjacencyCompressorFactory)
             .build();
 
@@ -78,8 +73,7 @@ public final class SingleTypeRelationshipImporter {
             adjacencyBuffer,
             importMetaData,
             importMetaData.typeTokenId(),
-            validateRelationships,
-            allocationTracker
+            validateRelationships
         );
     }
 
@@ -88,15 +82,13 @@ public final class SingleTypeRelationshipImporter {
         AdjacencyBuffer adjacencyBuffer,
         ImportMetaData importMetaData,
         int typeToken,
-        boolean validateRelationships,
-        AllocationTracker allocationTracker
+        boolean validateRelationships
     ) {
         this.adjacencyCompressorFactory = adjacencyCompressorFactory;
         this.importMetaData = importMetaData;
         this.typeId = typeToken;
         this.adjacencyBuffer = adjacencyBuffer;
         this.validateRelationships = validateRelationships;
-        this.allocationTracker = allocationTracker;
     }
 
     public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks(Optional<AdjacencyCompressor.ValueMapper> mapper) {
@@ -113,7 +105,6 @@ public final class SingleTypeRelationshipImporter {
             .relationshipsBatchBuffer(createBuffer(idMap, bulkSize))
             .importMetaData(importMetaData)
             .propertyReader(propertyReader)
-            .allocationTracker(allocationTracker)
             .build();
     }
 
@@ -133,7 +124,6 @@ public final class SingleTypeRelationshipImporter {
             .relationshipsBatchBuffer(createBuffer(idMap, bulkSize))
             .importMetaData(importMetaData)
             .propertyReader(propertyReader)
-            .allocationTracker(allocationTracker)
             .build();
     }
 

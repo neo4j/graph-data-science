@@ -29,7 +29,6 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -131,7 +130,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
 
         // export db
         var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
-        exporter.run(AllocationTracker.empty());
+        exporter.run();
 
         var aLabel = NodeLabel.of("A");
         var bLabel = NodeLabel.of("B");
@@ -216,7 +215,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
 
         // export db
         var exporter = GraphStoreToFileExporter.csv(concurrentGraphStore, config, tempDir);
-        exporter.run(AllocationTracker.empty());
+        exporter.run();
 
         // Assert headers
         var nodeSchema = concurrentGraphStore.schema().nodeSchema();
@@ -273,7 +272,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             .build();
 
         var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
-        exporter.run(AllocationTracker.empty());
+        exporter.run();
 
         assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, GRAPH_INFO_FILE_NAME));
 
@@ -336,7 +335,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             .build();
 
         var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
-        exporter.run(AllocationTracker.empty());
+        exporter.run();
 
         assertThat(tempDir)
             .isDirectoryContaining("glob:**.userinfo");
@@ -355,7 +354,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             .build();
 
         var exporter = GraphStoreToFileExporter.csv(noPropertiesGraphStore, config, tempDir);
-        exporter.run(AllocationTracker.empty());
+        exporter.run();
 
         assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, GRAPH_INFO_FILE_NAME));
 
@@ -399,7 +398,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
 
         // export db
         var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
-        exporter.run(AllocationTracker.empty());
+        exporter.run();
 
         assertCsvFiles(List.of(
             "nodes_0.csv", "nodes_header.csv",

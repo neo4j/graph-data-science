@@ -30,7 +30,6 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.msbfs.ANPStrategy;
@@ -47,20 +46,17 @@ public class CollapsePath extends Algorithm<Relationships> {
     private final long nodeCount;
     private final CollapsePathConfig config;
     private final ExecutorService executorService;
-    private final AllocationTracker allocationTracker;
 
     public CollapsePath(
         Graph[] graphs,
         CollapsePathConfig config,
-        ExecutorService executorService,
-        AllocationTracker allocationTracker
+        ExecutorService executorService
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graphs = graphs;
         this.nodeCount = graphs[0].nodeCount();
         this.config = config;
         this.executorService = executorService;
-        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -71,7 +67,6 @@ public class CollapsePath extends Algorithm<Relationships> {
             .aggregation(Aggregation.NONE)
             .concurrency(config.concurrency())
             .executorService(executorService)
-            .allocationTracker(allocationTracker)
             .build();
 
         var traversalConsumer = config.allowSelfLoops()

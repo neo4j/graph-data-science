@@ -28,7 +28,6 @@ import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
 import org.neo4j.gds.core.utils.AscendingLongComparator;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -50,8 +49,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         AdjacencyListBuilderFactory<long[], ? extends AdjacencyList, long[], ? extends AdjacencyProperties> adjacencyListBuilderFactory,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
-        boolean noAggregation,
-        AllocationTracker allocationTracker
+        boolean noAggregation
     ) {
         @SuppressWarnings("unchecked")
         AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings.numberOfMappings()];
@@ -62,8 +60,7 @@ public final class RawCompressor implements AdjacencyCompressor {
             adjacencyListBuilderFactory.newAdjacencyListBuilder(),
             propertyBuilders,
             noAggregation,
-            aggregations,
-            allocationTracker
+            aggregations
         );
     }
 
@@ -273,16 +270,14 @@ public final class RawCompressor implements AdjacencyCompressor {
             AdjacencyListBuilder<long[], ? extends AdjacencyList> adjacencyBuilder,
             AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
             boolean noAggregation,
-            Aggregation[] aggregations,
-            AllocationTracker allocationTracker
+            Aggregation[] aggregations
         ) {
             super(
                 nodeCountSupplier,
                 adjacencyBuilder,
                 propertyBuilders,
                 noAggregation,
-                aggregations,
-                allocationTracker
+                aggregations
             );
         }
 

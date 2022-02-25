@@ -30,7 +30,6 @@ import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -110,7 +109,7 @@ class GraphStoreNodeVisitorTest {
         var idMapAndProperties = nodesBuilder.build();
         var idMap = idMapAndProperties.idMap();
         var nodeProperties = unionNodePropertiesOrThrow(idMapAndProperties);
-        var relationships = GraphFactory.emptyRelationships(idMap, AllocationTracker.empty());
+        var relationships = GraphFactory.emptyRelationships(idMap);
         HugeGraph actualGraph = GraphFactory.create(
             idMap,
             nodeSchema,

@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.gds.core.loading.ZigZagLongDecoding;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -41,9 +40,9 @@ public class CompressedRandomWalks {
     private int maxWalkLength;
     private long size = 0L;
 
-    public CompressedRandomWalks(long maxWalkCount, AllocationTracker allocationTracker) {
+    public CompressedRandomWalks(long maxWalkCount) {
         this.compressedWalks = HugeObjectArray.newArray(byte[].class, maxWalkCount);
-        this.walkLengths = HugeIntArray.newArray(maxWalkCount, allocationTracker);
+        this.walkLengths = HugeIntArray.newArray(maxWalkCount);
     }
 
     public void add(long... walk) {

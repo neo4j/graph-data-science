@@ -138,7 +138,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         this.messenger = reducer.isPresent()
             ? new ReducingMessenger(graph, config, reducer.get(), allocationTracker)
             : config.isAsynchronous()
-                ? new AsyncQueueMessenger(graph.nodeCount(), allocationTracker)
+                ? new AsyncQueueMessenger(graph.nodeCount())
                 : new SyncQueueMessenger(graph.nodeCount());
 
         this.computer = PregelComputer.<CONFIG>builder()
