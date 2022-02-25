@@ -19,9 +19,16 @@
  */
 package org.neo4j.gds.ml;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.core.features.FeatureConsumer;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public interface Trainer {
 
@@ -76,5 +83,38 @@ public interface Trainer {
                 }
             };
         }
+
+        static Features extractLazyFeatures(Graph graph, List<String> featureProperties) {
+
+            var featureExtractors = new ArrayList<FeatureExtractor>();
+            featureExtractors.addAll(FeatureExtraction.propertyExtractors(graph, featureProperties));
+            var numberOfFeatures = FeatureExtraction.featureCount(featureExtractors);
+            Features features = new Features() {
+                @Override
+                public long size() {
+                    return graph.nodeCount();
+                }
+
+                @Override
+                public double[] get(long id) {
+                    var features = new double[numberOfFeatures];
+                    FeatureExtraction.extract(id, 0, featureExtractors, new FeatureConsumer() {
+                        @Override
+                        public void acceptScalar(long nodeOffset, int offset, double value) {
+                            features[offset] = value;
+                        }
+
+                        @Override
+                        public void acceptArray(long nodeOffset, int offset, double[] values) {
+                            System.arraycopy(values, 0, features, offset, values.length);
+                        }
+                    });
+                    return features;
+                }
+            };
+
+            return features;
+        }
+
     }
 }
