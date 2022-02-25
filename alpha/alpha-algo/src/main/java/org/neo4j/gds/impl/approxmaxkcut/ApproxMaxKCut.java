@@ -59,7 +59,6 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
     private final LocalSearch localSearch;
     private final HugeByteArray[] candidateSolutions;
     private final AtomicDoubleArray[] costs;
-    private final AllocationTracker allocationTracker;
     private VariableNeighborhoodSearch variableNeighborhoodSearch;
     private AtomicLongArray currentCardinalities;
 
@@ -75,12 +74,11 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
         this.graph = graph;
         this.config = config;
         this.comparator = config.minimize() ? MINIMIZING : MAXIMIZING;
-        this.allocationTracker = allocationTracker;
 
         // We allocate two arrays in order to be able to compare results between iterations "GRASP style".
         this.candidateSolutions = new HugeByteArray[]{
-            HugeByteArray.newArray(graph.nodeCount(), allocationTracker),
-            HugeByteArray.newArray(graph.nodeCount(), allocationTracker)
+            HugeByteArray.newArray(graph.nodeCount()),
+            HugeByteArray.newArray(graph.nodeCount())
         };
 
         this.costs = new AtomicDoubleArray[]{
@@ -153,8 +151,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
                 localSearch,
                 candidateSolutions,
                 costs,
-                progressTracker,
-                allocationTracker
+                progressTracker
             );
         }
 

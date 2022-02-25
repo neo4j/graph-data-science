@@ -21,7 +21,6 @@ package org.neo4j.gds.impl.approxmaxkcut;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.AtomicDoubleArray;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
@@ -52,8 +51,7 @@ class VariableNeighborhoodSearch {
         LocalSearch localSearch,
         HugeByteArray[] candidateSolutions,
         AtomicDoubleArray[] costs,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.random = random;
@@ -64,7 +62,7 @@ class VariableNeighborhoodSearch {
         this.costs = costs;
         this.progressTracker = progressTracker;
 
-        this.neighborSolution = HugeByteArray.newArray(graph.nodeCount(), allocationTracker);
+        this.neighborSolution = HugeByteArray.newArray(graph.nodeCount());
         this.neighborCardinalities = new AtomicLongArray(config.k());
     }
 

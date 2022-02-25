@@ -23,7 +23,6 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.decisiontree.GiniIndex;
@@ -74,7 +73,6 @@ public class ClassificationRandomForestTest {
     @ValueSource(ints = {1, 4})
     void usingOneTree(int concurrency) {
         var randomForestTrain = new ClassificationRandomForestTrain(
-            AllocationTracker.empty(),
             giniIndexLoss,
             allFeatureVectors,
             1,
@@ -98,7 +96,6 @@ public class ClassificationRandomForestTest {
     @ValueSource(ints = {1, 4})
     void usingTwentyTrees(int concurrency) {
         var randomForestTrain = new ClassificationRandomForestTrain(
-            AllocationTracker.empty(),
             giniIndexLoss,
             allFeatureVectors,
             2,
@@ -122,7 +119,6 @@ public class ClassificationRandomForestTest {
     @ValueSource(ints = {1, 4})
     void shouldMakeSaneErrorEstimation(int concurrency) {
         var randomForestTrain = new ClassificationRandomForestTrain(
-            AllocationTracker.empty(),
             giniIndexLoss,
             allFeatureVectors,
             2,

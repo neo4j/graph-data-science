@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.core.decisiontree;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -34,7 +33,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTION> {
 
     private final Random random;
-    private final AllocationTracker allocationTracker;
     private final LOSS lossFunction;
     private final HugeObjectArray<double[]> allFeatureVectors;
     private final int maxDepth;
@@ -46,7 +44,6 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     private FeatureBagger featureBagger = null;
 
     DecisionTreeTrain(
-        AllocationTracker allocationTracker,
         LOSS lossFunction,
         HugeObjectArray<double[]> allFeatureVectors,
         int maxDepth,
@@ -61,14 +58,13 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         assert featureBaggingRatio >= 0.0 && featureBaggingRatio <= 1.0;
         assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
 
-        this.allocationTracker = allocationTracker;
         this.lossFunction = lossFunction;
         this.allFeatureVectors = allFeatureVectors;
         this.maxDepth = maxDepth;
         this.minSize = minSize;
         this.random = random.orElseGet(ThreadLocalRandom::current);
         this.numFeatureVectorsRatio = numFeatureVectorsRatio;
-        this.bootstrappedDataset = HugeByteArray.newArray(allFeatureVectors.size(), allocationTracker);
+        this.bootstrappedDataset = HugeByteArray.newArray(allFeatureVectors.size());
 
         int totalNumFeatures = allFeatureVectors.get(0).length;
         if (Double.compare(featureBaggingRatio, 0.0d) == 0) {

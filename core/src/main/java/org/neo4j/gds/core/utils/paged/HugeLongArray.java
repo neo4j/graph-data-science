@@ -22,7 +22,6 @@ package org.neo4j.gds.core.utils.paged;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.utils.ArrayUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
@@ -152,7 +151,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * {@inheritDoc}
      */
     @Override
-    public final HugeLongArray copyOf(final long newLength, final AllocationTracker allocationTracker) {
+    public final HugeLongArray copyOf(final long newLength) {
         HugeLongArray copy = HugeLongArray.newArray(newLength);
         this.copyTo(copy, newLength);
         return copy;
@@ -216,8 +215,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
     }
 
     /**
-     * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
-     * The tracker is no longer referenced, as the arrays do not dynamically change their size.
+     * Creates a new array of the given size.
      */
     public static HugeLongArray newArray(long size) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {

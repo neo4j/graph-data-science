@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.core.randomforest;
 
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -34,7 +33,6 @@ import java.util.Optional;
 
 public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
 
-    private final AllocationTracker allocationTracker;
     private final LOSS lossFunction;
     private final HugeObjectArray<double[]> allFeatureVectors;
     private final int maxDepth;
@@ -48,7 +46,6 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
     private final HugeIntArray allLabels;
 
     public ClassificationRandomForestTrain(
-        AllocationTracker allocationTracker,
         LOSS lossFunction,
         HugeObjectArray<double[]> allFeatureVectors,
         int maxDepth,
@@ -61,7 +58,6 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
         int[] classes,
         HugeIntArray allLabels
     ) {
-        this.allocationTracker = allocationTracker;
         this.lossFunction = lossFunction;
         this.allFeatureVectors = allFeatureVectors;
         this.maxDepth = maxDepth;
@@ -87,7 +83,6 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
         var tasks = ParallelUtil.tasks(numDecisionTrees, index -> () -> {
             var decisionTreeBuilder =
                 new ClassificationDecisionTreeTrain.Builder<>(
-                    allocationTracker,
                     lossFunction,
                     allFeatureVectors,
                     maxDepth,

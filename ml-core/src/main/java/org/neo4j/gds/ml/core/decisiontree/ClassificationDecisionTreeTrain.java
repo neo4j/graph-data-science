@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.core.decisiontree;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -35,7 +34,6 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
     private final Map<Integer, Integer> classToIdx;
 
     public ClassificationDecisionTreeTrain(
-        AllocationTracker allocationTracker,
         LOSS lossFunction,
         HugeObjectArray<double[]> allFeatures,
         int maxDepth,
@@ -48,7 +46,6 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         Map<Integer, Integer> classToIdx
     ) {
         super(
-            allocationTracker,
             lossFunction,
             allFeatures,
             maxDepth,
@@ -70,7 +67,6 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
 
     public static final class Builder<LOSS extends DecisionTreeLoss> {
 
-        private final AllocationTracker allocationTracker;
         private final LOSS lossFunction;
         private final HugeObjectArray<double[]> allFeatures;
         private final int maxDepth;
@@ -84,7 +80,6 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         private Optional<Random> random = Optional.empty();
 
         public Builder(
-            AllocationTracker allocationTracker,
             LOSS lossFunction,
             HugeObjectArray<double[]> allFeatures,
             int maxDepth,
@@ -92,7 +87,6 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
             HugeIntArray allLabels,
             Map<Integer, Integer> classToIdx
         ) {
-            this.allocationTracker = allocationTracker;
             this.lossFunction = lossFunction;
             this.allFeatures = allFeatures;
             this.maxDepth = maxDepth;
@@ -103,7 +97,6 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
 
         public ClassificationDecisionTreeTrain<LOSS> build() {
             return new ClassificationDecisionTreeTrain<>(
-                allocationTracker,
                 lossFunction,
                 allFeatures,
                 maxDepth,
