@@ -171,6 +171,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             trainConfig.concurrency(),
             modelConfig,
             classIdMap,
+            true,
             terminationFlag,
             customProgressTracker
         ).train(featureAndLabels.features(), featureAndLabels.labels());

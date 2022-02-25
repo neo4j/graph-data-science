@@ -34,6 +34,9 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.function.Supplier;
 
+import static org.neo4j.gds.ml.logisticregression.LogisticRegressionData.standard;
+import static org.neo4j.gds.ml.logisticregression.LogisticRegressionData.withReducedClassCount;
+
 public final class LogisticRegressionTrainer implements Trainer {
 
     private final ReadOnlyHugeLongArray trainSet;
@@ -41,6 +44,7 @@ public final class LogisticRegressionTrainer implements Trainer {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final LocalIdMap classIdMap;
+    private final boolean reduceClassCount;
     private final int concurrency;
 
     public static MemoryEstimation estimate(LogisticRegressionTrainConfig llrConfig, MemoryRange linkFeatureDimension) {
@@ -63,6 +67,7 @@ public final class LogisticRegressionTrainer implements Trainer {
         int concurrency,
         LogisticRegressionTrainConfig trainConfig,
         LocalIdMap classIdMap,
+        boolean reduceClassCount,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
@@ -72,11 +77,14 @@ public final class LogisticRegressionTrainer implements Trainer {
         this.classIdMap = classIdMap;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
+        this.reduceClassCount = reduceClassCount;
     }
 
     @Override
     public LogisticRegressionClassifier train(Features features, HugeLongArray labels) {
-        var data = LogisticRegressionData.withReducedClassCount(features.get(0).length, trainConfig.useBiasFeature(), classIdMap);
+        var data = reduceClassCount
+            ? withReducedClassCount(features.get(0).length, trainConfig.useBiasFeature(), classIdMap)
+            : standard(features.get(0).length, trainConfig.useBiasFeature(), classIdMap);
         var classifier = new LogisticRegressionClassifier(data);
         var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);
         var training = new Training(trainConfig, progressTracker, features.size(), terminationFlag);

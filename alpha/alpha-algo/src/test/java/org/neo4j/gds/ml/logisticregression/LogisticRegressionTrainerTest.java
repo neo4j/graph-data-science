@@ -51,6 +51,7 @@ class LogisticRegressionTrainerTest {
             1,
             LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
+            true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -85,6 +86,7 @@ class LogisticRegressionTrainerTest {
             4,
             LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
+            true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -117,6 +119,7 @@ class LogisticRegressionTrainerTest {
             1,
             LogisticRegressionTrainConfig.of(Map.of("useBiasFeature", false)),
             fourClassIdMap(),
+            true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -144,12 +147,48 @@ class LogisticRegressionTrainerTest {
     }
 
     @Test
+    void usingStandardWeights() {
+        var trainer = new LogisticRegressionTrainer(
+            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
+            1,
+            LogisticRegressionTrainConfig.of(Map.of("useBiasFeature", false)),
+            fourClassIdMap(),
+            false,
+            TerminationFlag.RUNNING_TRUE,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        double[][] features = new double[5][5];
+        for (int i = 0; i < features.length; i++) {
+            for (int j = 0; j < features[i].length; j++) {
+                features[i][j] = ((double) i) / (j + 1);
+            }
+        }
+        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
+
+        assertThat(classifier.numberOfClasses()).isEqualTo(4);
+        assertThat(classifier.data().bias()).isEmpty();
+        assertThat(classifier.data().weights().data().dimensions()).containsExactly(4, 5);
+        assertThat(classifier.data().weights().data().data())
+            .containsExactly(
+                new double[]{
+                    0.059906731262955704, 0.05990672786615244, 0.05990672446934952, 0.05990672107254702, 0.05990671767574492,
+                    0.059906731262955704, 0.059906727866152434, 0.05990672446934951, 0.05990672107254702, 0.05990671767574492,
+                    0.06257710759125375, 0.06257710592417495, 0.06257710425709619, 0.06257710259001756, 0.06257710092293897,
+                    -0.05930114848368565, -0.05930114677572412, -0.05930114506776269, -0.05930114335980138, -0.059301141651840146
+                },
+                Offset.offset(1e-9)
+            );
+    }
+
+    @Test
     void usingPenaltyShouldGiveSmallerAbsoluteValueWeights() {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
             LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "maxEpochs", 100)),
             fourClassIdMap(),
+            true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -182,6 +221,7 @@ class LogisticRegressionTrainerTest {
             1,
             LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
+            true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
