@@ -29,7 +29,6 @@ import org.neo4j.gds.beta.filter.expression.SemanticErrors;
 import org.neo4j.gds.beta.filter.expression.ValidationContext;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.core.loading.CSRGraphStore;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -80,7 +79,6 @@ public final class GraphStoreFilter {
         GraphStore graphStore,
         GraphProjectFromGraphConfig config,
         ExecutorService executorService,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) throws ParseException, SemanticErrors {
         var expressions = parseAndValidate(graphStore, config.nodeFilter(), config.relationshipFilter());
@@ -113,8 +111,7 @@ public final class GraphStoreFilter {
                 filteredNodes.propertyStores(),
                 filteredRelationships.topology(),
                 filteredRelationships.propertyStores(),
-                config.concurrency(),
-                allocationTracker
+                config.concurrency()
             );
         } finally {
             progressTracker.endSubTask();

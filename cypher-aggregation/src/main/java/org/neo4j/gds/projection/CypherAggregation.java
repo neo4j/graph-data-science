@@ -49,7 +49,6 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.procedure.Description;
@@ -92,8 +91,7 @@ public final class CypherAggregation extends BaseProc {
             progressTimer,
             catalogRequest,
             this.api.databaseId(),
-            username(),
-            this.allocationTracker
+            username()
         );
     }
 
@@ -103,7 +101,6 @@ public final class CypherAggregation extends BaseProc {
         private final CatalogRequest catalogRequest;
         private final NamedDatabaseId databaseId;
         private final String username;
-        private final AllocationTracker allocationTracker;
 
         private @Nullable String graphName;
         private @Nullable LazyIdMapBuilder idMapBuilder;
@@ -114,14 +111,12 @@ public final class CypherAggregation extends BaseProc {
             ProgressTimer progressTimer,
             CatalogRequest catalogRequest,
             NamedDatabaseId databaseId,
-            String username,
-            AllocationTracker allocationTracker
+            String username
         ) {
             this.progressTimer = progressTimer;
             this.catalogRequest = catalogRequest;
             this.databaseId = databaseId;
             this.username = username;
-            this.allocationTracker = allocationTracker;
             this.relImporters = new HashMap<>();
         }
 
@@ -393,7 +388,6 @@ public final class CypherAggregation extends BaseProc {
             }
 
             var graphStoreBuilder = new GraphStoreBuilder()
-                .allocationTracker(allocationTracker)
                 .concurrency(4)
                 .databaseId(databaseId);
 

@@ -32,7 +32,6 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.util.Optional;
@@ -106,8 +105,7 @@ final class GraphInfoTest {
             graph,
             "TY",
             Optional.empty(),
-            1,
-            AllocationTracker.empty()
+            1
         );
 
         return constructor.apply(storeConfig, graphStore);

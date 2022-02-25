@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -70,7 +69,7 @@ class CsvGraphStoreImporterIntegrationTest {
         GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run();
 
         var importer = CsvGraphStoreImporter.create(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
-        var userGraphStore = importer.run(AllocationTracker.empty());
+        var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
         var importedGraph = importedGraphStore.getUnion();
@@ -84,7 +83,7 @@ class CsvGraphStoreImporterIntegrationTest {
         GraphStoreToFileExporter.csv(graphStore, exportConfig(4), graphLocation).run();
 
         var importer = CsvGraphStoreImporter.create(4, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
-        var userGraphStore = importer.run(AllocationTracker.empty());
+        var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
         var importedGraph = importedGraphStore.getUnion();

@@ -282,7 +282,6 @@ public class GraphProjectProc extends CatalogProc {
             fromGraphStore,
             config,
             Pools.DEFAULT,
-            allocationTracker(),
             progressTracker
         );
 

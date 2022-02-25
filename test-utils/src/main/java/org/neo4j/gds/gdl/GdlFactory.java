@@ -177,16 +177,14 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         });
 
-        CSRGraphStore graphStore = CSRGraphStore.of(
+        return CSRGraphStore.of(
             databaseId,
             nodes.idMap(),
             nodes.properties(),
             topologies,
             properties,
-            1,
-            loadingContext.allocationTracker()
+            1
         );
-        return graphStore;
     }
 
     private IdMapAndProperties loadNodes() {

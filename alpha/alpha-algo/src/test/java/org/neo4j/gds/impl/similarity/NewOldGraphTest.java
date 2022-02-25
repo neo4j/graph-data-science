@@ -25,7 +25,6 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.extension.GdlSupportExtension;
 import org.roaringbitmap.RoaringBitmap;
 
@@ -40,7 +39,6 @@ class NewOldGraphTest {
 
     private static final IdMap ID_MAP = idMap(5);
     private static final int CONCURRENCY = 1;
-    private static final AllocationTracker ALLOCATION_TRACKER = AllocationTracker.empty();
 
     @Test
     void allRelationshipsNewByDefault() {
@@ -54,8 +52,7 @@ class NewOldGraphTest {
             importer.buildGraphStore(
                 GdlSupportExtension.DATABASE_ID,
                 ID_MAP,
-                CONCURRENCY,
-                ALLOCATION_TRACKER
+                CONCURRENCY
             ).getUnion(),
             visitedRelationships
         );
@@ -79,8 +76,7 @@ class NewOldGraphTest {
             importer.buildGraphStore(
                 GdlSupportExtension.DATABASE_ID,
                 ID_MAP,
-                CONCURRENCY,
-                ALLOCATION_TRACKER
+                CONCURRENCY
             ).getUnion(),
             visitedRelationships
         );
@@ -103,8 +99,7 @@ class NewOldGraphTest {
             importer.buildGraphStore(
                 GdlSupportExtension.DATABASE_ID,
                 ID_MAP,
-                CONCURRENCY,
-                ALLOCATION_TRACKER
+                CONCURRENCY
             ).getUnion(),
             visitedRelationships
         );

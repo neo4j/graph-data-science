@@ -67,8 +67,7 @@ public abstract class ApproxNearestNeighborsProc<PROC_RESULT> extends AlphaSimil
             api,
             log,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            allocationTracker
+            ProgressTracker.NULL_TRACKER
         );
     }
 
