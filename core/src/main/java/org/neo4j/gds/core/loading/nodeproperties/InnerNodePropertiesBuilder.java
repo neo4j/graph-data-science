@@ -28,5 +28,19 @@ public abstract class InnerNodePropertiesBuilder {
 
     public abstract void setValue(long neoNodeId, Value value);
 
+    /**
+     * Builds the underlying node properties as-is.
+     *
+     * Note:
+     * The method expects the underlying node properties to be indexed
+     * by internal ids, i.e., ids ranging from 0 to node count.
+     * Violating the constraint is undefined behaviour.
+     */
+    public abstract NodeProperties buildDirect(long size);
+
+    /**
+     * Builds the underlying node properties and performs a remapping
+     * to the internal id space using the given id map.
+     */
     public abstract NodeProperties build(long size, IdMap idMap);
 }
