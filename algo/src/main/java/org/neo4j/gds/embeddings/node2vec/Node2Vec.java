@@ -62,7 +62,6 @@ public class Node2Vec extends Algorithm<HugeObjectArray<FloatVector>> {
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config,
-            allocationTracker,
             progressTracker
         );
 

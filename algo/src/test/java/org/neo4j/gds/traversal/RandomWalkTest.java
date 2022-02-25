@@ -30,7 +30,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.node2vec.ImmutableNode2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
@@ -82,7 +81,6 @@ class RandomWalkTest {
         var randomWalk = RandomWalk.create(
             graph,
             config,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -122,7 +120,6 @@ class RandomWalkTest {
         var randomWalk = RandomWalk.create(
             graph,
             config,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -135,7 +132,6 @@ class RandomWalkTest {
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -175,7 +171,6 @@ class RandomWalkTest {
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -235,7 +230,6 @@ class RandomWalkTest {
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -284,7 +278,6 @@ class RandomWalkTest {
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -321,7 +314,6 @@ class RandomWalkTest {
             () -> RandomWalk.create(
                 graph,
                 config,
-                AllocationTracker.empty(),
                 ProgressTracker.NULL_TRACKER
             )
         ).isInstanceOf(RuntimeException.class)
@@ -356,7 +348,6 @@ class RandomWalkTest {
         var randomWalk = RandomWalk.create(
             graph,
             config,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -380,7 +371,6 @@ class RandomWalkTest {
         var randomWalk = RandomWalk.create(
             graph,
             config,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 

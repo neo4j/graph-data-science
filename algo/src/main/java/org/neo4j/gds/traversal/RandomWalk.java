@@ -24,7 +24,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.QueueBasedSpliterator;
 import org.neo4j.gds.degree.DegreeCentrality;
@@ -47,24 +46,20 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
     private final Graph graph;
     private final RandomWalkBaseConfig config;
-    private final AllocationTracker allocationTracker;
 
     private RandomWalk(
         Graph graph,
         RandomWalkBaseConfig config,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
-        this.allocationTracker = allocationTracker;
     }
 
     public static RandomWalk create(
         Graph graph,
         RandomWalkBaseConfig config,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         if (graph.hasRelationshipProperty()) {
@@ -77,7 +72,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             );
         }
 
-        return new RandomWalk(graph, config, allocationTracker, progressTracker);
+        return new RandomWalk(graph, config, progressTracker);
     }
 
     @Override
@@ -134,8 +129,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             graph,
             Pools.DEFAULT,
             degreeCentralityConfig,
-            progressTracker,
-            allocationTracker
+            progressTracker
         ).compute();
     }
 

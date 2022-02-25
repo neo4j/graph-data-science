@@ -40,7 +40,7 @@ public class DeltaSteppingFactory<T extends AllShortestPathsDeltaBaseConfig> ext
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        return DeltaStepping.of(graph, configuration, Pools.DEFAULT, progressTracker, allocationTracker);
+        return DeltaStepping.of(graph, configuration, Pools.DEFAULT, progressTracker);
     }
 
     @Override

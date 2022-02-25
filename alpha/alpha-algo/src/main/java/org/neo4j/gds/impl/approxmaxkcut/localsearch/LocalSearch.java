@@ -78,7 +78,7 @@ public class LocalSearch {
         // Used to keep track of the costs for swapping a node to another community.
         // TODO: If we had pull-based traversal we could have a |V| sized int array here instead of the |V|*k sized
         //  double array.
-        this.nodeToCommunityWeights = HugeAtomicDoubleArray.newArray(graph.nodeCount() * config.k(), allocationTracker);
+        this.nodeToCommunityWeights = HugeAtomicDoubleArray.newArray(graph.nodeCount() * config.k());
 
         // Used to keep track of whether we can swap a node into another community or not.
         this.swapStatus = HugeAtomicByteArray.newArray(graph.nodeCount(), allocationTracker);

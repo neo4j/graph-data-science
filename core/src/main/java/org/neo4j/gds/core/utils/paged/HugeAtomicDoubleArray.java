@@ -22,7 +22,6 @@ package org.neo4j.gds.core.utils.paged;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.core.utils.ArrayUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -163,8 +162,6 @@ public abstract class HugeAtomicDoubleArray {
      * <p>
      * Note that the data might not immediately collectible if there are still cursors alive that reference this array.
      * You have to {@link HugeCursor#close()} every cursor instance as well.
-     * <p>
-     * The amount is not removed from the {@link org.neo4j.gds.core.utils.mem.AllocationTracker} that had been provided in the constructor.
      *
      * @return the amount of memory freed, in bytes.
      */
@@ -185,27 +182,24 @@ public abstract class HugeAtomicDoubleArray {
     }
 
     /**
-     * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
-     * The tracker is no longer referenced, as the arrays do not dynamically change their size.
+     * Creates a new array of the given size.
      */
-    public static HugeAtomicDoubleArray newArray(long size, AllocationTracker allocationTracker) {
-        return newArray(size, DoublePageCreator.passThrough(1), allocationTracker);
+    public static HugeAtomicDoubleArray newArray(long size) {
+        return newArray(size, DoublePageCreator.passThrough(1));
     }
 
     /**
-     * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
-     * The tracker is no longer referenced, as the arrays do not dynamically change their size.
+     * Creates a new array of the given size.
      * The values are pre-calculated according to the semantics of {@link java.util.Arrays#setAll(double[], java.util.function.IntToDoubleFunction)}
      */
     public static HugeAtomicDoubleArray newArray(
         long size,
-        DoublePageCreator pageFiller,
-        AllocationTracker allocationTracker
+        DoublePageCreator pageFiller
     ) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller, allocationTracker);
+            return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller);
         }
-        return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller, allocationTracker);
+        return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller);
     }
 
     public static long memoryEstimation(long size) {
@@ -227,7 +221,7 @@ public abstract class HugeAtomicDoubleArray {
         long size,
         final DoublePageCreator pageFiller
     ) {
-        return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller, AllocationTracker.empty());
+        return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller);
     }
 
     @TestOnly
@@ -235,7 +229,7 @@ public abstract class HugeAtomicDoubleArray {
         int size,
         final DoublePageCreator pageFiller
     ) {
-        return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller, AllocationTracker.empty());
+        return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller);
     }
 
     private static final class SingleHugeAtomicDoubleArray extends HugeAtomicDoubleArray {
@@ -244,12 +238,10 @@ public abstract class HugeAtomicDoubleArray {
 
         private static HugeAtomicDoubleArray of(
             long size,
-            DoublePageCreator pageCreator,
-            AllocationTracker allocationTracker
+            DoublePageCreator pageCreator
         ) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
-            allocationTracker.add(sizeOfLongArray(intSize));
             double[] page = new double[intSize];
             pageCreator.fillPage(page, 0);
             return new HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray(intSize, page);
@@ -353,8 +345,7 @@ public abstract class HugeAtomicDoubleArray {
 
         private static HugeAtomicDoubleArray of(
             long size,
-            DoublePageCreator pageCreator,
-            AllocationTracker allocationTracker
+            DoublePageCreator pageCreator
         ) {
             int numPages = numberOfPages(size);
             final int lastPageSize = exclusiveIndexOfPage(size);
@@ -363,7 +354,6 @@ public abstract class HugeAtomicDoubleArray {
             pageCreator.fill(pages, lastPageSize);
 
             long memoryUsed = memoryUsageOfData(size);
-            allocationTracker.add(memoryUsed);
             return new PagedHugeAtomicDoubleArray(size, pages, memoryUsed);
         }
 

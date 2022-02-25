@@ -20,7 +20,6 @@
 package org.neo4j.gds.paths.delta;
 
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.DoublePageCreator;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
@@ -63,26 +62,22 @@ public interface TentativeDistances {
 
     static DistanceOnly distanceOnly(
         long size,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         var distances = HugeAtomicDoubleArray.newArray(
             size,
-            DoublePageCreator.of(concurrency, index -> DIST_INF),
-            allocationTracker
+            DoublePageCreator.of(concurrency, index -> DIST_INF)
         );
         return new DistanceOnly(distances);
     }
 
     static DistanceAndPredecessor distanceAndPredecessors(
         long size,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         var distances = HugeAtomicDoubleArray.newArray(
             size,
-            DoublePageCreator.of(concurrency, index -> DIST_INF),
-            allocationTracker
+            DoublePageCreator.of(concurrency, index -> DIST_INF)
         );
 
         var predecessors = HugeAtomicLongArray.newArray(

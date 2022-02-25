@@ -21,7 +21,6 @@ package org.neo4j.gds.impl.harmonic;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.msbfs.BfsConsumer;
@@ -41,7 +40,6 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
     public HarmonicCentrality(
         Graph graph,
         int concurrency,
-        AllocationTracker allocationTracker,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -49,7 +47,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
         this.graph = graph;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        this.inverseFarness = HugeAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
+        this.inverseFarness = HugeAtomicDoubleArray.newArray(graph.nodeCount());
         this.nodeCount = graph.nodeCount();
     }
 

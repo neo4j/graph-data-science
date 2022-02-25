@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.TestGraph;
@@ -41,8 +40,6 @@ import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
 class BetweennessCentralityTest {
-
-    private static final AllocationTracker ALLOCATION_TRACKER = AllocationTracker.empty();
 
     private static final BetweennessCentralityStreamConfig DEFAULT_CONFIG = BetweennessCentralityStreamConfig.of(CypherMapWrapper.empty());
 
@@ -136,8 +133,7 @@ class BetweennessCentralityTest {
             new SelectionStrategy.RandomDegree(samplingSize, Optional.of(42L)),
             Pools.DEFAULT,
             concurrency,
-            ProgressTracker.NULL_TRACKER,
-            ALLOCATION_TRACKER
+            ProgressTracker.NULL_TRACKER
         ).compute();
 
         assertEquals(expectedResult.size(), actualResult.size());
@@ -155,8 +151,7 @@ class BetweennessCentralityTest {
             SelectionStrategy.ALL,
             Pools.DEFAULT,
             concurrency,
-            ProgressTracker.NULL_TRACKER,
-            ALLOCATION_TRACKER
+            ProgressTracker.NULL_TRACKER
         ).compute();
         assertEquals(5, actualResult.size(), "Expected 5 centrality values");
         assertEquals(0.0, actualResult.get((int) graph.toMappedNodeId("a")));

@@ -209,8 +209,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.nextCommunities = HugeLongArray.newArray(nodeCount);
         this.cumulativeNodeWeights = HugeDoubleArray.newArray(nodeCount);
         this.nodeCommunityInfluences = HugeDoubleArray.newArray(nodeCount);
-        this.communityWeights = HugeAtomicDoubleArray.newArray(nodeCount, allocationTracker);
-        this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, allocationTracker);
+        this.communityWeights = HugeAtomicDoubleArray.newArray(nodeCount);
+        this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount);
 
         var initTasks = PartitionUtils.rangePartition(concurrency, nodeCount, (partition) ->
             new InitTask(
@@ -318,7 +318,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         );
 
         // reset communityWeightUpdates
-        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, allocationTracker);
+        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount);
     }
 
     private Collection<ModularityOptimizationTask> createModularityOptimizationTasks(long currentColor) {

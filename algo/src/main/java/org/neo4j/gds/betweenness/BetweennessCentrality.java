@@ -25,7 +25,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -52,25 +51,22 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
     private final ExecutorService executorService;
     private final int concurrency;
-    private final AllocationTracker allocationTracker;
 
     public BetweennessCentrality(
         Graph graph,
         SelectionStrategy selectionStrategy,
         ExecutorService executorService,
         int concurrency,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.nodeCount = graph.nodeCount();
-        this.centrality = HugeAtomicDoubleArray.newArray(nodeCount, allocationTracker);
+        this.centrality = HugeAtomicDoubleArray.newArray(nodeCount);
         this.selectionStrategy = selectionStrategy;
         this.selectionStrategy.init(graph, executorService, concurrency);
-        this.allocationTracker = allocationTracker;
         this.divisor = graph.isUndirected() ? 2.0 : 1.0;
     }
 

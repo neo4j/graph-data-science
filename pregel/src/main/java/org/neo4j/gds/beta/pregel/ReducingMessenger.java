@@ -21,7 +21,6 @@ package org.neo4j.gds.beta.pregel;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
@@ -41,15 +40,15 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
     private HugeAtomicDoubleArray sendArray;
     private HugeAtomicDoubleArray receiveArray;
 
-    ReducingMessenger(Graph graph, PregelConfig config, Reducer reducer, AllocationTracker allocationTracker) {
+    ReducingMessenger(Graph graph, PregelConfig config, Reducer reducer) {
         assert !Double.isNaN(reducer.identity()): "identity element must not be NaN";
 
         this.graph = graph;
         this.config = config;
         this.reducer = reducer;
 
-        this.receiveArray = HugeAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
-        this.sendArray = HugeAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
+        this.receiveArray = HugeAtomicDoubleArray.newArray(graph.nodeCount());
+        this.sendArray = HugeAtomicDoubleArray.newArray(graph.nodeCount());
     }
 
     static MemoryEstimation memoryEstimation() {

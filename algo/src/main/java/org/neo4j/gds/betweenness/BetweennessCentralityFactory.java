@@ -62,8 +62,7 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
             strategy,
             Pools.DEFAULT,
             configuration.concurrency(),
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
     }
 

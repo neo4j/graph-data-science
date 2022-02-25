@@ -47,7 +47,7 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> exte
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        return new DegreeCentrality(graph, Pools.DEFAULT, configuration, progressTracker, allocationTracker);
+        return new DegreeCentrality(graph, Pools.DEFAULT, configuration, progressTracker);
     }
 
     @Override

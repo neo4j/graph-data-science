@@ -28,7 +28,6 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -74,8 +73,7 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
         Graph graph,
         AllShortestPathsDeltaBaseConfig config,
         ExecutorService executorService,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         return new DeltaStepping(
             graph,
@@ -84,8 +82,7 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
             config.concurrency(),
             true,
             executorService,
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
     }
 
@@ -132,8 +129,7 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
         int concurrency,
         boolean storePredecessors,
         ExecutorService executorService,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -146,14 +142,12 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
         if (storePredecessors) {
             this.distances = TentativeDistances.distanceAndPredecessors(
                 graph.nodeCount(),
-                concurrency,
-                allocationTracker
+                concurrency
             );
         } else {
             this.distances = TentativeDistances.distanceOnly(
                 graph.nodeCount(),
-                concurrency,
-                allocationTracker
+                concurrency
             );
         }
     }

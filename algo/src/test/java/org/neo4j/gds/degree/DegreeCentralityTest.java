@@ -29,7 +29,6 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -150,8 +149,7 @@ final class DegreeCentralityTest {
             graph,
             Pools.DEFAULT,
             config,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         var degreeFunction = degreeCentrality.compute();
@@ -204,8 +202,7 @@ final class DegreeCentralityTest {
             graph,
             Pools.DEFAULT,
             config,
-            progressTracker,
-            AllocationTracker.empty()
+            progressTracker
         );
 
         degreeCentrality.compute();
@@ -230,8 +227,7 @@ final class DegreeCentralityTest {
             graph,
             Pools.DEFAULT,
             config,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         // should not throw

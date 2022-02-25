@@ -46,7 +46,7 @@ public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> ext
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        return RandomWalk.create(graph, configuration, allocationTracker, progressTracker);
+        return RandomWalk.create(graph, configuration, progressTracker);
     }
 
     @Override

@@ -90,8 +90,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
 
         var degreeFunction = degreeFunction(
             graph,
-            configuration,
-            allocationTracker
+            configuration
         );
 
         var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
@@ -123,7 +122,6 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
             computation,
             mode,
             Pools.DEFAULT,
-            allocationTracker,
             progressTracker
         );
     }
@@ -136,8 +134,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
     @NotNull
     private LongToDoubleFunction degreeFunction(
         Graph graph,
-        CONFIG configuration,
-        AllocationTracker allocationTracker
+        CONFIG configuration
     ) {
         var config = ImmutableDegreeCentralityConfig.builder()
             .concurrency(configuration.concurrency())
@@ -148,8 +145,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
             graph,
             Pools.DEFAULT,
             config,
-            ProgressTracker.NULL_TRACKER,
-            allocationTracker
+            ProgressTracker.NULL_TRACKER
         );
 
         var degrees = degreeCentrality.compute();

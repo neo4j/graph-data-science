@@ -25,7 +25,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -45,7 +44,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
     private Graph graph;
     private final ExecutorService executor;
     private final DegreeCentralityConfig config;
-    private final AllocationTracker allocationTracker;
 
     public interface DegreeFunction {
         double get(long nodeId);
@@ -55,14 +53,12 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
         Graph graph,
         ExecutorService executor,
         DegreeCentralityConfig config,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.executor = executor;
         this.config = config;
-        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -169,7 +165,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
     }
 
     private DegreeFunction computeDegreeAtomic(TaskFunctionAtomic taskFunction) {
-        var degrees = HugeAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
+        var degrees = HugeAtomicDoubleArray.newArray(graph.nodeCount());
         var tasks = PartitionUtils.degreePartition(
             graph,
             config.concurrency(),

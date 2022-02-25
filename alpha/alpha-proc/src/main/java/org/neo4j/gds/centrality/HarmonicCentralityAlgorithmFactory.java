@@ -43,7 +43,6 @@ class HarmonicCentralityAlgorithmFactory extends GraphAlgorithmFactory<HarmonicC
         return new HarmonicCentrality(
             graph,
             configuration.concurrency(),
-            allocationTracker,
             Pools.DEFAULT,
             progressTracker
         );
