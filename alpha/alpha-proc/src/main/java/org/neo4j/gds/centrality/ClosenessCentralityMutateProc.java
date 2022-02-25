@@ -92,7 +92,7 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<MSClosenes
     }
 
     @SuppressWarnings("unused")
-    public static final class MutateResult extends CentralityScore.MutateStats {
+    public static final class MutateResult extends CentralityScore.Mutate {
 
         public final long nodePropertiesWritten;
         public final long postProcessingMillis;

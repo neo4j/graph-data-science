@@ -80,12 +80,12 @@ class CentralityScore {
         }
     }
 
-    public static class MutateStats {
+    public static class Mutate {
         public final long nodes, preProcessingMillis, computeMillis, mutateMillis;
         public final String mutateProperty;
         public final Map<String, Object> centralityDistribution;
 
-        public MutateStats(
+        public Mutate(
             long nodes,
             long preProcessingMillis,
             long computeMillis,
@@ -101,15 +101,15 @@ class CentralityScore {
             this.centralityDistribution = centralityDistribution;
         }
 
-        public static final class Builder extends AbstractCentralityResultBuilder<CentralityScore.MutateStats> {
+        public static final class Builder extends AbstractCentralityResultBuilder<Mutate> {
 
             public Builder(ProcedureCallContext callContext, int concurrency) {
                 super(callContext, concurrency);
             }
 
-            public CentralityScore.MutateStats buildResult() {
+            public Mutate buildResult() {
 
-                return new CentralityScore.MutateStats(
+                return new Mutate(
                     nodeCount,
                     preProcessingMillis,
                     computeMillis,
@@ -121,4 +121,3 @@ class CentralityScore {
         }
     }
 }
-
