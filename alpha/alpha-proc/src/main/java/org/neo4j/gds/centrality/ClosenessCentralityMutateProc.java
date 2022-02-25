@@ -83,11 +83,12 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<MSClosenes
         ComputationResult<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
+        var procResultBuilder = new MutateResult.Builder(
+            executionContext.callContext(),
+            computeResult.config().concurrency()
+        ).withMutateProperty(computeResult.config().mutateProperty());
         return ClosenessCentralityProc
-            .resultBuilder(new MutateResult.Builder(
-                executionContext.callContext(),
-                computeResult.config().concurrency()
-            ).withMutateProperty(computeResult.config().mutateProperty()), computeResult)
+            .resultBuilder(procResultBuilder, computeResult)
             .withNodeCount(computeResult.graph().nodeCount());
     }
 
