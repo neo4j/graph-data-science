@@ -29,7 +29,6 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -171,7 +170,7 @@ final class ConductanceTest {
         );
 
         factory
-            .build(naturalGraph, config, AllocationTracker.empty(), progressTracker)
+            .build(naturalGraph, config, progressTracker)
             .compute();
 
         assertThat(log.getMessages(TestLog.INFO))

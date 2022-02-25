@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -37,8 +36,7 @@ class NegativeSampleProducerTest {
             2,
             0.001,
             0.75,
-            4,
-            AllocationTracker.empty()
+            4
         );
 
         builder

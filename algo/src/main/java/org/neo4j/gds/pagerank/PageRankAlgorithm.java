@@ -24,7 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -52,7 +51,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
-        this.pregelJob = Pregel.create(graph, config, pregelComputation, executorService, AllocationTracker.empty(), progressTracker);
+        this.pregelJob = Pregel.create(graph, config, pregelComputation, executorService, progressTracker);
         this.mode = mode;
         this.executorService = executorService;
         this.config = config;

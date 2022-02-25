@@ -23,7 +23,6 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
@@ -55,7 +54,6 @@ public abstract class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, 
             public Prim build(
                 Graph graph,
                 SpanningTreeConfig configuration,
-                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);

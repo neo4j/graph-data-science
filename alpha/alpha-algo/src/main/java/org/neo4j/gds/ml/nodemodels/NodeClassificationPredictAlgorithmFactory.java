@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.nodemodels;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -48,7 +47,6 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
     public NodeClassificationPredict build(
         Graph graph,
         NodeClassificationPredictConfig configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         var model = modelCatalog.get(

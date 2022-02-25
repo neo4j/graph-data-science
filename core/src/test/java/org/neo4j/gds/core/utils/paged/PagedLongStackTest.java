@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,13 +39,13 @@ final class PagedLongStackTest {
 
     @Test
     void shouldCreateEmptyStack() {
-        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.empty());
+        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long());
         assertEmpty(stack);
     }
 
     @Test
     void shouldPopValuesInLIFOOrder() {
-        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.empty());
+        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long());
         long values[] = IntStream.range(0, between(1, 42).integer())
                 .mapToLong(i -> between(42L, 1337L).Long())
                 .toArray();
@@ -69,7 +68,7 @@ final class PagedLongStackTest {
 
     @Test
     void shouldPeekLastAddedValue() {
-        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.empty());
+        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long());
         int repetitions = between(1, 42).integer();
         List<Executable> assertions = new ArrayList<>();
         for (int i = 0; i < repetitions; i++) {
@@ -84,7 +83,7 @@ final class PagedLongStackTest {
 
     @Test
     void shouldPeekFromPreviousPage() {
-        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.empty());
+        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long());
 
         int repetitions = stack.pageSize + 1;
         long expectedLast = 0;
@@ -106,7 +105,7 @@ final class PagedLongStackTest {
 
     @Test
     void shouldClearToAnEmptyStack() {
-        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.empty());
+        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long());
         IntStream.range(0, between(13, 37).integer())
                 .mapToLong(i -> between(42L, 1337L).Long())
                 .forEach(stack::push);
@@ -116,7 +115,7 @@ final class PagedLongStackTest {
 
     @Test
     void shouldGrowAsNecessary() {
-        PagedLongStack stack = new PagedLongStack(0L, AllocationTracker.empty());
+        PagedLongStack stack = new PagedLongStack(0L);
         // something large enough to spill over one page
         int valuesToAdd = between(10_000, 20_000).integer();
         long[] values = IntStream.range(0, valuesToAdd)
@@ -143,11 +142,9 @@ final class PagedLongStackTest {
     @Test
     void shouldReleaseMemory() {
         int valuesToAdd = between(10_000, 20_000).integer();
-        AllocationTracker allocationTracker = AllocationTracker.create();
-        PagedLongStack stack = new PagedLongStack(valuesToAdd, allocationTracker);
-        long tracked = allocationTracker.trackedBytes();
+        PagedLongStack stack = new PagedLongStack(valuesToAdd);
         List<Executable> assertions = new ArrayList<>();
-        assertions.add(() -> assertEquals(stack.release(), tracked));
+        stack.release();
         assertions.add(() -> assertTrue(stack.isEmpty(), "released stack is empty"));
         assertions.add(() -> assertEquals(0L, stack.size(), "released stack has size 0"));
         assertions.add(() -> assertThrows(NullPointerException.class, stack::pop, "pop on released stack shouldn't succeed"));

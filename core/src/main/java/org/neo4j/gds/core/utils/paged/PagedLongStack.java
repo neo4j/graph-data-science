@@ -19,15 +19,13 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-
 public class PagedLongStack extends PagedDataStructure<long[]> {
 
     private static final PageAllocator.Factory<long[]> ALLOCATOR_FACTORY =
             PageAllocator.ofArray(long[].class);
 
-    public PagedLongStack(long initialSize, AllocationTracker allocationTracker) {
-        this(Math.max(1L, initialSize), ALLOCATOR_FACTORY.newAllocator(allocationTracker));
+    public PagedLongStack(long initialSize) {
+        this(Math.max(1L, initialSize), ALLOCATOR_FACTORY.newAllocator());
     }
 
     private PagedLongStack(long initialSize, PageAllocator<long[]> allocator) {

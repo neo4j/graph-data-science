@@ -22,7 +22,6 @@ package org.neo4j.gds.impl.approxmaxkcut;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
@@ -50,10 +49,9 @@ public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends Gr
     public ApproxMaxKCut build(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        return new ApproxMaxKCut(graph, Pools.DEFAULT, configuration, progressTracker, allocationTracker);
+        return new ApproxMaxKCut(graph, Pools.DEFAULT, configuration, progressTracker);
     }
 
     @Override

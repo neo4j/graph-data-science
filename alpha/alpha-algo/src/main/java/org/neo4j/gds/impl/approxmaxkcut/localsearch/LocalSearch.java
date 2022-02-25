@@ -22,7 +22,6 @@ package org.neo4j.gds.impl.approxmaxkcut.localsearch;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.AtomicDoubleArray;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
@@ -59,8 +58,7 @@ public class LocalSearch {
         ApproxMaxKCut.Comparator comparator,
         ApproxMaxKCutConfig config,
         ExecutorService executor,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.comparator = comparator;
@@ -81,7 +79,7 @@ public class LocalSearch {
         this.nodeToCommunityWeights = HugeAtomicDoubleArray.newArray(graph.nodeCount() * config.k());
 
         // Used to keep track of whether we can swap a node into another community or not.
-        this.swapStatus = HugeAtomicByteArray.newArray(graph.nodeCount(), allocationTracker);
+        this.swapStatus = HugeAtomicByteArray.newArray(graph.nodeCount());
 
         this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
     }

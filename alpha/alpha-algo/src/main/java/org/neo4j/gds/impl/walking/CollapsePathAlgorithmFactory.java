@@ -24,7 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public class CollapsePathAlgorithmFactory extends GraphStoreAlgorithmFactory<CollapsePath, CollapsePathConfig> {
@@ -33,7 +32,6 @@ public class CollapsePathAlgorithmFactory extends GraphStoreAlgorithmFactory<Col
     public CollapsePath build(
         GraphStore graphStore,
         CollapsePathConfig config,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         Graph[] graphs = config.relationshipTypes()

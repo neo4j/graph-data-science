@@ -31,7 +31,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -196,7 +195,6 @@ class GraphSageModelTrainerTest {
         var algo = new GraphSageTrainAlgorithmFactory().build(
             graph,
             config,
-            AllocationTracker.empty(),
             log,
             EmptyTaskRegistryFactory.INSTANCE
         );

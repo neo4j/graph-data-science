@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -108,8 +107,7 @@ class TraverseTest {
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             (s, t, w) -> 1.,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute().resultNodes();
 
         assertContains(new String[]{"a", "b", "c", "d"}, nodes);
@@ -128,8 +126,7 @@ class TraverseTest {
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             DEFAULT_AGGREGATOR,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute().resultNodes();
 
         assertEquals(5, nodes.length);
@@ -147,8 +144,7 @@ class TraverseTest {
             source,
             (s, t, w) -> Result.FOLLOW,
             DEFAULT_AGGREGATOR,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute().resultNodes();
         assertEquals(7, nodes.length); // should contain all nodes
     }
@@ -166,8 +162,7 @@ class TraverseTest {
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             DEFAULT_AGGREGATOR,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute().resultNodes();
         assertEquals(5, nodes.length);
     }
@@ -186,8 +181,7 @@ class TraverseTest {
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             DEFAULT_AGGREGATOR,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute().resultNodes();
         assertEquals(7, nodes.length);
     }
@@ -207,8 +201,7 @@ class TraverseTest {
             source,
             (s, t, w) -> w >= maxHops ? Result.CONTINUE : Result.FOLLOW,
             (s, t, w) -> w + 1.,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute().resultNodes();
         assertContains(new String[]{"a", "b", "c", "d"}, nodes);
     }
@@ -218,8 +211,7 @@ class TraverseTest {
         Traverse.bfs(loopGraph, 0,
             (s, t, w) -> Result.FOLLOW,
             Traverse.DEFAULT_AGGREGATOR,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute();
     }
 
@@ -230,8 +222,7 @@ class TraverseTest {
             0,
             (s, t, w) -> Result.FOLLOW,
             Traverse.DEFAULT_AGGREGATOR,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute();
     }
 
@@ -266,8 +257,7 @@ class TraverseTest {
             0,
             (s, t, w) -> Result.FOLLOW,
             Traverse.DEFAULT_AGGREGATOR,
-            progressTracker,
-            AllocationTracker.empty()
+            progressTracker
         ).compute();
         List<AtomicLong> progresses = progressTracker.getProgresses();
         assertEquals(1, progresses.size());

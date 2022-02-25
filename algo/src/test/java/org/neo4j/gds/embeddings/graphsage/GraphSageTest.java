@@ -36,7 +36,6 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -139,7 +138,6 @@ class GraphSageTest {
         var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
             orphanGraph,
             streamConfig,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
         GraphSage.GraphSageResult compute = graphSage.compute();
@@ -198,7 +196,6 @@ class GraphSageTest {
         var graphSageTrain = new GraphSageTrainAlgorithmFactory().build(
             graph,
             trainConfig,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -214,7 +211,6 @@ class GraphSageTest {
         var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
             graph,
             streamConfig,
-            AllocationTracker.empty(),
             log,
             EmptyTaskRegistryFactory.INSTANCE
         );

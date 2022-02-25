@@ -21,7 +21,6 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,14 +36,12 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
     default ALGO build(
         G graphOrGraphStore,
         CONFIG configuration,
-        AllocationTracker allocationTracker,
         Log log,
         TaskRegistryFactory taskRegistryFactory
     ) {
         return this.build(
             graphOrGraphStore,
             configuration,
-            allocationTracker,
             log,
             taskRegistryFactory,
             EmptyUserLogRegistryFactory.INSTANCE
@@ -54,7 +51,6 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
     default ALGO build(
         G graphOrGraphStore,
         CONFIG configuration,
-        AllocationTracker allocationTracker,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
@@ -67,13 +63,12 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
             taskRegistryFactory,
             userLogRegistryFactory
         );
-        return build(graphOrGraphStore, configuration, allocationTracker, progressTracker);
+        return build(graphOrGraphStore, configuration, progressTracker);
     }
 
     ALGO build(
         G graphOrGraphStore,
         CONFIG configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     );
 

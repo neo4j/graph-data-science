@@ -26,7 +26,6 @@ import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -84,18 +83,16 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
     public ModularityOptimization build(
         Graph graph,
         T configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         var seedProperty = configuration.seedProperty() != null ? graph.nodeProperties(configuration.seedProperty()) : null;
-        return build(graph, configuration, seedProperty, allocationTracker, progressTracker);
+        return build(graph, configuration, seedProperty, progressTracker);
     }
 
     public ModularityOptimization build(
         Graph graph,
         T configuration,
         NodeProperties seedProperty,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         return new ModularityOptimization(
@@ -106,8 +103,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
             configuration.concurrency(),
             configuration.batchSize(),
             Pools.DEFAULT,
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
     }
 

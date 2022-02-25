@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -52,7 +51,6 @@ interface RandomWalkProbabilities {
 
         private final long nodeCount;
         private final int concurrency;
-        private final AllocationTracker allocationTracker;
         private final double positiveSamplingFactor;
         private final double negativeSamplingExponent;
         private final HugeLongArray nodeFrequencies;
@@ -62,12 +60,10 @@ interface RandomWalkProbabilities {
             long nodeCount,
             double positiveSamplingFactor,
             double negativeSamplingExponent,
-            int concurrency,
-            AllocationTracker allocationTracker
+            int concurrency
         ) {
             this.nodeCount = nodeCount;
             this.concurrency = concurrency;
-            this.allocationTracker = allocationTracker;
             this.positiveSamplingFactor = positiveSamplingFactor;
             this.negativeSamplingExponent = negativeSamplingExponent;
 

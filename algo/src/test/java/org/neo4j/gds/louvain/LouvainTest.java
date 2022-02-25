@@ -34,7 +34,6 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -164,8 +163,7 @@ class LouvainTest {
             graph,
             defaultConfigBuilder().build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -205,8 +203,7 @@ class LouvainTest {
             graph,
             defaultConfigBuilder().build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -246,8 +243,7 @@ class LouvainTest {
             graph,
             defaultConfigBuilder().seedProperty("seed").build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -289,8 +285,7 @@ class LouvainTest {
                 .concurrency(1)
                 .build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -317,8 +312,7 @@ class LouvainTest {
                 .concurrency(1)
                 .build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -329,12 +323,12 @@ class LouvainTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 1, 6414145, 23057672),
-            arguments(1, 10, 6414145, 30258032),
-            arguments(4, 1, 6417433, 29057936),
-            arguments(4, 10, 6417433, 36258296),
-            arguments(42, 1, 6459081, 105061280),
-            arguments(42, 10, 6459081, 112261640)
+            arguments(1, 1, 6414137, 23057664),
+            arguments(1, 10, 6414137, 30258024),
+            arguments(4, 1, 6417425, 29057928),
+            arguments(4, 10, 6417425, 36258288),
+            arguments(42, 1, 6459073, 105061272),
+            arguments(42, 10, 6459073, 112261632)
         );
     }
 
@@ -415,8 +409,7 @@ class LouvainTest {
                     graph,
                     defaultConfigBuilder().concurrency(2).build(),
                     Pools.DEFAULT,
-                    ProgressTracker.NULL_TRACKER,
-                    AllocationTracker.empty()
+                    ProgressTracker.NULL_TRACKER
                 );
                 louvain.setTerminationFlag(terminationFlag);
                 louvain.compute();
@@ -447,8 +440,7 @@ class LouvainTest {
             graph,
             config,
             Pools.DEFAULT,
-            progressTracker,
-            AllocationTracker.empty()
+            progressTracker
         );
 
         louvain.compute();

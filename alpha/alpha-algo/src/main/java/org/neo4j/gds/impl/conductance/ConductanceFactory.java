@@ -22,7 +22,6 @@ package org.neo4j.gds.impl.conductance;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -42,7 +41,6 @@ public class ConductanceFactory<CONFIG extends ConductanceConfig> extends GraphA
     public Conductance build(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         return new Conductance(graph, Pools.DEFAULT, configuration, progressTracker);

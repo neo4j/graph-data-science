@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -202,7 +201,6 @@ class NodeClassificationTrainTest {
         var algorithm = factory.build(
             graph,
             config,
-            AllocationTracker.empty(),
             log,
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -425,7 +423,6 @@ class NodeClassificationTrainTest {
         Supplier<NodeClassificationTrain> algoSupplier = () -> new NodeClassificationTrainAlgorithmFactory().build(
             graph,
             config,
-            AllocationTracker.empty(),
             NullLog.getInstance(),
             EmptyTaskRegistryFactory.INSTANCE
         );

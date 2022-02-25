@@ -38,7 +38,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -88,8 +87,7 @@ class Node2VecTest extends AlgoTestBase {
         HugeObjectArray<FloatVector> node2Vec = new Node2Vec(
             graph,
             ImmutableNode2VecStreamConfig.builder().embeddingDimension(embeddingDimension).build(),
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute();
 
         graph.forEachNode(node -> {
@@ -120,8 +118,7 @@ class Node2VecTest extends AlgoTestBase {
         new Node2Vec(
             graph,
             config,
-            progressTracker,
-            AllocationTracker.empty()
+            progressTracker
         ).compute();
 
         assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: Start"));
@@ -171,7 +168,7 @@ class Node2VecTest extends AlgoTestBase {
             .relationshipWeightProperty("weight")
             .build();
 
-        var node2Vec = new Node2Vec(graph, config, ProgressTracker.NULL_TRACKER, AllocationTracker.empty());
+        var node2Vec = new Node2Vec(graph, config, ProgressTracker.NULL_TRACKER);
 
         assertThatThrownBy(node2Vec::compute)
             .isInstanceOf(RuntimeException.class)
@@ -202,15 +199,13 @@ class Node2VecTest extends AlgoTestBase {
         var embeddings = new Node2Vec(
             graph,
             config,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute();
 
         var otherEmbeddings = new Node2Vec(
             graph,
             config,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         ).compute();
 
         for (long node = 0; node < graph.nodeCount(); node++) {

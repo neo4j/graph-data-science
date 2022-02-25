@@ -21,7 +21,6 @@ package org.neo4j.gds.paths.astar;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -49,7 +48,6 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> extends Gr
     public AStar build(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         return AStar.sourceTarget(graph, configuration, progressTracker);

@@ -21,28 +21,21 @@ package org.neo4j.gds.test;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public class TestAlgorithm extends Algorithm<TestAlgorithm> {
 
     private final Graph graph;
-    private final AllocationTracker allocationTracker;
     private long relationshipCount = 0;
-    private final long memoryLimit;
     private final boolean throwInCompute;
 
     public TestAlgorithm(
         Graph graph,
-        AllocationTracker allocationTracker,
-        long memoryLimit,
         ProgressTracker progressTracker,
         boolean throwInCompute
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.allocationTracker = allocationTracker;
-        this.memoryLimit = memoryLimit;
         this.throwInCompute = throwInCompute;
     }
 
@@ -54,7 +47,6 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm> {
             throw new IllegalStateException("boo");
         }
         relationshipCount = graph.relationshipCount();
-        allocationTracker.add(memoryLimit * 2);
 
         progressTracker.endSubTask();
 

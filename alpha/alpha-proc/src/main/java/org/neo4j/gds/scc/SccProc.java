@@ -23,7 +23,6 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.scc.SccAlgorithm;
@@ -52,12 +51,10 @@ public abstract class SccProc<PROC_RESULT> extends NodePropertiesWriter<SccAlgor
             public SccAlgorithm build(
                 Graph graph,
                 SccConfig configuration,
-                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 return new SccAlgorithm(
                     graph,
-                    allocationTracker,
                     progressTracker
                 );
             }

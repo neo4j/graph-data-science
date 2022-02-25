@@ -44,7 +44,7 @@ class LocalClusteringCoefficientFactoryTest {
         MemoryRange actual = estimate.memoryUsage();
 
         long triangleCountEstimate = 56 + 24 + nodeCount * 8 + 16;
-        long hugeDoubleArray = 24 + nodeCount * 8 + 16;
+        long hugeDoubleArray = 16 + nodeCount * 8 + 16;
         long expected = 64 + hugeDoubleArray + triangleCountEstimate;
 
         assertEquals(expected, actual.min);
@@ -62,7 +62,7 @@ class LocalClusteringCoefficientFactoryTest {
         MemoryTree estimate = estimation.estimate(dimensions, 1);
         MemoryRange actual = estimate.memoryUsage();
 
-        long hugeDoubleArray = 24 + nodeCount * 8 + 16;
+        long hugeDoubleArray = 16 + nodeCount * 8 + 16;
         long expected = 56 + hugeDoubleArray;
         assertEquals(expected, actual.min);
         assertEquals(expected, actual.max);
@@ -80,7 +80,7 @@ class LocalClusteringCoefficientFactoryTest {
         MemoryRange actual = estimate.memoryUsage();
 
         long triangleCountEstimate = 56 + 32 + sizeOfHugeArray;
-        long hugeDoubleArray = 32 + sizeOfHugeArray;
+        long hugeDoubleArray = 24 + sizeOfHugeArray;
         long expected = 64 + hugeDoubleArray + triangleCountEstimate;
         assertEquals(expected, actual.min);
         assertEquals(expected, actual.max);
@@ -97,7 +97,7 @@ class LocalClusteringCoefficientFactoryTest {
         MemoryTree estimate = estimation.estimate(dimensions, 1);
         MemoryRange actual = estimate.memoryUsage();
 
-        long hugeDoubleArray = 32 + sizeOfHugeArray;
+        long hugeDoubleArray = 24 + sizeOfHugeArray;
         long expected = 56 + hugeDoubleArray;
         assertEquals(expected, actual.min);
         assertEquals(expected, actual.max);

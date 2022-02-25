@@ -36,7 +36,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -180,7 +179,6 @@ class WccTest {
         new WccAlgorithmFactory<>().build(
             createTestGraph(Orientation.NATURAL),
             ImmutableWccStreamConfig.builder().relationshipWeightProperty("weights").build(),
-            AllocationTracker.empty(),
             log,
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -199,7 +197,6 @@ class WccTest {
         var wcc = new WccAlgorithmFactory<>().build(
             graph,
             ImmutableWccStreamConfig.builder().concurrency(2).build(),
-            AllocationTracker.empty(),
             log,
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -414,7 +411,6 @@ class WccTest {
                 .build(
                     graph,
                     config,
-                    AllocationTracker.empty(),
                     ProgressTracker.NULL_TRACKER
                 ).compute();
 

@@ -33,7 +33,6 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.NativeFactory;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -55,15 +54,13 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgor
     public Louvain build(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         return new Louvain(
             graph,
             configuration,
             Pools.DEFAULT,
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
     }
 

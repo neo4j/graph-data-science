@@ -34,7 +34,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
@@ -239,8 +238,7 @@ class ModularityOptimizationTest {
             concurrency,
             minBatchSize,
             Pools.DEFAULT,
-            progressTracker,
-            AllocationTracker.empty()
+            progressTracker
         ).compute();
     }
 

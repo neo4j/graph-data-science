@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.nodemodels;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -49,7 +48,6 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
     public NodeClassificationTrainPipelineExecutor build(
         GraphStore graphStore,
         NodeClassificationPipelineTrainConfig configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(

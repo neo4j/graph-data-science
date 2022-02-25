@@ -21,7 +21,6 @@ package org.neo4j.gds.traverse;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -47,7 +46,6 @@ public class TraverseFactory<CONFIG extends TraverseConfig> extends GraphAlgorit
     public Traverse build(
         Graph graphOrGraphStore,
         CONFIG configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         Traverse.ExitPredicate exitFunction;
@@ -80,16 +78,14 @@ public class TraverseFactory<CONFIG extends TraverseConfig> extends GraphAlgorit
             mappedStartNodeId,
             exitFunction,
             aggregatorFunction,
-            progressTracker,
-            allocationTracker
+            progressTracker
         )
             : Traverse.dfs(
                 graphOrGraphStore,
                 mappedStartNodeId,
                 exitFunction,
                 aggregatorFunction,
-                progressTracker,
-                allocationTracker
+                progressTracker
             );
     }
 

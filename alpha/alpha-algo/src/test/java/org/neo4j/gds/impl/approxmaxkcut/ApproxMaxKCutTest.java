@@ -27,7 +27,6 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
@@ -174,8 +173,7 @@ final class ApproxMaxKCutTest {
             graph,
             Pools.DEFAULT,
             config,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         var result = approxMaxKCut.compute();
@@ -217,8 +215,7 @@ final class ApproxMaxKCutTest {
             maxGraph,
             Pools.DEFAULT,
             config,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         var cardinalities = new long[2];
@@ -243,7 +240,6 @@ final class ApproxMaxKCutTest {
         var approxMaxKCut = new ApproxMaxKCutFactory<>().build(
             maxGraph,
             config,
-            AllocationTracker.empty(),
             log,
             EmptyTaskRegistryFactory.INSTANCE
         );

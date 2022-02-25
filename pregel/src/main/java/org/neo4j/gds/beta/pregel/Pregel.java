@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -58,7 +57,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
         CONFIG config,
         PregelComputation<CONFIG> computation,
         ExecutorService executor,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         // This prevents users from disabling concurrency
@@ -73,7 +71,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
             computation,
             NodeValue.of(computation.schema(config), graph.nodeCount(), config.concurrency()),
             executor,
-            allocationTracker,
             progressTracker
         );
     }
@@ -123,7 +120,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
         final PregelComputation<CONFIG> computation,
         final NodeValue initialNodeValue,
         final ExecutorService executor,
-        final AllocationTracker allocationTracker,
         final ProgressTracker progressTracker
     ) {
         this.graph = graph;

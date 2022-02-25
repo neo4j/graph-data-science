@@ -29,7 +29,6 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -87,8 +86,8 @@ public final class ComputationStreamProc extends PregelStreamProc<ComputationAlg
         return new GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
             @Override
             public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,
-                                              AllocationTracker allocationTracker, ProgressTracker progressTracker) {
-                return new ComputationAlgorithm(graph, configuration, allocationTracker, progressTracker);
+                                              ProgressTracker progressTracker) {
+                return new ComputationAlgorithm(graph, configuration, progressTracker);
             }
 
             @Override

@@ -155,7 +155,6 @@ public abstract class AlphaSimilarityProc
             public ALGO build(
                 Graph graph,
                 CONFIG configuration,
-                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 removeGraph(username(), databaseId());

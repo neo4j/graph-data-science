@@ -23,7 +23,6 @@ import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -41,7 +40,6 @@ public class SplitRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFacto
     public SplitRelationships build(
         GraphStore graphStore,
         SplitRelationshipsMutateConfig configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         Optional<String> weightProperty = configuration != null

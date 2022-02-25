@@ -22,7 +22,6 @@ package org.neo4j.gds.impl.closeness;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -49,7 +48,6 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
     private final int concurrency;
     private final ExecutorService executorService;
     private final long nodeCount;
-    private final AllocationTracker allocationTracker;
 
     private final boolean wassermanFaust;
 
@@ -57,7 +55,6 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
         Graph graph,
         int concurrency,
         boolean wassermanFaust,
-        AllocationTracker allocationTracker,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -66,10 +63,9 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
         nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
         this.executorService = executorService;
-        this.allocationTracker = allocationTracker;
         this.wassermanFaust = wassermanFaust;
-        farness = PagedAtomicIntegerArray.newArray(nodeCount, this.allocationTracker);
-        component = PagedAtomicIntegerArray.newArray(nodeCount, this.allocationTracker);
+        farness = PagedAtomicIntegerArray.newArray(nodeCount);
+        component = PagedAtomicIntegerArray.newArray(nodeCount);
     }
 
     public HugeDoubleArray getCentrality() {
@@ -83,7 +79,7 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
         return cc;
     }
 
-    public void export(final String propertyName, final NodePropertyExporter exporter, ProgressTracker progressTracker) {
+    public void export(final String propertyName, final NodePropertyExporter exporter) {
         DoubleNodeProperties properties = new DoubleNodeProperties() {
             @Override
             public double doubleValue(long nodeId) {

@@ -36,7 +36,6 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -505,7 +504,7 @@ class FastRPTest extends AlgoTestBase {
         var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
 
         factory
-            .build(graph, config, AllocationTracker.empty(), progressTracker)
+            .build(graph, config, progressTracker)
             .compute();
 
         assertThat(log.getMessages(TestLog.INFO))

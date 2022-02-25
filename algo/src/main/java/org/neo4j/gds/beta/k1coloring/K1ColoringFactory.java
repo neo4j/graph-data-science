@@ -24,7 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -48,7 +47,6 @@ public class K1ColoringFactory<T extends K1ColoringConfig> extends GraphAlgorith
     public K1Coloring build(
         Graph graph,
         T configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         return new K1Coloring(

@@ -24,7 +24,6 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -65,7 +64,6 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
         public Dijkstra build(
             Graph graph,
             T configuration,
-            AllocationTracker allocationTracker,
             ProgressTracker progressTracker
         ) {
             return Dijkstra.sourceTarget(
@@ -82,7 +80,6 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
         public Dijkstra build(
             Graph graph,
             T configuration,
-            AllocationTracker allocationTracker,
             ProgressTracker progressTracker
         ) {
             return Dijkstra.singleSource(

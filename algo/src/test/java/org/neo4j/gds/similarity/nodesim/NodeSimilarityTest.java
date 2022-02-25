@@ -35,7 +35,6 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
@@ -292,8 +291,7 @@ final class NodeSimilarityTest {
             graph,
             configBuilder().relationshipWeightProperty("prop").concurrency(concurrency).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
@@ -314,8 +312,7 @@ final class NodeSimilarityTest {
             graph,
             configBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
@@ -336,8 +333,7 @@ final class NodeSimilarityTest {
             graph,
             configBuilder().concurrency(concurrency).topN(1).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
@@ -358,8 +354,7 @@ final class NodeSimilarityTest {
             graph,
             configBuilder().concurrency(concurrency).bottomN(1).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         Graph similarityGraph = nodeSimilarity.computeToGraph().similarityGraph();
@@ -381,8 +376,7 @@ final class NodeSimilarityTest {
             graph,
             configBuilder().topK(1).concurrency(concurrency).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
@@ -407,8 +401,7 @@ final class NodeSimilarityTest {
                 .bottomK(1)
                 .build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         Graph similarityGraph = nodeSimilarity.computeToGraph().similarityGraph();
@@ -438,8 +431,7 @@ final class NodeSimilarityTest {
             graph,
             configBuilder().concurrency(concurrency).similarityCutoff(0.1).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
@@ -463,8 +455,7 @@ final class NodeSimilarityTest {
             graph,
             configBuilder().degreeCutoff(2).concurrency(concurrency).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
@@ -486,8 +477,7 @@ final class NodeSimilarityTest {
             undirectedGraph,
             configBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         Set<SimilarityResult> result = nodeSimilarity.computeToStream().collect(Collectors.toSet());
         nodeSimilarity.release();
@@ -500,8 +490,7 @@ final class NodeSimilarityTest {
             naturalGraph,
             configBuilder().concurrency(1).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         var result1 = nodeSimilarity.computeToStream().collect(Collectors.toSet());
 
@@ -509,8 +498,7 @@ final class NodeSimilarityTest {
             naturalUnionGraph,
             configBuilder().concurrency(1).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
         var result2 = nodeSimilarity.computeToStream().collect(Collectors.toSet());
 
@@ -526,8 +514,7 @@ final class NodeSimilarityTest {
             graph,
             configBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph();
@@ -580,8 +567,7 @@ final class NodeSimilarityTest {
                 .topN(1)
                 .build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         SimilarityGraphResult similarityGraphResult = nodeSimilarity.computeToGraph();
@@ -621,8 +607,7 @@ final class NodeSimilarityTest {
             graph,
             configBuilder().concurrency(concurrency).topN(1).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
@@ -650,8 +635,7 @@ final class NodeSimilarityTest {
             graph,
             configBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER,
-            AllocationTracker.empty()
+            ProgressTracker.NULL_TRACKER
         );
 
         Set<String> result = nodeSimilarity
@@ -673,8 +657,7 @@ final class NodeSimilarityTest {
                 undirectedGraph,
                 configBuilder().concurrency(concurrency).build(),
                 Pools.DEFAULT,
-                ProgressTracker.NULL_TRACKER,
-                AllocationTracker.empty()
+                ProgressTracker.NULL_TRACKER
             ).computeToStream()
         );
         assertThat(ex.getMessage()).contains("Direction BOTH is not supported");
@@ -721,11 +704,11 @@ final class NodeSimilarityTest {
         long topKMapRangeMin;
         long topKMapRangeMax;
         if (topK == TOP_K_DEFAULT) {
-            topKMapRangeMin = 248_000_024L;
-            topKMapRangeMax = 248_000_024L;
+            topKMapRangeMin = 248_000_016L;
+            topKMapRangeMax = 248_000_016L;
         } else {
-            topKMapRangeMin = 1_688_000_024L;
-            topKMapRangeMax = 1_688_000_024L;
+            topKMapRangeMin = 1_688_000_016L;
+            topKMapRangeMax = 1_688_000_016L;
         }
         builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
 
@@ -781,11 +764,11 @@ final class NodeSimilarityTest {
         long topKMapRangeMin;
         long topKMapRangeMax;
         if (topK == TOP_K_DEFAULT) {
-            topKMapRangeMin = 248_000_024L;
-            topKMapRangeMax = 248_000_024L;
+            topKMapRangeMin = 248_000_016L;
+            topKMapRangeMax = 248_000_016L;
         } else {
-            topKMapRangeMin = 1_688_000_024L;
-            topKMapRangeMax = 1_688_000_024L;
+            topKMapRangeMin = 1_688_000_016L;
+            topKMapRangeMax = 1_688_000_016L;
         }
         builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
 
@@ -804,7 +787,6 @@ final class NodeSimilarityTest {
         var nodeSimilarity = new NodeSimilarityFactory<>().build(
             graph,
             config,
-            AllocationTracker.empty(),
             progressLog,
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -839,8 +821,7 @@ final class NodeSimilarityTest {
             graph,
             config,
             Pools.DEFAULT,
-            progressTracker,
-            AllocationTracker.empty()
+            progressTracker
         );
 
         long comparisons = nodeSimilarity.compute().streamResult().count();

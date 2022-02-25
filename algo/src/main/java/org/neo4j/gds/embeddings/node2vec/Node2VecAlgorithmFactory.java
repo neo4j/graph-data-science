@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -44,11 +43,10 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
     public Node2Vec build(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         validateConfig(configuration, graph);
-        return new Node2Vec(graph, configuration, progressTracker, allocationTracker);
+        return new Node2Vec(graph, configuration, progressTracker);
     }
 
     @Override

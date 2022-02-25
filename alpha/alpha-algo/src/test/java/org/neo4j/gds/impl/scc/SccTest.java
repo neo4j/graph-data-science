@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -80,7 +79,7 @@ class SccTest {
 
     @Test
     void testDirect() {
-        SccAlgorithm scc = new SccAlgorithm(graph, AllocationTracker.empty(), ProgressTracker.NULL_TRACKER);
+        SccAlgorithm scc = new SccAlgorithm(graph, ProgressTracker.NULL_TRACKER);
         HugeLongArray components = scc.compute();
 
         assertCC(components);
@@ -91,7 +90,7 @@ class SccTest {
 
     @Test
     void testHugeIterativeScc() {
-        SccAlgorithm algo = new SccAlgorithm(graph, AllocationTracker.empty(), ProgressTracker.NULL_TRACKER);
+        SccAlgorithm algo = new SccAlgorithm(graph, ProgressTracker.NULL_TRACKER);
         HugeLongArray components = algo.compute();
         assertCC(components);
     }
@@ -140,7 +139,6 @@ class SccTest {
 
         var algo = new SccAlgorithm(
             graph,
-            AllocationTracker.empty(),
             progressTracker
         );
 

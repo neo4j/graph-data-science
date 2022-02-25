@@ -23,7 +23,6 @@ package org.neo4j.gds.impl.closeness;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -33,14 +32,12 @@ public class ClosenessCentralityFactory<CONFIG extends ClosenessCentralityConfig
     public MSClosenessCentrality build(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         return new MSClosenessCentrality(
             graph,
             configuration.concurrency(),
             configuration.improved(),
-            allocationTracker,
             Pools.DEFAULT,
             progressTracker
         );

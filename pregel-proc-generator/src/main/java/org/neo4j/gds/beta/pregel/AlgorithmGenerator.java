@@ -28,7 +28,6 @@ import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import javax.lang.model.SourceVersion;
@@ -85,7 +84,6 @@ class AlgorithmGenerator extends PregelGenerator {
         return MethodSpec.constructorBuilder()
             .addParameter(Graph.class, "graph")
             .addParameter(pregelSpec.configTypeName(), configurationVar)
-            .addParameter(AllocationTracker.class, "allocationTracker")
             .addParameter(ProgressTracker.class, "progressTracker")
             .addStatement(CodeBlock.builder().add("super(progressTracker)").build())
             .addStatement(
@@ -95,7 +93,6 @@ class AlgorithmGenerator extends PregelGenerator {
                     "$config:N, " +
                     "new $computation:T(), " +
                     "$pools:T.DEFAULT, " +
-                    "allocationTracker, " +
                     "progressTracker" +
                     ")",
                     Map.of(

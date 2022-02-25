@@ -117,15 +117,7 @@ public abstract class PageAllocator<T> {
             return numPages * bytesPerPage;
         }
 
-        PageAllocator<T> newAllocator(AllocationTracker allocationTracker) {
-            if (AllocationTracker.isTracking(allocationTracker)) {
-                return new TrackingAllocator<>(
-                        newPage,
-                        emptyPages,
-                        pageSize,
-                        bytesPerPage,
-                        allocationTracker);
-            }
+        PageAllocator<T> newAllocator() {
             return new DirectAllocator<>(newPage, emptyPages, pageSize, bytesPerPage);
         }
     }
@@ -144,50 +136,6 @@ public abstract class PageAllocator<T> {
             allocationTracker.add(bytesPerPage);
             return newPage.get();
         };
-    }
-
-    private static final class TrackingAllocator<T> extends PageAllocator<T> {
-
-        private final PageFactory<T> newPage;
-        private final T[] emptyPages;
-        private final int pageSize;
-        private final long bytesPerPage;
-        private final AllocationTracker allocationTracker;
-
-        private TrackingAllocator(
-                PageFactory<T> newPage,
-                T[] emptyPages,
-                int pageSize,
-                long bytesPerPage,
-                AllocationTracker allocationTracker
-        ) {
-            this.emptyPages = emptyPages;
-            assert BitUtil.isPowerOfTwo(pageSize);
-            this.newPage = newPage;
-            this.pageSize = pageSize;
-            this.bytesPerPage = bytesPerPage;
-            this.allocationTracker = allocationTracker;
-        }
-
-        @Override
-        public T newPage() {
-            return newPage.newPage(allocationTracker);
-        }
-
-        @Override
-        public int pageSize() {
-            return pageSize;
-        }
-
-        @Override
-        public long bytesPerPage() {
-            return bytesPerPage;
-        }
-
-        @Override
-        public T[] emptyPages() {
-            return emptyPages;
-        }
     }
 
     private static final class DirectAllocator<T> extends PageAllocator<T> {

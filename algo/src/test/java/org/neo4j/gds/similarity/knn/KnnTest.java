@@ -32,7 +32,6 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.NullPropertyMap;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -430,7 +429,7 @@ class KnnTest {
         var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
 
         factory
-            .build(graph, config, AllocationTracker.empty(), progressTracker)
+            .build(graph, config, progressTracker)
             .compute();
 
         assertThat(log.getMessages(TestLog.INFO))

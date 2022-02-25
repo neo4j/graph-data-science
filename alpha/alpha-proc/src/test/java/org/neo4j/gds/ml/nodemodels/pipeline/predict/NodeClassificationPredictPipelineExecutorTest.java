@@ -38,7 +38,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Inject;
@@ -293,7 +292,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var algo = factory.build(
                 graphStore,
                 streamConfig,
-                AllocationTracker.empty(),
                 ProgressTracker.NULL_TRACKER
             );
             assertThatThrownBy(algo::compute)

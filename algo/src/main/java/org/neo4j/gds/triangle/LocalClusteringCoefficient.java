@@ -24,7 +24,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -36,7 +35,6 @@ import java.util.function.LongToDoubleFunction;
 public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficient.Result> {
 
     private final int concurrency;
-    private final AllocationTracker allocationTracker;
     private final NodeProperties triangleCountProperty;
     private final LocalClusteringCoefficientBaseConfig configuration;
 
@@ -49,12 +47,10 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     LocalClusteringCoefficient(
         Graph graph,
         LocalClusteringCoefficientBaseConfig configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.allocationTracker = allocationTracker;
 
         this.configuration = configuration;
         this.concurrency = configuration.concurrency();
@@ -113,7 +109,6 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         IntersectingTriangleCount intersectingTriangleCount = new IntersectingTriangleCountFactory<>().build(
             graph,
             LocalClusteringCoefficientFactory.createTriangleCountConfig(configuration),
-            allocationTracker,
             progressTracker
         );
 

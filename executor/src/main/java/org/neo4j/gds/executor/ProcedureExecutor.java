@@ -28,7 +28,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -96,13 +95,11 @@ public class ProcedureExecutor<
             return algoSpec.computationResultConsumer().consume(emptyComputationResult, executionContext);
         }
 
-        ALGO algo = newAlgorithm(graph, graphStore, config, executionContext.allocationTracker());
+        ALGO algo = newAlgorithm(graph, graphStore, config);
 
         algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
 
         ALGO_RESULT result = executeAlgorithm(releaseAlgorithm, releaseTopology, builder, graph, algo);
-
-        executionContext.log().info(algoSpec.name() + ": overall memory usage %s", executionContext.allocationTracker().getUsageString());
 
         var computationResult = builder
             .graph(graph)
@@ -146,8 +143,7 @@ public class ProcedureExecutor<
     private ALGO newAlgorithm(
         Graph graph,
         GraphStore graphStore,
-        CONFIG config,
-        AllocationTracker allocationTracker
+        CONFIG config
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(executionContext.transaction());
         ALGO algorithm = algoSpec.algorithmFactory()
@@ -157,7 +153,6 @@ public class ProcedureExecutor<
                     return graphAlgorithmFactory.build(
                         graph,
                         config,
-                        allocationTracker,
                         executionContext.log(),
                         executionContext.taskRegistryFactory(),
                         executionContext.userLogRegistryFactory()
@@ -169,7 +164,6 @@ public class ProcedureExecutor<
                     return graphStoreAlgorithmFactory.build(
                         graphStore,
                         config,
-                        allocationTracker,
                         executionContext.log(),
                         executionContext.taskRegistryFactory(),
                         executionContext.userLogRegistryFactory()

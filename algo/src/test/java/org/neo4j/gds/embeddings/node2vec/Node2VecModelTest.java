@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.utils.Intersections;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Random;
@@ -47,8 +46,7 @@ class Node2VecModelTest {
             numberOfClusters * clusterSize,
             0.001,
             0.75,
-            4,
-            AllocationTracker.empty()
+            4
         );
 
         CompressedRandomWalks walks = generateRandomWalks(
@@ -147,8 +145,7 @@ class Node2VecModelTest {
             numberOfClusters * clusterSize,
             0.001,
             0.75,
-            4,
-            AllocationTracker.empty()
+            4
         );
 
         CompressedRandomWalks walks = generateRandomWalks(probabilitiesBuilder, numberOfClusters, clusterSize, numberOfWalks, walkLength, random);

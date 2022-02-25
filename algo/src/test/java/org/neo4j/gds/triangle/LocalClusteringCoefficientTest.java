@@ -29,7 +29,6 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -309,7 +308,7 @@ class LocalClusteringCoefficientTest {
         var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
 
         factory
-            .build(graph, config, AllocationTracker.empty(), progressTracker)
+            .build(graph, config, progressTracker)
             .compute();
 
         log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Start");
@@ -369,7 +368,6 @@ class LocalClusteringCoefficientTest {
         var localClusteringCoefficient = new LocalClusteringCoefficient(
             graph,
             createConfig().build(),
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
         return localClusteringCoefficient.compute();

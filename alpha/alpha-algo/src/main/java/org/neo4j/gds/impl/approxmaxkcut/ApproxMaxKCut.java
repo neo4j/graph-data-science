@@ -24,7 +24,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.utils.AtomicDoubleArray;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
@@ -66,8 +65,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
         Graph graph,
         ExecutorService executor,
         ApproxMaxKCutConfig config,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.random = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
@@ -102,8 +100,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
             comparator,
             config,
             executor,
-            progressTracker,
-            allocationTracker
+            progressTracker
         );
     }
 

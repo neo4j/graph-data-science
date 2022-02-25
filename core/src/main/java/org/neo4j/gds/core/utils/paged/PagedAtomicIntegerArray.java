@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.collections.PageUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
@@ -43,8 +42,8 @@ public final class PagedAtomicIntegerArray extends PagedDataStructure<AtomicInte
     }
 
 
-    public static PagedAtomicIntegerArray newArray(long size, AllocationTracker allocationTracker) {
-        return new PagedAtomicIntegerArray(size, ALLOCATOR_FACTORY.newAllocator(allocationTracker));
+    public static PagedAtomicIntegerArray newArray(long size) {
+        return new PagedAtomicIntegerArray(size, ALLOCATOR_FACTORY.newAllocator());
     }
 
     private PagedAtomicIntegerArray(

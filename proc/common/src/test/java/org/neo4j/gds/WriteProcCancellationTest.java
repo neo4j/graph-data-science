@@ -76,8 +76,6 @@ class WriteProcCancellationTest extends BaseTest {
 
             var algorithm = new TestAlgorithm(
                 GdlGraphs.EMPTY,
-                AllocationTracker.empty(),
-                42,
                 ProgressTracker.NULL_TRACKER,
                 false
             );

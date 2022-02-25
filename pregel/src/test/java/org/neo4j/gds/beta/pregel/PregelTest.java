@@ -42,7 +42,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -104,7 +103,6 @@ class PregelTest {
             config,
             computation,
             Pools.DEFAULT,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -141,7 +139,6 @@ class PregelTest {
             config,
             computation,
             Pools.DEFAULT,
-            AllocationTracker.empty(),
             progressTracker
         ).run();
 
@@ -204,7 +201,6 @@ class PregelTest {
             config,
             computation,
             Pools.DEFAULT,
-            AllocationTracker.empty(),
             progressTracker
         );
 
@@ -267,7 +263,6 @@ class PregelTest {
             config,
             computation,
             Pools.DEFAULT,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -288,7 +283,6 @@ class PregelTest {
             config,
             new TestSendTo(),
             Pools.DEFAULT,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -314,7 +308,6 @@ class PregelTest {
             config,
             new CompositeTestComputation(),
             Pools.DEFAULT,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -353,7 +346,6 @@ class PregelTest {
             ImmutablePregelConfig.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(),
             Pools.DEFAULT,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -369,7 +361,6 @@ class PregelTest {
             ImmutablePregelConfig.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(2),
             Pools.DEFAULT,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -537,7 +528,6 @@ class PregelTest {
             config,
             new TestSendTo(),
             Pools.DEFAULT,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         ));
     }
@@ -561,7 +551,6 @@ class PregelTest {
             config,
             new TestEmptyMessageInInitialSuperstep(),
             Pools.DEFAULT,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 

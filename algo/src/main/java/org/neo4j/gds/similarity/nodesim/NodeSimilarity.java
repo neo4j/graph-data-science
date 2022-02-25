@@ -27,7 +27,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.SetBitsIterable;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
@@ -49,7 +48,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private final NodeSimilarityBaseConfig config;
 
     private final ExecutorService executorService;
-    private final AllocationTracker allocationTracker;
 
     private final BitSet nodeFilter;
 
@@ -63,15 +61,13 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         Graph graph,
         NodeSimilarityBaseConfig config,
         ExecutorService executorService,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.sortVectors = graph.schema().relationshipSchema().availableTypes().size() > 1;
         this.config = config;
         this.executorService = executorService;
-        this.allocationTracker = allocationTracker;
         this.nodeFilter = new BitSet(graph.nodeCount());
         this.weighted = config.hasRelationshipWeightProperty();
     }

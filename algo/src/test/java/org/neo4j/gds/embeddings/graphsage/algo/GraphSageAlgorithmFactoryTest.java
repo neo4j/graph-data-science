@@ -34,7 +34,6 @@ import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -395,7 +394,6 @@ class GraphSageAlgorithmFactoryTest {
             .build(
                 GdlGraphs.EMPTY,
                 multiLabelConfig,
-                AllocationTracker.empty(),
                 NullLog.getInstance(),
                 EmptyTaskRegistryFactory.INSTANCE
             );
@@ -412,7 +410,6 @@ class GraphSageAlgorithmFactoryTest {
             .build(
                 GdlGraphs.EMPTY,
                 singleLabelConfig,
-                AllocationTracker.empty(),
                 NullLog.getInstance(),
                 EmptyTaskRegistryFactory.INSTANCE
             );

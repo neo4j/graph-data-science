@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -34,7 +33,6 @@ public class Node2Vec extends Algorithm<HugeObjectArray<FloatVector>> {
 
     private final Graph graph;
     private final Node2VecBaseConfig config;
-    private final AllocationTracker allocationTracker;
 
     public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
         return MemoryEstimations.builder(Node2Vec.class)
@@ -48,11 +46,10 @@ public class Node2Vec extends Algorithm<HugeObjectArray<FloatVector>> {
             .build();
     }
 
-    public Node2Vec(Graph graph, Node2VecBaseConfig config, ProgressTracker progressTracker, AllocationTracker allocationTracker) {
+    public Node2Vec(Graph graph, Node2VecBaseConfig config, ProgressTracker progressTracker) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
-        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -69,8 +66,7 @@ public class Node2Vec extends Algorithm<HugeObjectArray<FloatVector>> {
             graph.nodeCount(),
             config.positiveSamplingFactor(),
             config.negativeSamplingExponent(),
-            config.concurrency(),
-            allocationTracker
+            config.concurrency()
         );
         var walks = new CompressedRandomWalks(graph.nodeCount() * config.walksPerNode());
 

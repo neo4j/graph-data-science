@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.pregel.sssp;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -81,7 +80,6 @@ class SingleSourceShortestPathPregelAlgoTest {
             config,
             new SingleSourceShortestPathPregel(),
             Pools.DEFAULT,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 

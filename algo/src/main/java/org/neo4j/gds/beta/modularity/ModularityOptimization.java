@@ -33,7 +33,6 @@ import org.neo4j.gds.beta.k1coloring.K1Coloring;
 import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
 import org.neo4j.gds.beta.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -68,7 +67,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final Graph graph;
     private final NodeProperties seedProperty;
     private final ExecutorService executor;
-    private final AllocationTracker allocationTracker;
 
     private int iterationCounter;
     private boolean didConverge = false;
@@ -92,8 +90,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         int concurrency,
         int minBatchSize,
         ExecutorService executor,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -103,7 +100,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.seedProperty = seedProperty;
         this.executor = executor;
         this.concurrency = concurrency;
-        this.allocationTracker = allocationTracker;
         this.minBatchSize = minBatchSize;
 
         if (maxIterations < 1) {
@@ -165,7 +161,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             .batchSize((int) minBatchSize)
             .build();
 
-        K1Coloring coloring = new K1ColoringFactory<>().build(graph, k1Config, allocationTracker, progressTracker);
+        K1Coloring coloring = new K1ColoringFactory<>().build(graph, k1Config, progressTracker);
         coloring.setTerminationFlag(terminationFlag);
 
         this.colors = coloring.compute();

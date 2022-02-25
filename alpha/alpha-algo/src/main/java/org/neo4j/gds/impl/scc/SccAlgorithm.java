@@ -22,7 +22,6 @@ package org.neo4j.gds.impl.scc;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.PagedLongStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -63,18 +62,17 @@ public class SccAlgorithm extends Algorithm<HugeLongArray> {
 
     public SccAlgorithm(
         Graph graph,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.index = HugeLongArray.newArray(nodeCount);
-        this.stack = new PagedLongStack(nodeCount, allocationTracker);
-        this.boundaries = new PagedLongStack(nodeCount, allocationTracker);
+        this.stack = new PagedLongStack(nodeCount);
+        this.boundaries = new PagedLongStack(nodeCount);
         this.connectedComponents = HugeLongArray.newArray(nodeCount);
         this.visited = new BitSet(nodeCount);
-        this.todo = new PagedLongStack(nodeCount, allocationTracker);
+        this.todo = new PagedLongStack(nodeCount);
     }
 
     /**

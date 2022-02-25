@@ -31,7 +31,6 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -237,10 +236,9 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(Graph.class, "graph")
                 .addParameter(pregelSpec.configTypeName(), "configuration")
-                .addParameter(AllocationTracker.class, "allocationTracker")
                 .addParameter(ProgressTracker.class, "progressTracker")
                 .returns(algorithmClassName)
-                .addStatement("return new $T(graph, configuration, allocationTracker, progressTracker)", algorithmClassName)
+                .addStatement("return new $T(graph, configuration, progressTracker)", algorithmClassName)
                 .build()
             )
             .addMethod(MethodSpec.methodBuilder("taskName")

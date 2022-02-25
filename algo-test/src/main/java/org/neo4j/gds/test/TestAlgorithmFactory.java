@@ -21,7 +21,6 @@ package org.neo4j.gds.test;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -38,13 +37,10 @@ public class TestAlgorithmFactory<CONFIG extends TestConfig> extends GraphAlgori
     public TestAlgorithm build(
         Graph graph,
         TestConfig configuration,
-        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         return new TestAlgorithm(
             graph,
-            allocationTracker,
-            0L,
             progressTracker,
             configuration.throwInCompute()
         );

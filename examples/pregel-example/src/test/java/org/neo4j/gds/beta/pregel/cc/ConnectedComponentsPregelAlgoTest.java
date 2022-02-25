@@ -24,7 +24,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -87,7 +86,6 @@ class ConnectedComponentsPregelAlgoTest {
             config,
             new ConnectedComponentsPregel(),
             Pools.DEFAULT,
-            AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
         );
 

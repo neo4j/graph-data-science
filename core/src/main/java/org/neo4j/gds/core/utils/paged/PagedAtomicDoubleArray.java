@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.utils.AtomicDoubleArray;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 
 public final class PagedAtomicDoubleArray extends PagedDataStructure<AtomicDoubleArray> {
@@ -39,8 +38,8 @@ public final class PagedAtomicDoubleArray extends PagedDataStructure<AtomicDoubl
                 new AtomicDoubleArray[0]);
     }
 
-    public static PagedAtomicDoubleArray newArray(long size, AllocationTracker allocationTracker) {
-        return new PagedAtomicDoubleArray(size, ALLOCATOR_FACTORY.newAllocator(allocationTracker));
+    public static PagedAtomicDoubleArray newArray(long size) {
+        return new PagedAtomicDoubleArray(size, ALLOCATOR_FACTORY.newAllocator());
     }
 
     private PagedAtomicDoubleArray(

@@ -46,7 +46,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -313,13 +312,11 @@ public class PregelProcTest extends BaseProcTest {
                 public CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
-                    AllocationTracker allocationTracker,
                     ProgressTracker progressTracker
                 ) {
                     return new CompositeTestAlgorithm(
                         graph,
                         configuration,
-                        allocationTracker,
                         progressTracker,
                         configuration.throwInCompute()
                     );
@@ -383,13 +380,11 @@ public class PregelProcTest extends BaseProcTest {
                 public CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
-                    AllocationTracker allocationTracker,
                     ProgressTracker progressTracker
                 ) {
                     return new CompositeTestAlgorithm(
                         graph,
                         configuration,
-                        allocationTracker,
                         progressTracker,
                         configuration.throwInCompute()
                     );
@@ -456,13 +451,11 @@ public class PregelProcTest extends BaseProcTest {
                 public CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
-                    AllocationTracker allocationTracker,
                     ProgressTracker progressTracker
                 ) {
                     return new CompositeTestAlgorithm(
                         graph,
                         configuration,
-                        allocationTracker,
                         progressTracker,
                         configuration.throwInCompute()
                     );
@@ -494,7 +487,6 @@ public class PregelProcTest extends BaseProcTest {
         CompositeTestAlgorithm(
             Graph graph,
             PregelProcedureConfig configuration,
-            AllocationTracker allocationTracker,
             ProgressTracker progressTracker,
             boolean throwInCompute
         ) {
@@ -522,7 +514,7 @@ public class PregelProcTest extends BaseProcTest {
                     context.setNodeValue(LONG_ARRAY_KEY, new long[]{1, 3, 3, 7});
                     context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{1, 9, 8, 4});
                 }
-            }, Pools.DEFAULT, allocationTracker, progressTracker);
+            }, Pools.DEFAULT, progressTracker);
         }
 
         @Override

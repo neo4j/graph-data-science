@@ -35,7 +35,6 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -56,7 +55,6 @@ public final class Louvain extends Algorithm<Louvain> {
     private final LouvainBaseConfig config;
     private final NodeProperties seedingValues;
     private final ExecutorService executorService;
-    private final AllocationTracker allocationTracker;
     // results
     private HugeLongArray[] dendrograms;
     private double[] modularities;
@@ -66,15 +64,13 @@ public final class Louvain extends Algorithm<Louvain> {
         Graph graph,
         LouvainBaseConfig config,
         ExecutorService executorService,
-        ProgressTracker progressTracker,
-        AllocationTracker allocationTracker
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.config = config;
         this.rootGraph = graph;
         this.seedingValues = Optional.ofNullable(config.seedProperty()).map(graph::nodeProperties).orElse(null);
         this.executorService = executorService;
-        this.allocationTracker = allocationTracker;
         this.dendrograms = new HugeLongArray[config.maxLevels()];
         this.modularities = new double[config.maxLevels()];
     }
@@ -173,7 +169,6 @@ public final class Louvain extends Algorithm<Louvain> {
                 louvainGraph,
                 modularityOptimizationConfig,
                 seed,
-                allocationTracker,
                 progressTracker
             );
         modularityOptimization.setTerminationFlag(terminationFlag);
