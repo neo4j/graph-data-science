@@ -12,6 +12,8 @@ ext {
         'dev'           : properties.getOrDefault('neo4jVersionDev', '5.0.0-dev'),
     ]
 
+    neo4jDefault = neos.'4.3'
+
     neo4j_minor = properties.getOrDefault('neo4jVersion', neos.'4.3').toString().split('\\.')[0..1].join('.')
 
     scalas = [
@@ -62,7 +64,7 @@ ext {
         'lucene'               : '8.8.0',
         'memoryfilesystem'     : '2.2.0',
         'mockito'              : '3.11.2',
-        'neo4j'                : properties.getOrDefault('neo4jVersion', neos.'4.3'),
+        'neo4j'                : properties.getOrDefault('neo4jVersion', neo4jDefault),
         'opencypher-front-end' : '9.0.20210312',
         'picocli'              : '4.6.1',
         'qala-datagen'         : '2.3.0',
