@@ -23,32 +23,16 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.MutatePropertyConfig;
-import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ClosenessCentralityConfig extends
-    AlgoBaseConfig,
-    WritePropertyConfig,
-    MutatePropertyConfig
-{
+public interface ClosenessCentralityConfig extends AlgoBaseConfig {
 
     @Value.Default
     default boolean improved() {
         return false;
-    }
-
-    @Value.Default
-    default String writeProperty() {
-        return "centrality";
-    }
-
-    @Value.Default
-    default String mutateProperty() {
-        return "centrality";
     }
 
     static ClosenessCentralityConfig of(CypherMapWrapper config) {

@@ -20,6 +20,7 @@
 package org.neo4j.gds.impl.closeness;
 
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutatePropertyConfig;
@@ -28,6 +29,11 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @ValueClass
 @Configuration
 public interface ClosenessCentralityMutateConfig extends ClosenessCentralityConfig, MutatePropertyConfig {
+
+    @Value.Default
+    default String mutateProperty() {
+        return "centrality";
+    }
 
     static ClosenessCentralityMutateConfig of(CypherMapWrapper config) {
         return new ClosenessCentralityMutateConfigImpl(config);
