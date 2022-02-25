@@ -64,4 +64,21 @@ class LogisticRegressionDataTest {
         assertThat(data.classIdMap()).isEqualTo(classIdMap);
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldCreateStandardData(boolean useBias) {
+        var classIdMap = new LocalIdMap();
+        classIdMap.toMapped(42);
+        classIdMap.toMapped(43);
+        classIdMap.toMapped(1900);
+        var data = LogisticRegressionData.standard(3, useBias, classIdMap);
+        var matrix = data.weights().data();
+
+        assertThat(matrix.rows()).isEqualTo(3);
+        assertThat(matrix.cols()).isEqualTo(3);
+        assertThat(matrix.data()).containsExactly(new double[9]);
+        assertThat(data.bias().isPresent()).isEqualTo(useBias);
+        assertThat(data.classIdMap()).isEqualTo(classIdMap);
+    }
+
 }

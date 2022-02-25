@@ -33,6 +33,30 @@ import java.util.Optional;
 
 @ValueClass
 public interface LogisticRegressionData extends Trainer.ClassifierData {
+
+    Weights<Matrix> weights();
+    Optional<Weights<Scalar>> bias();
+    LocalIdMap classIdMap();
+
+    static LogisticRegressionData standard(int featureCount, boolean useBias, LocalIdMap classIdMap) {
+        return create(classIdMap.size(), featureCount, useBias, classIdMap);
+    }
+
+    // this is an optimization where "virtually" add a weight of 0.0 for the last class
+    static LogisticRegressionData withReducedClassCount(int featureCount, boolean useBias, LocalIdMap classIdMap) {
+        return create(classIdMap.size() - 1, featureCount, useBias, classIdMap);
+    }
+
+    private static LogisticRegressionData create(int classCount, int featureCount, boolean useBias, LocalIdMap classIdMap) {
+        var weights = Weights.ofMatrix(classCount, featureCount);
+
+        var bias = useBias
+            ? Optional.of(Weights.ofScalar(0))
+            : Optional.<Weights<Scalar>>empty();
+
+        return ImmutableLogisticRegressionData.builder().weights(weights).classIdMap(classIdMap).bias(bias).build();
+    }
+
     static MemoryEstimation memoryEstimation(MemoryRange linkFeatureDimension) {
         return MemoryEstimations.builder(LogisticRegressionData.class)
             .fixed("weights", linkFeatureDimension.apply(featureDim -> Weights.sizeInBytes(
@@ -41,20 +65,5 @@ public interface LogisticRegressionData extends Trainer.ClassifierData {
             )))
             .fixed("bias", Weights.sizeInBytes(1, 1))
             .build();
-    }
-
-    Weights<Matrix> weights();
-    Optional<Weights<Scalar>> bias();
-    LocalIdMap classIdMap();
-
-    static LogisticRegressionData withReducedClassCount(int featureCount, boolean useBias, LocalIdMap classIdMap) {
-        // this is an optimization where "virtually" add a weight of 0.0 for the last class
-        var weights = Weights.ofMatrix(classIdMap.size() - 1, featureCount);
-
-        var bias = useBias
-            ? Optional.of(Weights.ofScalar(0))
-            : Optional.<Weights<Scalar>>empty();
-
-        return ImmutableLogisticRegressionData.builder().weights(weights).classIdMap(classIdMap).bias(bias).build();
     }
 }
