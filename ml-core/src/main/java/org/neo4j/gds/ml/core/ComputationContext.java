@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -130,6 +131,10 @@ public class ComputationContext {
 
         return result.toString();
 
+    }
+
+    public Set<Variable<?>> computedVariables() {
+        return data.keySet();
     }
 
     private void renderOrphanGradients(StringBuilder result) {

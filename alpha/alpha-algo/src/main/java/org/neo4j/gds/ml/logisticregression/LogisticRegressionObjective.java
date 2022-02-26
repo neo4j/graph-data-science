@@ -108,18 +108,26 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
 
     @Override
     public Variable<Scalar> loss(Batch batch, long trainSize) {
+        var unpenalizedLoss = crossEntropyLoss(batch);
+        var penaltyVariable = penaltyForBatch(batch, trainSize);
+        return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
+    }
+
+    public ConstantScale<Scalar> penaltyForBatch(Batch batch, long trainSize) {
+        return new ConstantScale<>(new L2NormSquared(modelData().weights()), batch.size() * penalty / trainSize);
+    }
+
+    public ReducedCrossEntropyLoss crossEntropyLoss(Batch batch) {
         var batchLabels = batchLabelVector(batch, classifier.classIdMap());
         var batchFeatures = LogisticRegressionClassifier.batchFeatureMatrix(batch, features);
         var predictions = classifier.predictionsVariable(batchFeatures);
-        var unpenalizedLoss = new ReducedCrossEntropyLoss(
+        return new ReducedCrossEntropyLoss(
             predictions,
             classifier.data().weights(),
             classifier.data().bias(),
             batchFeatures,
             batchLabels
         );
-        var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData().weights()), batch.size() * penalty / trainSize);
-        return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
     }
 
     @Override
