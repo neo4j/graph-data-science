@@ -22,8 +22,8 @@ package org.neo4j.gds.ml.logisticregression;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.Objective;
-import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -46,7 +46,7 @@ import java.util.Optional;
 public class LogisticRegressionObjective implements Objective<LogisticRegressionData> {
     private final LogisticRegressionClassifier classifier;
     private final double penalty;
-    private final Trainer.Features features;
+    private final Features features;
     private final HugeLongArray labels;
 
     //TODO: add support for number of classes and Fudge only in NC
@@ -85,7 +85,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
     public LogisticRegressionObjective(
         LogisticRegressionClassifier classifier,
         double penalty,
-        Trainer.Features features,
+        Features features,
         HugeLongArray labels
     ) {
         this.classifier = classifier;

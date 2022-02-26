@@ -25,7 +25,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.Trainer;
+import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.Map;
@@ -252,7 +252,7 @@ class LogisticRegressionTrainerTest {
     }
 
 
-    public static final class TestFeatures implements Trainer.Features {
+    public static final class TestFeatures implements Features {
 
         private final double[][] features;
 

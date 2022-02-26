@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -59,7 +60,7 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
     }
 
     @Override
-    public double[] predictProbabilities(long id, Trainer.Features features) {
+    public double[] predictProbabilities(long id, Features features) {
         var batch = new SingletonBatch(id);
         ComputationContext ctx = new ComputationContext();
         return ctx.forward(predictionsVariable(batchFeatureMatrix(batch, features))).data();
@@ -79,7 +80,7 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
             : new ReducedSoftmax(softmaxInput);
     }
 
-    static Constant<Matrix> batchFeatureMatrix(Batch batch, Trainer.Features features) {
+    static Constant<Matrix> batchFeatureMatrix(Batch batch, Features features) {
         var batchFeatures = new Matrix(batch.size(), features.get(0).length);
         var batchFeaturesOffset = new MutableInt();
 

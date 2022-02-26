@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.ml.Trainer;
+import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
@@ -74,7 +74,7 @@ class LogisticRegressionObjectiveTest {
         this.objective = new LogisticRegressionObjective(
             classifier,
             1.0,
-            Trainer.Features.wrap(features),
+            Features.wrap(features),
             labels
         );
     }
@@ -103,7 +103,7 @@ class LogisticRegressionObjectiveTest {
         });
 
         Constant<Matrix> batchFeatures = LogisticRegressionClassifier.batchFeatureMatrix(batch,
-            Trainer.Features.wrap(allFeatures));
+            Features.wrap(allFeatures));
 
         assertThat(batchFeatures.data()).isEqualTo(expected);
     }

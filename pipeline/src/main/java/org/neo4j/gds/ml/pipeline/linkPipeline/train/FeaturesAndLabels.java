@@ -21,11 +21,11 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.ml.Trainer;
+import org.neo4j.gds.ml.Features;
 
 @ValueClass
 interface FeaturesAndLabels {
-    Trainer.Features features();
+    Features features();
 
     HugeLongArray labels();
 
