@@ -28,6 +28,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -36,18 +41,37 @@ import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
 import org.neo4j.gds.ml.core.functions.Softmax;
+import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionObjective;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@GdlExtension
 class LogisticRegressionObjectiveTest {
 
+    @GdlGraph
+    private static final String DB_QUERY =
+        "CREATE " +
+        "  (a:N {p: [0.48999999999999994, 0.48999999999999994], t: 1})" +
+        ", (b:N {p: [1.0, 2.8899999999999997], t: 1})" +
+        ", (c:N {p: [1.0, 2.5600000000000005], t: 0})" +
+        ", (d:N {p: [0.09, 0.16], t: 0})";
+
+    @Inject
+    TestGraph graph;
+
+    @Inject
+    IdFunction idFunction;
     private HugeLongArray labels;
 
     private static Stream<Arguments> featureBatches() {
@@ -220,6 +244,45 @@ class LogisticRegressionObjectiveTest {
         assertThat(actualUnpenalizedLoss).isEqualTo(expectedUnpenalizedLoss, Offset.offset(1e-9));
 
         assertThat(lossValue).isEqualTo(expectedUnpenalizedLoss + expectedPenalty, Offset.offset(1e-9));
+    }
+
+    @Test
+    void compareOldAndNewObjectives() {
+        var idMap = new LocalIdMap();
+        idMap.toMapped(1);
+        idMap.toMapped(0);
+        var modelData = NodeLogisticRegressionData.builder()
+            .weights(new Weights<>(new Matrix(new double[2 * 3], 2, 3)))
+            .classIdMap(idMap)
+            .build();
+        var predictor = new NodeLogisticRegressionPredictor(modelData, List.of("p"));
+        var oldObjective = new NodeLogisticRegressionObjective(graph, predictor, "t", 1.0);
+        var trainSize = 42;
+        var batch = new LazyBatch(0, 4, 4);
+        var oldLossValue = new ComputationContext().forward(oldObjective.loss(batch, trainSize)).value();
+        var newLossValue = new ComputationContext().forward(standardObjective.loss(batch, trainSize)).value();
+        assertThat(oldLossValue).isEqualTo(newLossValue, Offset.offset(1e-9));
+    }
+
+    @Test
+    void compareOldAndNewTrainedObjectives() {
+        var idMap = new LocalIdMap();
+        idMap.toMapped(1);
+        idMap.toMapped(0);
+        var modelData = NodeLogisticRegressionData.builder()
+            .weights(new Weights<>(new Matrix(new double[]{
+                0.0, 1.0, 0.0,
+                2.0, 3.0, 0.0
+            }, 2, 3)))
+            .classIdMap(idMap)
+            .build();
+        var predictor = new NodeLogisticRegressionPredictor(modelData, List.of("p"));
+        var oldObjective = new NodeLogisticRegressionObjective(graph, predictor, "t", 1.0);
+        var trainSize = 42;
+        var batch = new LazyBatch(0, 4, 4);
+        var oldLossValue = new ComputationContext().forward(oldObjective.loss(batch, trainSize)).value();
+        var newLossValue = new ComputationContext().forward(trainedStandardObjective.loss(batch, trainSize)).value();
+        assertThat(oldLossValue).isEqualTo(newLossValue, Offset.offset(1e-7));
     }
 
     @ParameterizedTest
