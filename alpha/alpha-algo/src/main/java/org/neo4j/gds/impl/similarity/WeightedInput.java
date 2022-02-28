@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.impl.similarity;
 
+import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.impl.utils.NumberUtils;
 import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.gds.core.utils.Intersections;
 
 import java.util.Arrays;
 import java.util.List;
@@ -140,7 +140,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         return new SimilarityResult(id, other.id, itemCount, other.itemCount, intersection, sumSquareDelta, bidirectional, false);
     }
 
-    public SimilarityResult cosineSquaresSkip(RleDecoder decoder, double similarityCutoff, WeightedInput other, double skipValue, boolean bidirectional) {
+    public SimilarityResult cosinesSkip(RleDecoder decoder, double similarityCutoff, WeightedInput other, double skipValue, boolean bidirectional) {
         double[] thisWeights = weights;
         double[] otherWeights = other.weights;
         if (decoder != null) {
@@ -150,14 +150,14 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         }
 
         int len = Math.min(thisWeights.length, otherWeights.length);
-        double cosineSquares = Intersections.cosineSquareSkip(thisWeights, otherWeights, len, skipValue);
+        double cosineSquares = Intersections.cosineSkip(thisWeights, otherWeights, len, skipValue);
         long intersection = 0;
 
         if (similarityCutoff >= 0D && (cosineSquares == 0 || cosineSquares < similarityCutoff)) return null;
         return new SimilarityResult(id, other.id, itemCount, other.itemCount, intersection, cosineSquares, bidirectional, false);
     }
 
-    public SimilarityResult cosineSquares(RleDecoder decoder, double similarityCutoff, WeightedInput other, boolean bidirectional) {
+    public SimilarityResult cosines(RleDecoder decoder, double similarityCutoff, WeightedInput other, boolean bidirectional) {
         double[] thisWeights = weights;
         double[] otherWeights = other.weights;
         if (decoder != null) {
@@ -167,7 +167,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         }
 
         int len = Math.min(thisWeights.length, otherWeights.length);
-        double cosineSquares = Intersections.cosineSquare(thisWeights, otherWeights, len);
+        double cosineSquares = Intersections.cosine(thisWeights, otherWeights, len);
         long intersection = 0;
 
         if (similarityCutoff >= 0D && (cosineSquares == 0 || cosineSquares < similarityCutoff)) return null;

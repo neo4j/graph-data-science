@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SimilaritiesFuncTest extends BaseProcTest {
@@ -129,6 +130,14 @@ class SimilaritiesFuncTest extends BaseProcTest {
 
                 assertEquals(bobSimilarity.get(), result.next().get("cosineSim"));
                 assertEquals(jimSimilarity.get(), result.next().get("cosineSim"));
+            });
+    }
+
+    @Test
+    void testCosineSimilarityOppositeDirections() {
+        runQueryWithResultConsumer(
+            "RETURN gds.alpha.similarity.cosine([1.0, 1.0], [-1.0, -1.0]) AS similarity", result -> {
+                assertThat(result.next().get("similarity")).isEqualTo(-1.0);
             });
     }
 

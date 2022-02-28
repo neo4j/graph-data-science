@@ -20,8 +20,8 @@
 package org.neo4j.gds.impl.similarity;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.results.SimilarityResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,7 +170,7 @@ class WeightedInputTest {
         WeightedInput input1 = new WeightedInput(1, weights1);
         WeightedInput input2 = new WeightedInput(2, weights2);
 
-        SimilarityResult similarityResult = input1.cosineSquares(null, -1.0, input2, true);
+        SimilarityResult similarityResult = input1.cosines(null, -1.0, input2, true);
 
         assertEquals(1.0, similarityResult.similarity, 0.01);
     }
@@ -185,7 +185,7 @@ class WeightedInputTest {
 
         RleDecoder decoder = new RleDecoder(weights1.length);
 
-        SimilarityResult similarityResult = input1.cosineSquares(decoder, -1.0, input2, true);
+        SimilarityResult similarityResult = input1.cosines(decoder, -1.0, input2, true);
 
         assertEquals(1.0, similarityResult.similarity, 0.01);
     }
@@ -198,7 +198,7 @@ class WeightedInputTest {
         WeightedInput input1 = new WeightedInput(1, weights1);
         WeightedInput input2 = new WeightedInput(2, weights2);
 
-        SimilarityResult similarityResult = input1.cosineSquaresSkip(null, -1.0, input2, 0.0, true);
+        SimilarityResult similarityResult = input1.cosinesSkip(null, -1.0, input2, 0.0, true);
 
         assertEquals(1.0, similarityResult.similarity, 0.01);
     }
@@ -213,7 +213,7 @@ class WeightedInputTest {
 
         RleDecoder decoder = new RleDecoder(weights1.length);
 
-        SimilarityResult similarityResult = input1.cosineSquaresSkip(decoder, -1.0, input2, 0.0, true);
+        SimilarityResult similarityResult = input1.cosinesSkip(decoder, -1.0, input2, 0.0, true);
 
         assertEquals(1.0, similarityResult.similarity, 0.01);
     }

@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -356,6 +357,16 @@ class CosineProcTest extends AlphaSimilarityProcTest<CosineAlgorithm, WeightedIn
                  " CALL gds.alpha.similarity.cosine.stream({data: data})" +
                  " YIELD item1, item2, count1, count2, similarity\n" +
                  " RETURN item1, item2, similarity");
+    }
+
+    @Test
+    void testCosineOppositeDirections() {
+        runQueryWithResultConsumer("WITH [{item: 1, weights: [1.0, 1.0]}, {item: 2, weights: [-1.0, -1.0]}] AS data" +
+                         " CALL gds.alpha.similarity.cosine.stream({data: data})" +
+                         " YIELD similarity\n" +
+                         " RETURN similarity", result -> {
+            assertThat(result.next().get("similarity")).isEqualTo(-1.0);
+        });
     }
 
     private Map<String, Object> flip(Map<String, Object> row) {

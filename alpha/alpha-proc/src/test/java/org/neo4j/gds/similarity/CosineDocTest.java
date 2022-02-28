@@ -103,11 +103,11 @@ class CosineDocTest extends BaseProcTest {
                        "        p2.name AS to," +
                        "        gds.alpha.similarity.cosine(collect(likes1.score), collect(likes2.score)) AS similarity";
 
-        String expectedString = "+-----------------------------------------+\n" +
-                                "| from      | to     | similarity         |\n" +
-                                "+-----------------------------------------+\n" +
-                                "| \"Michael\" | \"Arya\" | 0.9788908326303921 |\n" +
-                                "+-----------------------------------------+\n" +
+        String expectedString = "+----------------------------------------+\n" +
+                                "| from      | to     | similarity        |\n" +
+                                "+----------------------------------------+\n" +
+                                "| \"Michael\" | \"Arya\" | 0.978890832630392 |\n" +
+                                "+----------------------------------------+\n" +
                                 "1 row\n";
 
         assertEquals(expectedString, runQuery(query, Result::resultAsString));
@@ -126,9 +126,9 @@ class CosineDocTest extends BaseProcTest {
         String expectedString = "+---------------------------------------------+\n" +
                                 "| from      | to         | similarity         |\n" +
                                 "+---------------------------------------------+\n" +
-                                "| \"Michael\" | \"Arya\"     | 0.9788908326303921 |\n" +
+                                "| \"Michael\" | \"Arya\"     | 0.978890832630392  |\n" +
                                 "| \"Michael\" | \"Zhen\"     | 0.9542262139256075 |\n" +
-                                "| \"Michael\" | \"Praveena\" | 0.9429903335828894 |\n" +
+                                "| \"Michael\" | \"Praveena\" | 0.9429903335828895 |\n" +
                                 "| \"Michael\" | \"Karin\"    | 0.8498063272285821 |\n" +
                                 "+---------------------------------------------+\n" +
                                 "4 rows\n";
@@ -152,11 +152,11 @@ class CosineDocTest extends BaseProcTest {
                                 "| from       | to         | similarity         |\n" +
                                 "+----------------------------------------------+\n" +
                                 "| \"Praveena\" | \"Karin\"    | 1.0                |\n" +
-                                "| \"Michael\"  | \"Arya\"     | 0.9788908326303921 |\n" +
+                                "| \"Michael\"  | \"Arya\"     | 0.978890832630392  |\n" +
                                 "| \"Arya\"     | \"Karin\"    | 0.9610904115204073 |\n" +
                                 "| \"Zhen\"     | \"Michael\"  | 0.9542262139256075 |\n" +
                                 "| \"Praveena\" | \"Michael\"  | 0.9429903335828895 |\n" +
-                                "| \"Zhen\"     | \"Praveena\" | 0.9191450300180579 |\n" +
+                                "| \"Zhen\"     | \"Praveena\" | 0.9191450300180578 |\n" +
                                 "| \"Michael\"  | \"Karin\"    | 0.8498063272285821 |\n" +
                                 "| \"Praveena\" | \"Arya\"     | 0.7194014606174091 |\n" +
                                 "| \"Zhen\"     | \"Arya\"     | 0.0                |\n" +
@@ -188,11 +188,11 @@ class CosineDocTest extends BaseProcTest {
                                 "| from       | to         | similarity         |\n" +
                                 "+----------------------------------------------+\n" +
                                 "| \"Praveena\" | \"Karin\"    | 1.0                |\n" +
-                                "| \"Michael\"  | \"Arya\"     | 0.9788908326303921 |\n" +
+                                "| \"Michael\"  | \"Arya\"     | 0.978890832630392  |\n" +
                                 "| \"Arya\"     | \"Karin\"    | 0.9610904115204073 |\n" +
                                 "| \"Zhen\"     | \"Michael\"  | 0.9542262139256075 |\n" +
                                 "| \"Praveena\" | \"Michael\"  | 0.9429903335828895 |\n" +
-                                "| \"Zhen\"     | \"Praveena\" | 0.9191450300180579 |\n" +
+                                "| \"Zhen\"     | \"Praveena\" | 0.9191450300180578 |\n" +
                                 "| \"Michael\"  | \"Karin\"    | 0.8498063272285821 |\n" +
                                 "| \"Praveena\" | \"Arya\"     | 0.7194014606174091 |\n" +
                                 "+----------------------------------------------+\n" +
@@ -220,9 +220,9 @@ class CosineDocTest extends BaseProcTest {
         String expectedString = "+----------------------------------------------+\n" +
                                 "| from       | to         | similarity         |\n" +
                                 "+----------------------------------------------+\n" +
-                                "| \"Arya\"     | \"Michael\"  | 0.9788908326303921 |\n" +
+                                "| \"Arya\"     | \"Michael\"  | 0.978890832630392  |\n" +
                                 "| \"Karin\"    | \"Praveena\" | 1.0                |\n" +
-                                "| \"Michael\"  | \"Arya\"     | 0.9788908326303921 |\n" +
+                                "| \"Michael\"  | \"Arya\"     | 0.978890832630392  |\n" +
                                 "| \"Praveena\" | \"Karin\"    | 1.0                |\n" +
                                 "| \"Zhen\"     | \"Michael\"  | 0.9542262139256075 |\n" +
                                 "+----------------------------------------------+\n" +
@@ -290,12 +290,12 @@ class CosineDocTest extends BaseProcTest {
                        " RETURN from.name AS from, to.name AS to, similarity" +
                        "  ORDER BY similarity DESC";
 
-        String expectedString = "+---------------------------------------------+\n" +
-                                "| from       | to        | similarity         |\n" +
-                                "+---------------------------------------------+\n" +
-                                "| \"Praveena\" | \"Karin\"   | 1.0                |\n" +
-                                "| \"Arya\"     | \"Michael\" | 0.9788908326303921 |\n" +
-                                "+---------------------------------------------+\n" +
+        String expectedString = "+--------------------------------------------+\n" +
+                                "| from       | to        | similarity        |\n" +
+                                "+--------------------------------------------+\n" +
+                                "| \"Praveena\" | \"Karin\"   | 1.0               |\n" +
+                                "| \"Arya\"     | \"Michael\" | 0.978890832630392 |\n" +
+                                "+--------------------------------------------+\n" +
                                 "2 rows\n";
 
         assertEquals(expectedString, runQuery(query, Result::resultAsString));
