@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
@@ -59,6 +60,10 @@ public class Weights<T extends Tensor<T>> extends AbstractVariable<T> {
 
     public static Weights<Matrix> ofMatrix(int rows, int cols) {
         return new Weights<>(new Matrix(rows, cols));
+    }
+
+    public static Weights<Vector> ofVector(double... values) {
+        return new Weights<>(new Vector(values));
     }
 
     public static Weights<Scalar> ofScalar(double value) {

@@ -45,8 +45,8 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.logisticregression.ImmutableLogisticRegressionData;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
@@ -58,6 +58,7 @@ import org.neo4j.gds.test.TestProc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -131,7 +132,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                         1,
                         3
                     )),
-                Weights.ofScalar(0),
+                Optional.empty(),
                 LinkPredictionTrain.makeClassIdMap()
             );
 
@@ -181,7 +182,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                         1,
                         4
                     )),
-                Weights.ofScalar(0),
+                Optional.empty(),
                 LinkPredictionTrain.makeClassIdMap()
             );
 
@@ -229,7 +230,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                         1,
                         4
                     )),
-                Weights.ofScalar(0),
+                Optional.empty(),
                 LinkPredictionTrain.makeClassIdMap()
             );
 

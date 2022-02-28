@@ -27,7 +27,7 @@ import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.Optional;
 
@@ -35,7 +35,7 @@ import java.util.Optional;
 public interface LogisticRegressionData extends Trainer.ClassifierData {
 
     Weights<Matrix> weights();
-    Optional<Weights<Scalar>> bias();
+    Optional<Weights<Vector>> bias();
     LocalIdMap classIdMap();
 
     static LogisticRegressionData standard(int featureCount, boolean useBias, LocalIdMap classIdMap) {
@@ -51,14 +51,16 @@ public interface LogisticRegressionData extends Trainer.ClassifierData {
         var weights = Weights.ofMatrix(classCount, featureCount);
 
         var bias = useBias
-            ? Optional.of(Weights.ofScalar(0))
-            : Optional.<Weights<Scalar>>empty();
+            ? Optional.of(new Weights<>(new Vector(classCount)))
+            : Optional.<Weights<Vector>>empty();
 
         return ImmutableLogisticRegressionData.builder().weights(weights).classIdMap(classIdMap).bias(bias).build();
     }
 
-    static LogisticRegressionData create(Weights<Matrix> weights, Weights<Scalar> bias, LocalIdMap classIdMap) {
-        return ImmutableLogisticRegressionData.builder().weights(weights).classIdMap(classIdMap).bias(bias).build();
+    static LogisticRegressionData create(Weights<Matrix> weights, Optional<Weights<Vector>> bias, LocalIdMap classIdMap) {
+        var builder = ImmutableLogisticRegressionData.builder().weights(weights).classIdMap(classIdMap);
+        bias.ifPresent(builder::bias);
+        return builder.build();
     }
 
     static MemoryEstimation memoryEstimation(MemoryRange linkFeatureDimension) {

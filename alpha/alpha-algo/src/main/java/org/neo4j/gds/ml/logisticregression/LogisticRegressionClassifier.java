@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.core.batch.SingletonBatch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.EWiseAddMatrixScalar;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.ml.core.functions.MatrixVectorSum;
 import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
 import org.neo4j.gds.ml.core.functions.Softmax;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -73,7 +74,7 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
             weights
         );
         var softmaxInput = data.bias().isPresent()
-            ? new EWiseAddMatrixScalar(weightedFeatures, data.bias().get())
+            ? new MatrixVectorSum(weightedFeatures, data.bias().get())
             : weightedFeatures;
         return weights.data().rows() == numberOfClasses()
             ? new Softmax(softmaxInput)

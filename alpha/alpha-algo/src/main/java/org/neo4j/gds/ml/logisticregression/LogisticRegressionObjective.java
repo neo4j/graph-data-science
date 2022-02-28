@@ -98,7 +98,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
-        Optional<Weights<Scalar>> bias = classifier.data().bias();
+        Optional<Weights<Vector>> bias = classifier.data().bias();
         if (bias.isPresent()) {
             return List.of(classifier.data().weights(), bias.get());
         } else {

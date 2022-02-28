@@ -26,6 +26,7 @@ import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 import java.util.Optional;
@@ -89,8 +90,8 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
         );
 
         var weightedFeatures = new MatrixMultiplyWithTransposedSecondOperand(features, weights);
-        var bias = new Weights<>(new Scalar(0.37));
-        var affineVariable = new EWiseAddMatrixScalar(weightedFeatures, bias);
+        var bias = new Weights<>(new Vector(0.37, 0.37, 0.37));
+        var affineVariable = new MatrixVectorSum(weightedFeatures, bias);
 
         var predictions = new ReducedSoftmax(useBias ? affineVariable : weightedFeatures);
         var labels = Constant.vector(new double[]{1.0, 0.0, 2.0});

@@ -112,10 +112,12 @@ class LogisticRegressionObjectiveTest {
             LogisticRegressionData.standard(2, true, idMap)
         );
         Arrays.setAll(trainedStandardClassifier.data().weights().data().data(), i -> i);
+        Arrays.setAll(trainedStandardClassifier.data().bias().orElseThrow().data().data(), i -> i == 0 ? 0.4 : 0.8);
         var trainedReducedClassifier = new LogisticRegressionClassifier(
             LogisticRegressionData.withReducedClassCount(2, true, idMap)
         );
         Arrays.setAll(trainedReducedClassifier.data().weights().data().data(), i -> i);
+        Arrays.setAll(trainedReducedClassifier.data().bias().orElseThrow().data().data(), i -> i == 0 ? 0.4 : 0.8);
         var features = Features.wrap(featuresHOA);
         this.standardObjective = new LogisticRegressionObjective(
             standardClassifier,
@@ -271,8 +273,8 @@ class LogisticRegressionObjectiveTest {
         idMap.toMapped(0);
         var modelData = NodeLogisticRegressionData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
-                0.0, 1.0, 0.0,
-                2.0, 3.0, 0.0
+                0.0, 1.0, 0.4,
+                2.0, 3.0, 0.8
             }, 2, 3)))
             .classIdMap(idMap)
             .build();

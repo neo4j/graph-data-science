@@ -41,14 +41,14 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
 
     private final Variable<Matrix> predictions;
     private final Variable<Matrix> weights;
-    private final Optional<Weights<Scalar>> bias;
+    private final Optional<Weights<Vector>> bias;
     private final Variable<Matrix> features;
     private final Variable<Vector> labels;
 
     public ReducedCrossEntropyLoss(
         Variable<Matrix> predictions,
         Variable<Matrix> weights,
-        Optional<Weights<Scalar>> bias,
+        Optional<Weights<Vector>> bias,
         Variable<Matrix> features,
         Variable<Vector> labels
     ) {
@@ -109,14 +109,17 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
             }
             return gradient;
         } else if (bias.map(b -> parent == b).orElse(Boolean.FALSE)) {
-            var gradient = new Scalar(0);
+            var biasVector = ctx.data(parent);
+            var gradient = biasVector.createWithSameDimensions();
+            int reducedClassCount = biasVector.totalSize();
+
             for (int row = 0; row < numberOfExamples; row++) {
                 int trueClass = (int) labelsVector.dataAt(row);
-                for (int classIdx = 0; classIdx < weights.dimension(0); classIdx++) {
+                for (int classIdx = 0; classIdx < reducedClassCount; classIdx++) {
                     double predictedClassProbability = predMatrix.dataAt(row, classIdx);
                     var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
                     var errorPerExample = (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
-                    gradient.addDataAt(0, errorPerExample);
+                    gradient.addDataAt(classIdx, errorPerExample);
                 }
             }
             return gradient;
