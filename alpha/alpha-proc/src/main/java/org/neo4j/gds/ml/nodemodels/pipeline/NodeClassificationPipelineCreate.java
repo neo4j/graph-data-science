@@ -19,48 +19,21 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
-import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.StringIdentifierValidations;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 
 public class NodeClassificationPipelineCreate {
 
-    public static PipelineInfoResult create(
-        ModelCatalog modelCatalog,
-        String username,
-        String pipelineName
-    ) {
+    private NodeClassificationPipelineCreate() {}
+
+    public static PipelineInfoResult create(String username, String pipelineName) {
         StringIdentifierValidations.validateNoWhiteCharacter(pipelineName, "pipelineName");
 
         var pipeline = new NodeClassificationPipeline();
 
-        modelCatalog.set(fromTrainingPipelineToModel(
-            username,
-            pipelineName,
-            pipeline
-        ));
+        PipelineCatalog.set(username, pipelineName, pipeline);
 
         return new PipelineInfoResult(pipelineName, pipeline);
-    }
-
-    @NotNull
-    public static Model<Object, PipelineCreateConfig, NodeClassificationPipeline> fromTrainingPipelineToModel(
-        String username,
-        String pipelineName,
-        NodeClassificationPipeline pipeline
-    ) {
-        return Model.of(
-            username,
-            pipelineName,
-            NodeClassificationPipeline.PIPELINE_TYPE,
-            GraphSchema.empty(),
-            new Object(),
-            PipelineCreateConfig.of(username),
-            pipeline
-        );
     }
 }

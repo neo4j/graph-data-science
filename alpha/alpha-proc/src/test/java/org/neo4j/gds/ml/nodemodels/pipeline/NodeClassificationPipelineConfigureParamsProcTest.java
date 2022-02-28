@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -32,17 +31,18 @@ import java.util.Map;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG;
 
 
-@Neo4jModelCatalogExtension
 class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
-
-    @Inject
-    private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(NodeClassificationPipelineConfigureParamsProc.class, NodeClassificationPipelineCreateProc.class);
 
         runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.create('myPipeline')");
+    }
+
+    @AfterEach
+    void tearDown() {
+        PipelineCatalog.removeAll();
     }
 
     @Test

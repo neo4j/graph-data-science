@@ -39,7 +39,6 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
         return Stream.of(NodeClassificationPipelineAddSteps.addNodeProperty(
-            modelCatalog(),
             username(),
             this,
             pipelineName,
@@ -54,6 +53,6 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name("nodeProperties") Object nodeProperties
     ) {
-        return Stream.of(NodeClassificationPipelineAddSteps.selectFeatures(modelCatalog(), username(), pipelineName, nodeProperties));
+        return Stream.of(NodeClassificationPipelineAddSteps.selectFeatures(username(), pipelineName, nodeProperties));
     }
 }

@@ -78,7 +78,7 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
 
     @Override
     public GraphStoreAlgorithmFactory<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainConfig> algorithmFactory() {
-        return new NodeClassificationTrainPipelineAlgorithmFactory(executionContext(), modelCatalog());
+        return new NodeClassificationTrainPipelineAlgorithmFactory(executionContext());
     }
 
     @Override

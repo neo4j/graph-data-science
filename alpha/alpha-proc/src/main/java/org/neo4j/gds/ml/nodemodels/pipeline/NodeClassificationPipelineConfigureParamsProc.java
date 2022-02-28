@@ -23,6 +23,8 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfigImpl;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,7 +44,7 @@ public class NodeClassificationPipelineConfigureParamsProc extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name("parameterSpace") List<Map<String, Object>> parameterSpace
     ) {
-        var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(modelCatalog(), pipelineName, username());
+        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationPipeline.class);
 
         List<NodeLogisticRegressionTrainCoreConfig> trainConfigs = parameterSpace
             .stream()

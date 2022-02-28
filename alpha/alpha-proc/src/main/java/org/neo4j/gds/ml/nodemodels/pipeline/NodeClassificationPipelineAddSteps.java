@@ -20,25 +20,27 @@
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.getNCPipeline;
 import static org.neo4j.gds.ml.pipeline.NodePropertyStepFactory.createNodePropertyStep;
 
 public final class NodeClassificationPipelineAddSteps {
+
+    private NodeClassificationPipelineAddSteps() {}
+
     public static PipelineInfoResult addNodeProperty(
-        ModelCatalog modelCatalog,
         String username,
         BaseProc caller,
         String pipelineName,
         String taskName,
         Map<String, Object> procedureConfig
     ) {
-        var pipeline = getNCPipeline(modelCatalog, pipelineName, username);
+        var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationPipeline.class);
 
         pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
 
@@ -46,12 +48,11 @@ public final class NodeClassificationPipelineAddSteps {
     }
 
     public static PipelineInfoResult selectFeatures(
-        ModelCatalog modelCatalog,
         String username,
         String pipelineName,
         Object nodeProperties
     ) {
-        var pipeline = getNCPipeline(modelCatalog, pipelineName, username);
+        var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationPipeline.class);
 
         if (nodeProperties instanceof String) {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of((String) nodeProperties));

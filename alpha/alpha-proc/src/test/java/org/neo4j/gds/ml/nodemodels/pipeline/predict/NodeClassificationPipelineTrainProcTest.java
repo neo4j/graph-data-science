@@ -44,6 +44,7 @@ import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineAddStepPro
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineConfigureParamsProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCreateProc;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.model.catalog.ModelDropProc;
 
 import java.util.HashMap;
@@ -119,7 +120,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
+        PipelineCatalog.removeAll();
     }
 
     @Test

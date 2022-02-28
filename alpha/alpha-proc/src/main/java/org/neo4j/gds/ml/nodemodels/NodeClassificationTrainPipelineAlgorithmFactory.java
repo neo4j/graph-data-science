@@ -21,15 +21,15 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
 
 import java.util.List;
@@ -37,11 +37,9 @@ import java.util.List;
 public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainConfig> {
 
     private final ExecutionContext executionContext;
-    private final ModelCatalog modelCatalog;
 
-    public NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext executionContext, ModelCatalog modelCatalog) {
+    public NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext executionContext) {
         this.executionContext = executionContext;
-        this.modelCatalog = modelCatalog;
     }
 
     @Override
@@ -50,10 +48,10 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
         NodeClassificationPipelineTrainConfig configuration,
         ProgressTracker progressTracker
     ) {
-        var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(
-            this.modelCatalog,
+        var pipeline = PipelineCatalog.getTyped(
+            configuration.username(),
             configuration.pipeline(),
-            configuration.username()
+            NodeClassificationPipeline.class
         );
         pipeline.validateBeforeExecution(graphStore, configuration);
 
@@ -69,14 +67,18 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
 
     @Override
     public MemoryEstimation memoryEstimation(NodeClassificationPipelineTrainConfig configuration) {
-        var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(
-            this.modelCatalog,
+        var pipeline = PipelineCatalog.getTyped(
+            configuration.username(),
             configuration.pipeline(),
-            configuration.username()
+            NodeClassificationPipeline.class
         );
 
         return MemoryEstimations.builder(NodeClassificationTrainPipelineExecutor.class)
-            .add("Pipeline executor", NodeClassificationTrainPipelineExecutor.estimate(pipeline, configuration, modelCatalog))
+            .add("Pipeline executor", NodeClassificationTrainPipelineExecutor.estimate(
+                pipeline,
+                configuration,
+                executionContext.modelCatalog()
+            ))
             .build();
     }
 
@@ -87,11 +89,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
 
     @Override
     public Task progressTask(GraphStore graphStore, NodeClassificationPipelineTrainConfig config) {
-        var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(
-            this.modelCatalog,
-            config.pipeline(),
-            config.username()
-        );
+        var pipeline = PipelineCatalog.getTyped(config.username(), config.pipeline(), NodeClassificationPipeline.class);
 
         return Tasks.task(
             taskName(),

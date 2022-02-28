@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -29,6 +30,7 @@ import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineStreamProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineTrainProc;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.model.catalog.ModelListProc;
 import org.neo4j.gds.wcc.WccMutateProc;
 
@@ -114,6 +116,11 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
         runQuery(GRAPH);
     }
 
+    @AfterEach
+    void tearDown() {
+        PipelineCatalog.removeAll();
+    }
+
     @Test
     void trainWithNodePropertyStepsAndFeatures() {
         runQuery(
@@ -149,7 +156,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.beta.model.list() YIELD modelInfo RETURN count(*) AS modelCount",
-            List.of(Map.of("modelCount", 2L))
+            List.of(Map.of("modelCount", 1L))
         );
 
         assertCypherResult(
@@ -208,7 +215,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.beta.model.list() YIELD modelInfo RETURN count(*) AS modelCount",
-            List.of(Map.of("modelCount", 3L))
+            List.of(Map.of("modelCount", 2L))
         );
     }
 

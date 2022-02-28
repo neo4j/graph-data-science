@@ -25,12 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
-import org.neo4j.gds.model.catalog.TestTrainConfig;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.test.TestMutateProc;
 
 import java.util.List;
@@ -43,27 +39,22 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig.DEFAULT_CONFIG;
 
-@Neo4jModelCatalogExtension
 class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
-
-    @Inject
-    ModelCatalog modelCatalog;
 
     @BeforeEach
     void setUp() {
-        NodeClassificationPipelineCreate.create(modelCatalog, getUsername(), "myPipeline");
+        NodeClassificationPipelineCreate.create(getUsername(), "myPipeline");
     }
 
     @AfterEach
     void tearDown() {
-        modelCatalog.removeAllLoadedModels();
+        PipelineCatalog.removeAll();
     }
 
     @Test
     void shouldAddNodePropertyStep() {
         run(caller -> {
             var result = NodeClassificationPipelineAddSteps.addNodeProperty(
-                modelCatalog,
                 getUsername(),
                 caller,
                 "myPipeline",
@@ -84,15 +75,14 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldSelectFeatures() {
+        // FIXME these test do not need to use `run` after rebase
         run(caller -> {
             NodeClassificationPipelineAddSteps.selectFeatures(
-                modelCatalog,
                 getUsername(),
                 "myPipeline",
                 "test"
             );
             var result = NodeClassificationPipelineAddSteps.selectFeatures(
-                modelCatalog,
                 getUsername(),
                 "myPipeline",
                 List.of("pr", "pr2")
@@ -108,7 +98,6 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     @Test
     void failOnIncompleteNodePropertyStepConfig() {
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
-            modelCatalog,
             getUsername(),
             caller,
             "myPipeline",
@@ -125,7 +114,6 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     void failOnDuplicateMutateProperty() {
         run(caller -> {
             NodeClassificationPipelineAddSteps.addNodeProperty(
-                modelCatalog,
                 getUsername(),
                 caller,
                 "myPipeline",
@@ -133,7 +121,6 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                 Map.of("mutateProperty", "pr")
             );
             assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
-                modelCatalog,
                 getUsername(),
                 caller,
                 "myPipeline",
@@ -149,7 +136,6 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     @Test
     void failOnUnexpectedConfigKeysInNodePropertyStepConfig() {
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
-            modelCatalog,
             getUsername(),
             caller,
             "myPipeline",
@@ -164,7 +150,6 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     void shouldAddNodeAndSelectFeatureProperties() {
         run(caller -> {
             NodeClassificationPipelineAddSteps.addNodeProperty(
-                modelCatalog,
                 getUsername(),
                 caller,
                 "myPipeline",
@@ -172,13 +157,11 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                 Map.of("mutateProperty", "pr")
             );
             NodeClassificationPipelineAddSteps.selectFeatures(
-                modelCatalog,
                 getUsername(),
                 "myPipeline",
                 "pr"
             );
             var result = NodeClassificationPipelineAddSteps.selectFeatures(
-                modelCatalog,
                 getUsername(),
                 "myPipeline",
                 "pr2"
@@ -199,7 +182,6 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     void shouldAddTwoNodePropertySteps() {
         run(caller -> {
                 NodeClassificationPipelineAddSteps.addNodeProperty(
-                    modelCatalog,
                     getUsername(),
                     caller,
                     "myPipeline",
@@ -207,7 +189,6 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                     Map.of("mutateProperty", "pr")
                 );
             var result = NodeClassificationPipelineAddSteps.addNodeProperty(
-                modelCatalog,
                 getUsername(),
                 caller,
                 "myPipeline",
@@ -234,7 +215,6 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     @Test
     void shouldThrowIfPipelineDoesntExistForNodePropertyStep() {
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
-            modelCatalog,
             getUsername(),
             caller,
             "ceci n'est pas une pipe",
@@ -242,25 +222,23 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
             Map.of("mutateProperty", "pr")
         ))
             .isExactlyInstanceOf(NoSuchElementException.class)
-            .hasMessageContaining("Model with name `ceci n'est pas une pipe` does not exist."));
+            .hasMessageContaining("Pipeline with name `ceci n'est pas une pipe` does not exist for user ``."));
     }
 
     @Test
     void shouldThrowIfPipelineDoesntExistForFeatureStep() {
         assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.selectFeatures(
-            modelCatalog,
             getUsername(),
             "ceci n'est pas une pipe",
             "test"
         ))
             .isExactlyInstanceOf(NoSuchElementException.class)
-            .hasMessageContaining("Model with name `ceci n'est pas une pipe` does not exist.");
+            .hasMessageContaining("Pipeline with name `ceci n'est pas une pipe` does not exist for user ``.");
     }
 
     @Test
     void shouldThrowInvalidNodePropertyStepName() {
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
-            modelCatalog,
             getUsername(),
             caller,
             "myPipeline",
@@ -274,7 +252,6 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     @Test
     void failOnConfiguringReservedConfigFields() {
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
-            modelCatalog,
             getUsername(),
             caller,
             "myPipeline",
@@ -289,53 +266,33 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldThrowIfAddingNodePropertyToANonPipeline() {
-        var model1 = Model.of(
-            getUsername(),
-            "testModel1",
-            "testAlgo1",
-            GraphSchema.empty(),
-            "testData",
-            TestTrainConfig.of(),
-            Map::of
-        );
+        PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionPipeline());
 
-        modelCatalog.set(model1);
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
-            modelCatalog,
             getUsername(),
             caller,
-            "testModel1",
+            "testPipe",
             "pageRank",
             Map.of("mutateProperty", "pr")
         ))
             .isExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
-                "Expected a model of type `Node classification training pipeline`. But model `testModel1` is of type `testAlgo1`."
+                "The pipeline `testPipe` is of type `Link prediction training pipeline`, but expected type `Node classification training pipeline`."
             ));
     }
 
     @Test
     void shouldThrowIfAddingFeatureToANonPipeline() {
-        var model1 = Model.of(
-            getUsername(),
-            "testModel1",
-            "testAlgo1",
-            GraphSchema.empty(),
-            "testData",
-            TestTrainConfig.of(),
-            Map::of
-        );
+        PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionPipeline());
 
-        modelCatalog.set(model1);
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.selectFeatures(
-            modelCatalog,
             getUsername(),
-            "testModel1",
+            "testPipe",
             "something"
         ))
             .isExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
-                "Expected a model of type `Node classification training pipeline`. But model `testModel1` is of type `testAlgo1`."
+                "The pipeline `testPipe` is of type `Link prediction training pipeline`, but expected type `Node classification training pipeline`."
             ));
     }
 

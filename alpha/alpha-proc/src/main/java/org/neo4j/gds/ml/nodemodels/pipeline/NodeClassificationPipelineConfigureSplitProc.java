@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,7 +38,7 @@ public class NodeClassificationPipelineConfigureSplitProc extends BaseProc {
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.configureSplit", mode = READ)
     @Description("Configures the split of the node classification pipeline.")
     public Stream<PipelineInfoResult> configureSplit(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
-        var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(modelCatalog(), pipelineName, username());
+        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationPipeline.class);
 
         var cypherConfig = CypherMapWrapper.create(configMap);
         var config = NodeClassificationSplitConfig.of(cypherConfig);

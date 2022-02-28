@@ -29,24 +29,20 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFactory;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
-import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.ImmutableNodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.ImmutableNodeClassificationSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
@@ -63,7 +59,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
-@Neo4jModelCatalogExtension
 class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     private static String PIPELINE_NAME = "pipe";
     private static final String GRAPH_NAME = "g";
@@ -90,9 +85,6 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
     private GraphStore graphStore;
 
-    @Inject
-    ModelCatalog modelCatalog;
-
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphProjectProc.class);
@@ -111,8 +103,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        modelCatalog.removeAllLoadedModels();
-        GraphStoreCatalog.removeAllLoadedGraphs();
+        PipelineCatalog.removeAll();
     }
 
     @Test
@@ -250,10 +241,10 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
-                new NodeClassificationTrainPipelineAlgorithmFactory(
-                    caller.executionContext(),
-                    modelCatalog
-                ).progressTask(graphStore, config),
+                new NodeClassificationTrainPipelineAlgorithmFactory(caller.executionContext()).progressTask(
+                    graphStore,
+                    config
+                ),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE
@@ -343,7 +334,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             .metrics(List.of(MetricSpecification.parse("F1_WEIGHTED")))
             .build();
 
-        var memoryEstimation = NodeClassificationTrainPipelineExecutor.estimate(pipeline, config, modelCatalog);
+        var memoryEstimation = NodeClassificationTrainPipelineExecutor.estimate(pipeline, config, new OpenModelCatalog());
         assertMemoryEstimation(
             () -> memoryEstimation,
             graphStore.nodeCount(),
@@ -355,11 +346,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
     }
     private NodeClassificationPipeline insertPipelineIntoCatalog() {
-        var dummyConfig = PipelineCreateConfig.of(getUsername());
         var info = new NodeClassificationPipeline();
-        modelCatalog.set(
-            Model.of("", PIPELINE_NAME, NodeClassificationPipeline.PIPELINE_TYPE, GraphSchema.empty(), new Object(), dummyConfig, info)
-        );
+        PipelineCatalog.set(getUsername(), PIPELINE_NAME, info);
         return info;
     }
 

@@ -23,14 +23,11 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
 
 import java.util.List;
 import java.util.Map;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeClassificationPipelineCompanion {
     public static final String PREDICT_DESCRIPTION = "Predicts classes for all nodes based on a previously trained pipeline model";
@@ -41,23 +38,6 @@ public final class NodeClassificationPipelineCompanion {
     );
 
     private NodeClassificationPipelineCompanion() {}
-
-    public static NodeClassificationPipeline getNCPipeline(ModelCatalog modelCatalog, String pipelineName, String username) {
-        var model = modelCatalog.getUntypedOrThrow(username, pipelineName);
-
-        assert model != null;
-        if (!model.algoType().equals(NodeClassificationPipeline.PIPELINE_TYPE)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Expected a model of type `%s`. But model `%s` is of type `%s`.",
-                NodeClassificationPipeline.PIPELINE_TYPE,
-                pipelineName,
-                model.algoType()
-            ));
-        }
-        assert model.customInfo() instanceof NodeClassificationPipeline;
-
-        return (NodeClassificationPipeline) model.customInfo();
-    }
 
     public static Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> getTrainedNCPipelineModel(
         ModelCatalog modelCatalog,
