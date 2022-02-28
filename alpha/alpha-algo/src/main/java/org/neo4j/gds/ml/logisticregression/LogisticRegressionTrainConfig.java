@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
+package org.neo4j.gds.ml.logisticregression;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
@@ -30,7 +30,7 @@ import java.util.Map;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LinkLogisticRegressionTrainConfig extends TrainingConfig {
+public interface LogisticRegressionTrainConfig extends TrainingConfig {
 
     @Value.Default
     @Configuration.DoubleRange(min = 0.0)
@@ -48,16 +48,16 @@ public interface LinkLogisticRegressionTrainConfig extends TrainingConfig {
     @Configuration.CollectKeys
     Collection<String> configKeys();
 
-    static LinkLogisticRegressionTrainConfig of(Map<String, Object> params) {
+    static LogisticRegressionTrainConfig of(Map<String, Object> params) {
         var cypherMapWrapper = CypherMapWrapper.create(params);
 
-        var config = new LinkLogisticRegressionTrainConfigImpl(cypherMapWrapper);
+        var config = new LogisticRegressionTrainConfigImpl(cypherMapWrapper);
 
         cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
         return config;
     }
 
-    static LinkLogisticRegressionTrainConfig defaultConfig() {
-        return LinkLogisticRegressionTrainConfig.of(Map.of());
+    static LogisticRegressionTrainConfig defaultConfig() {
+        return LogisticRegressionTrainConfig.of(Map.of());
     }
 }

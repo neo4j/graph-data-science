@@ -39,14 +39,14 @@ import static org.neo4j.gds.ml.core.Dimensions.scalar;
  */
 public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
 
-    private final ReducedSoftmax predictions;
+    private final Variable<Matrix> predictions;
     private final Variable<Matrix> weights;
     private final Optional<Weights<Scalar>> bias;
     private final Variable<Matrix> features;
     private final Variable<Vector> labels;
 
     public ReducedCrossEntropyLoss(
-        ReducedSoftmax predictions,
+        Variable<Matrix> predictions,
         Variable<Matrix> weights,
         Optional<Weights<Scalar>> bias,
         Variable<Matrix> features,

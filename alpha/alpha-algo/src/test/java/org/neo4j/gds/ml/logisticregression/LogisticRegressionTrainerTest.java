@@ -25,11 +25,11 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.Trainer;
+import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 
 import java.util.Map;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,8 +50,9 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
-            LinkLogisticRegressionTrainConfig.defaultConfig(),
+            LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
+            true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -84,8 +85,9 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(labels),
             4,
-            LinkLogisticRegressionTrainConfig.defaultConfig(),
+            LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
+            true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -116,8 +118,9 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
-            LinkLogisticRegressionTrainConfig.of(Map.of("useBiasFeature", false)),
+            LogisticRegressionTrainConfig.of(Map.of("useBiasFeature", false)),
             fourClassIdMap(),
+            true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -145,12 +148,50 @@ class LogisticRegressionTrainerTest {
     }
 
     @Test
+    void usingStandardWeights() {
+        var trainer = new LogisticRegressionTrainer(
+            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
+            1,
+            LogisticRegressionTrainConfig.of(Map.of("useBiasFeature", false)),
+            fourClassIdMap(),
+            false,
+            TerminationFlag.RUNNING_TRUE,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        var random = new Random(42L);
+        double[][] features = new double[5][5];
+        for (int i = 0; i < features.length; i++) {
+            for (int j = 0; j < features[i].length; j++) {
+                features[i][j] = random.nextDouble();
+            }
+        }
+        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
+
+        assertThat(classifier.numberOfClasses()).isEqualTo(4);
+        assertThat(classifier.data().bias()).isEmpty();
+        assertThat(classifier.data().weights().data().dimensions()).containsExactly(4, 5);
+        assertThat(classifier.data().weights().data().data())
+            .containsExactly(
+                new double[]{
+                    0.07112165177005575, 0.07282159911961641, 0.07299361494706944, -0.08118839640670544, 0.0738451516049731,
+                    0.07250321634094545, 0.06926188286299505, 0.07036007869555168, 0.07155818423783798, 0.071881927159593,
+                    -0.070415705597294, 0.09351752899399764, -0.06700072894326915, 0.07646075088422129, -0.07382078874569262,
+                    -0.07247742154547929, -0.07244736978411997, -0.07254489591102062, -0.07245099306947704, -0.07250321395784994
+
+                },
+                Offset.offset(1e-9)
+            );
+    }
+
+    @Test
     void usingPenaltyShouldGiveSmallerAbsoluteValueWeights() {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
-            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 100, "maxEpochs", 100)),
+            LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "maxEpochs", 100)),
             fourClassIdMap(),
+            true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -181,8 +222,9 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
-            LinkLogisticRegressionTrainConfig.defaultConfig(),
+            LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
+            true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -210,7 +252,7 @@ class LogisticRegressionTrainerTest {
     }
 
 
-    public static final class TestFeatures implements Trainer.Features {
+    public static final class TestFeatures implements Features {
 
         private final double[][] features;
 

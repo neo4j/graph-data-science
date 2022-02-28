@@ -35,8 +35,8 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
@@ -129,7 +129,7 @@ class LinkPredictionTrainTest {
                 Map.<String, Object>of("batchSize", 10),
                 Map.<String, Object>of("batchSize", 100L)
             )
-            .map(LinkLogisticRegressionTrainConfig::of)
+            .map(LogisticRegressionTrainConfig::of)
             .collect(Collectors.toList());
 
         return Stream.of(
@@ -154,7 +154,7 @@ class LinkPredictionTrainTest {
         assertThat(actualModel.trainConfig()).isEqualTo(trainConfig);
         // length of the linkFeatures
         assertThat(actualModel.data())
-            .asInstanceOf(InstanceOfAssertFactories.type(LogisticRegressionTrainer.LogisticRegressionData.class))
+            .asInstanceOf(InstanceOfAssertFactories.type(LogisticRegressionData.class))
             .extracting(llrData -> llrData.weights().data().totalSize())
             .isEqualTo(6);
 
@@ -166,7 +166,7 @@ class LinkPredictionTrainTest {
 
         assertThat(customInfo.bestParameters())
             .usingRecursiveComparison()
-            .isEqualTo(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
+            .isEqualTo(LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
     }
 
     @Test
@@ -175,10 +175,10 @@ class LinkPredictionTrainTest {
 
         LinkPredictionTrainConfig trainConfig = trainingConfig(modelName);
 
-        var modelData = ((LogisticRegressionTrainer.LogisticRegressionData) runLinkPrediction(trainConfig)
+        var modelData = ((LogisticRegressionData) runLinkPrediction(trainConfig)
             .model()
             .data());
-        var modelDataRepeated = ((LogisticRegressionTrainer.LogisticRegressionData) runLinkPrediction(trainConfig)
+        var modelDataRepeated = ((LogisticRegressionData) runLinkPrediction(trainConfig)
             .model()
             .data());
 
@@ -255,7 +255,7 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("paramsForEstimationsWithParamSpace")
-    void estimateWithParameterSpace(String desc, List<LinkLogisticRegressionTrainConfig> parameterSpace, MemoryRange expectedRange) {
+    void estimateWithParameterSpace(String desc, List<LogisticRegressionTrainConfig> parameterSpace, MemoryRange expectedRange) {
         var trainConfig = LinkPredictionTrainConfig
             .builder()
             .modelName("DUMMY")
@@ -326,8 +326,8 @@ class LinkPredictionTrainTest {
             .build());
 
         pipeline.setTrainingParameterSpace(List.of(
-            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)),
-            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 100, "patience", 5, "tolerance", 0.00001))
+            LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)),
+            LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "patience", 5, "tolerance", 0.00001))
         ));
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));

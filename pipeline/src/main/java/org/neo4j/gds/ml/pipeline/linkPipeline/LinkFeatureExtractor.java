@@ -26,7 +26,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.Trainer;
+import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.TrainingConfig;
 
 import java.util.ArrayList;
@@ -66,7 +66,7 @@ public final class LinkFeatureExtractor {
         return new LinkFeatureExtractor(linkFeatureProducers, featureDimension, featureDimensions);
     }
 
-    public static Trainer.Features extractFeatures(
+    public static Features extractFeatures(
         Graph graph,
         List<LinkFeatureStep> linkFeatureSteps,
         int concurrency,
@@ -102,7 +102,7 @@ public final class LinkFeatureExtractor {
 
         ParallelUtil.runWithConcurrency(concurrency, linkFeatureWriters, Pools.DEFAULT);
 
-        return Trainer.Features.wrap(linkFeatures);
+        return Features.wrap(linkFeatures);
     }
 
     public double[] extractFeatures(long source, long target) {

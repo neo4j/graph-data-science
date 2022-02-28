@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.logisticregression;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -27,29 +26,29 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.Trainer;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
-import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 
-import java.util.Optional;
 import java.util.function.Supplier;
+
+import static org.neo4j.gds.ml.logisticregression.LogisticRegressionData.standard;
+import static org.neo4j.gds.ml.logisticregression.LogisticRegressionData.withReducedClassCount;
 
 public final class LogisticRegressionTrainer implements Trainer {
 
     private final ReadOnlyHugeLongArray trainSet;
-    private final LinkLogisticRegressionTrainConfig trainConfig;
+    private final LogisticRegressionTrainConfig trainConfig;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final LocalIdMap classIdMap;
+    private final boolean reduceClassCount;
     private final int concurrency;
 
-    public static MemoryEstimation estimate(LinkLogisticRegressionTrainConfig llrConfig, MemoryRange linkFeatureDimension) {
+    public static MemoryEstimation estimate(LogisticRegressionTrainConfig llrConfig, MemoryRange linkFeatureDimension) {
         return MemoryEstimations.builder("train model")
             .add("model data", LogisticRegressionData.memoryEstimation(linkFeatureDimension))
             .add("update weights", Training.memoryEstimation(linkFeatureDimension, 1, 1))
@@ -67,8 +66,9 @@ public final class LogisticRegressionTrainer implements Trainer {
     public LogisticRegressionTrainer(
         ReadOnlyHugeLongArray trainSet,
         int concurrency,
-        LinkLogisticRegressionTrainConfig trainConfig,
+        LogisticRegressionTrainConfig trainConfig,
         LocalIdMap classIdMap,
+        boolean reduceClassCount,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
@@ -78,14 +78,17 @@ public final class LogisticRegressionTrainer implements Trainer {
         this.classIdMap = classIdMap;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
+        this.reduceClassCount = reduceClassCount;
     }
 
     @Override
     public LogisticRegressionClassifier train(Features features, HugeLongArray labels) {
-        var data = LogisticRegressionData.of(features.get(0).length, trainConfig.useBiasFeature(), classIdMap);
+        var data = reduceClassCount
+            ? withReducedClassCount(features.get(0).length, trainConfig.useBiasFeature(), classIdMap)
+            : standard(features.get(0).length, trainConfig.useBiasFeature(), classIdMap);
         var classifier = new LogisticRegressionClassifier(data);
         var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);
-        var training = new Training(trainConfig, progressTracker, features.size(), terminationFlag);
+        var training = new Training(trainConfig, progressTracker, trainSet.size(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, trainConfig.batchSize());
 
         training.train(objective, queueSupplier, concurrency);
@@ -93,31 +96,4 @@ public final class LogisticRegressionTrainer implements Trainer {
         return classifier;
     }
 
-    @ValueClass
-    public interface LogisticRegressionData extends ClassifierData {
-        static MemoryEstimation memoryEstimation(MemoryRange linkFeatureDimension) {
-            return MemoryEstimations.builder(LogisticRegressionData.class)
-                .fixed("weights", linkFeatureDimension.apply(featureDim -> Weights.sizeInBytes(
-                    1,
-                    Math.toIntExact(featureDim)
-                )))
-                .fixed("bias", Weights.sizeInBytes(1, 1))
-                .build();
-        }
-
-        Weights<Matrix> weights();
-        Optional<Weights<Scalar>> bias();
-        LocalIdMap classIdMap();
-
-        static LogisticRegressionData of(int numberOfLinkFeatures, boolean useBias, LocalIdMap classIdMap) {
-            // this is an optimization where "virtually" add a weight of 0.0 for the last class
-            var weights = Weights.ofMatrix(classIdMap.size() - 1, numberOfLinkFeatures);
-
-            var bias = useBias
-                ? Optional.of(Weights.ofScalar(0))
-                : Optional.<Weights<Scalar>>empty();
-
-            return ImmutableLogisticRegressionData.builder().weights(weights).classIdMap(classIdMap).bias(bias).build();
-        }
-    }
 }

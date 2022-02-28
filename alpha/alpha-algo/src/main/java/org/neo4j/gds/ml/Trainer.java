@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml;
 
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 public interface Trainer {
@@ -43,38 +42,4 @@ public interface Trainer {
     // placeholder
     interface ClassifierData {}
 
-    interface Features {
-        long size();
-
-        double[] get(long id);
-
-        static Features wrap(HugeObjectArray<double[]> features) {
-            return new Features() {
-                @Override
-                public long size() {
-                    return features.size();
-                }
-
-                @Override
-                public double[] get(long id) {
-                    return features.get(id);
-                }
-            };
-        }
-
-        static Features wrap(double[] features) {
-            return new Features() {
-                @Override
-                public long size() {
-                    return 1;
-                }
-
-                @Override
-                public double[] get(long id) {
-                    assert id == 0;
-                    return features;
-                }
-            };
-        }
-    }
 }

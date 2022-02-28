@@ -21,9 +21,10 @@ package org.neo4j.gds.ml.logisticregression;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer.LogisticRegressionData;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,6 +45,40 @@ class LogisticRegressionDataTest {
             .estimate(dimensions, 5000);
 
         assertThat(memoryEstimation.memoryUsage()).isEqualTo(MemoryRange.of(minEstimation, maxEstimation));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldCreateReducedData(boolean useBias) {
+        var classIdMap = new LocalIdMap();
+        classIdMap.toMapped(42);
+        classIdMap.toMapped(43);
+        classIdMap.toMapped(1900);
+        var data = LogisticRegressionData.withReducedClassCount(3, useBias, classIdMap);
+        var matrix = data.weights().data();
+
+        assertThat(matrix.rows()).isEqualTo(2);
+        assertThat(matrix.cols()).isEqualTo(3);
+        assertThat(matrix.data()).containsExactly(new double[6]);
+        assertThat(data.bias().isPresent()).isEqualTo(useBias);
+        assertThat(data.classIdMap()).isEqualTo(classIdMap);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldCreateStandardData(boolean useBias) {
+        var classIdMap = new LocalIdMap();
+        classIdMap.toMapped(42);
+        classIdMap.toMapped(43);
+        classIdMap.toMapped(1900);
+        var data = LogisticRegressionData.standard(3, useBias, classIdMap);
+        var matrix = data.weights().data();
+
+        assertThat(matrix.rows()).isEqualTo(3);
+        assertThat(matrix.cols()).isEqualTo(3);
+        assertThat(matrix.data()).containsExactly(new double[9]);
+        assertThat(data.bias().isPresent()).isEqualTo(useBias);
+        assertThat(data.classIdMap()).isEqualTo(classIdMap);
     }
 
 }

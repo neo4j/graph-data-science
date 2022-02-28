@@ -23,7 +23,7 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.executor.GdsCallableFinder;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
@@ -48,7 +48,7 @@ class LinkPredictionPipelineTest {
 
         assertThat(pipeline.trainingParameterSpace())
             .usingRecursiveComparison()
-            .isEqualTo(List.of(LinkLogisticRegressionTrainConfig.defaultConfig()));
+            .isEqualTo(List.of(LogisticRegressionTrainConfig.defaultConfig()));
     }
 
     @Test
@@ -89,7 +89,7 @@ class LinkPredictionPipelineTest {
 
     @Test
     void canSetParameterSpace() {
-        var config = LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 19));
+        var config = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
 
         var pipeline = new LinkPredictionPipeline();
         pipeline.setTrainingParameterSpace(List.of(
@@ -101,9 +101,9 @@ class LinkPredictionPipelineTest {
 
     @Test
     void overridesTheParameterSpace() {
-        var config1 = LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 19));
-        var config2 = LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1337));
-        var config3 = LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 42));
+        var config1 = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
+        var config2 = LogisticRegressionTrainConfig.of(Map.of("penalty", 1337));
+        var config3 = LogisticRegressionTrainConfig.of(Map.of("penalty", 42));
 
         var pipeline = new LinkPredictionPipeline();
         pipeline.setTrainingParameterSpace(List.of(
@@ -162,7 +162,7 @@ class LinkPredictionPipelineTest {
                     pipelineMap -> pipelineMap.get("splitConfig")
                 )
                 .returns(
-                    List.of(LinkLogisticRegressionTrainConfig.defaultConfig().toMap()),
+                    List.of(LogisticRegressionTrainConfig.defaultConfig().toMap()),
                     pipelineMap -> pipelineMap.get("trainingParameterSpace")
                 );
         }
@@ -180,8 +180,8 @@ class LinkPredictionPipelineTest {
             pipeline.addFeatureStep(hadamardFeatureStep);
 
             pipeline.setTrainingParameterSpace(List.of(
-                LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
-                LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))
+                LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
+                LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
             ));
 
             var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
@@ -208,7 +208,7 @@ class LinkPredictionPipelineTest {
                     pipelineMap -> pipelineMap.get("splitConfig")
                 )
                 .returns(
-                    pipeline.trainingParameterSpace().stream().map(LinkLogisticRegressionTrainConfig::toMap).collect(Collectors.toList()),
+                    pipeline.trainingParameterSpace().stream().map(LogisticRegressionTrainConfig::toMap).collect(Collectors.toList()),
                     pipelineMap -> pipelineMap.get("trainingParameterSpace")
                 );
         }
@@ -265,8 +265,8 @@ class LinkPredictionPipelineTest {
         void deepCopiesParameterSpace() {
             var pipeline = new LinkPredictionPipeline();
             pipeline.setTrainingParameterSpace(List.of(
-                LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
-                LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))
+                LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
+                LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
             ));
 
             var copy = pipeline.copy();

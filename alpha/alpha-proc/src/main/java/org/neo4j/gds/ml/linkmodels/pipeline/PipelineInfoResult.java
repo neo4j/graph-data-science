@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
@@ -46,6 +46,6 @@ public class PipelineInfoResult {
         this.splitConfig = info.splitConfig().toMap();
         this.parameterSpace = info.trainingParameterSpace()
             .stream()
-            .map(LinkLogisticRegressionTrainConfig::toMap).collect(Collectors.toList());
+            .map(LogisticRegressionTrainConfig::toMap).collect(Collectors.toList());
     }
 }

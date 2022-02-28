@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -41,11 +41,11 @@ public class LinkPredictionPipelineConfigureParamsProc extends BaseProc {
     public Stream<PipelineInfoResult> configureParams(@Name("pipelineName") String pipelineName, @Name("parameterSpace") List<Map<String, Object>> parameterSpace) {
         var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(modelCatalog(), pipelineName, username());
 
-        List<LinkLogisticRegressionTrainConfig> trainConfigs = parameterSpace
+        List<LogisticRegressionTrainConfig> trainConfigs = parameterSpace
             .stream()
             .map(CypherMapWrapper::create)
             .map(rawConfig -> {
-                var config = new LinkLogisticRegressionTrainConfigImpl(rawConfig);
+                var config = new LogisticRegressionTrainConfigImpl(rawConfig);
                 validateConfig(rawConfig, config.configKeys());
                 return config;
             })

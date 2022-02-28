@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.Pipeline;
 
 import java.util.ArrayList;
@@ -31,11 +31,11 @@ import java.util.Optional;
 
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 
-public class LinkPredictionPipeline extends Pipeline<LinkFeatureStep, LinkLogisticRegressionTrainConfig> {
+public class LinkPredictionPipeline extends Pipeline<LinkFeatureStep, LogisticRegressionTrainConfig> {
     private LinkPredictionSplitConfig splitConfig;
 
     public LinkPredictionPipeline() {
-        super(List.of(LinkLogisticRegressionTrainConfig.defaultConfig()));
+        super(List.of(LogisticRegressionTrainConfig.defaultConfig()));
         this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
     }
 

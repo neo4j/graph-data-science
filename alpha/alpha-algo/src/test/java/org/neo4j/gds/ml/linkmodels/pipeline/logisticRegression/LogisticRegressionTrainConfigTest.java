@@ -20,16 +20,17 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class LinkLogisticRegressionTrainConfigTest {
+class LogisticRegressionTrainConfigTest {
 
     @Test
     void failOnUnexpectedKeys() {
-        assertThatThrownBy(() -> LinkLogisticRegressionTrainConfig.of(Map.of("boogiewoogie", 1)))
+        assertThatThrownBy(() -> LogisticRegressionTrainConfig.of(Map.of("boogiewoogie", 1)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Unexpected configuration key: boogiewoogie");
     }
