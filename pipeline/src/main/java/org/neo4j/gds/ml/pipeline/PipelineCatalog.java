@@ -50,6 +50,21 @@ public final class PipelineCatalog {
             .orElseThrow(() -> createPipelineNotFoundException(user, pipelineName));
     }
 
+    public static <PIPELINE extends Pipeline> PIPELINE getTyped(String user, String pipelineName, Class<PIPELINE> expectedType) {
+        Pipeline<?, ?> pipeline = get(user, pipelineName);
+
+        if (!expectedType.isInstance(pipeline)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The pipeline `%s` is of type `%s`, but expected type `%s`.",
+                pipelineName,
+                pipeline.getClass().getSimpleName(),
+                expectedType.getSimpleName()
+            ));
+        }
+
+        return (PIPELINE) pipeline;
+    }
+
     public static Pipeline<?, ?> drop(String user, String pipelineName) {
         return userCatalogs.getOrDefault(user, PipelineUserCatalog.EMPTY)
             .drop(pipelineName)

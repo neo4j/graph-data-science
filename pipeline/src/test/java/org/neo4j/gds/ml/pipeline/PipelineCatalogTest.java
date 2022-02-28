@@ -79,9 +79,27 @@ class PipelineCatalogTest {
     }
 
     @Test
+    void getTypedPipeline() {
+        var ncPipe = new NodeClassificationPipeline();
+        var lpPipe = new LinkPredictionPipeline();
+        PipelineCatalog.set(ALICE, "onePipe", ncPipe);
+        PipelineCatalog.set(ALICE, "lpPipe", lpPipe);
+
+        assertThat(PipelineCatalog.getTyped(ALICE, "onePipe", NodeClassificationPipeline.class)).isSameAs(ncPipe);
+        assertThat(PipelineCatalog.getTyped(ALICE, "lpPipe", LinkPredictionPipeline.class)).isSameAs(lpPipe);
+    }
+
+    @Test
     void failOnGetNonExistingPipeline() {
         assertThatThrownBy(() -> PipelineCatalog.get(ALICE, "NOT_SAVED_PIPE"))
             .hasMessage("Pipeline with name `NOT_SAVED_PIPE` does not exist for user `alice`.");
+    }
+
+    @Test
+    void failOnGetTypedOnUnexpectedTypedPipeline() {
+        PipelineCatalog.set(ALICE, "ncPipe", new NodeClassificationPipeline());
+        assertThatThrownBy(() -> PipelineCatalog.getTyped(ALICE, "ncPipe", LinkPredictionPipeline.class))
+            .hasMessage("The pipeline `ncPipe` is of type `NodeClassificationPipeline`, but expected type `LinkPredictionPipeline`.");
     }
 
     @Test
