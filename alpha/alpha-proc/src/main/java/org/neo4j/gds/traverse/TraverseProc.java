@@ -43,14 +43,16 @@ public abstract class TraverseProc extends AlgoBaseProc<Traverse, Traverse, Trav
     @Override
     public ComputationResultConsumer<Traverse, Traverse, TraverseConfig, Stream<WalkResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            if (computationResult.graph().isEmpty()) {
+            var graph = computationResult.graph();
+            if (graph.isEmpty()) {
                 return Stream.empty();
             }
 
             Traverse traverse = computationResult.algorithm();
             long[] nodes = traverse.resultNodes();
-            var nodeList = Arrays.stream(nodes).boxed().collect(Collectors.toList());
-            return Stream.of(new WalkResult(nodes,
+            var nodeList = Arrays.stream(nodes).boxed().map(graph::toOriginalNodeId).collect(Collectors.toList());
+            return Stream.of(new WalkResult(
+                nodes,
                 PathFactory.create(transaction.internalTransaction(), nodeList, NEXT)
             ));
         };
