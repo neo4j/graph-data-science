@@ -20,9 +20,7 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -39,8 +37,6 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
-import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
-import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 
 import java.util.List;
 
@@ -52,10 +48,8 @@ class NodeClassificationPredictConsumerTest {
 
 
     @GdlGraph
-    private static final String DB_CYPHER = "({class: 0}), ({class: 1})";
-
-    @Inject
-    GraphStore graphStore;
+    private static final String GDL =
+        "({class: 0, nanembedding: [NaN, NaN]}), ({class: 1, nanembedding: [NaN, NaN]})";
 
     @Inject
     Graph graph;
@@ -118,37 +112,21 @@ class NodeClassificationPredictConsumerTest {
 
     @Test
     void shouldThrowWhenFeaturePropertiesContainNaN() {
-        graphStore.addNodeProperty(
-            NodeLabel.ALL_NODES,
-            "nan-embedding-1",
-            new DoubleArrayTestProperties((long nodeId) -> new double[] {Double.NaN, Double.NaN})
-        );
-        graphStore.addNodeProperty(
-            NodeLabel.ALL_NODES,
-            "nan-embedding-2",
-            new DoubleArrayTestProperties((long nodeId) -> new double[] {Double.NaN, Double.NaN})
-        );
-        graphStore.addNodeProperty(
-            NodeLabel.ALL_NODES,
-            "without-nan",
-            new DoubleTestProperties(nodeId -> 4.2)
-        );
-        Graph graph = graphStore.getUnion();
-        var featureProperties = List.of("nan-embedding-1", "nan-embedding-2");
+        var featureProperties = List.of("nanembedding");
         var data = NodeLogisticRegressionData.from(graph, featureProperties, "class");
-        var predictor = new NodeLogisticRegressionPredictor(data, featureProperties);
         var consumer = new NodeClassificationPredictConsumer(
             graph,
             BatchTransformer.IDENTITY,
-            predictor,
+            new NodeLogisticRegressionPredictor(data, featureProperties),
             null,
             HugeLongArray.of(0, 1),
             featureProperties,
             ProgressTracker.NULL_TRACKER
         );
+
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> consumer.accept(new ListBatch(List.of(0L, 1L))))
-            .withMessage("Node with ID 0 has invalid feature property value NaN. Properties with NaN values: [nan-embedding-1, nan-embedding-2]");
+            .withMessage("Node with ID `0` has invalid feature property value NaN for property `nanembedding`");
     }
 
 }
