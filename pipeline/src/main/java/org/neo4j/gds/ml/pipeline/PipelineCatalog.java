@@ -95,17 +95,6 @@ public final class PipelineCatalog {
         ));
     }
 
-    // no diff between open and ee -> use singleton similar to GraphStoreCatalog
-    //      get, getUntyped, drop, exists
-
-    // per user -> UserCatalog
-
-    // UserCatalog (pipelineName -> pipelineObject):
-    //      get (typed or untyped)
-    //          typed for usage in the specific algorithms/procs (not using the generics but actual pipeline impl classes)
-    //          untyped for iterating over all pipelines
-    //      drop
-
     static class PipelineUserCatalog {
 
         private final Map<String, Pipeline<?, ?>> pipelineByName;
