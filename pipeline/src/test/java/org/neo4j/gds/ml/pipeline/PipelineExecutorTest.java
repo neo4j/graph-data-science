@@ -294,6 +294,11 @@ class PipelineExecutorTest {
         }
 
         @Override
+        public String type() {
+            return "bogus pipeline";
+        }
+
+        @Override
         protected Map<String, List<Map<String, Object>>> featurePipelineDescription() {
             return Map.of();
         }
@@ -317,6 +322,11 @@ class PipelineExecutorTest {
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {
             return List.of(new AddBogusNodePropertyStep(), new FailingNodePropertyStep());
+        }
+
+        @Override
+        public String type() {
+            return "failing pipeline";
         }
 
         @Override

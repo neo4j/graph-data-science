@@ -40,7 +40,6 @@ public final class LinkPredictionPipelineCompanion {
 
     public static final String PREDICT_DESCRIPTION = "Predicts relationships for all node pairs based on a previously trained link prediction model.";
     public static final String ESTIMATE_PREDICT_DESCRIPTION = "Estimates memory for predicting links based on a previously trained pipeline model";
-    public static final String PIPELINE_MODEL_TYPE = "Link prediction training pipeline";
     static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(
         LogisticRegressionTrainConfig.defaultConfig().toMap()
     );
@@ -51,10 +50,10 @@ public final class LinkPredictionPipelineCompanion {
        var model = modelCatalog.getUntypedOrThrow(username, pipelineName);
 
         assert model != null;
-        if (!model.algoType().equals(PIPELINE_MODEL_TYPE)) {
+        if (!model.algoType().equals(LinkPredictionPipeline.PIPELINE_TYPE)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Steps can only be added to a model of type `%s`. But model `%s` is of type `%s`.",
-                PIPELINE_MODEL_TYPE,
+                LinkPredictionPipeline.PIPELINE_TYPE,
                 pipelineName,
                 model.algoType()
             ));

@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -33,6 +35,11 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class PipelineCatalog {
 
     private static final ConcurrentHashMap<String, PipelineUserCatalog> userCatalogs = new ConcurrentHashMap<>();
+
+    private static final Map<Class<?>, String> classToType = Map.of(
+        NodeClassificationPipeline.class, NodeClassificationPipeline.PIPELINE_TYPE,
+        LinkPredictionPipeline.class, LinkPredictionPipeline.PIPELINE_TYPE
+    );
 
     private PipelineCatalog() { }
 
@@ -50,15 +57,15 @@ public final class PipelineCatalog {
             .orElseThrow(() -> createPipelineNotFoundException(user, pipelineName));
     }
 
-    public static <PIPELINE extends Pipeline> PIPELINE getTyped(String user, String pipelineName, Class<PIPELINE> expectedType) {
+    public static <PIPELINE extends Pipeline<?, ?>> PIPELINE getTyped(String user, String pipelineName, Class<PIPELINE> expectedClass) {
         Pipeline<?, ?> pipeline = get(user, pipelineName);
 
-        if (!expectedType.isInstance(pipeline)) {
+        if (!expectedClass.isInstance(pipeline)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The pipeline `%s` is of type `%s`, but expected type `%s`.",
                 pipelineName,
-                pipeline.getClass().getSimpleName(),
-                expectedType.getSimpleName()
+                pipeline.type(),
+                classToType.getOrDefault(expectedClass, expectedClass.getSimpleName())
             ));
         }
 

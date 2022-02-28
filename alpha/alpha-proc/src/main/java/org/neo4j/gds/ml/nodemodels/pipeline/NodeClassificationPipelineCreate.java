@@ -27,8 +27,6 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 
-import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PIPELINE_MODEL_TYPE;
-
 public class NodeClassificationPipelineCreate {
 
     public static PipelineInfoResult create(
@@ -58,7 +56,7 @@ public class NodeClassificationPipelineCreate {
         return Model.of(
             username,
             pipelineName,
-            PIPELINE_MODEL_TYPE,
+            NodeClassificationPipeline.PIPELINE_TYPE,
             GraphSchema.empty(),
             new Object(),
             PipelineCreateConfig.of(username),

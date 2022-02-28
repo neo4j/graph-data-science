@@ -99,7 +99,7 @@ class PipelineCatalogTest {
     void failOnGetTypedOnUnexpectedTypedPipeline() {
         PipelineCatalog.set(ALICE, "ncPipe", new NodeClassificationPipeline());
         assertThatThrownBy(() -> PipelineCatalog.getTyped(ALICE, "ncPipe", LinkPredictionPipeline.class))
-            .hasMessage("The pipeline `ncPipe` is of type `NodeClassificationPipeline`, but expected type `LinkPredictionPipeline`.");
+            .hasMessage("The pipeline `ncPipe` is of type `Node classification training pipeline`, but expected type `Link prediction training pipeline`.");
     }
 
     @Test
