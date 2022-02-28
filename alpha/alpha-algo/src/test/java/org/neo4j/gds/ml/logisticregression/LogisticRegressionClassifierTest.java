@@ -63,7 +63,7 @@ class LogisticRegressionClassifierTest {
 
         var result = predictor.predictProbabilities(
             0,
-            new LogisticRegressionTrainerTest.TestFeatures(new double[][] {features})
+            new TestFeatures(new double[][] {features})
         )[1];
 
         assertThat(result).isCloseTo(expectedResult, Offset.offset(1e-8));

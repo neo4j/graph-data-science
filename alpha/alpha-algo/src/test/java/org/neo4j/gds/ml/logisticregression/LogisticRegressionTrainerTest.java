@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.Map;
@@ -255,24 +254,5 @@ class LogisticRegressionTrainerTest {
         );
     }
 
-
-    public static final class TestFeatures implements Features {
-
-        private final double[][] features;
-
-        TestFeatures(double[][] features) {
-            this.features = features;
-        }
-
-        @Override
-        public long size() {
-            return features.length;
-        }
-
-        @Override
-        public double[] get(long id) {
-            return features[(int) id];
-        }
-    }
 
 }
