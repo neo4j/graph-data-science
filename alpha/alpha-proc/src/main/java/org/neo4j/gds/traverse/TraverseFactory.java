@@ -26,6 +26,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.impl.traverse.Aggregator;
+import org.neo4j.gds.impl.traverse.ExitPredicate;
 import org.neo4j.gds.impl.traverse.Traverse;
 import org.neo4j.gds.impl.traverse.TraverseConfig;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -48,22 +50,22 @@ public class TraverseFactory<CONFIG extends TraverseConfig> extends GraphAlgorit
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        Traverse.ExitPredicate exitFunction;
-        Traverse.Aggregator aggregatorFunction;
+        ExitPredicate exitFunction;
+        Aggregator aggregatorFunction;
         // target node given; terminate if target is reached
         if (!configuration.targetNodes().isEmpty()) {
             List<Long> mappedTargets = configuration.targetNodes().stream()
                 .map(graphOrGraphStore::safeToMappedNodeId)
                 .collect(Collectors.toList());
-            exitFunction = (s, t, w) -> mappedTargets.contains(t) ? Traverse.ExitPredicate.Result.BREAK : Traverse.ExitPredicate.Result.FOLLOW;
+            exitFunction = (s, t, w) -> mappedTargets.contains(t) ? ExitPredicate.Result.BREAK : ExitPredicate.Result.FOLLOW;
             aggregatorFunction = (s, t, w) -> .0;
             // maxDepth given; continue to aggregate nodes with lower depth until no more nodes left
         } else if (configuration.maxDepth() != -1) {
-            exitFunction = (s, t, w) -> w > configuration.maxDepth() ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
+            exitFunction = (s, t, w) -> w > configuration.maxDepth() ? ExitPredicate.Result.CONTINUE : ExitPredicate.Result.FOLLOW;
             aggregatorFunction = (s, t, w) -> w + 1.;
             // do complete BFS until all nodes have been visited
         } else {
-            exitFunction = (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW;
+            exitFunction = (s, t, w) -> ExitPredicate.Result.FOLLOW;
             aggregatorFunction = (s, t, w) -> .0;
         }
 
@@ -99,7 +101,7 @@ public class TraverseFactory<CONFIG extends TraverseConfig> extends GraphAlgorit
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.leaf(taskName(), graph.relationshipCount());
     }
-    
+
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(Traverse.class);

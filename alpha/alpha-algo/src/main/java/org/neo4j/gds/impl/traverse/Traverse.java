@@ -174,46 +174,5 @@ public final class Traverse extends Algorithm<Traverse> {
         visited = null;
     }
 
-    public interface ExitPredicate {
 
-        enum Result {
-            /**
-             * add current node to the result set and visit all neighbors
-             */
-            FOLLOW,
-            /**
-             * add current node to the result set and terminate traversal
-             */
-            BREAK,
-            /**
-             * does not add node to the result set, does not follow its neighbors,
-             * just continue with next element on the stack
-             */
-            CONTINUE
-        }
-
-        /**
-         * called once for each accepted node during traversal
-         *
-         * @param sourceNode     the source node
-         * @param currentNode    the current node
-         * @param weightAtSource the total weight that has been collected by the Aggregator during the traversal
-         * @return a result
-         */
-        Result test(long sourceNode, long currentNode, double weightAtSource);
-    }
-
-
-    public interface Aggregator {
-
-        /**
-         * aggregate weight between source and current node
-         *
-         * @param sourceNode     source node
-         * @param currentNode    the current node
-         * @param weightAtSource the weight that has been aggregated for the currentNode so far
-         * @return new weight (e.g. weightAtSource + 1.)
-         */
-        double apply(long sourceNode, long currentNode, double weightAtSource);
-    }
 }

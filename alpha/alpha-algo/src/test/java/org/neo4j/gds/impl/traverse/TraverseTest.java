@@ -30,7 +30,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.impl.traverse.Traverse.ExitPredicate.Result;
+import org.neo4j.gds.impl.traverse.ExitPredicate.Result;
 
 import java.util.Arrays;
 import java.util.List;
