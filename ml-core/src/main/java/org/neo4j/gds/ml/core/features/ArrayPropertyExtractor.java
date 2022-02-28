@@ -64,7 +64,7 @@ public class ArrayPropertyExtractor implements ArrayFeatureExtractor {
         for (double val : propertyValue) {
             if (Double.isNaN(val)) {
                 throw new IllegalArgumentException(
-                    formatWithLocale("Node with ID %d has invalid feature property value NaN for property %s",
+                    formatWithLocale("Node with ID `%d` has invalid feature property value NaN for property `%s`",
                         graph.toOriginalNodeId(nodeId),
                         propertyKey
                     )
