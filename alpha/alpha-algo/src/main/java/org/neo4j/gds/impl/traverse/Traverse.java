@@ -130,14 +130,14 @@ public final class Traverse extends Algorithm<Traverse> {
             switch (exitPredicate.test(source, node, weight)) {
                 case BREAK:
                     if(!inResult.getAndSet(node)) {
-                        result.add(graph.toOriginalNodeId(node));
+                        result.add(node);
                     }
                     break loop;
                 case CONTINUE:
                     continue loop;
                 case FOLLOW:
                     if (!inResult.getAndSet(node)) {
-                        result.add(graph.toOriginalNodeId(node));
+                        result.add(node);
                     }
                     break;
             }
