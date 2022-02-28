@@ -92,7 +92,7 @@ public abstract class FeatureExtractionBaseTest {
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> makeExtractions(missingScalarGraph))
             .withMessageContaining(
-                "Missing node property for property key `b` on node with id `0`."
+                "Node with ID `0` has invalid feature property value `NaN` for property `b`"
             );
     }
 

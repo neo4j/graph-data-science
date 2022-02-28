@@ -568,7 +568,7 @@ class FastRPTest extends AlgoTestBase {
             assertThatThrownBy(fastRP::initRandomVectors)
                 .hasMessageContaining(
                     formatWithLocale(
-                        "Missing node property for property key `prop` on node with id `%s`.",
+                        "Node with ID `%s` has invalid feature property value `NaN` for property `prop`",
                         idFunction.of("b")
                     )
                 );

@@ -40,9 +40,9 @@ public class ScalarPropertyExtractor implements ScalarFeatureExtractor {
         var propertyValue = nodeProperties.doubleValue(nodeId);
         if (Double.isNaN(propertyValue)) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Missing node property for property key `%s` on node with id `%s`. Consider using a default value in the property projection.",
-                propertyKey,
-                graph.toOriginalNodeId(nodeId)
+                "Node with ID `%d` has invalid feature property value `NaN` for property `%s`",
+                graph.toOriginalNodeId(nodeId),
+                propertyKey
             ));
         }
         return propertyValue;
