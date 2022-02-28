@@ -34,28 +34,23 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
-import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
@@ -75,7 +70,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
-@Neo4jModelCatalogExtension
 class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     @Neo4jGraph
@@ -119,9 +113,6 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     private GraphStore graphStore;
 
-    @Inject
-    private ModelCatalog modelCatalog;
-
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
@@ -142,8 +133,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        modelCatalog.removeAllLoadedModels();
-        GraphStoreCatalog.removeAllLoadedGraphs();
+        PipelineCatalog.removeAll();
     }
 
     @Test
@@ -342,22 +332,12 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .randomSeed(1337L)
             .build();
 
-        var model = Model.of(
-            getUsername(),
-            "DUMMY",
-            LinkPredictionPipeline.PIPELINE_TYPE,
-            GraphSchema.empty(),
-            new Object(),
-            PipelineCreateConfig.of(getUsername()),
-            pipeline
-        );
-
-        modelCatalog.set(model);
+        PipelineCatalog.set(getUsername(), "DUMMY", pipeline);
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
-                new LinkPredictionTrainPipelineAlgorithmFactory(caller.executionContext(), modelCatalog).progressTask(graphStore, config),
+                new LinkPredictionTrainPipelineAlgorithmFactory(caller.executionContext()).progressTask(graphStore, config),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE

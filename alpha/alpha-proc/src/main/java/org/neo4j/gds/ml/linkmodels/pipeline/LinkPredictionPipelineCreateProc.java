@@ -20,10 +20,8 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.StringIdentifierValidations;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,19 +39,10 @@ public class LinkPredictionPipelineCreateProc extends BaseProc {
     public Stream<PipelineInfoResult> create(@Name("pipelineName") String input) {
         var pipelineName = StringIdentifierValidations.validateNoWhiteCharacter(input, "pipelineName");
 
-        var model = Model.of(
-            username(),
-            pipelineName,
-            LinkPredictionPipeline.PIPELINE_TYPE,
-            GraphSchema.empty(),
-            new Object(),
-            PipelineCreateConfig.of(username()),
-            new LinkPredictionPipeline()
-        );
+        LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
+        PipelineCatalog.set(username(), pipelineName, pipeline);
 
-        modelCatalog().set(model);
-
-        return Stream.of(new PipelineInfoResult(pipelineName, model.customInfo()));
+        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }
 
 }

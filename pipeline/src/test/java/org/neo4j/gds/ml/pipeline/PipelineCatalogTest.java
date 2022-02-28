@@ -64,7 +64,7 @@ class PipelineCatalogTest {
         PipelineCatalog.set(ALICE, "myPipe", new NodeClassificationPipeline());
 
         assertThatThrownBy(() -> PipelineCatalog.set(ALICE, "myPipe", new NodeClassificationPipeline()))
-            .hasMessage("Pipeline named myPipe already exists.");
+            .hasMessage("Pipeline named `myPipe` already exists.");
     }
 
     @Test

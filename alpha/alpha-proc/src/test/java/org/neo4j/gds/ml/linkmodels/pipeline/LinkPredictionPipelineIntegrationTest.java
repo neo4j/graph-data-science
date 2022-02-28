@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -32,6 +33,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionPipelineTrainProc;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.model.catalog.ModelListProc;
 
 import java.util.List;
@@ -118,6 +120,11 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         graphStore = GraphStoreCatalog
             .get(getUsername(), db.databaseId(), "g")
             .graphStore();
+    }
+
+    @AfterEach
+    void tearDown() {
+        PipelineCatalog.removeAll();
     }
 
     @Test

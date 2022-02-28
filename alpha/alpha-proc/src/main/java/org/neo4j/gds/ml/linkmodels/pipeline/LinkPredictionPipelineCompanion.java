@@ -28,13 +28,10 @@ import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPredictPipelineBaseConfig;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 
 import java.util.List;
 import java.util.Map;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class LinkPredictionPipelineCompanion {
 
@@ -45,23 +42,6 @@ public final class LinkPredictionPipelineCompanion {
     );
 
     private LinkPredictionPipelineCompanion() {}
-
-    public static LinkPredictionPipeline getLPPipeline(ModelCatalog modelCatalog, String pipelineName, String username) {
-       var model = modelCatalog.getUntypedOrThrow(username, pipelineName);
-
-        assert model != null;
-        if (!model.algoType().equals(LinkPredictionPipeline.PIPELINE_TYPE)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Steps can only be added to a model of type `%s`. But model `%s` is of type `%s`.",
-                LinkPredictionPipeline.PIPELINE_TYPE,
-                pipelineName,
-                model.algoType()
-            ));
-        }
-        assert model.customInfo() instanceof LinkPredictionPipeline;
-
-        return (LinkPredictionPipeline) model.customInfo();
-    }
 
     public static <CONFIG extends LinkPredictionPredictPipelineBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig() {
         return new ValidationConfiguration<>() {

@@ -115,7 +115,7 @@ public final class PipelineCatalog {
         public void set(String pipelineName, Pipeline<?, ?> pipeline) {
             if (pipelineByName.containsKey(pipelineName)) {
                 throw new IllegalStateException(formatWithLocale(
-                    "Pipeline named %s already exists.",
+                    "Pipeline named `%s` already exists.",
                     pipelineName
                 ));
             }

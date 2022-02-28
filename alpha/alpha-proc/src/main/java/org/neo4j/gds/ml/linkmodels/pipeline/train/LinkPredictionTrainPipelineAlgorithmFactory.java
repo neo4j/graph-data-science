@@ -22,27 +22,23 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 
 import java.util.List;
 
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.getLPPipeline;
-
 public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> {
     private final ExecutionContext executionContext;
-    private final ModelCatalog modelCatalog;
 
-    public LinkPredictionTrainPipelineAlgorithmFactory(ExecutionContext executionContext, ModelCatalog modelCatalog) {
+    public LinkPredictionTrainPipelineAlgorithmFactory(ExecutionContext executionContext) {
         this.executionContext = executionContext;
-        this.modelCatalog = modelCatalog;
     }
 
     @Override
@@ -51,7 +47,11 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
         LinkPredictionTrainConfig trainConfig,
         ProgressTracker progressTracker
     ) {
-        var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(modelCatalog, trainConfig.pipeline(), trainConfig.username());
+        var pipeline = PipelineCatalog.getTyped(
+            trainConfig.username(),
+            trainConfig.pipeline(),
+            LinkPredictionPipeline.class
+        );
         pipeline.validate();
 
         return new LinkPredictionTrainPipelineExecutor(
@@ -71,7 +71,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
 
     @Override
     public Task progressTask(GraphStore graphStore, LinkPredictionTrainConfig config) {
-        var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(modelCatalog, config.pipeline(), config.username());
+        var pipeline = PipelineCatalog.getTyped(config.username(), config.pipeline(), LinkPredictionPipeline.class);
 
         return Tasks.task(
             taskName(),
@@ -86,20 +86,22 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
     }
 
     public MemoryEstimation memoryEstimation(LinkPredictionTrainConfig configuration) {
-        var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(
-            this.modelCatalog,
+        var pipeline = PipelineCatalog.getTyped(
+            configuration.username(),
             configuration.pipeline(),
-            configuration.username()
+            LinkPredictionPipeline.class
         );
 
-        return LinkPredictionTrainPipelineExecutor.estimate(modelCatalog, pipeline, configuration);
+        return LinkPredictionTrainPipelineExecutor.estimate(executionContext.modelCatalog(), pipeline, configuration);
     }
 
     @Override
     public GraphDimensions estimatedGraphDimensionTransformer(GraphDimensions graphDimensions, LinkPredictionTrainConfig config) {
         // inject expected relationship set sizes which are used in the estimation of the TrainPipelineExecutor
         // this allows to compute the MemoryTree over a single graphDimension
-        var splitConfig = getLPPipeline(modelCatalog, config.pipeline(), config.username()).splitConfig();
+        var splitConfig = PipelineCatalog
+            .getTyped(config.username(), config.pipeline(), LinkPredictionPipeline.class)
+            .splitConfig();
 
         return splitConfig.expectedGraphDimensions(graphDimensions.nodeCount(), graphDimensions.relCountUpperBound());
     }

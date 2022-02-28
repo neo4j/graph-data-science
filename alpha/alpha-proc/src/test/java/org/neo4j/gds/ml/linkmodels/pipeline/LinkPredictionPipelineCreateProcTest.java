@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -32,15 +31,16 @@ import java.util.Map;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcsTest.DEFAULT_SPLIT_CONFIG;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_CONFIG;
 
-@Neo4jModelCatalogExtension
-public class LinkPredictionPipelineCreateProcTest extends BaseProcTest {
-
-    @Inject
-    private ModelCatalog modelCatalog;
+class LinkPredictionPipelineCreateProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(LinkPredictionPipelineCreateProc.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        PipelineCatalog.removeAll();
     }
 
     @Test
@@ -60,7 +60,7 @@ public class LinkPredictionPipelineCreateProcTest extends BaseProcTest {
     @Test
     void failOnCreatingPipelineWithExistingName() {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')");
-        assertError("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')", "Model with name `myPipeline` already exists.");
+        assertError("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')", "Pipeline named `myPipeline` already exists.");
     }
 
     @Test

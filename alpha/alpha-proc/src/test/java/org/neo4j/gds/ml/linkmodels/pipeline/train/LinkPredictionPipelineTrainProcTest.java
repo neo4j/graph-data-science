@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -41,6 +42,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParam
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.model.catalog.ModelDropProc;
 
 import java.util.List;
@@ -133,6 +135,11 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
         runQuery(createQuery);
         runQuery(createQueryWeighted);
+    }
+
+    @AfterEach
+    void tearDown() {
+        PipelineCatalog.removeAll();
     }
 
     @Test
