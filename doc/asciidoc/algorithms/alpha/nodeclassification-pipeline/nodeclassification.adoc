@@ -16,10 +16,10 @@ This section describes Node classification pipelines in the Neo4j Graph Data Sci
 
 Node Classification is a common machine learning task applied to graphs: training models to classify nodes.
 Concretely, Node Classification models are used to predict the classes of unlabeled nodes as a node properties based on other node properties.
-The property representing the class of the node is referred to as the target property.
+During training, the property representing the class of the node is referred to as the target property.
 GDS supports both binary and multi-class node classification.
 
-In GDS, we have Node Classification pipelines which offer an end-to-end workflow, from features extraction to node classification.
+In GDS, we have Node Classification pipelines which offer an end-to-end workflow, from feature extraction to node classification.
 There are two kinds of pipelines: training pipelines and classification pipelines, both of which reside in the <<model-catalog-ops, model catalog>>.
 When a training pipeline is executed, a classification pipeline is created and stored in the model catalog.
 
@@ -35,7 +35,7 @@ The training phase (II) trains multiple model candidates using cross-validation,
 
 After <<algorithms-ml-nodeclassification-pipelines-train, training the pipeline>>, a classification pipeline is created.
 This new pipeline inherits the node property steps and feature configuration from the training pipeline and uses them to generate the relevant features for classifying unlabeled nodes.
-The classification pipeline can be used to predict the value of the `target` property (class) of previously unseen nodes.
+The classification pipeline can be used to predict the class of previously unseen nodes.
 In addition to the predicted class for each node, the predicted probability for each class may also be retained on the nodes.
 The order of the probabilities matches the order of the classes registered in the model.
 
