@@ -22,17 +22,13 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
-import org.neo4j.gds.test.TestMutateProc;
 
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -53,53 +49,46 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldAddNodePropertyStep() {
-        run(caller -> {
-            var result = NodeClassificationPipelineAddSteps.addNodeProperty(
-                getUsername(),
-                caller,
-                "myPipeline",
-                "pageRank",
-                Map.of("mutateProperty", "pr")
-            );
-            assertThat(result.name).isEqualTo("myPipeline");
-            assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
-            assertThat(result.nodePropertySteps).isEqualTo(List.of(
-                Map.of(
-                    "name", "gds.pageRank.mutate",
-                    "config", Map.of("mutateProperty", "pr")
-                )));
-            assertThat(result.featureProperties).isEqualTo(List.of());
-            assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
-        });
+        var result = NodeClassificationPipelineAddSteps.addNodeProperty(
+            getUsername(),
+            "myPipeline",
+            "pageRank",
+            Map.of("mutateProperty", "pr")
+        );
+        assertThat(result.name).isEqualTo("myPipeline");
+        assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
+        assertThat(result.nodePropertySteps).isEqualTo(List.of(
+            Map.of(
+                "name", "gds.pageRank.mutate",
+                "config", Map.of("mutateProperty", "pr")
+            )));
+        assertThat(result.featureProperties).isEqualTo(List.of());
+        assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
     }
 
     @Test
     void shouldSelectFeatures() {
-        // FIXME these test do not need to use `run` after rebase
-        run(caller -> {
-            NodeClassificationPipelineAddSteps.selectFeatures(
-                getUsername(),
-                "myPipeline",
-                "test"
-            );
-            var result = NodeClassificationPipelineAddSteps.selectFeatures(
-                getUsername(),
-                "myPipeline",
-                List.of("pr", "pr2")
-            );
-            assertThat(result.name).isEqualTo("myPipeline");
-            assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
-            assertThat(result.nodePropertySteps).isEqualTo(List.of());
-            assertThat(result.featureProperties).isEqualTo(List.of("test", "pr", "pr2"));
-            assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
-        });
+        NodeClassificationPipelineAddSteps.selectFeatures(
+            getUsername(),
+            "myPipeline",
+            "test"
+        );
+        var result = NodeClassificationPipelineAddSteps.selectFeatures(
+            getUsername(),
+            "myPipeline",
+            List.of("pr", "pr2")
+        );
+        assertThat(result.name).isEqualTo("myPipeline");
+        assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
+        assertThat(result.nodePropertySteps).isEqualTo(List.of());
+        assertThat(result.featureProperties).isEqualTo(List.of("test", "pr", "pr2"));
+        assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
     }
 
     @Test
     void failOnIncompleteNodePropertyStepConfig() {
-        run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
             getUsername(),
-            caller,
             "myPipeline",
             "fastRP",
             Map.of()
@@ -107,97 +96,86 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
             .isExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Multiple errors in configuration arguments:")
             .hasMessageContaining("No value specified for the mandatory configuration parameter `embeddingDimension`")
-            .hasMessageContaining("No value specified for the mandatory configuration parameter `mutateProperty`"));
+            .hasMessageContaining("No value specified for the mandatory configuration parameter `mutateProperty`");
     }
 
     @Test
     void failOnDuplicateMutateProperty() {
-        run(caller -> {
-            NodeClassificationPipelineAddSteps.addNodeProperty(
-                getUsername(),
-                caller,
-                "myPipeline",
-                "pageRank",
-                Map.of("mutateProperty", "pr")
-            );
-            assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
-                getUsername(),
-                caller,
-                "myPipeline",
-                "pageRank",
-                Map.of("mutateProperty", "pr")
-            ))
-                .isExactlyInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining(
-                    "The value of `mutateProperty` is expected to be unique, but pr was already specified in the gds.pageRank.mutate procedure.");
-        });
+        NodeClassificationPipelineAddSteps.addNodeProperty(
+            getUsername(),
+            "myPipeline",
+            "pageRank",
+            Map.of("mutateProperty", "pr")
+        );
+        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+            getUsername(),
+            "myPipeline",
+            "pageRank",
+            Map.of("mutateProperty", "pr")
+        ))
+            .isExactlyInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(
+                "The value of `mutateProperty` is expected to be unique, but pr was already specified in the gds.pageRank.mutate procedure.");
     }
 
     @Test
     void failOnUnexpectedConfigKeysInNodePropertyStepConfig() {
-        run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
             getUsername(),
-            caller,
             "myPipeline",
             "pageRank",
             Map.of("mutateProperty", "pr", "destroyEverything", true)
         ))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Unexpected configuration key: destroyEverything"));
+            .hasMessageContaining("Unexpected configuration key: destroyEverything");
     }
 
     @Test
     void shouldAddNodeAndSelectFeatureProperties() {
-        run(caller -> {
-            NodeClassificationPipelineAddSteps.addNodeProperty(
-                getUsername(),
-                caller,
-                "myPipeline",
-                "pageRank",
-                Map.of("mutateProperty", "pr")
-            );
-            NodeClassificationPipelineAddSteps.selectFeatures(
-                getUsername(),
-                "myPipeline",
-                "pr"
-            );
-            var result = NodeClassificationPipelineAddSteps.selectFeatures(
-                getUsername(),
-                "myPipeline",
-                "pr2"
-            );
-            assertThat(result.name).isEqualTo("myPipeline");
-            assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
-            assertThat(result.nodePropertySteps).isEqualTo(List.of(
-                Map.of(
-                    "name", "gds.pageRank.mutate",
-                    "config", Map.of("mutateProperty", "pr")
-                )));
-            assertThat(result.featureProperties).isEqualTo(List.of("pr", "pr2"));
-            assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
-        });
+        NodeClassificationPipelineAddSteps.addNodeProperty(
+            getUsername(),
+            "myPipeline",
+            "pageRank",
+            Map.of("mutateProperty", "pr")
+        );
+        NodeClassificationPipelineAddSteps.selectFeatures(
+            getUsername(),
+            "myPipeline",
+            "pr"
+        );
+        var result = NodeClassificationPipelineAddSteps.selectFeatures(
+            getUsername(),
+            "myPipeline",
+            "pr2"
+        );
+        assertThat(result.name).isEqualTo("myPipeline");
+        assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
+        assertThat(result.nodePropertySteps).isEqualTo(List.of(
+            Map.of(
+                "name", "gds.pageRank.mutate",
+                "config", Map.of("mutateProperty", "pr")
+            )));
+        assertThat(result.featureProperties).isEqualTo(List.of("pr", "pr2"));
+        assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
     }
 
     @Test
     void shouldAddTwoNodePropertySteps() {
-        run(caller -> {
-                NodeClassificationPipelineAddSteps.addNodeProperty(
-                    getUsername(),
-                    caller,
-                    "myPipeline",
-                    "pageRank",
-                    Map.of("mutateProperty", "pr")
-                );
-            var result = NodeClassificationPipelineAddSteps.addNodeProperty(
-                getUsername(),
-                caller,
-                "myPipeline",
-                "pageRank",
-                Map.of("mutateProperty", "pr2")
-            );
-            assertThat(result.name).isEqualTo("myPipeline");
-            assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
-            assertThat(result.nodePropertySteps).isEqualTo(List.of(
+        NodeClassificationPipelineAddSteps.addNodeProperty(
+            getUsername(),
+            "myPipeline",
+            "pageRank",
+            Map.of("mutateProperty", "pr")
+        );
+        var result = NodeClassificationPipelineAddSteps.addNodeProperty(
+            getUsername(),
+            "myPipeline",
+            "pageRank",
+            Map.of("mutateProperty", "pr2")
+        );
+        assertThat(result.name).isEqualTo("myPipeline");
+        assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
+        assertThat(result.nodePropertySteps).isEqualTo(List.of(
                 Map.of(
                     "name", "gds.pageRank.mutate",
                     "config", Map.of("mutateProperty", "pr")
@@ -205,24 +183,23 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                 Map.of(
                     "name", "gds.pageRank.mutate",
                     "config", Map.of("mutateProperty", "pr2")
-                ))
-            );
-            assertThat(result.featureProperties).isEqualTo(List.of());
-            assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
-        });
+                )
+            )
+        );
+        assertThat(result.featureProperties).isEqualTo(List.of());
+        assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
     }
 
     @Test
     void shouldThrowIfPipelineDoesntExistForNodePropertyStep() {
-        run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
             getUsername(),
-            caller,
             "ceci n'est pas une pipe",
             "pageRank",
             Map.of("mutateProperty", "pr")
         ))
             .isExactlyInstanceOf(NoSuchElementException.class)
-            .hasMessageContaining("Pipeline with name `ceci n'est pas une pipe` does not exist for user ``."));
+            .hasMessageContaining("Pipeline with name `ceci n'est pas une pipe` does not exist for user ``.");
     }
 
     @Test
@@ -238,22 +215,20 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldThrowInvalidNodePropertyStepName() {
-        run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
             getUsername(),
-            caller,
             "myPipeline",
             "juggleSpoons",
             Map.of("mutateProperty", "pr")
         ))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Could not find a procedure called gds.jugglespoons.mutate"));
+            .hasMessageContaining("Could not find a procedure called gds.jugglespoons.mutate");
     }
 
     @Test
     void failOnConfiguringReservedConfigFields() {
-        run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
             getUsername(),
-            caller,
             "myPipeline",
             "pageRank",
             Map.of("nodeLabels", List.of("LABEL"), "mutateProperty", "pr")
@@ -261,16 +236,15 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
             .isExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
                 "Cannot configure ['nodeLabels', 'relationshipTypes'] for an individual node property step, but can only be configured at `train` and `predict` mode."
-            ));
+            );
     }
 
     @Test
     void shouldThrowIfAddingNodePropertyToANonPipeline() {
         PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionPipeline());
 
-        run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
             getUsername(),
-            caller,
             "testPipe",
             "pageRank",
             Map.of("mutateProperty", "pr")
@@ -278,25 +252,20 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
             .isExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
                 "The pipeline `testPipe` is of type `Link prediction training pipeline`, but expected type `Node classification training pipeline`."
-            ));
+            );
     }
 
     @Test
     void shouldThrowIfAddingFeatureToANonPipeline() {
         PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionPipeline());
 
-        run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.selectFeatures(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.selectFeatures(
             getUsername(),
             "testPipe",
             "something"
         ))
             .isExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
-                "The pipeline `testPipe` is of type `Link prediction training pipeline`, but expected type `Node classification training pipeline`."
-            ));
-    }
-
-    private void run(Consumer<BaseProc> procConsumer) {
-        TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, procConsumer::accept);
+                "The pipeline `testPipe` is of type `Link prediction training pipeline`, but expected type `Node classification training pipeline`.");
     }
 }

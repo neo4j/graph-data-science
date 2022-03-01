@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
@@ -35,7 +34,6 @@ public final class NodeClassificationPipelineAddSteps {
 
     public static PipelineInfoResult addNodeProperty(
         String username,
-        BaseProc caller,
         String pipelineName,
         String taskName,
         Map<String, Object> procedureConfig

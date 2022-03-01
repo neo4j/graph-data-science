@@ -40,7 +40,6 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
     ) {
         return Stream.of(NodeClassificationPipelineAddSteps.addNodeProperty(
             username(),
-            this,
             pipelineName,
             taskName,
             procedureConfig
