@@ -31,10 +31,12 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfigImpl;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -67,8 +69,8 @@ class PipelineListProcTest extends BaseProcTest {
 
         assertCypherResult(
             formatWithLocale(
-                "CALL %s YIELD pipelineInfo, pipelineName, pipelineType " +
-                "RETURN pipelineInfo.splitConfig, pipelineName, pipelineType " +
+                "CALL %s YIELD pipelineInfo, pipelineName, pipelineType, creationTime " +
+                "RETURN pipelineInfo.splitConfig, pipelineName, pipelineType, creationTime " +
                 "ORDER BY pipelineName",
                 query
             ),
@@ -80,6 +82,7 @@ class PipelineListProcTest extends BaseProcTest {
                         "validationFolds", 3,
                         "trainFraction", 0.1
                     ),
+                    "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", "lpPipe",
                     "pipelineType", LinkPredictionPipeline.PIPELINE_TYPE
                 ),
@@ -88,6 +91,7 @@ class PipelineListProcTest extends BaseProcTest {
                         "testFraction", 0.8,
                         "validationFolds", 3
                     ),
+                    "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", "ncPipe1",
                     "pipelineType", NodeClassificationPipeline.PIPELINE_TYPE
                 ),
@@ -96,6 +100,7 @@ class PipelineListProcTest extends BaseProcTest {
                         "testFraction", 0.3,
                         "validationFolds", 3
                     ),
+                    "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", "ncPipe2",
                     "pipelineType", NodeClassificationPipeline.PIPELINE_TYPE
                 )
@@ -128,8 +133,8 @@ class PipelineListProcTest extends BaseProcTest {
         PipelineCatalog.set(getUsername(), "ncPipe2", ncPipe2);
 
         assertCypherResult(
-            "CALL gds.beta.pipeline.list('ncPipe1') YIELD pipelineInfo, pipelineName, pipelineType " +
-            "RETURN pipelineInfo.splitConfig, pipelineName, pipelineType " +
+            "CALL gds.beta.pipeline.list('ncPipe1') YIELD pipelineInfo, pipelineName, pipelineType, creationTime " +
+            "RETURN pipelineInfo.splitConfig, pipelineName, pipelineType, creationTime " +
             "ORDER BY pipelineName",
             List.of(
                 map(
@@ -137,6 +142,7 @@ class PipelineListProcTest extends BaseProcTest {
                         "testFraction", 0.8,
                         "validationFolds", 3
                     ),
+                    "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", "ncPipe1",
                     "pipelineType", NodeClassificationPipeline.PIPELINE_TYPE
                 )

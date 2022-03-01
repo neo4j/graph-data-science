@@ -26,9 +26,11 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -58,8 +60,8 @@ class PipelineDropProcTest extends BaseProcTest {
         var query = "gds.beta.pipeline.drop($pipelineName)";
         assertCypherResult(
             formatWithLocale(
-                "CALL %s YIELD pipelineInfo, pipelineName, pipelineType " +
-                "RETURN pipelineInfo.splitConfig, pipelineName, pipelineType",
+                "CALL %s YIELD pipelineInfo, pipelineName, pipelineType, creationTime " +
+                "RETURN pipelineInfo.splitConfig, pipelineName, pipelineType, creationTime",
                 query
             ),
             Map.of("pipelineName", pipeName),
@@ -69,6 +71,7 @@ class PipelineDropProcTest extends BaseProcTest {
                         "testFraction", 0.3,
                         "validationFolds", 3
                     ),
+                    "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", pipeName,
                     "pipelineType", NodeClassificationPipeline.PIPELINE_TYPE
                 )

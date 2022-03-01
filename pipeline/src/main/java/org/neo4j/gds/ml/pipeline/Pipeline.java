@@ -23,7 +23,9 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.utils.TimeUtil;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,7 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
 
     protected final List<ExecutableNodePropertyStep> nodePropertySteps;
     protected final List<FEATURE_STEP> featureSteps;
+    private final ZonedDateTime creationTime;
 
     protected List<TRAINING_CONFIG> trainingParameterSpace;
 
@@ -46,6 +49,7 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
         this.nodePropertySteps = new ArrayList<>();
         this.featureSteps = new ArrayList<>();
         this.trainingParameterSpace = initialTrainingParameterSpace;
+        this.creationTime = TimeUtil.now();
     }
 
     @Override
@@ -143,5 +147,9 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
                 ));
             }
         });
+    }
+
+    public ZonedDateTime creationTime() {
+        return creationTime;
     }
 }
