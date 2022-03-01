@@ -97,6 +97,9 @@
         <d:tocentry linkend="pipeline-catalog-exists">
             <?dbhtml filename="pipeline-catalog/exists/index.html"?>
         </d:tocentry>
+        <d:tocentry linkend="pipeline-catalog-drop">
+            <?dbhtml filename="pipeline-catalog/drop/index.html"?>
+        </d:tocentry>
     </d:tocentry>
 
     <d:tocentry linkend="model-catalog-ops">

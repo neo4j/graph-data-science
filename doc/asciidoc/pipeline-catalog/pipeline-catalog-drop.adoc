@@ -1,0 +1,63 @@
+[.beta]
+[[pipeline-catalog-drop]]
+= Removing pipelines
+
+If we no longer need a training pipeline, we can remove it from the catalog.
+
+
+== Syntax
+
+[.pipeline-drop-syntax]
+--
+.Remove a pipeline from the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.drop(pipelineName: String, failIfMissing: Boolean)
+YIELD
+    pipelineName: String,
+    pipelineType: String,
+    creationTime: DateTime,
+    pipelineInfo: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name          | Type    | Default | Optional | Description
+| pipelineName  | String  | n/a     | yes      | The name of a pipeline. If not specified, all pipelines in the catalog are listed.
+| failIfMissing | Boolean | true    | yes      | By default, the library will raise an error when trying to remove a non-existing pipeline. When set to `false`, the procedure returns an empty result.
+|===
+
+include::shared/pipeline-info-result.adoc[]
+--
+
+
+== Example
+
+In this section we are going to demonstrate the usage of `gds.beta.pipeline.drop`.
+To exemplify this, we first create a <<algorithms-ml-linkprediction-pipelines, link prediction pipeline>>.
+
+.Creating a link prediction training pipelines:
+[source, cypher, role=noplay setup-query]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')
+----
+
+[role=query-example]
+--
+.Remove a pipeline from the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.drop('pipe')
+YIELD pipelineName, pipelineType
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| pipelineName | pipelineType
+| "pipe"       | "Link prediction training pipeline"
+|===
+--
+
+NOTE: Since the `failIfMissing` flag defaults to `true`, if the pipeline name does not exist, an error will be raised.

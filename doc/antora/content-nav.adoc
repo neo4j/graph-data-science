@@ -34,6 +34,7 @@
 * xref:pipeline-catalog/index.adoc[]
 ** xref:pipeline-catalog/list/index.adoc[]
 ** xref:pipeline-catalog/exists/index.adoc[]
+** xref:pipeline-catalog/drop/index.adoc[]
 * xref:model-catalog/index.adoc[]
 ** xref:model-catalog/list/index.adoc[]
 ** xref:model-catalog/exists/index.adoc[]
