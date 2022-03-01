@@ -391,9 +391,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             .graph());
     }
 
-    private void withGrid(
-            Consumer<? super GraphBuilder<?>> build,
-            Consumer<? super Graph> block) {
+    private void withGrid(Consumer<? super GraphBuilder<?>> build, Consumer<? super Graph> block) {
         DefaultBuilder graphBuilder = GraphBuilder.create(db)
             .setLabel("Foo")
             .setRelationship("BAR");
@@ -406,9 +404,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         block.accept(graph);
     }
 
-    private static BfsSources toList(
-            BfsSources sources,
-            LongUnaryOperator modify) {
+    private static BfsSources toList(BfsSources sources, LongUnaryOperator modify) {
         List<Long> longs = new ArrayList<>();
         while (sources.hasNext()) {
             longs.add(modify.applyAsLong(sources.next()));
