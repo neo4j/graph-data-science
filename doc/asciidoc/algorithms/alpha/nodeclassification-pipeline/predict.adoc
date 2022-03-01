@@ -6,7 +6,7 @@
 In the previous sections we have seen how to build up a Node Classification training pipeline and train it to produce a classification pipeline.
 After <<algorithms-ml-nodeclassification-pipelines-train, training>>, the runnable model is of type `Node classification pipeline` and resides in the <<model-catalog-ops, model catalog>>.
 
-The classification pipeline can be executed with a graph in the graph catalog to predict the value of the `target` property (class) of previously unseen nodes.
+The classification pipeline can be executed with a graph in the graph catalog to predict the class of previously unseen nodes.
 In addition to the predicted class for each node, the predicted probability for each class may also be retained on the nodes.
 The order of the probabilities matches the order of the classes registered in the model.
 
