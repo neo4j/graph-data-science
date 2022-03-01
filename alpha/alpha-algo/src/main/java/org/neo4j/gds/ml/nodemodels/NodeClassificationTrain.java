@@ -382,10 +382,6 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         progressTracker.endSubTask("TrainSelectedOnRemainder");
 
         progressTracker.beginSubTask(outerSplit.testSet().size() + outerSplit.trainSet().size());
-        var builder = ImmutableNodeLogisticRegressionData.builder()
-            .classIdMap(bestClassifier.classIdMap())
-            .weights(bestClassifier.data().weights());
-        bestClassifier.data().bias().ifPresent(builder::bias);
         var testMetrics = metricComputer.computeMetrics(outerSplit.testSet(), bestClassifier.convertToPredictor(config.featureProperties()));
         var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), bestClassifier.convertToPredictor(config.featureProperties()));
         progressTracker.endSubTask();
