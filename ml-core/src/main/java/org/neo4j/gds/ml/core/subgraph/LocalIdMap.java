@@ -82,4 +82,12 @@ public class LocalIdMap {
         LocalIdMap that = (LocalIdMap) o;
         return Arrays.equals(originalIds(), that.originalIds());
     }
+
+    @Override
+    public String toString() {
+        return "LocalIdMap{" +
+               "originalIds=" + originalIds +
+               ", originalToInternalIdMap=" + originalToInternalIdMap +
+               '}';
+    }
 }
