@@ -54,6 +54,7 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
 
     @Override
     public Map<String, Object> toMap() {
+        // The pipeline's type and creation is not part of the map.
         Map<String, Object> map = new HashMap<>();
         map.put("featurePipeline", featurePipelineDescription());
         map.put(
