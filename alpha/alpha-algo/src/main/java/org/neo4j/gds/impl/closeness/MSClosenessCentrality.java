@@ -21,11 +21,9 @@ package org.neo4j.gds.impl.closeness;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.msbfs.BfsConsumer;
 import org.neo4j.gds.impl.msbfs.MultiSourceBFS;
 
@@ -77,30 +75,6 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
                     wassermanFaust));
         }
         return cc;
-    }
-
-    public void export(final String propertyName, final NodePropertyExporter exporter) {
-        DoubleNodeProperties properties = new DoubleNodeProperties() {
-            @Override
-            public double doubleValue(long nodeId) {
-                return centrality(
-                    farness.get(nodeId),
-                    component.get(nodeId),
-                    nodeCount,
-                    wassermanFaust
-                );
-            }
-
-            @Override
-            public long size() {
-                return graph.nodeCount();
-            }
-        };
-
-        exporter.write(
-            propertyName,
-            properties
-        );
     }
 
     public Stream<MSClosenessCentrality.Result> resultStream() {
