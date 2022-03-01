@@ -145,7 +145,7 @@ class MutatePropertyComputationResultConsumerTest {
     ) {
         TestAlgorithm algorithm = new TestAlgorithm(
             graph,
-            ProgressTracker.EmptyProgressTracker.NULL_TRACKER,
+            ProgressTracker.NULL_TRACKER,
             false
         );
 
