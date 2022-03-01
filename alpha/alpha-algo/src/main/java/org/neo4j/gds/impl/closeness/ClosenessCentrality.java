@@ -41,13 +41,12 @@ public class ClosenessCentrality extends Algorithm<ClosenessCentrality> {
 
     static double centrality(long farness, long componentSize, long nodeCount, boolean wassermanFaust) {
         if (farness == 0L) {
-            return 0.;
+            return 0.0D;
         }
         if (wassermanFaust) {
-            return (componentSize / ((double) farness)) * ((componentSize) / (nodeCount - 1.));
-        } else {
-            return componentSize / ((double) farness);
+            return (componentSize / ((double) farness)) * ((componentSize) / (nodeCount - 1.0D));
         }
+        return componentSize / ((double) farness);
     }
 
     private final Graph graph;
