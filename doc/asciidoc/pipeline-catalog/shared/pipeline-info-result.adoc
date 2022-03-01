@@ -1,0 +1,9 @@
+.Results
+[opts="header",cols="1,1,4"]
+|===
+| Name         | Type     | Description
+| pipelineName | String   | The name of the pipeline.
+| pipelineType | String   | The type of the pipeline.
+| creationTime | Datetime | Time when the pipeline was created.
+| pipelineInfo | Map      | Detailed information about this particular training pipeline, such as about intermediate steps in the pipeline.
+|===

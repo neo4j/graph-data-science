@@ -27,6 +27,7 @@ dependencies {
     testImplementation project(':pipeline')
     testImplementation project(':proc')
     testImplementation project(':pregel-example')
+    testImplementation project(':pipeline')
 
     testImplementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 }

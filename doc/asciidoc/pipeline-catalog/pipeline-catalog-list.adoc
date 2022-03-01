@@ -1,0 +1,90 @@
+[.beta]
+[[pipeline-catalog-list]]
+= Listing pipelines
+
+Information about pipelines in the catalog can be retrieved using the `gds.beta.pipeline.list()` procedure.
+
+
+== Syntax
+
+[.pipeline-list-syntax]
+--
+.List pipelines from the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.list(pipelineName: String)
+YIELD
+    pipelineName: String,
+    pipelineType: String,
+    creationTime: DateTime,
+    pipelineInfo: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name          | Type   | Default | Optional | Description
+| pipelineName  | String | n/a     | yes      | The name of a pipeline. If not specified, all pipelines in the catalog are listed.
+|===
+
+include::shared/pipeline-info-result.adoc[]
+--
+
+== Examples
+
+Once we have created training pipelines in the catalog we can see information about either all of them or a single model using its name.
+
+To exemplify listing pipelines, we create a <<algorithms-ml-nodeclassification-pipelines, node classification pipeline>> and a <<algorithms-ml-linkprediction-pipelines, link prediction pipeline>> so that we have something to list.
+
+.Creating a link prediction training pipelines:
+[source, cypher, role=noplay setup-query]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.create('lpPipe')
+----
+
+.Creating node classification training pipelines:
+[source, cypher, role=noplay setup-query]
+----
+CALL gds.alpha.ml.pipeline.nodeClassification.create('ncPipe')
+----
+
+
+=== Listing all pipelines
+
+[role=query-example]
+--
+.Listing detailed information about all pipelines:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.list()
+YIELD pipelineName, pipelineType
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| pipelineName | pipelineType
+| "lpPipe"     | "Link prediction training pipeline"
+| "ncPipe"     | "Node classification training pipeline"
+|===
+--
+
+
+=== Listing a specific pipeline
+
+[role=query-example]
+--
+.Listing detailed information about specific pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.list('lpPipe')
+YIELD pipelineName, pipelineType
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| pipelineName | pipelineType
+| "lpPipe"     | "Link prediction training pipeline"
+|===
+--
