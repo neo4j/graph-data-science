@@ -37,7 +37,7 @@ import java.util.stream.Stream;
  * Utilizes the MSBFS for counting the farness between nodes.
  * See MSBFS documentation.
  */
-public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
+public class ClosenessCentrality extends Algorithm<ClosenessCentrality> {
 
     static double centrality(long farness, long componentSize, long nodeCount, boolean wassermanFaust) {
         if (farness == 0L) {
@@ -58,7 +58,7 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
     private final PagedAtomicIntegerArray farness;
     private final PagedAtomicIntegerArray component;
 
-    public MSClosenessCentrality(
+    public ClosenessCentrality(
         Graph graph,
         int concurrency,
         boolean wassermanFaust,
@@ -88,9 +88,9 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
         return cc;
     }
 
-    public Stream<MSClosenessCentrality.Result> resultStream() {
+    public Stream<ClosenessCentrality.Result> resultStream() {
         return LongStream.range(0L, nodeCount)
-            .mapToObj(nodeId -> new MSClosenessCentrality.Result(
+            .mapToObj(nodeId -> new ClosenessCentrality.Result(
                 graph.toOriginalNodeId(nodeId),
                 centrality(farness.get(nodeId), component.get(nodeId), nodeCount, wassermanFaust)
             ));
@@ -100,7 +100,7 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
     public void release() {}
 
     @Override
-    public MSClosenessCentrality compute() {
+    public ClosenessCentrality compute() {
         progressTracker.beginSubTask();
         final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
             int len = sourceNodeIds.size();

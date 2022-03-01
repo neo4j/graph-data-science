@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
+import org.neo4j.gds.impl.closeness.ClosenessCentrality;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
@@ -88,7 +88,7 @@ class ClosenessCentralityDirectedTest {
 
     @Test
     void testCentrality() {
-        MSClosenessCentrality algo = new MSClosenessCentrality(
+        ClosenessCentrality algo = new ClosenessCentrality(
             graph,
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
             false,
@@ -103,7 +103,7 @@ class ClosenessCentralityDirectedTest {
 
     @Test
     void testCentralityWithWassermanFaust() {
-        MSClosenessCentrality algo = new MSClosenessCentrality(
+        ClosenessCentrality algo = new ClosenessCentrality(
             graph,
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
             true,
@@ -120,7 +120,7 @@ class ClosenessCentralityDirectedTest {
     void testStreamIfOnADirectedGraph() {
         final double[] centrality = new double[(int) graph.nodeCount()];
 
-        MSClosenessCentrality algo = new MSClosenessCentrality(
+        ClosenessCentrality algo = new ClosenessCentrality(
             graph,
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
             false,

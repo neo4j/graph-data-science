@@ -27,14 +27,14 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public class ClosenessCentralityFactory<CONFIG extends ClosenessCentralityConfig> extends GraphAlgorithmFactory<MSClosenessCentrality, CONFIG> {
+public class ClosenessCentralityFactory<CONFIG extends ClosenessCentralityConfig> extends GraphAlgorithmFactory<ClosenessCentrality, CONFIG> {
     @Override
-    public MSClosenessCentrality build(
+    public ClosenessCentrality build(
         Graph graph,
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new MSClosenessCentrality(
+        return new ClosenessCentrality(
             graph,
             configuration.concurrency(),
             configuration.improved(),

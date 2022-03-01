@@ -28,7 +28,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.impl.closeness.ClosenessCentralityMutateConfig;
-import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
+import org.neo4j.gds.impl.closeness.ClosenessCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class ClosenessCentralityMutateProc extends MutatePropertyProc<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityMutateProc.MutateResult, ClosenessCentralityMutateConfig> {
+public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityMutateProc.MutateResult, ClosenessCentralityMutateConfig> {
 
     @Override
     public String name() {
@@ -69,18 +69,18 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<MSClosenes
     }
 
     @Override
-    public GraphAlgorithmFactory<MSClosenessCentrality, ClosenessCentralityMutateConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ClosenessCentrality, ClosenessCentralityMutateConfig> algorithmFactory() {
         return ClosenessCentralityProc.algorithmFactory();
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityMutateConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityMutateConfig> computationResult) {
         return ClosenessCentralityProc.nodeProperties(computationResult);
     }
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityMutateConfig> computeResult,
+        ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
         var procResultBuilder = new MutateResult.Builder(

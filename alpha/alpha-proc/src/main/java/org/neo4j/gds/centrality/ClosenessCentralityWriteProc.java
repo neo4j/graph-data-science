@@ -29,7 +29,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.impl.closeness.ClosenessCentralityWriteConfig;
-import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
+import org.neo4j.gds.impl.closeness.ClosenessCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -45,7 +45,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.alpha.closeness.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class ClosenessCentralityWriteProc extends WriteProc<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityWriteProc.WriteResult, ClosenessCentralityWriteConfig> {
+public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityWriteProc.WriteResult, ClosenessCentralityWriteConfig> {
 
     @Override
     public String name() {
@@ -72,18 +72,18 @@ public class ClosenessCentralityWriteProc extends WriteProc<MSClosenessCentralit
     }
 
     @Override
-    public GraphAlgorithmFactory<MSClosenessCentrality, ClosenessCentralityWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ClosenessCentrality, ClosenessCentralityWriteConfig> algorithmFactory() {
         return ClosenessCentralityProc.algorithmFactory();
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityWriteConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityWriteConfig> computationResult) {
         return ClosenessCentralityProc.nodeProperties(computationResult);
     }
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityWriteConfig> computeResult,
+        ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return ClosenessCentralityProc.resultBuilder(

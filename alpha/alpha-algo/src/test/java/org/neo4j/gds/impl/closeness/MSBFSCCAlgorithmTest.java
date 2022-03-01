@@ -22,7 +22,7 @@ package org.neo4j.gds.impl.closeness;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.impl.closeness.MSClosenessCentrality.centrality;
+import static org.neo4j.gds.impl.closeness.ClosenessCentrality.centrality;
 
 class MSBFSCCAlgorithmTest {
 

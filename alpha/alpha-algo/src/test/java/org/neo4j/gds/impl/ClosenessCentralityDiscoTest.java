@@ -28,7 +28,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
+import org.neo4j.gds.impl.closeness.ClosenessCentrality;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,7 +68,7 @@ class ClosenessCentralityDiscoTest {
 
     @Test
     void testHuge() {
-        final MSClosenessCentrality algo = new MSClosenessCentrality(
+        final ClosenessCentrality algo = new ClosenessCentrality(
             graph,
             2,
             true,
