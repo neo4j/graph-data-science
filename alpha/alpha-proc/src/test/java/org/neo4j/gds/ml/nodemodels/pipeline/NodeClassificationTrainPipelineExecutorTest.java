@@ -168,8 +168,12 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                 .usingComparatorForType(new DoubleComparator(1e-10), Double.class)
                 .isEqualTo(Map.of("avg",0.399999996, "max",0.799999992, "min",0.0));
 
-            assertThat(customInfo.trainingPipeline()).isNotEqualTo(pipeline);
-            assertThat(customInfo.trainingPipeline()).usingRecursiveComparison().isEqualTo(pipeline);
+            assertThat(customInfo.trainingPipeline()).isNotSameAs(pipeline);
+            assertThat(customInfo.trainingPipeline())
+                .usingRecursiveComparison()
+                .ignoringFields("creationTime")
+                .isEqualTo(pipeline);
+
             assertThat(customInfo.trainingPipeline().toMap()).isEqualTo(pipeline.toMap());
         });
     }
