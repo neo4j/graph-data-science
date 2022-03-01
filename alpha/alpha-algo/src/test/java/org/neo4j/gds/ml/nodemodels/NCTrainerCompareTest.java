@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.MessageCollectingProgressTracker;

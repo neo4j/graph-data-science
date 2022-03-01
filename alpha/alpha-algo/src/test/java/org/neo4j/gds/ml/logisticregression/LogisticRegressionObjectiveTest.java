@@ -223,7 +223,7 @@ class LogisticRegressionObjectiveTest {
 
         var expectedPenalty = 0.0;
         for (var weight : objective.modelData().weights().data().data()) {
-            expectedPenalty += weight * weight * batch.size() / trainSize ;
+            expectedPenalty += weight * weight * batch.size() / trainSize;
         }
         var actualPenalty = ctx.forward(objective.penaltyForBatch(batch, trainSize)).value();
         assertThat(actualPenalty).isEqualTo(expectedPenalty, Offset.offset(1e-9));
