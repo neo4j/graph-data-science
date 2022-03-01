@@ -62,6 +62,7 @@ import org.openjdk.jol.util.Multiset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
@@ -223,13 +224,14 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
     }
 
     public static LocalIdMap makeClassIdMap(HugeLongArray targets) {
+        var classSet = new TreeSet<Long>();
         var classIdMap = new LocalIdMap();
         for (long i = 0; i < targets.size(); i++) {
-            classIdMap.toMapped(targets.get(i));
+            classSet.add(targets.get(i));
         }
+        classSet.forEach(classIdMap::toMapped);
         return classIdMap;
     }
-
 
     private static Pair<HugeLongArray, Multiset<Long>> computeGlobalTargetsAndClasses(
         NodeProperties targetNodeProperty,
