@@ -74,7 +74,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PIPELINE_MODEL_TYPE;
 
 @Neo4jModelCatalogExtension
 class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
@@ -346,7 +345,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         var model = Model.of(
             getUsername(),
             "DUMMY",
-            PIPELINE_MODEL_TYPE,
+            LinkPredictionPipeline.PIPELINE_TYPE,
             GraphSchema.empty(),
             new Object(),
             PipelineCreateConfig.of(getUsername()),

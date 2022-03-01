@@ -32,6 +32,9 @@ import java.util.Optional;
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 
 public class LinkPredictionPipeline extends Pipeline<LinkFeatureStep, LogisticRegressionTrainConfig> {
+
+    public static final String PIPELINE_TYPE = "Link prediction training pipeline";
+
     private LinkPredictionSplitConfig splitConfig;
 
     public LinkPredictionPipeline() {
@@ -48,6 +51,11 @@ public class LinkPredictionPipeline extends Pipeline<LinkFeatureStep, LogisticRe
         return copied;
     }
 
+
+    @Override
+    public String type() {
+        return PIPELINE_TYPE;
+    }
 
     @Override
     protected Map<String, List<Map<String, Object>>> featurePipelineDescription() {

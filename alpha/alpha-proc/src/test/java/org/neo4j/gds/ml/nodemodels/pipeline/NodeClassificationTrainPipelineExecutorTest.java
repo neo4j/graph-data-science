@@ -354,7 +354,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var dummyConfig = PipelineCreateConfig.of(getUsername());
         var info = new NodeClassificationPipeline();
         modelCatalog.set(
-            Model.of("", PIPELINE_NAME, NodeClassificationPipelineCompanion.PIPELINE_MODEL_TYPE, GraphSchema.empty(), new Object(), dummyConfig, info)
+            Model.of("", PIPELINE_NAME, NodeClassificationPipeline.PIPELINE_TYPE, GraphSchema.empty(), new Object(), dummyConfig, info)
         );
         return info;
     }

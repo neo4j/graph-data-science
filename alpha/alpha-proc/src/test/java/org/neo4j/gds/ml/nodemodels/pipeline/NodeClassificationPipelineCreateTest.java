@@ -27,6 +27,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.model.catalog.ModelListProc;
 
 import java.time.ZonedDateTime;
@@ -39,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
-import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PIPELINE_MODEL_TYPE;
 
 @Neo4jModelCatalogExtension
 public class NodeClassificationPipelineCreateTest extends BaseProcTest {
@@ -67,7 +67,7 @@ public class NodeClassificationPipelineCreateTest extends BaseProcTest {
                 map(
                     "modelInfo", map(
                         "modelName", "myPipeline",
-                        "modelType", PIPELINE_MODEL_TYPE,
+                        "modelType", NodeClassificationPipeline.PIPELINE_TYPE,
                         "featurePipeline", Map.of(
                             "nodePropertySteps", List.of(),
                             "featureProperties", List.of()

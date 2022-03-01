@@ -31,7 +31,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PIPELINE_MODEL_TYPE;
 import static org.neo4j.procedure.Mode.READ;
 
 @SuppressWarnings("immutables:subtype")
@@ -45,7 +44,7 @@ public class LinkPredictionPipelineCreateProc extends BaseProc {
         var model = Model.of(
             username(),
             pipelineName,
-            PIPELINE_MODEL_TYPE,
+            LinkPredictionPipeline.PIPELINE_TYPE,
             GraphSchema.empty(),
             new Object(),
             PipelineCreateConfig.of(username()),

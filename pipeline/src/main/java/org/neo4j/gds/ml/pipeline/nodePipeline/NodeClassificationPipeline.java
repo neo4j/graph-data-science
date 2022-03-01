@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatureStep, NodeLogisticRegressionTrainCoreConfig> {
+    public static final String PIPELINE_TYPE = "Node classification training pipeline";
     public static final String MODEL_TYPE = "Node classification pipeline";
 
 
@@ -48,6 +49,11 @@ public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatu
         return copied;
     }
 
+
+    @Override
+    public String type() {
+        return PIPELINE_TYPE;
+    }
 
     @Override
     protected Map<String, List<Map<String, Object>>> featurePipelineDescription() {

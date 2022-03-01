@@ -60,6 +60,8 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
         return map;
     }
 
+    public abstract String type();
+
     protected abstract Map<String, List<Map<String, Object>>> featurePipelineDescription();
 
     protected abstract Map<String, Object> additionalEntries();
