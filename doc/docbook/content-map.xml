@@ -89,6 +89,10 @@
         </d:tocentry>
     </d:tocentry>
 
+    <d:tocentry linkend="pipeline-catalog-ops">
+        <?dbhtml filename="pipeline-catalog/index.html"?>
+    </d:tocentry>
+
     <d:tocentry linkend="model-catalog-ops">
         <?dbhtml filename="model-catalog/index.html"?>
         <d:tocentry linkend="catalog-model-list">

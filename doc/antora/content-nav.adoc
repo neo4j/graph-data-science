@@ -31,6 +31,7 @@
 ** xref:management-ops/utility-functions/index.adoc[]
 ** xref:management-ops/create-cypher-db/index.adoc[]
 ** xref:management-ops/administration/index.adoc[]
+* xref:pipeline-catalog/index.adoc[]
 * xref:model-catalog/index.adoc[]
 ** xref:model-catalog/list/index.adoc[]
 ** xref:model-catalog/exists/index.adoc[]

@@ -1,0 +1,24 @@
+[[pipeline-catalog-ops]]
+= Pipeline catalog
+
+[abstract]
+--
+This section details the pipeline catalog operations available to manage named training pipelines within the Neo4j Graph Data Science library.
+--
+
+In GDS, we have machine learning pipelines which offer an end-to-end workflow, from graph feature extraction to model training.
+One such example is the <<algorithms-ml-linkprediction-pipelines, link prediction pipeline>>.
+
+The pipeline catalog is a concept within the GDS library that allows managing multiple training pipelines by name.
+
+
+This chapter explains the available pipeline catalog operations.
+
+//[[model-catalog-procs]]
+//[opts=header,cols="1m,1"]
+//|===
+//| Name                                                | Description
+//| <<catalog-model-list, gds.beta.model.list>>         | Prints information about models that are currently available in the catalog.
+//| <<catalog-model-exists, gds.beta.model.exists>>     | Checks if a named model is available in the catalog.
+//| <<catalog-model-drop, gds.beta.model.drop>>         | Drops a named model from the catalog.
+//|===
