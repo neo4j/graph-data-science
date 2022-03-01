@@ -50,6 +50,9 @@ public enum SyntaxMode {
     PIPELINE_ADD_FEATURE("pipeline-add-feature-syntax"),
     PIPELINE_CONFIGURE_SPLIT("pipeline-configure-split-syntax"),
     PIPELINE_CONFIGURE_PARAMS("pipeline-configure-params-syntax"),
+    PIPELINE_LIST("pipeline-list-syntax"),
+    PIPELINE_EXISTS("pipeline-exists-syntax"),
+    PIPELINE_DROP("pipeline-drop-syntax"),
     SYSTEM_MONITOR("system-monitor-syntax", false);
 
     private final String mode;
