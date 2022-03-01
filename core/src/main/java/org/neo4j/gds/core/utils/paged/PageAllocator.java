@@ -20,12 +20,10 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.collections.PageUtil;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.lang.reflect.Array;
-import java.util.function.Supplier;
 
 public abstract class PageAllocator<T> {
 
@@ -40,14 +38,6 @@ public abstract class PageAllocator<T> {
     public final long estimateMemoryUsage(long size) {
         long numPages = PageUtil.numPagesFor(size, pageSize());
         return numPages * bytesPerPage();
-    }
-
-    public static <T> Factory<T> of(
-            int pageSize,
-            long bytesPerPage,
-            Supplier<T> newPage,
-            T[] emptyPages) {
-        return new Factory<>(pageSize, bytesPerPage, pageFactory(newPage, bytesPerPage), emptyPages);
     }
 
     public static <T> Factory<T> of(
@@ -69,27 +59,7 @@ public abstract class PageAllocator<T> {
         long bytesPerPage = MemoryUsage.sizeOfArray(pageSize, bytesPerElement);
 
         T[] emptyPages = (T[]) Array.newInstance(componentType, 0, 0);
-        PageFactory<T> newPage = (allocationTracker) -> {
-            allocationTracker.add(bytesPerPage);
-            return (T) Array.newInstance(componentType, pageSize);
-        };
-
-        return of(pageSize, bytesPerPage, newPage, emptyPages);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Factory<T> ofArray(Class<T> arrayClass, int pageSize) {
-        Class<?> componentType = arrayClass.getComponentType();
-        assert componentType != null && componentType.isPrimitive();
-
-        long bytesPerElement = MemoryUsage.sizeOfInstance(componentType);
-        long bytesPerPage = MemoryUsage.sizeOfArray(pageSize, bytesPerElement);
-
-        T[] emptyPages = (T[]) Array.newInstance(componentType, 0, 0);
-        PageFactory<T> newPage = (allocationTracker) -> {
-            allocationTracker.add(bytesPerPage);
-            return (T) Array.newInstance(componentType, pageSize);
-        };
+        PageFactory<T> newPage = () -> (T) Array.newInstance(componentType, pageSize);
 
         return of(pageSize, bytesPerPage, newPage, emptyPages);
     }
@@ -112,11 +82,6 @@ public abstract class PageAllocator<T> {
             this.emptyPages = emptyPages;
         }
 
-        public long estimateMemoryUsage(long size) {
-            long numPages = PageUtil.numPagesFor(size, pageSize);
-            return numPages * bytesPerPage;
-        }
-
         PageAllocator<T> newAllocator() {
             return new DirectAllocator<>(newPage, emptyPages, pageSize, bytesPerPage);
         }
@@ -124,18 +89,7 @@ public abstract class PageAllocator<T> {
 
     @FunctionalInterface
     public interface PageFactory<T> {
-        T newPage(AllocationTracker allocationTracker);
-
-        default T newPage() {
-            return newPage(AllocationTracker.empty());
-        }
-    }
-
-    private static <T> PageFactory<T> pageFactory(Supplier<T> newPage, long bytesPerPage) {
-        return allocationTracker -> {
-            allocationTracker.add(bytesPerPage);
-            return newPage.get();
-        };
+        T newPage();
     }
 
     private static final class DirectAllocator<T> extends PageAllocator<T> {

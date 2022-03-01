@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.BitUtil;
 
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void testGetSetClear(HabsSupplier provider) {
-        var bitSet = provider.get(42, AllocationTracker.empty());
+        var bitSet = provider.get(42);
         assertThat(bitSet.get(7)).isFalse();
         assertThat(bitSet.get(8)).isFalse();
         assertThat(bitSet.get(9)).isFalse();
@@ -58,7 +57,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void testForEachSetBit(HabsSupplier supplier) {
-        var bitSet = supplier.get(4096, AllocationTracker.empty());
+        var bitSet = supplier.get(4096);
 
         var expected = List.of(0L, 1L, 3L, 7L, 15L, 63L, 64L, 72L, 128L, 420L, 1337L, 4095L);
         expected.forEach(bitSet::set);
@@ -72,7 +71,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void getAndSetReturnsTrueIfTheBitWasSet(HabsSupplier supplier) {
-        var bitSet = supplier.get(1, AllocationTracker.empty());
+        var bitSet = supplier.get(1);
         bitSet.set(0);
         assertThat(bitSet.getAndSet(0)).isTrue();
     }
@@ -80,14 +79,14 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void getAndSetReturnsFalseIfTheBitWasNotSet(HabsSupplier supplier) {
-        var bitSet = supplier.get(1, AllocationTracker.empty());
+        var bitSet = supplier.get(1);
         assertThat(bitSet.getAndSet(0)).isFalse();
     }
 
     @ParameterizedTest
     @MethodSource("suppliers")
     void getAndSetSetsTheBit(HabsSupplier supplier) {
-        var bitSet = supplier.get(1, AllocationTracker.empty());
+        var bitSet = supplier.get(1);
         assertThat(bitSet.get(0)).isFalse();
         bitSet.getAndSet(0);
         assertThat(bitSet.get(0)).isTrue();
@@ -96,7 +95,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void testSize(HabsSupplier supplier) {
-        var bitSet = supplier.get(1337, AllocationTracker.empty());
+        var bitSet = supplier.get(1337);
         assertThat(bitSet.size()).isEqualTo(1337);
     }
 
@@ -104,7 +103,7 @@ class HugeAtomicBitSetTest {
     @CsvSource({"0,1336", "0,63", "70,140"})
     void setRange(int startIndex, int endIndex) {
         suppliers().forEach(supplier -> {
-            var bitSet = supplier.get(1337, AllocationTracker.empty());
+            var bitSet = supplier.get(1337);
             bitSet.set(startIndex, endIndex);
             for (int i = 0; i < bitSet.size(); i++) {
                 if (i >= startIndex && i < endIndex) {
@@ -119,7 +118,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void setRangeDoesNotSetOutsideOfRange(HabsSupplier supplier) {
-        var bitSet = supplier.get(1337, AllocationTracker.empty());
+        var bitSet = supplier.get(1337);
         bitSet.set(0, 1337);
         // need to go through the inner bitset to check for values outside of size()
         var innerBitSet = bitSet.toHppcBitSet();
@@ -136,7 +135,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void setRangeParallel(HabsSupplier supplier) {
-        var bitSet = supplier.get(128, AllocationTracker.empty());
+        var bitSet = supplier.get(128);
         var phaser = new Phaser(5);
         var pool = Executors.newCachedThreadPool();
         pool.submit(new SetTask(bitSet, phaser, 0, 16));
@@ -157,7 +156,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void setRangeParallelDoesNotSetOutsideOfRange(HabsSupplier supplier) {
-        var bitSet = supplier.get(168, AllocationTracker.empty());
+        var bitSet = supplier.get(168);
         var phaser = new Phaser(5);
         var pool = Executors.newCachedThreadPool();
         pool.submit(new SetTask(bitSet, phaser, 0, 42));
@@ -203,7 +202,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void testFlipping(HabsSupplier supplier) {
-        var bitSet = supplier.get(42, AllocationTracker.empty());
+        var bitSet = supplier.get(42);
         bitSet.flip(41);
         assertThat(bitSet.get(41)).isTrue();
         bitSet.flip(41);
@@ -213,7 +212,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void testCardinality(HabsSupplier supplier) {
-        var bitSet = supplier.get(42, AllocationTracker.empty());
+        var bitSet = supplier.get(42);
         assertThat(bitSet.cardinality()).isEqualTo(0L);
 
         bitSet.set(41);
@@ -228,7 +227,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void testClearAll(HabsSupplier supplier) {
-        var bitSet = supplier.get(100, AllocationTracker.empty());
+        var bitSet = supplier.get(100);
         for (long i = 0; i < bitSet.size(); i++) {
             bitSet.set(i);
         }
@@ -243,7 +242,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void testToBitSet(HabsSupplier supplier) {
-        var atomicBitSet = supplier.get(42, AllocationTracker.empty());
+        var atomicBitSet = supplier.get(42);
         atomicBitSet.set(1);
         atomicBitSet.set(9);
         atomicBitSet.set(8);
@@ -262,7 +261,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void testIsEmpty(HabsSupplier supplier) {
-        var atomicBitSet = supplier.get(42, AllocationTracker.empty());
+        var atomicBitSet = supplier.get(42);
         assertThat(atomicBitSet.isEmpty()).isTrue();
         atomicBitSet.set(23);
         assertThat(atomicBitSet.isEmpty()).isFalse();
@@ -273,7 +272,7 @@ class HugeAtomicBitSetTest {
     @ParameterizedTest
     @MethodSource("suppliers")
     void testAllSet(HabsSupplier supplier) {
-        var atomicBitSet = supplier.get(42, AllocationTracker.empty());
+        var atomicBitSet = supplier.get(42);
         assertThat(atomicBitSet.allSet()).isFalse();
         atomicBitSet.set(23);
         assertThat(atomicBitSet.allSet()).isFalse();
@@ -312,12 +311,12 @@ class HugeAtomicBitSetTest {
     }
 
     interface HabsSupplier {
-        HabsOps get(long size, AllocationTracker tracker);
+        HabsOps get(long size);
     }
 
     static Stream<HabsSupplier> suppliers() {
         return Stream.of(
-            (size, tracker) -> {
+            (size) -> {
                 var habs = HugeAtomicBitSet.create(size);
                 return new HabsOps() {
                     @Override
@@ -388,7 +387,7 @@ class HugeAtomicBitSetTest {
                     }
                 };
             },
-            (size, tracker) -> {
+            (size) -> {
                 var habs = HugeAtomicGrowingBitSet.create(size);
                 return new HabsOps() {
                     @Override

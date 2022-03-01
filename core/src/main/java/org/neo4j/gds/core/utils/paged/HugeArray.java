@@ -58,8 +58,6 @@ public abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, S
      * <p>
      * Note that the data might not immediately collectible if there are still cursors alive that reference this array.
      * You have to {@link HugeCursor#close()} every cursor instance as well.
-     * <p>
-     * The amount is not removed from the {@link org.neo4j.gds.core.utils.mem.AllocationTracker} that had been provided in the constructor.
      *
      * @return the amount of memory freed, in bytes.
      */

@@ -241,20 +241,6 @@ public final class Neo4jProxy {
         return IMPL.compositeNodeCursor(cursors, labelIds);
     }
 
-    public static MemoryTrackerProxy memoryTrackerProxy(KernelTransaction kernelTransaction) {
-        return IMPL.memoryTrackerProxy(kernelTransaction);
-    }
-
-    @TestOnly
-    public static MemoryTrackerProxy emptyMemoryTrackerProxy() {
-        return IMPL.emptyMemoryTracker();
-    }
-
-    @TestOnly
-    public static MemoryTrackerProxy limitedMemoryTrackerProxy(long limitInBytes, long grabSizeInBytes) {
-        return IMPL.limitedMemoryTracker(limitInBytes, grabSizeInBytes);
-    }
-
     public static BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
         DatabaseLayout directoryStructure,

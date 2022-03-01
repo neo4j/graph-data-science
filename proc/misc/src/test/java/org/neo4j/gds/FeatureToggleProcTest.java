@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
-import static org.neo4j.gds.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
@@ -82,25 +81,6 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("enabled", false))
         );
         assertFalse(USE_PRE_AGGREGATION.isEnabled());
-    }
-
-    @Test
-    void toggleUseKernelTracker() {
-        var useKernelTracker = USE_KERNEL_TRACKER.isEnabled();
-        runQuery("CALL gds.features.useKernelTracker($value)", Map.of("value", !useKernelTracker));
-        assertEquals(!useKernelTracker, USE_KERNEL_TRACKER.isEnabled());
-        runQuery("CALL gds.features.useKernelTracker($value)", Map.of("value", useKernelTracker));
-        assertEquals(useKernelTracker, USE_KERNEL_TRACKER.isEnabled());
-    }
-
-    @Test
-    void resetUseKernelTracker() {
-        USE_KERNEL_TRACKER.reset();
-        assertCypherResult(
-            "CALL gds.features.useKernelTracker.reset()",
-            List.of(Map.of("enabled", false))
-        );
-        assertFalse(USE_KERNEL_TRACKER.isEnabled());
     }
 
     @Test
