@@ -39,15 +39,24 @@ import java.util.stream.Stream;
  */
 public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
 
-    private final Graph graph;
-    private final PagedAtomicIntegerArray farness;
-    private final PagedAtomicIntegerArray component;
+    static double centrality(long farness, long componentSize, long nodeCount, boolean wassermanFaust) {
+        if (farness == 0L) {
+            return 0.;
+        }
+        if (wassermanFaust) {
+            return (componentSize / ((double) farness)) * ((componentSize) / (nodeCount - 1.));
+        } else {
+            return componentSize / ((double) farness);
+        }
+    }
 
+    private final Graph graph;
+    private final long nodeCount;
     private final int concurrency;
     private final ExecutorService executorService;
-    private final long nodeCount;
-
     private final boolean wassermanFaust;
+    private final PagedAtomicIntegerArray farness;
+    private final PagedAtomicIntegerArray component;
 
     public MSClosenessCentrality(
         Graph graph,
@@ -58,31 +67,33 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
     ) {
         super(progressTracker);
         this.graph = graph;
-        nodeCount = graph.nodeCount();
+        this.nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.wassermanFaust = wassermanFaust;
-        farness = PagedAtomicIntegerArray.newArray(nodeCount);
-        component = PagedAtomicIntegerArray.newArray(nodeCount);
+        this.farness = PagedAtomicIntegerArray.newArray(nodeCount);
+        this.component = PagedAtomicIntegerArray.newArray(nodeCount);
     }
 
     public HugeDoubleArray getCentrality() {
         final HugeDoubleArray cc = HugeDoubleArray.newArray(nodeCount);
         for (int i = 0; i < nodeCount; i++) {
-            cc.set(i, centrality(farness.get(i),
-                    component.get(i),
-                    nodeCount,
-                    wassermanFaust));
+            cc.set(i, centrality(
+                farness.get(i),
+                component.get(i),
+                nodeCount,
+                wassermanFaust
+            ));
         }
         return cc;
     }
 
     public Stream<MSClosenessCentrality.Result> resultStream() {
         return LongStream.range(0L, nodeCount)
-                .mapToObj(nodeId -> new MSClosenessCentrality.Result(
-                        graph.toOriginalNodeId(nodeId),
-                        centrality(farness.get(nodeId), component.get(nodeId), nodeCount, wassermanFaust)
-                ));
+            .mapToObj(nodeId -> new MSClosenessCentrality.Result(
+                graph.toOriginalNodeId(nodeId),
+                centrality(farness.get(nodeId), component.get(nodeId), nodeCount, wassermanFaust)
+            ));
     }
 
     @Override
@@ -111,17 +122,6 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
                 .limit(Integer.MAX_VALUE)
                 .mapToDouble(r -> r.centrality)
                 .toArray();
-    }
-
-    static double centrality(long farness, long componentSize, long nodeCount, boolean wassermanFaust) {
-        if (farness == 0L) {
-            return 0.;
-        }
-        if (wassermanFaust) {
-            return (componentSize / ((double) farness)) * ((componentSize) / (nodeCount - 1.));
-        } else {
-            return componentSize / ((double) farness);
-        }
     }
 
     /**
