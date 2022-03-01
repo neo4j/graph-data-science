@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
+import org.junit.jupiter.api.AfterAll;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
@@ -29,10 +30,16 @@ import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineStreamProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionPipelineTrainProc;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 
 import java.util.List;
 
 class LinkPredictionPipelineDocTest extends DocTestBase {
+
+    @AfterAll
+    static void tearDown() {
+        PipelineCatalog.removeAll();
+    }
 
     @Override
     List<Class<?>> functions() {
@@ -58,5 +65,4 @@ class LinkPredictionPipelineDocTest extends DocTestBase {
     protected String adocFile() {
         return "algorithms/alpha/linkprediction-pipeline/linkprediction.adoc";
     }
-
 }

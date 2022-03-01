@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
+import org.junit.jupiter.api.AfterAll;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
@@ -30,11 +31,17 @@ import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineMu
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineStreamProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineTrainProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineWriteProc;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.scaling.ScalePropertiesMutateProc;
 
 import java.util.List;
 
 class NodeClassificationPipelineDocTest extends DocTestBase {
+
+    @AfterAll
+    static void tearDown() {
+        PipelineCatalog.removeAll();
+    }
 
     @Override
     List<Class<?>> functions() {
@@ -62,5 +69,4 @@ class NodeClassificationPipelineDocTest extends DocTestBase {
     protected String adocFile() {
         return "algorithms/alpha/nodeclassification-pipeline/nodeclassification.adoc";
     }
-
 }
