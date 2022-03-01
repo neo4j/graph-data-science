@@ -401,11 +401,10 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metricResults,
         LogisticRegressionClassifier retrainedClassifier
     ) {
-        var builder = ImmutableNodeLogisticRegressionData.builder()
-            .weights(retrainedClassifier.data().weights())
-            .classIdMap(retrainedClassifier.data().classIdMap());
-        retrainedClassifier.data().bias().ifPresent(bias -> builder.bias(bias));
-        NodeLogisticRegressionData retrainedModelData = builder.build();
+        NodeLogisticRegressionData retrainedModelData = retrainedClassifier
+            .convertToPredictor(config.featureProperties())
+            .modelData();
+
         var modelInfo = NodeClassificationModelInfo.of(
             retrainedModelData.classIdMap().originalIdsList(),
             bestParameters,
