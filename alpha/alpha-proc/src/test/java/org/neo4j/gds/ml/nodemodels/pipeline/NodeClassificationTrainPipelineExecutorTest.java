@@ -45,6 +45,7 @@ import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.ImmutableNodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.ImmutableNodeClassificationSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
@@ -113,7 +114,9 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             "pageRank",
             Map.of("mutateProperty", "pr")
         ));
-        pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
+        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("array"));
+        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
+        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("pr"));
 
         var metricSpecification = MetricSpecification.parse("F1(class=1)");
         var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
@@ -222,7 +225,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     void shouldLogProgress() {
         var pipeline = insertPipelineIntoCatalog();
 
-        pipeline.featureProperties().addAll(List.of("array", "scalar"));
+        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("array"));
+        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
 
         var metricSpecification = MetricSpecification.parse("F1(class=1)");
 
