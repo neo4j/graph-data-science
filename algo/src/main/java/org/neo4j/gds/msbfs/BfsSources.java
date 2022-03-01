@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.msbfs;
+package org.neo4j.gds.msbfs;
 
-@FunctionalInterface
-public interface BfsWithPredecessorConsumer {
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
-    void accept(long nodeId, long predecessorId, int depth, BfsSources sourceNodeIds);
+public interface BfsSources extends PrimitiveLongIterator {
+
+    int size();
 }

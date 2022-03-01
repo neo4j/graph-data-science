@@ -21,6 +21,7 @@ package org.neo4j.gds.impl.msbfs;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.msbfs.MultiSourceBFS;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;

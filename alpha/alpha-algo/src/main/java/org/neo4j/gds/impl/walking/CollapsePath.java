@@ -32,10 +32,10 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.impl.msbfs.ANPStrategy;
-import org.neo4j.gds.impl.msbfs.BfsConsumer;
-import org.neo4j.gds.impl.msbfs.BfsSources;
-import org.neo4j.gds.impl.msbfs.MultiSourceBFS;
+import org.neo4j.gds.msbfs.ANPStrategy;
+import org.neo4j.gds.msbfs.BfsConsumer;
+import org.neo4j.gds.msbfs.BfsSources;
+import org.neo4j.gds.msbfs.MultiSourceBFS;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;

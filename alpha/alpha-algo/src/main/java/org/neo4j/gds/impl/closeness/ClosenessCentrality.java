@@ -24,8 +24,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.impl.msbfs.BfsConsumer;
-import org.neo4j.gds.impl.msbfs.MultiSourceBFS;
+import org.neo4j.gds.msbfs.BfsConsumer;
+import org.neo4j.gds.msbfs.MultiSourceBFS;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
