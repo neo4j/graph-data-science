@@ -40,9 +40,7 @@ import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfigImpl;
@@ -338,7 +336,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
                 progressTracker.beginSubTask("Training");
                 var classifier = trainModel(trainSet, modelParams);
 
-                var predictor = convertClassifier(classifier);
+                var predictor = classifier.convertToPredictor(config.featureProperties());
                 progressTracker.endSubTask("Training");
 
                 progressTracker.beginSubTask(validationSet.size() + trainSet.size());
@@ -361,28 +359,6 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         var bestModelStats = validationStats.pickBestModelStats(mainMetric);
 
         return ModelSelectResult.of(bestModelStats.params(), trainStats, validationStats);
-    }
-
-    @NotNull
-    private NodeLogisticRegressionPredictor convertClassifier(LogisticRegressionClassifier classifier) {
-        var weights = classifier.data().weights().data().data();
-        var bias = classifier.data().bias().orElseThrow().data().data();
-
-        var weightsWithBias = new double[weights.length + bias.length];
-        for (int i = 0; i < weightsWithBias.length; i++) {
-            int numberOfColumns = weights.length / bias.length + 1;
-            int currentColumn = i % numberOfColumns;
-            if (currentColumn == numberOfColumns - 1) {
-                weightsWithBias[i] = bias[i / numberOfColumns];
-            } else {
-                weightsWithBias[i] = weights[i - i / numberOfColumns];
-            }
-        }
-
-        var builder = ImmutableNodeLogisticRegressionData.builder()
-            .classIdMap(classifier.classIdMap())
-            .weights(new Weights<>(new Matrix(weightsWithBias, classifier.data().weights().data().rows(), classifier.data().weights().data().cols() + 1)));
-        return new NodeLogisticRegressionPredictor(builder.build(), config.featureProperties());
     }
 
     private LogisticRegressionTrainConfig convertConfig(NodeLogisticRegressionTrainConfig nlrConfig) {
@@ -410,8 +386,8 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
             .classIdMap(bestClassifier.classIdMap())
             .weights(bestClassifier.data().weights());
         bestClassifier.data().bias().ifPresent(builder::bias);
-        var testMetrics = metricComputer.computeMetrics(outerSplit.testSet(), convertClassifier(bestClassifier));
-        var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), convertClassifier(bestClassifier));
+        var testMetrics = metricComputer.computeMetrics(outerSplit.testSet(), bestClassifier.convertToPredictor(config.featureProperties()));
+        var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), bestClassifier.convertToPredictor(config.featureProperties()));
         progressTracker.endSubTask();
 
         return mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
