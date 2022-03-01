@@ -198,6 +198,8 @@ This makes sense, as all houses in class 0 had three stories, class 1 two storie
 Additionally, we see that the model is confident in these predictions, as the confidence is >=79% in all cases.
 --
 
+NOTE: The indices in the `predictedProbabilities` correspond to the order of the classes in the classification model. To inspect the order of the classes, we can look at its `modelInfo` (see <<catalog-model-list, listing models>>).
+
 [[algorithms-ml-nodeclassification-pipeline-examples-mutate]]
 ==== Mutate
 
