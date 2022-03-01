@@ -38,10 +38,6 @@ public class PredecessorStrategy implements MultiSourceBFS.ExecutionStrategy {
     private final BfsConsumer perNodeAction;
     private final BfsWithPredecessorConsumer perNeighborAction;
 
-    PredecessorStrategy(BfsWithPredecessorConsumer perNeighborAction) {
-        this((nodeId, depth, sourceNodeIds) -> {}, perNeighborAction);
-    }
-
     PredecessorStrategy(BfsConsumer perNodeAction, BfsWithPredecessorConsumer perNeighborAction) {
         this.perNodeAction = perNodeAction;
         this.perNeighborAction = perNeighborAction;

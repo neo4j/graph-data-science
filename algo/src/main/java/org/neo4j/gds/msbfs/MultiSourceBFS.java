@@ -96,20 +96,6 @@ public final class MultiSourceBFS implements Runnable {
     private int sourceNodeCount;
     private long nodeOffset;
 
-    /**
-     * Initializes MS-BFS prepared for executing the Aggregated Neighbor Processing strategy.
-     * <p>
-     * The created MS-BFS can be shared between multiple threads.
-     * This method is supposed to be used if the MS-BFS needs to be executed
-     * with different consumers, e.g. for reusing not-thread-safe consumers.
-     * <p>
-     * To finalize initialization, one must call:
-     * {@link MultiSourceBFS#initAggregatedNeighborProcessing}.
-     */
-    public static MultiSourceBFS aggregatedNeighborProcessing(Graph graph) {
-        return new MultiSourceBFS(graph, graph, null, false, false);
-    }
-
     public static MultiSourceBFS aggregatedNeighborProcessing(
         IdMap nodeIds,
         RelationshipIterator relationships,
@@ -117,20 +103,6 @@ public final class MultiSourceBFS implements Runnable {
         long... startNodes
     ) {
         return new MultiSourceBFS(nodeIds, relationships, new ANPStrategy(perNodeAction), false, false, startNodes);
-    }
-
-    /**
-     * Initializes MS-BFS prepared for executing the Predecessor Processing strategy.
-     * <p>
-     * The created MS-BFS can be shared between multiple threads and is supposed to
-     * be used if the MS-BFS needs to be executed with different consumers,
-     * e.g. for reusing not-thread-safe consumers.
-     * <p>
-     * To finalize initialization, one must call:
-     * {@link MultiSourceBFS#initPredecessorProcessing}.
-     */
-    public static MultiSourceBFS predecessorProcessing(Graph graph) {
-        return new MultiSourceBFS(graph, graph, null, true, false);
     }
 
     public static MultiSourceBFS predecessorProcessing(
@@ -145,40 +117,6 @@ public final class MultiSourceBFS implements Runnable {
             new PredecessorStrategy(perNodeAction, perNeighborAction),
             true,
             false,
-            startNodes
-        );
-    }
-
-    public MultiSourceBFS initAggregatedNeighborProcessing(BfsConsumer perNodeAction, long[] startNodes) {
-        return new MultiSourceBFS(
-            nodeIds,
-            relationships.concurrentCopy(),
-            new ANPStrategy(perNodeAction),
-            nodeCount,
-            false,
-            visits,
-            visitsNext,
-            seens,
-            seensNext,
-            startNodes
-        );
-    }
-
-    public MultiSourceBFS initPredecessorProcessing(
-        BfsConsumer perNodeAction,
-        BfsWithPredecessorConsumer perNeighborAction,
-        long[] startNodes
-    ) {
-        return new MultiSourceBFS(
-            nodeIds,
-            relationships.concurrentCopy(),
-            new PredecessorStrategy(perNodeAction, perNeighborAction),
-            nodeCount,
-            false,
-            visits,
-            visitsNext,
-            seens,
-            seensNext,
             startNodes
         );
     }
