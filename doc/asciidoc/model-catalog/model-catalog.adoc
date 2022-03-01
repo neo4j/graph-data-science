@@ -8,7 +8,7 @@ This section details the model catalog operations available to manage named trai
 
 
 Some graph algorithms use trained models in their computation.
-A model is generally a mathematical formula representing a real-world or fictitious entities.
+A model is generally a mathematical formula representing real-world or fictitious entities.
 Each algorithm requiring a trained model provides the formulation and means to compute this model (see <<algorithms-embeddings-graph-sage-syntax, GraphSage train syntax>>).
 
 The model catalog is a concept within the GDS library that allows storing and managing multiple trained models by name.
