@@ -20,7 +20,6 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
@@ -55,7 +54,6 @@ public class SccStreamProc extends SccProc<SccAlgorithm.StreamResult> {
     @Override
     public ComputationResultConsumer<SccAlgorithm, HugeLongArray, SccConfig, Stream<SccAlgorithm.StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            AllocationTracker allocationTracker = allocationTracker();
             Graph graph = computationResult.graph();
             HugeLongArray components = computationResult.result();
 
@@ -64,7 +62,6 @@ public class SccStreamProc extends SccProc<SccAlgorithm.StreamResult> {
                 return Stream.empty();
             }
 
-            log.info("Scc: overall memory usage: %s", allocationTracker.getUsageString());
             graph.release();
 
             return LongStream.range(0, graph.nodeCount())

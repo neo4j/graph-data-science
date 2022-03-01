@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.cosine;
 
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.impl.similarity.CosineAlgorithm;
 import org.neo4j.gds.impl.similarity.CosineConfig;
 import org.neo4j.gds.impl.similarity.CosineConfigImpl;
@@ -36,7 +35,7 @@ public abstract class CosineProc<PROC_RESULT> extends AlphaSimilarityProc<Cosine
     }
 
     @Override
-    protected CosineAlgorithm newAlgo(CosineConfig config, AllocationTracker allocationTracker) {
+    protected CosineAlgorithm newAlgo(CosineConfig config) {
         return new CosineAlgorithm(config, api);
     }
 

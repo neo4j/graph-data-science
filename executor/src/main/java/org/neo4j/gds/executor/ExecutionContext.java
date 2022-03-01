@@ -24,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -61,8 +60,6 @@ public interface ExecutionContext {
 
     @Nullable
     ProcedureCallContext callContext();
-
-    AllocationTracker allocationTracker();
 
     @Nullable
     TaskRegistryFactory taskRegistryFactory();
@@ -120,11 +117,6 @@ public interface ExecutionContext {
         @Override
         public @Nullable ProcedureCallContext callContext() {
             return ProcedureCallContext.EMPTY;
-        }
-
-        @Override
-        public AllocationTracker allocationTracker() {
-            return AllocationTracker.empty();
         }
 
         @Override

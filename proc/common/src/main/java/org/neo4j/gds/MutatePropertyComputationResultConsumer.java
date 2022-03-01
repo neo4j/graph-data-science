@@ -56,7 +56,7 @@ public final class MutatePropertyComputationResultConsumer<ALGO extends Algorith
         var graph = computationResult.graph();
         MutatePropertyConfig mutatePropertyConfig = computationResult.config();
 
-        final var nodeProperties = this.nodePropertyListFunction.apply(computationResult, executionContext.allocationTracker());
+        final var nodeProperties = this.nodePropertyListFunction.apply(computationResult);
 
         var maybeTranslatedProperties = graph.asNodeFilteredGraph()
             .map(filteredGraph -> nodeProperties.stream()

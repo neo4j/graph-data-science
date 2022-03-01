@@ -21,7 +21,6 @@ package org.neo4j.gds.similarity.ann;
 
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm;
 import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfig;
@@ -56,8 +55,7 @@ public abstract class ApproxNearestNeighborsProc<PROC_RESULT> extends AlphaSimil
 
     @Override
     protected ApproxNearestNeighborsAlgorithm<SimilarityInput> newAlgo(
-        ApproximateNearestNeighborsConfig config,
-        AllocationTracker allocationTracker
+        ApproximateNearestNeighborsConfig config
     ) {
         SimilarityAlgorithm<?, SimilarityInput> similarity =
             (SimilarityAlgorithm<?, SimilarityInput>) similarityAlgorithm(config);

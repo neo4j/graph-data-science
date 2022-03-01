@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.overlap;
 
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.impl.similarity.OverlapAlgorithm;
 import org.neo4j.gds.impl.similarity.OverlapConfig;
 import org.neo4j.gds.impl.similarity.OverlapConfigImpl;
@@ -36,7 +35,7 @@ public abstract class OverlapProc<PROC_RESULT> extends AlphaSimilarityProc<Overl
     }
 
     @Override
-    protected OverlapAlgorithm newAlgo(OverlapConfig config, AllocationTracker allocationTracker) {
+    protected OverlapAlgorithm newAlgo(OverlapConfig config) {
         return new OverlapAlgorithm(config, api);
     }
 

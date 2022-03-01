@@ -41,7 +41,6 @@ public abstract class StreamOfRelationshipsWriter<ALGO extends Algorithm<ALGO_RE
             .procedureTransaction(procedureTransaction)
             .transaction(transaction)
             .callContext(callContext)
-            .allocationTracker(allocationTracker)
             .userLogRegistryFactory(userLogRegistryFactory)
             .taskRegistryFactory(taskRegistryFactory)
             .username(username())

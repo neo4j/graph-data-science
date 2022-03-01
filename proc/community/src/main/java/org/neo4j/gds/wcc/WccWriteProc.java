@@ -23,7 +23,6 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -92,7 +91,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
         ExecutionContext executionContext
     ) {
         return WccProc.resultBuilder(
-            new WriteResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
+            new WriteResult.Builder(callContext, computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -127,7 +126,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
 
         static class Builder extends AbstractCommunityResultBuilder<WriteResult> {
 
-            Builder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
+            Builder(ProcedureCallContext context, int concurrency) {
                 super(context, concurrency);
             }
 

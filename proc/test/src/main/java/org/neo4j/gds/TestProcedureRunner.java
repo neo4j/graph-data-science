@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.graphdb.Transaction;
@@ -56,7 +55,6 @@ public final class TestProcedureRunner {
             ProcedureCallContext.EMPTY,
             log,
             EmptyTaskRegistryFactory.INSTANCE,
-            AllocationTracker.empty(),
             tx,
             Username.EMPTY_USERNAME,
             func
@@ -75,7 +73,6 @@ public final class TestProcedureRunner {
             Neo4jProxy.testLog(),
             EmptyTaskRegistryFactory.INSTANCE,
             EmptyUserLogRegistryFactory.INSTANCE,
-            AllocationTracker.empty(),
             tx,
             Username.EMPTY_USERNAME
         );

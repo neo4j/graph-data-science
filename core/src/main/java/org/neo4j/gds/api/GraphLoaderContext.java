@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -47,11 +46,6 @@ public interface GraphLoaderContext {
     @Value.Default
     default ExecutorService executor() {
         return Pools.DEFAULT;
-    }
-
-    @Value.Default
-    default AllocationTracker allocationTracker() {
-        return AllocationTracker.empty();
     }
 
     @Value.Default

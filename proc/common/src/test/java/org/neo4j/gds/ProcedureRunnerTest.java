@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -93,14 +92,12 @@ class ProcedureRunnerTest extends BaseTest {
                 username.username(),
                 new GlobalTaskStore()
             );
-            var allocationTracker = AllocationTracker.empty();
             ProcedureRunner.applyOnProcedure(
                 db,
                 TestProc.class,
                 procedureCallContext,
                 log,
                 taskRegistryFactory,
-                allocationTracker,
                 tx,
                 username,
                 proc -> {
@@ -109,7 +106,6 @@ class ProcedureRunnerTest extends BaseTest {
                     assertThat(proc.log).isEqualTo(log);
                     assertThat(proc.taskRegistryFactory).isEqualTo(taskRegistryFactory);
                     assertThat(proc.username).isEqualTo(username);
-                    assertThat(proc.allocationTracker).isEqualTo(allocationTracker);
                     assertThat(proc.modelCatalog()).isEqualTo(modelCatalog);
                 }
             );

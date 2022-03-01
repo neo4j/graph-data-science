@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.euclidean;
 
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.impl.similarity.EuclideanAlgorithm;
 import org.neo4j.gds.impl.similarity.EuclideanConfig;
 import org.neo4j.gds.impl.similarity.EuclideanConfigImpl;
@@ -36,7 +35,7 @@ public abstract class EuclideanProc<PROC_RESULT> extends AlphaSimilarityProc<Euc
     }
 
     @Override
-    protected EuclideanAlgorithm newAlgo(EuclideanConfig config, AllocationTracker allocationTracker) {
+    protected EuclideanAlgorithm newAlgo(EuclideanConfig config) {
         return new EuclideanAlgorithm(config, api);
     }
 

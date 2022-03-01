@@ -36,7 +36,6 @@ import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
@@ -48,7 +47,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.internal.id.IdGeneratorFactory;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.neo4j.gds.core.GraphDimensionsValidation.validate;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -218,14 +216,13 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         validate(dimensions, storeConfig);
 
         int concurrency = graphProjectConfig.readConcurrency();
-        AllocationTracker allocationTracker = loadingContext.allocationTracker();
         try {
             progressTracker.beginSubTask();
             IdMapAndProperties nodes = loadNodes(concurrency);
             RelationshipsAndProperties relationships = loadRelationships(nodes.idMap(), concurrency);
             CSRGraphStore graphStore = createGraphStore(nodes, relationships);
 
-            logLoadingSummary(graphStore, Optional.of(allocationTracker));
+            logLoadingSummary(graphStore);
 
             return graphStore;
         } finally {

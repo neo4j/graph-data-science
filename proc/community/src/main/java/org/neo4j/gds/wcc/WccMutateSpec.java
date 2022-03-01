@@ -59,7 +59,7 @@ public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccM
 
     @Override
     public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateProc.MutateResult>> computationResultConsumer() {
-        MutateNodePropertyListFunction<Wcc, DisjointSetStruct, WccMutateConfig> mutateConfigNodePropertyListFunction = (computationResult, allocationTracker) -> List.of(
+        MutateNodePropertyListFunction<Wcc, DisjointSetStruct, WccMutateConfig> mutateConfigNodePropertyListFunction = (computationResult) -> List.of(
             ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
                 WccProc.nodeProperties(
@@ -78,8 +78,7 @@ public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccM
         return WccProc.resultBuilder(
             new WccMutateProc.MutateResult.Builder(
                 executionContext.callContext(),
-                computationResult.config().concurrency(),
-                executionContext.allocationTracker()
+                computationResult.config().concurrency()
             ),
             computationResult
         );

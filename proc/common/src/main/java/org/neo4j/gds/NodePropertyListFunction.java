@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 
@@ -29,7 +28,6 @@ import java.util.List;
 @FunctionalInterface
 public interface NodePropertyListFunction<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig> {
     List<NodeProperty> apply(
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
-        AllocationTracker allocationTracker
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     );
 }

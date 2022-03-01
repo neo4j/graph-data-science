@@ -22,7 +22,6 @@ package org.neo4j.gds.wcc;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -122,8 +121,7 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
 
             Builder(
                 ProcedureCallContext context,
-                int concurrency,
-                AllocationTracker allocationTracker
+                int concurrency
             ) {
                 super(context, concurrency);
             }

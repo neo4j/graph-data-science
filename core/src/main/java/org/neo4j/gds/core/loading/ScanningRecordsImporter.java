@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
 
@@ -42,7 +41,6 @@ public abstract class ScanningRecordsImporter<Record, T> {
     protected final ExecutorService executorService;
     protected final TransactionContext transaction;
     protected final GraphDimensions dimensions;
-    protected final AllocationTracker allocationTracker;
     protected final ProgressTracker progressTracker;
     protected final int concurrency;
 
@@ -57,7 +55,6 @@ public abstract class ScanningRecordsImporter<Record, T> {
         this.transaction = loadingContext.transactionContext();
         this.dimensions = dimensions;
         this.executorService = loadingContext.executor();
-        this.allocationTracker = loadingContext.allocationTracker();
         this.progressTracker = progressTracker;
         this.concurrency = concurrency;
     }

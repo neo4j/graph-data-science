@@ -59,7 +59,7 @@ public abstract class WriteProc<
     public WriteNodePropertiesComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
-            (computationResult, allocationTracker) -> nodePropertyList(computationResult),
+            (computationResult) -> nodePropertyList(computationResult),
             nodePropertyExporterBuilder,
             name()
         );

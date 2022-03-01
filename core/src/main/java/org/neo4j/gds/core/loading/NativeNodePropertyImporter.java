@@ -34,7 +34,6 @@ import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.values.storable.Value;
@@ -146,7 +145,6 @@ public final class NativeNodePropertyImporter {
         private int concurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         private Map<NodeLabel, PropertyMappings> propertyMappings;
         private GraphDimensions dimensions;
-        private AllocationTracker allocationTracker = AllocationTracker.empty();
 
 
         private Builder() {
@@ -164,11 +162,6 @@ public final class NativeNodePropertyImporter {
 
         public Builder dimensions(GraphDimensions dimensions) {
             this.dimensions = dimensions;
-            return this;
-        }
-
-        public Builder allocationTracker(AllocationTracker allocationTracker) {
-            this.allocationTracker = allocationTracker;
             return this;
         }
 

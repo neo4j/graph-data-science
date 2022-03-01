@@ -26,7 +26,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -139,7 +138,7 @@ public abstract class AlphaSimilarityProc
         };
     }
 
-    protected abstract ALGO newAlgo(CONFIG config, AllocationTracker allocationTracker);
+    protected abstract ALGO newAlgo(CONFIG config);
 
     protected abstract String taskName();
 
@@ -158,7 +157,7 @@ public abstract class AlphaSimilarityProc
                 ProgressTracker progressTracker
             ) {
                 removeGraph(username(), databaseId());
-                return newAlgo(configuration, allocationTracker);
+                return newAlgo(configuration);
             }
         };
     }

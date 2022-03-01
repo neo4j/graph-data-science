@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
@@ -44,7 +43,6 @@ public final class ProcedureRunner {
         Log log,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
-        AllocationTracker allocationTracker,
         Transaction tx,
         Username username
     ) {
@@ -60,7 +58,6 @@ public final class ProcedureRunner {
         proc.api = graphDb;
         proc.callContext = procedureCallContext;
         proc.log = log;
-        proc.allocationTracker = allocationTracker;
         proc.taskRegistryFactory = taskRegistryFactory;
         proc.userLogRegistryFactory = userLogRegistryFactory;
         proc.username = username;
@@ -75,7 +72,6 @@ public final class ProcedureRunner {
         ProcedureCallContext procedureCallContext,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
-        AllocationTracker allocationTracker,
         Transaction tx,
         Username username,
         Consumer<P> func
@@ -87,7 +83,6 @@ public final class ProcedureRunner {
             log,
             taskRegistryFactory,
             EmptyUserLogRegistryFactory.INSTANCE,
-            allocationTracker,
             tx,
             username
         );

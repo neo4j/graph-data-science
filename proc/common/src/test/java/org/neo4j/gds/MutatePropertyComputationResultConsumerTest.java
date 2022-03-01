@@ -31,7 +31,6 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.CSRGraphStore;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
@@ -68,7 +67,6 @@ class MutatePropertyComputationResultConsumerTest {
 
     private final ExecutionContext executionContext = ImmutableExecutionContext
         .builder()
-        .allocationTracker(AllocationTracker.empty())
         .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
         .log(Neo4jProxy.testLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
@@ -79,7 +77,7 @@ class MutatePropertyComputationResultConsumerTest {
     void setup() {
         var nodePropertyList = List.of(ImmutableNodeProperty.of("mutateProperty", new TestNodeProperties()));
         mutateResultConsumer = new MutatePropertyComputationResultConsumer<>(
-            (computationResult, allocationTracker) -> nodePropertyList,
+            (computationResult) -> nodePropertyList,
             (computationResult, executionContext) -> new TestAlgoResultBuilder()
         );
     }

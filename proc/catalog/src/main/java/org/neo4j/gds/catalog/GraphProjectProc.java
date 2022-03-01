@@ -34,7 +34,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -309,15 +308,6 @@ public class GraphProjectProc extends CatalogProc {
                 .collect(Collectors.toList());
 
         validateConfig(cypherConfig, allowedKeys);
-    }
-
-    /**
-     * This is (temporarily) overridden due to a performance regression
-     * caused by tracking memory allocation during graph creation.
-     */
-    @Override
-    protected AllocationTracker allocationTracker() {
-        return AllocationTracker.empty();
     }
 
     private GraphProjectResult projectGraph(GraphProjectConfig config) {

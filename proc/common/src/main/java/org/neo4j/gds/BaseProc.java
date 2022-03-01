@@ -29,7 +29,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -71,9 +70,6 @@ public abstract class BaseProc {
     public ProcedureCallContext callContext;
 
     @Context
-    public AllocationTracker allocationTracker;
-
-    @Context
     public TaskRegistryFactory taskRegistryFactory;
 
     @Context
@@ -86,16 +82,6 @@ public abstract class BaseProc {
     // instead use org.neo4j.gds.BaseProc.modelCatalog for access
     @Context
     public ModelCatalog internalModelCatalog;
-
-    protected BaseProc() {
-        if (allocationTracker == null) {
-            allocationTracker = AllocationTracker.empty();
-        }
-    }
-
-    protected AllocationTracker allocationTracker() {
-        return allocationTracker;
-    }
 
     protected String username() {
         return username.username();
@@ -160,7 +146,6 @@ public abstract class BaseProc {
             .transactionContext(TransactionContext.of(api, procedureTransaction))
             .api(api)
             .log(log)
-            .allocationTracker(allocationTracker)
             .taskRegistryFactory(taskRegistryFactory)
             .userLogRegistryFactory(userLogRegistryFactory)
             .terminationFlag(TerminationFlag.wrap(transaction))
@@ -180,7 +165,6 @@ public abstract class BaseProc {
             .procedureTransaction(procedureTransaction)
             .transaction(transaction)
             .callContext(callContext)
-            .allocationTracker(allocationTracker)
             .userLogRegistryFactory(userLogRegistryFactory)
             .taskRegistryFactory(taskRegistryFactory)
             .username(username())

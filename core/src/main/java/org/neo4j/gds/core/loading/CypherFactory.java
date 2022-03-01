@@ -143,7 +143,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
 
             progressTracker.endSubTask("Loading");
 
-            logLoadingSummary(graphStore, Optional.empty());
+            logLoadingSummary(graphStore);
 
             return graphStore;
         });

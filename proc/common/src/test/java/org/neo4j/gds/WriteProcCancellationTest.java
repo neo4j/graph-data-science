@@ -24,7 +24,6 @@ import org.neo4j.gds.AlgoBaseProcTest.InvocationCountingTaskStore;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
@@ -69,7 +68,7 @@ class WriteProcCancellationTest extends BaseTest {
 
             var resultConsumer = new WriteNodePropertiesComputationResultConsumer<TestAlgorithm, TestAlgorithm, TestWriteConfig, TestResult>(
                 (computationResult, executionContext) -> new TestAlgoResultBuilder(),
-                (computationResult, allocationTracker) -> List.of(nodeProperty),
+                (computationResult) -> List.of(nodeProperty),
                 new NativeNodePropertiesExporterBuilder(TransactionContext.of(db, tx)),
                 "foo"
             );
@@ -106,7 +105,6 @@ class WriteProcCancellationTest extends BaseTest {
                 .api(db)
                 .taskRegistryFactory(() -> new TaskRegistry("", taskStore))
                 .username("")
-                .allocationTracker(AllocationTracker.empty())
                 .log(Neo4jProxy.testLog())
                 .build();
 

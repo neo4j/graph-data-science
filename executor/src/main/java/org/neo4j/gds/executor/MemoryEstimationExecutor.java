@@ -76,7 +76,6 @@ public class MemoryEstimationExecutor<
                 : ImmutableGraphLoaderContext
                     .builder()
                     .api(executionContext.api())
-                    .allocationTracker(executionContext.allocationTracker())
                     .log(executionContext.log())
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
                     .userLogRegistryFactory(executionContext.userLogRegistryFactory())

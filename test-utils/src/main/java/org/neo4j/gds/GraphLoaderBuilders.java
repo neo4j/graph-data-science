@@ -31,7 +31,6 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -60,7 +59,6 @@ public final class GraphLoaderBuilders {
         GraphDatabaseAPI api,
         Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
-        Optional<AllocationTracker> allocationTracker,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
@@ -101,7 +99,6 @@ public final class GraphLoaderBuilders {
             api,
             transactionContext,
             executorService,
-            allocationTracker,
             terminationFlag,
             log,
             userName,
@@ -115,7 +112,6 @@ public final class GraphLoaderBuilders {
         GraphDatabaseAPI api,
         Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
-        Optional<AllocationTracker> allocationTracker,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
@@ -125,7 +121,6 @@ public final class GraphLoaderBuilders {
             api,
             transactionContext,
             executorService,
-            allocationTracker,
             terminationFlag,
             log,
             userName,
@@ -143,7 +138,6 @@ public final class GraphLoaderBuilders {
         // GraphLoader parameters
         GraphDatabaseAPI api,
         Optional<TransactionContext> transactionContext,
-        Optional<AllocationTracker> allocationTracker,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
@@ -169,7 +163,6 @@ public final class GraphLoaderBuilders {
             api,
             transactionContext,
             Optional.empty(),
-            allocationTracker,
             terminationFlag,
             log,
             userName,
@@ -182,7 +175,6 @@ public final class GraphLoaderBuilders {
         GraphDatabaseAPI api,
         Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
-        Optional<AllocationTracker> allocationTracker,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
@@ -193,7 +185,6 @@ public final class GraphLoaderBuilders {
                 .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(api)))
                 .api(api)
                 .executor(executorService.orElse(Pools.DEFAULT))
-                .allocationTracker(allocationTracker.orElse(AllocationTracker.empty()))
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)

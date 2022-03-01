@@ -24,10 +24,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.IdMapAndProperties;
 import org.neo4j.gds.core.loading.RelationshipsAndProperties;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.MemoryUsage;
-
-import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -55,13 +52,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         );
     }
 
-    protected void logLoadingSummary(GraphStore graphStore, Optional<AllocationTracker> allocationTracker) {
-        var allocationMessage = allocationTracker.map(AllocationTracker::get).orElse("");
-
-        if (!allocationMessage.isEmpty()) {
-            progressTracker.logMessage(allocationMessage);
-        }
-
+    protected void logLoadingSummary(GraphStore graphStore) {
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
         var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
         progressTracker.logMessage(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));

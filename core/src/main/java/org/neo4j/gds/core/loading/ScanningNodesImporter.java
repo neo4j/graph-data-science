@@ -31,7 +31,6 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -64,7 +63,6 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         ProgressTracker progressTracker,
         int concurrency
     ) {
-        var allocationTracker = loadingContext.allocationTracker();
         var expectedCapacity = dimensions.highestPossibleNodeCount();
         var labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 
@@ -92,8 +90,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         var nodePropertyImporter = initializeNodePropertyImporter(
             propertyMappings,
             dimensions,
-            concurrency,
-            allocationTracker
+            concurrency
         );
 
         return new ScanningNodesImporter(
@@ -271,8 +268,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
     private static @Nullable NativeNodePropertyImporter initializeNodePropertyImporter(
         IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
         GraphDimensions dimensions,
-        int concurrency,
-        AllocationTracker allocationTracker
+        int concurrency
     ) {
         var propertyMappingsByLabel = propertyMappings.storedProperties();
         boolean loadProperties = propertyMappingsByLabel
@@ -286,7 +282,6 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
                 .concurrency(concurrency)
                 .dimensions(dimensions)
                 .propertyMappings(propertyMappingsByLabel)
-                .allocationTracker(allocationTracker)
                 .build();
         }
 

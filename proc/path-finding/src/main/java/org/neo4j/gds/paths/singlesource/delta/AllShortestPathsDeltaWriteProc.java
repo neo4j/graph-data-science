@@ -89,7 +89,6 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
             .procedureTransaction(procedureTransaction)
             .transaction(transaction)
             .callContext(callContext)
-            .allocationTracker(allocationTracker)
             .userLogRegistryFactory(userLogRegistryFactory)
             .taskRegistryFactory(taskRegistryFactory)
             .username(username())

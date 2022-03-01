@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.pearson;
 
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.impl.similarity.PearsonAlgorithm;
 import org.neo4j.gds.impl.similarity.PearsonConfig;
 import org.neo4j.gds.impl.similarity.PearsonConfigImpl;
@@ -38,7 +37,7 @@ public abstract class PearsonProc<PROC_RESULT> extends AlphaSimilarityProc<Pears
     }
 
     @Override
-    protected PearsonAlgorithm newAlgo(PearsonConfig config, AllocationTracker allocationTracker) {
+    protected PearsonAlgorithm newAlgo(PearsonConfig config) {
         return new PearsonAlgorithm(config, api);
     }
 
