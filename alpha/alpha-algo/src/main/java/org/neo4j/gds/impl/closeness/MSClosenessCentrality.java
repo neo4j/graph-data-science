@@ -117,13 +117,6 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
         return this;
     }
 
-    public final double[] exportToArray() {
-        return resultStream()
-                .limit(Integer.MAX_VALUE)
-                .mapToDouble(r -> r.centrality)
-                .toArray();
-    }
-
     /**
      * Result class used for streaming
      */

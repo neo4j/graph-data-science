@@ -96,7 +96,7 @@ class ClosenessCentralityDirectedTest {
             ProgressTracker.NULL_TRACKER
         );
         algo.compute();
-        final double[] centrality = algo.exportToArray();
+        final double[] centrality = algo.getCentrality().toArray();
 
         assertArrayEquals(EXPECTED, centrality, 0.1);
     }
@@ -111,7 +111,7 @@ class ClosenessCentralityDirectedTest {
             ProgressTracker.NULL_TRACKER
         );
         algo.compute();
-        final double[] centrality = algo.exportToArray();
+        final double[] centrality = algo.getCentrality().toArray();
 
         assertArrayEquals(EXPECTED_WF, centrality, 0.1);
     }
