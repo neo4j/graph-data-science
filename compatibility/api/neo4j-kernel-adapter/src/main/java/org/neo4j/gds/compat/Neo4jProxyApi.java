@@ -20,7 +20,6 @@
 package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.Node;
@@ -156,14 +155,6 @@ public interface Neo4jProxyApi {
     ) throws Exception;
 
     CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds);
-
-    MemoryTrackerProxy memoryTrackerProxy(KernelTransaction kernelTransaction);
-
-    @TestOnly
-    MemoryTrackerProxy emptyMemoryTracker();
-
-    @TestOnly
-    MemoryTrackerProxy limitedMemoryTracker(long limitInBytes, long grabSizeInBytes);
 
     BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,

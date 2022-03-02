@@ -67,21 +67,6 @@ public final class FeatureToggleProc {
     }
 
     @Internal
-    @Procedure("gds.features.useKernelTracker")
-    @Description("Toggle whether the native memory tracking feature on Neo4j 4.1+ should be used.")
-    public void useKernelTracker(@Name(value = "useKernelTracker") boolean useKernelTracker) {
-        GdsFeatureToggles.USE_KERNEL_TRACKER.toggle(useKernelTracker);
-    }
-
-    @Internal
-    @Procedure("gds.features.useKernelTracker.reset")
-    @Description("Set the behavior of whether to use the native memory tracking to the default. That value is returned.")
-    public Stream<FeatureState> resetUseKernelTracker() {
-        GdsFeatureToggles.USE_KERNEL_TRACKER.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_KERNEL_TRACKER.isEnabled()));
-    }
-
-    @Internal
     @Procedure("gds.features.usePropertyValueIndex")
     @Description("Toggle whether the property value index should be used during node property loading.")
     public void usePropertyValueIndex(@Name(value = "usePropertyValueIndex") boolean usePropertyValueIndex) {
