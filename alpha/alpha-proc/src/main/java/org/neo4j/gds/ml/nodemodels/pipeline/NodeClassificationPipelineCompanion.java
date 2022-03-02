@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
@@ -39,7 +39,7 @@ public final class NodeClassificationPipelineCompanion {
 
     private NodeClassificationPipelineCompanion() {}
 
-    public static Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> getTrainedNCPipelineModel(
+    public static Model<LogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> getTrainedNCPipelineModel(
         ModelCatalog modelCatalog,
         String modelName,
         String username
@@ -47,7 +47,7 @@ public final class NodeClassificationPipelineCompanion {
         return modelCatalog.get(
             username,
             modelName,
-            NodeLogisticRegressionData.class,
+            LogisticRegressionData.class,
             NodeClassificationPipelineTrainConfig.class,
             NodeClassificationPipelineModelInfo.class
         );

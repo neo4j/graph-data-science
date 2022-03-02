@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.Predictor;
+import org.neo4j.gds.ml.Features;
+import org.neo4j.gds.ml.Trainer.Classifier;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.metrics.ClassificationMetric;
 import org.openjdk.jol.util.Multiset;
 
@@ -37,61 +35,64 @@ import java.util.stream.Collectors;
 public class ClassificationMetricComputer implements MetricComputer {
     private final List<Metric> metrics;
     private final Multiset<Long> classCounts;
-    private final Graph graph;
-    private final NodeClassificationTrainConfig config;
+    private final Features features;
+    private final HugeLongArray targets;
+    private final int concurrency;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
     public ClassificationMetricComputer(
         List<Metric> metrics,
         Multiset<Long> classCounts,
-        Graph graph,
-        NodeClassificationTrainConfig config,
+        Features features,
+        HugeLongArray targets,
+        int concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         this.metrics = metrics;
         this.classCounts = classCounts;
-        this.graph = graph;
-        this.config = config;
+        this.features = features;
+        this.targets = targets;
+        this.concurrency = concurrency;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
     }
 
     @Override
     public Map<Metric, Double> computeMetrics(
-        HugeLongArray evaluationSet, Predictor<Matrix, ?> predictor
+        HugeLongArray evaluationSet, Classifier classifier
     ) {
         var predictedClasses = HugeLongArray.newArray(evaluationSet.size());
 
         // consume from queue which contains local nodeIds, i.e. indices into evaluationSet
         // the consumer internally remaps to original nodeIds before prediction
         var consumer = new NodeClassificationPredictConsumer(
-            graph,
+            features,
             evaluationSet::get,
-            (Predictor<Matrix, NodeLogisticRegressionData>) predictor,
+            classifier,
             null,
             predictedClasses,
-            config.featureProperties(),
             progressTracker
         );
 
         var queue = new BatchQueue(evaluationSet.size());
-        queue.parallelConsume(consumer, config.concurrency(), terminationFlag);
+        queue.parallelConsume(consumer, concurrency, terminationFlag);
 
-        var localTargets = makeLocalTargets(evaluationSet);
+        var localLabels = makeLocalTargets(evaluationSet, targets);
         return metrics.stream().collect(Collectors.toMap(
             metric -> metric,
-            metric -> ((ClassificationMetric) metric).compute(localTargets, predictedClasses, classCounts)
+            metric -> ((ClassificationMetric) metric).compute(localLabels, predictedClasses, classCounts)
         ));
     }
 
-    private HugeLongArray makeLocalTargets(HugeLongArray nodeIds) {
-        var targets = HugeLongArray.newArray(nodeIds.size());
-        var targetNodeProperty = graph.nodeProperties(config.targetProperty());
+    // nodeIds: 4, 42
+    // node4.target, node42.target
+    private HugeLongArray makeLocalTargets(HugeLongArray nodeIds, HugeLongArray targets) {
+        var localTargets = HugeLongArray.newArray(nodeIds.size());
 
-        targets.setAll(i -> targetNodeProperty.longValue(nodeIds.get(i)));
-        return targets;
+        localTargets.setAll(i -> targets.get(nodeIds.get(i)));
+        return localTargets;
     }
 
 }

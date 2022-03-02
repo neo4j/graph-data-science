@@ -20,11 +20,10 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.ml.Predictor;
-import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.Trainer.Classifier;
 
 import java.util.Map;
 
 public interface MetricComputer {
-    Map<Metric, Double> computeMetrics(HugeLongArray evaluationSet, Predictor<Matrix, ?> predictor);
+    Map<Metric, Double> computeMetrics(HugeLongArray evaluationSet, Classifier classifier);
 }

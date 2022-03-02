@@ -21,13 +21,13 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
 
 @ValueClass
 public interface NodeClassificationPipelineTrainResult {
-    Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model();
+    Model<LogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model();
     NodeClassificationTrain.ModelSelectResult modelSelectionStatistics();
 }

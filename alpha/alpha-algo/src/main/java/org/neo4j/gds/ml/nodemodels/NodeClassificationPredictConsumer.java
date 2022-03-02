@@ -19,19 +19,14 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.Predictor;
+import org.neo4j.gds.ml.Features;
+import org.neo4j.gds.ml.Trainer.Classifier;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
-import org.neo4j.gds.ml.core.batch.MappedBatch;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -42,58 +37,54 @@ import java.util.function.Consumer;
  * will also be written into it.
  */
 public class NodeClassificationPredictConsumer implements Consumer<Batch> {
-    private final Graph graph;
+    private final Features features;
     private final BatchTransformer nodeIds;
-    private final Predictor<Matrix, NodeLogisticRegressionData> predictor;
+    private final Classifier classifier;
     private final HugeObjectArray<double[]> predictedProbabilities;
     private final HugeLongArray predictedClasses;
-    private final List<String> featureProperties;
     private final ProgressTracker progressTracker;
 
-    public NodeClassificationPredictConsumer(
-        Graph graph,
+    NodeClassificationPredictConsumer(
+        Features features,
         BatchTransformer nodeIds,
-        Predictor<Matrix, NodeLogisticRegressionData> predictor,
-        @Nullable HugeObjectArray<double[]> predictedProbabilities,
+        Classifier classifier,
+        HugeObjectArray<double[]> predictedProbabilities,
         HugeLongArray predictedClasses,
-        List<String> featureProperties,
         ProgressTracker progressTracker
     ) {
-        this.graph = graph;
+        this.features = features;
         this.nodeIds = nodeIds;
-        this.predictor = predictor;
+        this.classifier = classifier;
         this.predictedProbabilities = predictedProbabilities;
         this.predictedClasses = predictedClasses;
-        this.featureProperties = featureProperties;
         this.progressTracker = progressTracker;
     }
 
     @Override
     public void accept(Batch batch) {
-        var originalNodeIdsBatch = new MappedBatch(batch, nodeIds);
-        var probabilityMatrix = predictor.predict(graph, originalNodeIdsBatch);
-        var numberOfClasses = probabilityMatrix.cols();
-        var currentRow = 0;
+        var numberOfClasses = classifier.numberOfClasses();
         for (long nodeIndex : batch.nodeIds()) {
+            var nodeId = nodeIds.apply(nodeIndex);
+            var predictedProbabilitiesForNode = classifier.predictProbabilities(nodeId, features);
             if (predictedProbabilities != null) {
-                predictedProbabilities.set(nodeIndex, probabilityMatrix.getRow(currentRow));
+                predictedProbabilities.set(nodeIndex, predictedProbabilitiesForNode);
             }
             var bestClassId = -1;
             var maxProbability = -1d;
 
             // TODO: replace with a generic DoubleMatrixOperations.maxWithIndex (lookup correct name)
             for (int classId = 0; classId < numberOfClasses; classId++) {
-                var probability = probabilityMatrix.dataAt(currentRow, classId);
+                var probability = predictedProbabilitiesForNode[classId];
                 if (probability > maxProbability) {
                     maxProbability = probability;
                     bestClassId = classId;
                 }
             }
 
-            long bestClass = predictor.modelData().classIdMap().toOriginal(bestClassId);
+            long bestClass = classifier.classIdMap().toOriginal(bestClassId);
             predictedClasses.set(nodeIndex, bestClass);
-            currentRow++;
         }
         progressTracker.logProgress(batch.size());
     }
+
 }

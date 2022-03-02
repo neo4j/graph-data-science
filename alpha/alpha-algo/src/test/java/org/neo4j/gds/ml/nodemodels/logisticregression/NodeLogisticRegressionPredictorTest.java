@@ -30,8 +30,8 @@ public class NodeLogisticRegressionPredictorTest {
         var memoryUsageInBytes = NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(100, 10, 10);
 
         int memoryUsageOfFeatureExtractors = 320; // 32 bytes * number of features
-        int memoryUsageOfFeatureMatrix = 8032; // 8 bytes * batch size * number of features + 32
-        int memoryUsageOfMatrixMultiplication = 8000; // 8 bytes per double * batchSize * numberOfClasses
+        int memoryUsageOfFeatureMatrix = 8016; // 8 bytes * batch size * number of features + 16
+        int memoryUsageOfMatrixMultiplication = 8016; // 8 bytes per double * batchSize * numberOfClasses + 16
         int memoryUsageOfSoftMax = memoryUsageOfMatrixMultiplication; // computed over the matrix multiplication, it requires an equally-sized matrix
         assertThat(memoryUsageInBytes).isEqualTo(memoryUsageOfFeatureExtractors + memoryUsageOfFeatureMatrix + memoryUsageOfFeatureMatrix + memoryUsageOfSoftMax);
     }

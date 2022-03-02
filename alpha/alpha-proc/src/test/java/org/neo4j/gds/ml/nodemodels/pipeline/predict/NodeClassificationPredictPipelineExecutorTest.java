@@ -43,7 +43,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
@@ -127,8 +126,12 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
 
-            var weights=new double[]{-2.0, -1.0, 3.0, 0.0,-1.5,-1.3,2.6,0.0};
-            var modelData = NodeClassificationPipelinePredictProcTestUtil.createModeldata(weights);
+            var weights = new double[]{
+                -2.0, -1.0, 3.0,
+                -1.5, -1.3, 2.6
+            };
+            var bias = new double[]{0.0, 0.0};
+            var modelData = NodeClassificationPipelinePredictProcTestUtil.createModeldata(weights, bias);
 
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
                 pipeline,
@@ -171,8 +174,12 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("degree"));
-            var weights=new double[]{1.0,1.0,-2.0, -1.0, 3.0, 0.0,-1.5,-1.3,2.6,0.0};
-            NodeLogisticRegressionData modelData = NodeClassificationPipelinePredictProcTestUtil.createModeldata(weights);
+            var weights = new double[]{
+                1.0, 1.0, -2.0, -1.0,
+                0.0, -1.5, -1.3, 2.6
+            };
+            var bias = new double[]{3.0, 0.0};
+            var modelData = NodeClassificationPipelinePredictProcTestUtil.createModeldata(weights, bias);
 
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
                 pipeline,
@@ -214,8 +221,12 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("degree"));
-            var weights=new double[]{1.0,1.0,-2.0, -1.0, 3.0, 0.0,-1.5,-1.3,2.6,0.0};
-            NodeLogisticRegressionData modelData = NodeClassificationPipelinePredictProcTestUtil.createModeldata(weights);
+            var weights = new double[]{
+                1.0, 1.0, -2.0, -1.0,
+                0.0, -1.5, -1.3, 2.6
+            };
+            var bias = new double[]{3.0, 0.0};
+            var modelData = NodeClassificationPipelinePredictProcTestUtil.createModeldata(weights, bias);
 
             modelCatalog.set(Model.of(
                 getUsername(),
@@ -318,8 +329,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),
-            11960L,
-            11960L
+            6952L,
+            6952L
         );
 
     }

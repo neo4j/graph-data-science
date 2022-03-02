@@ -35,7 +35,6 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 
 import java.util.List;
@@ -48,15 +47,6 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
         LogisticRegressionData data
     ) {
         this.data = data;
-    }
-
-    //TODO: remove me with NodeLogisticRegressionData
-    public LogisticRegressionClassifier(NodeLogisticRegressionData data) {
-        this(convertModelData(data));
-    }
-
-    private static LogisticRegressionData convertModelData(NodeLogisticRegressionData modelData) {
-        return LogisticRegressionData.create(modelData.weights(), modelData.bias(), modelData.classIdMap());
     }
 
     @Override

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model;
@@ -27,8 +28,9 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.core.tensor.Vector;
+import org.neo4j.gds.ml.logisticregression.ImmutableLogisticRegressionData;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
@@ -63,7 +65,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         addPipelineModelWithFeatures(modelCatalog, graphName, username, dimensionOfNodeFeatures, List.of("a","b"));
     }
 
-    static Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
+    static Model<LogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
         String graphName,
         String username,
         int dimensionOfNodeFeatures,
@@ -80,12 +82,20 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         }
 
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("degree"));
-        var weights = new double[2 * (dimensionOfNodeFeatures + 2)];
-        for (int i = 0; i < weights.length; ++i) {
-            weights[i] = i;
+        var weights = Matrix.create(0.0, 2, dimensionOfNodeFeatures + 1);
+        var bias = Vector.create(0, 2);
+        var value = new MutableDouble();
+        for (int row = 0; row < weights.rows(); row++) {
+            for (int col = 0; col < weights.cols() + 1; col++) {
+                if (col == weights.cols()) {
+                    bias.setDataAt(row, value.getAndIncrement());
+                } else {
+                    weights.setDataAt(row, col, value.getAndIncrement());
+                }
+            }
         }
 
-        NodeLogisticRegressionData modelData = createModeldata(weights);
+        var modelData = createModeldata(weights.data(), bias.data());
         return Model.of(
             username,
             "model",
@@ -117,11 +127,11 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         modelCatalog.set(createModel(graphName, username, dimensionOfNodeFeatures, nodeFeatures));
     }
 
-    static NodeLogisticRegressionData createModeldata(double[] weights) {
+    static LogisticRegressionData createModeldata(double[] weights, double[] bias) {
         var idMap = new LocalIdMap();
         idMap.toMapped(0);
         idMap.toMapped(1);
-        return ImmutableNodeLogisticRegressionData.builder()
+        return ImmutableLogisticRegressionData.builder()
             .weights(new Weights<>(
                 new Matrix(
                     weights,
@@ -129,18 +139,19 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                     weights.length / 2
                 ))
             )
+            .bias(new Weights<>(new Vector(bias)))
             .classIdMap(idMap)
             .build();
     }
 
     static Stream<Arguments> graphNameOrConfigurations() {
-        MemoryRange pipelineExecutorEstimation = MemoryRange.of(10344L, 10344L);
+        MemoryRange pipelineExecutorEstimation = MemoryRange.of(6168L, 6168L);
 
         return Stream.of(
             Arguments.of("g", pipelineExecutorEstimation),
             Arguments.of(
                 Map.of("nodeProjection", "*", "relationshipProjection", "*"),
-                MemoryRange.of(305656)
+                MemoryRange.of(301480)
             )
         );
     }

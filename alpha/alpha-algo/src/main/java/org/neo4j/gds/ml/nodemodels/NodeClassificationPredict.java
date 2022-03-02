@@ -28,7 +28,9 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 
@@ -39,7 +41,7 @@ import static org.neo4j.gds.ml.core.batch.BatchTransformer.IDENTITY;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationResult> {
 
-    private final NodeLogisticRegressionPredictor predictor;
+    private final LogisticRegressionClassifier classifier;
     private final Graph graph;
     private final int batchSize;
     private final int concurrency;
@@ -47,7 +49,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
     private final List<String> featureProperties;
 
     public NodeClassificationPredict(
-        NodeLogisticRegressionPredictor predictor,
+        LogisticRegressionClassifier classifier,
         Graph graph,
         int batchSize,
         int concurrency,
@@ -56,7 +58,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
-        this.predictor = predictor;
+        this.classifier = classifier;
         this.graph = graph;
         this.concurrency = concurrency;
         this.batchSize = batchSize;
@@ -102,15 +104,15 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
     @Override
     public NodeClassificationResult compute() {
         progressTracker.beginSubTask();
+        var features = Features.extractLazyFeatures(graph, featureProperties);
         var predictedProbabilities = initProbabilities();
         var predictedClasses = HugeLongArray.newArray(graph.nodeCount());
         var consumer = new NodeClassificationPredictConsumer(
-            graph,
+            features,
             IDENTITY,
-            predictor,
+            classifier,
             predictedProbabilities,
             predictedClasses,
-            featureProperties,
             progressTracker
         );
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize, concurrency);
@@ -126,8 +128,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
 
     private @Nullable HugeObjectArray<double[]> initProbabilities() {
         if (produceProbabilities) {
-            var data = predictor.modelData();
-            var numberOfClasses = data.classIdMap().originalIds().length;
+            var numberOfClasses = classifier.numberOfClasses();
             var predictions = HugeObjectArray.newArray(
                 double[].class,
                 graph.nodeCount()

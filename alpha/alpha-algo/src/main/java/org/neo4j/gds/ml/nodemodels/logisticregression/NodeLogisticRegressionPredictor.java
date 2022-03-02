@@ -35,7 +35,6 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
 import static org.neo4j.gds.ml.core.Dimensions.matrix;
 import static org.neo4j.gds.ml.core.features.FeatureExtraction.extract;
@@ -53,12 +52,15 @@ public class NodeLogisticRegressionPredictor implements Predictor<Matrix, NodeLo
         return
             sizeOfFeatureExtractorsInBytes(numberOfFeatures) +
             Constant.sizeInBytes(dimensionsOfFirstMatrix) +
-            MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(dimensionsOfFirstMatrix, dimensionsOfSecondMatrix) +
+            MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(
+                dimensionsOfFirstMatrix,
+                dimensionsOfSecondMatrix
+            ) +
             Softmax.sizeInBytes(resultRows, resultCols);
     }
 
     private static long sizeOfFeatureExtractorsInBytes(int numberOfFeatures) {
-        return FeatureExtraction.memoryUsageInBytes(numberOfFeatures) + sizeOfInstance(BiasFeature.class);
+        return FeatureExtraction.memoryUsageInBytes(numberOfFeatures);
     }
 
 

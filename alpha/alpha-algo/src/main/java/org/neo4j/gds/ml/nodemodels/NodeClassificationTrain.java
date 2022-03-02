@@ -42,10 +42,10 @@ import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrain;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
@@ -70,7 +70,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
-public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
+public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
 
     public static final String MODEL_TYPE = "nodeLogisticRegression";
 
@@ -276,8 +276,9 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         this.metricComputer = new ClassificationMetricComputer(
             metrics,
             classCounts,
-            graph,
-            config,
+            features,
+            targets,
+            config.concurrency(),
             progressTracker,
             terminationFlag
         );
@@ -287,7 +288,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
     public void release() {}
 
     @Override
-    public Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> compute() {
+    public Model<LogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> compute() {
         progressTracker.beginSubTask();
 
         progressTracker.beginSubTask();
@@ -335,12 +336,11 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
                 progressTracker.beginSubTask("Training");
                 var classifier = trainModel(trainSet, modelParams);
 
-                var predictor = classifier.convertToPredictor(config.featureProperties());
                 progressTracker.endSubTask("Training");
 
                 progressTracker.beginSubTask(validationSet.size() + trainSet.size());
-                metricComputer.computeMetrics(validationSet, predictor).forEach(validationStatsBuilder::update);
-                metricComputer.computeMetrics(trainSet, predictor).forEach(trainStatsBuilder::update);
+                metricComputer.computeMetrics(validationSet, classifier).forEach(validationStatsBuilder::update);
+                metricComputer.computeMetrics(trainSet, classifier).forEach(trainStatsBuilder::update);
                 progressTracker.endSubTask();
 
                 progressTracker.endSubTask();
@@ -382,8 +382,8 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         progressTracker.endSubTask("TrainSelectedOnRemainder");
 
         progressTracker.beginSubTask(outerSplit.testSet().size() + outerSplit.trainSet().size());
-        var testMetrics = metricComputer.computeMetrics(outerSplit.testSet(), bestClassifier.convertToPredictor(config.featureProperties()));
-        var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), bestClassifier.convertToPredictor(config.featureProperties()));
+        var testMetrics = metricComputer.computeMetrics(outerSplit.testSet(), bestClassifier);
+        var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), bestClassifier);
         progressTracker.endSubTask();
 
         return mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
@@ -396,17 +396,13 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         return retrainedClassifier;
     }
 
-    private Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> createModel(
+    private Model<LogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> createModel(
         NodeLogisticRegressionTrainConfig bestParameters,
         Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metricResults,
         LogisticRegressionClassifier classifier
     ) {
-        NodeLogisticRegressionData retrainedModelData = classifier
-            .convertToPredictor(config.featureProperties())
-            .modelData();
-
         var modelInfo = NodeClassificationModelInfo.of(
-            retrainedModelData.classIdMap().originalIdsList(),
+            classifier.classIdMap().originalIdsList(),
             bestParameters,
             metricResults
         );
@@ -416,7 +412,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
             config.modelName(),
             MODEL_TYPE,
             graph.schema(),
-            retrainedModelData,
+            classifier.data(),
             config,
             modelInfo
         );

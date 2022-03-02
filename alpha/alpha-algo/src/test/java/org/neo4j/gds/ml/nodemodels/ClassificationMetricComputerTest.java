@@ -20,35 +20,46 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.Trainer;
-import org.neo4j.gds.ml.core.batch.BatchTransformer;
-import org.neo4j.gds.ml.core.batch.SingletonBatch;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.logisticregression.TestFeatures;
+import org.openjdk.jol.util.Multiset;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.List;
 
-public class NodeClassificationPredictConsumerTest {
+import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConsumerTest.idMapOf;
+import static org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric.F1_WEIGHTED;
 
-    public static LocalIdMap idMapOf(long... ids) {
-        LocalIdMap idMap = new LocalIdMap();
-        for (long id : ids) {
-            idMap.toMapped(id);
-        }
-
-        return idMap;
-    }
+class ClassificationMetricComputerTest {
 
     @Test
-    void canProducePredictions() {
+    void shouldComputeMetrics() {
+        var multiSet = new Multiset<Long>();
+        multiSet.add(0L, 2);
+        multiSet.add(1L, 1);
+        multiSet.add(3L, 1);
+        var idMap = idMapOf(1, 0, 3, 0);
+        var features = new TestFeatures(new double[][]{new double[]{2.4}, new double[]{2.9}, new double[]{-3.1}, new double[]{0.0}});
+        var targets = HugeLongArray.of(1, 0, 3, 0);
+
+        var classificationMetricComputer = new ClassificationMetricComputer(
+            List.of(F1_WEIGHTED),
+            multiSet,
+            features,
+            targets,
+            1,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
         var classifier = new Trainer.Classifier() {
             @Override
             public LocalIdMap classIdMap() {
-                return idMapOf(0, 1);
+                return idMap;
             }
 
             @Override
@@ -65,23 +76,6 @@ public class NodeClassificationPredictConsumerTest {
                 return null;
             }
         };
-        var probabilities = HugeObjectArray.newArray(double[].class, 2);
-        var predictedClasses = HugeLongArray.newArray(2);
-        var predictConsumer = new NodeClassificationPredictConsumer(
-            new TestFeatures(new double[0][0]),
-            BatchTransformer.IDENTITY,
-            classifier,
-            probabilities,
-            predictedClasses,
-            ProgressTracker.NULL_TRACKER
-        );
-
-        predictConsumer.accept(new SingletonBatch(0));
-        predictConsumer.accept(new SingletonBatch(1));
-
-        assertThat(probabilities.get(0)).containsExactly(0.2, 0.8);
-        assertThat(probabilities.get(1)).containsExactly(0.7, 0.3);
-        assertThat(predictedClasses.get(0)).isEqualTo(1);
-        assertThat(predictedClasses.get(1)).isEqualTo(0);
+//        classificationMetricComputer.computeMetrics(evaluationSet, )
     }
 }
