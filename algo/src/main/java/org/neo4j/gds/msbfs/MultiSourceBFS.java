@@ -88,7 +88,6 @@ public final class MultiSourceBFS implements Runnable {
     private final CloseableThreadLocal<HugeLongArray> seensNext;
 
     private final long nodeCount;
-    private final IdMap nodes;
     private final RelationshipIterator relationships;
     private final ExecutionStrategy strategy;
     private final boolean allowStartNodeTraversal;
@@ -103,7 +102,7 @@ public final class MultiSourceBFS implements Runnable {
         long... sourceNodes
     ) {
         return new MultiSourceBFS(
-            nodes,
+            nodes.nodeCount(),
             relationships,
             new ANPStrategy(perNodeAction),
             false,
@@ -119,7 +118,7 @@ public final class MultiSourceBFS implements Runnable {
         long... sourceNodes
     ) {
         return new MultiSourceBFS(
-            graph,
+            graph.nodeCount(),
             graph,
             new PredecessorStrategy(perNodeAction, perNeighborAction),
             true,
@@ -129,14 +128,13 @@ public final class MultiSourceBFS implements Runnable {
     }
 
     public MultiSourceBFS(
-        IdMap nodes,
+        long nodeCount,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
         boolean initSeenNext,
         boolean allowStartNodeTraversal,
         long... sourceNodes
     ) {
-        this.nodes = nodes;
         this.relationships = relationships;
         this.strategy = strategy;
         this.allowStartNodeTraversal = allowStartNodeTraversal;
@@ -144,7 +142,7 @@ public final class MultiSourceBFS implements Runnable {
         if (this.sourceNodes != null) {
             Arrays.sort(this.sourceNodes);
         }
-        this.nodeCount = nodes.nodeCount();
+        this.nodeCount = nodeCount;
         this.visits = new LocalHugeLongArray(nodeCount);
         this.visitsNext = new LocalHugeLongArray(nodeCount);
         this.seens = new LocalHugeLongArray(nodeCount);
@@ -152,7 +150,6 @@ public final class MultiSourceBFS implements Runnable {
     }
 
     private MultiSourceBFS(
-        IdMap nodeIds,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
         long nodeCount,
@@ -164,7 +161,6 @@ public final class MultiSourceBFS implements Runnable {
         long... sourceNodes
     ) {
         assert sourceNodes != null && sourceNodes.length > 0;
-        this.nodes = nodeIds;
         this.relationships = relationships;
         this.strategy = strategy;
         this.sourceNodes = sourceNodes;
@@ -177,7 +173,6 @@ public final class MultiSourceBFS implements Runnable {
     }
 
     private MultiSourceBFS(
-        IdMap nodeIds,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
         long nodeCount,
@@ -189,7 +184,6 @@ public final class MultiSourceBFS implements Runnable {
         CloseableThreadLocal<HugeLongArray> seens,
         CloseableThreadLocal<HugeLongArray> seensNext
     ) {
-        this.nodes = nodeIds;
         this.relationships = relationships;
         this.strategy = strategy;
         this.sourceNodes = null;
@@ -301,7 +295,6 @@ public final class MultiSourceBFS implements Runnable {
                 @Override
                 MultiSourceBFS next(final long from, final int length) {
                     return new MultiSourceBFS(
-                        nodes,
                         relationships.concurrentCopy(),
                         strategy,
                         sourceLength,
@@ -322,7 +315,6 @@ public final class MultiSourceBFS implements Runnable {
             @Override
             MultiSourceBFS next(final long from, final int length) {
                 return new MultiSourceBFS(
-                    nodes,
                     relationships.concurrentCopy(),
                     strategy,
                     nodeCount,
