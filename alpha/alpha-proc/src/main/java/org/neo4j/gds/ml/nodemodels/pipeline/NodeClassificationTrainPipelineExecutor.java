@@ -91,6 +91,8 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
 
     @Override
     public Map<DatasetSplits, GraphFilter> splitDataset() {
+        // we don't split the input graph but generate the features and predict over the whole graph.
+        // Inside the training algo we split the nodes into multiple sets.
         return Map.of(
             DatasetSplits.FEATURE_INPUT,
             ImmutableGraphFilter.of(

@@ -59,6 +59,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
 
     @Override
     public Map<DatasetSplits, GraphFilter> splitDataset() {
+        // For prediction, we don't split the input graph but generate the features and predict over the whole graph
         return Map.of(
             DatasetSplits.FEATURE_INPUT,
             ImmutableGraphFilter.of(

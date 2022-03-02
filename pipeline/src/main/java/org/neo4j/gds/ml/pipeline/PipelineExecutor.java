@@ -58,7 +58,7 @@ public abstract class PipelineExecutor<
     protected final GraphStore graphStore;
     protected final String graphName;
 
-    public PipelineExecutor(
+    protected PipelineExecutor(
         PIPELINE pipeline,
         PIPELINE_CONFIG config,
         ExecutionContext executionContext,
@@ -96,11 +96,9 @@ public abstract class PipelineExecutor<
 
         var dataSplits = splitDataset();
         try {
-            // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships
-            var featureInputGraphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
-
             progressTracker.beginSubTask("execute node property steps");
-            executeNodePropertySteps(featureInputGraphFilter);
+            // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships
+            executeNodePropertySteps(dataSplits.get(DatasetSplits.FEATURE_INPUT));
             progressTracker.endSubTask("execute node property steps");
 
             validate(graphStore, config);
