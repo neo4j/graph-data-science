@@ -175,6 +175,9 @@ project(':proc-sysinfo').projectDir = file('proc/sysinfo')
 include('proc-test')
 project(':proc-test').projectDir = file('proc/test')
 
+include('proc-pipeline-catalog')
+project(':proc-pipeline-catalog').projectDir = file('proc/pipeline-catalog')
+
 include('storage-engine-adapter')
 project(':storage-engine-adapter').projectDir = file('cypher/common/storage-engine-adapter')
 
