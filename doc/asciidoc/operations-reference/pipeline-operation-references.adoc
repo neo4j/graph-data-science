@@ -7,8 +7,8 @@
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
-| Description                     | Operation
-| Check if a pipeline exists      | `gds.beta.pipeline.exists`
-| Remove a pipeline from memory   | `gds.beta.pipeline.drop`
-| List pipelines                  | `gds.beta.pipeline.list`
+| Description                                                | Operation
+| <<pipeline-catalog-exists, Check if a pipeline exists>>    | `gds.beta.pipeline.exists`
+| <<pipeline-catalog-drop, Remove a pipeline from memory>>   | `gds.beta.pipeline.drop`
+| <<pipeline-catalog-list, List pipelines>>                  | `gds.beta.pipeline.list`
 |===
