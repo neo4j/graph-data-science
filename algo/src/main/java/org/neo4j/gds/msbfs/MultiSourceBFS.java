@@ -230,50 +230,42 @@ public final class MultiSourceBFS implements Runnable {
     public void run() {
         assert sourceLength() <= OMEGA : "more than " + OMEGA + " sources not supported";
 
-        HugeLongArray visitSet = visits.get();
-        HugeLongArray visitNextSet = visitsNext.get();
-        HugeLongArray seenSet = seens.get();
-        HugeLongArray seenNextSet = seensNext != null ? seensNext.get() : null;
+        var visitSet = visits.get();
+        var visitNextSet = visitsNext.get();
+        var seenSet = seens.get();
+        var seenNextSet = seensNext != null ? seensNext.get() : null;
 
-        final SourceNodes sourceNodes;
-        if (this.sourceNodes == null) {
-            sourceNodes = prepareOffsetSources(visitSet, seenSet);
-        } else {
-            sourceNodes = prepareSpecifiedSources(visitSet, seenSet);
-        }
+        SourceNodes sourceNodes = this.sourceNodes == null
+            ? prepareOffsetSources(visitSet, seenSet)
+            : prepareSpecifiedSources(visitSet, seenSet);
 
         strategy.run(relationships, nodeCount, sourceNodes, visitSet, visitNextSet, seenSet, seenNextSet);
     }
 
     private SourceNodes prepareOffsetSources(HugeLongArray visitSet, HugeLongArray seenSet) {
-        int localNodeCount = this.sourceNodeCount;
-        long nodeOffset = this.nodeOffset;
-        SourceNodes sourceNodes = new SourceNodes(nodeOffset, localNodeCount);
+        var localNodeCount = this.sourceNodeCount;
+        var nodeOffset = this.nodeOffset;
 
         for (int i = 0; i < localNodeCount; ++i) {
             seenSet.set(nodeOffset + i, 1L << i);
             visitSet.or(nodeOffset + i, 1L << i);
         }
 
-        return sourceNodes;
+        return new SourceNodes(nodeOffset, localNodeCount);
     }
 
     private SourceNodes prepareSpecifiedSources(HugeLongArray visitSet, HugeLongArray seenSet) {
         assert isSorted(sourceNodes);
 
-        long[] localSourceNodes = this.sourceNodes;
-        int localSourceNodeCount = localSourceNodes.length;
-        SourceNodes sourceNodes = new SourceNodes(localSourceNodes);
-
-        for (int i = 0; i < localSourceNodeCount; ++i) {
-            long nodeId = localSourceNodes[i];
+        for (int i = 0; i < sourceNodes.length; ++i) {
+            long nodeId = sourceNodes[i];
             if (!allowStartNodeTraversal) {
                 seenSet.set(nodeId, 1L << i);
             }
             visitSet.or(nodeId, 1L << i);
         }
 
-        return sourceNodes;
+        return new SourceNodes(sourceNodes);
     }
 
     /* assert-only */ private boolean isSorted(long[] nodes) {
