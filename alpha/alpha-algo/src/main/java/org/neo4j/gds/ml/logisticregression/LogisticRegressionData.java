@@ -81,4 +81,7 @@ public interface LogisticRegressionData extends Trainer.ClassifierData {
         return builder.build();
     }
 
+    static ImmutableLogisticRegressionData.Builder builder() {
+        return ImmutableLogisticRegressionData.builder();
+    }
 }
