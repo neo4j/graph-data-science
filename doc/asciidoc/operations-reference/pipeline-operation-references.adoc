@@ -1,5 +1,5 @@
 [[appendix-a-pipeline-ops]]
-= Model Catalog
+= Pipeline Catalog
 
 == Beta Tier
 
@@ -8,7 +8,7 @@
 [opts=header,cols="1, 1"]
 |===
 | Description                     | Operation
-| Check if a pipeline exists>>    | `gds.beta.pipeline.exists`
-| Remove a pipeline from memory>> | `gds.beta.pipeline.drop`
+| Check if a pipeline exists      | `gds.beta.pipeline.exists`
+| Remove a pipeline from memory   | `gds.beta.pipeline.drop`
 | List pipelines                  | `gds.beta.pipeline.list`
 |===
