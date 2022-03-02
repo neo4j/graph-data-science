@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatureStep, NodeLogisticRegressionTrainCoreConfig> {
     public static final String PIPELINE_TYPE = "Node classification training pipeline";
-    public static final String MODEL_TYPE = "Node classification pipeline";
+    public static final String MODEL_TYPE = "Node classification model";
 
 
     private NodeClassificationSplitConfig splitConfig;

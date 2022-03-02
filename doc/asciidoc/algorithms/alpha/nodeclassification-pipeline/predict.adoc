@@ -1,12 +1,12 @@
 [[algorithms-node-classification-pipelines-predict]]
 == Applying a trained model for prediction
-:modelType: Node classification pipeline model
+:modelType: Node classification model
 :entity: node
 
 In the previous sections we have seen how to build up a Node Classification training pipeline and train it to produce a classification pipeline.
-After <<algorithms-ml-nodeclassification-pipelines-train, training>>, the runnable model is of type `Node classification pipeline` and resides in the <<model-catalog-ops, model catalog>>.
+After <<algorithms-ml-nodeclassification-pipelines-train, training>>, the runnable model is of type `Node classification model` and resides in the <<model-catalog-ops, model catalog>>.
 
-The classification pipeline can be executed with a graph in the graph catalog to predict the class of previously unseen nodes.
+The classification model can be executed with a graph in the graph catalog to predict the class of previously unseen nodes.
 In addition to the predicted class for each node, the predicted probability for each class may also be retained on the nodes.
 The order of the probabilities matches the order of the classes registered in the model.
 
@@ -130,7 +130,8 @@ include::specific-write-mutate-configuration.adoc[]
 
 [[algorithms-node-classification-pipelines-predict-examples]]
 === Example
-In the following examples we will show how to use a classification pipeline to predict the class of a node in your in-memory graph.
+
+In the following examples we will show how to use a classification model to predict the class of a node in your in-memory graph.
 In addition to the predicted class, we will also produce the probability for each class in another node property.
 In order to do this, we must first have an already trained model registered in the Model Catalog.
 We will use the model which we trained in the <<algorithms-ml-nodeclassification-pipelines-train, train example>> which we gave the name `'nc-pipeline-model'`.

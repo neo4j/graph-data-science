@@ -32,7 +32,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class NodeClassificationPipelineCreateProc extends BaseProc {
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.create", mode = READ)
-    @Description("Creates a node classification pipeline in the model catalog.")
+    @Description("Creates a node classification training pipeline in the model catalog.")
     public Stream<PipelineInfoResult> create(@Name("pipelineName") String pipelineName) {
         return Stream.of(NodeClassificationPipelineCreate.create(username(), pipelineName));
     }

@@ -32,7 +32,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class NodeClassificationPipelineAddStepProcs extends BaseProc {
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.addNodeProperty", mode = READ)
-    @Description("Add a node property step to an existing node classification pipeline.")
+    @Description("Add a node property step to an existing node classification training pipeline.")
     public Stream<PipelineInfoResult> addNodeProperty(
         @Name("pipelineName") String pipelineName,
         @Name("procedureName") String taskName,
@@ -47,7 +47,7 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.selectFeatures", mode = READ)
-    @Description("Add one or several features to an existing node classification pipeline.")
+    @Description("Add one or several features to an existing node classification training pipeline.")
     public Stream<PipelineInfoResult> selectFeatures(
         @Name("pipelineName") String pipelineName,
         @Name("nodeProperties") Object nodeProperties
