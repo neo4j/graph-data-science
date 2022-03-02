@@ -2,11 +2,12 @@
 = Machine learning pipelines
 
 The Python client has special support for <<algorithms-ml-linkprediction-pipelines>> and <<algorithms-ml-nodeclassification-pipelines>>.
-The GDS pipelines are represented as pipeline objects that are <<python-client-model-object, model objects>> with extra functionality.
+The GDS pipelines are represented as pipeline objects.
 
 The Python method calls to _create_ the pipelines match their Cypher counterparts exactly.
 However, the rest of the pipeline functionality is deferred to methods on the pipeline objects themselves.
-And in addition to the standard GDS calls, there are several methods to query the pipelines for information about them.
+Once created, the `TrainingPipeline` can be passed as arguments to methods in the Python client, such as the <<pipeline-catalog-ops, pipeline catalog operations>>.
+Additionally, the `TrainingPipeline` has convenience methods allowing for inspection of the pipeline represented without explicitly involving the pipeline catalog.
 
 include::python-client-gds-object.adoc[]
 
@@ -49,6 +50,11 @@ Below is a description of the methods on such objects:
 | feature_properties      | -                      | list[dict[str, any]]   | Returns a list of the selected feature properties for the pipeline.
 | split_config            | -                      | dict[str, any]         | Returns the configuration set up for train-test splitting of the dataset.
 | parameter_space         | -                      | list[dict[str, any]]   | Returns the model parameter space set up for model selection when training.
+| name                    | -                      | str                    | The name of the pipeline as it appears in the pipeline catalog.
+| type                    | -                      | str                    | The type of pipeline.
+| creation_time           | -                      | neo4j.time.Datetime    | Time when the pipeline was created.
+| drop                    | -                      | None                   | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
+| exists                  | -                      | bool                   | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
 |===
 
 There are two main differences when comparing the methods above that map to procedures of the Cypher API:
@@ -56,7 +62,7 @@ There are two main differences when comparing the methods above that map to proc
 * As the Python methods are called on the pipeline object, one does not need to provide a name when calling them.
 * Configuration parameters in the Cypher calls are represented by named keyword arguments in the Python method calls.
 
-Another difference is that the `train` Python call takes a <<python-client-graph-object, graph object>> instead of a graph name, and returns a `NCPredictionPipeline` <<python-client-model-object, model object>> that we can run predictions with as well as a `dict[str, any]` with the metadata from the training.
+Another difference is that the `train` Python call takes a <<python-client-graph-object, graph object>> instead of a graph name, and returns a `NCModel` <<python-client-model-object, model object>> that we can run predictions with as well as a `dict[str, any]` with the metadata from the training.
 
 Please consult the <<algorithms-ml-nodeclassification-pipelines, node classification Cypher documentation>> for information about what kind of input the methods expect.
 
@@ -177,6 +183,11 @@ Below is a description of the methods on such objects:
 | feature_steps       | -                      | list[dict[str, any]]    | Returns a list of the selected feature steps for the pipeline.
 | split_config        | -                      | dict[str, any]          | Returns the configuration set up for feature-train-test splitting of the dataset.
 | parameter_space     | -                      | list[dict[str, any]]    | Returns the model parameter space set up for model selection when training.
+| name                | -                      | str                     | The name of the pipeline as it appears in the pipeline catalog.
+| type                | -                      | str                     | The type of pipeline.
+| creation_time       | -                      | neo4j.time.Datetime     | Time when the pipeline was created.
+| drop                | -                      | None                    | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
+| exists              | -                      | bool                    | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
 |===
 
 There are two main differences when comparing the methods above that map to procedures of the Cypher API:
@@ -184,7 +195,7 @@ There are two main differences when comparing the methods above that map to proc
 * As the Python methods are called on the pipeline object, one does not need to provide a name when calling them.
 * Configuration parameters in the Cypher calls are represented by named keyword arguments in the Python method calls.
 
-Another difference is that the `train` Python call takes a <<python-client-graph-object, graph object>> instead of a graph name, and returns a `LPPredictionPipeline` <<python-client-model-object, model object>> that we can run predictions with as well as a `dict[str, any]` with the metadata from the training.
+Another difference is that the `train` Python call takes a <<python-client-graph-object, graph object>> instead of a graph name, and returns a `LPModel` <<python-client-model-object, model object>> that we can run predictions with as well as a `dict[str, any]` with the metadata from the training.
 
 Please consult the <<algorithms-ml-linkprediction-pipelines, link prediction Cypher documentation>> for information about what kind of input the methods expect.
 
@@ -261,3 +272,18 @@ assert metrics["AUCPR"]["test"] >= 0.85
 results = trained_pipe_model.predict_mutate(H, topN=5, mutateRelationshipType="PRED_REL")
 assert result["relationshipsWritten"] == 5 * 2  #  Undirected relationships written
 ----
+
+
+== The pipeline catalog
+
+The primary way to use pipeline objects is for training models.
+Additionally, pipeline objects can be used as input to <<pipeline-catalog-ops, GDS Pipeline Catalog operations>>.
+For instance, supposing we have a pipeline object `pipe`, we could:
+
+[source,python]
+----
+catalog_contains_pipe = gds.beta.pipeline.exists(pipe)
+
+gds.beta.model.drop(pipe) #  same as pipe.drop()
+----
+
