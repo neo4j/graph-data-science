@@ -82,7 +82,7 @@ public final class PipelineCatalog {
         userCatalogs.clear();
     }
 
-    public static Stream<PipelineUserCatalog.PipelineCatalogEntry> getAllPipelines(String user) {
+    public static Stream<PipelineCatalogEntry> getAllPipelines(String user) {
         return userCatalogs.getOrDefault(user, PipelineUserCatalog.EMPTY).stream();
     }
 
@@ -93,6 +93,13 @@ public final class PipelineCatalog {
             pipelineName,
             user
         ));
+    }
+
+    @ValueClass
+    public interface PipelineCatalogEntry {
+        String pipelineName();
+
+        Pipeline<?, ?> pipeline();
     }
 
     static class PipelineUserCatalog {
@@ -130,13 +137,6 @@ public final class PipelineCatalog {
 
         Stream<PipelineCatalogEntry> stream() {
             return pipelineByName.entrySet().stream().map(mapEntry -> ImmutablePipelineCatalogEntry.of(mapEntry.getKey(), mapEntry.getValue()));
-        }
-
-        @ValueClass
-        interface PipelineCatalogEntry {
-            String pipelineName();
-
-            Pipeline<?, ?> pipeline();
         }
     }
 }

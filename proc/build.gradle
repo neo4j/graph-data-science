@@ -35,6 +35,7 @@ dependencies {
     api project(':proc-path-finding')
     api project(':proc-beta')
     api project(':proc-catalog')
+    api project(':proc-pipeline-catalog')
     api project(':proc-misc')
 
     implementation(
