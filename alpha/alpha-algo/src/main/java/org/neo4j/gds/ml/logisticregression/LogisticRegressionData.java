@@ -61,9 +61,9 @@ public interface LogisticRegressionData extends Trainer.ClassifierData {
         return ImmutableLogisticRegressionData.builder().bias(bias).weights(weights).classIdMap(classIdMap).build();
     }
 
-    static MemoryEstimation memoryEstimation(MemoryRange linkFeatureDimension) {
+    static MemoryEstimation memoryEstimationBinaryReduced(MemoryRange featureDimension) {
         return MemoryEstimations.builder(LogisticRegressionData.class)
-            .fixed("weights", linkFeatureDimension.apply(featureDim -> Weights.sizeInBytes(
+            .fixed("weights", featureDimension.apply(featureDim -> Weights.sizeInBytes(
                 1,
                 Math.toIntExact(featureDim)
             )))

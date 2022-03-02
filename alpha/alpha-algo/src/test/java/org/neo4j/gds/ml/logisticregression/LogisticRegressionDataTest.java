@@ -41,7 +41,7 @@ class LogisticRegressionDataTest {
         var estimatedFeatureCount = MemoryRange.of(minFeatureCount, maxFeatureCount);
         var dimensions = GraphDimensions.of(1000L, relCount);
         var memoryEstimation = LogisticRegressionData
-            .memoryEstimation(estimatedFeatureCount)
+            .memoryEstimationBinaryReduced(estimatedFeatureCount)
             .estimate(dimensions, 5000);
 
         assertThat(memoryEstimation.memoryUsage()).isEqualTo(MemoryRange.of(minEstimation, maxEstimation));

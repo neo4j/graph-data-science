@@ -50,7 +50,7 @@ public final class LogisticRegressionTrainer implements Trainer {
 
     public static MemoryEstimation estimate(LogisticRegressionTrainConfig llrConfig, MemoryRange linkFeatureDimension) {
         return MemoryEstimations.builder("train model")
-            .add("model data", LogisticRegressionData.memoryEstimation(linkFeatureDimension))
+            .add("model data", LogisticRegressionData.memoryEstimationBinaryReduced(linkFeatureDimension))
             .add("update weights", Training.memoryEstimation(linkFeatureDimension, 1, 1))
             .perThread(
                 "computation graph",
