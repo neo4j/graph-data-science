@@ -32,7 +32,6 @@ import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
-import org.neo4j.gds.compat.MemoryTrackerProxy;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.compat.StoreScan;
@@ -95,8 +94,6 @@ import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
-import org.neo4j.memory.LocalMemoryTracker;
-import org.neo4j.memory.MemoryPools;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.PropertySelection;
@@ -336,26 +333,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
         return new CompositeNodeCursorImpl(cursors, labelIds);
-    }
-
-    @Override
-    public MemoryTrackerProxy memoryTrackerProxy(KernelTransaction kernelTransaction) {
-        return MemoryTrackerProxyImpl.of(kernelTransaction.memoryTracker());
-    }
-
-    @Override
-    public MemoryTrackerProxy emptyMemoryTracker() {
-        return MemoryTrackerProxyImpl.of(EmptyMemoryTracker.INSTANCE);
-    }
-
-    @Override
-    public MemoryTrackerProxy limitedMemoryTracker(long limitInBytes, long grabSizeInBytes) {
-        return MemoryTrackerProxyImpl.of(new LocalMemoryTracker(
-            MemoryPools.NO_TRACKING,
-            limitInBytes,
-            grabSizeInBytes,
-            "setting"
-        ));
     }
 
     @Override
