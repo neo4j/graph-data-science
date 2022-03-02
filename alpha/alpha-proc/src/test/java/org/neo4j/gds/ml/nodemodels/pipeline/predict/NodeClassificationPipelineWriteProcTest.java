@@ -83,7 +83,7 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
 
         var query = GdsCypher
             .call(GRAPH_NAME)
-            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .algo("gds.beta.pipeline.nodeClassification.predict")
             .writeMode()
             .addParameter("writeProperty", "class")
             .addParameter("modelName", MODEL_NAME)
@@ -116,7 +116,7 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
 
         var query = GdsCypher
             .call(GRAPH_NAME)
-            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .algo("gds.beta.pipeline.nodeClassification.predict")
             .writeMode()
             .addParameter("writeProperty", "class")
             .addParameter("predictedProbabilityProperty", "probabilities")
@@ -156,7 +156,7 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
 
         var query = GdsCypher
             .call(GRAPH_NAME)
-            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .algo("gds.beta.pipeline.nodeClassification.predict")
             .writeMode()
             .addParameter("writeProperty", "foo")
             .addParameter("predictedProbabilityProperty", "foo")
@@ -170,7 +170,7 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
     void shouldEstimateMemory(Object graphNameOrConfiguration, MemoryRange expected) {
         addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2);
 
-        var query = "CALL gds.alpha.ml.pipeline.nodeClassification.predict.write.estimate(" +
+        var query = "CALL gds.beta.pipeline.nodeClassification.predict.write.estimate(" +
                     "   $graphDefinition, {" +
                     "       modelName: $modelName," +
                     "       writeProperty: 'foo'," +

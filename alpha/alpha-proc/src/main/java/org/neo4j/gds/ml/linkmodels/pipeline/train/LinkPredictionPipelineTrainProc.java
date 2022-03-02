@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.ml.pipeline.linkPrediction.train", description = "Trains a link prediction model based on a pipeline", executionMode = TRAIN)
+@GdsCallable(name = "gds.beta.pipeline.linkPrediction.train", description = "Trains a link prediction model based on a pipeline", executionMode = TRAIN)
 public class LinkPredictionPipelineTrainProc extends TrainProc<
     LinkPredictionTrainPipelineExecutor,
     LinkPredictionTrainResult,
@@ -50,7 +50,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
     LinkPredictionPipelineTrainProc.LPTrainResult
     > {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.train", mode = Mode.READ)
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.train", mode = Mode.READ)
     @Description("Trains a link prediction model based on a pipeline")
     public Stream<LPTrainResult> train(
         @Name(value = "graphName") String graphName,
@@ -60,7 +60,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
         return trainAndStoreModelWithResult(compute(graphName, config));
     }
 
-    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.train.estimate", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.train.estimate", mode = READ)
     @Description("Estimates memory for applying a linkPrediction model")
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

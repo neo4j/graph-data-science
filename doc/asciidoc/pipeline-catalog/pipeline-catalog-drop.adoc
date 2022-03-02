@@ -40,7 +40,7 @@ To exemplify this, we first create a <<algorithms-ml-linkprediction-pipelines, l
 .Creating a link prediction training pipelines:
 [source, cypher, role=noplay setup-query]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')
+CALL gds.beta.pipeline.linkPrediction.create('pipe')
 ----
 
 [role=query-example]

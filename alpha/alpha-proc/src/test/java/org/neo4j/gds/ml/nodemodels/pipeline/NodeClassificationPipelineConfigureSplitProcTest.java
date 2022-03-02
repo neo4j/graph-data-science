@@ -37,7 +37,7 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
     void setUp() throws Exception {
         registerProcedures(NodeClassificationPipelineConfigureSplitProc.class, NodeClassificationPipelineCreateProc.class);
 
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.create('myPipeline')");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.create('myPipeline')");
     }
 
     @AfterEach
@@ -51,7 +51,7 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
             put("validationFolds", 42);
         }};
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('myPipeline', {validationFolds: 42})",
+            "CALL gds.beta.pipeline.nodeClassification.configureSplit('myPipeline', {validationFolds: 42})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", expectedSplitConfig,
@@ -67,10 +67,10 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
         var expectedSplitConfig = new HashMap<>(NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG) {{
             put("testFraction", 0.5);
         }};
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('myPipeline', {validationFolds: 42})");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.configureSplit('myPipeline', {validationFolds: 42})");
 
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('myPipeline', {testFraction: 0.5})",
+            "CALL gds.beta.pipeline.nodeClassification.configureSplit('myPipeline', {testFraction: 0.5})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", expectedSplitConfig,
@@ -84,7 +84,7 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
     @Test
     void failOnInvalidKeys() {
         assertError(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('myPipeline', {invalidKey: 42, testMyFraction: -0.51})",
+            "CALL gds.beta.pipeline.nodeClassification.configureSplit('myPipeline', {invalidKey: 42, testMyFraction: -0.51})",
             "Unexpected configuration keys: invalidKey, testMyFraction (Did you mean [testFraction]?)"
         );
     }

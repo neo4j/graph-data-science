@@ -51,7 +51,7 @@ import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.ml.pipeline.nodeClassification.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
 public class NodeClassificationPipelineStreamProc
     extends StreamProc<
     NodeClassificationPredictPipelineExecutor,
@@ -60,7 +60,7 @@ public class NodeClassificationPipelineStreamProc
     NodeClassificationPredictPipelineStreamConfig>
 {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.stream", mode = Mode.READ)
+    @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
     public Stream<NodeClassificationStreamResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -70,7 +70,7 @@ public class NodeClassificationPipelineStreamProc
         return stream(compute(graphName, configuration));
     }
 
-    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.stream.estimate", mode = Mode.READ)
+    @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.stream.estimate", mode = Mode.READ)
     @Description(ESTIMATE_PREDICT_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

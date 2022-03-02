@@ -128,23 +128,23 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         var pipe = Map.<String, Object>of("pipeline", PIPELINE_NAME);
 
         runQuery(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.create($pipeline)",
+            "CALL gds.beta.pipeline.nodeClassification.create($pipeline)",
             pipe
         );
         runQuery(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty($pipeline, 'pageRank', {mutateProperty: 'pr'})",
+            "CALL gds.beta.pipeline.nodeClassification.addNodeProperty($pipeline, 'pageRank', {mutateProperty: 'pr'})",
             pipe
         );
         runQuery(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures($pipeline, ['array', 'scalar', 'pr'])",
+            "CALL gds.beta.pipeline.nodeClassification.selectFeatures($pipeline, ['array', 'scalar', 'pr'])",
             pipe
         );
         runQuery(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureParams($pipeline, [{penalty: 1000, maxEpochs: 1}])",
+            "CALL gds.beta.pipeline.nodeClassification.configureParams($pipeline, [{penalty: 1000, maxEpochs: 1}])",
             pipe
         );
         runQuery(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit($pipeline, {testFraction: 0.3, validationFolds: 2})",
+            "CALL gds.beta.pipeline.nodeClassification.configureSplit($pipeline, {testFraction: 0.3, validationFolds: 2})",
             pipe
         );
 
@@ -206,7 +206,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         }, "a model selection statistics map");
 
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.train(" +
+            "CALL gds.beta.pipeline.nodeClassification.train(" +
             "   $graphName, {" +
             "       pipeline: $pipeline," +
             "       modelName: $modelName," +
@@ -245,12 +245,12 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         params.put("modelName", MODEL_NAME);
 
         runQuery(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.create($pipeline)",
+            "CALL gds.beta.pipeline.nodeClassification.create($pipeline)",
             pipe
         );
 
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.train.estimate(" +
+            "CALL gds.beta.pipeline.nodeClassification.train.estimate(" +
             "   $graphDefinition, {" +
             "       pipeline: $pipeline," +
             "       modelName: $modelName," +

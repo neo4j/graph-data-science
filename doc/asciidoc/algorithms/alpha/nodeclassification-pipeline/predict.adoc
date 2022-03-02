@@ -26,7 +26,7 @@ If the predict and train graphs are distinct, it is also beneficial that they ha
 .Run Node Classification in stream mode on a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.predict.stream(
+CALL gds.beta.pipeline.nodeClassification.predict.stream(
   graphName: String,
   configuration: Map
 )
@@ -57,7 +57,7 @@ include::specific-stream-configuration.adoc[]
 .Run Node Classification in mutate mode on a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.predict.mutate(
+CALL gds.beta.pipeline.nodeClassification.predict.mutate(
   graphName: String,
   configuration: Map
 )
@@ -94,7 +94,7 @@ include::specific-write-mutate-configuration.adoc[]
 .Run Node Classification in write mode on a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.predict.write(
+CALL gds.beta.pipeline.nodeClassification.predict.write(
   graphName: String,
   configuration: Map
 )
@@ -146,7 +146,7 @@ include::../../shared/examples-estimate-intro.adoc[]
 .The following will estimate the memory requirements for running the algorithm in stream mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.predict.stream.estimate('myGraph', {
+CALL gds.beta.pipeline.nodeClassification.predict.stream.estimate('myGraph', {
   modelName: 'nc-pipeline-model',
   includePredictedProbabilities: true,
   nodeLabels: ['UnknownHouse']
@@ -170,7 +170,7 @@ NOTE: If a node property step does not have an estimation implemented, the step 
 --
 [source, cypher]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.predict.stream('myGraph', {
+CALL gds.beta.pipeline.nodeClassification.predict.stream('myGraph', {
   modelName: 'nc-pipeline-model',
   includePredictedProbabilities: true,
   nodeLabels: ['UnknownHouse']
@@ -214,7 +214,7 @@ For more details on the `mutate` mode in general, see <<running-algos-mutate>>.
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.predict.mutate('myGraph', {
+CALL gds.beta.pipeline.nodeClassification.predict.mutate('myGraph', {
   nodeLabels: ['UnknownHouse'],
   modelName: 'nc-pipeline-model',
   mutateProperty: 'predictedClass',
@@ -247,7 +247,7 @@ For more details on the `write` mode in general, see <<running-algos-write>>.
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.predict.write('myGraph', {
+CALL gds.beta.pipeline.nodeClassification.predict.write('myGraph', {
   nodeLabels: ['UnknownHouse'],
   modelName: 'nc-pipeline-model',
   writeProperty: 'predictedClass',

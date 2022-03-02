@@ -31,7 +31,7 @@ import static org.neo4j.procedure.Mode.READ;
 @SuppressWarnings("immutables:subtype")
 public class NodeClassificationPipelineCreateProc extends BaseProc {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.create", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.nodeClassification.create", mode = READ)
     @Description("Creates a node classification pipeline in the model catalog.")
     public Stream<PipelineInfoResult> create(@Name("pipelineName") String pipelineName) {
         return Stream.of(NodeClassificationPipelineCreate.create(username(), pipelineName));

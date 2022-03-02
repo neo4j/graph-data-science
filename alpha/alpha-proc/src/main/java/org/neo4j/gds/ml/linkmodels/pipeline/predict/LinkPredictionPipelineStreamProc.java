@@ -45,10 +45,10 @@ import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.ml.pipeline.linkPrediction.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.beta.pipeline.linkPrediction.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
 public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig, LinkPredictionPipelineStreamProc.Result> {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.stream", mode = Mode.READ)
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
     public Stream<Result> stream(
         @Name(value = "graphName") String graphName,
@@ -59,7 +59,7 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
         return computationResultConsumer().consume(result, executionContext());
     }
 
-    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.stream.estimate", mode = Mode.READ)
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.predict.stream.estimate", mode = Mode.READ)
     @Description(ESTIMATE_PREDICT_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

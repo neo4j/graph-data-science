@@ -23,7 +23,7 @@ To create a new node classification pipeline one would make the following call:
 
 [source,python]
 ----
-pipe, res = gds.alpha.ml.pipeline.nodeClassification.create("my-pipe")
+pipe, res = gds.beta.pipeline.nodeClassification.create("my-pipe")
 ----
 
 where `pipe` is a pipeline object, and `res` is a `dict[str, any]` containing metadata from the underlying procedure call.
@@ -70,7 +70,7 @@ We suppose that the graph `G` we train on has a node property "my-class" which w
 
 [source,python]
 ----
-pipe, _ = gds.alpha.ml.pipeline.nodeClassification.create("my-pipe")
+pipe, _ = gds.beta.pipeline.nodeClassification.create("my-pipe")
 
 # Add Degree centrality as a property step producing "rank" node properties
 pipe.addNodeProperty("degree", mutateProperty="rank")
@@ -151,7 +151,7 @@ To create a new link prediction pipeline one would make the following call:
 
 [source,python]
 ----
-pipe, res = gds.alpha.ml.pipeline.linkPrediction.create("my-pipe")
+pipe, res = gds.beta.pipeline.linkPrediction.create("my-pipe")
 ----
 
 where `pipe` is a pipeline object, and `res` is a `dict[str, any]` containing metadata from the underlying procedure call.
@@ -198,7 +198,7 @@ Suppose we have a graph `G` that we want to train our pipeline on.
 
 [source,python]
 ----
-pipe, _ = gds.alpha.ml.pipeline.linkPrediction.create("my-pipe")
+pipe, _ = gds.beta.pipeline.linkPrediction.create("my-pipe")
 
 # Add FastRP as a property step producing "embedding" node properties
 pipe.addNodeProperty("fastRP", embeddingDimension=128, mutateProperty="embedding")

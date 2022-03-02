@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
 
-@GdsCallable(name = "gds.alpha.ml.pipeline.nodeClassification.train", description = "Trains a node classification model based on a pipeline", executionMode = TRAIN)
+@GdsCallable(name = "gds.beta.pipeline.nodeClassification.train", description = "Trains a node classification model based on a pipeline", executionMode = TRAIN)
 public class NodeClassificationPipelineTrainProc extends TrainProc<
     NodeClassificationTrainPipelineExecutor,
     NodeClassificationPipelineTrainResult,
@@ -51,7 +51,7 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
     NodeClassificationPipelineTrainProc.NCTrainResult
     > {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.train", mode = Mode.READ)
+    @Procedure(name = "gds.beta.pipeline.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model based on a pipeline")
     public Stream<NCTrainResult> train(
         @Name(value = "graphName") String graphName,
@@ -61,7 +61,7 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
         return trainAndStoreModelWithResult(compute(graphName, configuration));
     }
 
-    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.train.estimate", mode = Mode.READ)
+    @Procedure(name = "gds.beta.pipeline.nodeClassification.train.estimate", mode = Mode.READ)
     @Description("Estimates memory for training a node classification model based on a pipeline")
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

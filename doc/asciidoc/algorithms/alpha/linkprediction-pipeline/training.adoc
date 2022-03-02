@@ -1,7 +1,7 @@
 [[algorithms-ml-linkprediction-pipelines-train]]
 == Training the pipeline
 
-The train mode, `gds.alpha.ml.pipeline.linkPrediction.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
+The train mode, `gds.beta.pipeline.linkPrediction.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
 Running this mode results in a `Link prediction pipeline` model being stored in the model catalog along with metrics collected during training.
 The trained pipeline can be <<algorithms-link-prediction-pipelines-predict, applied>> to a possibly different graph which produces a relationship type of predicted links, each having a predicted probability stored as a property.
 
@@ -13,7 +13,7 @@ These graphs are internally managed and exist only for the duration of the train
 . Apply the node property steps, added according to <<algorithms-ml-linkprediction-adding-node-properties, Adding node properties>>, on the `feature-input` graph.
 . Apply the feature steps, added according to <<algorithms-ml-linkprediction-adding-features, Adding link features>>, to the `train` graph, which yields for each `train` relationship an _instance_, that is, a feature vector and a binary label.
 . Split the training instances using stratified k-fold cross-validation.
-The number of folds `k` can be configured using `validationFolds` in `gds.alpha.ml.pipeline.linkPrediction.configureSplit`.
+The number of folds `k` can be configured using `validationFolds` in `gds.beta.pipeline.linkPrediction.configureSplit`.
 . Train each model candidate given by the <<algorithms-ml-linkprediction-configure-model-parameters,parameter space>> for each of the folds and evaluate the model on the respective validation set.
 The training process uses a logistic regression algorithm, and the evaluation uses the <<algorithms-ml-linkprediction-pipelines-metrics, AUCPR metric>>.
 . Declare as winner the model with the highest average metric across the folds.
@@ -34,7 +34,7 @@ NOTE: A step can only use node properties that are already present in the input 
 .Run Link Prediction in train mode on a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.train(
+CALL gds.beta.pipeline.linkPrediction.train(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -185,7 +185,7 @@ WARNING: The Link Prediction model requires the graph to be created using the `U
 .The following will train a model using a pipeline:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.train('myGraph', {
+CALL gds.beta.pipeline.linkPrediction.train('myGraph', {
   pipeline: 'pipe',
   modelName: 'lp-pipeline-model',
   randomSeed: 42

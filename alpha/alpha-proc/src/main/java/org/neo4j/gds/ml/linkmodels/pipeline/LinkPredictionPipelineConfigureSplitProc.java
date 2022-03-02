@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPipelineConfigureSplitProc extends BaseProc {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.configureSplit", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.configureSplit", mode = READ)
     @Description("Configures the split of the link prediction pipeline.")
     public Stream<PipelineInfoResult> configureSplit(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionPipeline.class);

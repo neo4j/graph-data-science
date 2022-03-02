@@ -83,7 +83,7 @@ public class LinkPredictionPipeline extends Pipeline<LinkFeatureStep, LogisticRe
     public void validate() {
         if (featureSteps().isEmpty()) {
             throw new IllegalArgumentException(
-                "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.alpha.ml.pipeline.linkPrediction.addFeature`.");
+                "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.beta.pipeline.linkPrediction.addFeature`.");
         }
     }
 

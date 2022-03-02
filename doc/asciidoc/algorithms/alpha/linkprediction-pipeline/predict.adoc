@@ -33,7 +33,7 @@ If the predict and train graphs are distinct, it is also beneficial that they ha
 .Run Link Prediction in mutate mode on a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate(
+CALL gds.beta.pipeline.linkPrediction.predict.mutate(
   graphName: String,
   configuration: Map
 )
@@ -86,7 +86,7 @@ include::specific-predict-configuration.adoc[]
 .Run Link Prediction in stream mode on a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.predict.stream(
+CALL gds.beta.pipeline.linkPrediction.predict.stream(
   graphName: String,
   configuration: Map
 )
@@ -142,7 +142,7 @@ The stream procedure will yield a node pair only once.
 --
 [source, cypher]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.predict.stream('myGraph', {
+CALL gds.beta.pipeline.linkPrediction.predict.stream('myGraph', {
   modelName: 'lp-pipeline-model',
   topN: 5,
   threshold: 0.45
@@ -186,7 +186,7 @@ For each such node pair the model we trained will be used to predict whether the
 --
 [source, cypher]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate('myGraph', {
+CALL gds.beta.pipeline.linkPrediction.predict.mutate('myGraph', {
   modelName: 'lp-pipeline-model',
   relationshipTypes: ['KNOWS'],
   mutateRelationshipType: 'KNOWS_EXHAUSTIVE_PREDICTED',
@@ -233,7 +233,7 @@ See the <<algorithms-knn, K-Nearest Neighbors documentation>> for more details o
 --
 [source, cypher]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate('myGraph', {
+CALL gds.beta.pipeline.linkPrediction.predict.mutate('myGraph', {
   modelName: 'lp-pipeline-model',
   relationshipTypes: ['KNOWS'],
   mutateRelationshipType: 'KNOWS_APPROX_PREDICTED',

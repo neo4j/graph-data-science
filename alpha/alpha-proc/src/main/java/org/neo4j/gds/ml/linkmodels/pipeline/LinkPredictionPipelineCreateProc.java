@@ -34,7 +34,7 @@ import static org.neo4j.procedure.Mode.READ;
 @SuppressWarnings("immutables:subtype")
 public class LinkPredictionPipelineCreateProc extends BaseProc {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.create", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.create", mode = READ)
     @Description("Creates a link prediction pipeline in the model catalog.")
     public Stream<PipelineInfoResult> create(@Name("pipelineName") String input) {
         var pipelineName = StringIdentifierValidations.validateNoWhiteCharacter(input, "pipelineName");

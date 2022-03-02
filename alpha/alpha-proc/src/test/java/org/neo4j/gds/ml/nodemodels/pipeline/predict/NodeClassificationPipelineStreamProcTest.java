@@ -83,7 +83,7 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
 
         var query = GdsCypher
             .call(GRAPH_NAME)
-            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .algo("gds.beta.pipeline.nodeClassification.predict")
             .streamMode()
             .addParameter("modelName", MODEL_NAME)
             .yields();
@@ -120,7 +120,7 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
 
         var query = GdsCypher
             .call(GRAPH_NAME)
-            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .algo("gds.beta.pipeline.nodeClassification.predict")
             .streamMode()
             .addParameter("includePredictedProbabilities", true)
             .addParameter("modelName", MODEL_NAME)
@@ -157,7 +157,7 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
     void shouldEstimateMemory(Object graphNameOrConfiguration, MemoryRange expected) {
         addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2);
 
-        var query = "CALL gds.alpha.ml.pipeline.nodeClassification.predict.stream.estimate(" +
+        var query = "CALL gds.beta.pipeline.nodeClassification.predict.stream.estimate(" +
                     "   $graphDefinition, {" +
                     "       modelName: $modelName," +
                     "       includePredictedProbabilities: true" +

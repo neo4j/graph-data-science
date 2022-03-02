@@ -45,7 +45,7 @@ To exemplify this, we create a <<algorithms-ml-nodeclassification-pipelines, nod
 .Creating a link prediction training pipelines:
 [source, cypher, role=noplay setup-query]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.create('pipe')
+CALL gds.beta.pipeline.nodeClassification.create('pipe')
 ----
 
 [role=query-example]

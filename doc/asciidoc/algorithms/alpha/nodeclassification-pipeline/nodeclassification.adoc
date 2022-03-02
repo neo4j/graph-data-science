@@ -54,7 +54,7 @@ The rest of this page is divided as follows:
 [[algorithms-ml-nodeclassification-creating-a-pipeline]]
 == Creating a pipeline
 
-The first step of building a new pipeline is to create one using `gds.alpha.ml.pipeline.nodeClassification.create`.
+The first step of building a new pipeline is to create one using `gds.beta.pipeline.nodeClassification.create`.
 This stores a trainable model object in the model catalog of type `Node classification training pipeline`.
 This represents a configurable pipeline that can later be invoked for training, which in turn creates a classification pipeline.
 The latter is also a model which is stored in the catalog with type `Node classification pipeline`.
@@ -66,7 +66,7 @@ The latter is also a model which is stored in the catalog with type `Node classi
 .Create pipeline syntax
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.create(
+CALL gds.beta.pipeline.nodeClassification.create(
   pipelineName: String
 )
 YIELD
@@ -94,7 +94,7 @@ include::pipelineInfoResult.adoc[]
 .The following will create a pipeline:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.create('pipe')
+CALL gds.beta.pipeline.nodeClassification.create('pipe')
 ----
 
 .Results
@@ -128,7 +128,7 @@ For example, <<algorithms-ml-models-preprocessing, pre-processing algorithms>> c
 .Add node property syntax
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty(
+CALL gds.beta.pipeline.nodeClassification.addNodeProperty(
   pipelineName: String,
   procedureName: String,
   procedureConfiguration: Map
@@ -159,7 +159,7 @@ include::pipelineInfoResult.adoc[]
 .The following will add a node property step to the pipeline. Here we assume that the input graph contains a property `sizePerStory`.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty('pipe', 'alpha.scaleProperties', {
+CALL gds.beta.pipeline.nodeClassification.addNodeProperty('pipe', 'alpha.scaleProperties', {
   nodeProperties: 'sizePerStory',
   scaler: 'L1Norm',
   mutateProperty:'scaledSizes'
@@ -192,7 +192,7 @@ For example, the `embedding` property could be created by the previous example, 
 .Adding a feature to a pipeline syntax
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures(
+CALL gds.beta.pipeline.nodeClassification.selectFeatures(
   pipelineName: String,
   nodeProperties: List or String
 )
@@ -222,7 +222,7 @@ include::pipelineInfoResult.adoc[]
 .The following will select features for the pipeline. Here we assume that the input graph contains a property `sizePerStory` and `scaledSizes` was created in a `nodePropertyStep`.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures('pipe', ['scaledSizes', 'sizePerStory'])
+CALL gds.beta.pipeline.nodeClassification.selectFeatures('pipe', ['scaledSizes', 'sizePerStory'])
 YIELD name, featureProperties
 ----
 
@@ -272,7 +272,7 @@ image::train-test-splitting/validation-folds-node-classification.gif[validation-
 .Configure the relationship split syntax
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit(
+CALL gds.beta.pipeline.nodeClassification.configureSplit(
   pipelineName: String,
   configuration: Map
 )
@@ -310,7 +310,7 @@ include::pipelineInfoResult.adoc[]
 .The following will configure the splitting of the pipeline:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('pipe', {
+CALL gds.beta.pipeline.nodeClassification.configureSplit('pipe', {
  testFraction: 0.2,
   validationFolds: 5
 })
@@ -330,7 +330,7 @@ We now reconfigured the splitting of the pipeline, which will be applied during 
 [[algorithms-ml-nodeclassification-configure-model-parameters]]
 == Configuring the model parameters
 
-The `gds.alpha.ml.pipeline.nodeClassification.configureParams` mode is used to set up the train mode with a list of configurations of logistic regression models.
+The `gds.beta.pipeline.nodeClassification.configureParams` mode is used to set up the train mode with a list of configurations of logistic regression models.
 The set of model configurations is called the _parameter space_ which parametrizes a set of model candidates.
 The parameter space can be configured by passing this procedure a list of maps, where each map configures the training of one logistic regression model.
 In <<algorithms-ml-nodeclassification-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
@@ -347,7 +347,7 @@ The parameter space of a pipeline can be inspected using `gds.beta.model.list` a
 .Configure the train parameters syntax
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.configureParams(
+CALL gds.beta.pipeline.nodeClassification.configureParams(
   pipelineName: String,
   parameterSpace: List of Map
 )
@@ -390,7 +390,7 @@ include::pipelineInfoResult.adoc[]
 .The following will configure the parameter space of the pipeline:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.configureParams('pipe',
+CALL gds.beta.pipeline.nodeClassification.configureParams('pipe',
   [{penalty: 0.0625}, {tolerance: 0.01}, {maxEpochs: 500}]
 ) YIELD parameterSpace
 ----

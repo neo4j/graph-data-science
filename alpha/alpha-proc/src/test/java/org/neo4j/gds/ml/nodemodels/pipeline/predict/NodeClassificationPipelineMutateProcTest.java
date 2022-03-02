@@ -86,7 +86,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
         var query = GdsCypher
             .call(GRAPH_NAME)
-            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .algo("gds.beta.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "class")
             .addParameter("modelName", MODEL_NAME)
@@ -112,7 +112,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
         var query = GdsCypher
             .call(GRAPH_NAME)
-            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .algo("gds.beta.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "class")
             .addParameter("predictedProbabilityProperty", "probabilities")
@@ -142,7 +142,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
         var query = GdsCypher
             .call(GRAPH_NAME)
-            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .algo("gds.beta.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "foo")
             .addParameter("predictedProbabilityProperty", "foo")
@@ -157,7 +157,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
         var firstQuery = GdsCypher
             .call(GRAPH_NAME)
-            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .algo("gds.beta.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "foo")
             .addParameter("modelName", MODEL_NAME)
@@ -167,7 +167,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
         var secondQuery = GdsCypher
             .call(GRAPH_NAME)
-            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .algo("gds.beta.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "bar")
             .addParameter("predictedProbabilityProperty", "foo")
@@ -183,7 +183,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
     void shouldEstimateMemory(Object graphNameOrConfiguration, MemoryRange expected) {
         addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2);
 
-        var query = "CALL gds.alpha.ml.pipeline.nodeClassification.predict.mutate.estimate(" +
+        var query = "CALL gds.beta.pipeline.nodeClassification.predict.mutate.estimate(" +
                     "   $graphDefinition, {" +
                     "       modelName: $modelName," +
                     "       mutateProperty: 'foo'," +
