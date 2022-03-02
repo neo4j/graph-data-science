@@ -55,7 +55,7 @@ class LogisticRegressionClassifierTest {
         classIdMap.toMapped(1L);
         var modelData = ImmutableLogisticRegressionData.of(
             new Weights<>(new Matrix(new double[]{-0.5, -0.6, -0.7, -0.8}, 1, 4)),
-            Weights.ofScalar(0),
+            Weights.ofVector(0),
             classIdMap
         );
 
@@ -63,7 +63,7 @@ class LogisticRegressionClassifierTest {
 
         var result = predictor.predictProbabilities(
             0,
-            new LogisticRegressionTrainerTest.TestFeatures(new double[][] {features})
+            new TestFeatures(new double[][] {features})
         )[1];
 
         assertThat(result).isCloseTo(expectedResult, Offset.offset(1e-8));

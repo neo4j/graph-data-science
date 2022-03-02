@@ -36,11 +36,15 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.ml.Predictor;
+import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrain;
@@ -55,6 +59,7 @@ import org.openjdk.jol.util.Multiset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
@@ -71,7 +76,9 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
 
     private final Graph graph;
     private final NodeClassificationTrainConfig config;
+    private final Features features;
     private final HugeLongArray targets;
+    private final LocalIdMap classIdMap;
     private final HugeLongArray nodeIds;
     private final List<Metric> metrics;
     private final StatsMap trainStats;
@@ -189,16 +196,21 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
         var targetsAndClasses = computeGlobalTargetsAndClasses(targetNodeProperty, graph.nodeCount());
         var targets = targetsAndClasses.getOne();
+        var classIdMap = makeClassIdMap(targets);
         var classCounts = targetsAndClasses.getTwo();
         var metrics = createMetrics(config, classCounts);
         var nodeIds = HugeLongArray.newArray(graph.nodeCount());
         nodeIds.setAll(i -> i);
         var trainStats = StatsMap.create(metrics);
         var validationStats = StatsMap.create(metrics);
+        var features = Features.extractLazyFeatures(graph, config.featureProperties());
+
         return new NodeClassificationTrain(
             graph,
             config,
+            features,
             targets,
+            classIdMap,
             classCounts,
             metrics,
             nodeIds,
@@ -206,6 +218,16 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
             validationStats,
             progressTracker
         );
+    }
+
+    public static LocalIdMap makeClassIdMap(HugeLongArray targets) {
+        var classSet = new TreeSet<Long>();
+        var classIdMap = new LocalIdMap();
+        for (long i = 0; i < targets.size(); i++) {
+            classSet.add(targets.get(i));
+        }
+        classSet.forEach(classIdMap::toMapped);
+        return classIdMap;
     }
 
     private static Pair<HugeLongArray, Multiset<Long>> computeGlobalTargetsAndClasses(
@@ -231,7 +253,9 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
     private NodeClassificationTrain(
         Graph graph,
         NodeClassificationTrainConfig config,
+        Features features,
         HugeLongArray targets,
+        LocalIdMap classIdMap,
         Multiset<Long> classCounts,
         List<Metric> metrics,
         HugeLongArray nodeIds,
@@ -242,7 +266,9 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         super(progressTracker);
         this.graph = graph;
         this.config = config;
+        this.features = features;
         this.targets = targets;
+        this.classIdMap = classIdMap;
         this.metrics = metrics;
         this.nodeIds = nodeIds;
         this.trainStats = trainStats;
@@ -307,7 +333,9 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
                 var validationSet = nodeSplit.testSet();
 
                 progressTracker.beginSubTask("Training");
-                var predictor = trainPredictor(trainSet, modelParams);
+                var classifier = trainModel(trainSet, modelParams);
+
+                var predictor = classifier.convertToPredictor(config.featureProperties());
                 progressTracker.endSubTask("Training");
 
                 progressTracker.beginSubTask(validationSet.size() + trainSet.size());
@@ -332,35 +360,51 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         return ModelSelectResult.of(bestModelStats.params(), trainStats, validationStats);
     }
 
+    // this is temporary code
+    private LogisticRegressionTrainConfig convertConfig(NodeLogisticRegressionTrainConfig nlrConfig) {
+        return LogisticRegressionTrainConfigImpl.builder()
+            .batchSize(nlrConfig.batchSize())
+            .maxEpochs(nlrConfig.maxEpochs())
+            .minEpochs(nlrConfig.minEpochs())
+            .patience(nlrConfig.patience())
+            .penalty(nlrConfig.penalty())
+            .tolerance(nlrConfig.tolerance())
+            .useBiasFeature(true).build();
+    }
+
     private Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> evaluateBestModel(
         TrainingExamplesSplit outerSplit,
         ModelSelectResult modelSelectResult,
         NodeLogisticRegressionTrainConfig bestParameters
     ) {
         progressTracker.beginSubTask("TrainSelectedOnRemainder");
-        Predictor<Matrix, ?> bestPredictor = trainPredictor(outerSplit.trainSet(), bestParameters);
+        var bestClassifier = trainModel(outerSplit.trainSet(), bestParameters);
         progressTracker.endSubTask("TrainSelectedOnRemainder");
 
         progressTracker.beginSubTask(outerSplit.testSet().size() + outerSplit.trainSet().size());
-        var testMetrics = metricComputer.computeMetrics(outerSplit.testSet(), bestPredictor);
-        var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), bestPredictor);
+        var testMetrics = metricComputer.computeMetrics(outerSplit.testSet(), bestClassifier.convertToPredictor(config.featureProperties()));
+        var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), bestClassifier.convertToPredictor(config.featureProperties()));
         progressTracker.endSubTask();
 
         return mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
     }
 
-    private NodeLogisticRegressionData retrainBestModel(NodeLogisticRegressionTrainConfig bestParameters) {
+    private LogisticRegressionClassifier retrainBestModel(NodeLogisticRegressionTrainConfig bestParameters) {
         progressTracker.beginSubTask("RetrainSelectedModel");
-        var retrainedModelData = trainModel(nodeIds, bestParameters);
+        var retrainedClassifier = trainModel(nodeIds, bestParameters);
         progressTracker.endSubTask("RetrainSelectedModel");
-        return retrainedModelData;
+        return retrainedClassifier;
     }
 
     private Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> createModel(
         NodeLogisticRegressionTrainConfig bestParameters,
         Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metricResults,
-        NodeLogisticRegressionData retrainedModelData
+        LogisticRegressionClassifier classifier
     ) {
+        NodeLogisticRegressionData retrainedModelData = classifier
+            .convertToPredictor(config.featureProperties())
+            .modelData();
+
         var modelInfo = NodeClassificationModelInfo.of(
             retrainedModelData.classIdMap().originalIdsList(),
             bestParameters,
@@ -395,19 +439,20 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         ));
     }
 
-    private NodeLogisticRegressionData trainModel(
+    private LogisticRegressionClassifier trainModel(
         HugeLongArray trainSet,
         NodeLogisticRegressionTrainConfig nlrConfig
     ) {
-        var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressTracker, terminationFlag, config.concurrency());
-        return train.compute();
-    }
-
-    private Predictor<Matrix, ?> trainPredictor(
-        HugeLongArray trainSet,
-        NodeLogisticRegressionTrainConfig nlrConfig
-    ) {
-        return new NodeLogisticRegressionPredictor(trainModel(trainSet, nlrConfig), nlrConfig.featureProperties());
+        var trainer = new LogisticRegressionTrainer(
+            ReadOnlyHugeLongArray.of(trainSet),
+            config.concurrency(),
+            convertConfig(nlrConfig),
+            classIdMap,
+            false,
+            terminationFlag,
+            progressTracker
+        );
+        return trainer.train(features, targets);
     }
 
     @ValueClass

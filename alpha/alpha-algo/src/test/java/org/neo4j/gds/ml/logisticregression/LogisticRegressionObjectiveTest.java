@@ -28,22 +28,51 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.core.functions.Constant;
+import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
+import org.neo4j.gds.ml.core.functions.Softmax;
+import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionObjective;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@GdlExtension
 class LogisticRegressionObjectiveTest {
+
+    @GdlGraph
+    private static final String DB_QUERY =
+        "CREATE " +
+        "  (a:N {p: [0.48999999999999994, 0.48999999999999994], t: 1})" +
+        ", (b:N {p: [1.0, 2.8899999999999997], t: 1})" +
+        ", (c:N {p: [1.0, 2.5600000000000005], t: 0})" +
+        ", (d:N {p: [0.09, 0.16], t: 0})";
+
+    @Inject
+    TestGraph graph;
+
+    @Inject
+    IdFunction idFunction;
+    private HugeLongArray labels;
 
     private static Stream<Arguments> featureBatches() {
         return Stream.of(
@@ -52,29 +81,66 @@ class LogisticRegressionObjectiveTest {
         );
     }
 
-    private LogisticRegressionObjective objective;
+    private LogisticRegressionObjective standardObjective;
+    private LogisticRegressionObjective reducedObjective;
+    private LogisticRegressionObjective trainedStandardObjective;
+    private LogisticRegressionObjective trainedReducedObjective;
 
     @BeforeEach
     void setup() {
-        var features = HugeObjectArray.of(
+        var featuresHOA = HugeObjectArray.of(
             new double[]{Math.pow(0.7, 2), Math.pow(0.7, 2)},
             new double[]{Math.pow(-1, 2), Math.pow(1.7, 2)},
             new double[]{Math.pow(1, 2), Math.pow(-1.6, 2)},
             new double[]{Math.pow(0.3, 2), Math.pow(-0.4, 2)}
         );
 
-        var labels = HugeLongArray.newArray(features.size());
+        labels = HugeLongArray.newArray(featuresHOA.size());
         labels.setAll(idx -> (idx < 2) ? 1 : 0);
         var idMap = new LocalIdMap();
         for (long i = 0; i < labels.size(); i++) {
             idMap.toMapped(labels.get(i));
         }
 
-        var classifier = new LogisticRegressionClassifier(LogisticRegressionData.withReducedClassCount(2, true, idMap));
-        this.objective = new LogisticRegressionObjective(
-            classifier,
+        var standardClassifier = new LogisticRegressionClassifier(
+            LogisticRegressionData.standard(2, true, idMap)
+        );
+        var reducedClassifier = new LogisticRegressionClassifier(
+            LogisticRegressionData.withReducedClassCount(2, true, idMap)
+        );
+        var trainedStandardClassifier = new LogisticRegressionClassifier(
+            LogisticRegressionData.standard(2, true, idMap)
+        );
+        Arrays.setAll(trainedStandardClassifier.data().weights().data().data(), i -> i);
+        Arrays.setAll(trainedStandardClassifier.data().bias().orElseThrow().data().data(), i -> i == 0 ? 0.4 : 0.8);
+        var trainedReducedClassifier = new LogisticRegressionClassifier(
+            LogisticRegressionData.withReducedClassCount(2, true, idMap)
+        );
+        Arrays.setAll(trainedReducedClassifier.data().weights().data().data(), i -> i);
+        Arrays.setAll(trainedReducedClassifier.data().bias().orElseThrow().data().data(), i -> i == 0 ? 0.4 : 0.8);
+        var features = Features.wrap(featuresHOA);
+        this.standardObjective = new LogisticRegressionObjective(
+            standardClassifier,
             1.0,
-            Features.wrap(features),
+            features,
+            labels
+        );
+        this.reducedObjective = new LogisticRegressionObjective(
+            reducedClassifier,
+            1.0,
+            features,
+            labels
+        );
+        this.trainedStandardObjective = new LogisticRegressionObjective(
+            trainedStandardClassifier,
+            1.0,
+            features,
+            labels
+        );
+        this.trainedReducedObjective = new LogisticRegressionObjective(
+            trainedReducedClassifier,
+            1.0,
+            features,
             labels
         );
     }
@@ -82,7 +148,7 @@ class LogisticRegressionObjectiveTest {
     @Test
     void makeTargets() {
         var batch = new LazyBatch(1, 2, 4);
-        var batchedTargets = objective.batchLabelVector(batch, objective.modelData().classIdMap());
+        var batchedTargets = standardObjective.batchLabelVector(batch, standardObjective.modelData().classIdMap());
 
         // original labels are 1.0, 0.0 , but these are local ids. since nodeId 0 has label 1.0, this maps to 0.0.
         assertThat(batchedTargets.data()).isEqualTo(new Vector(0.0, 1.0));
@@ -94,7 +160,6 @@ class LogisticRegressionObjectiveTest {
         var featureCount = 2;
 
         var allFeatures = HugeObjectArray.newArray(double[].class, 10);
-
 
         allFeatures.setAll(idx -> {
             double[] features = new double[featureCount];
@@ -109,15 +174,117 @@ class LogisticRegressionObjectiveTest {
     }
 
     @Test
-    void loss() {
+    void lossStandard() {
         var batch = new LazyBatch(0, 4, 4);
-        var loss = objective.loss(batch, 4);
+        var loss = standardObjective.loss(batch, 4);
 
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
 
         // weights are zero. penalty part of objective is 0. remaining part of CEL is -Math.log(0.5).
         assertThat(lossValue).isEqualTo(-Math.log(0.5), Offset.offset(1E-9));
+    }
+
+    @Test
+    void lossReduced() {
+        var batch = new LazyBatch(0, 4, 4);
+        var loss = reducedObjective.loss(batch, 4);
+
+        var ctx = new ComputationContext();
+        var lossValue = ctx.forward(loss).value();
+
+        // weights are zero. penalty part of objective is 0. remaining part of CEL is -Math.log(0.5).
+        assertThat(lossValue).isEqualTo(-Math.log(0.5), Offset.offset(1E-9));
+    }
+
+    @Test
+    void standardObjective() {
+        testLoss(Softmax.class, standardObjective);
+    }
+    @Test
+    void reducedObjective() {
+        testLoss(ReducedSoftmax.class, reducedObjective);
+    }
+    @Test
+    void trainedStandardObjective() {
+        testLoss(Softmax.class, trainedStandardObjective);
+    }
+    @Test
+    void trainedReducedObjective() {
+        testLoss(ReducedSoftmax.class, trainedReducedObjective);
+    }
+
+    <T extends Variable<Matrix>> void testLoss(Class softmaxClass, LogisticRegressionObjective objective) {
+        var trainSize = 42;
+        var ctx = new ComputationContext();
+        var batch = new LazyBatch(0, 4, 4);
+        var loss = objective.loss(batch, trainSize);
+        var lossValue = ctx.forward(loss).value();
+
+        var expectedPenalty = 0.0;
+        for (var weight : objective.modelData().weights().data().data()) {
+            expectedPenalty += weight * weight * batch.size() / trainSize;
+        }
+        var actualPenalty = ctx.forward(objective.penaltyForBatch(batch, trainSize)).value();
+        assertThat(actualPenalty).isEqualTo(expectedPenalty, Offset.offset(1e-9));
+
+        var predictions = (T) ctx
+            .computedVariables()
+            .stream()
+            .filter(v -> v.getClass() == softmaxClass)
+            .findFirst()
+            .get();
+        Matrix predictedValues = ctx.data(predictions);
+        var idMap = objective.modelData().classIdMap();
+        var expectedUnpenalizedLoss = 1.0/4.0 * (
+            -Math.log(predictedValues.dataAt(0, idMap.toMapped((int)labels.get(0))))
+            -Math.log(predictedValues.dataAt(1, idMap.toMapped((int)labels.get(1))))
+            -Math.log(predictedValues.dataAt(2, idMap.toMapped((int)labels.get(2))))
+            -Math.log(predictedValues.dataAt(3, idMap.toMapped((int)labels.get(3))))
+        );
+        var actualUnpenalizedLoss = ctx.forward(objective.crossEntropyLoss(batch)).value();
+        assertThat(actualUnpenalizedLoss).isEqualTo(expectedUnpenalizedLoss, Offset.offset(1e-9));
+
+        assertThat(lossValue).isEqualTo(expectedUnpenalizedLoss + expectedPenalty, Offset.offset(1e-9));
+    }
+
+    @Test
+    void compareOldAndNewObjectives() {
+        var idMap = new LocalIdMap();
+        idMap.toMapped(1);
+        idMap.toMapped(0);
+        var modelData = NodeLogisticRegressionData.builder()
+            .weights(new Weights<>(new Matrix(new double[2 * 3], 2, 3)))
+            .classIdMap(idMap)
+            .build();
+        var predictor = new NodeLogisticRegressionPredictor(modelData, List.of("p"));
+        var oldObjective = new NodeLogisticRegressionObjective(graph, predictor, "t", 1.0);
+        var trainSize = 42;
+        var batch = new LazyBatch(0, 4, 4);
+        var oldLossValue = new ComputationContext().forward(oldObjective.loss(batch, trainSize)).value();
+        var newLossValue = new ComputationContext().forward(standardObjective.loss(batch, trainSize)).value();
+        assertThat(oldLossValue).isEqualTo(newLossValue, Offset.offset(1e-9));
+    }
+
+    @Test
+    void compareOldAndNewTrainedObjectives() {
+        var idMap = new LocalIdMap();
+        idMap.toMapped(1);
+        idMap.toMapped(0);
+        var modelData = NodeLogisticRegressionData.builder()
+            .weights(new Weights<>(new Matrix(new double[]{
+                0.0, 1.0, 0.4,
+                2.0, 3.0, 0.8
+            }, 2, 3)))
+            .classIdMap(idMap)
+            .build();
+        var predictor = new NodeLogisticRegressionPredictor(modelData, List.of("p"));
+        var oldObjective = new NodeLogisticRegressionObjective(graph, predictor, "t", 1.0);
+        var trainSize = 42;
+        var batch = new LazyBatch(0, 4, 4);
+        var oldLossValue = new ComputationContext().forward(oldObjective.loss(batch, trainSize)).value();
+        var newLossValue = new ComputationContext().forward(trainedStandardObjective.loss(batch, trainSize)).value();
+        assertThat(oldLossValue).isEqualTo(newLossValue, Offset.offset(1e-7));
     }
 
     @ParameterizedTest

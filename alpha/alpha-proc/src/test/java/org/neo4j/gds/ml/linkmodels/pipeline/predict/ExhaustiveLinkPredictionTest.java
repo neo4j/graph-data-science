@@ -99,7 +99,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
                     1,
                     WEIGHTS.length
                 )),
-            Weights.ofScalar(0),
+            Optional.empty(),
             LinkPredictionTrain.makeClassIdMap()
         );
 
@@ -158,7 +158,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
                     1,
                     WEIGHTS.length
                 )),
-            Weights.ofScalar(0),
+            Optional.empty(),
             LinkPredictionTrain.makeClassIdMap()
         );
 

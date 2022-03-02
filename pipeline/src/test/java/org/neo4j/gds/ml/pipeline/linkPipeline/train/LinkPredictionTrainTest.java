@@ -183,12 +183,12 @@ class LinkPredictionTrainTest {
             .data());
 
         var modelWeights = modelData.weights().data();
-        var modelBias = modelData.bias().get().data().value();
+        var modelBias = modelData.bias().get().data().data();
         var modelWeightsRepeated = modelDataRepeated.weights().data();
-        var modelBiasRepeated = modelDataRepeated.bias().get().data().value();
+        var modelBiasRepeated = modelDataRepeated.bias().get().data().data();
 
         assertThat(modelWeights).matches(modelWeightsRepeated::equals);
-        assertThat(modelBias).isEqualTo(modelBiasRepeated);
+        assertThat(modelBias).containsExactly(modelBiasRepeated);
     }
 
     @ParameterizedTest

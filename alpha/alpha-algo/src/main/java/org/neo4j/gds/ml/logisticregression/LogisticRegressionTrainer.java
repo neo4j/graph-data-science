@@ -88,7 +88,7 @@ public final class LogisticRegressionTrainer implements Trainer {
             : standard(features.get(0).length, trainConfig.useBiasFeature(), classIdMap);
         var classifier = new LogisticRegressionClassifier(data);
         var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);
-        var training = new Training(trainConfig, progressTracker, trainSet.size(), terminationFlag);
+        var training = new Training(trainConfig, progressTracker, features.size(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, trainConfig.batchSize());
 
         training.train(objective, queueSupplier, concurrency);

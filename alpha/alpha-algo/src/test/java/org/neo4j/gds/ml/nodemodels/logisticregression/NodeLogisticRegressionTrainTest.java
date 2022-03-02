@@ -168,11 +168,11 @@ class NodeLogisticRegressionTrainTest {
 
         var trainedData = trainedWeights.data().data();
         var expectedData = new double[] {
-            0.0052934301, -0.1133411149, -0.0145320980,
-            0.1437066808, 0.0033567797, 0.0482791566,
-            -0.1489973177, 0.1099794116, -0.0337460297
+            0.02291542809512843, -0.09769301587228878, -0.21129220750800162,
+            0.0916257450149858, -0.0577815055288917, 0.35335255481509065,
+            -0.11454111373490988, 0.15547180246829373, -0.42841313034448925
         };
 
-        assertThat(trainedData).containsExactly(expectedData, Offset.offset(1e-10));
+        assertThat(trainedData).containsExactly(expectedData, Offset.offset(1e-9));
     }
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.core;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ml.core.functions.PassthroughVariable;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.TensorFactory;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -130,6 +132,11 @@ public class ComputationContext {
 
         return result.toString();
 
+    }
+
+    @TestOnly
+    public Set<Variable<?>> computedVariables() {
+        return data.keySet();
     }
 
     private void renderOrphanGradients(StringBuilder result) {

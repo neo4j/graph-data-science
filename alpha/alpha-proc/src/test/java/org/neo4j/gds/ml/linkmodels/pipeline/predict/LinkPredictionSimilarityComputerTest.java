@@ -38,6 +38,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -70,7 +71,7 @@ class LinkPredictionSimilarityComputerTest {
                 1,
                 2
             )),
-            Weights.ofScalar(0),
+            Optional.empty(),
             LinkPredictionTrain.makeClassIdMap()
         );
         var lpSimComputer = new LinkPredictionSimilarityComputer(

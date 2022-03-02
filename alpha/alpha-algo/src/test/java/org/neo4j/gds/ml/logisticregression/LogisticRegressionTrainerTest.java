@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.Map;
@@ -66,13 +65,15 @@ class LogisticRegressionTrainerTest {
         var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
-        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().value() != 0D);
+        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(0) != 0D);
+        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(1) != 0D);
+        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(2) != 0D);
         assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 3);
         assertThat(classifier.data().weights().data().data()).containsExactly(
             new double[]{
-                0.00199977923, 0.00199977903, 0.00199977883,
-                0.00199977923, 0.00199977903, 0.00199977883,
-                0.00199992845, 0.00199992838, 0.00199992831
+                0.001999707328540424, 0.0019997071280373367, 0.0019997069275342902,
+                0.001999707328540424, 0.0019997071280373367, 0.0019997069275342902,
+                0.0019999946590813496, 0.0019999945924114946, 0.0019999945257416444
             },
             Offset.offset(1e-11)
         );
@@ -101,13 +102,15 @@ class LogisticRegressionTrainerTest {
         var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
-        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().value() != 0D);
+        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(0) != 0D);
+        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(1) != 0D);
+        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(2) != 0D);
         assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 3);
         assertThat(classifier.data().weights().data().data()).containsExactly(
             new double[]{
-                0.0938383655, 0.0938383627, 0.0938383600,
-                0.0938383655, 0.0938383627, 0.0938383600,
-                -0.091255531, -0.0912555285, -0.0912555257
+                0.093050465, 0.093050463, 0.093050460,
+                0.093050465, 0.093050463, 0.093050460,
+                -0.088693323, -0.088693320, -0.088693318
             },
             Offset.offset(1e-9)
         );
@@ -209,9 +212,9 @@ class LogisticRegressionTrainerTest {
         assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 3);
         assertThat(classifier.data().weights().data().data()).containsExactly(
             new double[]{
-                0.001799698, 0.001187329, 0.000781799,
-                0.001799698, 0.001187329, 0.000781799,
-                0.001799698, 0.001187329, 0.000781799
+                0.001798823419447968, 0.0011862464619943674, 7.813062407504739E-4,
+                0.0017988234194479679, 0.0011862464619943674, 7.813062407504741E-4,
+                0.0018023058593831845, 0.0011905760984642403, 7.832819611133551E-4
             },
             Offset.offset(1e-9)
         );
@@ -251,24 +254,5 @@ class LogisticRegressionTrainerTest {
         );
     }
 
-
-    public static final class TestFeatures implements Features {
-
-        private final double[][] features;
-
-        TestFeatures(double[][] features) {
-            this.features = features;
-        }
-
-        @Override
-        public long size() {
-            return features.length;
-        }
-
-        @Override
-        public double[] get(long id) {
-            return features[(int) id];
-        }
-    }
 
 }

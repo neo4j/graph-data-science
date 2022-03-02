@@ -28,6 +28,7 @@ import org.neo4j.gds.ml.core.functions.ConstantScale;
 import org.neo4j.gds.ml.core.functions.CrossEntropyLoss;
 import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
+import org.neo4j.gds.ml.core.functions.L2NormSquaredOld;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -122,7 +123,7 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
             predictions,
             targets
         );
-        var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData().weights()), batch.size() * penalty / trainSize);
+        var penaltyVariable = new ConstantScale<>(new L2NormSquaredOld(modelData().weights()), batch.size() * penalty / trainSize);
         return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
     }
 

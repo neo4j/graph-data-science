@@ -47,6 +47,7 @@ import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -99,7 +100,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                     1,
                     WEIGHTS.length
                 )),
-            Weights.ofScalar(0),
+            Optional.empty(),
             LinkPredictionTrain.makeClassIdMap()
         );
 
@@ -162,7 +163,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 1,
                 weights.length
             )),
-            Weights.ofScalar(0),
+            Optional.empty(),
             LinkPredictionTrain.makeClassIdMap()
         );
 
@@ -215,7 +216,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                     1,
                     WEIGHTS.length
                 )),
-            Weights.ofScalar(0),
+            Optional.empty(),
             LinkPredictionTrain.makeClassIdMap()
         );
 
