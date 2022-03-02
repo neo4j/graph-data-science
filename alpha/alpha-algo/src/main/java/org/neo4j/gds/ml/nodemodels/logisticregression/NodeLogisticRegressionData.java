@@ -36,13 +36,6 @@ import java.util.TreeSet;
 @ValueClass
 public interface NodeLogisticRegressionData {
 
-    static MemoryEstimation memoryEstimation(int numberOfClasses, int numberOfFeatures) {
-        return MemoryEstimations.builder(NodeLogisticRegressionData.class)
-            .add("classIdMap", LocalIdMap.memoryEstimation(numberOfClasses))
-            .fixed("weights", Weights.sizeInBytes(numberOfClasses, numberOfFeatures))
-            .build();
-    }
-
     Weights<Matrix> weights();
     Optional<Weights<Vector>> bias();
 

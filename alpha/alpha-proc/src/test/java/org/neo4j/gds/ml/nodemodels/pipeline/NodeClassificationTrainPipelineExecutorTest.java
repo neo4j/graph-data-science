@@ -345,7 +345,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             graphStore.relationshipCount(),
             config.concurrency(),
             31742464L,
-            31766408L
+            31774424L
         );
 
     }

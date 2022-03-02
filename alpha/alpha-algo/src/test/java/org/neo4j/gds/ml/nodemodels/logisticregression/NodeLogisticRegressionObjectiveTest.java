@@ -21,17 +21,16 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.batch.LazyBatch;
 
 import java.util.List;
 
 import static java.lang.Math.log;
-import static java.lang.Math.max;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
@@ -71,43 +70,6 @@ class NodeLogisticRegressionObjectiveTest {
         var objective = new NodeLogisticRegressionObjective(graph, predictor, "t", 0.0);
         var classList = objective.modelData().classIdMap().originalIdsList();
         assertThat(classList).containsExactly(0L, 1L, 2L);
-    }
-
-    @Test
-    void shouldEstimateMemoryUsage() {
-        var memoryUsageInBytes = NodeLogisticRegressionObjective.sizeOfBatchInBytes(100, 10, 10);
-
-        var weightGradient = 8 * 10 * 10 + 16;      // 8 bytes for a double * numberOfClasses * numberOfFeatures + 16 for the double array
-        var makeTargets = 8 * 100 * 1 + 16;         // 8 bytes for a double * batchSize * 1 for the single target property + 16 for the double array
-        var weightedFeatures = 8 * 100 * 10 + 16;   // 8 bytes for a double * batchSize * numberOfClasses + 16 for the double array
-        var softMax = 8 * 100 * 10 + 16;            // 8 bytes for a double * batchSize * numberOfClasses + 16 for the double array
-        var unpenalizedLoss = 24;                   // 8 bytes for a double + 16 for the double array
-        var l2norm = 8 + 16;                        // 8 bytes for a double + 16 for the double array
-        var constantScale = 8 + 16;                 // 8 bytes for a double + 16 for the double array
-        var elementSum = 8 + 16;                    // 8 bytes for a double + 16 for the double array
-        var predictor = 24368;                      // black box, not from this class
-
-        var trainEpoch = makeTargets +
-                         weightedFeatures +
-                         softMax +
-                         2 * unpenalizedLoss +
-                         2 * l2norm +
-                         2 * constantScale +
-                         2 * elementSum +
-                         predictor;
-
-        var evaluateLoss = makeTargets +
-                           weightedFeatures +
-                           softMax +
-                           unpenalizedLoss +
-                           l2norm +
-                           constantScale +
-                           elementSum +
-                           predictor;
-
-        var expected = max(trainEpoch + weightGradient, evaluateLoss);
-        assertThat(makeTargets).isEqualTo(NodeLogisticRegressionObjective.costOfMakeTargets(100));
-        assertThat(memoryUsageInBytes).isEqualTo(expected);
     }
 
 }

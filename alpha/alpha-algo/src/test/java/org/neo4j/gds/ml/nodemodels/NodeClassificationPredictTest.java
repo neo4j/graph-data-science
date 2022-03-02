@@ -40,7 +40,6 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 
 import java.util.List;
 import java.util.Map;
@@ -284,7 +283,7 @@ class NodeClassificationPredictTest {
         // one thousand longs, plus overhead of a HugeLongArray
         var predictedClasses = 8 * 1000 + 40;
         // The predictions variable is tested elsewhere
-        var predictionsVariable = NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount);
+        var predictionsVariable = LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount);
 
         var expected = instance + predictedClasses + predictionsVariable;
 

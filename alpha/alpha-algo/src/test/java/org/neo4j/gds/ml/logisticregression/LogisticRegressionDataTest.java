@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.logisticregression;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,6 +30,50 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LogisticRegressionDataTest {
+
+    @Test
+    void shouldEstimateMemory() {
+        var dimensions = GraphDimensions.of(0);
+        var _04_05 = LogisticRegressionData.memoryEstimation(4, 5)
+            .estimate(dimensions, 1)
+            .memoryUsage();
+        var _04_10 = LogisticRegressionData.memoryEstimation(4, 10)
+            .estimate(dimensions, 1)
+            .memoryUsage();
+        var _08_05 = LogisticRegressionData.memoryEstimation(8, 5)
+            .estimate(dimensions, 1)
+            .memoryUsage();
+        var _08_10 = LogisticRegressionData.memoryEstimation(8, 10)
+            .estimate(dimensions, 1)
+            .memoryUsage();
+
+        var overheadForOneClassIdMap = 24 + 16 + 32;
+        var overheadForOneWeigths = 16;
+        var overheadForOneNLRData = 16 + overheadForOneClassIdMap + overheadForOneWeigths;
+
+        // scaling number of classes scales memory usage linearly, modulo overhead
+        assertThat(_08_05.max).isEqualTo(2 * _04_05.max - overheadForOneNLRData);
+        assertThat(_08_10.max).isEqualTo(2 * _04_10.max - overheadForOneNLRData);
+
+        var _04_20 = LogisticRegressionData.memoryEstimation(4, 20)
+            .estimate(dimensions, 1)
+            .memoryUsage();
+        var _04_30 = LogisticRegressionData.memoryEstimation(4, 30)
+            .estimate(dimensions, 1)
+            .memoryUsage();
+
+        // scaling number of features scales only the weights component
+        // 5:   the difference in the number of features
+        // * 4: the number of classes
+        // * 8: size per stored value in the weights matrix
+        // => the size of the change based on varying the number of features
+        assertThat(_04_05.max).isEqualTo(344);
+        assertThat(_04_10.max).isEqualTo(344 + 5 * 4 * 8); // five is the number of added features
+        assertThat(_04_10.max).isEqualTo(_04_05.max + 5 * 4 * 8);
+        assertThat(_08_10.max).isEqualTo(_08_05.max + 5 * 8 * 8);
+        assertThat(_04_20.max).isEqualTo(_04_05.max + 15 * 4 * 8);
+        assertThat(_04_30.max).isEqualTo(_04_05.max + 25 * 4 * 8);
+    }
 
     @ParameterizedTest
     @CsvSource(value = {

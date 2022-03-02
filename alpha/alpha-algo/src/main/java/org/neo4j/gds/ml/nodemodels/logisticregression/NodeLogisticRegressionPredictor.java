@@ -35,33 +35,12 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
-import static org.neo4j.gds.ml.core.Dimensions.matrix;
 import static org.neo4j.gds.ml.core.features.FeatureExtraction.extract;
 
 public class NodeLogisticRegressionPredictor implements Predictor<Matrix, NodeLogisticRegressionData> {
 
     private final NodeLogisticRegressionData modelData;
     private final List<String> featureProperties;
-
-    public static long sizeOfPredictionsVariableInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {
-        var dimensionsOfFirstMatrix = matrix(batchSize, numberOfFeatures);
-        var dimensionsOfSecondMatrix = matrix(numberOfClasses, numberOfFeatures);
-        var resultRows = dimensionsOfFirstMatrix[ROWS_INDEX];
-        var resultCols = dimensionsOfSecondMatrix[ROWS_INDEX]; // transposed second operand means we get the rows
-        return
-            sizeOfFeatureExtractorsInBytes(numberOfFeatures) +
-            Constant.sizeInBytes(dimensionsOfFirstMatrix) +
-            MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(
-                dimensionsOfFirstMatrix,
-                dimensionsOfSecondMatrix
-            ) +
-            Softmax.sizeInBytes(resultRows, resultCols);
-    }
-
-    private static long sizeOfFeatureExtractorsInBytes(int numberOfFeatures) {
-        return FeatureExtraction.memoryUsageInBytes(numberOfFeatures);
-    }
 
 
     public NodeLogisticRegressionPredictor(NodeLogisticRegressionData modelData, List<String> featureProperties) {

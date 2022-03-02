@@ -32,7 +32,6 @@ import org.neo4j.gds.ml.Features;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 
 import java.util.List;
 
@@ -72,7 +71,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
             builder.perNode("predicted probabilities", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfDoubleArray(classCount)));
         }
         builder.perNode("predicted classes", HugeLongArray::memoryEstimation);
-        builder.fixed("computation graph", NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount));
+        builder.fixed("computation graph", LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount));
         return builder.build();
     }
 
@@ -92,7 +91,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
         builder.perNode("predicted classes", HugeLongArray::memoryEstimation);
         builder.perGraphDimension(
             "computation graph",
-            (dim, threads) -> MemoryRange.of(NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(BatchQueue.computeBatchSize(
+            (dim, threads) -> MemoryRange.of(LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(BatchQueue.computeBatchSize(
                 dim.nodeCount(),
                 minBatchSize,
                 threads

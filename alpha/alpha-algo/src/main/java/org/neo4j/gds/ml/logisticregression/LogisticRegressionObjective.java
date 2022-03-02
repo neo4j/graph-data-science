@@ -40,7 +40,6 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 
 import java.util.List;
 import java.util.Optional;
@@ -87,6 +86,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
     }
 
     //TODO: fix me and merge with above method
+    @SuppressWarnings({"PointlessArithmeticExpression", "UnnecessaryLocalVariable"})
     public static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {
         // perThread
         var batchLocalWeightGradient = Weights.sizeInBytes(numberOfClasses, numberOfFeatures);
@@ -101,7 +101,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
         var constantScale = L2NormSquared.sizeInBytesOfApply(); //
         var elementSum = constantScale;
 
-        long sizeOfPredictionsVariableInBytes = NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(
+        long sizeOfPredictionsVariableInBytes = LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(
             batchSize,
             numberOfFeatures,
             numberOfClasses

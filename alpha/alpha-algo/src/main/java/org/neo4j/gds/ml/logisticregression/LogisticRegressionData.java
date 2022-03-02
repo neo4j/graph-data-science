@@ -81,6 +81,14 @@ public interface LogisticRegressionData extends Trainer.ClassifierData {
         return builder.build();
     }
 
+    static MemoryEstimation memoryEstimation(int numberOfClasses, int numberOfFeatures) {
+        return MemoryEstimations.builder(LogisticRegressionData.class)
+            .add("classIdMap", LocalIdMap.memoryEstimation(numberOfClasses))
+            .fixed("weights", Weights.sizeInBytes(numberOfClasses, numberOfFeatures))
+            .build();
+    }
+
+
     static ImmutableLogisticRegressionData.Builder builder() {
         return ImmutableLogisticRegressionData.builder();
     }

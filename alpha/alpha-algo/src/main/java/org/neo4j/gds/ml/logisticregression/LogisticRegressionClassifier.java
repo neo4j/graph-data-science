@@ -26,6 +26,7 @@ import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.SingletonBatch;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.MatrixVectorSum;
@@ -33,6 +34,9 @@ import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
 import org.neo4j.gds.ml.core.functions.Softmax;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+
+import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
+import static org.neo4j.gds.ml.core.Dimensions.matrix;
 
 public class LogisticRegressionClassifier implements Trainer.Classifier {
 
@@ -42,6 +46,25 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
         LogisticRegressionData data
     ) {
         this.data = data;
+    }
+
+    public static long sizeOfPredictionsVariableInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {
+        var dimensionsOfFirstMatrix = matrix(batchSize, numberOfFeatures);
+        var dimensionsOfSecondMatrix = matrix(numberOfClasses, numberOfFeatures);
+        var resultRows = dimensionsOfFirstMatrix[ROWS_INDEX];
+        var resultCols = dimensionsOfSecondMatrix[ROWS_INDEX]; // transposed second operand means we get the rows
+        return
+            sizeOfFeatureExtractorsInBytes(numberOfFeatures) +
+            Constant.sizeInBytes(dimensionsOfFirstMatrix) +
+            MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(
+                dimensionsOfFirstMatrix,
+                dimensionsOfSecondMatrix
+            ) +
+            Softmax.sizeInBytes(resultRows, resultCols);
+    }
+
+    private static long sizeOfFeatureExtractorsInBytes(int numberOfFeatures) {
+        return FeatureExtraction.memoryUsageInBytes(numberOfFeatures);
     }
 
     @Override

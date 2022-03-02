@@ -44,6 +44,7 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static java.lang.Math.max;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LogisticRegressionObjectiveTest {
@@ -232,6 +233,43 @@ class LogisticRegressionObjectiveTest {
     })
     void shouldEstimateMemoryUsage(int batchSize, int featureDim, boolean useBias, long expected) {
         var memoryUsageInBytes = LogisticRegressionObjective.sizeOfBatchInBytes(batchSize, featureDim, useBias);
+        assertThat(memoryUsageInBytes).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldEstimateMemoryUsage() {
+        var memoryUsageInBytes = LogisticRegressionObjective.sizeOfBatchInBytes(100, 10, 10);
+
+        var weightGradient = 8 * 10 * 10 + 16;      // 8 bytes for a double * numberOfClasses * numberOfFeatures + 16 for the double array
+        var makeTargets = 8 * 100 * 1 + 16;         // 8 bytes for a double * batchSize * 1 for the single target property + 16 for the double array
+        var weightedFeatures = 8 * 100 * 10 + 16;   // 8 bytes for a double * batchSize * numberOfClasses + 16 for the double array
+        var softMax = 8 * 100 * 10 + 16;            // 8 bytes for a double * batchSize * numberOfClasses + 16 for the double array
+        var unpenalizedLoss = 24;                   // 8 bytes for a double + 16 for the double array
+        var l2norm = 8 + 16;                        // 8 bytes for a double + 16 for the double array
+        var constantScale = 8 + 16;                 // 8 bytes for a double + 16 for the double array
+        var elementSum = 8 + 16;                    // 8 bytes for a double + 16 for the double array
+        var predictor = 24368;                      // black box, not from this class
+
+        var trainEpoch = makeTargets +
+                         weightedFeatures +
+                         softMax +
+                         2 * unpenalizedLoss +
+                         2 * l2norm +
+                         2 * constantScale +
+                         2 * elementSum +
+                         predictor;
+
+        var evaluateLoss = makeTargets +
+                           weightedFeatures +
+                           softMax +
+                           unpenalizedLoss +
+                           l2norm +
+                           constantScale +
+                           elementSum +
+                           predictor;
+
+        var expected = max(trainEpoch + weightGradient, evaluateLoss);
+        assertThat(makeTargets).isEqualTo(Matrix.sizeInBytes(100, 1));
         assertThat(memoryUsageInBytes).isEqualTo(expected);
     }
 }

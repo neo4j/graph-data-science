@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.logisticregression;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -45,6 +46,17 @@ class LogisticRegressionClassifierTest {
                 new double[]{0.28, 0.56, -0.28, 0.56}, 1 / (1 + Math.pow(Math.E, -1 * (0.28 * .5 + 0.56 * .6 +  (-0.28) * .7 + 0.56 * .8)))
             )
         );
+    }
+
+    @Test
+    public void shouldEstimateMemoryUsage() {
+        var memoryUsageInBytes = LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(100, 10, 10);
+
+        int memoryUsageOfFeatureExtractors = 320; // 32 bytes * number of features
+        int memoryUsageOfFeatureMatrix = 8016; // 8 bytes * batch size * number of features + 16
+        int memoryUsageOfMatrixMultiplication = 8016; // 8 bytes per double * batchSize * numberOfClasses + 16
+        int memoryUsageOfSoftMax = memoryUsageOfMatrixMultiplication; // computed over the matrix multiplication, it requires an equally-sized matrix
+        assertThat(memoryUsageInBytes).isEqualTo(memoryUsageOfFeatureExtractors + memoryUsageOfFeatureMatrix + memoryUsageOfFeatureMatrix + memoryUsageOfSoftMax);
     }
 
     @MethodSource("inputs")
