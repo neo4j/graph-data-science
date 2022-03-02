@@ -360,6 +360,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
         return ModelSelectResult.of(bestModelStats.params(), trainStats, validationStats);
     }
 
+    // this is temporary code
     private LogisticRegressionTrainConfig convertConfig(NodeLogisticRegressionTrainConfig nlrConfig) {
         return LogisticRegressionTrainConfigImpl.builder()
             .batchSize(nlrConfig.batchSize())
@@ -398,9 +399,9 @@ public final class NodeClassificationTrain extends Algorithm<Model<NodeLogisticR
     private Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> createModel(
         NodeLogisticRegressionTrainConfig bestParameters,
         Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metricResults,
-        LogisticRegressionClassifier retrainedClassifier
+        LogisticRegressionClassifier classifier
     ) {
-        NodeLogisticRegressionData retrainedModelData = retrainedClassifier
+        NodeLogisticRegressionData retrainedModelData = classifier
             .convertToPredictor(config.featureProperties())
             .modelData();
 

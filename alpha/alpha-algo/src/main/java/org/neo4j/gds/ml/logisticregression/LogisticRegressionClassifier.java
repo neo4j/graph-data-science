@@ -94,6 +94,7 @@ public class LogisticRegressionClassifier implements Trainer.Classifier {
         return new Constant<>(batchFeatures);
     }
 
+    // this is temporary code
     public NodeLogisticRegressionPredictor convertToPredictor(List<String> featureProperties) {
         var weights = data().weights().data().data();
         var bias = data().bias().orElseThrow().data().data();

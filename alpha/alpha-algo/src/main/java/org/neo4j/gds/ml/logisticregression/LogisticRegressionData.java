@@ -58,9 +58,7 @@ public interface LogisticRegressionData extends Trainer.ClassifierData {
     }
 
     static LogisticRegressionData create(Weights<Matrix> weights, Optional<Weights<Vector>> bias, LocalIdMap classIdMap) {
-        var builder = ImmutableLogisticRegressionData.builder().weights(weights).classIdMap(classIdMap);
-        bias.ifPresent(builder::bias);
-        return builder.build();
+        return ImmutableLogisticRegressionData.builder().bias(bias).weights(weights).classIdMap(classIdMap).build();
     }
 
     static MemoryEstimation memoryEstimation(MemoryRange linkFeatureDimension) {

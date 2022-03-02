@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.core;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ml.core.functions.PassthroughVariable;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.TensorFactory;
@@ -133,6 +134,7 @@ public class ComputationContext {
 
     }
 
+    @TestOnly
     public Set<Variable<?>> computedVariables() {
         return data.keySet();
     }
