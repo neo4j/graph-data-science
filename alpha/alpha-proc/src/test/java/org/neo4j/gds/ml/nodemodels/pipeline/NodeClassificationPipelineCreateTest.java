@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.model.catalog.ModelListProc;
 
 import java.util.List;
@@ -54,9 +53,7 @@ class NodeClassificationPipelineCreateTest extends BaseProcTest {
         assertThat(result.splitConfig).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG);
         assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
 
-        assertThat(PipelineCatalog.get(getUsername(), "myPipeline"))
-            .usingRecursiveComparison()
-            .isEqualTo(new NodeClassificationPipeline());
+        assertThat(PipelineCatalog.exists(getUsername(), "myPipeline")).isTrue();
     }
 
     @Test
