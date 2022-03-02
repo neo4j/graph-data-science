@@ -2,7 +2,6 @@
 = Node classification pipelines
 :entity: node
 :result: predicted property
-:modelType: Node classification pipeline
 
 
 [abstract]
