@@ -70,4 +70,15 @@ public interface LogisticRegressionData extends Trainer.ClassifierData {
             .fixed("bias", Weights.sizeInBytes(1, 1))
             .build();
     }
+
+    static MemoryEstimation memoryEstimation(int numberOfClasses, int numberOfFeatures, boolean useBias) {
+        var builder = MemoryEstimations.builder(LogisticRegressionData.class)
+            .add("classIdMap", LocalIdMap.memoryEstimation(numberOfClasses))
+            .fixed("weights", Weights.sizeInBytes(numberOfClasses, numberOfFeatures));
+        if (useBias) {
+            builder.fixed("bias", Weights.sizeInBytes(numberOfClasses, 1));
+        }
+        return builder.build();
+    }
+
 }

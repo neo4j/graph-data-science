@@ -47,7 +47,6 @@ import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrain;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
@@ -160,7 +159,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
         int fudgedFeatureCount,
         LongUnaryOperator nodeSetSize
     ) {
-        MemoryEstimation training = NodeLogisticRegressionTrain.memoryEstimation(
+        MemoryEstimation training = LogisticRegressionTrainer.memoryEstimation(
             fudgedClassCount,
             fudgedFeatureCount,
             maxBatchSize

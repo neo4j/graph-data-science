@@ -63,6 +63,24 @@ public final class LogisticRegressionTrainer implements Trainer {
             .build();
     }
 
+    public static MemoryEstimation memoryEstimation(
+        int numberOfClasses,
+        int numberOfFeatures,
+        int batchSize
+    ) {
+        var CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA = 1;
+        return MemoryEstimations.builder(LogisticRegressionTrainer.class)
+            .add("model data", LogisticRegressionData.memoryEstimation(numberOfClasses, numberOfFeatures, true))
+            .add("training", Training.memoryEstimation(numberOfFeatures, numberOfClasses, CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA))
+            .perThread("computation graph", sizeInBytesOfComputationGraph(batchSize, numberOfFeatures, numberOfClasses))
+            .build();
+    }
+
+    private static long sizeInBytesOfComputationGraph(int batchSize, int numberOfFeatures, int numberOfClasses) {
+        return LogisticRegressionObjective.sizeOfBatchInBytes(batchSize, numberOfFeatures, numberOfClasses);
+    }
+
+
     public LogisticRegressionTrainer(
         ReadOnlyHugeLongArray trainSet,
         int concurrency,

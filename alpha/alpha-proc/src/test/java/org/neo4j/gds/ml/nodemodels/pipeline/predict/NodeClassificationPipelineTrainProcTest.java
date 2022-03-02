@@ -86,11 +86,11 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         return Stream.of(
             Arguments.of(
                 GRAPH_NAME,
-                MemoryRange.of(66585848, 66617808)
+                MemoryRange.of(66593864, 66625824)
             ),
             Arguments.of(
                 Map.of("nodeProjection", "*", "relationshipProjection", "*"),
-                MemoryRange.of(66881240, 66913200)
+                MemoryRange.of(66889256, 66921216)
             )
         );
     }

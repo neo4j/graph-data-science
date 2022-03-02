@@ -28,7 +28,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 
 public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassificationPredictConfig> extends GraphAlgorithmFactory<NodeClassificationPredict, CONFIG> {
 
@@ -77,7 +76,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
         var classCount = modelCatalog
             .get(configuration.username(),
                 configuration.modelName(),
-                NodeLogisticRegressionData.class,
+                LogisticRegressionData.class,
                 NodeClassificationTrainConfig.class,
                 NodeClassificationModelInfo.class
             )

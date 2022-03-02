@@ -21,8 +21,6 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -40,23 +38,6 @@ public class NodeLogisticRegressionTrain {
     private final ProgressTracker progressTracker;
     private final int concurrency;
     private TerminationFlag terminationFlag;
-
-    public static MemoryEstimation memoryEstimation(
-        int numberOfClasses,
-        int numberOfFeatures,
-        int batchSize
-    ) {
-        var CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA = 1;
-        return MemoryEstimations.builder(NodeLogisticRegressionTrain.class)
-            .add("model data", NodeLogisticRegressionData.memoryEstimation(numberOfClasses, numberOfFeatures))
-            .add("training", Training.memoryEstimation(numberOfFeatures, numberOfClasses, CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA))
-            .perThread("computation graph", sizeInBytesOfComputationGraph(batchSize, numberOfFeatures, numberOfClasses))
-            .build();
-    }
-
-    private static long sizeInBytesOfComputationGraph(int batchSize, int numberOfFeatures, int numberOfClasses) {
-        return NodeLogisticRegressionObjective.sizeOfBatchInBytes(batchSize, numberOfFeatures, numberOfClasses);
-    }
 
     public NodeLogisticRegressionTrain(
         Graph graph,
