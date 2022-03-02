@@ -123,7 +123,7 @@ public class CollapsePath extends Algorithm<Relationships> {
             long[] startNodes
         ) {
             return new MultiSourceBFS(
-                graphs[0],
+                graphs[0].nodeCount(),
                 graphs[0],
                 new TraversalToEdgeMSBFSStrategy(graphs, perNodeAction),
                 false,

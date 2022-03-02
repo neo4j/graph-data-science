@@ -61,7 +61,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
         };
 
         MultiSourceBFS.aggregatedNeighborProcessing(
-            graph,
+            graph.nodeCount(),
             graph,
             consumer
         ).run(concurrency, executorService);

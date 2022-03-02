@@ -21,7 +21,6 @@ package org.neo4j.gds.msbfs;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -96,13 +95,13 @@ public final class MultiSourceBFS implements Runnable {
     private long nodeOffset;
 
     public static MultiSourceBFS aggregatedNeighborProcessing(
-        IdMap nodes,
+        long nodeCount,
         RelationshipIterator relationships,
         BfsConsumer perNodeAction,
         long... sourceNodes
     ) {
         return new MultiSourceBFS(
-            nodes.nodeCount(),
+            nodeCount,
             relationships,
             new ANPStrategy(perNodeAction),
             false,

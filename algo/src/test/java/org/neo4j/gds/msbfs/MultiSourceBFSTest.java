@@ -32,7 +32,6 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.graphbuilder.DefaultBuilder;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 
@@ -121,7 +120,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
             MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
-                graph,
+                graph.nodeCount(),
                 graph,
                 (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
                 0, 1
@@ -195,7 +194,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
             MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
-                graph,
+                graph.nodeCount(),
                 graph,
                 (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1))
             );
@@ -236,7 +235,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                 graph -> {
                     Set<Pair<Long, Integer>> seen = new HashSet<>();
                     MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
-                            graph,
+                            graph.nodeCount(),
                             graph,
                             (i, d, s) -> {
                                 String message = formatWithLocale(
@@ -260,7 +259,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                 gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
                 graph -> {
                     MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
-                            graph,
+                            graph.nodeCount(),
                             graph,
                             (i, d, s) -> {
                                 assertEquals(1, d);
@@ -292,7 +291,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                 gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
                 graph -> {
                     MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
-                            graph,
+                            graph.nodeCount(),
                             graph,
                             (i, d, s) -> {
                                 int prev = state[0];
@@ -357,7 +356,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         Arrays.setAll(sources, i -> i);
         final int[][] seen = new int[nodeCount][sourceCount];
         MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
-                new DirectIdMap(nodeCount),
+                nodeCount,
                 iter,
                 (nodeId, depth, sourceNodeIds) -> {
                     assertEquals(1, depth);
