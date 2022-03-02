@@ -2,8 +2,8 @@
 == Training the pipeline
 
 The train mode, `gds.beta.pipeline.linkPrediction.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
-Running this mode results in a `Link prediction pipeline` model being stored in the model catalog along with metrics collected during training.
-The trained pipeline can be <<algorithms-link-prediction-pipelines-predict, applied>> to a possibly different graph which produces a relationship type of predicted links, each having a predicted probability stored as a property.
+Running this mode results in a `Link prediction model` being stored in the <<model-catalog-ops,model catalog>> along with metrics collected during training.
+The model can be <<algorithms-link-prediction-pipelines-predict,applied>> to a possibly different graph which produces a relationship type of predicted links, each having a predicted probability stored as a property.
 
 More precisely, the procedure will in order:
 
@@ -119,7 +119,7 @@ The structure of `modelInfo` is:
 
 === Example
 
-In this example we will create a small graph and train the pipeline we have built up thus far.
+In this example we will create a small graph and use the training pipeline we have built up thus far.
 The graph consists of a handful nodes connected in a particular pattern.
 The example graph looks like this:
 

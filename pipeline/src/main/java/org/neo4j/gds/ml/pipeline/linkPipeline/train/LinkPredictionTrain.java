@@ -70,7 +70,7 @@ import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionEvaluat
 
 public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
-    public static final String MODEL_TYPE = "Link prediction pipeline";
+    public static final String MODEL_TYPE = "Link prediction model";
 
     private final Graph trainGraph;
     private final Graph validationGraph;
