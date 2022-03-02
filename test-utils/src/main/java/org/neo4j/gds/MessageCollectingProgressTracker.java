@@ -23,6 +23,8 @@ package org.neo4j.gds;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MessageCollectingProgressTracker extends ProgressTracker.EmptyProgressTracker {
 
@@ -33,8 +35,12 @@ public class MessageCollectingProgressTracker extends ProgressTracker.EmptyProgr
         messages.add(message);
     }
 
-    public void printAndClear() {
-        messages.forEach(System.out::println);
-        messages.clear();
+    List<String> messages() {
+        return messages;
+    }
+
+    @Override
+    public String toString() {
+        return messages.stream().collect(Collectors.joining("\n"));
     }
 }

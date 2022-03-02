@@ -100,7 +100,6 @@ class NCTrainerCompareTest {
             1
         );
         var oldData = oldTrainer.compute();
-//        progressTracker.printAndClear();
 
         var newTargets = HugeLongArray.newArray(graph.nodeCount());
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
@@ -119,7 +118,6 @@ class NCTrainerCompareTest {
             progressTracker
         );
         LogisticRegressionClassifier classifier = newTrainer.train(newFeatures, newTargets);
-//        progressTracker.printAndClear();
 
         assertThat(classifier.convertToPredictor(List.of("class")).modelData().weights().data().data()).containsExactly(
             oldData.weights().data().data(),
