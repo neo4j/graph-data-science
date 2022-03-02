@@ -108,7 +108,8 @@ class BFSOnBiggerGraphTest {
             (s, t, w) -> t == target ? ExitPredicate.Result.BREAK : ExitPredicate.Result.FOLLOW,
             (s, t, w) -> 1.,
             concurrency,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            1
         ).compute();
 
 

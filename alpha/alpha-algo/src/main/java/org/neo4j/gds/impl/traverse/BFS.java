@@ -42,11 +42,14 @@ public final class BFS extends Algorithm<long[]> {
 
     public static final Aggregator DEFAULT_AGGREGATOR = (s, t, w) -> .0;
 
+    private static final int DEFAULT_DELTA = 64;
+
     private final long startNodeId;
     private final ExitPredicate exitPredicate;
     private final Aggregator aggregatorFunction;
 
     private final Graph graph;
+    private final int delta;
 
     private HugeLongArray nodes;
     private final HugeLongArray sources;
@@ -54,6 +57,31 @@ public final class BFS extends Algorithm<long[]> {
 
     private HugeAtomicBitSet visited;
     private final int concurrency;
+
+    BFS(
+        Graph graph,
+        long startNodeId,
+        ExitPredicate exitPredicate,
+        Aggregator aggregatorFunction,
+        int concurrency,
+        ProgressTracker progressTracker,
+        int delta
+    ) {
+        super(progressTracker);
+        this.graph = graph;
+        this.startNodeId = startNodeId;
+        this.exitPredicate = exitPredicate;
+        this.aggregatorFunction = aggregatorFunction;
+        this.concurrency = concurrency;
+        this.delta = delta;
+
+        var nodeCount = Math.toIntExact(graph.nodeCount());
+
+        this.nodes = HugeLongArray.newArray(nodeCount);
+        this.sources = HugeLongArray.newArray(nodeCount);
+        this.weights = HugeDoubleArray.newArray(nodeCount);
+        this.visited = HugeAtomicBitSet.create(nodeCount);
+    }
 
     public BFS(
         Graph graph,
@@ -63,19 +91,7 @@ public final class BFS extends Algorithm<long[]> {
         int concurrency,
         ProgressTracker progressTracker
     ) {
-        super(progressTracker);
-        this.graph = graph;
-        this.startNodeId = startNodeId;
-        this.exitPredicate = exitPredicate;
-        this.aggregatorFunction = aggregatorFunction;
-        this.concurrency = concurrency;
-
-        var nodeCount = Math.toIntExact(graph.nodeCount());
-
-        this.nodes = HugeLongArray.newArray(nodeCount);
-        this.sources = HugeLongArray.newArray(nodeCount);
-        this.weights = HugeDoubleArray.newArray(nodeCount);
-        this.visited = HugeAtomicBitSet.create(nodeCount);
+        this(graph, startNodeId, exitPredicate, aggregatorFunction, concurrency, progressTracker, DEFAULT_DELTA);
     }
 
     @Override
@@ -105,7 +121,7 @@ public final class BFS extends Algorithm<long[]> {
             bfsTaskList.forEach(bfsTask -> bfsTask.setPhase(Phase.SYNC));
             ParallelUtil.run(bfsTaskList, Pools.DEFAULT);
             bfsTaskList.forEach(bfsTask -> bfsTask.setPhase(Phase.COMPUTE));
-
+            System.out.println("moving to next layer");
             nodesIndex.set(oldNodesLength);
 
             if (nodesLength.get() == oldNodesLength) {
@@ -130,7 +146,7 @@ public final class BFS extends Algorithm<long[]> {
         COMPUTE, SYNC
     }
 
-    class BFSTask implements Runnable {
+    private class BFSTask implements Runnable {
         private final Graph graph;
         private final AtomicInteger nodesIndex;
         private final HugeAtomicBitSet visited;
@@ -182,9 +198,12 @@ public final class BFS extends Algorithm<long[]> {
 
         private void compute() {
             int offset;
-            while ((offset = nodesIndex.getAndAdd(64)) < nodesLength.get()) {
-                int limit = Math.min(offset + 64, nodesLength.get());
+            while ((offset = nodesIndex.getAndAdd(delta)) < nodesLength.get()) {
+                int limit = Math.min(offset + delta, nodesLength.get());
                 for (int idx = offset; idx < limit; idx++) {
+                    if (idx == offset) {
+                        System.out.println("Compute in Thread : #" + Thread.currentThread().getId());
+                    }
                     var nodeId = nodes.get(idx);
                     var sourceId = sources.get(idx);
                     var weight = weights.get(idx);
