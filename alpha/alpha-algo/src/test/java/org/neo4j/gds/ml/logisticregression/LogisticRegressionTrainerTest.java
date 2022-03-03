@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.logisticregression;
 
 import org.assertj.core.data.Offset;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConsumerTest.idMapOf;
 
 class LogisticRegressionTrainerTest {
 
@@ -251,6 +253,37 @@ class LogisticRegressionTrainerTest {
                 0.001999999995, 0.001752452950, 0.001752452926
             },
             Offset.offset(1e-12)
+        );
+    }
+
+    @Test
+    void shouldApplyPenaltyScaledWithTrainSetSize() {
+        // different train set sizes
+        var trainer1 = trainer(ReadOnlyHugeLongArray.of(HugeLongArray.of(0)));
+        var trainer2 = trainer(ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 0, 0)));
+
+        // same training
+        var classifier1 = trainer1.train(TestFeatures.singleConstant(1.0), HugeLongArray.of(0));
+        var classifier2 = trainer2.train(TestFeatures.singleConstant(1.0), HugeLongArray.of(0));
+
+        // same weights; penalty is scaled accordingly
+        assertThat(classifier1.data().weights().data().data()).containsExactly(classifier2
+            .data()
+            .weights()
+            .data()
+            .data(), Offset.offset(1e-10));
+    }
+
+    @NotNull
+    private LogisticRegressionTrainer trainer(ReadOnlyHugeLongArray trainSetLarge) {
+        return new LogisticRegressionTrainer(
+            trainSetLarge,
+            1,
+            LogisticRegressionTrainConfig.of(Map.of("penalty", 1L)),
+            idMapOf(0),
+            false,
+            TerminationFlag.RUNNING_TRUE,
+            ProgressTracker.NULL_TRACKER
         );
     }
 

@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @GdlExtension
-class NodeClassificationPredictConsumerTest {
+public class NodeClassificationPredictConsumerTest {
 
 
     @GdlGraph
@@ -54,7 +54,7 @@ class NodeClassificationPredictConsumerTest {
     @Inject
     Graph graph;
 
-    static LocalIdMap idMapOf(long... ids) {
+    public static LocalIdMap idMapOf(long... ids) {
         LocalIdMap idMap = new LocalIdMap();
         for (long id : ids) {
             idMap.toMapped(id);

@@ -87,7 +87,7 @@ public class NodeLogisticRegressionTrain {
             config.targetProperty(),
             config.penalty()
         );
-        var training = new Training(config, progressTracker, graph.nodeCount(), terminationFlag);
+        var training = new Training(config, progressTracker, trainSet.size(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
         training.train(objective, queueSupplier, concurrency);
 

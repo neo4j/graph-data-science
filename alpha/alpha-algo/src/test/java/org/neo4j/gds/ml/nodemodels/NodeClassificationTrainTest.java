@@ -81,8 +81,9 @@ class NodeClassificationTrainTest {
 
         var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
 
-        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 1);
-        Map<String, Object> model2 = Map.of("penalty", 1, "maxEpochs", 10000, "tolerance", 1e-5);
+        // to keep same expectation as before bugfix in this commit
+        Map<String, Object> model1 = Map.of("penalty", 1 * 2.0/3.0 * 0.5, "maxEpochs", 1);
+        Map<String, Object> model2 = Map.of("penalty", 1 * 2.0/3.0 * 0.5, "maxEpochs", 10000, "tolerance", 1e-5);
 
         var config = createConfig(
             List.of(model1, model2),
@@ -185,8 +186,8 @@ class NodeClassificationTrainTest {
     @MethodSource("metricArguments")
     void shouldLogProgress(MetricSpecification metricSpecification) {
         var modelCandidates = List.of(
-            Map.<String, Object>of("penalty", 0.0625, "maxEpochs", 100),
-            Map.<String, Object>of("penalty", 0.125, "maxEpochs", 100)
+            Map.<String, Object>of("penalty", 0.0625 * 2.0/3.0 * 0.5, "maxEpochs", 100),
+            Map.<String, Object>of("penalty", 0.125 * 2.0/3.0 * 0.5, "maxEpochs", 100)
         );
         var log = Neo4jProxy.testLog();
 
@@ -349,26 +350,26 @@ class NodeClassificationTrainTest {
                 "NCTrain :: SelectBestModel :: Finished",
                 "NCTrain :: TrainSelectedOnRemainder :: Start",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 1 :: Start",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 1 :: Loss: 0.657839115784",
+                "NCTrain :: TrainSelectedOnRemainder :: Epoch 1 :: Loss: 0.657839074117",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 1 100%",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 1 :: Finished",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 2 :: Start",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 2 :: Loss: 0.632615796377",
+                "NCTrain :: TrainSelectedOnRemainder :: Epoch 2 :: Loss: 0.632615629710",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 2 100%",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 2 :: Finished",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 3 :: Start",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 3 :: Loss: 0.617174676953",
+                "NCTrain :: TrainSelectedOnRemainder :: Epoch 3 :: Loss: 0.617174301953",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 3 100%",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 3 :: Finished",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 4 :: Start",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 4 :: Loss: 0.611032054482",
+                "NCTrain :: TrainSelectedOnRemainder :: Epoch 4 :: Loss: 0.611031387815",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 4 100%",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 4 :: Finished",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 5 :: Start",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 5 :: Loss: 0.612867726658",
+                "NCTrain :: TrainSelectedOnRemainder :: Epoch 5 :: Loss: 0.612866775693",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 5 100%",
                 "NCTrain :: TrainSelectedOnRemainder :: Epoch 5 :: Finished",
-                "NCTrain :: TrainSelectedOnRemainder :: converged after 5 epochs. Initial loss: 0.693147180559, Last loss: 0.612867726658.",
+                "NCTrain :: TrainSelectedOnRemainder :: converged after 5 epochs. Initial loss: 0.693147180559, Last loss: 0.612866775693.",
                 "NCTrain :: TrainSelectedOnRemainder :: Finished",
                 "NCTrain :: EvaluateSelectedModel :: Start",
                 "NCTrain :: EvaluateSelectedModel 33%",
@@ -376,22 +377,22 @@ class NodeClassificationTrainTest {
                 "NCTrain :: EvaluateSelectedModel :: Finished",
                 "NCTrain :: RetrainSelectedModel :: Start",
                 "NCTrain :: RetrainSelectedModel :: Epoch 1 :: Start",
-                "NCTrain :: RetrainSelectedModel :: Epoch 1 :: Loss: 0.664572490770",
+                "NCTrain :: RetrainSelectedModel :: Epoch 1 :: Loss: 0.664572407436",
                 "NCTrain :: RetrainSelectedModel :: Epoch 1 100%",
                 "NCTrain :: RetrainSelectedModel :: Epoch 1 :: Finished",
                 "NCTrain :: RetrainSelectedModel :: Epoch 2 :: Start",
-                "NCTrain :: RetrainSelectedModel :: Epoch 2 :: Loss: 0.646082386126",
+                "NCTrain :: RetrainSelectedModel :: Epoch 2 :: Loss: 0.646082052793",
                 "NCTrain :: RetrainSelectedModel :: Epoch 2 100%",
                 "NCTrain :: RetrainSelectedModel :: Epoch 2 :: Finished",
                 "NCTrain :: RetrainSelectedModel :: Epoch 3 :: Start",
-                "NCTrain :: RetrainSelectedModel :: Epoch 3 :: Loss: 0.637371389999",
+                "NCTrain :: RetrainSelectedModel :: Epoch 3 :: Loss: 0.637370639999",
                 "NCTrain :: RetrainSelectedModel :: Epoch 3 100%",
                 "NCTrain :: RetrainSelectedModel :: Epoch 3 :: Finished",
                 "NCTrain :: RetrainSelectedModel :: Epoch 4 :: Start",
-                "NCTrain :: RetrainSelectedModel :: Epoch 4 :: Loss: 0.637609501031",
+                "NCTrain :: RetrainSelectedModel :: Epoch 4 :: Loss: 0.637608261583",
                 "NCTrain :: RetrainSelectedModel :: Epoch 4 100%",
                 "NCTrain :: RetrainSelectedModel :: Epoch 4 :: Finished",
-                "NCTrain :: RetrainSelectedModel :: converged after 4 epochs. Initial loss: 0.693147180559, Last loss: 0.637609501031.",
+                "NCTrain :: RetrainSelectedModel :: converged after 4 epochs. Initial loss: 0.693147180559, Last loss: 0.637608261583.",
                 "NCTrain :: RetrainSelectedModel :: Finished",
                 "NCTrain :: Finished"
             );

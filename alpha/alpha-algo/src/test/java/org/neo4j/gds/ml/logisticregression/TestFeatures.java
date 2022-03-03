@@ -25,6 +25,20 @@ public final class TestFeatures implements Features {
 
     private final double[][] features;
 
+    static Features singleConstant(double feature) {
+        return new Features() {
+            @Override
+            public long size() {
+                return 1;
+            }
+
+            @Override
+            public double[] get(long id) {
+                return new double[]{feature};
+            }
+        };
+    }
+
     public TestFeatures(double[][] features) {
         this.features = features;
     }
