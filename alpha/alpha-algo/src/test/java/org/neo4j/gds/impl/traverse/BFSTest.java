@@ -29,10 +29,10 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.impl.traverse.ExitPredicate.Result;
 
-import java.util.Arrays;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
 
 /**
@@ -103,9 +103,10 @@ class BFSTest {
             ProgressTracker.NULL_TRACKER
         ).compute();
 
-        assertContains(new String[]{"a", "b", "c", "d"}, nodes);
+        assertThat(nodes).isEqualTo(
+            Stream.of("a", "b", "c", "d").mapToLong(naturalGraph::toOriginalNodeId).toArray()
+        );
     }
-
 
     /**
      * bfs on incoming rels. from 'g' until taregt 'a' is reached.
@@ -147,7 +148,10 @@ class BFSTest {
             concurrency,
             ProgressTracker.NULL_TRACKER
         ).compute();
-        assertContains(new String[]{"a", "b", "c", "d"}, nodes);
+
+        assertThat(nodes).isEqualTo(
+            Stream.of("a", "b", "c", "d").mapToLong(naturalGraph::toOriginalNodeId).toArray()
+        );
     }
 
     @ParameterizedTest
@@ -159,26 +163,5 @@ class BFSTest {
             concurrency,
             ProgressTracker.NULL_TRACKER
         ).compute();
-    }
-
-
-    /**
-     * test if all both arrays contain the same nodes. not necessarily in
-     * same order
-     */
-    void assertContains(String[] expected, long[] given) {
-        Arrays.sort(given);
-        assertEquals(
-            expected.length,
-            given.length,
-            "expected " + Arrays.toString(expected) + " | given " + Arrays.toString(given)
-        );
-
-        for (String ex : expected) {
-            final long id = naturalGraph.toMappedNodeId(ex);
-            if (Arrays.binarySearch(given, id) == -1) {
-                fail(ex + " not in " + Arrays.toString(expected));
-            }
-        }
     }
 }

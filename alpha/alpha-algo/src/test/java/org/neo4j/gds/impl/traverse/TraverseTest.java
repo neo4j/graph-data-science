@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.impl.traverse;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
@@ -32,13 +33,12 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.impl.traverse.ExitPredicate.Result;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
@@ -110,7 +110,8 @@ class TraverseTest {
             ProgressTracker.NULL_TRACKER
         ).compute().resultNodes();
 
-        assertContains(new String[]{"a", "b", "c", "d"}, nodes);
+        Assertions.assertThat(nodes)
+            .isEqualTo(Stream.of("a", "b", "c", "d").mapToLong(naturalGraph::toMappedNodeId).toArray());
     }
 
     /**
@@ -203,7 +204,8 @@ class TraverseTest {
             (s, t, w) -> w + 1.,
             ProgressTracker.NULL_TRACKER
         ).compute().resultNodes();
-        assertContains(new String[]{"a", "b", "c", "d"}, nodes);
+        Assertions.assertThat(nodes)
+            .isEqualTo(Stream.of("a", "b", "c", "d").mapToLong(naturalGraph::toMappedNodeId).toArray());
     }
 
     @Test
@@ -224,26 +226,6 @@ class TraverseTest {
             Traverse.DEFAULT_AGGREGATOR,
             ProgressTracker.NULL_TRACKER
         ).compute();
-    }
-
-    /**
-     * test if all both arrays contain the same nodes. not necessarily in
-     * same order
-     */
-    void assertContains(String[] expected, long[] given) {
-        Arrays.sort(given);
-        assertEquals(
-            expected.length,
-            given.length,
-            "expected " + Arrays.toString(expected) + " | given " + Arrays.toString(given)
-        );
-
-        for (String ex : expected) {
-            final long id = naturalGraph.toMappedNodeId(ex);
-            if (Arrays.binarySearch(given, id) == -1) {
-                fail(ex + " not in " + Arrays.toString(expected));
-            }
-        }
     }
 
     @Test

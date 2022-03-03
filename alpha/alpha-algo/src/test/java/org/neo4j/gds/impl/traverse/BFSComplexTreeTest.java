@@ -28,72 +28,69 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.crossArguments;
 
-/*
-
-    (a)->(b)->(l)->(p)->(q)-->(r)->(s)
-           \    \            / |\
-            \    (m)->(n)->(o) | \
-             \                 |  \
-             (c)->(f)->(i)--->(j)->(k)
-               \    \        / |
-                \    (g)-->(h) |
-                 \             |
-                  (d)--------->(e)
-*/
-
 @GdlExtension
-class BFSOnBiggerGraphTest {
+class BFSComplexTreeTest {
 
     @GdlGraph
     private static final String CYPHER =
         "CREATE " +
-        "  (a:Node { num: 1})" +
-        ", (b:Node { num: 2})" +
-        ", (c:Node { num: 3})" +
-        ", (d:Node { num: 4})" +
-        ", (e:Node { num: 5})" +
-        ", (f:Node { num: 6})" +
-        ", (g:Node { num: 7})" +
-        ", (h:Node { num: 8})" +
-        ", (i:Node { num: 9})" +
-        ", (j:Node { num: 10})" +
-        ", (k:Node { num: 11})" +
-        ", (l:Node { num: 12})" +
-        ", (m:Node { num: 13})" +
-        ", (n:Node { num: 14})" +
-        ", (o:Node { num: 15})" +
-        ", (p:Node { num: 16})" +
-        ", (q:Node { num: 17})" +
-        ", (r:Node { num: 18})" +
-        ", (s:Node { num: 19})" +
+        "  (a:Node)" +
+
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+
+        ", (g:Node)" +
+        ", (h:Node)" +
+        ", (i:Node)" +
+        ", (j:Node)" +
+        ", (k:Node)" +
+        ", (l:Node)" +
+        ", (m:Node)" +
 
         ", (a)-[:REL]->(b)" +
+        ", (a)-[:REL]->(c)" +
+        ", (a)-[:REL]->(d)" +
+        ", (a)-[:REL]->(e)" +
+        ", (a)-[:REL]->(f)" +
+
+        ", (b)-[:REL]->(g)" +
+        ", (b)-[:REL]->(h)" +
+        ", (b)-[:REL]->(i)" +
+        ", (b)-[:REL]->(j)" +
+        ", (b)-[:REL]->(k)" +
         ", (b)-[:REL]->(l)" +
-        ", (l)-[:REL]->(m)" +
-        ", (l)-[:REL]->(p)" +
-        ", (p)-[:REL]->(q)" +
-        ", (q)-[:REL]->(r)" +
-        ", (m)-[:REL]->(n)" +
-        ", (n)-[:REL]->(o)" +
-        ", (o)-[:REL]->(r)" +
-        ", (r)-[:REL]->(s)" +
-        ", (b)-[:REL]->(c)" +
-        ", (c)-[:REL]->(d)" +
-        ", (c)-[:REL]->(f)" +
-        ", (d)-[:REL]->(e)" +
+
+        ", (c)-[:REL]->(g)" +
+        ", (c)-[:REL]->(h)" +
+        ", (c)-[:REL]->(i)" +
+        ", (c)-[:REL]->(j)" +
+        ", (c)-[:REL]->(k)" +
+        ", (c)-[:REL]->(l)" +
+
+        ", (d)-[:REL]->(g)" +
+        ", (d)-[:REL]->(h)" +
+        ", (d)-[:REL]->(i)" +
+        ", (d)-[:REL]->(j)" +
+        ", (d)-[:REL]->(k)" +
+        ", (d)-[:REL]->(l)" +
+
+        ", (e)-[:REL]->(g)" +
+        ", (e)-[:REL]->(h)" +
+        ", (e)-[:REL]->(i)" +
         ", (e)-[:REL]->(j)" +
-        ", (j)-[:REL]->(k)" +
-        ", (k)-[:REL]->(r)" +
-        ", (f)-[:REL]->(g)" +
-        ", (g)-[:REL]->(h)" +
-        ", (h)-[:REL]->(j)" +
-        ", (f)-[:REL]->(i)" +
-        ", (i)-[:REL]->(j)";
+        ", (e)-[:REL]->(k)" +
+        ", (e)-[:REL]->(l)" +
+
+        ", (f)-[:REL]->(m)";
 
     @Inject
     private static TestGraph graph;
@@ -102,11 +99,15 @@ class BFSOnBiggerGraphTest {
     @MethodSource("bfsParameters")
     void testBfsToTargetOut(int concurrency, int delta) {
         long source = graph.toMappedNodeId("a");
-        long target = graph.toMappedNodeId("r");
+        List<Long> targets = List.of(
+            graph.toMappedNodeId("h"),
+            graph.toMappedNodeId("j"),
+            graph.toMappedNodeId("l")
+        );
         long[] nodes = new BFS(
             graph,
             source,
-            (s, t, w) -> t == target ? ExitPredicate.Result.BREAK : ExitPredicate.Result.FOLLOW,
+            (s, t, w) -> targets.contains(t) ? ExitPredicate.Result.BREAK : ExitPredicate.Result.FOLLOW,
             (s, t, w) -> 1.,
             concurrency,
             ProgressTracker.NULL_TRACKER,
@@ -115,13 +116,9 @@ class BFSOnBiggerGraphTest {
 
         assertThat(nodes)
             .isEqualTo(Stream.of(
-                "a",                        // start node
-                "b",                        // layer 1
-                "c", "l",                   // layer 2
-                "d", "f", "m", "p",         // layer 3
-                "e", "g", "i", "n", "q",    // layer 4
-                "j", "h",                   // layer 5
-                "o", "r"                    // layer 6
+                "a",
+                "b", "c", "d", "e", "f",
+                "g", "h"
             ).mapToLong(graph::toMappedNodeId).toArray());
     }
 
@@ -131,4 +128,5 @@ class BFSOnBiggerGraphTest {
             () -> Stream.of(Arguments.of(1), Arguments.of(3), Arguments.of(5), Arguments.of(64))  // deltas
         );
     }
+
 }
