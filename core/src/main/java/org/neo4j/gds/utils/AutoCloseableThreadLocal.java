@@ -71,6 +71,9 @@ public final class AutoCloseableThreadLocal<T extends AutoCloseable> implements 
             }
             return true;
         });
+
+        closeableThreadLocal.close();
+
         var errorWhileClosing = error.get();
         if (errorWhileClosing != null) {
             throw errorWhileClosing;
