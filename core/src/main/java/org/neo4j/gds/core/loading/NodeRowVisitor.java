@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
@@ -45,6 +46,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     private long rows;
     private long maxNeoId = 0;
+    private RuntimeException error;
 
     private final NodesBuilder nodesBuilder;
     private final Collection<String> propertyColumns;
@@ -64,18 +66,34 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     }
 
     @Override
-    public boolean visit(Result.ResultRow row) throws RuntimeException {
+    public boolean visit(Result.ResultRow row) {
         long neoId = row.getNumber(ID_COLUMN).longValue();
         if (neoId > maxNeoId) {
             maxNeoId = neoId;
         }
         rows++;
 
-        var labels = getLabels(row, neoId);
-        var properties = getProperties(row);
-        nodesBuilder.addNode(neoId, properties, labels);
+        try {
+            var labels = getLabels(row, neoId);
+            var properties = getProperties(row);
+            nodesBuilder.addNode(neoId, properties, labels);
+        } catch (RuntimeException ex) {
+            // Throwing an exception will not stop iterating the current result.
+            // This might lead to a situation where followup exceptions shadow
+            // the initial cause. If there is an exception, we immediately stop
+            // the iteration and store the exception for consumption in the
+            // CypherNodeLoader.
+            this.error = ex;
+
+            return false;
+        }
+
         progressTracker.logProgress();
         return true;
+    }
+
+    Optional<RuntimeException> error() {
+        return Optional.ofNullable(this.error);
     }
 
     private NodeLabel[] getLabels(Result.ResultRow row, long neoId) {

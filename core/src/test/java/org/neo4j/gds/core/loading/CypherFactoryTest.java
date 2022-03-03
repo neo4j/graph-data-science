@@ -38,12 +38,14 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -469,7 +471,38 @@ class CypherFactoryTest extends BaseTest {
         );
     }
 
-    @ParameterizedTest(name =  "{0}")
+    @Test
+    void shouldFailImmediatelyDuringNodeLoading() {
+        // Inserting this many nodes will lead to at least one flush operation
+        // on the NodesBatchBuffer. If an exception occurred before flushing,
+        // i.e. due to a value conversion, the process should stop immediately,
+        // and we should never run into an AIOOB in the buffers.
+        var nodeCount = 2 * ParallelUtil.DEFAULT_BATCH_SIZE;
+
+        clearDb();
+        // create a node without `prop`
+        runQuery("CREATE (n {id: 0})");
+        // create more nodes with `prop`
+        runQuery("UNWIND range(1, $count) AS id CREATE (n {id: id, prop: 0.1337})", Map.of("count", nodeCount));
+
+        GraphLoader loader = new CypherLoaderBuilder()
+            .api(db)
+            // The `42` in coalesce will signal to the NodesBuilder that the type is `long`.
+            // However, all subsequent values will be floats, a conversion will fail for the
+            // second record, and we should see this immediately during construction.
+            .nodeQuery("MATCH (n) RETURN id(n) AS id, COALESCE(n.prop, 42) AS prop ORDER BY n.id ASC")
+            .relationshipQuery("MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target")
+            .build();
+
+        var ex = assertThrows(
+            UnsupportedOperationException.class,
+            loader::graphStore
+        );
+
+        assertThat(ex).hasMessageContaining("Cannot safely convert");
+    }
+
+    @ParameterizedTest(name = "{0}")
     @MethodSource("memoryEstimationVariants")
     void testMemoryEstimation(String description, String nodeQuery, String relQuery, long min, long max) {
         GraphLoader loader = new CypherLoaderBuilder()

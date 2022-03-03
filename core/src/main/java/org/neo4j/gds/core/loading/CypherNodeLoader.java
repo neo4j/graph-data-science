@@ -65,16 +65,28 @@ class CypherNodeLoader extends CypherRecordLoader<IdMapAndProperties> {
         var propertyColumns = getPropertyColumns(queryResult);
 
         var hasLabelInformation = queryResult.columns().contains(NodeRowVisitor.LABELS_COLUMN);
-        nodesBuilder = GraphFactory.initNodesBuilder()
+
+        this.nodesBuilder = GraphFactory.initNodesBuilder()
             .nodeCount(nodeCount)
             .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
             .hasLabelInformation(hasLabelInformation)
             .hasProperties(!propertyColumns.isEmpty())
             .build();
 
-        NodeRowVisitor visitor = new NodeRowVisitor(nodesBuilder, propertyColumns, hasLabelInformation, progressTracker);
+        var visitor = new NodeRowVisitor(
+            nodesBuilder,
+            propertyColumns,
+            hasLabelInformation,
+            progressTracker
+        );
 
         queryResult.accept(visitor);
+
+        if (visitor.error().isPresent()) {
+            // TODO: should we close the nodes builder? if we do, it tries to flush and potentially throws
+            throw visitor.error().get();
+        }
+
         long rows = visitor.rows();
         if (rows == 0) {
             throw new IllegalArgumentException("Node-Query returned no nodes");

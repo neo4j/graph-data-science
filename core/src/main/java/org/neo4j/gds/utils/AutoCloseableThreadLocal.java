@@ -76,6 +76,7 @@ public final class AutoCloseableThreadLocal<T extends AutoCloseable> implements 
             throw errorWhileClosing;
         }
 
+        // TODO: should this happen before we check for errors?
         closeableThreadLocal.close();
     }
 }
