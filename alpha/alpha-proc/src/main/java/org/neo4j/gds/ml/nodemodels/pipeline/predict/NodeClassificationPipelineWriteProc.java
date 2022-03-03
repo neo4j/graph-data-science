@@ -52,7 +52,7 @@ import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCom
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@GdsCallable(name = "gds.alpha.ml.pipeline.nodeClassification.predict.write", description = PREDICT_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.write", description = PREDICT_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class NodeClassificationPipelineWriteProc
     extends WriteProc<
     NodeClassificationPredictPipelineExecutor,
@@ -61,7 +61,7 @@ public class NodeClassificationPipelineWriteProc
     NodeClassificationPredictPipelineWriteConfig>
 {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.write", mode = Mode.WRITE)
+    @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.write", mode = Mode.WRITE)
     @Description(PREDICT_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
@@ -71,7 +71,7 @@ public class NodeClassificationPipelineWriteProc
         return write(compute(graphName, configuration));
     }
 
-    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.write.estimate", mode = Mode.READ)
+    @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.write.estimate", mode = Mode.READ)
     @Description(ESTIMATE_PREDICT_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

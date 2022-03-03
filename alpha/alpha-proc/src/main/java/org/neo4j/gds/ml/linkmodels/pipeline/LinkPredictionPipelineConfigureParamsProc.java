@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPipelineConfigureParamsProc extends BaseProc {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.configureParams", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.configureParams", mode = READ)
     @Description("Configures the parameters of the link prediction train pipeline.")
     public Stream<PipelineInfoResult> configureParams(@Name("pipelineName") String pipelineName, @Name("parameterSpace") List<Map<String, Object>> parameterSpace) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionPipeline.class);

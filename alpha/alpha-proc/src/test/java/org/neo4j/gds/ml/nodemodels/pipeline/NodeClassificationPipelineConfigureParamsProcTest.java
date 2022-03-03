@@ -37,7 +37,7 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
     void setUp() throws Exception {
         registerProcedures(NodeClassificationPipelineConfigureParamsProc.class, NodeClassificationPipelineCreateProc.class);
 
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.create('myPipeline')");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.create('myPipeline')");
     }
 
     @AfterEach
@@ -48,7 +48,7 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void shouldSetParams() {
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureParams('myPipeline', [{minEpochs: 42}])",
+            "CALL gds.beta.pipeline.nodeClassification.configureParams('myPipeline', [{minEpochs: 42}])",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
@@ -68,10 +68,10 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
 
     @Test
     void shouldOnlyKeepLastOverride() {
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.configureParams('myPipeline', [{minEpochs: 42}])");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.configureParams('myPipeline', [{minEpochs: 42}])");
 
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureParams('myPipeline', [{minEpochs: 4}])",
+            "CALL gds.beta.pipeline.nodeClassification.configureParams('myPipeline', [{minEpochs: 4}])",
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
@@ -92,7 +92,7 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void failOnInvalidParameterValues() {
         assertError(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureParams('myPipeline', [{minEpochs: 0.5, batchSize: 0.51}])",
+            "CALL gds.beta.pipeline.nodeClassification.configureParams('myPipeline', [{minEpochs: 0.5, batchSize: 0.51}])",
             "Multiple errors in configuration arguments:\n" +
             "\t\t\t\tThe value of `batchSize` must be of type `Integer` but was `Double`.\n" +
             "\t\t\t\tThe value of `minEpochs` must be of type `Integer` but was `Double`."
@@ -102,7 +102,7 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void failOnInvalidKeys() {
         assertError(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureParams('myPipeline', [{invalidKey: 42, penaltE: -0.51}])",
+            "CALL gds.beta.pipeline.nodeClassification.configureParams('myPipeline', [{invalidKey: 42, penaltE: -0.51}])",
             "Unexpected configuration keys: invalidKey, penaltE (Did you mean one of [penalty, patience]?)"
         );
     }

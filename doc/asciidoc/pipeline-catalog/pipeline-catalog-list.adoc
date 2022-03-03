@@ -39,13 +39,13 @@ To exemplify listing pipelines, we create a <<algorithms-ml-nodeclassification-p
 .Creating a link prediction training pipelines:
 [source, cypher, role=noplay setup-query]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.create('lpPipe')
+CALL gds.beta.pipeline.linkPrediction.create('lpPipe')
 ----
 
 .Creating node classification training pipelines:
 [source, cypher, role=noplay setup-query]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.create('ncPipe')
+CALL gds.beta.pipeline.nodeClassification.create('ncPipe')
 ----
 
 

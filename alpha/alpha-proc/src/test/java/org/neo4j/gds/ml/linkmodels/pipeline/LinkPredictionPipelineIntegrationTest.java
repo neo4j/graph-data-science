@@ -131,15 +131,15 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
     void trainAndPredict() {
         var topN = 4;
 
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 1}, {penalty: 2}] )");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('pipe', [{penalty: 1}, {penalty: 2}] )");
 
         var modelName = "trainedModel";
 
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
+            "CALL gds.beta.pipeline.linkPrediction.train(" +
             "   $graphName, " +
             "   { pipeline: 'pipe', modelName: $modelName, negativeClassWeight: 1.0, randomSeed: 1337 }" +
             ")" +
@@ -150,7 +150,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         );
 
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate($graphName, {" +
+            "CALL gds.beta.pipeline.linkPrediction.predict.mutate($graphName, {" +
             " modelName: $modelName," +
             " mutateRelationshipType: 'PREDICTED'," +
             " threshold: 0," +

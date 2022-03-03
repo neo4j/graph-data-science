@@ -40,7 +40,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPipelineAddStepProcs extends BaseProc {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.addNodeProperty", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.addNodeProperty", mode = READ)
     @Description("Add a node property step to an existing link prediction pipeline.")
     public Stream<PipelineInfoResult> addNodeProperty(
         @Name("pipelineName") String pipelineName,
@@ -55,7 +55,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }
 
-    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.addFeature", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.addFeature", mode = READ)
     @Description("Add a feature step to an existing link prediction pipeline.")
     public Stream<PipelineInfoResult> addFeature(
         @Name("pipelineName") String pipelineName,

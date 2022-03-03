@@ -36,7 +36,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     void setUp() throws Exception {
         registerProcedures(LinkPredictionPipelineConfigureParamsProc.class, LinkPredictionPipelineCreateProc.class);
 
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.create('myPipeline')");
     }
 
     @AfterEach
@@ -47,7 +47,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void shouldSetParams() {
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 42}])",
+            "CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 42}])",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
@@ -68,10 +68,10 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
 
     @Test
     void shouldOnlyKeepLastOverride() {
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 42}])");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 42}])");
 
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 4}])",
+            "CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 4}])",
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
@@ -93,7 +93,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void failOnInvalidParameterValues() {
         assertError(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 0.5, batchSize: 0.51}])",
+            "CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 0.5, batchSize: 0.51}])",
             "Multiple errors in configuration arguments:\n" +
             "\t\t\t\tThe value of `batchSize` must be of type `Integer` but was `Double`.\n" +
             "\t\t\t\tThe value of `minEpochs` must be of type `Integer` but was `Double`."
@@ -103,7 +103,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void failOnInvalidKeys() {
         assertError(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{invalidKey: 42, penaltE: -0.51}])",
+            "CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{invalidKey: 42, penaltE: -0.51}])",
             "Unexpected configuration keys: invalidKey, penaltE (Did you mean one of [penalty, patience]?)"
         );
     }

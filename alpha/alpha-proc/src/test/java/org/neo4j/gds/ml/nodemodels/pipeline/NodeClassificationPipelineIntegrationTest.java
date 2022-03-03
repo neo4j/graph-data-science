@@ -126,26 +126,26 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
         runQuery(
             "CALL gds.graph.project('g', ['N', 'Hidden'], {T: {properties: 'w'}}, {nodeProperties: ['a', 'b', 'class']})");
 
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.create('p')");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.create('p')");
 
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty('p', 'wcc', {" +
+        runQuery("CALL gds.beta.pipeline.nodeClassification.addNodeProperty('p', 'wcc', {" +
                  "  mutateProperty: 'community', " +
                  "  relationshipWeightProperty: 'w'" +
                  "})");
         // let's try both list and single string syntaxes
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures('p', 'a')");
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures('p', ['b', 'community'])");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.selectFeatures('p', 'a')");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.selectFeatures('p', ['b', 'community'])");
 
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('p', {" +
+        runQuery("CALL gds.beta.pipeline.nodeClassification.configureSplit('p', {" +
                  "  testFraction: 0.2, " +
                  "  validationFolds: 5" +
                  "})");
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.configureParams('p', [" +
+        runQuery("CALL gds.beta.pipeline.nodeClassification.configureParams('p', [" +
                  "    {penalty: 0.0625, maxEpochs: 1000}, " +
                  "    {penalty: 4.0, maxEpochs: 100}" +
                  "  ])");
 
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.train('g', {" +
+        runQuery("CALL gds.beta.pipeline.nodeClassification.train('g', {" +
                  " nodeLabels: ['N']," +
                  " pipeline: 'p'," +
                  " modelName: 'model'," +
@@ -160,7 +160,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
         );
 
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.predict.stream('g', {" +
+            "CALL gds.beta.pipeline.nodeClassification.predict.stream('g', {" +
             "  nodeLabels: ['Hidden']," +
             "  modelName: 'model'," +
             "  includePredictedProbabilities: true" +
@@ -180,7 +180,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
         runQuery(
             "CALL gds.graph.project('g', ['N', 'Hidden'], {T: {properties: 'w'}}, {nodeProperties: ['a', 'b', 'class']})");
 
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.create('p')");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.create('p')");
 
         // train GS model (not as a nodeProperty step as it does not produce a node property)
         runQuery(
@@ -196,15 +196,15 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
             "  }" +
             ")", Map.of("features", List.of("a", "b")));
 
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty('p', 'gds.beta.graphSage', {" +
+        runQuery("CALL gds.beta.pipeline.nodeClassification.addNodeProperty('p', 'gds.beta.graphSage', {" +
                  "  modelName: 'gsModel',   " +
                  "  mutateProperty: 'embedding'" +
                  "})");
 
         // let's try both list and single string syntaxes
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures('p', 'embedding')");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.selectFeatures('p', 'embedding')");
 
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.train('g', {" +
+        runQuery("CALL gds.beta.pipeline.nodeClassification.train('g', {" +
                  " nodeLabels: ['N']," +
                  " pipeline: 'p'," +
                  " modelName: 'model'," +

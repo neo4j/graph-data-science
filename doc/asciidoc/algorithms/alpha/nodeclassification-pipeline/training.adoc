@@ -1,7 +1,7 @@
 [[algorithms-ml-nodeclassification-pipelines-train]]
 == Training the pipeline
 
-The train mode, `gds.alpha.ml.pipeline.nodeClassification.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
+The train mode, `gds.beta.pipeline.nodeClassification.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
 Running this mode results in a classification pipeline of type `Node classification pipeline`, which is then stored in the <<model-catalog-ops, model catalog>>.
 The classification pipeline can be <<algorithms-node-classification-pipelines-predict, applied>> to a possibly different graph which classifies nodes.
 
@@ -55,7 +55,7 @@ The primary metric may not be a `*` expansion due to the ambiguity of which of t
 .Run Node Classification in train mode on a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.train(
+CALL gds.beta.pipeline.nodeClassification.train(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -209,7 +209,7 @@ include::../../shared/examples-estimate-intro.adoc[]
 .The following will estimate the memory requirements for running the algorithm in train mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.train.estimate('myGraph', {
+CALL gds.beta.pipeline.nodeClassification.train.estimate('myGraph', {
   pipeline: 'pipe',
   nodeLabels: ['House'],
   modelName: 'nc-model',
@@ -242,7 +242,7 @@ We will train a model to predict the class in which a house belongs, based on it
 .The following will train a model using a pipeline:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.train('myGraph', {
+CALL gds.beta.pipeline.nodeClassification.train('myGraph', {
   pipeline: 'pipe',
   nodeLabels: ['House'],
   modelName: 'nc-pipeline-model',

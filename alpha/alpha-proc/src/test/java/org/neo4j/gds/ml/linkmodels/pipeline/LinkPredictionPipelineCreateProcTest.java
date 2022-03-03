@@ -46,7 +46,7 @@ class LinkPredictionPipelineCreateProcTest extends BaseProcTest {
     @Test
     void createPipeline() {
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')",
+            "CALL gds.beta.pipeline.linkPrediction.create('myPipeline')",
             List.of(Map.of(
                 "name", "myPipeline",
                 "nodePropertySteps", List.of(),
@@ -59,13 +59,13 @@ class LinkPredictionPipelineCreateProcTest extends BaseProcTest {
 
     @Test
     void failOnCreatingPipelineWithExistingName() {
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')");
-        assertError("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')", "Pipeline named `myPipeline` already exists.");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.create('myPipeline')");
+        assertError("CALL gds.beta.pipeline.linkPrediction.create('myPipeline')", "Pipeline named `myPipeline` already exists.");
     }
 
     @Test
     void failOnCreatingPipelineWithInvalidName() {
-        assertError("CALL gds.alpha.ml.pipeline.linkPrediction.create(' ')",
+        assertError("CALL gds.beta.pipeline.linkPrediction.create(' ')",
             "`pipelineName` must not end or begin with whitespace characters, but got ` `.");
     }
 }

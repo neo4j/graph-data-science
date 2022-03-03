@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class NodeClassificationPipelineConfigureSplitProc extends BaseProc {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.configureSplit", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.nodeClassification.configureSplit", mode = READ)
     @Description("Configures the split of the node classification pipeline.")
     public Stream<PipelineInfoResult> configureSplit(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationPipeline.class);

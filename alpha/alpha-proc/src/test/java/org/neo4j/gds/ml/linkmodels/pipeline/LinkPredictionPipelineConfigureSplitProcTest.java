@@ -37,7 +37,7 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
     void setUp() throws Exception {
         registerProcedures(LinkPredictionPipelineConfigureSplitProc.class, LinkPredictionPipelineCreateProc.class);
 
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.create('myPipeline')");
     }
 
     @AfterEach
@@ -48,7 +48,7 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
     @Test
     void shouldOverrideSingleSplitField() {
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('myPipeline', {validationFolds: 42})",
+            "CALL gds.beta.pipeline.linkPrediction.configureSplit('myPipeline', {validationFolds: 42})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 42, "trainFraction", 0.1),
@@ -61,10 +61,10 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
 
     @Test
     void shouldOnlyKeepLastOverride() {
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('myPipeline', {validationFolds: 42})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('myPipeline', {validationFolds: 42})");
 
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('myPipeline', {testFraction: 0.5})",
+            "CALL gds.beta.pipeline.linkPrediction.configureSplit('myPipeline', {testFraction: 0.5})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.5, "validationFolds", 3, "trainFraction", 0.1),
@@ -79,14 +79,14 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
     void shouldNotThrowOnFractionsAddingToMoreThanOne() {
         assertThatCode(() ->
             runQuery(
-                "CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('myPipeline', {testFraction: 0.5, trainFraction: 0.51})")
+                "CALL gds.beta.pipeline.linkPrediction.configureSplit('myPipeline', {testFraction: 0.5, trainFraction: 0.51})")
         ).doesNotThrowAnyException();
     }
 
     @Test
     void failOnInvalidKeys() {
         assertError(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('myPipeline', {invalidKey: 42, traiXFraction: -0.51})",
+            "CALL gds.beta.pipeline.linkPrediction.configureSplit('myPipeline', {invalidKey: 42, traiXFraction: -0.51})",
             "Unexpected configuration keys: invalidKey, traiXFraction (Did you mean [trainFraction]?"
         );
     }

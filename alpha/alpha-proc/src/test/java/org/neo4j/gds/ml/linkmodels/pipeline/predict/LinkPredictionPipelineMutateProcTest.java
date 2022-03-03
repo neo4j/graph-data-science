@@ -57,7 +57,7 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
     @MethodSource("topNConcurrencyLabelCombinations")
     void shouldPredictWithTopN(int topN, int concurrency, String nodeLabel) {
         runQuery(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate('g', {" +
+            "CALL gds.beta.pipeline.linkPrediction.predict.mutate('g', {" +
             " nodeLabels: [$nodeLabel]," +
             " modelName: 'model'," +
             " mutateRelationshipType: 'PREDICTED'," +
@@ -109,7 +109,7 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
 
         var query = GdsCypher
             .call("g")
-            .algo("gds.alpha.ml.pipeline.linkPrediction.predict")
+            .algo("gds.beta.pipeline.linkPrediction.predict")
             .mutateMode()
             .addParameter("nodeLabels", List.of("N"))
             .addParameter("mutateRelationshipType", "PREDICTED")
@@ -157,7 +157,7 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
 
         var query = GdsCypher
             .call("g2")
-            .algo("gds.alpha.ml.pipeline.linkPrediction.predict")
+            .algo("gds.beta.pipeline.linkPrediction.predict")
             .mutateMode()
             .addParameter("mutateRelationshipType", "PREDICTED")
             .addParameter("modelName", "model")
@@ -179,7 +179,7 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
     @Test
     void estimate() {
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate.estimate('g', {" +
+            "CALL gds.beta.pipeline.linkPrediction.predict.mutate.estimate('g', {" +
             " modelName: 'model'," +
             " threshold: 0," +
             " mutateRelationshipType: 'PREDICTED'," +

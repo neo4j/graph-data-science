@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class NodeClassificationPipelineConfigureParamsProc extends BaseProc {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.configureParams", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.nodeClassification.configureParams", mode = READ)
     @Description("Configures the parameters of the node classification train pipeline.")
     public Stream<PipelineInfoResult> configureParams(
         @Name("pipelineName") String pipelineName,

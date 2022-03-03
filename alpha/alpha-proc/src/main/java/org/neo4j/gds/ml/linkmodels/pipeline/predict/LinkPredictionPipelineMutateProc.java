@@ -62,11 +62,11 @@ import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
 import static org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc.DESCRIPTION;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.ml.pipeline.linkPrediction.predict.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.beta.pipeline.linkPrediction.predict.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPredictPipelineMutateConfig> {
     static final String DESCRIPTION = "Predicts relationships for all non-connected node pairs based on a previously trained Link prediction pipeline.";
 
-    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.mutate", mode = Mode.READ)
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.predict.mutate", mode = Mode.READ)
     @Description(DESCRIPTION)
     public Stream<LinkPredictionPipelineMutateProc.MutateResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -76,7 +76,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
         return mutate(compute(graphName, configuration));
     }
 
-    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.mutate.estimate", mode = Mode.READ)
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.predict.mutate.estimate", mode = Mode.READ)
     @Description(ESTIMATE_PREDICT_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
