@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.triangle.intersect;
 
+import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.api.AdjacencyCursor;
@@ -32,15 +33,18 @@ import java.util.function.LongToIntFunction;
 public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
 
     private final LongToIntFunction degreeFunction;
+    private final LongToLongFunction idMappingFunction;
     private final CompositeAdjacencyList compositeAdjacencyList;
 
     private UnionGraphIntersect(
         LongToIntFunction degreeFunction,
+        LongToLongFunction idMappingFunction,
         CompositeAdjacencyList compositeAdjacencyList,
         long maxDegree
     ) {
         super(maxDegree);
         this.degreeFunction = degreeFunction;
+        this.idMappingFunction = idMappingFunction;
         this.compositeAdjacencyList = compositeAdjacencyList;
     }
 
@@ -56,7 +60,7 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
 
     @Override
     protected CompositeAdjacencyCursor cursorForNode(@Nullable CompositeAdjacencyCursor reuse, long node, int degree) {
-        return compositeAdjacencyList.adjacencyCursor(reuse, node);
+        return compositeAdjacencyList.adjacencyCursor(reuse, idMappingFunction.applyAsLong(node));
     }
 
     @ServiceProvider
@@ -64,7 +68,10 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
 
         @Override
         public boolean canLoad(Graph graph) {
-            return graph instanceof UnionGraph;
+            if (graph instanceof UnionGraph) {
+                return !((UnionGraph) graph).isNodeFilteredGraph();
+            }
+            return false;
         }
 
         @Override
@@ -73,6 +80,31 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
             var topology = ((UnionGraph) graph).relationshipTopology();
             return new UnionGraphIntersect(
                 graph::degree,
+                i -> i,
+                topology,
+                config.maxDegree()
+            );
+        }
+    }
+
+    @ServiceProvider
+    public static final class NodeFilteredUnionGraphIntersectFactory implements RelationshipIntersectFactory {
+
+        @Override
+        public boolean canLoad(Graph graph) {
+            if (graph instanceof UnionGraph) {
+                return ((UnionGraph) graph).isNodeFilteredGraph();
+            }
+            return false;
+        }
+
+        @Override
+        public UnionGraphIntersect load(Graph graph, RelationshipIntersectConfig config) {
+            assert graph instanceof UnionGraph;
+            var topology = ((UnionGraph) graph).relationshipTopology();
+            return new UnionGraphIntersect(
+                graph::degree,
+                graph::toRootNodeId,
                 topology,
                 config.maxDegree()
             );

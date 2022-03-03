@@ -39,8 +39,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.OptionalLong;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
@@ -296,6 +296,9 @@ public final class UnionGraph implements CSRGraph {
             .flatMap(Collection::stream)
             .map(Relationships.Topology::adjacencyList)
             .collect(Collectors.toList());
+        if (isNodeFilteredGraph()) {
+            return new CompositeAdjacencyList(adjacencies, Optional.of(first));
+        }
         return new CompositeAdjacencyList(adjacencies);
     }
 
@@ -317,6 +320,10 @@ public final class UnionGraph implements CSRGraph {
     @Override
     public boolean hasLabel(long nodeId, NodeLabel label) {
         return first.hasLabel(nodeId, label);
+    }
+
+    public boolean isNodeFilteredGraph() {
+        return first instanceof NodeFilteredGraph;
     }
 
     private static class ParallelRelationshipDegreeCounter implements RelationshipConsumer {

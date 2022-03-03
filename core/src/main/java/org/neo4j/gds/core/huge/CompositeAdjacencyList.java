@@ -22,16 +22,38 @@ package org.neo4j.gds.core.huge;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.IdMap;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class CompositeAdjacencyList implements AdjacencyList {
 
     private final List<AdjacencyList> adjacencyLists;
+    private final CompositeAdjacencyCursorFactory compositeAdjacencyCursorFactory;
+
+    @FunctionalInterface
+    interface CompositeAdjacencyCursorFactory {
+        CompositeAdjacencyCursor create(List<AdjacencyCursor> cursors);
+    }
 
     CompositeAdjacencyList(List<AdjacencyList> adjacencyLists) {
+        this(adjacencyLists, Optional.empty());
+    }
+
+    CompositeAdjacencyList(List<AdjacencyList> adjacencyLists, Optional<IdMap> filteredIdMap) {
         this.adjacencyLists = adjacencyLists;
+        this.compositeAdjacencyCursorFactory = filteredIdMap
+            .map(idMap -> (CompositeAdjacencyCursorFactory) cursors -> {
+                List<AdjacencyCursor> wrappedCursors = cursors
+                    .stream()
+                    .map(cursor -> new NodeFilteredAdjacencyCursor(cursor, idMap))
+                    .collect(Collectors.toList());
+                return new CompositeAdjacencyCursor(wrappedCursors);
+            })
+            .orElseGet(() -> CompositeAdjacencyCursor::new);
     }
 
     public int size() {
@@ -58,7 +80,7 @@ public class CompositeAdjacencyList implements AdjacencyList {
         for (var adjacency : adjacencyLists) {
             cursors.add(adjacency.adjacencyCursor(node, fallbackValue));
         }
-        return new CompositeAdjacencyCursor(cursors);
+        return compositeAdjacencyCursorFactory.create(cursors);
     }
 
     @Override
@@ -90,7 +112,7 @@ public class CompositeAdjacencyList implements AdjacencyList {
         for (var adjacency : adjacencyLists) {
             cursors.add(adjacency.rawAdjacencyCursor());
         }
-        return new CompositeAdjacencyCursor(cursors);
+        return compositeAdjacencyCursorFactory.create(cursors);
     }
 
     @Override
