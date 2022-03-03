@@ -35,6 +35,7 @@ import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
 import org.neo4j.gds.ml.core.optimizer.Updater;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.core.tensor.TensorFunctions.averageTensors;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Training {
     private final TrainingConfig config;
@@ -116,10 +116,10 @@ public class Training {
             stopper.registerLoss(lastLoss);
             epoch++;
 
-            progressTracker.logMessage(formatWithLocale("Loss: %s", lastLoss));
+            progressTracker.logMessage(StringFormatting.formatWithLocale("Loss: %s", lastLoss));
             progressTracker.endSubTask("Epoch");
         }
-        progressTracker.logMessage(formatWithLocale(
+        progressTracker.logMessage(StringFormatting.formatWithLocale(
             "%s after %d epochs. Initial loss: %s, Last loss: %s.%s",
             stopper.converged() ? "converged" : "terminated",
             epoch,

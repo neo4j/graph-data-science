@@ -35,6 +35,7 @@ dependencies {
 
     implementation project(':algo-common')
     implementation project(':alpha-algo')
+    implementation project(':ml-algo')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')

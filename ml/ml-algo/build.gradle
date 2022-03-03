@@ -5,5 +5,26 @@ description = 'Neo4j Graph Data Science :: Machine Learning Algorithms'
 group = 'org.neo4j.gds'
 
 dependencies {
+    annotationProcessor project(':annotations')
+    annotationProcessor project(':config-generator')
+    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
+    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
+    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    compileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
+    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+
+    implementation project(':annotations')
+    implementation project(':core')
+    implementation project(':memory-usage')
+    implementation project(':ml-core')
+    implementation project(':config-api')
+    implementation project(':string-formatting')
+
+    // TEST DEPENDENCIES
+    testAnnotationProcessor project(':annotations')
+    testAnnotationProcessor group: 'org.immutables',           name: 'value',            version: ver.'immutables'
+
+    testImplementation project(':test-utils')
+    testImplementation project(':ml-test-utils')
 }
