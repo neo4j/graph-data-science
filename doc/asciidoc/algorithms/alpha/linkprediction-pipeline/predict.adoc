@@ -135,6 +135,7 @@ The stream procedure will yield a node pair only once.
 ====
 
 
+[[algorithms-link-prediction-pipelines-predict-examples-estimate]]
 ==== Memory Estimation
 
 :mode: stream

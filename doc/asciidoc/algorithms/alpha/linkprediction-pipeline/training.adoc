@@ -179,6 +179,7 @@ CALL gds.graph.project(
 WARNING: The Link Prediction model requires the graph to be created using the `UNDIRECTED` orientation for relationships.
 
 
+[[algorithms-ml-linkprediction-pipeline-examples-train-estimate]]
 ==== Memory Estimation
 
 First off, we will estimate the cost of training the pipeline by using the `estimate` procedure.
