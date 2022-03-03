@@ -179,6 +179,38 @@ CALL gds.graph.project(
 WARNING: The Link Prediction model requires the graph to be created using the `UNDIRECTED` orientation for relationships.
 
 
+==== Memory Estimation
+
+First off, we will estimate the cost of training the pipeline by using the `estimate` procedure.
+Estimation is useful to understand the memory impact that training the pipeline on your graph will have.
+When actually training the pipeline the system will perform an estimation and prohibit the execution if the estimation shows there is a very high probability of the execution running out of memory.
+To read more about this, see <<estimate-heap-control>>.
+
+For more details on `estimate` in general, see <<memory-estimation>>.
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for training the pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.train.estimate('myGraph', {
+  pipeline: 'pipe',
+  modelName: 'lp-pipeline-model'
+})
+YIELD requiredMemory
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| requiredMemory
+| "[59 KiB \... 1717 KiB]"
+|===
+--
+
+
+==== Training
+
 [[algorithms-ml-linkprediction-pipeline-examples-train-query]]
 [role=query-example,group=lp]
 --

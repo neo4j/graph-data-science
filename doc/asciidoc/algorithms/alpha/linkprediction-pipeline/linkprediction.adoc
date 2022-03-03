@@ -55,7 +55,7 @@ The rest of this page is divided as follows:
 [[algorithms-ml-linkprediction-creating-a-pipeline]]
 == Creating a pipeline
 
-The first step of building a new pipeline is to create one using `gds.alpha.ml.pipeline.linkPrediction.create`.
+The first step of building a new pipeline is to create one using `gds.beta.pipeline.linkPrediction.create`.
 This stores a trainable pipeline object in the pipeline catalog of type `Link prediction training pipeline`.
 This represents a configurable pipeline that can later be invoked for training, which in turn creates a trained pipeline.
 The latter is also a model which is stored in the catalog with type `LinkPrediction`.
