@@ -18,10 +18,8 @@ package org.neo4j.gds.utils;
 
 import java.io.Closeable;
 import java.lang.ref.WeakReference;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
@@ -62,15 +60,6 @@ public class CloseableThreadLocal<T> implements Closeable {
     // GC'able, its entry may be removed:
     Map<Thread, T> hardRefs = new WeakHashMap<>();
 
-    // Increase this to decrease frequency of purging in get:
-    private static final int PURGE_MULTIPLIER = 1_000_000;
-
-    // On each get or set we decrement this; when it hits 0 we
-    // purge.  After purge, we set this to
-    // PURGE_MULTIPLIER * stillAliveCount.  This keeps
-    // amortized cost of purging linear.
-    private final AtomicInteger countUntilPurge = new AtomicInteger(PURGE_MULTIPLIER);
-
 
     public static <T> CloseableThreadLocal<T> withInitial(Supplier<T> initialValueSupplier) {
         return new CloseableThreadLocal<>(initialValueSupplier);
@@ -95,7 +84,6 @@ public class CloseableThreadLocal<T> implements Closeable {
                 return null;
             }
         } else {
-            maybePurge();
             return weakRef.get();
         }
     }
@@ -106,35 +94,6 @@ public class CloseableThreadLocal<T> implements Closeable {
 
         synchronized (hardRefs) {
             hardRefs.put(Thread.currentThread(), object);
-            maybePurge();
-        }
-    }
-
-    private void maybePurge() {
-        if (countUntilPurge.getAndDecrement() == 0) {
-            purge();
-        }
-    }
-
-    // Purge dead threads
-    private void purge() {
-        synchronized (hardRefs) {
-            int stillAliveCount = 0;
-            for (Iterator<Thread> it = hardRefs.keySet().iterator(); it.hasNext(); ) {
-                final Thread t = it.next();
-                if (!t.isAlive()) {
-                    it.remove();
-                } else {
-                    stillAliveCount++;
-                }
-            }
-            int nextCount = (1 + stillAliveCount) * PURGE_MULTIPLIER;
-            if (nextCount <= 0) {
-                // defensive: int overflow!
-                nextCount = 1000000;
-            }
-
-            countUntilPurge.set(nextCount);
         }
     }
 
