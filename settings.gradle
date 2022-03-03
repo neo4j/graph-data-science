@@ -97,6 +97,9 @@ project(':memory-usage').projectDir = file('memory-usage')
 include('ml-core')
 project(':ml-core').projectDir = file('ml/ml-core')
 
+include('ml-algo')
+project(':ml-algo').projectDir = file('ml/ml-algo')
+
 include('ml-test-utils')
 project(':ml-test-utils').projectDir = file('ml-test-utils')
 

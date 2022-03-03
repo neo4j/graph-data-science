@@ -1,0 +1,9 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Machine Learning Algorithms'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+}
