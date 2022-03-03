@@ -88,13 +88,13 @@ public interface SimilarityComputer {
     }
 
     static SimilarityComputer ofLongArrayProperty(NodeProperties nodeProperties) {
-        return new LongArrayPropertySimilarityComputer(nodeProperties, SimilarityComputer::currentMetric);
+        return new LongArrayPropertySimilarityComputer(nodeProperties, SimilarityComputer::jaccard);
     }
 
-    static double currentMetric(long[] left, long[] right) {
-        long sameElements = Intersections.intersection3(left, right);
-        long differentElements = left.length - sameElements;
-        return 1.0 / (1.0 + differentElements);
+    static double jaccard(long[] left, long[] right) {
+        long intersection = Intersections.intersection3(left, right);
+        double union = left.length + right.length - intersection;
+        return union == 0 ? 0 : intersection / union;
     }
 
     static SimilarityComputer ofProperty(NodePropertyContainer graph, String propertyName) {
