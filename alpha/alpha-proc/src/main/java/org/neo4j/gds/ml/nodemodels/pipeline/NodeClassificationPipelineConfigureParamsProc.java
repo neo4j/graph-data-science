@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfigImpl;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.procedure.Description;
@@ -46,11 +46,11 @@ public class NodeClassificationPipelineConfigureParamsProc extends BaseProc {
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationPipeline.class);
 
-        List<NodeLogisticRegressionTrainCoreConfig> trainConfigs = parameterSpace
+        List<LogisticRegressionTrainConfig> trainConfigs = parameterSpace
             .stream()
             .map(CypherMapWrapper::create)
             .map(rawConfig -> {
-                var config = new NodeLogisticRegressionTrainCoreConfigImpl(rawConfig);
+                var config = new LogisticRegressionTrainConfigImpl(rawConfig);
                 validateConfig(rawConfig, config.configKeys());
                 return config;
             })

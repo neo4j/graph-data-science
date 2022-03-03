@@ -23,8 +23,8 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfigImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -45,8 +45,8 @@ public interface NodeClassificationModelInfo extends ToMapConvertible {
      * for the selection metric.
      * @return
      */
-    NodeLogisticRegressionTrainConfig bestParameters();
-    Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metrics();
+    LogisticRegressionTrainConfig bestParameters();
+    Map<Metric, MetricData<LogisticRegressionTrainConfig>> metrics();
 
     @Override
     @Value.Auxiliary
@@ -64,15 +64,15 @@ public interface NodeClassificationModelInfo extends ToMapConvertible {
 
     static NodeClassificationModelInfo of(
         List<Long> classes,
-        NodeLogisticRegressionTrainConfig bestParameters,
-        Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metrics
+        LogisticRegressionTrainConfig bestParameters,
+        Map<Metric, MetricData<LogisticRegressionTrainConfig>> metrics
     ) {
         return ImmutableNodeClassificationModelInfo.of(classes, bestParameters, metrics);
     }
 
     static NodeClassificationModelInfo defaultConfig() {
         return NodeClassificationModelInfo.of(List.of(),
-            new NodeLogisticRegressionTrainConfigImpl(List.of(), "", CypherMapWrapper.create(Map.of())),
+            new LogisticRegressionTrainConfigImpl(CypherMapWrapper.create(Map.of())),
             Map.of()
         );
     }

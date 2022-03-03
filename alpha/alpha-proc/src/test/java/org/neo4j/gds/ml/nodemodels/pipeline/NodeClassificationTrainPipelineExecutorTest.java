@@ -37,9 +37,9 @@ import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFactory;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -121,7 +121,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var metricSpecification = MetricSpecification.parse("F1(class=1)");
         var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
 
-        pipeline.setTrainingParameterSpace(List.of(NodeLogisticRegressionTrainCoreConfig.of(
+        pipeline.setTrainingParameterSpace(List.of(LogisticRegressionTrainConfig.of(
             Map.of("penalty", 1, "maxEpochs", 1)
         )));
 

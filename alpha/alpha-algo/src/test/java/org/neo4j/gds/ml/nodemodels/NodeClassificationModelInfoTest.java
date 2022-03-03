@@ -22,8 +22,8 @@ package org.neo4j.gds.ml.nodemodels;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 
 import java.util.List;
@@ -37,7 +37,7 @@ class NodeClassificationModelInfoTest {
     void shouldCreateMap() {
         var info = NodeClassificationModelInfo.of(
             List.of(),
-            new NodeLogisticRegressionTrainConfigImpl(List.of(), "t", CypherMapWrapper.create(Map.of("penalty", 1))),
+            new LogisticRegressionTrainConfigImpl(CypherMapWrapper.create(Map.of("penalty", 1))),
             Map.of()
         );
 
@@ -51,9 +51,7 @@ class NodeClassificationModelInfoTest {
 
     @Test
     void shouldCreateMapWithStats() {
-        NodeLogisticRegressionTrainConfig trainConfig = new NodeLogisticRegressionTrainConfigImpl(
-            List.of(),
-            "t",
+        LogisticRegressionTrainConfig trainConfig = new LogisticRegressionTrainConfigImpl(
             CypherMapWrapper.create(Map.of("penalty", 1))
         );
         var trainStats = ImmutableModelStats.of(trainConfig, 0.5, 0.0, 1.0);
@@ -95,6 +93,7 @@ class NodeClassificationModelInfoTest {
     @NotNull
     private Map<String, Object> expectedParameters() {
         return Map.of(
+            "useBiasFeature", true,
             "batchSize", 100,
             "maxEpochs", 100,
             "minEpochs", 1,

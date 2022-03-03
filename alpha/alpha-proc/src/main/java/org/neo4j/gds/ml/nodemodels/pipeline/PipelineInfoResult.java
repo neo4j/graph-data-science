@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 
@@ -45,6 +45,6 @@ public class PipelineInfoResult {
         this.splitConfig = info.splitConfig().toMap();
         this.parameterSpace = info.trainingParameterSpace()
             .stream()
-            .map(NodeLogisticRegressionTrainCoreConfig::toMap).collect(Collectors.toList());
+            .map(LogisticRegressionTrainConfig::toMap).collect(Collectors.toList());
     }
 }

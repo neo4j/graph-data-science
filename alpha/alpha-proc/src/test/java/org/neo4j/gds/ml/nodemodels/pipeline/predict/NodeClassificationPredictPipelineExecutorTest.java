@@ -43,7 +43,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
@@ -242,7 +242,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .build(),
                 NodeClassificationPipelineModelInfo.builder()
                     .classes(modelData.classIdMap().originalIdsList())
-                    .bestParameters(NodeLogisticRegressionTrainConfig.of(List.of("foo", "bar"), "foo", Map.of()))
+                    .bestParameters(LogisticRegressionTrainConfig.of(Map.of()))
                     .metrics(Map.of())
                     .trainingPipeline(pipeline.copy())
                     .build()

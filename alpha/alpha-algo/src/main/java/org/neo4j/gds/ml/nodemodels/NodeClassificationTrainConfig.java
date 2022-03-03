@@ -28,7 +28,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.model.ModelConfig;
 
@@ -63,16 +63,11 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
 
     @Value.Derived
     @Configuration.Ignore
-    default List<NodeLogisticRegressionTrainConfig> paramsConfig() {
+    default List<LogisticRegressionTrainConfig> paramsConfig() {
         return params()
             .stream()
-            .map(map ->
-                NodeLogisticRegressionTrainConfig.of(
-                    featureProperties(),
-                    targetProperty(),
-                    map
-                )
-            ).collect(Collectors.toList());
+            .map(LogisticRegressionTrainConfig::of)
+            .collect(Collectors.toList());
     }
 
     @Value.Check

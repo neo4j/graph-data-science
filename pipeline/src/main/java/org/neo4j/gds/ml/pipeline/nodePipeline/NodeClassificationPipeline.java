@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline;
 
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.Pipeline;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatureStep, NodeLogisticRegressionTrainCoreConfig> {
+public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatureStep, LogisticRegressionTrainConfig> {
     public static final String PIPELINE_TYPE = "Node classification training pipeline";
     public static final String MODEL_TYPE = "Node classification pipeline";
 
@@ -36,7 +36,7 @@ public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatu
     private NodeClassificationSplitConfig splitConfig;
 
     public NodeClassificationPipeline() {
-        super(List.of(NodeLogisticRegressionTrainCoreConfig.defaultConfig()));
+        super(List.of(LogisticRegressionTrainConfig.defaultConfig()));
         this.splitConfig = NodeClassificationSplitConfig.DEFAULT_CONFIG;
     }
 

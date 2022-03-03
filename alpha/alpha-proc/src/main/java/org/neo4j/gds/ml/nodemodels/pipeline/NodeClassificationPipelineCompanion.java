@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
 
@@ -34,7 +34,7 @@ public final class NodeClassificationPipelineCompanion {
     public static final String ESTIMATE_PREDICT_DESCRIPTION = "Estimates memory for predicting classes for all nodes based on a previously trained pipeline model";
     static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("testFraction", 0.3, "validationFolds", 3);
     static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(
-        NodeLogisticRegressionTrainCoreConfig.defaultConfig().toMap()
+        LogisticRegressionTrainConfig.defaultConfig().toMap()
     );
 
     private NodeClassificationPipelineCompanion() {}

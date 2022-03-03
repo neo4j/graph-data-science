@@ -31,7 +31,7 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
@@ -110,7 +110,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 .build(),
             NodeClassificationPipelineModelInfo.builder()
                 .classes(modelData.classIdMap().originalIdsList())
-                .bestParameters(NodeLogisticRegressionTrainConfig.of(List.of("foo", "bar"), "foo", Map.of()))
+                .bestParameters(LogisticRegressionTrainConfig.of(Map.of()))
                 .metrics(Map.of())
                 .trainingPipeline(pipeline.copy())
                 .build()

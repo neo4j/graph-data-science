@@ -55,6 +55,7 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", List.of(Map.of(
+                    "useBiasFeature", true,
                     "maxEpochs", 100,
                     "minEpochs", 42,
                     "penalty", 0.0,
@@ -78,6 +79,7 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", List.of(Map.of(
+                    "useBiasFeature", true,
                     "maxEpochs", 100,
                     "minEpochs", 4,
                     "penalty", 0.0,

@@ -22,9 +22,9 @@ package org.neo4j.gds.ml.pipeline.nodePipeline;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.BestMetricData;
 import org.neo4j.gds.ml.nodemodels.Metric;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -47,7 +47,7 @@ public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
      * for the selection metric.
      * @return
      */
-    NodeLogisticRegressionTrainConfig bestParameters();
+    LogisticRegressionTrainConfig bestParameters();
 
     Map<Metric, BestMetricData> metrics();
 
