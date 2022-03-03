@@ -21,11 +21,19 @@ package org.neo4j.gds.traverse;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.traverse.Aggregator;
 import org.neo4j.gds.impl.traverse.BFS;
 import org.neo4j.gds.impl.traverse.BfsConfig;
 import org.neo4j.gds.impl.traverse.ExitPredicate;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -75,5 +83,50 @@ class BFSAlgorithmFactory extends GraphAlgorithmFactory<BFS, BfsConfig> {
     @Override
     public String taskName() {
         return "BFS";
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(BfsConfig configuration) {
+        MemoryEstimations.Builder builder = MemoryEstimations.builder(BFS.class);
+
+        builder.perNode("visited ", HugeAtomicBitSet::memoryEstimation) //global variables
+            .perNode("traversedNodes", HugeLongArray::memoryEstimation)
+            .perNode("sources", HugeLongArray::memoryEstimation)
+            .perNode("weights", HugeDoubleArray::memoryEstimation)
+            .perNode("minimumChunk", HugeAtomicLongArray::memoryEstimation);
+
+        //per thread
+        builder.rangePerGraphDimension("localNodes", (dimensions, concurrency) -> {
+            // lower-bound: each node is in exactly one localNode array
+            var lowerBound = MemoryUsage.sizeOfLongArray(dimensions.nodeCount() + dimensions.nodeCount() / 64);
+            // This is the worst-case, which we will most likely never hit since the
+            // graph needs to be complete to reach all nodes from all threads. Also each node needs to be accessed at the same time by all threads
+            var upperBound = MemoryUsage.sizeOfLongArray(dimensions.relCountUpperBound() + dimensions.nodeCount() / 64);
+            //The  nodeCount()/64 refers to the  chunk separator in localNodes
+            return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
+        }).rangePerGraphDimension("localSources", (dimensions, concurrency) -> {
+            // lower-bound: each node is in exactly one localNode array
+            var lowerBound = MemoryUsage.sizeOfLongArrayList(dimensions.nodeCount() + dimensions.nodeCount() / 64);
+            // This is the worst-case, which we will most likely never hit since the
+            // graph needs to be complete to reach all nodes from all threads. Also each node needs to be accessed at the same time by all threads
+            var upperBound = MemoryUsage.sizeOfLongArrayList(dimensions.relCountUpperBound() + dimensions.nodeCount() / 64);
+            //The  nodeCount()/64 refers to the  chunk separator in localNodes
+            return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
+        }).rangePerGraphDimension("localWeights", (dimensions, concurrency) -> {
+            // lower-bound: each node is in exactly one localNode array
+            var lowerBound = MemoryUsage.sizeOfDoubleArrayList(dimensions.nodeCount() + dimensions.nodeCount() / 64);
+            // This is the worst-case, which we will most likely never hit since the
+            // graph needs to be complete to reach all nodes from all threads. Also each node needs to be accessed at the same time by all threads
+            var upperBound = MemoryUsage.sizeOfDoubleArrayList(dimensions.relCountUpperBound() + dimensions.nodeCount() / 64);
+            //The  nodeCount()/64 refers to the  chunk separator in localNodes
+            return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
+        }).perGraphDimension("chunks", (dimensions, concurrency) ->
+            MemoryRange.of(dimensions.nodeCount() / 64)
+        );
+
+        builder.perNode("resultNodes", MemoryUsage::sizeOfLongArray);
+
+
+        return builder.build();
     }
 }

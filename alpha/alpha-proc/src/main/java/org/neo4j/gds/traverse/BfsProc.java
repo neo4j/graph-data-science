@@ -28,6 +28,7 @@ import org.neo4j.gds.impl.traverse.BFS;
 import org.neo4j.gds.impl.traverse.BfsConfig;
 import org.neo4j.gds.impl.walking.WalkResult;
 import org.neo4j.gds.paths.PathFactory;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -58,6 +59,16 @@ public class BfsProc extends AlgoBaseProc<BFS, long[], BfsConfig, WalkResult> {
     ) {
         var computationResult = compute(graphName, configuration);
         return computationResultConsumer().consume(computationResult, executionContext());
+    }
+
+    @Procedure(name = "gds.bfs.stream.estimate", mode = READ)
+    @Description(DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        var computationResult = compute(graphName, configuration);
+        return computeEstimate(graphName, configuration);
     }
 
     @Override
