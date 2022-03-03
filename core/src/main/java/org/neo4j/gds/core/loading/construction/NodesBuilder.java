@@ -402,11 +402,7 @@ public final class NodesBuilder {
         }
 
         @Override
-        public void close() {
-            if (buffer.length() != 0) {
-                throw new IllegalStateException("Buffers are not empty.");
-            }
-        }
+        public void close() {}
 
         private int importProperty(long neoNodeId, long[] labels, String propertyKey, Value value) {
             int propertiesImported = 0;
