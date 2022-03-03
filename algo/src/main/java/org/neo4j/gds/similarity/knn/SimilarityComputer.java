@@ -97,6 +97,12 @@ public interface SimilarityComputer {
         return union == 0 ? 0 : intersection / union;
     }
 
+    static double overlap(long[] left, long[] right) {
+        long intersection = Intersections.intersection3(left, right);
+        double denominator = Math.min(left.length, right.length);
+        return denominator == 0 ? 0 : intersection / denominator;
+    }
+
     static SimilarityComputer ofProperty(NodePropertyContainer graph, String propertyName) {
         var nodeProperties = Objects.requireNonNull(
             graph.nodeProperties(propertyName),
