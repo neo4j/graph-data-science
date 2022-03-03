@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.nodemodels;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfigImpl;
 
@@ -72,9 +71,8 @@ public interface NodeClassificationModelInfo extends ToMapConvertible {
 
     static NodeClassificationModelInfo defaultConfig() {
         return NodeClassificationModelInfo.of(List.of(),
-            new LogisticRegressionTrainConfigImpl(CypherMapWrapper.create(Map.of())),
+            LogisticRegressionTrainConfigImpl.builder().build(),
             Map.of()
         );
     }
 }
-
