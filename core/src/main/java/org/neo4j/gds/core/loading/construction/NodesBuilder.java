@@ -184,7 +184,23 @@ public final class NodesBuilder {
         return build(highestNeoId, true);
     }
 
+    /**
+     * Closes the NodesBuilder without flushing the internal buffers.
+     * The given exception is thrown, once the thread local builders
+     * are closed.
+     *
+     * This method must be called in case of an error while using the
+     * NodesBuilder.
+     */
+    public void close(RuntimeException exception) {
+        this.threadLocalBuilder.close();
+        throw exception;
+    }
+
     public IdMapAndProperties build(long highestNeoId, boolean checkDuplicateIds) {
+        // Flush remaining buffer contents
+        this.threadLocalBuilder.forEach(ThreadLocalBuilder::flush);
+        // Clean up resources held by local builders
         this.threadLocalBuilder.close();
 
         var idMap = this.idMapBuilder.build(
@@ -270,7 +286,7 @@ public final class NodesBuilder {
 
     private static class ThreadLocalBuilder implements AutoCloseable {
 
-        private final long[] anyLabelArray = { ANY_LABEL };
+        private final long[] anyLabelArray = {ANY_LABEL};
 
         private final LongAdder importedNodes;
         private final LongPredicate seenNodeIdPredicate;
@@ -280,6 +296,8 @@ public final class NodesBuilder {
         private final NodeImporter nodeImporter;
         private final IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey;
         private final List<Map<String, Value>> batchNodeProperties;
+
+        private boolean isClosed = false;
 
         ThreadLocalBuilder(
             LongAdder importedNodes,
@@ -385,7 +403,9 @@ public final class NodesBuilder {
 
         @Override
         public void close() {
-            flushBuffer();
+            if (buffer.length() != 0) {
+                throw new IllegalStateException("Buffers are not empty.");
+            }
         }
 
         private int importProperty(long neoNodeId, long[] labels, String propertyKey, Value value) {

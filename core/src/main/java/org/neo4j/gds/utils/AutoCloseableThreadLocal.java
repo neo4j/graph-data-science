@@ -57,6 +57,10 @@ public final class AutoCloseableThreadLocal<T extends AutoCloseable> implements 
     public T get() {
         return closeableThreadLocal.get();
     }
+    
+    public void forEach(Consumer<T> consumer) {
+        copies.forEach(consumer);
+    }
 
     @Override
     public void close() {
@@ -78,8 +82,5 @@ public final class AutoCloseableThreadLocal<T extends AutoCloseable> implements 
         if (errorWhileClosing != null) {
             throw errorWhileClosing;
         }
-
-        // TODO: should this happen before we check for errors?
-        closeableThreadLocal.close();
     }
 }

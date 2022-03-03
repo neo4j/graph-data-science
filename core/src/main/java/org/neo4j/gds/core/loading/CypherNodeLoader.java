@@ -83,13 +83,12 @@ class CypherNodeLoader extends CypherRecordLoader<IdMapAndProperties> {
         queryResult.accept(visitor);
 
         if (visitor.error().isPresent()) {
-            // TODO: should we close the nodes builder? if we do, it tries to flush and potentially throws
-            throw visitor.error().get();
+            nodesBuilder.close(visitor.error().get());
         }
 
         long rows = visitor.rows();
         if (rows == 0) {
-            throw new IllegalArgumentException("Node-Query returned no nodes");
+            nodesBuilder.close(new IllegalArgumentException("Node-Query returned no nodes"));
         }
         progressTracker.endSubTask("Nodes");
         return new BatchLoadResult(rows, visitor.maxId());
