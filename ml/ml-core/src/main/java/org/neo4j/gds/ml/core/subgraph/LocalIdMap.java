@@ -29,6 +29,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class LocalIdMap {
@@ -81,6 +82,11 @@ public class LocalIdMap {
         if (o == null || getClass() != o.getClass()) return false;
         LocalIdMap that = (LocalIdMap) o;
         return Arrays.equals(originalIds(), that.originalIds());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(originalIds, originalToInternalIdMap);
     }
 
     @Override
