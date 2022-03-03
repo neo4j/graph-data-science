@@ -51,6 +51,14 @@ public interface SimilarityComputer {
     }
 
     static SimilarityComputer ofProperty(NodeProperties nodeProperties, String propertyName) {
+        return ofProperty(nodeProperties, propertyName, defaultMetricForType(nodeProperties.valueType()));
+    }
+
+    static SimilarityComputer ofProperty(
+        NodeProperties nodeProperties,
+        String propertyName,
+        SimilarityMetric similarityMetric
+    ) {
         switch (nodeProperties.valueType()) {
             case LONG:
                 return ofLongProperty(nodeProperties);
@@ -61,7 +69,7 @@ public interface SimilarityComputer {
             case FLOAT_ARRAY:
                 return ofFloatArrayProperty(nodeProperties);
             case LONG_ARRAY:
-                return ofLongArrayProperty(new SortedLongArrayProperties(nodeProperties));
+                return ofLongArrayProperty(new SortedLongArrayProperties(nodeProperties), similarityMetric);
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "The property [%s] has an unsupported type [%s].",
@@ -87,8 +95,20 @@ public interface SimilarityComputer {
         return new DoubleArrayPropertySimilarityComputer(nodeProperties);
     }
 
-    static SimilarityComputer ofLongArrayProperty(NodeProperties nodeProperties) {
-        return new LongArrayPropertySimilarityComputer(nodeProperties, SimilarityComputer::jaccard);
+    static SimilarityComputer ofLongArrayProperty(NodeProperties nodeProperties, SimilarityMetric similarityMetric) {
+        if (similarityMetric == SimilarityMetric.JACCARD) {
+            return new LongArrayPropertySimilarityComputer(nodeProperties, SimilarityComputer::jaccard);
+        }
+        if (similarityMetric == SimilarityMetric.OVERLAP) {
+            return new LongArrayPropertySimilarityComputer(nodeProperties, SimilarityComputer::overlap);
+        }
+        throw new IllegalArgumentException(
+            formatWithLocale(
+                "Similarity metric [%s] is not supported for property type [%s].",
+                similarityMetric,
+                nodeProperties.valueType()
+            )
+        );
     }
 
     static double jaccard(long[] left, long[] right) {
@@ -110,6 +130,31 @@ public interface SimilarityComputer {
         );
         return ofProperty(nodeProperties, propertyName);
     }
+
+    static SimilarityMetric defaultMetricForType(ValueType valueType) {
+        switch (valueType) {
+            case LONG:
+                return SimilarityMetric.DUMMY_LONG_PROPERTY_METRIC;
+            case DOUBLE:
+                return SimilarityMetric.DUMMY_DOUBLE_PROPERTY_METRIC;
+            case DOUBLE_ARRAY:
+            case FLOAT_ARRAY:
+                return SimilarityMetric.COSINE;
+            case LONG_ARRAY:
+                return SimilarityMetric.JACCARD;
+            default:
+                throw new IllegalArgumentException(
+                    formatWithLocale(
+                        "No default similarity metric exists for value type [%s].",
+                        valueType
+                    )
+                );
+        }
+    }
+}
+
+enum SimilarityMetric {
+    JACCARD, OVERLAP, COSINE, DUMMY_LONG_PROPERTY_METRIC, DUMMY_DOUBLE_PROPERTY_METRIC
 }
 
 interface LongArraySimilarityMetric {

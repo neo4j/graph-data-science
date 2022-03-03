@@ -145,7 +145,7 @@ class SimilarityComputerTest {
     @Property
     void longArrayPropertySimilarityReturns1ForEqualValues(@ForAll @Positive long id) {
         NodeProperties props = new LongArrayTestProperties(nodeId -> new Random(nodeId).longs(42, 0, 1337).toArray());
-        var sim = SimilarityComputer.ofLongArrayProperty(props);
+        var sim = SimilarityComputer.ofLongArrayProperty(props, SimilarityMetric.JACCARD);
 
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
     }
@@ -153,14 +153,14 @@ class SimilarityComputerTest {
     @Property
     void longArrayPropertySimilarityReturnsValuesBetween0And1(@ForAll @From("differentValues") LongLongPair ids) {
         NodeProperties props = new LongArrayTestProperties(nodeId -> new Random(nodeId).longs(42, 0, 1337).toArray());
-        var sim = SimilarityComputer.ofLongArrayProperty(props);
+        var sim = SimilarityComputer.ofLongArrayProperty(props, SimilarityMetric.JACCARD);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
     }
 
     @Property
     void longArrayPropertySimilarityReturns0ForNegativeValues(@ForAll @From("differentValues") LongLongPair ids) {
         NodeProperties props = new LongArrayTestProperties(nodeId -> new Random(nodeId).longs(42, -10, 10).toArray());
-        var sim = SimilarityComputer.ofLongArrayProperty(props);
+        var sim = SimilarityComputer.ofLongArrayProperty(props, SimilarityMetric.JACCARD);
 
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
