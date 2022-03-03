@@ -88,7 +88,13 @@ public interface SimilarityComputer {
     }
 
     static SimilarityComputer ofLongArrayProperty(NodeProperties nodeProperties) {
-        return new LongArrayPropertySimilarityComputer(nodeProperties);
+        return new LongArrayPropertySimilarityComputer(nodeProperties, SimilarityComputer::currentMetric);
+    }
+
+    static double currentMetric(long[] left, long[] right) {
+        long sameElements = Intersections.intersection3(left, right);
+        long differentElements = left.length - sameElements;
+        return 1.0 / (1.0 + differentElements);
     }
 
     static SimilarityComputer ofProperty(NodePropertyContainer graph, String propertyName) {
@@ -98,6 +104,10 @@ public interface SimilarityComputer {
         );
         return ofProperty(nodeProperties, propertyName);
     }
+}
+
+interface LongArraySimilarityMetric {
+    double compute(long[] left, long[] right);
 }
 
 final class DoublePropertySimilarityComputer implements SimilarityComputer {
@@ -180,21 +190,21 @@ final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer 
 
 final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
     private final NodeProperties nodeProperties;
+    private final LongArraySimilarityMetric metric;
 
-    LongArrayPropertySimilarityComputer(NodeProperties nodeProperties) {
+    LongArrayPropertySimilarityComputer(NodeProperties nodeProperties, LongArraySimilarityMetric metric) {
         if (nodeProperties.valueType() != ValueType.LONG_ARRAY) {
             throw new IllegalArgumentException("The property is not of type LONG_ARRAY");
         }
         this.nodeProperties = nodeProperties;
+        this.metric = metric;
     }
 
     @Override
     public double similarity(long firstNodeId, long secondNodeId) {
         var left = nodeProperties.longArrayValue(firstNodeId);
         var right = nodeProperties.longArrayValue(secondNodeId);
-        long sameElements = Intersections.intersection3(left, right);
-        long differentElements = left.length - sameElements;
-        return 1.0 / (1.0 + differentElements);
+        return metric.compute(left, right);
     }
 
     static final class SortedLongArrayProperties implements LongArrayNodeProperties {
