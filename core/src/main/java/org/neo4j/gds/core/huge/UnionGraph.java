@@ -297,9 +297,9 @@ public final class UnionGraph implements CSRGraph {
             .map(Relationships.Topology::adjacencyList)
             .collect(Collectors.toList());
         if (isNodeFilteredGraph()) {
-            return new CompositeAdjacencyList(adjacencies, Optional.of(first));
+            return CompositeAdjacencyList.withFilteredIdMap(adjacencies, first);
         }
-        return new CompositeAdjacencyList(adjacencies);
+        return CompositeAdjacencyList.of(adjacencies);
     }
 
     @Override

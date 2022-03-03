@@ -26,7 +26,6 @@ import org.neo4j.gds.api.IdMap;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CompositeAdjacencyList implements AdjacencyList {
@@ -39,21 +38,28 @@ public class CompositeAdjacencyList implements AdjacencyList {
         CompositeAdjacencyCursor create(List<AdjacencyCursor> cursors);
     }
 
-    CompositeAdjacencyList(List<AdjacencyList> adjacencyLists) {
-        this(adjacencyLists, Optional.empty());
+    static CompositeAdjacencyList of(List<AdjacencyList> adjacencyLists) {
+        return new CompositeAdjacencyList(adjacencyLists, CompositeAdjacencyCursor::new);
     }
 
-    CompositeAdjacencyList(List<AdjacencyList> adjacencyLists, Optional<IdMap> filteredIdMap) {
+    static CompositeAdjacencyList withFilteredIdMap(List<AdjacencyList> adjacencyLists, IdMap filteredIdMap) {
+        assert filteredIdMap instanceof NodeFilteredGraph;
+        var compositeAdjacencyCursorFactory = (CompositeAdjacencyCursorFactory) cursors -> {
+            List<AdjacencyCursor> wrappedCursors = cursors
+                .stream()
+                .map(cursor -> new NodeFilteredAdjacencyCursor(cursor, filteredIdMap))
+                .collect(Collectors.toList());
+            return new CompositeAdjacencyCursor(wrappedCursors);
+        };
+        return new CompositeAdjacencyList(adjacencyLists, compositeAdjacencyCursorFactory);
+    }
+
+    private CompositeAdjacencyList(
+        List<AdjacencyList> adjacencyLists,
+        CompositeAdjacencyCursorFactory compositeAdjacencyCursorFactory
+    ) {
         this.adjacencyLists = adjacencyLists;
-        this.compositeAdjacencyCursorFactory = filteredIdMap
-            .map(idMap -> (CompositeAdjacencyCursorFactory) cursors -> {
-                List<AdjacencyCursor> wrappedCursors = cursors
-                    .stream()
-                    .map(cursor -> new NodeFilteredAdjacencyCursor(cursor, idMap))
-                    .collect(Collectors.toList());
-                return new CompositeAdjacencyCursor(wrappedCursors);
-            })
-            .orElseGet(() -> CompositeAdjacencyCursor::new);
+        this.compositeAdjacencyCursorFactory = compositeAdjacencyCursorFactory;
     }
 
     public int size() {
