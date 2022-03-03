@@ -52,21 +52,6 @@ public final class FeatureToggleProc {
     }
 
     @Internal
-    @Procedure("gds.features.importer.usePreAggregation")
-    @Description("Toggle whether the importer should pre-aggregate relationships.")
-    public void usePreAggregation(@Name(value = "usePreAggregation") boolean usePreAggregation) {
-        GdsFeatureToggles.USE_PRE_AGGREGATION.toggle(usePreAggregation);
-    }
-
-    @Internal
-    @Procedure("gds.features.importer.usePreAggregation.reset")
-    @Description("Set the behavior of whether to pre-aggregate relationships to the default. That value is returned.")
-    public Stream<FeatureState> resetUsePreAggregation() {
-        GdsFeatureToggles.USE_PRE_AGGREGATION.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled()));
-    }
-
-    @Internal
     @Procedure("gds.features.usePropertyValueIndex")
     @Description("Toggle whether the property value index should be used during node property loading.")
     public void usePropertyValueIndex(@Name(value = "usePropertyValueIndex") boolean usePropertyValueIndex) {
