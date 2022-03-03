@@ -195,7 +195,7 @@ public final class AdjacencyBuffer {
 
                 int pageIndex = paging.pageId(source);
 
-                if (pageIndex > lastPageIndex) {
+                if (pageIndex != lastPageIndex) {
                     // switch to the builder for this page
                     if (builder != null) {
                         builder.unlock();

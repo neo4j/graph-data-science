@@ -238,10 +238,6 @@ public final class ChunkedAdjacencyLists {
         new CompositeDrainingIterator(targetLists, properties, positions, lastValues, lengths).consume(consumer);
     }
 
-    public void release() {
-
-    }
-
     public interface Consumer {
         void accept(long sourceId, byte[] targets, long[][] properties, int compressedByteSize, int numberOfCompressedTargets);
     }
