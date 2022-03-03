@@ -82,7 +82,7 @@ class LogisticRegressionDataTest {
         "100,  50, 500, 456, 4056",
         "1000, 50, 500, 456, 4056"
     })
-    void shouldEstimateCorrectly(int relCount, int minFeatureCount, int maxFeatureCount, int minEstimation, int maxEstimation) {
+    void shouldEstimateCorrectlyBinaryReduced(int relCount, int minFeatureCount, int maxFeatureCount, int minEstimation, int maxEstimation) {
         var estimatedFeatureCount = MemoryRange.of(minFeatureCount, maxFeatureCount);
         var dimensions = GraphDimensions.of(1000L, relCount);
         var memoryEstimation = LogisticRegressionData
