@@ -30,8 +30,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
-
 
 public final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, RelationshipsAndProperties> {
 
@@ -99,8 +97,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
                     var importMetaData = SingleTypeRelationshipImporter.ImportMetaData.of(
                         projection,
                         dimensions.relationshipTypeTokenMapping().get(relationshipType),
-                        dimensions.relationshipPropertyTokens(),
-                        USE_PRE_AGGREGATION.isEnabled()
+                        dimensions.relationshipPropertyTokens()
                     );
 
                     var importerFactory = new SingleTypeRelationshipImporterBuilder()
