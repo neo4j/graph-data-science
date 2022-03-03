@@ -39,6 +39,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gradientdescent.Training;
 import org.neo4j.gds.gradientdescent.TrainingConfig;
 import org.neo4j.gds.ml.Features;
+import org.neo4j.gds.ml.FeaturesFactory;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
@@ -199,7 +200,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
         nodeIds.setAll(i -> i);
         var trainStats = StatsMap.create(metrics);
         var validationStats = StatsMap.create(metrics);
-        var features = Features.extractLazyFeatures(graph, config.featureProperties());
+        var features = FeaturesFactory.extractLazyFeatures(graph, config.featureProperties());
 
         return new NodeClassificationTrain(
             graph,

@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.gradientdescent.TrainingConfig;
 import org.neo4j.gds.ml.Features;
+import org.neo4j.gds.ml.FeaturesFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,7 +103,7 @@ public final class LinkFeatureExtractor {
 
         ParallelUtil.runWithConcurrency(concurrency, linkFeatureWriters, Pools.DEFAULT);
 
-        return Features.wrap(linkFeatures);
+        return FeaturesFactory.wrap(linkFeatures);
     }
 
     public double[] extractFeatures(long source, long target) {

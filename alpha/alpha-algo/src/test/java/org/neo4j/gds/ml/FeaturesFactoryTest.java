@@ -32,7 +32,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class FeaturesTest {
+class FeaturesFactoryTest {
 
     @GdlGraph
     private static final String DB_QUERY =
@@ -51,7 +51,7 @@ class FeaturesTest {
 
     @Test
     void lazyFeaturesSingleScalar() {
-        var features = Features.extractLazyFeatures(graph, List.of("a"));
+        var features = FeaturesFactory.extractLazyFeatures(graph, List.of("a"));
         assertThat(features.get(idFunction.of("a"))).containsExactly(new double[]{1.2}, Offset.offset(1e-6));
         assertThat(features.get(idFunction.of("b"))).containsExactly(new double[]{1.32}, Offset.offset(1e-6));
         assertThat(features.get(idFunction.of("c"))).containsExactly(new double[]{1.3}, Offset.offset(1e-6));
@@ -61,7 +61,7 @@ class FeaturesTest {
 
     @Test
     void lazyFeaturesSingleArray() {
-        var features = Features.extractLazyFeatures(graph, List.of("arrayProperty"));
+        var features = FeaturesFactory.extractLazyFeatures(graph, List.of("arrayProperty"));
         assertThat(features.get(idFunction.of("a"))).containsExactly(new double[]{1.2, 1.2}, Offset.offset(1e-6));
         assertThat(features.get(idFunction.of("b"))).containsExactly(new double[]{1.32, 0.5}, Offset.offset(1e-6));
         assertThat(features.get(idFunction.of("c"))).containsExactly(new double[]{1.3, 1.5}, Offset.offset(1e-6));
@@ -71,7 +71,7 @@ class FeaturesTest {
 
     @Test
     void lazyFeaturesArrayAndTwoScalars() {
-        var features = Features.extractLazyFeatures(graph, List.of("bananas", "arrayProperty", "a"));
+        var features = FeaturesFactory.extractLazyFeatures(graph, List.of("bananas", "arrayProperty", "a"));
         assertThat(features.get(idFunction.of("a"))).containsExactly(new double[]{100.0, 1.2, 1.2, 1.2}, Offset.offset(1e-6));
         assertThat(features.get(idFunction.of("b"))).containsExactly(new double[]{100.0, 1.32, 0.5, 1.32}, Offset.offset(1e-6));
         assertThat(features.get(idFunction.of("c"))).containsExactly(new double[]{100.0, 1.3, 1.5, 1.3}, Offset.offset(1e-6));

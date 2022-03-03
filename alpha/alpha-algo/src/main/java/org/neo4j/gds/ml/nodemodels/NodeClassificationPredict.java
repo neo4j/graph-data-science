@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.Features;
+import org.neo4j.gds.ml.FeaturesFactory;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
@@ -103,7 +103,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
     @Override
     public NodeClassificationResult compute() {
         progressTracker.beginSubTask();
-        var features = Features.extractLazyFeatures(graph, featureProperties);
+        var features = FeaturesFactory.extractLazyFeatures(graph, featureProperties);
         var predictedProbabilities = initProbabilities();
         var predictedClasses = HugeLongArray.newArray(graph.nodeCount());
         var consumer = new NodeClassificationPredictConsumer(
