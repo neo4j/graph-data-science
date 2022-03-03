@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.ml.Trainer;
+import org.neo4j.gds.modeltraining.Trainer;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 
 @ValueClass

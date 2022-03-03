@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.ml.Trainer.Classifier;
+import org.neo4j.gds.modeltraining.Trainer.Classifier;
 
 import java.util.Map;
 
