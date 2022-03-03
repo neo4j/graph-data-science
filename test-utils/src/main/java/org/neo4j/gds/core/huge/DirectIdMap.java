@@ -31,7 +31,7 @@ import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
-public final class DirectIdMap implements IdMap {
+public class DirectIdMap implements IdMap {
     private final long nodeCount;
 
     public DirectIdMap(long nodeCount) {
