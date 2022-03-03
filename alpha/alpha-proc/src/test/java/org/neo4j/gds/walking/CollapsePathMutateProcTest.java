@@ -83,8 +83,8 @@ class CollapsePathMutateProcTest extends BaseProcTest implements
                ", (b)" +
                ", (c)" +
 
-               ", (a)-[:KNOWS]->(b)" +
-               ", (b)-[:KNOWS]->(c)" +
+               ", (a)-[]->(b)" +
+               ", (b)-[]->(c)" +
                ", (a)-[:FoF]->(c)";
     }
 

@@ -267,7 +267,7 @@ class GraphLoaderTest extends BaseTest {
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .graph();
 
-        assertGraphEquals(fromGdl("(), ()-[{w:1337}]->()"), graph);
+        assertGraphEquals(fromGdl("(), ()-[:REL3 {w:1337}]->()"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
@@ -275,7 +275,7 @@ class GraphLoaderTest extends BaseTest {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("REL3")
             .graph();
-        assertGraphEquals(fromGdl("(), ()-->()"), graph);
+        assertGraphEquals(fromGdl("(), ()-[:REL3]->()"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
@@ -437,7 +437,7 @@ class GraphLoaderTest extends BaseTest {
             .withRelationshipTypes("Foo")
             .graph();
 
-        assertGraphEquals(fromGdl("(a)-->(b), (c)-->(d)"), graph);
+        assertGraphEquals(fromGdl("(a)-[:Foo]->(b), (c)-[:Foo]->(d)"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
@@ -452,6 +452,6 @@ class GraphLoaderTest extends BaseTest {
                 PropertyMapping.of("bar", 1.61)
             )).graph();
 
-        assertGraphEquals(fromGdl("(a)-[{bar: 3.14D}]->(b), (c)-[{bar: 1.61D}]->(d)"), graph);
+        assertGraphEquals(fromGdl("(a)-[:Foo {bar: 3.14D}]->(b), (c)-[:Foo {bar: 1.61D}]->(d)"), graph);
     }
 }

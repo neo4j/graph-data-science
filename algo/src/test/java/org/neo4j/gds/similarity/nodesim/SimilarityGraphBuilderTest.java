@@ -84,7 +84,7 @@ class SimilarityGraphBuilderTest {
         assertEquals(graph.nodeCount(), simGraph.nodeCount());
         assertEquals(1, simGraph.relationshipCount());
 
-        assertGraphEquals(fromGdl("(a)-[{w: 0.42000D}]->(b), (i1), (i2)"), simGraph);
+        assertGraphEquals(fromGdl("(a)-[:REL {w: 0.42000D}]->(b), (i1), (i2)"), simGraph);
     }
 
     @Test
@@ -106,7 +106,7 @@ class SimilarityGraphBuilderTest {
         assertEquals(graph.nodeCount(), simGraph.nodeCount());
         assertEquals(1, simGraph.relationshipCount());
 
-        assertGraphEquals(fromGdl("(a:Person)-[{w: 0.42000D}]->(b:Person), (i1:Item), (i2:Item)"), simGraph);
+        assertGraphEquals(fromGdl("(a:Person)-[:REL {w: 0.42000D}]->(b:Person), (i1:Item), (i2:Item)"), simGraph);
     }
 
     @Test
@@ -135,7 +135,7 @@ class SimilarityGraphBuilderTest {
             0, 1, 0.42
         )));
 
-        assertGraphEquals(fromGdl("(a:A), (b:A), (c:B), (d:B), (c)-[{similarity: 0.42}]->(d)"), simGraph);
+        assertGraphEquals(fromGdl("(a:A), (b:A), (c:B), (d:B), (c)-[:REL {similarity: 0.42}]->(d)"), simGraph);
     }
 
 

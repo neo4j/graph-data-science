@@ -285,9 +285,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         Graph rel2Graph = graphStore.getGraph(RelationshipType.of("REL2"));
         Graph unionGraph = graphStore.getGraph(RelationshipType.of("REL1"), RelationshipType.of("REL2"));
 
-        assertGraphEquals(fromGdl("(a)-->(b)-->(c)"), rel1Graph);
-        assertGraphEquals(fromGdl("(a)-->(c), (b)"), rel2Graph);
-        assertGraphEquals(fromGdl("(a)-->(b)-->(c)<--(a)"), unionGraph);
+        assertGraphEquals(fromGdl("(a)-[:REL1]->(b)-[:REL1]->(c)"), rel1Graph);
+        assertGraphEquals(fromGdl("(a)-[:REL2]->(c), (b)"), rel2Graph);
+        assertGraphEquals(fromGdl("(a)-[:REL1]->(b)-[:REL1]->(c)<-[:REL2]-(a)"), unionGraph);
     }
 
     @AllGraphStoreFactoryTypesTest
@@ -307,9 +307,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         Graph rel2Graph = graphStore.getGraph(RelationshipType.of("REL2"));
         Graph unionGraph = graphStore.getGraph(RelationshipType.of("REL1"), RelationshipType.of("REL2"));
 
-        assertGraphEquals(fromGdl("(a)-[]->(b)-[]->(c)"), rel1Graph);
-        assertGraphEquals(fromGdl("(a)-[]->(c), (b)"), rel2Graph);
-        assertGraphEquals(fromGdl("(a)-[]->(b)-[]->(c)<-[]-(a)"), unionGraph);
+        assertGraphEquals(fromGdl("(a)-[:REL1]->(b)-[:REL1]->(c)"), rel1Graph);
+        assertGraphEquals(fromGdl("(a)-[:REL2]->(c), (b)"), rel2Graph);
+        assertGraphEquals(fromGdl("(a)-[:REL1]->(b)-[:REL1]->(c)<-[:REL2]-(a)"), unionGraph);
     }
 
     @Test
@@ -604,9 +604,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         Graph graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("agg"));
         assertEquals(3L, graph.relationshipCount());
         Graph expectedGraph = fromGdl(
-            "(a)-[{w: 42.0d}]->(a)" +
-            "(a)-[{w: 44.0d}]->(a)" +
-            "(a)-[{w: 84.0d}]->(a)"
+            "(a)-[:REL_2 {w: 42.0d}]->(a)" +
+            "(a)-[:REL_3 {w: 44.0d}]->(a)" +
+            "(a)-[:REL_1 {w: 84.0d}]->(a)"
         );
         assertGraphEquals(expectedGraph, graph);
     }

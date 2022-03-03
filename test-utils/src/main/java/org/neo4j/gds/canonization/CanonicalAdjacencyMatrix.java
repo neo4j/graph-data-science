@@ -20,6 +20,7 @@
 package org.neo4j.gds.canonization;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -101,18 +103,22 @@ public final class CanonicalAdjacencyMatrix {
 
         Map<Long, List<String>> outAdjacencies = new HashMap<>();
         Map<Long, List<String>> inAdjacencies = new HashMap<>();
-        g.forEachNode(nodeId -> {
-            g.forEachRelationship(nodeId, 1.0, (sourceId, targetId, propertyValue) -> {
-                outAdjacencies.compute(
-                    sourceId,
-                    canonicalRelationship(canonicalLabels.get(targetId), propertyValue, "()-[w: %f]->%s"));
-                inAdjacencies.compute(
-                    targetId,
-                    canonicalRelationship(canonicalLabels.get(sourceId), propertyValue, "()<-[w: %f]-%s"));
+        for (RelationshipType relationshipType : g.schema().relationshipSchema().availableTypes()) {
+            var relTypeGraph = g.relationshipTypeFilteredGraph(Set.of(relationshipType));
+            g.forEachNode(nodeId -> {
+                g.forEachRelationship(nodeId, 1.0, (sourceId, targetId, propertyValue) -> {
+                    outAdjacencies.compute(
+                        sourceId,
+                        canonicalRelationship(canonicalLabels.get(targetId), relationshipType.name(), propertyValue, "()-[:%s w: %f]->%s"));
+                    inAdjacencies.compute(
+                        targetId,
+                        canonicalRelationship(canonicalLabels.get(sourceId), relationshipType.name(), propertyValue, "()<-[:%s w: %f]-%s"));
+                    return true;
+                });
                 return true;
             });
-            return true;
-        });
+        }
+
         Map<Long, String> canonicalOutAdjacencies = canonicalAdjacencies(outAdjacencies);
         Map<Long, String> canonicalInAdjacencies = canonicalAdjacencies(inAdjacencies);
 
@@ -139,13 +145,15 @@ public final class CanonicalAdjacencyMatrix {
 
     private static BiFunction<Long, List<String>, List<String>> canonicalRelationship(
         String canonicalNodeLabel,
+        String type,
         double relationshipProperty,
-        String pattern) {
+        String pattern
+    ) {
         return (unused, list) -> {
             if (list == null) {
                 list = new ArrayList<>();
             }
-            list.add(formatWithLocale(pattern, relationshipProperty, canonicalNodeLabel));
+            list.add(formatWithLocale(pattern, type, relationshipProperty, canonicalNodeLabel));
             return list;
         };
     }

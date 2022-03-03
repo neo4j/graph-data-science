@@ -133,7 +133,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
         runQuery(loadQuery);
 
         assertGraphEquals(
-            fromGdl("(a {id: 1})-[{w: 0.5}]->(b {id: 2}), (b)-[{w: 0.5}]->(a), (c {id: 3})-[{w: 0.25}]->(b)"),
+            fromGdl("(a {id: 1})-[:SIMILAR {w: 0.5}]->(b {id: 2}), (b)-[:SIMILAR {w: 0.5}]->(a), (c {id: 3})-[:SIMILAR {w: 0.25}]->(b)"),
             GraphStoreCatalog.get(getUsername(), namedDatabaseId(), resultGraphName).graphStore().getUnion()
         );
     }
@@ -242,8 +242,8 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
                     "(eve:Person)" +
                     "(dave:Foo)" +
                     "(bob:Foo)" +
-                    "(dave)-[{score: 1.0}]->(bob)" +
-                    "(bob)-[{score: 1.0}]->(dave)"
+                    "(dave)-[:SIMILAR {score: 1.0}]->(bob)" +
+                    "(bob)-[:SIMILAR {score: 1.0}]->(dave)"
             ),
             knnGraph
         );

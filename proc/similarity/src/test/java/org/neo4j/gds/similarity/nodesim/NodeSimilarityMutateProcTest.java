@@ -102,10 +102,10 @@ class NodeSimilarityMutateProcTest
             ", (b)-[{w: 1.0d}]->(i2)" +
             ", (c)-[{w: 1.0d}]->(i3)" +
             // SIMILAR_TO
-            ", (a)-[{w: %f}]->(b)" +
-            ", (a)-[{w: %f}]->(c)" +
-            ", (b)-[{w: %f}]->(a)" +
-            ", (c)-[{w: %f}]->(a)",
+            ", (a)-[:SIMILAR_TO {w: %f}]->(b)" +
+            ", (a)-[:SIMILAR_TO {w: %f}]->(c)" +
+            ", (b)-[:SIMILAR_TO {w: %f}]->(a)" +
+            ", (c)-[:SIMILAR_TO {w: %f}]->(a)",
             2 / 3.0,
             1 / 3.0,
             2 / 3.0,
@@ -218,7 +218,7 @@ class NodeSimilarityMutateProcTest
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
             .withNodeLabel("Bar")
-            .withAnyRelationshipType()
+            .withRelationshipType("KNOWS")
             .yields();
         runQuery(createQuery);
 
@@ -240,8 +240,8 @@ class NodeSimilarityMutateProcTest
         assertGraphEquals(
             fromGdl(
                 graphCreateQuery +
-                ", (dave)-[{score: 1.0}]->(bob)" +
-                ", (bob)-[{score: 1.0}]->(dave)"
+                ", (dave)-[:SIMILAR {score: 1.0}]->(bob)" +
+                ", (bob)-[:SIMILAR {score: 1.0}]->(dave)"
             ),
             mutatedGraph
         );

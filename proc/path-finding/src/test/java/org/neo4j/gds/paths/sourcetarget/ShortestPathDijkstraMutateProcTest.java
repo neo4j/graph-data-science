@@ -63,7 +63,7 @@ class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<Sh
 
     @Override
     public String expectedMutatedGraph() {
-        return EXISTING_GRAPH + ", (a)-[{w: 3.0D}]->(f)";
+        return EXISTING_GRAPH + ", (a)-[:PATH {w: 3.0D}]->(f)";
     }
 
     @Override
@@ -145,7 +145,7 @@ class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<Sh
         )));
 
         var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), "graph").graphStore().getUnion();
-        var expected = TestSupport.fromGdl(EXISTING_GRAPH + ", (a)-[{w: 20.0D}]->(f)");
+        var expected = TestSupport.fromGdl(EXISTING_GRAPH + ", (a)-[:PATH {w: 20.0D}]->(f)");
 
         assertGraphEquals(expected, actual);
     }

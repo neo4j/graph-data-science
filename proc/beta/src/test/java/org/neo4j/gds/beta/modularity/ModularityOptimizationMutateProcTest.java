@@ -168,13 +168,13 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
             ", (d { community: 3 }) " +
             ", (e { community: 4 }) " +
             ", (f { community: 3 }) " +
-            ", (a)-[:TYPE]->(b)" +
-            ", (a)-[:TYPE]->(e)" +
-            ", (a)-[:TYPE]->(f)" +
-            ", (b)-[:TYPE]->(c)" +
-            ", (b)-[:TYPE]->(d)" +
-            ", (c)-[:TYPE]->(e)" +
-            ", (f)-[:TYPE]->(d)";
+            ", (a)-[]->(b)" +
+            ", (a)-[]->(e)" +
+            ", (a)-[]->(f)" +
+            ", (b)-[]->(c)" +
+            ", (b)-[]->(d)" +
+            ", (c)-[]->(e)" +
+            ", (f)-[]->(d)";
     }
 
     @Override

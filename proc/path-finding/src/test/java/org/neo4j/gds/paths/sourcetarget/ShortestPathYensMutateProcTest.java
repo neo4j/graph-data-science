@@ -67,9 +67,9 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
     public String expectedMutatedGraph() {
         return EXISTING_GRAPH +
                // new relationship as a result from mutate
-               ", (c)-[{w: 3.0}]->(h)" +
-               ", (c)-[{w: 3.0}]->(h)" +
-               ", (c)-[{w: 3.0}]->(h)";
+               ", (c)-[:PATH {w: 3.0}]->(h)" +
+               ", (c)-[:PATH {w: 3.0}]->(h)" +
+               ", (c)-[:PATH {w: 3.0}]->(h)";
     }
 
     @Override
@@ -155,9 +155,9 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
         var expected = TestSupport.fromGdl(
             EXISTING_GRAPH +
             // new relationship as a result from mutate
-            ", (c)-[{w: 5.0}]->(h)" +
-            ", (c)-[{w: 7.0}]->(h)" +
-            ", (c)-[{w: 8.0}]->(h)"
+            ", (c)-[:PATH {w: 5.0}]->(h)" +
+            ", (c)-[:PATH {w: 7.0}]->(h)" +
+            ", (c)-[:PATH {w: 8.0}]->(h)"
         );
 
         assertGraphEquals(expected, actual);

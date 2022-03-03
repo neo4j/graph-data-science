@@ -132,12 +132,12 @@ public class NodeSimilarityWriteProcTest
                     ", (i2:Item {id: 11})" +
                     ", (i3:Item {id: 12})" +
                     ", (i4:Item {id: 13})" +
-                    ", (i1)-[{w: %f}]->(i2)" +
-                    ", (i1)-[{w: %f}]->(i3)" +
-                    ", (i2)-[{w: %f}]->(i1)" +
-                    ", (i2)-[{w: %f}]->(i3)" +
-                    ", (i3)-[{w: %f}]->(i1)" +
-                    ", (i3)-[{w: %f}]->(i2)",
+                    ", (i1)-[:SIMILAR {w: %f}]->(i2)" +
+                    ", (i1)-[:SIMILAR {w: %f}]->(i3)" +
+                    ", (i2)-[:SIMILAR {w: %f}]->(i1)" +
+                    ", (i2)-[:SIMILAR {w: %f}]->(i3)" +
+                    ", (i3)-[:SIMILAR {w: %f}]->(i1)" +
+                    ", (i3)-[:SIMILAR {w: %f}]->(i2)",
                     1 / 1.0,
                     1 / 3.0,
                     1 / 1.0,
@@ -152,12 +152,12 @@ public class NodeSimilarityWriteProcTest
                         ", (b:Person {id: 1})" +
                         ", (c:Person {id: 2})" +
                         ", (d:Person {id: 3})" +
-                        ", (a)-[{w: %f}]->(b)" +
-                        ", (a)-[{w: %f}]->(c)" +
-                        ", (b)-[{w: %f}]->(c)" +
-                        ", (b)-[{w: %f}]->(a)" +
-                        ", (c)-[{w: %f}]->(a)" +
-                        ", (c)-[{w: %f}]->(b)",
+                        ", (a)-[:SIMILAR {w: %f}]->(b)" +
+                        ", (a)-[:SIMILAR {w: %f}]->(c)" +
+                        ", (b)-[:SIMILAR {w: %f}]->(c)" +
+                        ", (b)-[:SIMILAR {w: %f}]->(a)" +
+                        ", (c)-[:SIMILAR {w: %f}]->(a)" +
+                        ", (c)-[:SIMILAR {w: %f}]->(b)",
                         2 / 3.0,
                         1 / 3.0,
                         0.0,
@@ -274,8 +274,8 @@ public class NodeSimilarityWriteProcTest
                     "(eve:Person)" +
                     "(dave:Foo)" +
                     "(bob:Foo)" +
-                    "(dave)-[{score: 1.0}]->(bob)" +
-                    "(bob)-[{score: 1.0}]->(dave)"
+                    "(dave)-[:SIMILAR {score: 1.0}]->(bob)" +
+                    "(bob)-[:SIMILAR {score: 1.0}]->(dave)"
             ),
             knnGraph
         );

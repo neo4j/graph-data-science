@@ -317,31 +317,31 @@ class GraphStoreTest extends BaseTest {
                 "filterByRelationshipType",
                 singletonList(RelationshipType.of("T1")),
                 Optional.empty(),
-                "(a:A), (b:B), (a)-[T1]->(b)"
+                "(a:A), (b:B), (a)-[:T1]->(b)"
             ),
             Arguments.of(
                 "filterByMultipleRelationshipTypes",
                 Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2")),
                 Optional.empty(),
-                "(a:A), (b:B), (a)-[T1]->(b), (a)-[T2]->(b)"
+                "(a:A), (b:B), (a)-[:T1]->(b), (a)-[:T2]->(b)"
             ),
             Arguments.of(
                 "filterByAnyRelationshipType",
                 Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2"), RelationshipType.of("T3")),
                 Optional.empty(),
-                "(a:A), (b:B), (a)-[T1]->(b), (a)-[T2]->(b), (a)-[T3]->(b)"
+                "(a:A), (b:B), (a)-[:T1]->(b), (a)-[:T2]->(b), (a)-[:T3]->(b)"
             ),
             Arguments.of(
                 "filterByRelationshipProperty",
                 Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2")),
                 Optional.of("property1"),
-                "(a:A), (b:B), (a)-[T1 {property1: 42.0}]->(b), (a)-[T2 {property1: 43.0}]->(b)"
+                "(a:A), (b:B), (a)-[:T1 {property1: 42.0}]->(b), (a)-[:T2 {property1: 43.0}]->(b)"
             ),
             Arguments.of(
                 "filterByRelationshipTypeAndProperty",
                 singletonList(RelationshipType.of("T1")),
                 Optional.of("property1"),
-                "(a:A), (b:B), (a)-[T1 {property1: 42.0}]->(b)"
+                "(a:A), (b:B), (a)-[:T1 {property1: 42.0}]->(b)"
             )
         );
     }
@@ -380,12 +380,12 @@ class GraphStoreTest extends BaseTest {
             Arguments.of(
                 "filterAllLabels",
                 Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("Ignore")),
-                "(a:A {nodeProperty: 33, a: 33}), (b:B {nodeProperty: 42, b: 42}), (a)-[T1]->(b)"
+                "(a:A {nodeProperty: 33, a: 33}), (b:B {nodeProperty: 42, b: 42}), (a)-[:T1]->(b)"
             ),
             Arguments.of(
                 "filterAllTypesExplicit",
                 Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B")),
-                "(a:A {nodeProperty: 33, a: 33}), (b:B {nodeProperty: 42, b: 42}), (a)-[T1]->(b)"
+                "(a:A {nodeProperty: 33, a: 33}), (b:B {nodeProperty: 42, b: 42}), (a)-[:T1]->(b)"
             ),
             Arguments.of(
                 "FilterA",

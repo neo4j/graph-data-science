@@ -490,7 +490,7 @@ class GraphProjectProcTest extends BaseProcTest {
         );
 
         Graph graph = GraphStoreCatalog.get("", db.databaseId(), name).graphStore().getUnion();
-        assertGraphEquals(fromGdl("()-[{w:55}]->()"), graph);
+        assertGraphEquals(fromGdl("()-[:B {w:55}]->()"), graph);
     }
 
     @Test
@@ -581,8 +581,8 @@ class GraphProjectProcTest extends BaseProcTest {
         assertGraphExists(name);
         Graph weightGraph = relPropertyGraph(name, RelationshipType.of("B"), "weight");
         Graph fooGraph = relPropertyGraph(name, RelationshipType.of("B"), "foo");
-        assertGraphEquals(fromGdl(formatWithLocale("(a)-[{w: %d}]->()", expectedValue)), weightGraph);
-        assertGraphEquals(fromGdl("(a)-[{w: 55}]->()"), fooGraph);
+        assertGraphEquals(fromGdl(formatWithLocale("(a)-[:B {w: %d}]->()", expectedValue)), weightGraph);
+        assertGraphEquals(fromGdl("(a)-[:B {w: 55}]->()"), fooGraph);
     }
 
     @ParameterizedTest(name = "aggregation={0}")
@@ -622,7 +622,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
         assertGraphExists(name);
         Graph graph = GraphStoreCatalog.get("", db.databaseId(), name).graphStore().getUnion();
-        assertGraphEquals(fromGdl(formatWithLocale("()-[{w: %d}]->()", expectedValue)), graph);
+        assertGraphEquals(fromGdl(formatWithLocale("()-[:B {w: %d}]->()", expectedValue)), graph);
     }
 
     @ParameterizedTest(name = "aggregation={0}")
@@ -966,7 +966,7 @@ class GraphProjectProcTest extends BaseProcTest {
         });
 
         Graph actual = GraphStoreCatalog.get("", db.databaseId(), "aggGraph").graphStore().getUnion();
-        Graph expected = fromGdl("(a:Node)-[{w:85.3D}]->(b:Node),(a)-[{w:42.1D}]->(b),(a)-[{w:2.0D}]->(b)");
+        Graph expected = fromGdl("(a:Node)-[:TYPE_1 {w:85.3D}]->(b:Node),(a)-[:TYPE_1 {w:42.1D}]->(b),(a)-[:TYPE_1 {w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
     }
 
@@ -992,7 +992,7 @@ class GraphProjectProcTest extends BaseProcTest {
         runQuery(query);
 
         Graph actual = relPropertyGraph("g", RelationshipType.of("TYPE"), "agg");
-        Graph expected = fromGdl(formatWithLocale("(a:Node)-[{w:%d}]->(b:Node)", expectedWeight));
+        Graph expected = fromGdl(formatWithLocale("(a:Node)-[:TYPE {w:%d}]->(b:Node)", expectedWeight));
         assertGraphEquals(expected, actual);
     }
 
@@ -1020,7 +1020,7 @@ class GraphProjectProcTest extends BaseProcTest {
         runQuery(query);
 
         Graph actual = relPropertyGraph("g", RelationshipType.of("TYPE"), "agg");
-        Graph expected = fromGdl(formatWithLocale("(a:Node)-[{w:%g}]->(b:Node)", expectedWeight));
+        Graph expected = fromGdl(formatWithLocale("(a:Node)-[:TYPE {w:%g}]->(b:Node)", expectedWeight));
         assertGraphEquals(expected, actual);
     }
 
@@ -1047,7 +1047,7 @@ class GraphProjectProcTest extends BaseProcTest {
         runQuery(query);
 
         Graph actual = relPropertyGraph("g", RelationshipType.of("TYPE"), "agg");
-        Graph expected = fromGdl(formatWithLocale("(a:Node)-[{w:%d}]->(b:Node)", expectedWeight));
+        Graph expected = fromGdl(formatWithLocale("(a:Node)-[:TYPE {w:%d}]->(b:Node)", expectedWeight));
         assertGraphEquals(expected, actual);
     }
 
@@ -1087,7 +1087,7 @@ class GraphProjectProcTest extends BaseProcTest {
         });
 
         Graph actual = relPropertyGraph("countGraph", RelationshipType.of("TYPE_1"), "count");
-        Graph expected = fromGdl("(a:Node)-[{w:2.0D}]->(b:Node)");
+        Graph expected = fromGdl("(a:Node)-[:TYPE_1 {w:2.0D}]->(b:Node)");
         assertGraphEquals(expected, actual);
     }
 
@@ -1127,7 +1127,7 @@ class GraphProjectProcTest extends BaseProcTest {
         });
 
         Graph actual = relPropertyGraph("countGraph", RelationshipType.of("TYPE"), "count");
-        Graph expected = fromGdl("(a:Node)-[{w:2.0D}]->(b:Node)");
+        Graph expected = fromGdl("(a:Node)-[:TYPE {w:2.0D}]->(b:Node)");
         assertGraphEquals(expected, actual);
     }
 
@@ -1172,11 +1172,11 @@ class GraphProjectProcTest extends BaseProcTest {
         });
 
         Graph countActual = relPropertyGraph("countGraph", RelationshipType.of("TYPE_1"), "count");
-        Graph countExpected = fromGdl("(a:Node)-[{w:2.0D}]->(b:Node)");
+        Graph countExpected = fromGdl("(a:Node)-[:TYPE_1 {w:2.0D}]->(b:Node)");
         assertGraphEquals(countExpected, countActual);
 
         Graph fooActual = relPropertyGraph("countGraph", RelationshipType.of("TYPE_1"), "foo");
-        Graph fooExpected = fromGdl("(a:Node)-[{w:2674.0D}]->(b:Node)");
+        Graph fooExpected = fromGdl("(a:Node)-[:TYPE_1 {w:2674.0D}]->(b:Node)");
         assertGraphEquals(fooExpected, fooActual);
     }
 
