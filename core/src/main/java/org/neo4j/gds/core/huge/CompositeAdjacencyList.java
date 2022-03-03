@@ -22,16 +22,44 @@ package org.neo4j.gds.core.huge;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.IdMap;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CompositeAdjacencyList implements AdjacencyList {
 
     private final List<AdjacencyList> adjacencyLists;
+    private final CompositeAdjacencyCursorFactory compositeAdjacencyCursorFactory;
 
-    CompositeAdjacencyList(List<AdjacencyList> adjacencyLists) {
+    @FunctionalInterface
+    interface CompositeAdjacencyCursorFactory {
+        CompositeAdjacencyCursor create(List<AdjacencyCursor> cursors);
+    }
+
+    static CompositeAdjacencyList of(List<AdjacencyList> adjacencyLists) {
+        return new CompositeAdjacencyList(adjacencyLists, CompositeAdjacencyCursor::new);
+    }
+
+    static CompositeAdjacencyList withFilteredIdMap(List<AdjacencyList> adjacencyLists, IdMap filteredIdMap) {
+        assert filteredIdMap instanceof NodeFilteredGraph;
+        var compositeAdjacencyCursorFactory = (CompositeAdjacencyCursorFactory) cursors -> {
+            List<AdjacencyCursor> wrappedCursors = cursors
+                .stream()
+                .map(cursor -> new NodeFilteredAdjacencyCursor(cursor, filteredIdMap))
+                .collect(Collectors.toList());
+            return new CompositeAdjacencyCursor(wrappedCursors);
+        };
+        return new CompositeAdjacencyList(adjacencyLists, compositeAdjacencyCursorFactory);
+    }
+
+    private CompositeAdjacencyList(
+        List<AdjacencyList> adjacencyLists,
+        CompositeAdjacencyCursorFactory compositeAdjacencyCursorFactory
+    ) {
         this.adjacencyLists = adjacencyLists;
+        this.compositeAdjacencyCursorFactory = compositeAdjacencyCursorFactory;
     }
 
     public int size() {
@@ -58,7 +86,7 @@ public class CompositeAdjacencyList implements AdjacencyList {
         for (var adjacency : adjacencyLists) {
             cursors.add(adjacency.adjacencyCursor(node, fallbackValue));
         }
-        return new CompositeAdjacencyCursor(cursors);
+        return compositeAdjacencyCursorFactory.create(cursors);
     }
 
     @Override
@@ -90,7 +118,7 @@ public class CompositeAdjacencyList implements AdjacencyList {
         for (var adjacency : adjacencyLists) {
             cursors.add(adjacency.rawAdjacencyCursor());
         }
-        return new CompositeAdjacencyCursor(cursors);
+        return compositeAdjacencyCursorFactory.create(cursors);
     }
 
     @Override
