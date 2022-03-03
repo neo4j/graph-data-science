@@ -25,7 +25,7 @@ public final class TestFeatures implements Features {
 
     private final double[][] features;
 
-    static Features singleConstant(double feature) {
+    public static Features singleConstant(double feature) {
         return new Features() {
             @Override
             public long size() {

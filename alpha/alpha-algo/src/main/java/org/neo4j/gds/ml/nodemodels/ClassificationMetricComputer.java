@@ -86,8 +86,6 @@ public class ClassificationMetricComputer implements MetricComputer {
         ));
     }
 
-    // nodeIds: 4, 42
-    // node4.target, node42.target
     private HugeLongArray makeLocalTargets(HugeLongArray nodeIds, HugeLongArray targets) {
         var localTargets = HugeLongArray.newArray(nodeIds.size());
 

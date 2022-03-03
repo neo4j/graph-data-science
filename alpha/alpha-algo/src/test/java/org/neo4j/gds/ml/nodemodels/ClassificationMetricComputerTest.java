@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -31,6 +33,7 @@ import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConsumerTest.idMapOf;
 import static org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric.F1_WEIGHTED;
 
@@ -42,14 +45,13 @@ class ClassificationMetricComputerTest {
         multiSet.add(0L, 2);
         multiSet.add(1L, 1);
         multiSet.add(3L, 1);
-        var idMap = idMapOf(1, 0, 3, 0);
-        var features = new TestFeatures(new double[][]{new double[]{2.4}, new double[]{2.9}, new double[]{-3.1}, new double[]{0.0}});
+        var idMap = idMapOf(1, 0, 3);
         var targets = HugeLongArray.of(1, 0, 3, 0);
 
         var classificationMetricComputer = new ClassificationMetricComputer(
             List.of(F1_WEIGHTED),
             multiSet,
-            features,
+            TestFeatures.singleConstant(1),
             targets,
             1,
             ProgressTracker.NULL_TRACKER,
@@ -64,11 +66,18 @@ class ClassificationMetricComputerTest {
 
             @Override
             public double[] predictProbabilities(long id, Features features) {
-                if (id == 0) {
-                    return new double[]{0.2, 0.8};
-                } else {
-                    return new double[]{0.7, 0.3};
+                switch ((int) id) {
+                    case 0:
+                        return new double[]{0.8, 0.1, 0.1};
+                    case 1:
+                        return new double[]{0.2, 0.6, 0.2};
+                    case 2:
+                        return new double[]{0.1, 0.1, 0.8};
+                    case 3:
+                        return new double[]{0.0, 1.0, 0.0};
                 }
+                Assertions.fail("we only got 4 nodes");
+                return null;
             }
 
             @Override
@@ -76,6 +85,12 @@ class ClassificationMetricComputerTest {
                 return null;
             }
         };
-//        classificationMetricComputer.computeMetrics(evaluationSet, )
+
+        var metrics = classificationMetricComputer.computeMetrics(
+            HugeLongArray.of(0, 1, 2, 3),
+            classifier
+        );
+
+        assertThat(metrics.get(F1_WEIGHTED)).isCloseTo(1.0, Offset.offset(1e-7));
     }
 }
