@@ -104,7 +104,6 @@ public class SysInfoProc {
 
     private static void features(Stream.Builder<DebugValue> builder) {
         builder
-            .add(value("featurePreAggregation", GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled()))
             .add(value("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.isEnabled()))
             .add(value("featureMaxArrayLengthShift", GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get()))
             .add(value("featurePropertyValueIndex", GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.isEnabled()))
