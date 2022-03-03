@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.core.batch;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class SingletonBatch implements Batch {
     private final long id;
@@ -28,7 +29,7 @@ public class SingletonBatch implements Batch {
 
     @Override
     public Iterable<Long> nodeIds() {
-        return () -> new Iterator<Long>() {
+        return () -> new Iterator<>() {
             private boolean hasNext = true;
 
             @Override
@@ -38,6 +39,10 @@ public class SingletonBatch implements Batch {
 
             @Override
             public Long next() {
+                if (!hasNext) {
+                    throw new NoSuchElementException();
+                }
+
                 hasNext = false;
                 return id;
             }
