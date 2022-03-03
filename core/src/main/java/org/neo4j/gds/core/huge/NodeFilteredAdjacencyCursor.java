@@ -24,6 +24,8 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.IdMap;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
 
     private final AdjacencyCursor innerCursor;
@@ -45,7 +47,10 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
 
     @Override
     public int size() {
-        return innerCursor.size();
+        throw new UnsupportedOperationException(formatWithLocale(
+            "AdjacencyCursor#size is not implemented for %s",
+            getClass().getSimpleName()
+        ));
     }
 
     @Override
@@ -77,7 +82,10 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
 
     @Override
     public int remaining() {
-        return this.innerCursor.remaining();
+        throw new UnsupportedOperationException(formatWithLocale(
+            "AdjacencyCursor#remaining is not implemented for %s",
+            getClass().getSimpleName()
+        ));
     }
 
     @Override
