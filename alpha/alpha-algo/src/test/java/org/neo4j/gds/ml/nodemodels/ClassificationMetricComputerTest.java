@@ -21,7 +21,9 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -32,6 +34,7 @@ import org.neo4j.gds.ml.logisticregression.TestFeatures;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConsumerTest.idMapOf;
@@ -39,14 +42,23 @@ import static org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric.F1_WEIGHTED;
 
 class ClassificationMetricComputerTest {
 
-    @Test
-    void shouldComputeMetrics() {
+    private static Stream<Arguments> targetAndScores() {
+        return Stream.of(
+            Arguments.of(0L, (2 * 4.0 / 5.0 + 1 * 0.0 + 1 * 1.0) / 4.0),
+            Arguments.of(1L, (2 * 1.0 + 1 * 1.0 + 1 * 1.0) / 4.0),
+            Arguments.of(3L, (2 * 1.0 + 1 * 0.0 + 1 * 2.0 / 3.0) / 4.0)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("targetAndScores")
+    void shouldComputeMetrics(long firstTarget, double expectedF1Score) {
         var multiSet = new Multiset<Long>();
         multiSet.add(0L, 2);
         multiSet.add(1L, 1);
         multiSet.add(3L, 1);
         var idMap = idMapOf(1, 0, 3);
-        var targets = HugeLongArray.of(1, 0, 3, 0);
+        var targets = HugeLongArray.of(firstTarget, 0, 3, 0);
 
         var classificationMetricComputer = new ClassificationMetricComputer(
             List.of(F1_WEIGHTED),
@@ -91,6 +103,6 @@ class ClassificationMetricComputerTest {
             classifier
         );
 
-        assertThat(metrics.get(F1_WEIGHTED)).isCloseTo(1.0, Offset.offset(1e-7));
+        assertThat(metrics.get(F1_WEIGHTED)).isCloseTo(expectedF1Score, Offset.offset(1e-7));
     }
 }
