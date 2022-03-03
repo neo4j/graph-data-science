@@ -23,7 +23,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.Features;
-import org.neo4j.gds.ml.Objective;
+import org.neo4j.gds.gradientdescent.Objective;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;

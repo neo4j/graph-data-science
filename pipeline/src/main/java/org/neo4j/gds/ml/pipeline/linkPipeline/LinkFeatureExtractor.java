@@ -26,8 +26,8 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.gradientdescent.TrainingConfig;
 import org.neo4j.gds.ml.Features;
-import org.neo4j.gds.ml.TrainingConfig;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.logisticregression;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.TrainingConfig;
+import org.neo4j.gds.gradientdescent.TrainingConfig;
 
 import java.util.Collection;
 import java.util.Map;
