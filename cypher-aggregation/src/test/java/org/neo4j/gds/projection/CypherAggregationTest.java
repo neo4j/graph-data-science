@@ -21,6 +21,7 @@ package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -353,6 +354,7 @@ class CypherAggregationTest extends BaseProcTest {
     }
 
     @Test
+    @Disabled("Test is flaky")
     void testMultipleRelationshipProperties() {
         runQuery(
             "MATCH (s:B)-[r:REL]->(t:B) RETURN " +
