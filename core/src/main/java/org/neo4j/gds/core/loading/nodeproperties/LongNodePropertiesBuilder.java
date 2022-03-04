@@ -96,6 +96,11 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
+    public NodeProperties buildDirect(long size) {
+        return new LongStoreNodeProperties(builder.build(), size, OptionalLong.empty());
+    }
+
+    @Override
     public NodeProperties build(long size, IdMap idMap) {
         var propertiesByNeoIds = builder.build();
 

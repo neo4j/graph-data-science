@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
 import org.neo4j.gds.collections.HugeSparseFloatArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -59,6 +60,11 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
     @Override
     public void setValue(long neoNodeId, Value value) {
         set(neoNodeId, Neo4jValueConversion.getFloatArray(value));
+    }
+
+    @Override
+    public NodeProperties buildDirect(long size) {
+        return new FloatArrayStoreNodeProperties(builder.build(), size);
     }
 
     @Override

@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.collections.HugeSparseDoubleArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -61,6 +62,11 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
     @Override
     public void setValue(long neoNodeId, Value value) {
         set(neoNodeId, Neo4jValueConversion.getDoubleArray(value));
+    }
+
+    @Override
+    public NodeProperties buildDirect(long size) {
+        return new DoubleArrayStoreNodeProperties(builder.build(), size);
     }
 
     @Override
