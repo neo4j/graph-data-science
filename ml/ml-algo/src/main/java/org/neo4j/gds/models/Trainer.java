@@ -17,28 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.logisticregression;
+package org.neo4j.gds.models;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
-import java.util.Optional;
+public interface Trainer {
 
-@ValueClass
-public interface NodeClassificationResult {
+    Classifier train(Features features, HugeLongArray labels);
 
-    HugeLongArray predictedClasses();
-    Optional<HugeObjectArray<double[]>> predictedProbabilities();
-
-    static NodeClassificationResult of(
-        HugeLongArray classes,
-        @Nullable HugeObjectArray<double[]> probabilities
-    ) {
-        return ImmutableNodeClassificationResult.builder()
-            .predictedProbabilities(Optional.ofNullable(probabilities))
-            .predictedClasses(classes)
-            .build();
-    }
 }

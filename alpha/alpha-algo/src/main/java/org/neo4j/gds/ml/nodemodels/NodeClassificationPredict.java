@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -28,17 +29,17 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.modeltraining.FeaturesFactory;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
+import org.neo4j.gds.models.FeaturesFactory;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.batch.BatchTransformer.IDENTITY;
 
-public class NodeClassificationPredict extends Algorithm<NodeClassificationResult> {
+public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict.NodeClassificationResult> {
 
     private final LogisticRegressionClassifier classifier;
     private final Graph graph;
@@ -136,6 +137,23 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationResul
             return predictions;
         } else {
             return null;
+        }
+    }
+
+    @ValueClass
+    public interface NodeClassificationResult {
+
+        HugeLongArray predictedClasses();
+        Optional<HugeObjectArray<double[]>> predictedProbabilities();
+
+        static NodeClassificationResult of(
+            HugeLongArray classes,
+            @Nullable HugeObjectArray<double[]> probabilities
+        ) {
+            return ImmutableNodeClassificationResult.builder()
+                .predictedProbabilities(Optional.ofNullable(probabilities))
+                .predictedClasses(classes)
+                .build();
         }
     }
 }

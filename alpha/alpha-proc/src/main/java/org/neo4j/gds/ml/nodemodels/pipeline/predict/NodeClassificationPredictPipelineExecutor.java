@@ -27,10 +27,9 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredict;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
@@ -44,7 +43,7 @@ import java.util.Optional;
 public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     NodeClassificationPredictPipelineBaseConfig,
     NodeClassificationPipeline,
-    NodeClassificationResult
+    NodeClassificationPredict.NodeClassificationResult
     > {
     private static final int MIN_BATCH_SIZE = 100;
     private final LogisticRegressionData modelData;
@@ -104,7 +103,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    protected NodeClassificationResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+    protected NodeClassificationPredict.NodeClassificationResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         var graph = graphStore.getGraph(
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore),

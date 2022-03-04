@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.logisticregression;
+package org.neo4j.gds;
 
-import org.neo4j.gds.modeltraining.Features;
+import org.neo4j.gds.models.Features;
 
 public final class TestFeatures implements Features {
 

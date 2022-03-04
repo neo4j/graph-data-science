@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.logisticregression;
+package org.neo4j.gds.models.logisticregression;
 
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -27,16 +27,16 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.gradientdescent.Training;
-import org.neo4j.gds.modeltraining.Features;
-import org.neo4j.gds.modeltraining.Trainer;
+import org.neo4j.gds.models.Features;
+import org.neo4j.gds.models.Trainer;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.ml.logisticregression.LogisticRegressionData.standard;
-import static org.neo4j.gds.ml.logisticregression.LogisticRegressionData.withReducedClassCount;
+import static org.neo4j.gds.models.logisticregression.LogisticRegressionData.standard;
+import static org.neo4j.gds.models.logisticregression.LogisticRegressionData.withReducedClassCount;
 
 public final class LogisticRegressionTrainer implements Trainer {
 

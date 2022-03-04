@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.logisticregression;
+package org.neo4j.gds.models.logisticregression;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.modeltraining.Trainer;
+import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -32,7 +32,7 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import java.util.Optional;
 
 @ValueClass
-public interface LogisticRegressionData extends Trainer.ClassifierData {
+public interface LogisticRegressionData extends Classifier.ClassifierData {
 
     Weights<Matrix> weights();
     Optional<Weights<Vector>> bias();

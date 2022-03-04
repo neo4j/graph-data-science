@@ -17,29 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modeltraining;
+package org.neo4j.gds;
 
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
-public interface Trainer {
+public final class TestLocalIdMap {
 
-    Classifier train(Features features, HugeLongArray labels);
+    private TestLocalIdMap() {}
 
-    interface Classifier {
-        default int numberOfClasses() {
-            return classIdMap().size();
+    public static LocalIdMap identityMapOf(long... ids) {
+        LocalIdMap idMap = new LocalIdMap();
+        for (long id : ids) {
+            idMap.toMapped(id);
         }
 
-        LocalIdMap classIdMap();
-
-        double[] predictProbabilities(long id, Features features);
-
-        ClassifierData data();
-
+        return idMap;
     }
-
-    // placeholder
-    interface ClassifierData {}
-
 }

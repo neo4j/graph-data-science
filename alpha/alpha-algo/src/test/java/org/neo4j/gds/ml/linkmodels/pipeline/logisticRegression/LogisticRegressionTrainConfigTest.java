@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.util.Map;
 

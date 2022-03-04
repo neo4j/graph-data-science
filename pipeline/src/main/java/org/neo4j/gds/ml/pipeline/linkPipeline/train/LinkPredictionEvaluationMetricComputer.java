@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.modeltraining.Trainer;
+import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
@@ -42,7 +42,7 @@ public final class LinkPredictionEvaluationMetricComputer {
 
     static Map<LinkMetric, Double> computeMetric(
         FeaturesAndLabels inputData,
-        Trainer.Classifier classifier,
+        Classifier classifier,
         BatchQueue evaluationQueue,
         LinkPredictionTrainConfig trainConfig,
         ProgressTracker progressTracker,

@@ -7,5 +7,6 @@ group = 'org.neo4j.gds'
 dependencies {
     implementation project(':core')
     implementation project(':ml-core')
+    implementation project(':ml-algo')
     implementation project(':test-utils')
 }

@@ -31,7 +31,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationPredict;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
@@ -54,7 +54,7 @@ import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCom
 public class NodeClassificationPipelineMutateProc
     extends MutatePropertyProc<
     NodeClassificationPredictPipelineExecutor,
-    NodeClassificationResult,
+    NodeClassificationPredict.NodeClassificationResult,
     NodeClassificationPipelineMutateProc.MutateResult,
     NodeClassificationPredictPipelineMutateConfig>
 {
@@ -84,7 +84,7 @@ public class NodeClassificationPipelineMutateProc
     }
 
     @Override
-    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationResult, NodeClassificationPredictPipelineMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig>> withModelCatalog(
+    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPredict.NodeClassificationResult, NodeClassificationPredictPipelineMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
         this.setModelCatalog(modelCatalog);
@@ -92,7 +92,7 @@ public class NodeClassificationPipelineMutateProc
     }
 
     @Override
-    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationResult, NodeClassificationPredictPipelineMutateConfig> computationResult) {
+    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredict.NodeClassificationResult, NodeClassificationPredictPipelineMutateConfig> computationResult) {
         var config = computationResult.config();
         var mutateProperty = config.mutateProperty();
         var result = computationResult.result();
@@ -125,7 +125,7 @@ public class NodeClassificationPipelineMutateProc
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationResult, NodeClassificationPredictPipelineMutateConfig> computeResult,
+        ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredict.NodeClassificationResult, NodeClassificationPredictPipelineMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new MutateResult.Builder();

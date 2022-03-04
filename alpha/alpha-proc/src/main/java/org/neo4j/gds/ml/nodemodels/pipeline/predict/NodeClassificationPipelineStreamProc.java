@@ -30,8 +30,8 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationPredict;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationStreamResult;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -55,7 +55,7 @@ import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCom
 public class NodeClassificationPipelineStreamProc
     extends StreamProc<
     NodeClassificationPredictPipelineExecutor,
-    NodeClassificationResult,
+    NodeClassificationPredict.NodeClassificationResult,
     NodeClassificationStreamResult,
     NodeClassificationPredictPipelineStreamConfig>
 {
@@ -84,7 +84,7 @@ public class NodeClassificationPipelineStreamProc
     protected Stream<NodeClassificationStreamResult> stream(
         ComputationResult<
                     NodeClassificationPredictPipelineExecutor,
-                    NodeClassificationResult,
+            NodeClassificationPredict.NodeClassificationResult,
                     NodeClassificationPredictPipelineStreamConfig
                     > computationResult
     ) {
@@ -133,7 +133,7 @@ public class NodeClassificationPipelineStreamProc
     }
 
     @Override
-    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationResult, NodeClassificationPredictPipelineStreamConfig, Stream<NodeClassificationStreamResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig>> withModelCatalog(
+    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPredict.NodeClassificationResult, NodeClassificationPredictPipelineStreamConfig, Stream<NodeClassificationStreamResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
         this.setModelCatalog(modelCatalog);

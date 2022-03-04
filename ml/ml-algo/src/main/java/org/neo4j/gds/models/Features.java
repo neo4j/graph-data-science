@@ -17,19 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.linkPipeline.train;
+package org.neo4j.gds.models;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.models.Features;
+public interface Features {
+    long size();
 
-@ValueClass
-interface FeaturesAndLabels {
-    Features features();
+    double[] get(long id);
 
-    HugeLongArray labels();
-
-    default long size() {
-        return features().size();
-    }
 }
