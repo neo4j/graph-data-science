@@ -32,7 +32,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationPredict;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteResult;
@@ -56,7 +56,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class NodeClassificationPipelineWriteProc
     extends WriteProc<
     NodeClassificationPredictPipelineExecutor,
-    NodeClassificationResult,
+    NodeClassificationPredict.NodeClassificationResult,
     NodeClassificationPipelineWriteProc.WriteResult,
     NodeClassificationPredictPipelineWriteConfig>
 {
@@ -106,7 +106,7 @@ public class NodeClassificationPipelineWriteProc
     }
 
     @Override
-    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationResult, NodeClassificationPredictPipelineWriteConfig, Stream<WriteResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig>> withModelCatalog(
+    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPredict.NodeClassificationResult, NodeClassificationPredictPipelineWriteConfig, Stream<WriteResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
         this.setModelCatalog(modelCatalog);
@@ -114,7 +114,7 @@ public class NodeClassificationPipelineWriteProc
     }
 
     @Override
-    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationResult, NodeClassificationPredictPipelineWriteConfig> computationResult) {
+    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredict.NodeClassificationResult, NodeClassificationPredictPipelineWriteConfig> computationResult) {
         var config = computationResult.config();
         var writeProperty = config.writeProperty();
         var result = computationResult.result();
@@ -147,7 +147,7 @@ public class NodeClassificationPipelineWriteProc
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationResult, NodeClassificationPredictPipelineWriteConfig> computeResult,
+        ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredict.NodeClassificationResult, NodeClassificationPredictPipelineWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new WriteResult.Builder();
