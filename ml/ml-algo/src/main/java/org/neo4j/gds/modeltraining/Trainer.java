@@ -37,9 +37,8 @@ public interface Trainer {
 
         ClassifierData data();
 
+        // placeholder
+        interface ClassifierData {}
     }
-
-    // placeholder
-    interface ClassifierData {}
 
 }

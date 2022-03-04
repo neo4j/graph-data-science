@@ -32,7 +32,7 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import java.util.Optional;
 
 @ValueClass
-public interface LogisticRegressionData extends Trainer.ClassifierData {
+public interface LogisticRegressionData extends Trainer.Classifier.ClassifierData {
 
     Weights<Matrix> weights();
     Optional<Weights<Vector>> bias();

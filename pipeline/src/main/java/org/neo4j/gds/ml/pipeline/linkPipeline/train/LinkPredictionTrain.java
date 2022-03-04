@@ -346,9 +346,9 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         );
     }
 
-    private Model<Trainer.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
+    private Model<Trainer.Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
         LogisticRegressionTrainConfig bestParameters,
-        Trainer.ClassifierData classifierData,
+        Trainer.Classifier.ClassifierData classifierData,
         Map<LinkMetric, BestMetricData> winnerMetrics
     ) {
         return Model.of(

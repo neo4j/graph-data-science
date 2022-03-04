@@ -61,7 +61,7 @@ public class NodeClassificationPredictConsumerTest {
             }
 
             @Override
-            public Trainer.ClassifierData data() {
+            public ClassifierData data() {
                 return null;
             }
         };

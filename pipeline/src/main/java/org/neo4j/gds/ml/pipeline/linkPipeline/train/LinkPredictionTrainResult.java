@@ -26,12 +26,12 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 
 @ValueClass
 public interface LinkPredictionTrainResult {
-    Model<Trainer.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model();
+    Model<Trainer.Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model();
 
     LinkPredictionTrain.ModelSelectResult modelSelectionStatistics();
 
     static LinkPredictionTrainResult of(
-        Model<Trainer.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
+        Model<Trainer.Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
         LinkPredictionTrain.ModelSelectResult modelSelectResult
     ) {
         return ImmutableLinkPredictionTrainResult.of(model, modelSelectResult);
