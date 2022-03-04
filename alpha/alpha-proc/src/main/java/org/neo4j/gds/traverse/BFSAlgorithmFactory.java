@@ -102,14 +102,6 @@ class BFSAlgorithmFactory extends GraphAlgorithmFactory<BFS, BfsConfig> {
         //per thread
         builder.rangePerGraphDimension("localNodes", (dimensions, concurrency) -> {
             // lower-bound: each node is in exactly one localNode array
-            var lowerBound = MemoryUsage.sizeOfLongArray(dimensions.nodeCount() + dimensions.nodeCount() / 64);
-            // This is the worst-case, which we will most likely never hit since the
-            // graph needs to be complete to reach all nodes from all threads. Also each node needs to be accessed at the same time by all threads
-            var upperBound = MemoryUsage.sizeOfLongArray(dimensions.relCountUpperBound() + dimensions.nodeCount() / 64);
-            //The  nodeCount()/64 refers to the  chunk separator in localNodes
-            return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
-        }).rangePerGraphDimension("localSources", (dimensions, concurrency) -> {
-            // lower-bound: each node is in exactly one localNode array
             var lowerBound = MemoryUsage.sizeOfLongArrayList(dimensions.nodeCount() + dimensions.nodeCount() / 64);
             // This is the worst-case, which we will most likely never hit since the
             // graph needs to be complete to reach all nodes from all threads. Also each node needs to be accessed at the same time by all threads

@@ -67,7 +67,6 @@ public class BfsProc extends AlgoBaseProc<BFS, long[], BfsConfig, WalkResult> {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
         return computeEstimate(graphName, configuration);
     }
 
