@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.logisticregression;
 
-import org.neo4j.gds.modeltraining.Features;
+import org.neo4j.gds.models.Features;
 
 public final class TestFeatures implements Features {
 

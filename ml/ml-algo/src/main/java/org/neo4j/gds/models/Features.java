@@ -17,22 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modeltraining;
+package org.neo4j.gds.models;
 
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+public interface Features {
+    long size();
 
-public interface Classifier {
-    default int numberOfClasses() {
-        return classIdMap().size();
-    }
+    double[] get(long id);
 
-    LocalIdMap classIdMap();
-
-    double[] predictProbabilities(long id, Features features);
-
-    ClassifierData data();
-
-    // placeholder
-    interface ClassifierData {
-    }
 }

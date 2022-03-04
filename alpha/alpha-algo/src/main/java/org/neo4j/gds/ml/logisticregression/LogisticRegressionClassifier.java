@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.neo4j.gds.modeltraining.Classifier;
-import org.neo4j.gds.modeltraining.Features;
+import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.models.Features;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
