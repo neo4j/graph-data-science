@@ -87,7 +87,7 @@ class BFSTridentGraphTest {
             graph.toMappedNodeId("j"),
             graph.toMappedNodeId("m")
         );
-        long[] nodes = new BFS(
+        long[] nodes = BFS.create(
             graph,
             source,
             (s, t, w) -> targets.contains(t) ? ExitPredicate.Result.BREAK : ExitPredicate.Result.FOLLOW,

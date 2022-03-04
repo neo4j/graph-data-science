@@ -94,7 +94,7 @@ class BFSTest {
     void testBfsToTargetOut(int concurrency) {
         long source = naturalGraph.toMappedNodeId("a");
         long target = naturalGraph.toMappedNodeId("d");
-        long[] nodes = new BFS(
+        long[] nodes = BFS.create(
             naturalGraph,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
@@ -118,7 +118,7 @@ class BFSTest {
     void testBfsToTargetIn(int concurrency) {
         long source = reverseGraph.toMappedNodeId("g");
         long target = reverseGraph.toMappedNodeId("a");
-        long[] nodes = new BFS(
+        long[] nodes = BFS.create(
             reverseGraph,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
@@ -140,7 +140,7 @@ class BFSTest {
     void testBfsMaxDepthOut(int concurrency) {
         long source = naturalGraph.toMappedNodeId("a");
         double maxHops = 3.;
-        long[] nodes = new BFS(
+        long[] nodes = BFS.create(
             naturalGraph,
             source,
             (s, t, w) -> w >= maxHops ? Result.CONTINUE : Result.FOLLOW,
@@ -157,7 +157,7 @@ class BFSTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void testBfsOnLoopGraph(int concurrency) {
-        new BFS(loopGraph, 0,
+        BFS.create(loopGraph, 0,
             (s, t, w) -> Result.FOLLOW,
             Traverse.DEFAULT_AGGREGATOR,
             concurrency,

@@ -103,7 +103,7 @@ class BFSOnBiggerGraphTest {
     void testBfsToTargetOut(int concurrency, int delta) {
         long source = graph.toMappedNodeId("a");
         long target = graph.toMappedNodeId("r");
-        long[] nodes = new BFS(
+        long[] nodes = BFS.create(
             graph,
             source,
             (s, t, w) -> t == target ? ExitPredicate.Result.BREAK : ExitPredicate.Result.FOLLOW,

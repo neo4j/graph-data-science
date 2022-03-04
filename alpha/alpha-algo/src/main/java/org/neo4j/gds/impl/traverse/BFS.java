@@ -54,9 +54,13 @@ public final class BFS extends Algorithm<long[]> {
     private HugeAtomicBitSet visited;
     private final int concurrency;
 
-    BFS(
+    private BFS(
         Graph graph,
         long startNodeId,
+        HugeLongArray traversedNodes,
+        HugeLongArray sources,
+        HugeDoubleArray weights,
+        HugeAtomicBitSet visited,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
         int concurrency,
@@ -71,15 +75,45 @@ public final class BFS extends Algorithm<long[]> {
         this.concurrency = concurrency;
         this.delta = delta;
 
-        var nodeCount = Math.toIntExact(graph.nodeCount());
-
-        this.traversedNodes = HugeLongArray.newArray(nodeCount);
-        this.sources = HugeLongArray.newArray(nodeCount);
-        this.weights = HugeDoubleArray.newArray(nodeCount);
-        this.visited = HugeAtomicBitSet.create(nodeCount);
+        this.traversedNodes = traversedNodes;
+        this.sources = sources;
+        this.weights = weights;
+        this.visited = visited;
     }
 
-    public BFS(
+    static BFS create(
+        Graph graph,
+        long startNodeId,
+        ExitPredicate exitPredicate,
+        Aggregator aggregatorFunction,
+        int concurrency,
+        ProgressTracker progressTracker,
+        int delta
+    ) {
+
+        var nodeCount = Math.toIntExact(graph.nodeCount());
+
+        var traversedNodes = HugeLongArray.newArray(nodeCount);
+        var sources = HugeLongArray.newArray(nodeCount);
+        var weights = HugeDoubleArray.newArray(nodeCount);
+        var visited = HugeAtomicBitSet.create(nodeCount);
+
+        return new BFS(
+            graph,
+            startNodeId,
+            traversedNodes,
+            sources,
+            weights,
+            visited,
+            exitPredicate,
+            aggregatorFunction,
+            concurrency,
+            progressTracker,
+            delta
+        );
+    }
+
+    public static BFS create(
         Graph graph,
         long startNodeId,
         ExitPredicate exitPredicate,
@@ -87,7 +121,15 @@ public final class BFS extends Algorithm<long[]> {
         int concurrency,
         ProgressTracker progressTracker
     ) {
-        this(graph, startNodeId, exitPredicate, aggregatorFunction, concurrency, progressTracker, DEFAULT_DELTA);
+        return create(
+            graph,
+            startNodeId,
+            exitPredicate,
+            aggregatorFunction,
+            concurrency,
+            progressTracker,
+            DEFAULT_DELTA
+        );
     }
 
     @Override
