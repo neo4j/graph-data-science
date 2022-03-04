@@ -36,7 +36,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gradientdescent.Training;
-import org.neo4j.gds.modeltraining.Trainer;
+import org.neo4j.gds.modeltraining.Classifier;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -160,7 +160,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     }
 
     @NotNull
-    private Trainer.Classifier trainModel(
+    private Classifier trainModel(
         FeaturesAndLabels featureAndLabels,
         ReadOnlyHugeLongArray trainSet,
         LogisticRegressionTrainConfig modelConfig,
@@ -224,7 +224,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         return ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
-    private Map<LinkMetric, Double> computeTestMetric(Trainer.Classifier classifier) {
+    private Map<LinkMetric, Double> computeTestMetric(Classifier classifier) {
         progressTracker.beginSubTask("extract test features");
         var testData = extractFeaturesAndLabels(
             validationGraph,
@@ -332,7 +332,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
     private Map<LinkMetric, Double> computeTrainMetric(
         FeaturesAndLabels trainData,
-        Trainer.Classifier classifier,
+        Classifier classifier,
         ReadOnlyHugeLongArray evaluationSet,
         ProgressTracker progressTracker
     ) {
@@ -346,9 +346,9 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         );
     }
 
-    private Model<Trainer.Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
+    private Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
         LogisticRegressionTrainConfig bestParameters,
-        Trainer.Classifier.ClassifierData classifierData,
+        Classifier.ClassifierData classifierData,
         Map<LinkMetric, BestMetricData> winnerMetrics
     ) {
         return Model.of(

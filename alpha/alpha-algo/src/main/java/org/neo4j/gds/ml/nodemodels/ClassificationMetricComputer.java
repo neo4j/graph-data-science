@@ -23,7 +23,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.modeltraining.Features;
-import org.neo4j.gds.modeltraining.Trainer.Classifier;
+import org.neo4j.gds.modeltraining.Classifier;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.metrics.ClassificationMetric;
 import org.openjdk.jol.util.Multiset;

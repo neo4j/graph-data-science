@@ -27,8 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.modeltraining.Classifier;
 import org.neo4j.gds.modeltraining.Features;
-import org.neo4j.gds.modeltraining.Trainer;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.logisticregression.TestFeatures;
 import org.openjdk.jol.util.Multiset;
@@ -70,7 +70,7 @@ class ClassificationMetricComputerTest {
             TerminationFlag.RUNNING_TRUE
         );
 
-        var classifier = new Trainer.Classifier() {
+        var classifier = new Classifier() {
             @Override
             public LocalIdMap classIdMap() {
                 return idMap;

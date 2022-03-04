@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.modeltraining.Classifier;
 import org.neo4j.gds.modeltraining.Features;
-import org.neo4j.gds.modeltraining.Trainer;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.core.batch.SingletonBatch;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -45,7 +45,7 @@ public class NodeClassificationPredictConsumerTest {
 
     @Test
     void canProducePredictions() {
-        var classifier = new Trainer.Classifier() {
+        var classifier = new Classifier() {
             @Override
             public LocalIdMap classIdMap() {
                 return idMapOf(0, 1);
