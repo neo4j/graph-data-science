@@ -66,10 +66,10 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         return "  (a { knn: 1.0 } )" +
                ", (b { knn: 2.0 } )" +
                ", (c { knn: 5.0 } )" +
-               ", (a)-[:IGNORE]->(b)" +
-               ", (a)-[{w: 0.5}]->(b)" +
-               ", (b)-[{w: 0.5}]->(a)" +
-               ", (c)-[{w: 0.25}]->(b)";
+               ", (a)-[]->(b)" +
+               ", (a)-[:SIMILAR {w: 0.5}]->(b)" +
+               ", (b)-[:SIMILAR {w: 0.5}]->(a)" +
+               ", (c)-[:SIMILAR {w: 0.25}]->(b)";
     }
 
     @Override
@@ -238,7 +238,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         assertGraphEquals(
             fromGdl(
                 nodeCreateQuery +
-                "(dave)-[{score: 1.0}]->(bob)" +
+                "(dave)-[:SIMILAR {score: 1.0}]->(bob)" +
                 "(bob)-[{score: 1.0}]->(dave)"
             ),
             mutatedGraph
@@ -322,7 +322,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         assertGraphEquals(
             fromGdl(
                 nodeCreateQuery +
-                "(dave)-[{score: 0.52}]->(bob)" +
+                "(dave)-[:SIMILAR {score: 0.52}]->(bob)" +
                 "(bob)-[{score: 0.52}]->(dave)"
             ),
             mutatedGraph

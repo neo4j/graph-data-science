@@ -41,13 +41,13 @@ public abstract class AllShortestPathsMutateProcTest extends AllShortestPathsPro
         ", (d:Label)" +
         ", (e:Label)" +
         ", (f:Label)" +
-        "  (a)-[{w: 4.0D}]->(b)" +
-        ", (a)-[{w: 2.0D}]->(c)" +
-        ", (b)-[{w: 5.0D}]->(c)" +
-        ", (b)-[{w: 10.0D}]->(d)" +
-        ", (c)-[{w: 3.0D}]->(e)" +
-        ", (d)-[{w: 11.0D}]->(f)" +
-        ", (e)-[{w: 4.0D}]->(d)";
+        "  (a)-[:MUTATE {w: 4.0D}]->(b)" +
+        ", (a)-[:MUTATE {w: 2.0D}]->(c)" +
+        ", (b)-[:MUTATE {w: 5.0D}]->(c)" +
+        ", (b)-[:MUTATE {w: 10.0D}]->(d)" +
+        ", (c)-[:MUTATE {w: 3.0D}]->(e)" +
+        ", (d)-[:MUTATE {w: 11.0D}]->(f)" +
+        ", (e)-[:MUTATE {w: 4.0D}]->(d)";
 
     @Test
     void testMutate() {

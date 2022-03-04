@@ -258,10 +258,10 @@ class NativeRelationshipExporterTest extends BaseTest {
         Graph actual = loadWrittenGraph(true);
         assertGraphEquals(
             fromGdl(
-                "(a)-[{w: 4.2}]->(b)," +
-                "(a)-[{w: 1.0}]->(a)," +
-                "(a)-[{w: 2.3}]->(c)," +
-                "(b)-[{w: " + PROPERTY_VALUE_IF_MISSING + "}]->(c)," +
+                "(a)-[:FOOBAR {w: 4.2}]->(b)," +
+                "(a)-[:FOOBAR {w: 1.0}]->(a)," +
+                "(a)-[:FOOBAR {w: 2.3}]->(c)," +
+                "(b)-[:FOOBAR {w: " + PROPERTY_VALUE_IF_MISSING + "}]->(c)," +
                 "(d)"),
             actual
         );
@@ -271,10 +271,10 @@ class NativeRelationshipExporterTest extends BaseTest {
         Graph actual = loadWrittenGraph(false);
         assertGraphEquals(
             fromGdl(
-                "(a)-->(b)," +
-                "(a)-->(a)," +
-                "(a)-->(c)," +
-                "(b)-->(c)," +
+                "(a)-[:FOOBAR]->(b)," +
+                "(a)-[:FOOBAR]->(a)," +
+                "(a)-[:FOOBAR]->(c)," +
+                "(b)-[:FOOBAR]->(c)," +
                 "(d)"),
             actual
         );

@@ -109,4 +109,11 @@ class CanonicalAdjacencyMatrixTest {
         Graph g2 = fromGdl("(a:A {aV:1.0, bV:NaN, cV:NaN}), (b:B {aV:NaN, bV:2.0, cV:NaN}), (c:V {aV:NaN, bV:NaN, cV:3.0})");
         assertNotEquals(canonicalize(g1), canonicalize(g2));
     }
+
+    @Test
+    void testRespectRelationshipSchema() {
+        Graph g1 = fromGdl("(a)-[:REL1]->(b)");
+        Graph g2 = fromGdl("(a)-[:REL2]->(b)");
+        assertNotEquals(canonicalize(g1), canonicalize(g2));
+    }
 }

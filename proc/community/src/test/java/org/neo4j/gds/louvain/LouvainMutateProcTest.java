@@ -78,31 +78,31 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
             ", (n:Node { communityId: 12, seed: 42 })" +
             ", (x:Node { communityId: 14, seed: 1 })" +
             // 'LOUVAIN_GRAPH' is UNDIRECTED, e.g. each rel twice
-            ", (a)-->(b)-->(a)" +
-            ", (a)-->(d)-->(a)" +
-            ", (a)-->(f)-->(a)" +
-            ", (b)-->(d)-->(b)" +
-            ", (b)-->(x)-->(b)" +
-            ", (b)-->(g)-->(b)" +
-            ", (b)-->(e)-->(b)" +
-            ", (c)-->(x)-->(c)" +
-            ", (c)-->(f)-->(c)" +
-            ", (d)-->(k)-->(d)" +
-            ", (e)-->(x)-->(e)" +
-            ", (e)-->(f)-->(e)" +
-            ", (e)-->(h)-->(e)" +
-            ", (f)-->(g)-->(f)" +
-            ", (g)-->(h)-->(g)" +
-            ", (h)-->(i)-->(h)" +
-            ", (h)-->(j)-->(h)" +
-            ", (i)-->(k)-->(i)" +
-            ", (j)-->(k)-->(j)" +
-            ", (j)-->(m)-->(j)" +
-            ", (j)-->(n)-->(j)" +
-            ", (k)-->(m)-->(k)" +
-            ", (k)-->(l)-->(k)" +
-            ", (l)-->(n)-->(l)" +
-            ", (m)-->(n)-->(m)";
+            ", (a)-[:TYPE]->(b)-[:TYPE]->(a)" +
+            ", (a)-[:TYPE]->(d)-[:TYPE]->(a)" +
+            ", (a)-[:TYPE]->(f)-[:TYPE]->(a)" +
+            ", (b)-[:TYPE]->(d)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(x)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(g)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(e)-[:TYPE]->(b)" +
+            ", (c)-[:TYPE]->(x)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(f)-[:TYPE]->(c)" +
+            ", (d)-[:TYPE]->(k)-[:TYPE]->(d)" +
+            ", (e)-[:TYPE]->(x)-[:TYPE]->(e)" +
+            ", (e)-[:TYPE]->(f)-[:TYPE]->(e)" +
+            ", (e)-[:TYPE]->(h)-[:TYPE]->(e)" +
+            ", (f)-[:TYPE]->(g)-[:TYPE]->(f)" +
+            ", (g)-[:TYPE]->(h)-[:TYPE]->(g)" +
+            ", (h)-[:TYPE]->(i)-[:TYPE]->(h)" +
+            ", (h)-[:TYPE]->(j)-[:TYPE]->(h)" +
+            ", (i)-[:TYPE]->(k)-[:TYPE]->(i)" +
+            ", (j)-[:TYPE]->(k)-[:TYPE]->(j)" +
+            ", (j)-[:TYPE]->(m)-[:TYPE]->(j)" +
+            ", (j)-[:TYPE]->(n)-[:TYPE]->(j)" +
+            ", (k)-[:TYPE]->(m)-[:TYPE]->(k)" +
+            ", (k)-[:TYPE]->(l)-[:TYPE]->(k)" +
+            ", (l)-[:TYPE]->(n)-[:TYPE]->(l)" +
+            ", (m)-[:TYPE]->(n)-[:TYPE]->(m)";
     }
 
     @Override
@@ -141,6 +141,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
 
         var updatedGraph = new StoreLoaderBuilder().api(db)
             .addNodeLabel("Node")
+            .addRelationshipType("TYPE")
             .globalOrientation(Orientation.UNDIRECTED)
             .addNodeProperty(mutateProperty(), mutateProperty(), DefaultValue.of(42.0), Aggregation.NONE)
             .addNodeProperty("seed", "seed", DefaultValue.of(42.0), Aggregation.NONE)

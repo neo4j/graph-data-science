@@ -85,7 +85,7 @@ class ShortestPathAStarMutateProcTest extends ShortestPathAStarProcTest<Shortest
 
     @Override
     public String expectedMutatedGraph() {
-        return EXISTING_GRAPH + ", (nA)-[{w: 8.0D}]->(nX)";
+        return EXISTING_GRAPH + ", (nA)-[:PATH {w: 8.0D}]->(nX)";
     }
 
     @Override
@@ -169,7 +169,7 @@ class ShortestPathAStarMutateProcTest extends ShortestPathAStarProcTest<Shortest
         )));
 
         var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), "graph").graphStore().getUnion();
-        var expected = TestSupport.fromGdl(EXISTING_GRAPH + ", (nA)-[{w: 2979.0D}]->(nX)");
+        var expected = TestSupport.fromGdl(EXISTING_GRAPH + ", (nA)-[:PATH {w: 2979.0D}]->(nX)");
 
         assertGraphEquals(expected, actual);
     }

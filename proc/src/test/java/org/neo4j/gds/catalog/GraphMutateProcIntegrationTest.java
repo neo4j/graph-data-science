@@ -91,19 +91,19 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         "(j {nodeId: 9.0,  labelPropagation: 10, louvain: 10, pageRank: 0.150000, wcc: 7})" +
         "(k {nodeId: 10.0, labelPropagation: 10, louvain: 10, pageRank: 0.395438, wcc: 7})" +
         "(l {nodeId: 11.0, labelPropagation: 11, louvain: 11, pageRank: 0.267938, wcc: 7})" +
-        "(a)-[{w: 1.0}]->(b)" +
-        "(b)-[{w: 1.0}]->(c)" +
-        "(c)-[{w: 1.0}]->(d)" +
-        "(d)-[{w: 1.0}]->(e)" +
-        "(e)-[{w: 1.0}]->(f)" +
-        "(f)-[{w: 1.0}]->(g)" +
-        "(h)-[{w: 1.0}]->(i)" +
-        "(i)-[{w: 1.0}]->(k)" +
-        "(i)-[{w: 1.0}]->(l)" +
-        "(j)-[{w: 1.0}]->(k)" +
+        "(a)-[:TYPE {w: 1.0}]->(b)" +
+        "(b)-[:TYPE {w: 1.0}]->(c)" +
+        "(c)-[:TYPE {w: 1.0}]->(d)" +
+        "(d)-[:TYPE {w: 1.0}]->(e)" +
+        "(e)-[:TYPE {w: 1.0}]->(f)" +
+        "(f)-[:TYPE {w: 1.0}]->(g)" +
+        "(h)-[:TYPE {w: 1.0}]->(i)" +
+        "(i)-[:TYPE {w: 1.0}]->(k)" +
+        "(i)-[:TYPE {w: 1.0}]->(l)" +
+        "(j)-[:TYPE {w: 1.0}]->(k)" +
         // SIMILAR_TO
-        "(i)-[{w: 0.5}]->(j)" +
-        "(j)-[{w: 0.5}]->(i)"
+        "(i)-[:SIMILAR_TO {w: 0.5}]->(j)" +
+        "(j)-[:SIMILAR_TO {w: 0.5}]->(i)"
     );
 
     @Inject

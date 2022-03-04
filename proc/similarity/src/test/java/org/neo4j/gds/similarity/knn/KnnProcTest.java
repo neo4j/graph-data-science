@@ -103,7 +103,7 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
             .graphProject()
             .withAnyLabel()
             .withNodeProperty("knn")
-            .withAnyRelationshipType()
+            .withRelationshipType("IGNORE")
             .yields();
 
         runQuery(graphCreateQuery);
