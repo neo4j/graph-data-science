@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.internal.recordstorage.InMemoryNodeScan;
@@ -30,6 +31,7 @@ import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import static java.lang.Math.min;
@@ -42,12 +44,16 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
     private final GraphStore graphStore;
     private final TokenHolders tokenHolders;
     private final boolean hasProperties;
+    private final long[] nodeLabelBuffer;
+    private final MutableInt nodeLabelCounter;
 
     public AbstractInMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID);
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
         this.hasProperties = !graphStore.nodePropertyKeys().values().stream().allMatch(Set::isEmpty);
+        nodeLabelBuffer = new long[graphStore.nodeLabels().size()];
+        nodeLabelCounter = new MutableInt();
     }
 
     public abstract void properties(StoragePropertyCursor propertyCursor);
@@ -56,10 +62,14 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
 
     @Override
     public long[] labels() {
-        return graphStore.nodes().nodeLabels(getId())
-            .stream()
-            .mapToLong(nodeLabel -> tokenHolders.labelTokens().getIdByName(nodeLabel.name()))
-            .toArray();
+        nodeLabelCounter.setValue(0);
+
+        graphStore.nodes().forEachNodeLabel(getId(), nodeLabel -> {
+            nodeLabelBuffer[nodeLabelCounter.getAndIncrement()] = tokenHolders.labelTokens().getIdByName(nodeLabel.name());
+                return true;
+        });
+
+        return Arrays.copyOf(nodeLabelBuffer, nodeLabelCounter.getValue());
     }
 
     @Override
