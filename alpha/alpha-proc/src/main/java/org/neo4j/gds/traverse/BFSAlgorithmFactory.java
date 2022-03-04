@@ -33,6 +33,9 @@ import org.neo4j.gds.impl.traverse.Aggregator;
 import org.neo4j.gds.impl.traverse.BFS;
 import org.neo4j.gds.impl.traverse.BfsConfig;
 import org.neo4j.gds.impl.traverse.ExitPredicate;
+import org.neo4j.gds.impl.traverse.MaxDepthExitPredicate;
+import org.neo4j.gds.impl.traverse.OneHopAggregator;
+import org.neo4j.gds.impl.traverse.TargetExitPredicate;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
@@ -45,33 +48,34 @@ class BFSAlgorithmFactory extends GraphAlgorithmFactory<BFS, BfsConfig> {
 
     @Override
     public BFS build(
-        Graph graphOrGraphStore, BfsConfig configuration, ProgressTracker progressTracker
+        Graph graph, BfsConfig configuration, ProgressTracker progressTracker
     ) {
-        validateStartNode(configuration.sourceNode(), graphOrGraphStore);
-        configuration.targetNodes().forEach(neoId -> validateEndNode(neoId, graphOrGraphStore));
+        validateStartNode(configuration.sourceNode(), graph);
+        configuration.targetNodes().forEach(neoId -> validateEndNode(neoId, graph));
 
         ExitPredicate exitFunction;
         Aggregator aggregatorFunction;
         // target node given; terminate if target is reached
         if (!configuration.targetNodes().isEmpty()) {
             List<Long> mappedTargets = configuration.targetNodes().stream()
-                .map(graphOrGraphStore::safeToMappedNodeId)
+                .map(graph::safeToMappedNodeId)
                 .collect(Collectors.toList());
-            exitFunction = (s, t, w) -> mappedTargets.contains(t) ? ExitPredicate.Result.BREAK : ExitPredicate.Result.FOLLOW;
-            aggregatorFunction = (s, t, w) -> .0;
+            exitFunction = new TargetExitPredicate(mappedTargets);
+            aggregatorFunction = Aggregator.NO_AGGREGATION;
             // maxDepth given; continue to aggregate nodes with lower depth until no more nodes left
         } else if (configuration.maxDepth() != -1) {
-            exitFunction = (s, t, w) -> w > configuration.maxDepth() ? ExitPredicate.Result.CONTINUE : ExitPredicate.Result.FOLLOW;
-            aggregatorFunction = (s, t, w) -> w + 1.;
+            exitFunction = new MaxDepthExitPredicate(configuration.maxDepth());
+            aggregatorFunction = new OneHopAggregator();
             // do complete BFS until all nodes have been visited
         } else {
-            exitFunction = (s, t, w) -> ExitPredicate.Result.FOLLOW;
-            aggregatorFunction = (s, t, w) -> .0;
+            exitFunction = ExitPredicate.FOLLOW;
+            aggregatorFunction = Aggregator.NO_AGGREGATION;
         }
-        var mappedStartNodeId = graphOrGraphStore.toMappedNodeId(configuration.sourceNode());
+
+        var mappedStartNodeId = graph.toMappedNodeId(configuration.sourceNode());
 
         return new BFS(
-            graphOrGraphStore,
+            graph,
             mappedStartNodeId,
             exitFunction,
             aggregatorFunction,

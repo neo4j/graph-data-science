@@ -19,17 +19,9 @@
  */
 package org.neo4j.gds.impl.traverse;
 
-public interface Aggregator {
-
-    Aggregator NO_AGGREGATION = (s, t, w) -> .0;
-
-    /**
-     * aggregate weight between source and current node
-     *
-     * @param sourceNode     source node
-     * @param currentNode    the current node
-     * @param weightAtSource the weight that has been aggregated for the currentNode so far
-     * @return new weight (e.g. weightAtSource + 1.)
-     */
-    double apply(long sourceNode, long currentNode, double weightAtSource);
+public class OneHopAggregator implements Aggregator {
+    @Override
+    public double apply(long sourceNode, long currentNode, double weightAtSource) {
+        return weightAtSource + 1.;
+    }
 }

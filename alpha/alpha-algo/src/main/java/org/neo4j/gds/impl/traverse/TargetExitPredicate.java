@@ -19,17 +19,15 @@
  */
 package org.neo4j.gds.impl.traverse;
 
-public interface Aggregator {
+import java.util.List;
 
-    Aggregator NO_AGGREGATION = (s, t, w) -> .0;
+public class TargetExitPredicate implements ExitPredicate {
+    private final List<Long> targets;
 
-    /**
-     * aggregate weight between source and current node
-     *
-     * @param sourceNode     source node
-     * @param currentNode    the current node
-     * @param weightAtSource the weight that has been aggregated for the currentNode so far
-     * @return new weight (e.g. weightAtSource + 1.)
-     */
-    double apply(long sourceNode, long currentNode, double weightAtSource);
+    public TargetExitPredicate(List<Long> targets) {this.targets = targets;}
+
+    @Override
+    public Result test(long sourceNode, long currentNode, double weightAtSource) {
+        return targets.contains(currentNode) ? Result.BREAK : Result.FOLLOW;
+    }
 }

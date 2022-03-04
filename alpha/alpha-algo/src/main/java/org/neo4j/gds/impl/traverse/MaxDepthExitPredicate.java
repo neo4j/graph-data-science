@@ -19,17 +19,14 @@
  */
 package org.neo4j.gds.impl.traverse;
 
-public interface Aggregator {
+public class MaxDepthExitPredicate implements ExitPredicate {
 
-    Aggregator NO_AGGREGATION = (s, t, w) -> .0;
+    private final long maxDepth;
 
-    /**
-     * aggregate weight between source and current node
-     *
-     * @param sourceNode     source node
-     * @param currentNode    the current node
-     * @param weightAtSource the weight that has been aggregated for the currentNode so far
-     * @return new weight (e.g. weightAtSource + 1.)
-     */
-    double apply(long sourceNode, long currentNode, double weightAtSource);
+    public MaxDepthExitPredicate(long maxDepth) {this.maxDepth = maxDepth;}
+
+    @Override
+    public Result test(long sourceNode, long currentNode, double weightAtSource) {
+        return weightAtSource > maxDepth ? ExitPredicate.Result.CONTINUE : ExitPredicate.Result.FOLLOW;
+    }
 }
