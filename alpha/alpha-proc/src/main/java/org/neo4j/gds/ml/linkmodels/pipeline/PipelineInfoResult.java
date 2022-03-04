@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;

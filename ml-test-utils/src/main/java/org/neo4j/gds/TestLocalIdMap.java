@@ -17,39 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.logisticregression;
+package org.neo4j.gds;
 
-import org.neo4j.gds.models.Features;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
-public final class TestFeatures implements Features {
+public final class TestLocalIdMap {
 
-    private final double[][] features;
+    private TestLocalIdMap() {}
 
-    public static Features singleConstant(double feature) {
-        return new Features() {
-            @Override
-            public long size() {
-                return 1;
-            }
+    public static LocalIdMap identityMapOf(long... ids) {
+        LocalIdMap idMap = new LocalIdMap();
+        for (long id : ids) {
+            idMap.toMapped(id);
+        }
 
-            @Override
-            public double[] get(long id) {
-                return new double[]{feature};
-            }
-        };
-    }
-
-    public TestFeatures(double[][] features) {
-        this.features = features;
-    }
-
-    @Override
-    public long size() {
-        return features.length;
-    }
-
-    @Override
-    public double[] get(long id) {
-        return features[(int) id];
+        return idMap;
     }
 }

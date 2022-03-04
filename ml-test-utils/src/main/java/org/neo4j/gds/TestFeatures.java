@@ -17,17 +17,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.pipeline;
+package org.neo4j.gds;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.models.Features;
 
-@ValueClass
-public interface NodeClassificationPipelineTrainResult {
-    Model<LogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model();
-    NodeClassificationTrain.ModelSelectResult modelSelectionStatistics();
+public final class TestFeatures implements Features {
+
+    private final double[][] features;
+
+    public static Features singleConstant(double feature) {
+        return new Features() {
+            @Override
+            public long size() {
+                return 1;
+            }
+
+            @Override
+            public double[] get(long id) {
+                return new double[]{feature};
+            }
+        };
+    }
+
+    public TestFeatures(double[][] features) {
+        this.features = features;
+    }
+
+    @Override
+    public long size() {
+        return features.length;
+    }
+
+    @Override
+    public double[] get(long id) {
+        return features[(int) id];
+    }
 }

@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
 

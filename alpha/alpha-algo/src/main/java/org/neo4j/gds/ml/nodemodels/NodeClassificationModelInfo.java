@@ -22,8 +22,8 @@ package org.neo4j.gds.ml.nodemodels;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfigImpl;
 
 import java.util.List;
 import java.util.Map;

@@ -20,35 +20,27 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestFeatures;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.models.Classifier;
-import org.neo4j.gds.models.Features;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.core.batch.SingletonBatch;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.logisticregression.TestFeatures;
+import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.models.Features;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestLocalIdMap.identityMapOf;
 
 public class NodeClassificationPredictConsumerTest {
-
-    public static LocalIdMap idMapOf(long... ids) {
-        LocalIdMap idMap = new LocalIdMap();
-        for (long id : ids) {
-            idMap.toMapped(id);
-        }
-
-        return idMap;
-    }
 
     @Test
     void canProducePredictions() {
         var classifier = new Classifier() {
             @Override
             public LocalIdMap classIdMap() {
-                return idMapOf(0, 1);
+                return identityMapOf(0, 1);
             }
 
             @Override

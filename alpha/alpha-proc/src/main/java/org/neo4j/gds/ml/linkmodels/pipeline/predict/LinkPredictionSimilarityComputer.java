@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.models.FeaturesFactory;
-import org.neo4j.gds.ml.logisticregression.LogisticRegressionClassifier;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.similarity.knn.NeighborFilter;

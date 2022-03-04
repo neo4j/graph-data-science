@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.logisticregression;
+package org.neo4j.gds.models.logisticregression;
 
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -35,8 +35,8 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.ml.logisticregression.LogisticRegressionData.standard;
-import static org.neo4j.gds.ml.logisticregression.LogisticRegressionData.withReducedClassCount;
+import static org.neo4j.gds.models.logisticregression.LogisticRegressionData.standard;
+import static org.neo4j.gds.models.logisticregression.LogisticRegressionData.withReducedClassCount;
 
 public final class LogisticRegressionTrainer implements Trainer {
 

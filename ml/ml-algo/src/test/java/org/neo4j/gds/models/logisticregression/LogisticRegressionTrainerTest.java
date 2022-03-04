@@ -17,11 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.logisticregression;
+package org.neo4j.gds.models.logisticregression;
 
 import org.assertj.core.data.Offset;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestFeatures;
+import org.neo4j.gds.TestLocalIdMap;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -32,7 +34,6 @@ import java.util.Map;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConsumerTest.idMapOf;
 
 class LogisticRegressionTrainerTest {
 
@@ -280,7 +281,7 @@ class LogisticRegressionTrainerTest {
             trainSetLarge,
             1,
             LogisticRegressionTrainConfig.of(Map.of("penalty", 1L)),
-            idMapOf(0),
+            TestLocalIdMap.identityMapOf(0),
             false,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER

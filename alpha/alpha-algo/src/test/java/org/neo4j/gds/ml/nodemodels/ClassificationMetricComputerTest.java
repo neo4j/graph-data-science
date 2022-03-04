@@ -24,20 +24,20 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.TestFeatures;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.Features;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.logisticregression.TestFeatures;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConsumerTest.idMapOf;
+import static org.neo4j.gds.TestLocalIdMap.identityMapOf;
 import static org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric.F1_WEIGHTED;
 
 class ClassificationMetricComputerTest {
@@ -57,7 +57,7 @@ class ClassificationMetricComputerTest {
         multiSet.add(0L, 2);
         multiSet.add(1L, 1);
         multiSet.add(3L, 1);
-        var idMap = idMapOf(1, 0, 3);
+        var idMap = identityMapOf(1, 0, 3);
         var targets = HugeLongArray.of(firstTarget, 0, 3, 0);
 
         var classificationMetricComputer = new ClassificationMetricComputer(
