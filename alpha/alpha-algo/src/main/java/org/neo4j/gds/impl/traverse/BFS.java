@@ -20,8 +20,6 @@
 package org.neo4j.gds.impl.traverse;
 
 
-import com.carrotsearch.hppc.DoubleArrayList;
-import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -38,12 +36,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.neo4j.gds.impl.Converters.longToIntConsumer;
-
 public final class BFS extends Algorithm<long[]> {
 
     private static final int DEFAULT_DELTA = 64;
-    private static final int IGNORE_NODE = -1;
+    static final int IGNORE_NODE = -1;
 
     private final long startNodeId;
     private final ExitPredicate exitPredicate;
@@ -110,20 +106,13 @@ public final class BFS extends Algorithm<long[]> {
         sources.set(0, startNodeId);
         weights.set(0, 0);
 
-        var bfsTaskList = new ArrayList<BFSTask>(concurrency);
-        for (int i = 0; i < concurrency; ++i) {
-            bfsTaskList.add(new BFSTask(
-                graph,
-                traversedNodes,
-                traversedNodesIndex,
-                traversedNodesLength,
-                visited,
-                sources,
-                weights,
-                targetFoundIndex,
-                minimumChunk
-            ));
-        }
+        var bfsTaskList = initialiseBfsTasks(
+            traversedNodesIndex,
+            traversedNodesLength,
+            targetFoundIndex,
+            minimumChunk,
+            delta
+        );
 
         while (running()) {
             ParallelUtil.run(bfsTaskList, Pools.DEFAULT);
@@ -133,9 +122,9 @@ public final class BFS extends Algorithm<long[]> {
 
             int previousTraversedNodesLength = traversedNodesLength.get();
 
-            int tasksFinished = 0;
-            int tasksWithChunks = countTasksWithChunks(bfsTaskList);
-            while (tasksFinished != tasksWithChunks) {
+            int numberOfFinishedTasks = 0;
+            int numberOfTasksWithChunks = countTasksWithChunks(bfsTaskList);
+            while (numberOfFinishedTasks != numberOfTasksWithChunks) {
                 int minimumTaskIndex = -1;
                 for (int i = 0; i < concurrency; ++i) {
                     var currentBfsTask = bfsTaskList.get(i);
@@ -152,7 +141,7 @@ public final class BFS extends Algorithm<long[]> {
                 var minimumIndexBfsTask = bfsTaskList.get(minimumTaskIndex);
                 minimumIndexBfsTask.syncNextChunk();
                 if (!minimumIndexBfsTask.hasMoreChunks()) {
-                    tasksFinished++;
+                    numberOfFinishedTasks++;
                 }
             }
 
@@ -173,6 +162,34 @@ public final class BFS extends Algorithm<long[]> {
         return resultNodes;
     }
 
+    private List<BFSTask> initialiseBfsTasks(
+        AtomicInteger traversedNodesIndex,
+        AtomicInteger traversedNodesLength,
+        AtomicLong targetFoundIndex,
+        HugeAtomicLongArray minimumChunk,
+        int delta
+    ) {
+        var bfsTaskList = new ArrayList<BFSTask>(concurrency);
+        for (int i = 0; i < concurrency; ++i) {
+            bfsTaskList.add(new BFSTask(
+                graph,
+                traversedNodes,
+                traversedNodesIndex,
+                traversedNodesLength,
+                visited,
+                sources,
+                weights,
+                targetFoundIndex,
+                minimumChunk,
+                exitPredicate,
+                aggregatorFunction,
+                delta,
+                terminationFlag
+            ));
+        }
+        return bfsTaskList;
+    }
+
     @Override
     public void release() {
         traversedNodes = null;
@@ -190,139 +207,4 @@ public final class BFS extends Algorithm<long[]> {
         return tasksWithChunks;
     }
 
-    private class BFSTask implements Runnable {
-        // shared variables
-        private final Graph graph;
-        private final AtomicInteger traversedNodesIndex;
-        private final HugeAtomicBitSet visited;
-        private final HugeLongArray traversedNodes;
-        private final HugeLongArray sources;
-        private final HugeDoubleArray weights;
-        private final AtomicLong targetFoundIndex;
-        private final AtomicInteger traversedNodesLength;
-        private final HugeAtomicLongArray minimumChunk;
-
-        // variables local to the task
-        private final LongArrayList localNodes;
-        private final LongArrayList localSources;
-        private final DoubleArrayList localWeights;
-        private final LongArrayList chunks;
-        private int indexOfChunk;
-        private int indexOfLocalNodes;
-
-        BFSTask(
-            Graph graph,
-            HugeLongArray traversedNodes,
-            AtomicInteger traversedNodesIndex,
-            AtomicInteger traversedNodesLength,
-            HugeAtomicBitSet visited,
-            HugeLongArray sources,
-            HugeDoubleArray weights,
-            AtomicLong targetFoundIndex,
-            HugeAtomicLongArray minimumChunk
-        ) {
-            this.graph = graph.concurrentCopy();
-            this.traversedNodesIndex = traversedNodesIndex;
-            this.traversedNodesLength = traversedNodesLength;
-            this.visited = visited;
-            this.traversedNodes = traversedNodes;
-            this.sources = sources;
-            this.weights = weights;
-            this.targetFoundIndex = targetFoundIndex;
-            this.minimumChunk = minimumChunk;
-
-            this.localNodes = new LongArrayList();
-            this.localSources = new LongArrayList();
-            this.localWeights = new DoubleArrayList();
-            this.chunks = new LongArrayList();
-        }
-
-        long currentChunkId() {
-            return this.chunks.get(indexOfChunk);
-        }
-
-        void moveToNextChunk() {
-            indexOfChunk++;
-        }
-
-        boolean hasMoreChunks() {
-            return indexOfChunk < chunks.size();
-        }
-
-        public void run() {
-            chunks.elementsCount = 0;
-            indexOfChunk = 0;
-
-            int offset;
-            while ((offset = traversedNodesIndex.getAndAdd(delta)) < traversedNodesLength.get()) {
-                int chunkLimit = Math.min(offset + delta, traversedNodesLength.get());
-                chunks.add(offset);
-                for (int idx = offset; idx < chunkLimit; idx++) {
-                    var nodeId = traversedNodes.get(idx);
-                    var sourceId = sources.get(idx);
-                    var weight = weights.get(idx);
-                    relaxNode(offset, idx, nodeId, sourceId, weight);
-                }
-                localNodes.add(Long.MAX_VALUE);
-                localSources.add(Long.MAX_VALUE);
-                localWeights.add(Long.MAX_VALUE);
-            }
-        }
-
-        void syncNextChunk() {
-            if (!localNodes.isEmpty()) {
-                int nodesTraversed = 0;
-                int index = traversedNodesLength.get();
-                while (localNodes.get(indexOfLocalNodes) != Long.MAX_VALUE) {
-                    long nodeId = localNodes.get(indexOfLocalNodes);
-                    if (minimumChunk.get(nodeId) == currentChunkId()) {
-                        traversedNodes.set(index, localNodes.get(indexOfLocalNodes));
-                        minimumChunk.set(nodeId, -1);
-                        sources.set(index, localSources.get(indexOfLocalNodes));
-                        weights.set(index++, localWeights.get(indexOfLocalNodes));
-                        visited.set(nodeId);
-                        nodesTraversed++;
-                    }
-                    indexOfLocalNodes++;
-                }
-                indexOfLocalNodes++;
-                traversedNodesLength.getAndAdd(nodesTraversed);
-                moveToNextChunk();
-                if (!hasMoreChunks()) {
-                    localNodes.elementsCount = 0;
-                    localSources.elementsCount = 0;
-                    localWeights.elementsCount = 0;
-                    indexOfLocalNodes = 0;
-                }
-            }
-        }
-
-        void relaxNode(int chunk, int nodeIndex, long nodeId, long sourceNodeId, double weight) {
-            var exitPredicateResult = exitPredicate.test(sourceNodeId, nodeId, weight);
-            if (exitPredicateResult == ExitPredicate.Result.CONTINUE) {
-                traversedNodes.set(nodeIndex, IGNORE_NODE);
-                return;
-            } else {
-                if (exitPredicateResult == ExitPredicate.Result.BREAK) {
-                    targetFoundIndex.getAndAccumulate(nodeIndex, Math::min);
-                    return;
-                }
-            }
-
-            this.graph.forEachRelationship(
-                nodeId,
-                longToIntConsumer((s, t) -> {
-                    if (!visited.get(t)) {
-                        minimumChunk.update(t, r -> Math.min(r, chunk));
-                        if (minimumChunk.get(t) == chunk) {
-                            localSources.add(s);
-                            localNodes.add(t);
-                            localWeights.add(aggregatorFunction.apply(s, t, weight));
-                        }
-                    }
-                    return running();
-                })
-            );
-        }
-    }
 }
