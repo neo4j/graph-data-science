@@ -188,12 +188,10 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
     private void node(NodeRecord record, long nodeId) {
         record.setId(nodeId);
 
-        Set<NodeLabel> nodeLabels = graphStore.nodes().nodeLabels(nodeId);
-
-        var nodeLabelIterator = nodeLabels.iterator();
-        if (nodeLabelIterator.hasNext()) {
-            var firstLabelToken = tokenHolders.labelTokens().getIdByName(nodeLabelIterator.next().name());
+        graphStore.nodes().forEachNodeLabel(nodeId, (label -> {
+            var firstLabelToken = tokenHolders.labelTokens().getIdByName(label.name());
             setLabelField(record, firstLabelToken);
-        }
+            return false;
+        }));
     }
 }
