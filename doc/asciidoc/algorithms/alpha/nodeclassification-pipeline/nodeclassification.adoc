@@ -34,7 +34,7 @@ The training phase (II) trains multiple model candidates using cross-validation,
 
 After <<algorithms-ml-nodeclassification-pipelines-train, training the pipeline>>, a classification model is created.
 This model includes the node property steps and feature configuration from the training pipeline and uses them to generate the relevant features for classifying unlabeled nodes.
-The classification model can be used to predict the class of previously unseen nodes.
+The classification model can be applied to predict the class of previously unseen nodes.
 In addition to the predicted class for each node, the predicted probability for each class may also be retained on the nodes.
 The order of the probabilities matches the order of the classes registered in the model.
 

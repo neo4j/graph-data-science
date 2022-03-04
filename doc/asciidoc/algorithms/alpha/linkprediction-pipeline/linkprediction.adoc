@@ -37,7 +37,7 @@ The training phase (III) trains multiple model candidates using cross-validation
 
 After <<algorithms-ml-linkprediction-pipelines-train, training the pipeline>>, a prediction model is created.
 This model includes the node property steps and link feature steps from the training pipeline and uses them to generate the relevant features for predicting new relationships.
-The prediction model can be used to infer the probability of the existence of a relationship between two non-adjacent nodes.
+The prediction model can be applied to infer the probability of the existence of a relationship between two non-adjacent nodes.
 
 NOTE: <<algorithms-link-prediction-pipelines-predict, Prediction>> can only be done with a prediction model (not with a training pipeline).
 
