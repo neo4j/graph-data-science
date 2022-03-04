@@ -102,10 +102,11 @@ public abstract class AbstractInMemoryPropertyCursor
 
         protected final CypherGraphStore graphStore;
         protected final TokenHolders tokenHolders;
+        private final Iterable<NamedToken> allPropertyTokens;
 
         final Map<String, ValueGroup> propertyKeyToValueGroupMapping;
 
-        private final Iterator<NamedToken> namedTokensIterator;
+        private Iterator<NamedToken> namedTokensIterator;
 
         @Nullable String currentPropertyKey;
 
@@ -116,8 +117,9 @@ public abstract class AbstractInMemoryPropertyCursor
             this.graphStore = graphStore;
             this.tokenHolders = tokenHolders;
             this.propertyKeyToValueGroupMapping = new HashMap<>();
-            this.namedTokensIterator = tokenHolders.propertyKeyTokens().getAllTokens().iterator();
+            this.allPropertyTokens = tokenHolders.propertyKeyTokens().getAllTokens();
 
+            resetNamedTokenIterator();
             populateKeyToValueGroupMapping();
         }
 
@@ -170,6 +172,7 @@ public abstract class AbstractInMemoryPropertyCursor
             clear();
             this.setId(NO_ID);
             this.currentPropertyKey = null;
+            resetNamedTokenIterator();
         }
 
         @Override
@@ -192,6 +195,10 @@ public abstract class AbstractInMemoryPropertyCursor
                         )
                     )
                 );
+        }
+
+        private void resetNamedTokenIterator() {
+            this.namedTokensIterator = this.allPropertyTokens.iterator();
         }
 
         private static ValueGroup valueGroupFromValueType(ValueType valueType) {

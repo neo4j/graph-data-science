@@ -31,15 +31,23 @@ public class InMemoryPropertyCursor extends AbstractInMemoryPropertyCursor {
 
     @Override
     public void initNodeProperties(long reference, long ownerReference) {
-        var delegate = new InMemoryNodePropertyCursor(graphStore, tokenHolders);
-        delegate.initNodeProperties(reference);
-        this.delegate = delegate;
+//        var delegate = new InMemoryNodePropertyCursor(graphStore, tokenHolders);
+//        delegate.initNodeProperties(reference);
+//        this.delegate = delegate;
+
+        if (this.delegate == null || !(this.delegate instanceof InMemoryNodePropertyCursor)) {
+            this.delegate = new InMemoryNodePropertyCursor(graphStore, tokenHolders);
+        }
+
+        ((InMemoryNodePropertyCursor) delegate).initNodeProperties(reference);
     }
 
     @Override
     public void initRelationshipProperties(long reference, long ownerReference) {
-        var delegate = new InMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
-        delegate.initRelationshipProperties(reference);
-        this.delegate = delegate;
+        if (this.delegate == null || !(this.delegate instanceof InMemoryRelationshipPropertyCursor)) {
+            this.delegate = new InMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
+        }
+
+        ((InMemoryRelationshipPropertyCursor) delegate).initRelationshipProperties(reference);
     }
 }
