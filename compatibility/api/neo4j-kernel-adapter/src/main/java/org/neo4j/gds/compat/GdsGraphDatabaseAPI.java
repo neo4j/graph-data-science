@@ -55,11 +55,15 @@ public abstract class GdsGraphDatabaseAPI implements GraphDatabaseAPI {
         this.dbms = dbms;
     }
 
+    public abstract Path dbHome(Path workingDir);
+
     public void shutdown() {
         dbms.shutdown();
     }
 
-    public abstract Path dbHome(Path workingDir);
+    public DatabaseManagementService dbms() {
+        return dbms;
+    }
 
     // delegate methods
 
