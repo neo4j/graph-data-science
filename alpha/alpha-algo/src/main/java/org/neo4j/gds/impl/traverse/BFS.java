@@ -171,7 +171,7 @@ public final class BFS extends Algorithm<long[]> {
 
     @Override
     public long[] compute() {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask(graph.relationshipCount());
 
         // This is used to read from `traversedNodes` in chunks, updated in `BFSTask`.
         var traversedNodesIndex = new AtomicInteger(0);
@@ -273,7 +273,8 @@ public final class BFS extends Algorithm<long[]> {
                 exitPredicate,
                 aggregatorFunction,
                 delta,
-                terminationFlag
+                terminationFlag,
+                progressTracker
             ));
         }
         return bfsTaskList;
