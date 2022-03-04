@@ -54,9 +54,9 @@ The rest of this page is divided as follows:
 == Creating a pipeline
 
 The first step of building a new pipeline is to create one using `gds.beta.pipeline.nodeClassification.create`.
-This stores a trainable model object in the model catalog of type `Node classification training pipeline`.
+This stores a trainable pipeline object in the pipeline catalog of type `Node classification training pipeline`.
 This represents a configurable pipeline that can later be invoked for training, which in turn creates a classification model.
-The latter is also a model which is stored in the catalog with type `Node classification model`.
+The latter is also a model which is stored in the catalog with type `NodeClassification`.
 
 === Syntax
 

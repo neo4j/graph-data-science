@@ -146,7 +146,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
             " YIELD modelInfo" +
             " RETURN modelInfo.modelType AS modelType",
             Map.of("graphName", GRAPH_NAME, "modelName", modelName),
-            List.of(Map.of("modelType", "Link prediction model"))
+            List.of(Map.of("modelType", "LinkPrediction"))
         );
 
         assertCypherResult(

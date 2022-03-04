@@ -159,7 +159,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                 Map.of(
                     "modelInfo", Matchers.allOf(
                         Matchers.hasEntry("modelName", "trainedModel1"),
-                        Matchers.hasEntry("modelType", "Link prediction model"),
+                        Matchers.hasEntry("modelType", "LinkPrediction"),
                         Matchers.hasKey("bestParameters"),
                         Matchers.hasKey("metrics"),
                         Matchers.hasKey("trainingPipeline")
@@ -228,7 +228,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                 Map.of(
                     "modelInfo", Matchers.allOf(
                         Matchers.hasEntry("modelName", "trainedModel4"),
-                        Matchers.hasEntry("modelType", "Link prediction model"),
+                        Matchers.hasEntry("modelType", "LinkPrediction"),
                         Matchers.hasEntry("metrics", expectedMetrics),
                         Matchers.hasKey("bestParameters"),
                         Matchers.hasKey("trainingPipeline")

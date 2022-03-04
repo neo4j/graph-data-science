@@ -2,8 +2,6 @@
 = Link prediction pipelines
 :entity: relationship
 :result: relationships
-//:algorithm: Link Prediction
-:modelType: Link prediction pipeline
 
 
 [abstract]
@@ -58,9 +56,9 @@ The rest of this page is divided as follows:
 == Creating a pipeline
 
 The first step of building a new pipeline is to create one using `gds.alpha.ml.pipeline.linkPrediction.create`.
-This stores a trainable model object in the model catalog of type `Link prediction training pipeline`.
+This stores a trainable pipeline object in the pipeline catalog of type `Link prediction training pipeline`.
 This represents a configurable pipeline that can later be invoked for training, which in turn creates a trained pipeline.
-The latter is also a model which is stored in the catalog with type `Link prediction model`.
+The latter is also a model which is stored in the catalog with type `LinkPrediction`.
 
 
 === Syntax
