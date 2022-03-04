@@ -44,8 +44,8 @@ RETURN gds.version() AS version
 | Name                | Description
 | gds.util.NaN        | Returns NaN as a Cypher value.
 | gds.util.infinity   | Return infinity as a Cypher value.
-| gds.util.isFinite   | Return true if the given argument is a finite value (not ±Infinity, NaN, or null).
-| gds.util.isInfinite | Return true if the given argument is not a finite value (not ±Infinity, NaN, or null).
+| gds.util.isFinite   | Return false if the given argument is ±Infinity, NaN, or null.
+| gds.util.isInfinite | Return true if the given argument is ±Infinity, NaN, or null.
 |===
 
 
