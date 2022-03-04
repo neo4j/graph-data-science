@@ -50,7 +50,6 @@ class BFSTask implements Runnable {
 
     // variables local to the task
     private final LongArrayList localNodes;
-    private final LongArrayList localSources;
     private final DoubleArrayList localWeights;
     private final LongArrayList chunks;
 
@@ -89,7 +88,6 @@ class BFSTask implements Runnable {
         this.terminationFlag = terminationFlag;
 
         this.localNodes = new LongArrayList();
-        this.localSources = new LongArrayList();
         this.localWeights = new DoubleArrayList();
         this.chunks = new LongArrayList();
     }
@@ -121,7 +119,6 @@ class BFSTask implements Runnable {
                 relaxNode(offset, idx, nodeId, sourceId, weight);
             }
             localNodes.add(Long.MAX_VALUE);
-            localSources.add(Long.MAX_VALUE);
             localWeights.add(Long.MAX_VALUE);
         }
     }
@@ -132,10 +129,11 @@ class BFSTask implements Runnable {
             int index = traversedNodesLength.get();
             while (localNodes.get(indexOfLocalNodes) != Long.MAX_VALUE) {
                 long nodeId = localNodes.get(indexOfLocalNodes);
-                if (minimumChunk.get(nodeId) == currentChunkId()) {
+                long minimumChunkIndex = minimumChunk.get(nodeId);
+                if (minimumChunkIndex < delta + currentChunkId() && minimumChunkIndex != BFS.IGNORE_NODE) {
                     traversedNodes.set(index, localNodes.get(indexOfLocalNodes));
-                    minimumChunk.set(nodeId, -1);
-                    sources.set(index, localSources.get(indexOfLocalNodes));
+                    minimumChunk.set(nodeId, BFS.IGNORE_NODE);
+                    sources.set(index, traversedNodes.get(minimumChunkIndex));
                     weights.set(index++, localWeights.get(indexOfLocalNodes));
                     visited.set(nodeId);
                     nodesTraversed++;
@@ -147,7 +145,6 @@ class BFSTask implements Runnable {
             moveToNextChunk();
             if (!hasMoreChunks()) {
                 localNodes.elementsCount = 0;
-                localSources.elementsCount = 0;
                 localWeights.elementsCount = 0;
                 indexOfLocalNodes = 0;
             }
@@ -170,9 +167,8 @@ class BFSTask implements Runnable {
             nodeId,
             longToIntConsumer((s, t) -> {
                 if (!visited.get(t)) {
-                    minimumChunk.update(t, r -> Math.min(r, chunk));
-                    if (minimumChunk.get(t) == chunk) {
-                        localSources.add(s);
+                    minimumChunk.update(t, r -> Math.min(r, nodeIndex));
+                    if (minimumChunk.get(t) == nodeIndex) {
                         localNodes.add(t);
                         localWeights.add(aggregatorFunction.apply(s, t, weight));
                     }
