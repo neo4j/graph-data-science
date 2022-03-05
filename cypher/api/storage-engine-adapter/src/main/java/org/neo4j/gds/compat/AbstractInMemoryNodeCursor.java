@@ -44,7 +44,7 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
     private final GraphStore graphStore;
     private final TokenHolders tokenHolders;
     private final boolean hasProperties;
-    private final long[] nodeLabelBuffer;
+    private final long[] nodeLabelReadBuffer;
     private final MutableInt nodeLabelCounter;
 
     public AbstractInMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
@@ -52,24 +52,22 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
         this.hasProperties = !graphStore.nodePropertyKeys().values().stream().allMatch(Set::isEmpty);
-        nodeLabelBuffer = new long[graphStore.nodeLabels().size()];
+        nodeLabelReadBuffer = new long[graphStore.nodeLabels().size()];
         nodeLabelCounter = new MutableInt();
     }
 
     public abstract void properties(StoragePropertyCursor propertyCursor);
-
-    protected abstract void setLabelField(NodeRecord record, long firstLabelToken);
 
     @Override
     public long[] labels() {
         nodeLabelCounter.setValue(0);
 
         graphStore.nodes().forEachNodeLabel(getId(), nodeLabel -> {
-            nodeLabelBuffer[nodeLabelCounter.getAndIncrement()] = tokenHolders.labelTokens().getIdByName(nodeLabel.name());
+            nodeLabelReadBuffer[nodeLabelCounter.getAndIncrement()] = tokenHolders.labelTokens().getIdByName(nodeLabel.name());
                 return true;
         });
 
-        return Arrays.copyOf(nodeLabelBuffer, nodeLabelCounter.getValue());
+        return Arrays.copyOf(nodeLabelReadBuffer, nodeLabelCounter.getValue());
     }
 
     @Override
@@ -197,11 +195,5 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
 
     private void node(NodeRecord record, long nodeId) {
         record.setId(nodeId);
-
-        graphStore.nodes().forEachNodeLabel(nodeId, (label -> {
-            var firstLabelToken = tokenHolders.labelTokens().getIdByName(label.name());
-            setLabelField(record, firstLabelToken);
-            return false;
-        }));
     }
 }

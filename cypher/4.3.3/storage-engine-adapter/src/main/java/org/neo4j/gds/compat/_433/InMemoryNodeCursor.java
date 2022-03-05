@@ -21,13 +21,10 @@ package org.neo4j.gds.compat._433;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
-import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.storageengine.api.Degrees;
 import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.token.TokenHolders;
-
-import java.util.List;
 
 public class InMemoryNodeCursor extends AbstractInMemoryNodeCursor {
 
@@ -51,8 +48,4 @@ public class InMemoryNodeCursor extends AbstractInMemoryNodeCursor {
     ) {
     }
 
-    @Override
-    protected void setLabelField(NodeRecord record, long firstLabelToken) {
-        record.setLabelField(firstLabelToken, List.of());
-    }
 }
