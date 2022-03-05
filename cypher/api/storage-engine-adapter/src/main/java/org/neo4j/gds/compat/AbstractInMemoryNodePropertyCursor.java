@@ -23,10 +23,10 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
-import org.neo4j.token.api.NamedToken;
 import org.neo4j.values.storable.Value;
 
 import java.util.Map;
+import java.util.function.Predicate;
 
 public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor<NodeLabel, PropertySchema> {
 
@@ -40,6 +40,16 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
     }
 
     @Override
+    protected void setPropertySelection(Predicate<Integer> propertySelection) {
+        var nodeLabels = graphStore.nodes().nodeLabels(getId());
+        this.propertyIterator = graphStore
+            .nodePropertyKeys(nodeLabels)
+            .stream()
+            .filter(label -> propertySelection.test(tokenHolders.propertyKeyTokens().getIdByName(label)))
+            .iterator();
+    }
+
+    @Override
     public Value propertyValue() {
         if (currentPropertyKey != null) {
             return graphStore.nodePropertyValues(currentPropertyKey).value(getId());
@@ -47,13 +57,5 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
             throw new IllegalStateException(
                 "Property cursor is initialized as node and relationship cursor, maybe you forgot to `reset()`?");
         }
-    }
-
-    @Override
-    protected boolean graphStoreContainsPropertyForElementType(NamedToken namedPropertyToken) {
-        return graphStore.hasNodeProperty(
-            graphStore.nodes().nodeLabels(getId()),
-            namedPropertyToken.name()
-        );
     }
 }
