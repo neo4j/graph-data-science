@@ -34,7 +34,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.neo4j.gds.impl.Converters.longToIntConsumer;
 
 class BFSTask implements Runnable {
-
     // shared variables
     private final Graph graph;
     private final AtomicInteger traversedNodesIndex;
@@ -105,8 +104,7 @@ class BFSTask implements Runnable {
     }
 
     public void run() {
-        chunks.elementsCount = 0;
-        indexOfChunk = 0;
+        resetChunks();
 
         int offset;
         while ((offset = traversedNodesIndex.getAndAdd(delta)) < traversedNodesLength.get()) {
@@ -118,8 +116,8 @@ class BFSTask implements Runnable {
                 var weight = weights.get(idx);
                 relaxNode(offset, idx, nodeId, sourceId, weight);
             }
-            localNodes.add(Long.MAX_VALUE);
-            localWeights.add(Long.MAX_VALUE);
+            localNodes.add(BFS.IGNORE_NODE);
+            localWeights.add(BFS.IGNORE_NODE);
         }
     }
 
@@ -127,15 +125,16 @@ class BFSTask implements Runnable {
         if (!localNodes.isEmpty()) {
             int nodesTraversed = 0;
             int index = traversedNodesLength.get();
-            while (localNodes.get(indexOfLocalNodes) != Long.MAX_VALUE) {
+            while (localNodes.get(indexOfLocalNodes) != BFS.IGNORE_NODE) {
                 long nodeId = localNodes.get(indexOfLocalNodes);
                 long minimumChunkIndex = minimumChunk.get(nodeId);
-                if (minimumChunkIndex < delta + currentChunkId() && minimumChunkIndex != BFS.IGNORE_NODE) {
-                    traversedNodes.set(index, localNodes.get(indexOfLocalNodes));
+                if (minimumChunkIndex != BFS.IGNORE_NODE && minimumChunkIndex < delta + currentChunkId()) {
+                    traversedNodes.set(index, nodeId);
                     minimumChunk.set(nodeId, BFS.IGNORE_NODE);
                     sources.set(index, traversedNodes.get(minimumChunkIndex));
-                    weights.set(index++, localWeights.get(indexOfLocalNodes));
+                    weights.set(index, localWeights.get(indexOfLocalNodes));
                     visited.set(nodeId);
+                    index++;
                     nodesTraversed++;
                 }
                 indexOfLocalNodes++;
@@ -144,9 +143,7 @@ class BFSTask implements Runnable {
             traversedNodesLength.getAndAdd(nodesTraversed);
             moveToNextChunk();
             if (!hasMoreChunks()) {
-                localNodes.elementsCount = 0;
-                localWeights.elementsCount = 0;
-                indexOfLocalNodes = 0;
+                resetLocalState();
             }
         }
     }
@@ -166,6 +163,9 @@ class BFSTask implements Runnable {
         this.graph.forEachRelationship(
             nodeId,
             longToIntConsumer((s, t) -> {
+                // Potential race condition
+                // We consider it okay since it's handled by `minimumChunk.update`
+                // which is an atomic operation and always will have the minimum chunk index
                 if (!visited.get(t)) {
                     minimumChunk.update(t, r -> Math.min(r, nodeIndex));
                     if (minimumChunk.get(t) == nodeIndex) {
@@ -176,5 +176,16 @@ class BFSTask implements Runnable {
                 return terminationFlag.running();
             })
         );
+    }
+
+    private void resetLocalState() {
+        localNodes.elementsCount = 0;
+        localWeights.elementsCount = 0;
+        indexOfLocalNodes = 0;
+    }
+
+    private void resetChunks() {
+        chunks.elementsCount = 0;
+        indexOfChunk = 0;
     }
 }

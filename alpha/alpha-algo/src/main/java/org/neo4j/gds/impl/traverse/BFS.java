@@ -28,10 +28,12 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.LongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -54,31 +56,23 @@ public final class BFS extends Algorithm<long[]> {
     private HugeAtomicBitSet visited;
     private final int concurrency;
 
-    private BFS(
+    public static BFS create(
         Graph graph,
         long startNodeId,
-        HugeLongArray traversedNodes,
-        HugeLongArray sources,
-        HugeDoubleArray weights,
-        HugeAtomicBitSet visited,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
         int concurrency,
-        ProgressTracker progressTracker,
-        int delta
+        ProgressTracker progressTracker
     ) {
-        super(progressTracker);
-        this.graph = graph;
-        this.startNodeId = startNodeId;
-        this.exitPredicate = exitPredicate;
-        this.aggregatorFunction = aggregatorFunction;
-        this.concurrency = concurrency;
-        this.delta = delta;
-
-        this.traversedNodes = traversedNodes;
-        this.sources = sources;
-        this.weights = weights;
-        this.visited = visited;
+        return create(
+            graph,
+            startNodeId,
+            exitPredicate,
+            aggregatorFunction,
+            concurrency,
+            progressTracker,
+            DEFAULT_DELTA
+        );
     }
 
     static BFS create(
@@ -113,23 +107,31 @@ public final class BFS extends Algorithm<long[]> {
         );
     }
 
-    public static BFS create(
+    private BFS(
         Graph graph,
         long startNodeId,
+        HugeLongArray traversedNodes,
+        HugeLongArray sources,
+        HugeDoubleArray weights,
+        HugeAtomicBitSet visited,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
         int concurrency,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        int delta
     ) {
-        return create(
-            graph,
-            startNodeId,
-            exitPredicate,
-            aggregatorFunction,
-            concurrency,
-            progressTracker,
-            DEFAULT_DELTA
-        );
+        super(progressTracker);
+        this.graph = graph;
+        this.startNodeId = startNodeId;
+        this.exitPredicate = exitPredicate;
+        this.aggregatorFunction = aggregatorFunction;
+        this.concurrency = concurrency;
+        this.delta = delta;
+
+        this.traversedNodes = traversedNodes;
+        this.sources = sources;
+        this.weights = weights;
+        this.visited = visited;
     }
 
     @Override
@@ -140,21 +142,24 @@ public final class BFS extends Algorithm<long[]> {
         var traversedNodesLength = new AtomicInteger(1);
         var targetFoundIndex = new AtomicLong(Long.MAX_VALUE);
 
-        var minimumChunk = HugeAtomicLongArray.newArray(graph.nodeCount());
-        minimumChunk.setAll(Long.MAX_VALUE);
+        var minimumChunk = HugeAtomicLongArray.newArray(
+            graph.nodeCount(),
+            LongPageCreator.of(concurrency, l -> Long.MAX_VALUE)
+        );
 
         visited.set(startNodeId);
         traversedNodes.set(0, startNodeId);
         sources.set(0, startNodeId);
         weights.set(0, 0);
 
-        var bfsTaskList = initialiseBfsTasks(
+        var bfsTaskList = initializeBfsTasks(
             traversedNodesIndex,
             traversedNodesLength,
             targetFoundIndex,
             minimumChunk,
             delta
         );
+        int bfsTaskListSize = bfsTaskList.size();
 
         while (running()) {
             ParallelUtil.run(bfsTaskList, Pools.DEFAULT);
@@ -166,16 +171,16 @@ public final class BFS extends Algorithm<long[]> {
 
             int numberOfFinishedTasks = 0;
             int numberOfTasksWithChunks = countTasksWithChunks(bfsTaskList);
-            while (numberOfFinishedTasks != numberOfTasksWithChunks) {
+            while (numberOfFinishedTasks != numberOfTasksWithChunks && running()) {
                 int minimumTaskIndex = -1;
-                for (int i = 0; i < concurrency; ++i) {
-                    var currentBfsTask = bfsTaskList.get(i);
+                for (int bfsTaskIndex = 0; bfsTaskIndex < bfsTaskListSize; ++bfsTaskIndex) {
+                    var currentBfsTask = bfsTaskList.get(bfsTaskIndex);
                     if (currentBfsTask.hasMoreChunks()) {
                         if (minimumTaskIndex == -1) {
-                            minimumTaskIndex = i;
+                            minimumTaskIndex = bfsTaskIndex;
                         } else {
                             if (bfsTaskList.get(minimumTaskIndex).currentChunkId() > currentBfsTask.currentChunkId()) {
-                                minimumTaskIndex = i;
+                                minimumTaskIndex = bfsTaskIndex;
                             }
                         }
                     }
@@ -204,7 +209,7 @@ public final class BFS extends Algorithm<long[]> {
         return resultNodes;
     }
 
-    private List<BFSTask> initialiseBfsTasks(
+    private List<BFSTask> initializeBfsTasks(
         AtomicInteger traversedNodesIndex,
         AtomicInteger traversedNodesLength,
         AtomicLong targetFoundIndex,
@@ -239,14 +244,8 @@ public final class BFS extends Algorithm<long[]> {
         visited = null;
     }
 
-    private int countTasksWithChunks(List<BFSTask> bfsTaskList) {
-        int tasksWithChunks = 0;
-        for (int i = 0; i < concurrency; ++i) {
-            if (bfsTaskList.get(i).hasMoreChunks()) {
-                tasksWithChunks++;
-            }
-        }
-        return tasksWithChunks;
+    private int countTasksWithChunks(Collection<BFSTask> bfsTaskList) {
+        return (int) bfsTaskList.stream().filter(BFSTask::hasMoreChunks).count();
     }
 
 }
