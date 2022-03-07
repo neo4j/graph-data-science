@@ -136,8 +136,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.spanningTree.maximum.write",
         "gds.alpha.spanningTree.minimum.write",
         "gds.alpha.triangles",
-        "gds.alpha.ml.ann.write",
-        "gds.alpha.ml.ann.stream",
         "gds.alpha.ml.splitRelationships.mutate",
         "gds.alpha.influenceMaximization.greedy.stream",
         "gds.alpha.influenceMaximization.celf.stream",
