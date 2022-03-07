@@ -95,6 +95,8 @@ public interface SimilarityComputer {
         switch (similarityMetric) {
             case COSINE:
                 return new FloatArrayPropertySimilarityComputer(nodeProperties, Cosine::floatMetric);
+            case EUCLIDEAN:
+                return new FloatArrayPropertySimilarityComputer(nodeProperties, Euclidean::floatMetric);
             default:
                 throw unsupportedSimilarityMetric(nodeProperties.valueType(), similarityMetric);
         }
@@ -104,6 +106,8 @@ public interface SimilarityComputer {
         switch (similarityMetric) {
             case COSINE:
                 return new DoubleArrayPropertySimilarityComputer(nodeProperties, Cosine::doubleMetric);
+            case EUCLIDEAN:
+                return new DoubleArrayPropertySimilarityComputer(nodeProperties, Euclidean::doubleMetric);
             default:
                 throw unsupportedSimilarityMetric(nodeProperties.valueType(), similarityMetric);
         }

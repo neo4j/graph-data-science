@@ -252,11 +252,11 @@ class SimilarityComputerTest {
 
     @Provide("doubleArrayMetrics")
     final Arbitrary<SimilarityMetric> doubleArrayMetrics() {
-        return Arbitraries.of(SimilarityMetric.COSINE);
+        return Arbitraries.of(SimilarityMetric.COSINE, SimilarityMetric.EUCLIDEAN);
     }
 
     @Provide("floatArrayMetrics")
     final Arbitrary<SimilarityMetric> floatArrayMetrics() {
-        return Arbitraries.of(SimilarityMetric.COSINE);
+        return Arbitraries.of(SimilarityMetric.COSINE, SimilarityMetric.EUCLIDEAN);
     }
 }
