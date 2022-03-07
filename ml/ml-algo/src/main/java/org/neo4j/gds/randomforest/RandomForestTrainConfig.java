@@ -30,4 +30,7 @@ public interface RandomForestTrainConfig extends DecisionTreeTrainConfig {
 
     @Configuration.DoubleRange(min = 0, max = 1)
     double numFeatureVectorsRatio();
+
+    @Configuration.IntegerRange(min = 1)
+    int numberOfDecisionTrees();
 }

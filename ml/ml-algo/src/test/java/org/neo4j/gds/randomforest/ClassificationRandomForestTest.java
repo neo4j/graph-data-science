@@ -35,16 +35,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ClassificationRandomForestTest {
     private static final long NUM_SAMPLES = 10;
     private static final int[] CLASSES = {1337, 42};
-    private static final Map<Integer, Integer> CLASS_TO_IDX = Map.of(
-        1337, 0,
-        42, 1
-    );
+    private static final Map<Integer, Integer> CLASS_TO_IDX = Map.of(1337, 0, 42, 1);
 
     private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES);
-    private final HugeObjectArray<double[]> allFeatureVectors = HugeObjectArray.newArray(
-        double[].class,
-        NUM_SAMPLES
-    );
+    private final HugeObjectArray<double[]> allFeatureVectors = HugeObjectArray.newArray(double[].class, NUM_SAMPLES);
 
     private GiniIndex giniIndexLoss;
 
@@ -75,15 +69,18 @@ public class ClassificationRandomForestTest {
         var randomForestTrain = new ClassificationRandomForestTrain(
             giniIndexLoss,
             allFeatureVectors,
-            1,
-            1,
-            0.0D,
-            0.0D,
-            Optional.empty(),
-            1,
             concurrency,
             CLASSES,
-            allLabels
+            allLabels,
+            RandomForestTrainConfigImpl
+                .builder()
+                .maxDepth(1)
+                .minSplitSize(1)
+                .randomSeed(Optional.empty())
+                .numFeatureVectorsRatio(0.0D)
+                .featureBaggingRatio(0.0D)
+                .numberOfDecisionTrees(1)
+                .build()
         );
 
         var randomForestPredict = randomForestTrain.train().predictor();
@@ -98,15 +95,18 @@ public class ClassificationRandomForestTest {
         var randomForestTrain = new ClassificationRandomForestTrain(
             giniIndexLoss,
             allFeatureVectors,
-            2,
-            1,
-            0.0D,
-            0.5D,
-            Optional.of(1337L),
-            20,
             concurrency,
             CLASSES,
-            allLabels
+            allLabels,
+            RandomForestTrainConfigImpl
+                .builder()
+                .maxDepth(2)
+                .minSplitSize(1)
+                .randomSeed(Optional.of(1337L))
+                .numFeatureVectorsRatio(0.5D)
+                .featureBaggingRatio(0.0D)
+                .numberOfDecisionTrees(20)
+                .build()
         );
 
         var randomForestPredict = randomForestTrain.train().predictor();
@@ -121,22 +121,27 @@ public class ClassificationRandomForestTest {
         var randomForestTrain = new ClassificationRandomForestTrain(
             giniIndexLoss,
             allFeatureVectors,
-            2,
-            1,
-            0.0D,
-            1.0D,
-            Optional.of(1337L),
-            20,
             concurrency,
             CLASSES,
-            allLabels
+            allLabels,
+            RandomForestTrainConfigImpl
+                .builder()
+                .maxDepth(2)
+                .minSplitSize(1)
+                .randomSeed(Optional.of(1337L))
+                .numFeatureVectorsRatio(1.0D)
+                .featureBaggingRatio(0.0D)
+                .numberOfDecisionTrees(20)
+                .build()
         );
 
         var trainResult = randomForestTrain.train();
         var randomForestPredict = trainResult.predictor();
         var bootstrappedDatasets = trainResult.bootstrappedDatasets();
 
-        assertThat(randomForestPredict.outOfBagError(bootstrappedDatasets, allFeatureVectors, allLabels))
-            .isCloseTo(0.2, Offset.offset(0.000001D));
+        assertThat(randomForestPredict.outOfBagError(bootstrappedDatasets, allFeatureVectors, allLabels)).isCloseTo(
+            0.2,
+            Offset.offset(0.000001D)
+        );
     }
 }

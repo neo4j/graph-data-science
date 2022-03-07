@@ -30,62 +30,47 @@ import org.neo4j.gds.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.decisiontree.DecisionTreeTrainConfigImpl;
 
 import java.util.HashMap;
-import java.util.Optional;
 
 public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
 
     private final LOSS lossFunction;
     private final HugeObjectArray<double[]> allFeatureVectors;
-    private final int maxDepth;
-    private final int minSize;
-    private final double numFeatureIndicesRatio;
-    private final double numFeatureVectorsRatio;
-    private final Optional<Long> randomSeed;
+    private final RandomForestTrainConfig config;
     private final int concurrency;
-    private final int numDecisionTrees;
     private final int[] classes;
     private final HugeIntArray allLabels;
 
     public ClassificationRandomForestTrain(
         LOSS lossFunction,
         HugeObjectArray<double[]> allFeatureVectors,
-        int maxDepth,
-        int minSize,
-        double numFeatureIndicesRatio,
-        double numFeatureVectorsRatio,
-        Optional<Long> randomSeed,
-        int numDecisionTrees,
         int concurrency,
         int[] classes,
-        HugeIntArray allLabels
+        HugeIntArray allLabels,
+        RandomForestTrainConfig config
     ) {
         this.lossFunction = lossFunction;
         this.allFeatureVectors = allFeatureVectors;
-        this.maxDepth = maxDepth;
-        this.minSize = minSize;
-        this.numFeatureIndicesRatio = numFeatureIndicesRatio;
-        this.numFeatureVectorsRatio = numFeatureVectorsRatio;
-        this.randomSeed = randomSeed;
+        this.config = config;
         this.concurrency = concurrency;
-        this.numDecisionTrees = numDecisionTrees;
         this.classes = classes;
         this.allLabels = allLabels;
     }
 
     public ClassificationRandomForestTrainResult train() {
-        var decisionTrees = new DecisionTreePredict[numDecisionTrees];
-        var bootstrappedDatasets = new HugeByteArray[numDecisionTrees];
+        int numberOfDecisionTrees = config.numberOfDecisionTrees();
+        var decisionTrees = new DecisionTreePredict[numberOfDecisionTrees];
+        var bootstrappedDatasets = new HugeByteArray[numberOfDecisionTrees];
 
         var classToIdx = new HashMap<Integer, Integer>();
         for (int i = 0; i < classes.length; i++) {
             classToIdx.put(classes[i], i);
         }
 
-        var tasks = ParallelUtil.tasks(numDecisionTrees, index -> () -> {
+        var tasks = ParallelUtil.tasks(numberOfDecisionTrees, index -> () -> {
             var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
-                .maxDepth(maxDepth)
-                .minSplitSize(minSize)
-                .randomSeed(randomSeed.map(seed -> seed + index)).build();
+                .maxDepth(config.maxDepth())
+                .minSplitSize(config.minSplitSize())
+                .randomSeed(config.randomSeed().map(seed -> seed + index)).build();
 
             var decisionTree = new ClassificationDecisionTreeTrain<>(
                 lossFunction,
@@ -94,8 +79,8 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
                 allLabels,
                 classToIdx,
                 decisionTreeTrainConfig,
-                numFeatureIndicesRatio,
-                numFeatureVectorsRatio
+                config.featureBaggingRatio(),
+                config.numFeatureVectorsRatio()
             );
             decisionTrees[index] = decisionTree.train();
             bootstrappedDatasets[index] = decisionTree.bootstrappedDataset();
