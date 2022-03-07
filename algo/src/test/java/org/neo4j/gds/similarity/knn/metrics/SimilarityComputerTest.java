@@ -107,7 +107,7 @@ class SimilarityComputerTest {
             .toArray()
         );
         var sim = SimilarityComputer.ofFloatArrayProperty(props, similarityMetric);
-        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
+        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
 
     @Property
@@ -146,7 +146,7 @@ class SimilarityComputerTest {
     ) {
         NodeProperties props = new DoubleArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0).toArray());
         var sim = SimilarityComputer.ofDoubleArrayProperty(props, similarityMetric);
-        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
+        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
 
     @Property
@@ -252,11 +252,11 @@ class SimilarityComputerTest {
 
     @Provide("doubleArrayMetrics")
     final Arbitrary<SimilarityMetric> doubleArrayMetrics() {
-        return Arbitraries.of(SimilarityMetric.COSINE, SimilarityMetric.EUCLIDEAN);
+        return Arbitraries.of(SimilarityMetric.COSINE, SimilarityMetric.EUCLIDEAN, SimilarityMetric.PEARSON);
     }
 
     @Provide("floatArrayMetrics")
     final Arbitrary<SimilarityMetric> floatArrayMetrics() {
-        return Arbitraries.of(SimilarityMetric.COSINE, SimilarityMetric.EUCLIDEAN);
+        return Arbitraries.of(SimilarityMetric.COSINE, SimilarityMetric.EUCLIDEAN, SimilarityMetric.PEARSON);
     }
 }
