@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.randomforest;
+package org.neo4j.gds.models.randomforest;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +32,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ClassificationRandomForestTest {
+class ClassificationRandomForestTest {
     private static final long NUM_SAMPLES = 10;
     private static final int[] CLASSES = {1337, 42};
     private static final Map<Integer, Integer> CLASS_TO_IDX = Map.of(1337, 0, 42, 1);

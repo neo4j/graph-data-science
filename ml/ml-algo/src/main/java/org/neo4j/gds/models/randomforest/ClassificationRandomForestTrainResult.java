@@ -17,20 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.randomforest;
+package org.neo4j.gds.models.randomforest;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.decisiontree.DecisionTreeTrainConfig;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.paged.HugeByteArray;
 
-@Configuration
-public interface RandomForestTrainConfig extends DecisionTreeTrainConfig {
+@ValueClass
+public interface ClassificationRandomForestTrainResult {
+    ClassificationRandomForestPredict predictor();
 
-    @Configuration.DoubleRange(min = 0, max = 1)
-    double featureBaggingRatio();
-
-    @Configuration.DoubleRange(min = 0, max = 1)
-    double numFeatureVectorsRatio();
-
-    @Configuration.IntegerRange(min = 1)
-    int numberOfDecisionTrees();
+    HugeByteArray[] bootstrappedDatasets();
 }
