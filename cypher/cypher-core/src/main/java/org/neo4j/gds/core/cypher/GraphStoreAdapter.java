@@ -142,7 +142,7 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     public NodeProperties nodePropertyValues(
         NodeLabel label, String propertyKey
     ) {
-        return graphStore.nodePropertyValues(propertyKey);
+        return graphStore.nodePropertyValues(label, propertyKey);
     }
 
     @Override

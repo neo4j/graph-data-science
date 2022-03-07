@@ -27,7 +27,6 @@ import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.Map;
-import java.util.function.Predicate;
 
 public abstract class AbstractInMemoryRelationshipPropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor<RelationshipType, RelationshipPropertySchema> {
 
@@ -56,7 +55,7 @@ public abstract class AbstractInMemoryRelationshipPropertyCursor extends Abstrac
     }
 
     @Override
-    protected void setPropertySelection(Predicate<Integer> propertySelection) {
+    protected void setPropertySelection(InMemoryPropertySelection propertySelection) {
         var relationshipTypes = graphStore.relationshipIds().relationshipTypeForId(getId());
         this.propertyIterator = graphStore
             .relationshipPropertyKeys(relationshipTypes)

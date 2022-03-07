@@ -27,7 +27,6 @@ import org.neo4j.token.TokenHolders;
 import org.neo4j.values.storable.Value;
 
 import java.util.Map;
-import java.util.function.Predicate;
 
 public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor<NodeLabel, PropertySchema> {
 
@@ -63,7 +62,7 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
     }
 
     @Override
-    protected void setPropertySelection(Predicate<Integer> propertySelection) {
+    protected void setPropertySelection(InMemoryPropertySelection propertySelection) {
         var nodeId = getId();
         this.nodePropertyCount = 0;
 
@@ -73,9 +72,16 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
                 if (propertySelection.test(propertyId) && !Arrays.contains(nodePropertyKeyMapping, propertyId)) {
                     int propertyIndex = nodePropertyCount++;
                     nodePropertyKeyMapping[propertyIndex] = propertyId;
-                    nodePropertyValues[propertyIndex] = graphStore
-                        .nodePropertyValues(label, nodePropertyKey)
-                        .value(nodeId);
+
+                    if (!propertySelection.isKeysOnly()) {
+                        nodePropertyValues[propertyIndex] = graphStore
+                            .nodePropertyValues(label, nodePropertyKey)
+                            .value(nodeId);
+                    }
+
+                    if (propertySelection.isLimited() && nodePropertyCount == propertySelection.numberOfKeys()) {
+                        return false;
+                    }
                 }
             }
             return true;

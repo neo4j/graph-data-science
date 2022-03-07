@@ -45,6 +45,6 @@ public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelation
     ) {
         reset();
         setId(((LongReference) reference).id);
-        setPropertySelection(propertySelection::test);
+        setPropertySelection(new InMemoryPropertySelectionImpl(propertySelection));
     }
 }

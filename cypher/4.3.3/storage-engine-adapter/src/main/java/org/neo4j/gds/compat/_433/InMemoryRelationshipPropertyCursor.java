@@ -20,6 +20,7 @@
 package org.neo4j.gds.compat._433;
 
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipPropertyCursor;
+import org.neo4j.gds.compat.InMemoryPropertySelection;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
 
@@ -41,6 +42,6 @@ public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelation
     public void initRelationshipProperties(long reference, long ownerReference) {
         reset();
         setId(reference);
-        setPropertySelection(i -> true);
+        setPropertySelection(InMemoryPropertySelection.SELECT_ALL);
     }
 }

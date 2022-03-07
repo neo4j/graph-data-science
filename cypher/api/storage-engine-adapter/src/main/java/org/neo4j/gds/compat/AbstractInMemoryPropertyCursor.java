@@ -34,7 +34,6 @@ import org.neo4j.values.storable.ValueGroup;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.function.Predicate;
 
 public abstract class AbstractInMemoryPropertyCursor
     extends PropertyRecord implements StoragePropertyCursor {
@@ -118,7 +117,7 @@ public abstract class AbstractInMemoryPropertyCursor
 
         protected abstract Map<IDENTIFIER, Map<String, PROP_SCHEMA>> propertySchema();
 
-        protected abstract void setPropertySelection(Predicate<Integer> propertySelection);
+        protected abstract void setPropertySelection(InMemoryPropertySelection propertySelection);
 
         @Override
         public int propertyKey() {
