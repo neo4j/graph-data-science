@@ -28,6 +28,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -127,7 +128,7 @@ class CypherAggregationTest extends BaseProcTest {
     }
 
     @Nested
-    class LargerGraph extends RandomGraphTestCase {
+    class LargerGraphTest extends RandomGraphTestCase {
 
         @Override
         @BeforeEach
@@ -137,10 +138,74 @@ class CypherAggregationTest extends BaseProcTest {
 
         @Test
         void testLargerGraphSize() {
-            runQuery("MATCH (s:Label) OPTIONAL MATCH (s)-[:TYPE]->(t:Label) RETURN gds.alpha.graph.project('g', s, t)");
+            runQuery(
+                "MATCH (s:Label) " +
+                "OPTIONAL MATCH (s)-[r:TYPE]->(t:Label) " +
+                "RETURN gds.alpha.graph.project('g', s, t)"
+            );
             assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
             var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
             assertThat(graph.nodeCount()).isEqualTo(10000);
+        }
+    }
+
+    @Nested
+    class InverseGraphTest extends BaseTest {
+
+        long nodeCount;
+        long relCount;
+
+        @BeforeEach
+        protected void setupGraph() {
+            runQuery(
+                "CREATE (a:A)" +
+                ",(a)-[:REL {weight:rand()}]->(:B) " +
+                ",(a)-[:REL {weight:rand()}]->(:B)"
+            );
+            runQuery("FOREACH (x IN range(1, 1000) | CREATE (:A))");
+
+            nodeCount = runQuery(
+                "MATCH (n) RETURN COUNT(n) AS count",
+                r -> r.<Long>columnAs("count").stream().findFirst().get()
+            );
+            relCount = runQuery(
+                "MATCH ()-->() RETURN COUNT(*) AS count",
+                r -> r.<Long>columnAs("count").stream().findFirst().get()
+            );
+        }
+
+        @Test
+        void testInverseIds() {
+            runQuery(
+                "MATCH (s:A) " +
+                "OPTIONAL MATCH (s)-[r:REL]->(t:B) " +
+                "WITH s, t, r " +
+                "ORDER BY id(s) DESC " +
+                "RETURN gds.alpha.graph.project('g', s, t)"
+            );
+
+            assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
+            var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+            assertThat(graph.nodeCount()).isEqualTo(nodeCount);
+            assertThat(graph.relationshipCount()).isEqualTo(relCount);
+        }
+
+        @Test
+        void testInverseIdsWithProperties() {
+            runQuery(
+                "MATCH (s:A) " +
+                "OPTIONAL MATCH (s)-[r:REL]->(t:B) " +
+                "WITH s, t, r " +
+                "ORDER BY id(s) DESC " +
+                "RETURN gds.alpha.graph.project('g', s, t, {}," +
+                " { properties: { weight: coalesce(r.weight, 13.37) } }" +
+                ")"
+            );
+
+            assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
+            var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+            assertThat(graph.nodeCount()).isEqualTo(nodeCount);
+            assertThat(graph.relationshipCount()).isEqualTo(relCount);
         }
     }
 

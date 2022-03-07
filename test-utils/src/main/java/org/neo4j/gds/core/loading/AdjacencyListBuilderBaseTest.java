@@ -24,6 +24,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compress.AdjacencyCompressor.ValueMapper;
 import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.huge.DirectIdMap;
 
@@ -31,27 +32,32 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 public abstract class AdjacencyListBuilderBaseTest {
 
-    protected void testAdjacencyList() {
-        var nodeCount = 6;
+    void adjacencyListTest(Optional<Long> idOffset) {
+        long nodeCount = 6;
+
+        var fakeNodeCount = idOffset.map(o -> nodeCount + o).orElse(nodeCount);
+        var mapper = idOffset.map(offset -> (ValueMapper) value -> value + offset);
+        var toMapped = mapper.orElseGet(() -> id -> id);
 
         var importMetaData = ImmutableImportMetaData.builder()
             .projection(RelationshipProjection.of("", Orientation.NATURAL, Aggregation.NONE))
             .aggregations(Aggregation.NONE)
-            .propertyKeyIds(new int[0])
-            .defaultValues(new double[0])
+            .propertyKeyIds()
+            .defaultValues()
             .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
             .preAggregate(false).build();
 
+
         var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
-            () -> nodeCount,
+            () -> fakeNodeCount,
             PropertyMappings.of(),
             importMetaData.aggregations()
         );
@@ -79,24 +85,33 @@ public abstract class AdjacencyListBuilderBaseTest {
         );
         importer.importRelationships();
 
-        adjacencyBuffer.adjacencyListBuilderTasks(Optional.empty()).forEach(Runnable::run);
+        adjacencyBuffer.adjacencyListBuilderTasks(mapper).forEach(Runnable::run);
 
         try (var adjacencyList = adjacencyCompressorFactory.build().adjacency()) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-                try (var cursor = adjacencyList.adjacencyCursor(nodeId)) {
+                try (var cursor = adjacencyList.adjacencyCursor(toMapped.map(nodeId))) {
                     while (cursor.hasNextVLong()) {
                         long target = cursor.nextVLong();
-                        assertEquals(relationships.remove(nodeId), target);
+                        var expected = toMapped.map(relationships.remove(nodeId));
+                        assertEquals(expected, target);
                     }
                 }
             }
-            assertTrue(relationships.isEmpty());
+            assertThat(relationships).isEmpty();
         }
     }
 
-    @Test
+    void testAdjacencyList() {
+        adjacencyListTest(Optional.empty());
+    }
+
+    void testValueMapper() {
+        adjacencyListTest(Optional.of(10000L));
+    }
+
     // TODO test single case
     // TODO add testcase that sets a range
+    @Test
     void testAggregation() {
         var values = new long[]{3, 1, 2, 2, 3, 1};
 

@@ -115,11 +115,24 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
-        AdjacencyCompression.copyFrom(buffer, semiCompressedBytesDuringLoading, numberOfCompressedTargets, compressedByteSize, mapper);
+        AdjacencyCompression.copyFrom(
+            buffer,
+            semiCompressedBytesDuringLoading,
+            numberOfCompressedTargets,
+            compressedByteSize,
+            mapper
+        );
         int degree = AdjacencyCompression.applyDeltaEncoding(buffer, aggregations[0]);
+
+        // since we might have to map to larger ids
+        // we can no longer guarantee that we fit into the buffer
         if (mapper != ZigZagLongDecoding.Identity.INSTANCE) {
-            semiCompressedBytesDuringLoading = AdjacencyCompression.ensureBufferSize(buffer, semiCompressedBytesDuringLoading);
+            semiCompressedBytesDuringLoading = AdjacencyCompression.ensureBufferSize(
+                buffer,
+                semiCompressedBytesDuringLoading
+            );
         }
+
         int requiredBytes = AdjacencyCompression.compress(buffer, semiCompressedBytesDuringLoading);
 
         long address = copyIds(semiCompressedBytesDuringLoading, requiredBytes);
@@ -154,6 +167,15 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         // buffer contains sorted target list
         // values are delta encoded except for the first one
         // values are still uncompressed
+
+        // since we might have to map to larger ids
+        // we can no longer guarantee that we fit into the buffer
+        if (mapper != ZigZagLongDecoding.Identity.INSTANCE) {
+            semiCompressedBytesDuringLoading = AdjacencyCompression.ensureBufferSize(
+                buffer,
+                semiCompressedBytesDuringLoading
+            );
+        }
 
         int requiredBytes = AdjacencyCompression.compress(buffer, semiCompressedBytesDuringLoading);
         // values are now vlong encoded in the array storage (semiCompressed)

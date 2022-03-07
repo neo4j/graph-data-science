@@ -25,7 +25,12 @@ import org.neo4j.gds.utils.GdsFeatureToggles;
 class UncompressedAdjacencyListBuilderTest extends AdjacencyListBuilderBaseTest {
 
     @Test
-    void test() throws Exception {
+    void test() {
         GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(this::testAdjacencyList);
+    }
+
+    @Test
+    void testMapper() {
+        GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(this::testValueMapper);
     }
 }
