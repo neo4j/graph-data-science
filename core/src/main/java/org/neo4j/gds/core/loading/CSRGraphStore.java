@@ -166,7 +166,7 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public Set<String> nodePropertyKeys(NodeLabel label) {
-        return new HashSet<>(nodeProperties.getOrDefault(label, NodePropertyStore.empty()).keySet());
+        return nodeProperties.getOrDefault(label, NodePropertyStore.empty()).keySet();
     }
 
     @Override
