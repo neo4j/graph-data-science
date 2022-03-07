@@ -42,10 +42,17 @@ class IntersectingTriangleCountFilteredGraphTest extends BaseTest {
 
     @Neo4jGraph
     static final String DB_CYPHER = "CREATE " +
-                                    "  (a:A)" +
+                                    "  (a1:A)" +
+                                    ", (a2:A)" +
+                                    ", (a3:A)" +
                                     ", (b1:B)" +
                                     ", (b2:B)" +
                                     ", (b3:B)" +
+
+                                    ", (a1)-[:R1]->(a2)" +
+                                    ", (a2)-[:R2]->(a3)" +
+                                    ", (a1)-[:R1]->(a3)" +
+
                                     ", (b1)-[:R1]->(b2)" +
                                     ", (b2)-[:R2]->(b3)" +
                                     ", (b1)-[:R1]->(b3)";
