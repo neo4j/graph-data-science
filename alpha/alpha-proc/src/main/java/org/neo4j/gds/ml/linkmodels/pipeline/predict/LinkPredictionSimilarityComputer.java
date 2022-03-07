@@ -26,7 +26,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 import org.neo4j.gds.similarity.knn.NeighborFilterFactory;
-import org.neo4j.gds.similarity.knn.SimilarityComputer;
+import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 class LinkPredictionSimilarityComputer implements SimilarityComputer {
 

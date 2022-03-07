@@ -44,6 +44,7 @@ import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;
+import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 import java.util.Comparator;
 import java.util.List;
@@ -106,7 +107,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = new Knn(graph, knnConfig, knnContext);
+        var knn = Knn.createWithDefaults(graph, knnConfig, knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -129,7 +130,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = new Knn(graph, knnConfig, knnContext);
+        var knn = Knn.createWithDefaults(graph, knnConfig, knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -170,7 +171,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = new Knn(graph, knnConfig, knnContext);
+        var knn = Knn.createWithDefaults(graph, knnConfig, knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -207,7 +208,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = new Knn(multPropMissingGraph, knnConfig, knnContext);
+        var knn = Knn.createWithDefaults(multPropMissingGraph, knnConfig, knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -242,7 +243,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = new Knn(simThresholdGraph, knnConfig, knnContext);
+        var knn = Knn.createWithDefaults(simThresholdGraph, knnConfig, knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -272,7 +273,7 @@ class KnnTest {
             .topK(2)
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
-        var knn = new Knn(
+        var knn = Knn.create(
             graph,
             knnConfig,
             SimilarityComputer.ofProperty(nodeProperties, "knn"),
@@ -298,7 +299,7 @@ class KnnTest {
     @Test
     void testMixedExistingAndNonExistingProperties(SoftAssertions softly) {
         var nodeProperties = new DoubleTestProperties(nodeId -> nodeId == 0 ? Double.NaN : 42.1337);
-        var knn = new Knn(
+        var knn = Knn.create(
             graph,
             ImmutableKnnBaseConfig
                 .builder()
@@ -405,7 +406,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = new Knn(graph, knnConfig, knnContext);
+        var knn = Knn.createWithDefaults(graph, knnConfig, knnContext);
 
         var result = knn.compute();
 
@@ -485,7 +486,7 @@ class KnnTest {
                 .concurrency(1)
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = new Knn(graph, config, knnContext);
+            var knn = Knn.createWithDefaults(graph, config, knnContext);
             var result = knn.compute();
 
             assertEquals(1, result.ranIterations());
@@ -512,7 +513,7 @@ class KnnTest {
                 .build();
 
             var knnContext = KnnContext.empty();
-            var knn = new Knn(graph, config, knnContext);
+            var knn = Knn.createWithDefaults(graph, config, knnContext);
             var result = knn.compute();
 
             assertTrue(result.didConverge());
@@ -573,7 +574,7 @@ class KnnTest {
                 .initialSampler(KnnSampler.SamplerType.RANDOMWALK)
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = new Knn(graph, config, knnContext);
+            var knn = Knn.createWithDefaults(graph, config, knnContext);
             var result = knn.compute();
 
             long nodeAId = idFunction.of("a");

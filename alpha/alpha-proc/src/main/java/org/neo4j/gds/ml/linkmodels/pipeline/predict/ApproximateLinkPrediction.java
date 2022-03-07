@@ -74,7 +74,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
         Graph graph,
         LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     ) {
-        var knnResult = new Knn(
+        var knnResult = Knn.create(
             graph,
             knnConfig,
             linkPredictionSimilarityComputer,

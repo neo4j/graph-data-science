@@ -53,7 +53,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new Knn(
+        return Knn.createWithDefaults(
             graph,
             configuration,
             ImmutableKnnContext

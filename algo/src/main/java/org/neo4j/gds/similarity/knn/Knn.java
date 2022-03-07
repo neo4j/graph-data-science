@@ -20,6 +20,7 @@
 package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongArrayList;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
@@ -32,6 +33,7 @@ import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
@@ -44,42 +46,67 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Knn extends Algorithm<Knn.Result> {
-
     private final Graph graph;
     private final KnnBaseConfig config;
     private final NeighborFilterFactory neighborFilterFactory;
     private final KnnContext context;
-    private final SplittableRandom random;
-    private final SimilarityComputer computer;
+    private final SplittableRandom splittableRandom;
+    private final SimilarityComputer similarityComputer;
+
     private long nodePairsConsidered;
 
-    public Knn(Graph graph, KnnBaseConfig config, KnnContext context) {
-        this(
+    public static Knn createWithDefaults(Graph graph, KnnBaseConfig config, KnnContext context) {
+        return new Knn(
+            context.progressTracker(),
             graph,
             config,
             SimilarityComputer.ofProperties(graph, config.nodeProperties()),
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            context
+            context,
+            getSplittableRandom(config.randomSeed())
         );
     }
 
-    public Knn(
+    public static Knn create(
         Graph graph,
         KnnBaseConfig config,
         SimilarityComputer similarityComputer,
         NeighborFilterFactory neighborFilterFactory,
         KnnContext context
     ) {
-        super(context.progressTracker());
+        SplittableRandom splittableRandom = getSplittableRandom(config.randomSeed());
+        return new Knn(
+            context.progressTracker(),
+            graph,
+            config,
+            similarityComputer,
+            neighborFilterFactory,
+            context,
+            splittableRandom
+        );
+    }
+
+    @NotNull
+    private static SplittableRandom getSplittableRandom(Optional<Long> randomSeed) {
+        return randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
+    }
+
+    Knn(
+        ProgressTracker progressTracker,
+        Graph graph,
+        KnnBaseConfig config,
+        SimilarityComputer similarityComputer,
+        NeighborFilterFactory neighborFilterFactory,
+        KnnContext context,
+        SplittableRandom splittableRandom
+    ) {
+        super(progressTracker);
         this.graph = graph;
         this.config = config;
-        this.computer = similarityComputer;
+        this.similarityComputer = similarityComputer;
         this.neighborFilterFactory = neighborFilterFactory;
         this.context = context;
-
-        this.random = this.config.randomSeed().isPresent()
-            ? new SplittableRandom(this.config.randomSeed().get())
-            : new SplittableRandom();
+        this.splittableRandom = splittableRandom;
     }
 
     public long nodeCount() {
@@ -164,11 +191,11 @@ public class Knn extends Algorithm<Knn.Result> {
             config.concurrency(),
             graph.nodeCount(),
             partition -> {
-                var localRandom = random.split();
+                var localRandom = splittableRandom.split();
                 return new GenerateRandomNeighbors(
                     initializeSampler(localRandom),
                     localRandom,
-                    this.computer,
+                    this.similarityComputer,
                     this.neighborFilterFactory.create(),
                     neighbors,
                     k,
@@ -225,7 +252,7 @@ public class Knn extends Algorithm<Knn.Result> {
 
         progressTracker.beginSubTask();
         ParallelUtil.readParallel(concurrency, nodeCount, executor, new SplitOldAndNewNeighbors(
-            this.random,
+            this.splittableRandom,
             neighbors,
             allOldNeighbors,
             allNewNeighbors,
@@ -254,8 +281,8 @@ public class Knn extends Algorithm<Knn.Result> {
             concurrency,
             nodeCount,
             partition -> new JoinNeighbors(
-                this.random.split(),
-                this.computer,
+                this.splittableRandom.split(),
+                this.similarityComputer,
                 this.neighborFilterFactory.create(),
                 neighbors,
                 allOldNeighbors,
@@ -340,7 +367,7 @@ public class Knn extends Algorithm<Knn.Result> {
         private long updateCount;
         private final Partition partition;
         private long nodePairsConsidered;
-        private double perturbationRate;
+        private final double perturbationRate;
 
         private JoinNeighbors(
             SplittableRandom random,
