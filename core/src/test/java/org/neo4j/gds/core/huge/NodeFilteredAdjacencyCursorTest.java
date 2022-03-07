@@ -78,7 +78,7 @@ class NodeFilteredAdjacencyCursorTest {
         assertThat(adjacencyCursor.advance(9L)).isEqualTo(AdjacencyCursor.NOT_FOUND);
     }
 
-    static class FilteredDirectIdMap extends DirectIdMap {
+    static class FilteredDirectIdMap extends DirectIdMapping {
 
         private final LongPredicate nodeFilter;
 

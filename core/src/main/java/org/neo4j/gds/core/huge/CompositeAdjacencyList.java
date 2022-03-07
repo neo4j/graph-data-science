@@ -22,7 +22,7 @@ package org.neo4j.gds.core.huge;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.IdMapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class CompositeAdjacencyList implements AdjacencyList {
         return new CompositeAdjacencyList(adjacencyLists, CompositeAdjacencyCursor::new);
     }
 
-    static CompositeAdjacencyList withFilteredIdMap(List<AdjacencyList> adjacencyLists, IdMap filteredIdMap) {
+    static CompositeAdjacencyList withFilteredIdMap(List<AdjacencyList> adjacencyLists, IdMapping filteredIdMap) {
         assert filteredIdMap instanceof NodeFilteredGraph;
         var compositeAdjacencyCursorFactory = (CompositeAdjacencyCursorFactory) cursors -> {
             List<AdjacencyCursor> wrappedCursors = cursors
