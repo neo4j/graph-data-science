@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.knn.metrics;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.NodePropertyContainer;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.similarity.knn.metrics.LongArrayPropertySimilarityComputer.SortedLongArrayProperties;
 
 import java.util.List;
@@ -95,13 +96,7 @@ public interface SimilarityComputer {
             case COSINE:
                 return new FloatArrayPropertySimilarityComputer(nodeProperties, Cosine::floatMetric);
             default:
-                throw new IllegalArgumentException(
-                    formatWithLocale(
-                        "Similarity metric [%s] is not supported for property type [%s].",
-                        similarityMetric,
-                        nodeProperties.valueType()
-                    )
-                );
+                throw unsupportedSimilarityMetric(nodeProperties.valueType(), similarityMetric);
         }
     }
 
@@ -110,13 +105,7 @@ public interface SimilarityComputer {
             case COSINE:
                 return new DoubleArrayPropertySimilarityComputer(nodeProperties, Cosine::doubleMetric);
             default:
-                throw new IllegalArgumentException(
-                    formatWithLocale(
-                        "Similarity metric [%s] is not supported for property type [%s].",
-                        similarityMetric,
-                        nodeProperties.valueType()
-                    )
-                );
+                throw unsupportedSimilarityMetric(nodeProperties.valueType(), similarityMetric);
         }
     }
 
@@ -127,13 +116,20 @@ public interface SimilarityComputer {
             case OVERLAP:
                 return new LongArrayPropertySimilarityComputer(nodeProperties, Overlap::metric);
             default:
-                throw new IllegalArgumentException(
-                    formatWithLocale(
-                        "Similarity metric [%s] is not supported for property type [%s].",
-                        similarityMetric,
-                        nodeProperties.valueType()
-                    )
-                );
+                throw unsupportedSimilarityMetric(nodeProperties.valueType(), similarityMetric);
         }
+    }
+
+    static IllegalArgumentException unsupportedSimilarityMetric(
+        ValueType valueType,
+        SimilarityMetric similarityMetric
+    ) {
+        return new IllegalArgumentException(
+            formatWithLocale(
+                "Similarity metric [%s] is not supported for property type [%s].",
+                similarityMetric,
+                valueType
+            )
+        );
     }
 }
