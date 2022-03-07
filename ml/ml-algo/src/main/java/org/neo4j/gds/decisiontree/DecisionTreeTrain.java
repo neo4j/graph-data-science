@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core.decisiontree;
+package org.neo4j.gds.decisiontree;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
@@ -25,10 +25,8 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Stack;
-import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTION> {
 
@@ -44,25 +42,22 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     private FeatureBagger featureBagger = null;
 
     DecisionTreeTrain(
-        LOSS lossFunction,
         HugeObjectArray<double[]> allFeatureVectors,
-        int maxDepth,
-        int minSize,
+        DecisionTreeTrainConfig config,
+        LOSS lossFunction,
         double featureBaggingRatio,
-        double numFeatureVectorsRatio,
-        Optional<Random> random
+        double numFeatureVectorsRatio
     ) {
         assert allFeatureVectors.size() > 0;
-        assert maxDepth >= 1;
-        assert minSize >= 0;
         assert featureBaggingRatio >= 0.0 && featureBaggingRatio <= 1.0;
         assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
 
         this.lossFunction = lossFunction;
         this.allFeatureVectors = allFeatureVectors;
-        this.maxDepth = maxDepth;
-        this.minSize = minSize;
-        this.random = random.orElseGet(ThreadLocalRandom::current);
+        this.maxDepth = config.maxDepth();
+        this.minSize = config.minSplitSize();
+        this.random = config.randomSeed().map(Random::new).orElseGet(Random::new);
+
         this.numFeatureVectorsRatio = numFeatureVectorsRatio;
         this.bootstrappedDataset = HugeByteArray.newArray(allFeatureVectors.size());
 
@@ -132,6 +127,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         return bootstrappedDataset;
     }
 
+    // TODO comment to explain this name could be useful
     protected abstract PREDICTION toTerminal(HugeLongArray group, long groupSize);
 
     private TreeNode<PREDICTION> splitAndPush(

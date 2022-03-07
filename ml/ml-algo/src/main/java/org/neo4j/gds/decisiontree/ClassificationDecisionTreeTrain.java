@@ -24,8 +24,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
 
 public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> extends DecisionTreeTrain<LOSS, Integer> {
 
@@ -36,23 +34,19 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
     public ClassificationDecisionTreeTrain(
         LOSS lossFunction,
         HugeObjectArray<double[]> allFeatures,
-        int maxDepth,
-        int minSize,
-        double featureBaggingRatio,
-        double numFeatureVectorsRatio,
-        Optional<Random> random,
         int[] classes,
         HugeIntArray allLabels,
-        Map<Integer, Integer> classToIdx
-    ) {
+        Map<Integer, Integer> classToIdx,
+        DecisionTreeTrainConfig config,
+        double featureBaggingRatio,
+        double numFeatureVectorsRatio
+        ) {
         super(
-            lossFunction,
             allFeatures,
-            maxDepth,
-            minSize,
+            config,
+            lossFunction,
             featureBaggingRatio,
-            numFeatureVectorsRatio,
-            random
+            numFeatureVectorsRatio
         );
 
         assert classes.length > 0;
@@ -69,15 +63,13 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
 
         private final LOSS lossFunction;
         private final HugeObjectArray<double[]> allFeatures;
-        private final int maxDepth;
         private final int[] classes;
         private final HugeIntArray allLabels;
         private final Map<Integer, Integer> classToIdx;
 
-        private int minSize = 1;
         private double featureBaggingRatio = 0.0; // Use all feature indices.
         private double numFeatureVectorsRatio = 0.0; // Use all feature vectors.
-        private Optional<Random> random = Optional.empty();
+        private DecisionTreeTrainConfigImpl.Builder configBuilder;
 
         public Builder(
             LOSS lossFunction,
@@ -89,7 +81,8 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         ) {
             this.lossFunction = lossFunction;
             this.allFeatures = allFeatures;
-            this.maxDepth = maxDepth;
+            this.configBuilder = DecisionTreeTrainConfigImpl.builder()
+                .maxDepth(maxDepth);
             this.classes = classes;
             this.allLabels = allLabels;
             this.classToIdx = classToIdx;
@@ -99,19 +92,17 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
             return new ClassificationDecisionTreeTrain<>(
                 lossFunction,
                 allFeatures,
-                maxDepth,
-                minSize,
-                featureBaggingRatio,
-                numFeatureVectorsRatio,
-                random,
                 classes,
                 allLabels,
-                classToIdx
+                classToIdx,
+                configBuilder.build(),
+                featureBaggingRatio,
+                numFeatureVectorsRatio
             );
         }
 
         public Builder<LOSS> withMinSize(int minSize) {
-            this.minSize = minSize;
+            this.configBuilder.minSplitSize(minSize);
             return this;
         }
 
@@ -126,7 +117,7 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         }
 
         public Builder<LOSS> withRandomSeed(long seed) {
-            this.random = Optional.of(new Random(seed));
+            this.configBuilder.randomSeed(seed);
             return this;
         }
     }

@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.decisiontree.ClassificationDecisionTreeTrain;
 import org.neo4j.gds.decisiontree.DecisionTreeLoss;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.decisiontree.DecisionTreeTrainConfigImpl;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -81,24 +82,21 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
         }
 
         var tasks = ParallelUtil.tasks(numDecisionTrees, index -> () -> {
-            var decisionTreeBuilder =
-                new ClassificationDecisionTreeTrain.Builder<>(
-                    lossFunction,
-                    allFeatureVectors,
-                    maxDepth,
-                    classes,
-                    allLabels,
-                    classToIdx
-                )
-                    .withMinSize(minSize)
-                    .withFeatureBaggingRatio(numFeatureIndicesRatio)
-                    .withNumFeatureVectorsRatio(numFeatureVectorsRatio);
+            var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
+                .maxDepth(maxDepth)
+                .minSplitSize(minSize)
+                .randomSeed(randomSeed.map(seed -> seed + index)).build();
 
-            randomSeed.ifPresent(seed -> {
-                decisionTreeBuilder.withRandomSeed(seed + index);
-            });
-
-            var decisionTree = decisionTreeBuilder.build();
+            var decisionTree = new ClassificationDecisionTreeTrain<>(
+                lossFunction,
+                allFeatureVectors,
+                classes,
+                allLabels,
+                classToIdx,
+                decisionTreeTrainConfig,
+                numFeatureIndicesRatio,
+                numFeatureVectorsRatio
+            );
             decisionTrees[index] = decisionTree.train();
             bootstrappedDatasets[index] = decisionTree.bootstrappedDataset();
         });

@@ -91,18 +91,19 @@ class ClassificationDecisionTreeTest {
         int maxDepth,
         int minSize
     ) {
-        var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
+        var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
             allFeatureVectors,
-            maxDepth,
             CLASSES,
             allLabels,
-            CLASS_TO_IDX
+            CLASS_TO_IDX,
+            DecisionTreeTrainConfigImpl.builder()
+                .maxDepth(maxDepth)
+                .minSplitSize(minSize)
+                .build(),
+            0.0,
+            0.0
         );
-
-        var decisionTree = decisionTreeBuilder
-            .withMinSize(minSize)
-            .build();
 
         var decisionTreePredict = decisionTree.train();
 
@@ -111,27 +112,41 @@ class ClassificationDecisionTreeTest {
 
     @Test
     void indexSamplingShouldWork() {
-        var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
+        var decisionTreeTrainConfigBuilder = DecisionTreeTrainConfigImpl.builder()
+            .maxDepth(1)
+            .minSplitSize(1);
+
+        var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
             allFeatureVectors,
-            1,
             CLASSES,
             allLabels,
-            CLASS_TO_IDX
+            CLASS_TO_IDX,
+            decisionTreeTrainConfigBuilder
+                .randomSeed(-6938002729576536314L)
+                .build(),
+            0.5D, // Only one feature is used.
+            0.0
         );
 
         var features = new double[]{8.0, 0.0};
 
-        var decisionTree = decisionTreeBuilder
-            .withFeatureBaggingRatio(0.5D) // Only one feature is used.
-            .withRandomSeed(-6938002729576536314L)
-            .build();
         var decisionTreePredict = decisionTree.train();
         assertThat(decisionTreePredict.predict(features)).isEqualTo(42);
 
-        decisionTree = decisionTreeBuilder
-            .withRandomSeed(42L)
-            .build();
+        decisionTree = new ClassificationDecisionTreeTrain<>(
+            giniIndexLoss,
+            allFeatureVectors,
+            CLASSES,
+            allLabels,
+            CLASS_TO_IDX,
+            decisionTreeTrainConfigBuilder
+                .randomSeed(42L)
+                .build(),
+            0.5D, // Only one feature is used.
+            0.0
+        );
+
         decisionTreePredict = decisionTree.train();
         assertThat(decisionTreePredict.predict(features)).isEqualTo(1337);
     }
@@ -145,7 +160,8 @@ class ClassificationDecisionTreeTest {
             CLASSES,
             allLabels,
             CLASS_TO_IDX
-        );
+        )
+            .withMinSize(1);
 
         var features = new double[]{8.0, 0.0};
 
@@ -158,6 +174,7 @@ class ClassificationDecisionTreeTest {
 
         decisionTree = decisionTreeBuilder
             .withRandomSeed(321328L)
+            .withMinSize(1)
             .build();
         decisionTreePredict = decisionTree.train();
         assertThat(decisionTreePredict.predict(features)).isEqualTo(1337);
