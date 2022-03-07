@@ -33,18 +33,18 @@ import java.util.function.LongToIntFunction;
 public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
 
     private final LongToIntFunction degreeFunction;
-    private final LongToLongFunction idMappingFunction;
+    private final LongToLongFunction fromFilteredIdFunction;
     private final CompositeAdjacencyList compositeAdjacencyList;
 
     private UnionGraphIntersect(
         LongToIntFunction degreeFunction,
-        LongToLongFunction idMappingFunction,
+        LongToLongFunction fromFilteredIdFunction,
         CompositeAdjacencyList compositeAdjacencyList,
         long maxDegree
     ) {
         super(maxDegree);
         this.degreeFunction = degreeFunction;
-        this.idMappingFunction = idMappingFunction;
+        this.fromFilteredIdFunction = fromFilteredIdFunction;
         this.compositeAdjacencyList = compositeAdjacencyList;
     }
 
@@ -60,7 +60,7 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
 
     @Override
     protected CompositeAdjacencyCursor cursorForNode(@Nullable CompositeAdjacencyCursor reuse, long node, int degree) {
-        return compositeAdjacencyList.adjacencyCursor(reuse, idMappingFunction.applyAsLong(node));
+        return compositeAdjacencyList.adjacencyCursor(reuse, fromFilteredIdFunction.applyAsLong(node));
     }
 
     @ServiceProvider
