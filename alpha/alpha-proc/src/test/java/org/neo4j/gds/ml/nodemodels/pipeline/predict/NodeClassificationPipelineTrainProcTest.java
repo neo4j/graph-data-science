@@ -161,7 +161,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
 
             var modelInfo = assertThat(m).asInstanceOf(soMap)
                 .containsEntry("modelName", MODEL_NAME)
-                .containsEntry("modelType", "Node classification pipeline")
+                .containsEntry("modelType", "NodeClassification")
                 .containsKey("bestParameters")
                 .containsEntry("classes", List.of(0L, 1L));
 

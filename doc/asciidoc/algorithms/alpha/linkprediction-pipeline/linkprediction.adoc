@@ -2,8 +2,6 @@
 = Link prediction pipelines
 :entity: relationship
 :result: relationships
-//:algorithm: Link Prediction
-:modelType: Link prediction pipeline
 
 
 [abstract]
@@ -19,9 +17,9 @@ Link prediction is a common machine learning task applied to graphs: training a 
 More precisely, the input to the machine learning model are _examples_ of node pairs.
 During training, the node pairs are labeled as adjacent or not adjacent.
 
-In GDS, we have Link Prediction pipelines which offer an end-to-end workflow, from feature extraction to link prediction.
-There are two kinds of pipelines: training pipelines and prediction pipelines, both of which reside in the <<model-catalog-ops,model catalog>>.
-When a training pipeline is executed, a prediction pipeline is created and stored in the model catalog.
+In GDS, we have Link prediction pipelines which offer an end-to-end workflow, from feature extraction to link prediction.
+The training pipelines reside in the <<pipeline-catalog-ops,pipeline catalog>>.
+When a training pipeline is <<algorithms-ml-linkprediction-pipelines-train,executed>>, a prediction model is created and stored in the <<model-catalog-ops,model catalog>>.
 
 A training pipeline is a sequence of three phases:
 [upperroman]
@@ -37,11 +35,11 @@ The steps execute GDS algorithms that create new node properties.
 After configuring the node property steps, one can <<algorithms-ml-linkprediction-adding-features, define>> how to combine node properties of node pairs into link features.
 The training phase (III) trains multiple model candidates using cross-validation, selects the best one, and reports relevant performance metrics.
 
-After <<algorithms-ml-linkprediction-pipelines-train, training the pipeline>>, a prediction pipeline is created.
-This new pipeline inherits the node property steps and link feature steps from the training pipeline and uses them to generate the relevant features for predicting new relationships.
-The prediction pipeline can be used to infer the probability of the existence of a relationship between two non-adjacent nodes.
+After <<algorithms-ml-linkprediction-pipelines-train, training the pipeline>>, a prediction model is created.
+This model includes the node property steps and link feature steps from the training pipeline and uses them to generate the relevant features for predicting new relationships.
+The prediction model can be applied to infer the probability of the existence of a relationship between two non-adjacent nodes.
 
-NOTE: <<algorithms-link-prediction-pipelines-predict, Prediction>> can only be done with a trained pipeline (not with a training pipeline).
+NOTE: <<algorithms-link-prediction-pipelines-predict, Prediction>> can only be done with a prediction model (not with a training pipeline).
 
 The rest of this page is divided as follows:
 
@@ -58,9 +56,9 @@ The rest of this page is divided as follows:
 == Creating a pipeline
 
 The first step of building a new pipeline is to create one using `gds.alpha.ml.pipeline.linkPrediction.create`.
-This stores a trainable model object in the model catalog of type `Link prediction training pipeline`.
+This stores a trainable pipeline object in the pipeline catalog of type `Link prediction training pipeline`.
 This represents a configurable pipeline that can later be invoked for training, which in turn creates a trained pipeline.
-The latter is also a model which is stored in the catalog with type `Link prediction pipeline`.
+The latter is also a model which is stored in the catalog with type `LinkPrediction`.
 
 
 === Syntax
@@ -120,7 +118,7 @@ This shows that the newly created pipeline does not contain any steps yet, and h
 
 A link prediction pipeline can execute one or several GDS algorithms in mutate mode that create node properties in the projected graph.
 Such steps producing node properties can be chained one after another and created properties can also be used to <<algorithms-ml-linkprediction-adding-features, add features>>.
-Moreover, the node property steps that are added to the pipeline will be executed both when <<algorithms-ml-linkprediction-pipelines-train, training>> a model and when the trained model is <<algorithms-link-prediction-pipelines-predict, applied for prediction>>.
+Moreover, the node property steps that are added to the pipeline will be executed both when <<algorithms-ml-linkprediction-pipelines-train, training>> a pipeline and when the trained model is <<algorithms-link-prediction-pipelines-predict, applied for prediction>>.
 
 The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
 The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
@@ -286,7 +284,7 @@ For example, the `embedding` property could be created by the previous example, 
 [[algorithms-ml-linkprediction-configure-splits]]
 == Configuring the relationship splits
 
-Link Prediction pipelines manage splitting the relationships into several sets and add sampled negative relationships to some of these sets.
+Link Prediction training pipelines manage splitting the relationships into several sets and add sampled negative relationships to some of these sets.
 Configuring the splitting is optional, and if omitted, splitting will be done using default settings.
 
 The splitting configuration of a pipeline can be inspected by using `gds.beta.model.list` and possibly only yielding `splitConfig`.
