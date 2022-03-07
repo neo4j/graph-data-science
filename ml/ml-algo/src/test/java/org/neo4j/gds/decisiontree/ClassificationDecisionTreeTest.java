@@ -153,29 +153,41 @@ class ClassificationDecisionTreeTest {
 
     @Test
     void vectorSamplingShouldWork() {
-        var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
-            giniIndexLoss,
-            allFeatureVectors,
-            1,
-            CLASSES,
-            allLabels,
-            CLASS_TO_IDX
-        )
-            .withMinSize(1);
-
         var features = new double[]{8.0, 0.0};
 
-        var decisionTree = decisionTreeBuilder
-            .withNumFeatureVectorsRatio(0.4D) // Use 40% of all training examples.
-            .withRandomSeed(5677377167946646799L)
-            .build();
+        var decisionTreeTrainConfigBuilder = DecisionTreeTrainConfigImpl.builder()
+            .maxDepth(1)
+            .minSplitSize(1);
+
+        var decisionTree = new ClassificationDecisionTreeTrain<>(
+            giniIndexLoss,
+            allFeatureVectors,
+            CLASSES,
+            allLabels,
+            CLASS_TO_IDX,
+            decisionTreeTrainConfigBuilder
+                .randomSeed(5677377167946646799L)
+                .build(),
+            0.0,
+            0.4D // Use 40% of all training examples.
+        );
+
         var decisionTreePredict = decisionTree.train();
         assertThat(decisionTreePredict.predict(features)).isEqualTo(42);
 
-        decisionTree = decisionTreeBuilder
-            .withRandomSeed(321328L)
-            .withMinSize(1)
-            .build();
+        decisionTree = new ClassificationDecisionTreeTrain<>(
+            giniIndexLoss,
+            allFeatureVectors,
+            CLASSES,
+            allLabels,
+            CLASS_TO_IDX,
+            decisionTreeTrainConfigBuilder
+                .randomSeed(321328L)
+                .build(),
+            0.0,
+            0.4D // Use 40% of all training examples.
+        );
+
         decisionTreePredict = decisionTree.train();
         assertThat(decisionTreePredict.predict(features)).isEqualTo(1337);
     }

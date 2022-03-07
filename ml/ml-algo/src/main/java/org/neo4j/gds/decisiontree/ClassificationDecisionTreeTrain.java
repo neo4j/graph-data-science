@@ -59,69 +59,6 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         this.classToIdx = classToIdx;
     }
 
-    public static final class Builder<LOSS extends DecisionTreeLoss> {
-
-        private final LOSS lossFunction;
-        private final HugeObjectArray<double[]> allFeatures;
-        private final int[] classes;
-        private final HugeIntArray allLabels;
-        private final Map<Integer, Integer> classToIdx;
-
-        private double featureBaggingRatio = 0.0; // Use all feature indices.
-        private double numFeatureVectorsRatio = 0.0; // Use all feature vectors.
-        private DecisionTreeTrainConfigImpl.Builder configBuilder;
-
-        public Builder(
-            LOSS lossFunction,
-            HugeObjectArray<double[]> allFeatures,
-            int maxDepth,
-            int[] classes,
-            HugeIntArray allLabels,
-            Map<Integer, Integer> classToIdx
-        ) {
-            this.lossFunction = lossFunction;
-            this.allFeatures = allFeatures;
-            this.configBuilder = DecisionTreeTrainConfigImpl.builder()
-                .maxDepth(maxDepth);
-            this.classes = classes;
-            this.allLabels = allLabels;
-            this.classToIdx = classToIdx;
-        }
-
-        public ClassificationDecisionTreeTrain<LOSS> build() {
-            return new ClassificationDecisionTreeTrain<>(
-                lossFunction,
-                allFeatures,
-                classes,
-                allLabels,
-                classToIdx,
-                configBuilder.build(),
-                featureBaggingRatio,
-                numFeatureVectorsRatio
-            );
-        }
-
-        public Builder<LOSS> withMinSize(int minSize) {
-            this.configBuilder.minSplitSize(minSize);
-            return this;
-        }
-
-        public Builder<LOSS> withFeatureBaggingRatio(double ratio) {
-            this.featureBaggingRatio = ratio;
-            return this;
-        }
-
-        public Builder<LOSS> withNumFeatureVectorsRatio(double ratio) {
-            this.numFeatureVectorsRatio = ratio;
-            return this;
-        }
-
-        public Builder<LOSS> withRandomSeed(long seed) {
-            this.configBuilder.randomSeed(seed);
-            return this;
-        }
-    }
-
     @Override
     protected Integer toTerminal(final HugeLongArray group, final long groupSize) {
         assert groupSize > 0;
