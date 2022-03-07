@@ -17,13 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core.decisiontree;
+package org.neo4j.gds.decisiontree;
 
-import org.neo4j.gds.annotation.ValueClass;
+class TreeNode<PREDICTION> {
+    public PREDICTION prediction;
+    public int index = -1;
+    public double value;
+    public TreeNode<PREDICTION> leftChild = null;
+    public TreeNode<PREDICTION> rightChild = null;
 
-@ValueClass
-interface GroupSizes {
-    long left();
+    TreeNode(int index, double value) {
+        assert index >= 0;
 
-    long right();
+        this.index = index;
+        this.value = value;
+    }
+
+    TreeNode(PREDICTION prediction) {
+        this.prediction = prediction;
+    }
 }

@@ -17,32 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core.decisiontree;
+package org.neo4j.gds.decisiontree;
 
-public class DecisionTreePredict<PREDICTION> {
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Random;
 
-    private final TreeNode<PREDICTION> root;
+class FeatureBagger {
 
-    DecisionTreePredict(TreeNode<PREDICTION> root) {
-        this.root = root;
+    private final Random random;
+    private final int totalIndices;
+
+    FeatureBagger(Random random, int totalIndices) {
+        this.random = random;
+        this.totalIndices = totalIndices;
     }
 
-    public PREDICTION predict(double[] features) {
-        assert features.length > 0;
+    void sample(int[] bag) {
+        var tmpAvailableIndices = new Integer[totalIndices];
+        Arrays.setAll(tmpAvailableIndices, i -> i);
+        final var availableIndices = new LinkedList<>(Arrays.asList(tmpAvailableIndices));
 
-        TreeNode<PREDICTION> node = root;
-
-        while (node.leftChild != null) {
-            assert features.length > node.index;
-            assert node.rightChild != null;
-
-            if (features[node.index] < node.value) {
-                node = node.leftChild;
-            } else {
-                node = node.rightChild;
-            }
+        for (int i = 0; i < bag.length; i++) {
+            int j = random.nextInt(availableIndices.size());
+            bag[i] = (availableIndices.get(j));
+            availableIndices.remove(j);
         }
-
-        return node.prediction;
     }
 }

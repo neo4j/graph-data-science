@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core.randomforest;
+package org.neo4j.gds.randomforest;
 
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.ml.core.decisiontree.ClassificationDecisionTreeTrain;
-import org.neo4j.gds.ml.core.decisiontree.DecisionTreeLoss;
-import org.neo4j.gds.ml.core.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.decisiontree.ClassificationDecisionTreeTrain;
+import org.neo4j.gds.decisiontree.DecisionTreeLoss;
+import org.neo4j.gds.decisiontree.DecisionTreePredict;
 
 import java.util.HashMap;
 import java.util.Optional;

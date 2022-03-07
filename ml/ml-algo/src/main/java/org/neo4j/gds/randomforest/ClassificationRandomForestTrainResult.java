@@ -17,8 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core.decisiontree;
+package org.neo4j.gds.randomforest;
 
-public interface DecisionTreeLoss {
-    double splitLoss(Groups groups, GroupSizes groupSizes);
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.paged.HugeByteArray;
+
+@ValueClass
+public interface ClassificationRandomForestTrainResult {
+    ClassificationRandomForestPredict predictor();
+
+    HugeByteArray[] bootstrappedDatasets();
 }
