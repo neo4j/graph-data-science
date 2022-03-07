@@ -32,6 +32,7 @@ import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;
@@ -119,25 +120,34 @@ class SimilarityComputerTest {
     }
 
     @Property
-    void doubleArrayPropertySimilarityReturns1ForEqualValues(@ForAll @Positive long id) {
+    void doubleArrayPropertySimilarityReturns1ForEqualValues(
+        @ForAll @Positive long id,
+        @ForAll @From("doubleArrayMetrics") SimilarityMetric similarityMetric
+    ) {
         NodeProperties props = new DoubleArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0).toArray());
-        var sim = SimilarityComputer.ofDoubleArrayProperty(props);
+        var sim = SimilarityComputer.ofDoubleArrayProperty(props, similarityMetric);
 
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
     }
 
     @Property
-    void doubleArrayPropertySimilarityReturnsValuesBetween0And1(@ForAll @From("differentValues") LongLongPair ids) {
+    void doubleArrayPropertySimilarityReturnsValuesBetween0And1(
+        @ForAll @From("differentValues") LongLongPair ids,
+        @ForAll @From("doubleArrayMetrics") SimilarityMetric similarityMetric
+    ) {
         NodeProperties props = new DoubleArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0).toArray());
-        var sim = SimilarityComputer.ofDoubleArrayProperty(props);
+        var sim = SimilarityComputer.ofDoubleArrayProperty(props, similarityMetric);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
     }
 
     @Property
-    void doubleArrayPropertySimilarityReturns0ForNegativeValues(@ForAll @From("differentValues") LongLongPair ids) {
+    void doubleArrayPropertySimilarityReturns0ForNegativeValues(
+        @ForAll @From("differentValues") LongLongPair ids,
+        @ForAll @From("doubleArrayMetrics") SimilarityMetric similarityMetric
+    ) {
         NodeProperties props = new DoubleArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, -10.0, 10.0).toArray());
 
-        var sim = SimilarityComputer.ofDoubleArrayProperty(props);
+        var sim = SimilarityComputer.ofDoubleArrayProperty(props, similarityMetric);
 
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
@@ -188,7 +198,10 @@ class SimilarityComputerTest {
             }
             return new double[0];
         });
-        var sim = SimilarityComputer.ofDoubleArrayProperty(props);
+        var sim = SimilarityComputer.ofDoubleArrayProperty(
+            props,
+            SimilarityMetric.defaultMetricForType(ValueType.DOUBLE_ARRAY)
+        );
 
         assertThat(sim.similarity(0, 1)).isCloseTo(1.0D, within(0.05));
     }
@@ -206,7 +219,10 @@ class SimilarityComputerTest {
             SimilarityComputer.ofDoubleProperty(new DoubleTestProperties(nodeId -> Double.POSITIVE_INFINITY)),
             SimilarityComputer.ofDoubleProperty(new DoubleTestProperties(nodeId -> Double.NEGATIVE_INFINITY)),
             SimilarityComputer.ofFloatArrayProperty(new FloatArrayTestProperties(nodeId -> new float[]{})),
-            SimilarityComputer.ofDoubleArrayProperty(new DoubleArrayTestProperties(nodeId -> new double[]{}))
+            SimilarityComputer.ofDoubleArrayProperty(
+                new DoubleArrayTestProperties(nodeId -> new double[]{}),
+                SimilarityMetric.defaultMetricForType(ValueType.DOUBLE_ARRAY)
+            )
         );
     }
 
@@ -220,5 +236,10 @@ class SimilarityComputerTest {
     @Provide("longArrayMetrics")
     final Arbitrary<SimilarityMetric> longArrayMetrics() {
         return Arbitraries.of(SimilarityMetric.JACCARD, SimilarityMetric.OVERLAP);
+    }
+
+    @Provide("doubleArrayMetrics")
+    final Arbitrary<SimilarityMetric> doubleArrayMetrics() {
+        return Arbitraries.of(SimilarityMetric.COSINE);
     }
 }

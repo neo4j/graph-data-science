@@ -68,7 +68,7 @@ public interface SimilarityComputer {
             case DOUBLE:
                 return ofDoubleProperty(nodeProperties);
             case DOUBLE_ARRAY:
-                return ofDoubleArrayProperty(nodeProperties);
+                return ofDoubleArrayProperty(nodeProperties, defaultSimilarityMetric);
             case FLOAT_ARRAY:
                 return ofFloatArrayProperty(nodeProperties);
             case LONG_ARRAY:
@@ -94,8 +94,19 @@ public interface SimilarityComputer {
         return new FloatArrayPropertySimilarityComputer(nodeProperties);
     }
 
-    static SimilarityComputer ofDoubleArrayProperty(NodeProperties nodeProperties) {
-        return new DoubleArrayPropertySimilarityComputer(nodeProperties);
+    static SimilarityComputer ofDoubleArrayProperty(NodeProperties nodeProperties, SimilarityMetric similarityMetric) {
+        switch (similarityMetric) {
+            case COSINE:
+                return new DoubleArrayPropertySimilarityComputer(nodeProperties, Cosine::metric);
+            default:
+                throw new IllegalArgumentException(
+                    formatWithLocale(
+                        "Similarity metric [%s] is not supported for property type [%s].",
+                        similarityMetric,
+                        nodeProperties.valueType()
+                    )
+                );
+        }
     }
 
     static SimilarityComputer ofLongArrayProperty(NodeProperties nodeProperties, SimilarityMetric similarityMetric) {
