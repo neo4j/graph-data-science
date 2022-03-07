@@ -70,7 +70,7 @@ public interface SimilarityComputer {
             case DOUBLE_ARRAY:
                 return ofDoubleArrayProperty(nodeProperties, defaultSimilarityMetric);
             case FLOAT_ARRAY:
-                return ofFloatArrayProperty(nodeProperties);
+                return ofFloatArrayProperty(nodeProperties, defaultSimilarityMetric);
             case LONG_ARRAY:
                 return ofLongArrayProperty(new SortedLongArrayProperties(nodeProperties), defaultSimilarityMetric);
             default:
@@ -90,14 +90,25 @@ public interface SimilarityComputer {
         return new LongPropertySimilarityComputer(nodeProperties);
     }
 
-    static SimilarityComputer ofFloatArrayProperty(NodeProperties nodeProperties) {
-        return new FloatArrayPropertySimilarityComputer(nodeProperties);
+    static SimilarityComputer ofFloatArrayProperty(NodeProperties nodeProperties, SimilarityMetric similarityMetric) {
+        switch (similarityMetric) {
+            case COSINE:
+                return new FloatArrayPropertySimilarityComputer(nodeProperties, Cosine::floatMetric);
+            default:
+                throw new IllegalArgumentException(
+                    formatWithLocale(
+                        "Similarity metric [%s] is not supported for property type [%s].",
+                        similarityMetric,
+                        nodeProperties.valueType()
+                    )
+                );
+        }
     }
 
     static SimilarityComputer ofDoubleArrayProperty(NodeProperties nodeProperties, SimilarityMetric similarityMetric) {
         switch (similarityMetric) {
             case COSINE:
-                return new DoubleArrayPropertySimilarityComputer(nodeProperties, Cosine::metric);
+                return new DoubleArrayPropertySimilarityComputer(nodeProperties, Cosine::doubleMetric);
             default:
                 throw new IllegalArgumentException(
                     formatWithLocale(

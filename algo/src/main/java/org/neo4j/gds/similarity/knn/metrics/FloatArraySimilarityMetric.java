@@ -19,20 +19,6 @@
  */
 package org.neo4j.gds.similarity.knn.metrics;
 
-import org.neo4j.gds.core.utils.Intersections;
-
-public final class Cosine {
-    private Cosine() {}
-
-    public static double floatMetric(float[] left, float[] right) {
-        var len = Math.min(left.length, right.length);
-        var cosine = Intersections.cosine(left, right, len);
-        return Math.max(cosine, 0);
-    }
-
-    public static double doubleMetric(double[] left, double[] right) {
-        var len = Math.min(left.length, right.length);
-        var cosine = Intersections.cosine(left, right, len);
-        return Math.max(cosine, 0);
-    }
+interface FloatArraySimilarityMetric {
+    double compute(float[] left, float[] right);
 }

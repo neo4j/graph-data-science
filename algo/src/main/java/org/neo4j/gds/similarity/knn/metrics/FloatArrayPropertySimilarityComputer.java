@@ -21,12 +21,13 @@ package org.neo4j.gds.similarity.knn.metrics;
 
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.utils.Intersections;
 
 final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
     private final NodeProperties nodeProperties;
+    private final FloatArraySimilarityMetric metric;
 
-    FloatArrayPropertySimilarityComputer(NodeProperties nodeProperties) {
+    FloatArrayPropertySimilarityComputer(NodeProperties nodeProperties, FloatArraySimilarityMetric metric) {
+        this.metric = metric;
         if (nodeProperties.valueType() != ValueType.FLOAT_ARRAY) {
             throw new IllegalArgumentException("The property is not of type FLOAT_ARRAY");
         }
@@ -37,7 +38,6 @@ final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
     public double similarity(long firstNodeId, long secondNodeId) {
         var left = nodeProperties.floatArrayValue(firstNodeId);
         var right = nodeProperties.floatArrayValue(secondNodeId);
-        int len = Math.min(left.length, right.length);
-        return Math.max(Intersections.cosine(left, right, len), 0);
+        return metric.compute(left, right);
     }
 }
