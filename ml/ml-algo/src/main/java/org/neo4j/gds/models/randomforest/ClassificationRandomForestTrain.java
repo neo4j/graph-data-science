@@ -28,7 +28,10 @@ import org.neo4j.gds.decisiontree.ClassificationDecisionTreeTrain;
 import org.neo4j.gds.decisiontree.DecisionTreeLoss;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.decisiontree.DecisionTreeTrainConfigImpl;
+import org.neo4j.gds.decisiontree.FeatureBagger;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+
+import java.util.Random;
 
 public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
 
@@ -66,13 +69,19 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
                 .minSplitSize(config.minSplitSize())
                 .randomSeed(config.randomSeed().map(seed -> seed + index)).build();
 
+            var random = config.randomSeed()
+                .map(seed -> new Random(seed + index))
+                .orElseGet(Random::new);
+
+            var featureBagger = new FeatureBagger(random, allFeatureVectors.get(0).length, config.featureBaggingRatio());
+
             var decisionTree = new ClassificationDecisionTreeTrain<>(
                 lossFunction,
                 allFeatureVectors,
                 allLabels,
                 classIdMap,
                 decisionTreeTrainConfig,
-                config.featureBaggingRatio(),
+                featureBagger,
                 config.numFeatureVectorsRatio()
             );
             decisionTrees[index] = decisionTree.train();

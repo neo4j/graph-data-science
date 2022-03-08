@@ -25,7 +25,7 @@ import org.neo4j.gds.decisiontree.DecisionTreeTrainConfig;
 @Configuration
 public interface RandomForestTrainConfig extends DecisionTreeTrainConfig {
 
-    @Configuration.DoubleRange(min = 0, max = 1)
+    @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     double featureBaggingRatio();
 
     @Configuration.DoubleRange(min = 0, max = 1)

@@ -23,25 +23,43 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
 
-class FeatureBagger {
+public class FeatureBagger {
 
     private final Random random;
-    private final int totalIndices;
+    private final int totalNumberOfFeatures;
+    private final int[] featureBag;
 
-    FeatureBagger(Random random, int totalIndices) {
+    public FeatureBagger(Random random, int totalNumberOfFeatures, double featureBaggingRatio) {
+        assert featureBaggingRatio != 0: "Invalid featureBaggingRatio";
+
         this.random = random;
-        this.totalIndices = totalIndices;
+        this.totalNumberOfFeatures = totalNumberOfFeatures;
+        this.featureBag = new int[(int) Math.ceil(featureBaggingRatio * totalNumberOfFeatures)];
+
+        if (Double.compare(featureBaggingRatio, 1.0D) == 0) {
+            // cache everything is sampled
+            for (int i = 0; i < featureBag.length; i++) {
+                featureBag[i] = i;
+            }
+        }
     }
 
-    void sample(int[] bag) {
-        var tmpAvailableIndices = new Integer[totalIndices];
+    int[] sample() {
+        var tmpAvailableIndices = new Integer[totalNumberOfFeatures];
         Arrays.setAll(tmpAvailableIndices, i -> i);
         final var availableIndices = new LinkedList<>(Arrays.asList(tmpAvailableIndices));
 
-        for (int i = 0; i < bag.length; i++) {
+        if (totalNumberOfFeatures == featureBag.length) {
+            // everything is sampled
+            return featureBag;
+        }
+
+        for (int i = 0; i < featureBag.length; i++) {
             int j = random.nextInt(availableIndices.size());
-            bag[i] = (availableIndices.get(j));
+            featureBag[i] = (availableIndices.get(j));
             availableIndices.remove(j);
         }
+
+        return featureBag;
     }
 }

@@ -34,14 +34,14 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         HugeLongArray allLabels,
         LocalIdMap classIdMap,
         DecisionTreeTrainConfig config,
-        double featureBaggingRatio,
+        FeatureBagger featureBagger,
         double numFeatureVectorsRatio
         ) {
         super(
             allFeatures,
             config,
             lossFunction,
-            featureBaggingRatio,
+            featureBagger,
             numFeatureVectorsRatio
         );
         this.classIdMap = classIdMap;

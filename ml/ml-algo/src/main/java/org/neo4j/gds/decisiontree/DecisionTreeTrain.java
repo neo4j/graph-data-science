@@ -24,7 +24,6 @@ import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
-import java.util.Arrays;
 import java.util.Random;
 import java.util.Stack;
 
@@ -36,20 +35,18 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     private final int maxDepth;
     private final int minSize;
     private final double numFeatureVectorsRatio;
-    private final int[] featureBag;
     // TODO: Implement HugeBitSet and use that instead of HugeByteArray.
     private final HugeByteArray bootstrappedDataset;
-    private FeatureBagger featureBagger = null;
+    private final FeatureBagger featureBagger;
 
     DecisionTreeTrain(
         HugeObjectArray<double[]> allFeatureVectors,
         DecisionTreeTrainConfig config,
         LOSS lossFunction,
-        double featureBaggingRatio,
+        FeatureBagger featureBagger,
         double numFeatureVectorsRatio
     ) {
         assert allFeatureVectors.size() > 0;
-        assert featureBaggingRatio >= 0.0 && featureBaggingRatio <= 1.0;
         assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
 
         this.lossFunction = lossFunction;
@@ -60,16 +57,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
 
         this.numFeatureVectorsRatio = numFeatureVectorsRatio;
         this.bootstrappedDataset = HugeByteArray.newArray(allFeatureVectors.size());
-
-        int totalNumFeatures = allFeatureVectors.get(0).length;
-        if (Double.compare(featureBaggingRatio, 0.0d) == 0) {
-            this.featureBag = new int[totalNumFeatures];
-            Arrays.setAll(this.featureBag, i -> i);
-        } else {
-            int numActiveFeatures = (int) Math.ceil(featureBaggingRatio * totalNumFeatures);
-            this.featureBag = new int[numActiveFeatures];
-            this.featureBagger = new FeatureBagger(this.random, totalNumFeatures);
-        }
+        this.featureBagger = featureBagger;
     }
 
     public DecisionTreePredict<PREDICTION> train() {
@@ -201,9 +189,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         );
         var bestGroupSizes = ImmutableGroupSizes.of(-1, -1);
 
-        if (featureBagger != null) {
-            featureBagger.sample(featureBag);
-        }
+        int[] featureBag = featureBagger.sample();
 
         for (long j = 0; j < groupSize; j++) {
             for (int i : featureBag) {

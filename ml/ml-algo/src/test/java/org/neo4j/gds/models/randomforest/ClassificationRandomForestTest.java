@@ -77,7 +77,7 @@ class ClassificationRandomForestTest {
                 .minSplitSize(1)
                 .randomSeed(Optional.empty())
                 .numFeatureVectorsRatio(0.0D)
-                .featureBaggingRatio(0.0D)
+                .featureBaggingRatio(1.0D)
                 .numberOfDecisionTrees(1)
                 .build()
         );
@@ -103,7 +103,7 @@ class ClassificationRandomForestTest {
                 .minSplitSize(1)
                 .randomSeed(Optional.of(1337L))
                 .numFeatureVectorsRatio(0.5D)
-                .featureBaggingRatio(0.0D)
+                .featureBaggingRatio(1.0D)
                 .numberOfDecisionTrees(20)
                 .build()
         );
@@ -129,7 +129,7 @@ class ClassificationRandomForestTest {
                 .minSplitSize(1)
                 .randomSeed(Optional.of(1337L))
                 .numFeatureVectorsRatio(1.0D)
-                .featureBaggingRatio(0.0D)
+                .featureBaggingRatio(1.0D)
                 .numberOfDecisionTrees(20)
                 .build()
         );

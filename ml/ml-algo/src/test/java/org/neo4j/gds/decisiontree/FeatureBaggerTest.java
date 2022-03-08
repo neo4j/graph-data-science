@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.decisiontree;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Random;
 
@@ -31,20 +29,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FeatureBaggerTest {
 
     private static final int TOTAL_INDICES = 20;
-    private static final int[] BAG = new int[10];
-    private static final FeatureBagger featureBagger = new FeatureBagger(new Random(), TOTAL_INDICES);
-
-    @BeforeEach
-    void setup() {
-        Arrays.fill(BAG, 0);
-    }
+    private static final FeatureBagger featureBagger = new FeatureBagger(new Random(), TOTAL_INDICES, 0.5);
 
     @Test
     void shouldSampleValidInterval() {
-        featureBagger.sample(BAG);
+        var bag = featureBagger.sample();
 
-        for (int i : BAG) {
-            assertThat(i).isGreaterThanOrEqualTo(0).isLessThan(TOTAL_INDICES);
+        for (int i : bag) {
+            assertThat(i).isBetween(0, TOTAL_INDICES - 1);
         }
     }
 
@@ -52,9 +44,9 @@ class FeatureBaggerTest {
     void shouldSampleWithoutReplacement() {
         var sampledIndices = new BitSet(TOTAL_INDICES);
 
-        featureBagger.sample(BAG);
+        var bag = featureBagger.sample();
 
-        for (int i : BAG) {
+        for (int i : bag) {
             assertThat(sampledIndices.get(i)).isFalse();
             sampledIndices.set(i);
         }
