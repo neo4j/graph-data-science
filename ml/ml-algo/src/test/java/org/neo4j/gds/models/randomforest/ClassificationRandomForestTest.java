@@ -84,7 +84,9 @@ class ClassificationRandomForestTest {
         var randomForestPredict = randomForestTrain.train().predictor();
 
         var features = new double[]{8.0, 0.0};
-        assertThat(randomForestPredict.predict(features)).isEqualTo(42);
+
+        assertThat(randomForestPredict.predictLabel(features)).isEqualTo(42);
+        assertThat(randomForestPredict.predictProbabilities(features)).containsExactly(0.0, 1.0);
     }
 
     @ParameterizedTest
@@ -110,7 +112,8 @@ class ClassificationRandomForestTest {
         var randomForestPredict = randomForestTrain.train().predictor();
 
         var features = new double[]{8.0, 3.2};
-        assertThat(randomForestPredict.predict(features)).isEqualTo(42);
+        assertThat(randomForestPredict.predictLabel(features)).isEqualTo(42);
+        assertThat(randomForestPredict.predictProbabilities(features)).containsExactly(0.45, 0.55);
     }
 
     @ParameterizedTest

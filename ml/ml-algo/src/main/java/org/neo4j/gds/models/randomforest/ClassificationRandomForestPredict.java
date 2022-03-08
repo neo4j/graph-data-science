@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.models.randomforest;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
@@ -27,11 +28,12 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.models.Features;
 
-import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class ClassificationRandomForestPredict {
+public class ClassificationRandomForestPredict implements Classifier {
 
     private final DecisionTreePredict<Long>[] decisionTrees;
     private final LocalIdMap classMapping;
@@ -47,20 +49,43 @@ public class ClassificationRandomForestPredict {
         this.concurrency = concurrency;
     }
 
-    public long predict(final double[] features) {
-        final var predictionsPerClass = new AtomicIntegerArray(classMapping.size());
-        var tasks = ParallelUtil.tasks(decisionTrees.length, index -> () -> {
-            var tree = decisionTrees[index];
-            var prediction = tree.predict(features);
-            predictionsPerClass.incrementAndGet(classMapping.toMapped(prediction));
-        });
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+    @Override
+    public LocalIdMap classIdMap() {
+        return classMapping;
+    }
+
+    @Override
+    public ClassifierData data() {
+        return ImmutableRandomForestData.of(decisionTrees);
+    }
+
+    @Override
+    public double[] predictProbabilities(long id, Features features) {
+        return predictProbabilities(features.get(id));
+    }
+
+    public double[] predictProbabilities(double[] features) {
+        int[] votesPerClass = gatherTreePredictions(features);
+
+        double[] probabilities = new double[votesPerClass.length];
+
+        for (int classIdx = 0; classIdx < votesPerClass.length; classIdx++) {
+            int voteForClass = votesPerClass[classIdx];
+            probabilities[classIdx] = (double) voteForClass / decisionTrees.length;
+        }
+
+        return probabilities;
+    }
+
+    @TestOnly
+    long predictLabel(final double[] features) {
+        final int[] predictionsPerClass = gatherTreePredictions(features);
 
         int max = -1;
         int maxClassIdx = 0;
 
-        for (int i = 0; i < predictionsPerClass.length(); i++) {
-            var numPredictions = predictionsPerClass.get(i);
+        for (int i = 0; i < predictionsPerClass.length; i++) {
+            var numPredictions = predictionsPerClass[i];
 
             if (numPredictions <= max) continue;
 
@@ -140,5 +165,15 @@ public class ClassificationRandomForestPredict {
         ParallelUtil.runWithConcurrency(concurrency, majorityVoteTasks, Pools.DEFAULT);
 
         return totalMistakes.doubleValue() / totalOutOfAnyBagVectors.doubleValue();
+    }
+
+    private int[] gatherTreePredictions(double[] features) {
+        final var predictionsPerClass = new int[classMapping.size()];
+
+        for (DecisionTreePredict<Long> decisionTree : decisionTrees) {
+            long predictedClass = decisionTree.predict(features);
+            predictionsPerClass[classMapping.toMapped(predictedClass)]++;
+        }
+        return predictionsPerClass;
     }
 }
