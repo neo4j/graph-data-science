@@ -23,7 +23,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -74,10 +74,10 @@ public class ClassificationRandomForestPredict {
     public double outOfBagError(
         final HugeByteArray[] bootstrappedDatasets,
         final HugeObjectArray<double[]> allFeatureVectors,
-        final HugeIntArray allLabels
+        final HugeLongArray expectedLabels
     ) {
         assert bootstrappedDatasets.length == decisionTrees.length;
-        assert allFeatureVectors.size() == allLabels.size();
+        assert allFeatureVectors.size() == expectedLabels.size();
 
         final var totalNumVectors = allFeatureVectors.size();
         final var numClasses = classMapping.size();
@@ -129,7 +129,7 @@ public class ClassificationRandomForestPredict {
 
                 // The ith feature vector was in at least one out-of-bag dataset.
                 numOutOfAnyBagVectors++;
-                if (classMapping.toOriginal(maxClassIdx) != allLabels.get(i)) {
+                if (classMapping.toOriginal(maxClassIdx) != expectedLabels.get(i)) {
                     numMistakes++;
                 }
             }

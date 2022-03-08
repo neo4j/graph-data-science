@@ -19,20 +19,19 @@
  */
 package org.neo4j.gds.decisiontree;
 
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> extends DecisionTreeTrain<LOSS, Long> {
 
-    private final HugeIntArray allLabels;
+    private final HugeLongArray allLabels;
     private final LocalIdMap classIdMap;
 
     public ClassificationDecisionTreeTrain(
         LOSS lossFunction,
         HugeObjectArray<double[]> allFeatures,
-        HugeIntArray allLabels,
+        HugeLongArray allLabels,
         LocalIdMap classIdMap,
         DecisionTreeTrainConfig config,
         double featureBaggingRatio,
@@ -59,8 +58,8 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         final var classesInGroup = new long[classIdMap.size()];
 
         for (long i = 0; i < groupSize; i++) {
-            int c = allLabels.get(group.get(i));
-            classesInGroup[classIdMap.toMapped(c)]++;
+            long label = allLabels.get(group.get(i));
+            classesInGroup[classIdMap.toMapped(label)]++;
         }
 
         long max = -1;

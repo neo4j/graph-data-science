@@ -22,7 +22,7 @@ package org.neo4j.gds.models.randomforest;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.decisiontree.ClassificationDecisionTreeTrain;
 import org.neo4j.gds.decisiontree.DecisionTreeLoss;
@@ -37,14 +37,14 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
     private final LocalIdMap classIdMap;
     private final RandomForestTrainConfig config;
     private final int concurrency;
-    private final HugeIntArray allLabels;
+    private final HugeLongArray allLabels;
 
     public ClassificationRandomForestTrain(
         LOSS lossFunction,
         HugeObjectArray<double[]> allFeatureVectors,
         int concurrency,
         LocalIdMap classIdMap,
-        HugeIntArray allLabels,
+        HugeLongArray allLabels,
         RandomForestTrainConfig config
     ) {
         this.lossFunction = lossFunction;

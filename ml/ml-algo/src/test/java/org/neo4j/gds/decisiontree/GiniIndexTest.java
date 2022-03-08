@@ -23,7 +23,6 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
@@ -73,7 +72,7 @@ class GiniIndexTest {
     @ParameterizedTest
     @MethodSource("giniParameters")
     void shouldComputeCorrectLoss(int[] allLabels, long[][] groups, GroupSizes groupSizes, double expectedLoss) {
-        var hugeLabels = HugeIntArray.newArray(allLabels.length);
+        var hugeLabels = HugeLongArray.newArray(allLabels.length);
         for (int i = 0; i < allLabels.length; i++) {
             hugeLabels.set(i, allLabels[i]);
         }

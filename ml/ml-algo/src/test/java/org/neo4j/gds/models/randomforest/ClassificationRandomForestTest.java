@@ -23,7 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.decisiontree.GiniIndex;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -36,7 +36,7 @@ class ClassificationRandomForestTest {
     private static final long NUM_SAMPLES = 10;
     private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
 
-    private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES);
+    private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
     private final HugeObjectArray<double[]> allFeatureVectors = HugeObjectArray.newArray(double[].class, NUM_SAMPLES);
 
     private GiniIndex giniIndexLoss;
