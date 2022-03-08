@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.decisiontree;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 class TreeNode<PREDICTION> {
     public PREDICTION prediction;
     public int index = -1;
@@ -35,5 +37,43 @@ class TreeNode<PREDICTION> {
 
     TreeNode(PREDICTION prediction) {
         this.prediction = prediction;
+    }
+
+    @Override
+    public String toString() {
+        return formatWithLocale(
+            "Node: prediction %s, featureIndex %s, splitValue %f",
+            this.prediction,
+            this.index,
+            this.value
+        );
+    }
+
+    /**
+     * Renders the variable into a human readable representation.
+     */
+    public String render() {
+        StringBuilder sb = new StringBuilder();
+        render(sb, this, 0);
+        return sb.toString();
+    }
+
+
+    static void render(StringBuilder sb, TreeNode<?> node, int depth) {
+        if (node == null) {
+            return;
+        }
+
+        sb.append("\t".repeat(Math.max(0, depth - 1)));
+
+        if (depth > 0) {
+            sb.append("|-- ");
+        }
+
+        sb.append(node);
+        sb.append(System.lineSeparator());
+
+        render(sb, node.leftChild, depth + 1);
+        render(sb, node.rightChild, depth + 1);
     }
 }
