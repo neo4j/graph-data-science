@@ -100,9 +100,9 @@ class BfsProcTest extends BaseProcTest {
             .algo("gds.bfs")
             .streamMode()
             .addParameter("sourceNode", id)
-            .yields("startNodeId, nodeIds");
+            .yields("sourceNode, nodeIds");
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(row.getNumber("startNodeId").longValue(), id);
+            assertEquals(row.getNumber("sourceNode").longValue(), id);
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             var expectedOrder = new HashMap<String, List<Integer>>();
             expectedOrder.put("g", List.of(0));
@@ -131,9 +131,9 @@ class BfsProcTest extends BaseProcTest {
             .algo("gds.bfs")
             .streamMode()
             .addParameter("sourceNode", id)
-            .yields("startNodeId, nodeIds");
+            .yields("sourceNode, nodeIds");
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(row.getNumber("startNodeId").longValue(), id);
+            assertEquals(row.getNumber("sourceNode").longValue(), id);
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             var expectedOrder = new HashMap<String, List<Integer>>();
             expectedOrder.put("g", List.of(6));
