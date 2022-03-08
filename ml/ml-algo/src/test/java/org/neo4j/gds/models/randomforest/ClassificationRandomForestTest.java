@@ -75,7 +75,7 @@ class ClassificationRandomForestTest {
                 .builder()
                 .maxDepth(1)
                 .minSplitSize(1)
-                .randomSeed(Optional.empty())
+                .randomSeed(42L)
                 .featureBaggingRatio(1.0D)
                 .numberOfDecisionTrees(1)
                 .build()
