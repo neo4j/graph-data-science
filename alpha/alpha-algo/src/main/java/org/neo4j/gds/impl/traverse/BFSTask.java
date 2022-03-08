@@ -34,9 +34,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.neo4j.gds.impl.Converters.longToIntConsumer;
 
 /**
- * A task that will compute BDS for portion of the graph.
+ * A task that will compute BFS for portion of the graph.
  *
- * Computation is performed in parallel while syncronization of the result is done sequentially.
+ * Computation is performed in parallel while synchronization of the result is done sequentially.
  */
 class BFSTask implements Runnable {
     // shared variables; see comments in `BFS`.
@@ -53,15 +53,17 @@ class BFSTask implements Runnable {
     private final Aggregator aggregatorFunction;
 
     // variables local to the task
-    // Chunk(s) of `traversedNodes` that a single task operates on; each chunk ends with `BFS.IGNORE_NODE` which acts as separator.
+    // Chunk(s) of `traversedNodes` that a single task operates on; each chunk
+    // ends with `BFS.IGNORE_NODE` which acts as a separator.
     private final LongArrayList localNodes;
-    // Chunk(s) of `weights` that a single task operates on; each chunk ends with `BFS.IGNORE_NODE` which acts as separator.
+    // Chunk(s) of `weights` that a single task operates on; each chunk
+    // ends with `BFS.IGNORE_NODE` which acts as a separator.
     private final DoubleArrayList localWeights;
     // IDs of the chunk(s) processed by a single task, ordered in ascending order.
     private final LongArrayList chunks;
-
     // Maximum size of a single chunk.
     private final int delta;
+
     private final TerminationFlag terminationFlag;
 
     // Used in the synchronization phase, keeps track of the current chunk index.
@@ -130,7 +132,7 @@ class BFSTask implements Runnable {
                 var nodeId = traversedNodes.get(idx);
                 var sourceId = predecessors.get(idx);
                 var weight = weights.get(idx);
-                relaxNode(offset, idx, nodeId, sourceId, weight);
+                relaxNode(idx, nodeId, sourceId, weight);
             }
             // Add a chunk separator.
             localNodes.add(BFS.IGNORE_NODE);
@@ -148,7 +150,7 @@ class BFSTask implements Runnable {
                 long minimumChunkIndex = minimumChunk.get(nodeId);
                 // The chunks are ordered and processed  sequentially,
                 // the first time, we encounter `nodeId` in localNodes,
-                // `nodeId` as set to visited  and added to traversedNodes.
+                // `nodeId` is set to visited and added to traversedNodes.
                 // In case `nodeId` is encountered in a later chunk,
                 // the if check will be false and not added to traversedNodes again.
                 if (!visited.getAndSet(nodeId)) {
@@ -171,7 +173,7 @@ class BFSTask implements Runnable {
         }
     }
 
-    private void relaxNode(int chunk, int nodeIndex, long nodeId, long sourceNodeId, double weight) {
+    private void relaxNode(int nodeIndex, long nodeId, long sourceNodeId, double weight) {
         var exitPredicateResult = exitPredicate.test(sourceNodeId, nodeId, weight);
         if (exitPredicateResult == ExitPredicate.Result.CONTINUE) {
             traversedNodes.set(nodeIndex, BFS.IGNORE_NODE);
@@ -192,13 +194,10 @@ class BFSTask implements Runnable {
                 // which is an atomic operation and always will have the minimum chunk index.
                 // Due to the fact, that syncing is done sequentially, there will never be a problem
                 // even when two different threads include `targetNodeId` in their localNodes.
-                // This is explained in the syncNextChunk function
+                // This is further explained in the syncNextChunk function.
                 if (!visited.get(targetNodeId)) {
-                    System.out.println(Thread.currentThread().getId() + "\t" + targetNodeId);
                     minimumChunk.update(targetNodeId, currentValue -> Math.min(currentValue, nodeIndex));
-                    System.out.println(minimumChunk.get(targetNodeId) + "\t" + nodeIndex);
                     if (minimumChunk.get(targetNodeId) == nodeIndex) {
-                        System.out.println("Adding  " + targetNodeId);
                         localNodes.add(targetNodeId);
                         localWeights.add(aggregatorFunction.apply(s, targetNodeId, weight));
                     }
