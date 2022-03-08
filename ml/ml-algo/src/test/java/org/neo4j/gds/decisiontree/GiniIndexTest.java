@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class GiniIndexTest {
 
-    private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(5 ,1);
+    private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(5, 1);
 
     private static Stream<Arguments> giniParameters() {
         return Stream.of(
