@@ -54,21 +54,25 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     private final NodeMapping filteredIdMap;
     private long relationshipCount;
     private final HugeIntArray degreeCache;
+    private final ThreadLocal<Graph> threadLocalGraph;
 
-    public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap, AllocationTracker allocationTracker) {
-        super(originalGraph);
-        this.relationshipCount = -1;
-        this.filteredIdMap = filteredIdMap;
-        this.degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount(), allocationTracker);
-
-        degreeCache.fill(NO_DEGREE);
+    public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap) {
+        this(originalGraph, filteredIdMap, emptyDegreeCache(filteredIdMap),-1);
     }
 
-    public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap, HugeIntArray degreeCache) {
+    private NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap, HugeIntArray degreeCache, long relationshipCount) {
         super(originalGraph);
 
         this.degreeCache = degreeCache;
         this.filteredIdMap = filteredIdMap;
+        this.relationshipCount = relationshipCount;
+        this.threadLocalGraph = ThreadLocal.withInitial(this::concurrentCopy);
+    }
+
+    private static HugeIntArray emptyDegreeCache(IdMap filteredIdMap) {
+        var degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount());
+        degreeCache.fill(NO_DEGREE);
+        return degreeCache;
     }
 
     public NodeMapping nodeMapping() {
@@ -104,7 +108,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
         var degree = new MutableInt();
 
-        forEachRelationship(nodeId, (s, t) -> {
+        threadLocalGraph.get().forEachRelationship(nodeId, (s, t) -> {
             degree.increment();
             return true;
         });
@@ -232,7 +236,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public CSRGraph concurrentCopy() {
-        return new NodeFilteredGraph(graph.concurrentCopy(), filteredIdMap, degreeCache);
+        return new NodeFilteredGraph(graph.concurrentCopy(), filteredIdMap, degreeCache, relationshipCount);
     }
 
     @Override
