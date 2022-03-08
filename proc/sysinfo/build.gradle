@@ -36,7 +36,7 @@ tasks.register('unpackDocs', Copy) {
     from tarTree(project(':doc').tasks.assembleDocs.archiveFile)
     into "$buildDir/doc-sources"
 }
-test.dependsOn tasks.named('unpackDocs')
+processTestResources.dependsOn tasks.named('unpackDocs')
 
 // configure the keys that will be written to the info.properties file
 infoBroker {

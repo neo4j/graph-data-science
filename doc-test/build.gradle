@@ -38,4 +38,4 @@ tasks.register('unpackDocs', Copy) {
     into "$buildDir/doc-sources"
 }
 
-test.dependsOn tasks.named('unpackDocs')
+processTestResources.dependsOn tasks.named('unpackDocs')
