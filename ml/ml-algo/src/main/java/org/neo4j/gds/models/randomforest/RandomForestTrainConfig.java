@@ -28,8 +28,10 @@ public interface RandomForestTrainConfig extends DecisionTreeTrainConfig {
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     double featureBaggingRatio();
 
-    @Configuration.DoubleRange(min = 0, max = 1)
-    double numFeatureVectorsRatio();
+    @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
+    default double numberOfSamplesRatio() {
+        return 1;
+    };
 
     @Configuration.IntegerRange(min = 1)
     int numberOfDecisionTrees();

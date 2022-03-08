@@ -82,7 +82,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
                 classIdMap,
                 decisionTreeTrainConfig,
                 featureBagger,
-                config.numFeatureVectorsRatio()
+                config.numberOfSamplesRatio()
             );
             decisionTrees[index] = decisionTree.train();
             bootstrappedDatasets[index] = decisionTree.bootstrappedDataset();
