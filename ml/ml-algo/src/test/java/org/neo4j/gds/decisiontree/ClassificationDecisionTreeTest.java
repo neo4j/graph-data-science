@@ -97,11 +97,13 @@ class ClassificationDecisionTreeTest {
                 .maxDepth(maxDepth)
                 .minSplitSize(minSize)
                 .build(),
-            new FeatureBagger(new Random(), features.length, 1),
-            0.0
+            new FeatureBagger(new Random(), features.length, 1)
         );
 
-        var decisionTreePredict = decisionTree.train();
+        HugeLongArray activeFeatureVectors = HugeLongArray.newArray(allFeatureVectors.size());
+        activeFeatureVectors.setAll(idx -> idx);
+
+        var decisionTreePredict = decisionTree.train(activeFeatureVectors);
 
         assertThat(decisionTreePredict.predict(features)).isEqualTo(expectedPrediction);
     }
@@ -112,6 +114,9 @@ class ClassificationDecisionTreeTest {
             .maxDepth(1)
             .minSplitSize(1);
 
+        HugeLongArray activeFeatureVectors = HugeLongArray.newArray(allFeatureVectors.size());
+        activeFeatureVectors.setAll(idx -> idx);
+
         var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
             allFeatureVectors,
@@ -120,14 +125,12 @@ class ClassificationDecisionTreeTest {
             decisionTreeTrainConfigBuilder
                 .randomSeed(-6938002729576536314L)
                 .build(),
-            new FeatureBagger(new Random(-6938002729576536314L), allFeatureVectors.get(0).length, 0.5D),
-            // Only one feature is used.
-            0.0
+            new FeatureBagger(new Random(-6938002729576536314L), allFeatureVectors.get(0).length, 0.5D)
         );
 
         var features = new double[]{8.0, 0.0};
 
-        var decisionTreePredict = decisionTree.train();
+        var decisionTreePredict = decisionTree.train(activeFeatureVectors);
         assertThat(decisionTreePredict.predict(features)).isEqualTo(42);
 
         decisionTree = new ClassificationDecisionTreeTrain<>(
@@ -138,21 +141,23 @@ class ClassificationDecisionTreeTest {
             decisionTreeTrainConfigBuilder
                 .randomSeed(42L)
                 .build(),
-            new FeatureBagger(new Random(42L), features.length, 0.5D), // Only one feature is used.
-            0.0
+            new FeatureBagger(new Random(42L), features.length, 0.5D) // Only one feature is used.
         );
 
-        decisionTreePredict = decisionTree.train();
+        decisionTreePredict = decisionTree.train(activeFeatureVectors);
         assertThat(decisionTreePredict.predict(features)).isEqualTo(1337);
     }
 
     @Test
-    void vectorSamplingShouldWork() {
+    void considersSampledVectors() {
         var features = new double[]{8.0, 0.0};
 
         var decisionTreeTrainConfigBuilder = DecisionTreeTrainConfigImpl.builder()
             .maxDepth(1)
             .minSplitSize(1);
+
+        var sampledVectors = HugeLongArray.newArray(1);
+        sampledVectors.set(0 ,1);
 
         var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
@@ -162,26 +167,25 @@ class ClassificationDecisionTreeTest {
             decisionTreeTrainConfigBuilder
                 .randomSeed(5677377167946646799L)
                 .build(),
-            new FeatureBagger(new Random(5677377167946646799L), features.length, 1),
-            0.4D // Use 40% of all training examples.
+            new FeatureBagger(new Random(5677377167946646799L), features.length, 1)
         );
 
-        var decisionTreePredict = decisionTree.train();
-        assertThat(decisionTreePredict.predict(features)).isEqualTo(42);
+        var decisionTreePredict = decisionTree.train(sampledVectors);
+        assertThat(decisionTreePredict.predict(features)).isEqualTo(1337L);
+
+        var otherSampledVectors = HugeLongArray.newArray(1);
+        otherSampledVectors.set(0 ,allFeatureVectors.size() - 1);
 
         decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
             allFeatureVectors,
             allLabels,
             CLASS_MAPPING,
-            decisionTreeTrainConfigBuilder
-                .randomSeed(321328L)
-                .build(),
-            new FeatureBagger(new Random(321328L), features.length, 1),
-            0.4D // Use 40% of all training examples.
+            decisionTreeTrainConfigBuilder.randomSeed(321328L).build(),
+            new FeatureBagger(new Random(321328L), features.length, 1)
         );
 
-        decisionTreePredict = decisionTree.train();
-        assertThat(decisionTreePredict.predict(features)).isEqualTo(1337);
+        decisionTreePredict = decisionTree.train(otherSampledVectors);
+        assertThat(decisionTreePredict.predict(features)).isEqualTo(42L);
     }
 }

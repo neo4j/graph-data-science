@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.decisiontree;
+package org.neo4j.gds.models.randomforest;
 
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -41,9 +41,9 @@ final class DatasetBootstrapper {
         final var bootstrappedVectors = HugeLongArray.newArray(numVectors);
 
         for (long i = 0; i < numVectors; i++) {
-            long j = randomNonNegativeLong(random, 0, totalNumFeatureVectors);
-            bootstrappedVectors.set(i, j);
-            cachedBootstrappedDataset.set(j, (byte) 1);
+            long sampledVectorIdx = randomNonNegativeLong(random, 0, totalNumFeatureVectors);
+            bootstrappedVectors.set(i, sampledVectorIdx);
+            cachedBootstrappedDataset.set(sampledVectorIdx, (byte) 1);
         }
 
         return bootstrappedVectors;

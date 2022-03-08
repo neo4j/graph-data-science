@@ -81,11 +81,29 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
                 allLabels,
                 classIdMap,
                 decisionTreeTrainConfig,
-                featureBagger,
-                config.numberOfSamplesRatio()
+                featureBagger
             );
-            decisionTrees[index] = decisionTree.train();
-            bootstrappedDatasets[index] = decisionTree.bootstrappedDataset();
+
+            // TODO: Implement HugeBitSet and use that instead of HugeByteArray.
+            HugeByteArray bootstrappedDataset = HugeByteArray.newArray(allFeatureVectors.size());
+            HugeLongArray activeFeatureVectors;
+
+            if (Double.compare(config.numberOfSamplesRatio(), 0.0d) == 0) {
+                // 0 => no sampling but take every vector
+                var allVectors = HugeLongArray.newArray(allFeatureVectors.size());
+                allVectors.setAll(i -> i);
+                bootstrappedDataset.fill((byte) 1);
+                activeFeatureVectors = allVectors;
+            } else {
+                activeFeatureVectors = DatasetBootstrapper.bootstrap(
+                    random,
+                    config.numberOfSamplesRatio(),
+                    bootstrappedDataset
+                );
+            }
+
+            decisionTrees[index] = decisionTree.train(activeFeatureVectors);
+            bootstrappedDatasets[index] = bootstrappedDataset;
         });
         ParallelUtil.runWithConcurrency(this.concurrency, tasks, Pools.DEFAULT);
 
