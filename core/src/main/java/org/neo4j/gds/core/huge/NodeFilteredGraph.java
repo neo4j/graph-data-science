@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CSRGraphAdapter;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.ImmutableRelationshipCursor;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
@@ -56,8 +57,8 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     private final HugeIntArray degreeCache;
     private final ThreadLocal<Graph> threadLocalGraph;
 
-    public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap) {
-        this(originalGraph, filteredIdMap, emptyDegreeCache(filteredIdMap),-1);
+    public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap, AllocationTracker allocationTracker) {
+        this(originalGraph, filteredIdMap, emptyDegreeCache(filteredIdMap, allocationTracker),-1);
     }
 
     private NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap, HugeIntArray degreeCache, long relationshipCount) {
@@ -69,8 +70,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
         this.threadLocalGraph = ThreadLocal.withInitial(this::concurrentCopy);
     }
 
-    private static HugeIntArray emptyDegreeCache(IdMap filteredIdMap) {
-        var degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount());
+    private static HugeIntArray emptyDegreeCache(
+        IdMapping filteredIdMap,
+        AllocationTracker allocationTracker
+    ) {
+        var degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount(), allocationTracker);
         degreeCache.fill(NO_DEGREE);
         return degreeCache;
     }
