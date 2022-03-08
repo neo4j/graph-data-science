@@ -48,6 +48,13 @@ public class LocalIdMap {
         this.originalToInternalIdMap = new LongIntHashMap();
     }
 
+    public static LocalIdMap of(long... originalIds) {
+        var idMap = new LocalIdMap();
+        Arrays.stream(originalIds).forEach(idMap::toMapped);
+
+        return idMap;
+    }
+
     public int toMapped(long originalId) {
         if (originalToInternalIdMap.containsKey(originalId)) {
             return originalToInternalIdMap.get(originalId);

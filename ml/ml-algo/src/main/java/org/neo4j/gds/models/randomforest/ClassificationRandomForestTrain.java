@@ -28,31 +28,30 @@ import org.neo4j.gds.decisiontree.ClassificationDecisionTreeTrain;
 import org.neo4j.gds.decisiontree.DecisionTreeLoss;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.decisiontree.DecisionTreeTrainConfigImpl;
-
-import java.util.HashMap;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
 
     private final LOSS lossFunction;
     private final HugeObjectArray<double[]> allFeatureVectors;
+    private final LocalIdMap classIdMap;
     private final RandomForestTrainConfig config;
     private final int concurrency;
-    private final int[] classes;
     private final HugeIntArray allLabels;
 
     public ClassificationRandomForestTrain(
         LOSS lossFunction,
         HugeObjectArray<double[]> allFeatureVectors,
         int concurrency,
-        int[] classes,
+        LocalIdMap classIdMap,
         HugeIntArray allLabels,
         RandomForestTrainConfig config
     ) {
         this.lossFunction = lossFunction;
         this.allFeatureVectors = allFeatureVectors;
+        this.classIdMap = classIdMap;
         this.config = config;
         this.concurrency = concurrency;
-        this.classes = classes;
         this.allLabels = allLabels;
     }
 
@@ -60,11 +59,6 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
         int numberOfDecisionTrees = config.numberOfDecisionTrees();
         var decisionTrees = new DecisionTreePredict[numberOfDecisionTrees];
         var bootstrappedDatasets = new HugeByteArray[numberOfDecisionTrees];
-
-        var classToIdx = new HashMap<Integer, Integer>();
-        for (int i = 0; i < classes.length; i++) {
-            classToIdx.put(classes[i], i);
-        }
 
         var tasks = ParallelUtil.tasks(numberOfDecisionTrees, index -> () -> {
             var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
@@ -75,9 +69,8 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
             var decisionTree = new ClassificationDecisionTreeTrain<>(
                 lossFunction,
                 allFeatureVectors,
-                classes,
                 allLabels,
-                classToIdx,
+                classIdMap,
                 decisionTreeTrainConfig,
                 config.featureBaggingRatio(),
                 config.numFeatureVectorsRatio()
@@ -88,7 +81,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
         ParallelUtil.runWithConcurrency(this.concurrency, tasks, Pools.DEFAULT);
 
         return ImmutableClassificationRandomForestTrainResult.of(
-            new ClassificationRandomForestPredict(decisionTrees, classes, classToIdx, concurrency),
+            new ClassificationRandomForestPredict(decisionTrees, classIdMap, concurrency),
             bootstrappedDatasets
         );
     }

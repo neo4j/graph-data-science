@@ -27,8 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,11 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ClassificationDecisionTreeTest {
 
     private static final long NUM_SAMPLES = 10;
-    private static final int[] CLASSES = {1337, 42};
-    private static final Map<Integer, Integer> CLASS_TO_IDX = Map.of(
-            1337, 0,
-            42, 1
-        );
+    private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
 
     private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES);
     private final HugeObjectArray<double[]> allFeatureVectors = HugeObjectArray.newArray(
@@ -67,7 +63,7 @@ class ClassificationDecisionTreeTest {
         allFeatureVectors.set(8, new double[]{10.12493903, 3.234550982});
         allFeatureVectors.set(9, new double[]{6.642287351, 3.319983761});
 
-        giniIndexLoss = new GiniIndex(CLASSES, allLabels, CLASS_TO_IDX);
+        giniIndexLoss = new GiniIndex(allLabels, CLASS_MAPPING);
     }
 
     private static Stream<Arguments> predictionWithoutSamplingParameters() {
@@ -94,9 +90,8 @@ class ClassificationDecisionTreeTest {
         var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
             allFeatureVectors,
-            CLASSES,
             allLabels,
-            CLASS_TO_IDX,
+            CLASS_MAPPING,
             DecisionTreeTrainConfigImpl.builder()
                 .maxDepth(maxDepth)
                 .minSplitSize(minSize)
@@ -119,9 +114,8 @@ class ClassificationDecisionTreeTest {
         var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
             allFeatureVectors,
-            CLASSES,
             allLabels,
-            CLASS_TO_IDX,
+            CLASS_MAPPING,
             decisionTreeTrainConfigBuilder
                 .randomSeed(-6938002729576536314L)
                 .build(),
@@ -137,9 +131,8 @@ class ClassificationDecisionTreeTest {
         decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
             allFeatureVectors,
-            CLASSES,
             allLabels,
-            CLASS_TO_IDX,
+            CLASS_MAPPING,
             decisionTreeTrainConfigBuilder
                 .randomSeed(42L)
                 .build(),
@@ -162,9 +155,8 @@ class ClassificationDecisionTreeTest {
         var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
             allFeatureVectors,
-            CLASSES,
             allLabels,
-            CLASS_TO_IDX,
+            CLASS_MAPPING,
             decisionTreeTrainConfigBuilder
                 .randomSeed(5677377167946646799L)
                 .build(),
@@ -178,9 +170,8 @@ class ClassificationDecisionTreeTest {
         decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
             allFeatureVectors,
-            CLASSES,
             allLabels,
-            CLASS_TO_IDX,
+            CLASS_MAPPING,
             decisionTreeTrainConfigBuilder
                 .randomSeed(321328L)
                 .build(),

@@ -22,21 +22,18 @@ package org.neo4j.gds.decisiontree;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
-import java.util.Map;
+public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> extends DecisionTreeTrain<LOSS, Long> {
 
-public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> extends DecisionTreeTrain<LOSS, Integer> {
-
-    private final int[] classes;
     private final HugeIntArray allLabels;
-    private final Map<Integer, Integer> classToIdx;
+    private final LocalIdMap classIdMap;
 
     public ClassificationDecisionTreeTrain(
         LOSS lossFunction,
         HugeObjectArray<double[]> allFeatures,
-        int[] classes,
         HugeIntArray allLabels,
-        Map<Integer, Integer> classToIdx,
+        LocalIdMap classIdMap,
         DecisionTreeTrainConfig config,
         double featureBaggingRatio,
         double numFeatureVectorsRatio
@@ -48,27 +45,22 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
             featureBaggingRatio,
             numFeatureVectorsRatio
         );
-
-        assert classes.length > 0;
-        this.classes = classes;
+        this.classIdMap = classIdMap;
 
         assert allLabels.size() == allFeatures.size();
         this.allLabels = allLabels;
-
-        assert classToIdx.keySet().size() == classes.length;
-        this.classToIdx = classToIdx;
     }
 
     @Override
-    protected Integer toTerminal(final HugeLongArray group, final long groupSize) {
+    protected Long toTerminal(final HugeLongArray group, final long groupSize) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
 
-        final var classesInGroup = new long[classes.length];
+        final var classesInGroup = new long[classIdMap.size()];
 
         for (long i = 0; i < groupSize; i++) {
             int c = allLabels.get(group.get(i));
-            classesInGroup[classToIdx.get(c)]++;
+            classesInGroup[classIdMap.toMapped(c)]++;
         }
 
         long max = -1;
@@ -80,6 +72,6 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
             maxClassIdx = i;
         }
 
-        return classes[maxClassIdx];
+        return classIdMap.toOriginal(maxClassIdx);
     }
 }
