@@ -165,6 +165,9 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.knn.stream.estimate`
 | `gds.knn.write`
 | `gds.knn.write.estimate`
+.2+<.^|<<algorithms-bfs, BFS>>
+| `gds.bfs.stream`
+| `gds.bfs.stream.estimate`
 |===
 
 [[beta-tier]]

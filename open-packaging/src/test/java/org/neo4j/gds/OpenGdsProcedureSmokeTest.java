@@ -236,6 +236,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.betweenness.write",
         "gds.betweenness.write.estimate",
 
+        "gds.bfs.stream",
+        "gds.bfs.stream.estimate",
+
         "gds.debug.sysInfo",
 
         "gds.degree.mutate",

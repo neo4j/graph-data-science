@@ -74,7 +74,7 @@ class BFSAlgorithmFactory extends GraphAlgorithmFactory<BFS, BfsConfig> {
 
         var mappedStartNodeId = graph.toMappedNodeId(configuration.sourceNode());
 
-        return new BFS(
+        return BFS.create(
             graph,
             mappedStartNodeId,
             exitFunction,

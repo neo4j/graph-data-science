@@ -177,7 +177,7 @@ class BFSTest {
         var progressTask = Tasks.leaf("BFS", naturalGraph.relationshipCount());
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
-        new BFS(
+        BFS.create(
             naturalGraph,
             0,
             (s, t, w) -> Result.FOLLOW,
