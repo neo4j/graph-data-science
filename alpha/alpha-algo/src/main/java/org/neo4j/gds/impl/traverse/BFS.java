@@ -38,6 +38,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+/*
+    Parallel implementation of the BFS algorithm.
+
+    It uses the concept of bucketing/chunking to keep track of the ordering of the visited nodes.
+*/
 public final class BFS extends Algorithm<long[]> {
 
     private static final int DEFAULT_DELTA = 64;
@@ -49,10 +54,29 @@ public final class BFS extends Algorithm<long[]> {
     private final Graph graph;
     private final int delta;
 
+    /*
+        An array to keep the node ids that were already traversed in the correct order.
+        It is initialised with the total number of nodes but may contain less than that.
+    */
     private HugeLongArray traversedNodes;
+
+    /*
+        An array to keep the predecessor node ids of the node at the same position in `traversedNodes`.
+        It is initialised with the total number of nodes but may contain less than that.
+        NOTE: this is not currently used and may be removed soon.
+    */
     private final HugeLongArray sources;
+
+    /*
+        An array to keep the weight/depth of the node at the same position in `traversedNodes`.
+        It is initialised with the total number of nodes but may contain less than that.
+        This is used for early termination when `maxDepth` parameter is specified.
+    */
     private HugeDoubleArray weights;
 
+    /*
+        Used to keep track of the visited nodes, the value at index will be `true` for each node id in the `traversedNodes`.
+    */
     private HugeAtomicBitSet visited;
     private final int concurrency;
 
@@ -75,6 +99,7 @@ public final class BFS extends Algorithm<long[]> {
         );
     }
 
+    // Currently, only used in tests to allow setting different values for `delta`.
     static BFS create(
         Graph graph,
         long startNodeId,
@@ -138,10 +163,15 @@ public final class BFS extends Algorithm<long[]> {
     public long[] compute() {
         progressTracker.beginSubTask();
 
+        // This is used to read from `traversedNodes` in chunks, updated in `BFSTask`.
         var traversedNodesIndex = new AtomicInteger(0);
+        // This keeps the current length of the `traversedNodes`, updated in `BFSTask.syncNextChunk`.
         var traversedNodesLength = new AtomicInteger(1);
+        // Used for early exit when target node is reached (if specified by the user), updated in `BFSTask`.
         var targetFoundIndex = new AtomicLong(Long.MAX_VALUE);
 
+        // The minimum position of a predecessor that contains relationship to the node in the `traversedNodes`.
+        // This is updated in `BFSTask` and is helping to maintain the correct traversal order for the output.
         var minimumChunk = HugeAtomicLongArray.newArray(
             graph.nodeCount(),
             LongPageCreator.of(concurrency, l -> Long.MAX_VALUE)
@@ -162,13 +192,14 @@ public final class BFS extends Algorithm<long[]> {
         int bfsTaskListSize = bfsTaskList.size();
 
         while (running()) {
+            // Run the BFSTasks in parallel
             ParallelUtil.run(bfsTaskList, Pools.DEFAULT);
             if (targetFoundIndex.get() != Long.MAX_VALUE) {
                 break;
             }
 
+            // Synchronize the results sequentially
             int previousTraversedNodesLength = traversedNodesLength.get();
-
             int numberOfFinishedTasks = 0;
             int numberOfTasksWithChunks = countTasksWithChunks(bfsTaskList);
             while (numberOfFinishedTasks != numberOfTasksWithChunks && running()) {
@@ -199,6 +230,7 @@ public final class BFS extends Algorithm<long[]> {
             traversedNodesIndex.set(previousTraversedNodesLength);
         }
 
+        // Find the portion of `traversedNodes` that contains the actual result, doesn't account for target node, hence the `if` statement.
         int nodesLengthToRetain = traversedNodesLength.get();
         if (targetFoundIndex.get() != Long.MAX_VALUE) {
             nodesLengthToRetain = targetFoundIndex.intValue() + 1;
@@ -247,5 +279,4 @@ public final class BFS extends Algorithm<long[]> {
     private int countTasksWithChunks(Collection<BFSTask> bfsTaskList) {
         return (int) bfsTaskList.stream().filter(BFSTask::hasMoreChunks).count();
     }
-
 }

@@ -33,8 +33,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.gds.impl.Converters.longToIntConsumer;
 
+/*
+    A task that will compute BDS for portion of the graph.
+
+    Computation is performed in parallel while syncronization of the result is done sequentially.
+*/
 class BFSTask implements Runnable {
-    // shared variables
+    // shared variables; see comments in `BFS`.
     private final Graph graph;
     private final AtomicInteger traversedNodesIndex;
     private final HugeAtomicBitSet visited;
@@ -48,13 +53,21 @@ class BFSTask implements Runnable {
     private final Aggregator aggregatorFunction;
 
     // variables local to the task
+    // Chunk(s) of `traversedNodes` that a single task operates on; each chunk ends with `BFS.IGNORE_NODE` which acts as separator.
     private final LongArrayList localNodes;
+    // Chunk(s) of `weights` that a single task operates on; each chunk ends with `BFS.IGNORE_NODE` which acts as separator.
     private final DoubleArrayList localWeights;
+    // IDs of the chunk(s) processed by a single task, ordered in ascending order.
     private final LongArrayList chunks;
 
+    // Maximum size of a single chunk.
     private final int delta;
     private final TerminationFlag terminationFlag;
+
+    // Used in the synchronization phase, keeps track of the current chunk index.
     private int indexOfChunk;
+
+    // Used in the synchronization phase, keeps track of the current index in the `localNodes`.
     private int indexOfLocalNodes;
 
     BFSTask(
@@ -103,6 +116,9 @@ class BFSTask implements Runnable {
         return indexOfChunk < chunks.size();
     }
 
+    /*
+        Processes a single chunk at a time.
+    */
     public void run() {
         resetChunks();
 
@@ -116,6 +132,7 @@ class BFSTask implements Runnable {
                 var weight = weights.get(idx);
                 relaxNode(offset, idx, nodeId, sourceId, weight);
             }
+            // Add a chunk separator.
             localNodes.add(BFS.IGNORE_NODE);
             localWeights.add(BFS.IGNORE_NODE);
         }
@@ -123,23 +140,26 @@ class BFSTask implements Runnable {
 
     void syncNextChunk() {
         if (!localNodes.isEmpty()) {
+            // Keep track on how many nodes are in the current chunk.
             int nodesTraversed = 0;
             int index = traversedNodesLength.get();
             while (localNodes.get(indexOfLocalNodes) != BFS.IGNORE_NODE) {
                 long nodeId = localNodes.get(indexOfLocalNodes);
                 long minimumChunkIndex = minimumChunk.get(nodeId);
-                if (minimumChunkIndex != BFS.IGNORE_NODE && minimumChunkIndex < delta + currentChunkId()) {
+                // Because the chunks are ordered and processed  sequentially,
+                // the first time we see the `nodeId` we know it is in the correct chunk.
+                if (!visited.getAndSet(nodeId)) {
                     traversedNodes.set(index, nodeId);
-                    minimumChunk.set(nodeId, BFS.IGNORE_NODE);
                     sources.set(index, traversedNodes.get(minimumChunkIndex));
                     weights.set(index, localWeights.get(indexOfLocalNodes));
-                    visited.set(nodeId);
                     index++;
                     nodesTraversed++;
                 }
                 indexOfLocalNodes++;
             }
+            // Account for chunk separator.
             indexOfLocalNodes++;
+            // Update the global `traverseNodesLength`.
             traversedNodesLength.getAndAdd(nodesTraversed);
             moveToNextChunk();
             if (!hasMoreChunks()) {
@@ -155,6 +175,7 @@ class BFSTask implements Runnable {
             return;
         } else {
             if (exitPredicateResult == ExitPredicate.Result.BREAK) {
+                // Update the global `targetFoundIndex` so other tasks will know a target is reached and terminate as well.
                 targetFoundIndex.getAndAccumulate(nodeIndex, Math::min);
                 return;
             }
