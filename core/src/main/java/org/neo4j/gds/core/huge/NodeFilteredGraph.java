@@ -54,21 +54,25 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     private final IdMap filteredIdMap;
     private long relationshipCount;
     private final HugeIntArray degreeCache;
+    private final ThreadLocal<Graph> threadLocalGraph;
 
     public NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap) {
-        super(originalGraph);
-        this.relationshipCount = -1;
-        this.filteredIdMap = filteredIdMap;
-        this.degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount());
-
-        degreeCache.fill(NO_DEGREE);
+        this(originalGraph, filteredIdMap, emptyDegreeCache(filteredIdMap),-1);
     }
 
-    public NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap, HugeIntArray degreeCache) {
+    private NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap, HugeIntArray degreeCache, long relationshipCount) {
         super(originalGraph);
 
         this.degreeCache = degreeCache;
         this.filteredIdMap = filteredIdMap;
+        this.relationshipCount = relationshipCount;
+        this.threadLocalGraph = ThreadLocal.withInitial(this::concurrentCopy);
+    }
+
+    private static HugeIntArray emptyDegreeCache(IdMap filteredIdMap) {
+        var degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount());
+        degreeCache.fill(NO_DEGREE);
+        return degreeCache;
     }
 
     public IdMap idMap() {
@@ -104,7 +108,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
         var degree = new MutableInt();
 
-        forEachRelationship(nodeId, (s, t) -> {
+        threadLocalGraph.get().forEachRelationship(nodeId, (s, t) -> {
             degree.increment();
             return true;
         });
@@ -190,7 +194,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
-        return super.streamRelationships(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue)
+        return super.streamRelationships(filteredIdMap.toRootNodeId(nodeId), fallbackValue)
             .filter(rel -> filteredIdMap.contains(rel.sourceId()) && filteredIdMap.contains(rel.targetId()))
             .map(rel -> ImmutableRelationshipCursor.of(filteredIdMap.toMappedNodeId(rel.sourceId()), filteredIdMap.toMappedNodeId(rel.targetId()), rel.property()));
     }
@@ -199,7 +203,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
         return filteredIdMap.toMappedNodeId(nodeId);
     }
 
-    public long getIntermediateOriginalNodeId(long nodeId) {
+    long getIntermediateOriginalNodeId(long nodeId) {
         return filteredIdMap.toOriginalNodeId(nodeId);
     }
 
@@ -225,7 +229,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public CSRGraph concurrentCopy() {
-        return new NodeFilteredGraph(csrGraph.concurrentCopy(), filteredIdMap, degreeCache);
+        return new NodeFilteredGraph(csrGraph.concurrentCopy(), filteredIdMap, degreeCache, relationshipCount);
     }
 
     @Override
