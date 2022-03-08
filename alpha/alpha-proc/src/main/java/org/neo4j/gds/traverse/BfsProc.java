@@ -65,7 +65,7 @@ public class BfsProc extends AlgoBaseProc<BFS, long[], BfsConfig, BfsProc.BfsRes
     @Procedure(name = "gds.bfs.stream.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphName") String graphName,
+        @Name(value = "graphName") Object graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return computeEstimate(graphName, configuration);

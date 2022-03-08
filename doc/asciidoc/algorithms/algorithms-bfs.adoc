@@ -1,13 +1,10 @@
 [[algorithms-bfs]]
-[.alpha]
 = Breadth First Search
 
 [abstract]
 --
 This section describes the Breadth First Search traversal algorithm in the Neo4j Graph Data Science library.
 --
-
-include::alpha-note.adoc[]
 
 
 [[algorithms-bfs-intro]]
@@ -25,37 +22,37 @@ The output of the procedure contains information about which nodes were visited 
 .The following describes the API for running the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.bfs.stream(
+CALL gds.bfs.stream(
   graphName: string,
   configuration: map
 )
 YIELD
   // general stream return columns
-  startNodeId: int,
+  sourceNode: int,
   nodeIds: int,
   path: Path
 ----
 
-include::../common-configuration/common-parameters.adoc[]
+include::common-configuration/common-parameters.adoc[]
 
-include::../common-configuration/common-configuration.adoc[]
+include::common-configuration/common-configuration.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name         | Type      | Default     | Optional | Description
-| startNodeId  | Integer   | n/a         | no       | The node id of the node where to start the traversal.
+| Name         | Type            | Default     | Optional | Description
+| sourceNode   | Integer         | n/a         | no       | The node id of the node where to start the traversal.
 | targetNodes  | List of Integer | empty list  | yes      | Ids for target nodes. Traversal terminates when any target node is visited.
-| maxDepth     | Integer   | -1          | yes      | The maximum distance from the start node at which nodes are visited.
+| maxDepth     | Integer         | -1          | yes      | The maximum distance from the start node at which nodes are visited.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type      | Description
-| startNodeId   | Integer   | The node id of the node where to start the traversal.
+| Name          | Type            | Description
+| sourceNode    | Integer         | The node id of the node where to start the traversal.
 | nodeIds       | List of Integer | The ids of all nodes that were visited during the traversal.
-| path          | Path      | A path containing all the nodes that were visited during the traversal.
+| path          | Path            | A path containing all the nodes that were visited during the traversal.
 |===
 
 
@@ -94,7 +91,7 @@ In the following examples we will demonstrate using the Breadth First Search alg
 ----
 MATCH (a:Node{tag:'a'})
 WITH id(a) AS startNode
-CALL gds.alpha.bfs.stream('myGraph', {startNode: startNode})
+CALL gds.bfs.stream('myGraph', {sourceNode: startNode})
 YIELD path
 UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
@@ -122,7 +119,7 @@ Since none of the options for early termination are specified, the whole graph i
 ----
 MATCH (a:Node{tag:'a'}), (d:Node{tag:'d'}), (e:Node{tag:'e'})
 WITH id(a) AS startNode, [id(d), id(e)] AS targetNodes
-CALL gds.alpha.bfs.stream('myGraph', {startNode: startNode, targetNodes: targetNodes})
+CALL gds.bfs.stream('myGraph', {sourceNode: startNode, targetNodes: targetNodes})
 YIELD path
 UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
@@ -147,7 +144,7 @@ ORDER BY tags
 ----
 MATCH (a:Node{tag:'a'})
 WITH id(a) AS startNode
-CALL gds.alpha.bfs.stream('myGraph', {startNode: startNode, maxDepth: 1})
+CALL gds.bfs.stream('myGraph', {sourceNode: startNode, maxDepth: 1})
 YIELD path
 UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags

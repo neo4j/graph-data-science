@@ -20,7 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.traverse.TraverseProcBFS;
+import org.neo4j.gds.traverse.BfsProc;
 
 import java.util.List;
 
@@ -28,11 +28,11 @@ public class BfsDocTest extends DocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(TraverseProcBFS.class, GraphProjectProc.class);
+        return List.of(BfsProc.class, GraphProjectProc.class);
     }
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/alpha-bfs.adoc";
+        return "algorithms/algorithms-bfs.adoc";
     }
 }

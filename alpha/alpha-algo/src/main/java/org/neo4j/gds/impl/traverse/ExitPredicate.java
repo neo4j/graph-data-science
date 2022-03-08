@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.impl.traverse;
 
-import java.util.List;
-
 public interface ExitPredicate {
 
     ExitPredicate FOLLOW = (s, t, w) -> ExitPredicate.Result.FOLLOW;
