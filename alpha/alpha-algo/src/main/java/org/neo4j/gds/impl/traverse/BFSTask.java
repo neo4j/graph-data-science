@@ -146,8 +146,11 @@ class BFSTask implements Runnable {
             while (localNodes.get(indexOfLocalNodes) != BFS.IGNORE_NODE) {
                 long nodeId = localNodes.get(indexOfLocalNodes);
                 long minimumChunkIndex = minimumChunk.get(nodeId);
-                // Because the chunks are ordered and processed  sequentially,
-                // the first time we see the `nodeId` we know it is in the correct chunk.
+                // The chunks are ordered and processed  sequentially,
+                // the first time, we encounter `nodeId` in localNodes,
+                // `nodeId` as set to visited  and added to traversedNodes.
+                // In case `nodeId` is encountered in a later chunk,
+                // the if check will be false and not added to traversedNodes again.
                 if (!visited.getAndSet(nodeId)) {
                     traversedNodes.set(index, nodeId);
                     predecessors.set(index, traversedNodes.get(minimumChunkIndex));
@@ -183,15 +186,21 @@ class BFSTask implements Runnable {
 
         this.graph.forEachRelationship(
             nodeId,
-            longToIntConsumer((s, t) -> {
+            longToIntConsumer((s, targetNodeId) -> {
                 // Potential race condition
                 // We consider it okay since it's handled by `minimumChunk.update`
-                // which is an atomic operation and always will have the minimum chunk index
-                if (!visited.get(t)) {
-                    minimumChunk.update(t, r -> Math.min(r, nodeIndex));
-                    if (minimumChunk.get(t) == nodeIndex) {
-                        localNodes.add(t);
-                        localWeights.add(aggregatorFunction.apply(s, t, weight));
+                // which is an atomic operation and always will have the minimum chunk index.
+                // Due to the fact, that syncing is done sequentially, there will never be a problem
+                // even when two different threads include `targetNodeId` in their localNodes.
+                // This is explained in the syncNextChunk function
+                if (!visited.get(targetNodeId)) {
+                    System.out.println(Thread.currentThread().getId() + "\t" + targetNodeId);
+                    minimumChunk.update(targetNodeId, currentValue -> Math.min(currentValue, nodeIndex));
+                    System.out.println(minimumChunk.get(targetNodeId) + "\t" + nodeIndex);
+                    if (minimumChunk.get(targetNodeId) == nodeIndex) {
+                        System.out.println("Adding  " + targetNodeId);
+                        localNodes.add(targetNodeId);
+                        localWeights.add(aggregatorFunction.apply(s, targetNodeId, weight));
                     }
                 }
                 return terminationFlag.running();

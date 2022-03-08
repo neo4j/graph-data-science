@@ -42,6 +42,19 @@ import java.util.concurrent.atomic.AtomicLong;
  * Parallel implementation of the BFS algorithm.
  *
  * It uses the concept of bucketing/chunking to keep track of the ordering of the visited nodes.
+ *
+ * Conceptually, a bucket keeps all nodes at a fixed distance from the starting node.
+ * The nodes within each bucket are kept in a list ordered by their final position in the output BFS ordering.
+ *
+ * To implement parallelism, the nodes  within a bucket are processed concurrently.
+ * For this, the nodes of the bucket are partitioned into chunks, where each chunk contains a continuous
+ * segment from the list of nodes.
+ * Threads are then assigned chunks in parallel and process each node within the chunks.
+ *
+ * To maintain a correct ordering, once the parallel processing phase has concluded.
+ * We perform a sequiential step, where we examine the chunks from earliest to latest to create the next bucket,
+ * such that a correct BFS ordering is returned where all descendants from the nodes of a chunk, appear  together before
+ * those from a latter chunk.
  */
 public final class BFS extends Algorithm<long[]> {
 
