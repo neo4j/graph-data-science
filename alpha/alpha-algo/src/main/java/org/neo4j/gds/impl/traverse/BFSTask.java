@@ -33,18 +33,18 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.gds.impl.Converters.longToIntConsumer;
 
-/*
-    A task that will compute BDS for portion of the graph.
-
-    Computation is performed in parallel while syncronization of the result is done sequentially.
-*/
+/**
+ * A task that will compute BDS for portion of the graph.
+ *
+ * Computation is performed in parallel while syncronization of the result is done sequentially.
+ */
 class BFSTask implements Runnable {
     // shared variables; see comments in `BFS`.
     private final Graph graph;
     private final AtomicInteger traversedNodesIndex;
     private final HugeAtomicBitSet visited;
     private final HugeLongArray traversedNodes;
-    private final HugeLongArray sources;
+    private final HugeLongArray predecessors;
     private final HugeDoubleArray weights;
     private final AtomicLong targetFoundIndex;
     private final AtomicInteger traversedNodesLength;
@@ -76,7 +76,7 @@ class BFSTask implements Runnable {
         AtomicInteger traversedNodesIndex,
         AtomicInteger traversedNodesLength,
         HugeAtomicBitSet visited,
-        HugeLongArray sources,
+        HugeLongArray predecessors,
         HugeDoubleArray weights,
         AtomicLong targetFoundIndex,
         HugeAtomicLongArray minimumChunk,
@@ -90,7 +90,7 @@ class BFSTask implements Runnable {
         this.traversedNodesLength = traversedNodesLength;
         this.visited = visited;
         this.traversedNodes = traversedNodes;
-        this.sources = sources;
+        this.predecessors = predecessors;
         this.weights = weights;
         this.targetFoundIndex = targetFoundIndex;
         this.minimumChunk = minimumChunk;
@@ -116,9 +116,9 @@ class BFSTask implements Runnable {
         return indexOfChunk < chunks.size();
     }
 
-    /*
-        Processes a single chunk at a time.
-    */
+    /**
+     * Processes a single chunk at a time.
+     */
     public void run() {
         resetChunks();
 
@@ -128,7 +128,7 @@ class BFSTask implements Runnable {
             chunks.add(offset);
             for (int idx = offset; idx < chunkLimit; idx++) {
                 var nodeId = traversedNodes.get(idx);
-                var sourceId = sources.get(idx);
+                var sourceId = predecessors.get(idx);
                 var weight = weights.get(idx);
                 relaxNode(offset, idx, nodeId, sourceId, weight);
             }
@@ -150,7 +150,7 @@ class BFSTask implements Runnable {
                 // the first time we see the `nodeId` we know it is in the correct chunk.
                 if (!visited.getAndSet(nodeId)) {
                     traversedNodes.set(index, nodeId);
-                    sources.set(index, traversedNodes.get(minimumChunkIndex));
+                    predecessors.set(index, traversedNodes.get(minimumChunkIndex));
                     weights.set(index, localWeights.get(indexOfLocalNodes));
                     index++;
                     nodesTraversed++;

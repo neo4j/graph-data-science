@@ -38,11 +38,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-/*
-    Parallel implementation of the BFS algorithm.
-
-    It uses the concept of bucketing/chunking to keep track of the ordering of the visited nodes.
-*/
+/**
+ * Parallel implementation of the BFS algorithm.
+ *
+ * It uses the concept of bucketing/chunking to keep track of the ordering of the visited nodes.
+ */
 public final class BFS extends Algorithm<long[]> {
 
     private static final int DEFAULT_DELTA = 64;
@@ -54,29 +54,22 @@ public final class BFS extends Algorithm<long[]> {
     private final Graph graph;
     private final int delta;
 
-    /*
-        An array to keep the node ids that were already traversed in the correct order.
-        It is initialised with the total number of nodes but may contain less than that.
-    */
+    // An array to keep the node ids that were already traversed in the correct order.
+    // It is initialized with the total number of nodes but may contain less than that.
     private HugeLongArray traversedNodes;
 
-    /*
-        An array to keep the predecessor node ids of the node at the same position in `traversedNodes`.
-        It is initialised with the total number of nodes but may contain less than that.
-        NOTE: this is not currently used and may be removed soon.
-    */
-    private final HugeLongArray sources;
+    // An array to store the predecessors for a given nodeId.
+    // It is initialized with the total number of nodes but may contain less than that.
+    // NOTE: this is not currently used and may be removed soon.
+    private final HugeLongArray predecessors;
 
-    /*
-        An array to keep the weight/depth of the node at the same position in `traversedNodes`.
-        It is initialised with the total number of nodes but may contain less than that.
-        This is used for early termination when `maxDepth` parameter is specified.
-    */
+    // An array to keep the weight/depth of the node at the same position in `traversedNodes`.
+    // It is initialized with the total number of nodes but may contain less than that.
+    // This is used for early termination when `maxDepth` parameter is specified.
+    // `maxDepth` specifies the number of "layers" that will be traversed in the input graph, starting from `startNodeId`.
     private HugeDoubleArray weights;
 
-    /*
-        Used to keep track of the visited nodes, the value at index will be `true` for each node id in the `traversedNodes`.
-    */
+    // Used to keep track of the visited nodes, the value at index will be `true` for each node id in the `traversedNodes`.
     private HugeAtomicBitSet visited;
     private final int concurrency;
 
@@ -99,7 +92,6 @@ public final class BFS extends Algorithm<long[]> {
         );
     }
 
-    // Currently, only used in tests to allow setting different values for `delta`.
     static BFS create(
         Graph graph,
         long startNodeId,
@@ -136,7 +128,7 @@ public final class BFS extends Algorithm<long[]> {
         Graph graph,
         long startNodeId,
         HugeLongArray traversedNodes,
-        HugeLongArray sources,
+        HugeLongArray predecessors,
         HugeDoubleArray weights,
         HugeAtomicBitSet visited,
         ExitPredicate exitPredicate,
@@ -154,7 +146,7 @@ public final class BFS extends Algorithm<long[]> {
         this.delta = delta;
 
         this.traversedNodes = traversedNodes;
-        this.sources = sources;
+        this.predecessors = predecessors;
         this.weights = weights;
         this.visited = visited;
     }
@@ -170,7 +162,7 @@ public final class BFS extends Algorithm<long[]> {
         // Used for early exit when target node is reached (if specified by the user), updated in `BFSTask`.
         var targetFoundIndex = new AtomicLong(Long.MAX_VALUE);
 
-        // The minimum position of a predecessor that contains relationship to the node in the `traversedNodes`.
+        // The minimum position of a predecessor that contains a relationship to the node in the `traversedNodes`.
         // This is updated in `BFSTask` and is helping to maintain the correct traversal order for the output.
         var minimumChunk = HugeAtomicLongArray.newArray(
             graph.nodeCount(),
@@ -179,7 +171,7 @@ public final class BFS extends Algorithm<long[]> {
 
         visited.set(startNodeId);
         traversedNodes.set(0, startNodeId);
-        sources.set(0, startNodeId);
+        predecessors.set(0, startNodeId);
         weights.set(0, 0);
 
         var bfsTaskList = initializeBfsTasks(
@@ -192,7 +184,6 @@ public final class BFS extends Algorithm<long[]> {
         int bfsTaskListSize = bfsTaskList.size();
 
         while (running()) {
-            // Run the BFSTasks in parallel
             ParallelUtil.run(bfsTaskList, Pools.DEFAULT);
             if (targetFoundIndex.get() != Long.MAX_VALUE) {
                 break;
@@ -256,7 +247,7 @@ public final class BFS extends Algorithm<long[]> {
                 traversedNodesIndex,
                 traversedNodesLength,
                 visited,
-                sources,
+                predecessors,
                 weights,
                 targetFoundIndex,
                 minimumChunk,

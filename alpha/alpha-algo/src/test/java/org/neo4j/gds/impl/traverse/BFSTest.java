@@ -139,7 +139,7 @@ class BFSTest {
     @ValueSource(ints = {1, 4})
     void testBfsMaxDepthOut(int concurrency) {
         long source = naturalGraph.toMappedNodeId("a");
-        double maxHops = 3.;
+        double maxHops = 4.;
         long[] nodes = BFS.create(
             naturalGraph,
             source,
@@ -150,7 +150,7 @@ class BFSTest {
         ).compute();
 
         assertThat(nodes).isEqualTo(
-            Stream.of("a", "b", "c", "d").mapToLong(naturalGraph::toOriginalNodeId).toArray()
+            Stream.of("a", "b", "c", "d", "e", "f").mapToLong(naturalGraph::toOriginalNodeId).toArray()
         );
     }
 
