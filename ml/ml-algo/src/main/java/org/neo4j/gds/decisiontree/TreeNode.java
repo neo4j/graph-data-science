@@ -41,12 +41,7 @@ class TreeNode<PREDICTION> {
 
     @Override
     public String toString() {
-        return formatWithLocale(
-            "Node: prediction %s, featureIndex %s, splitValue %f",
-            this.prediction,
-            this.index,
-            this.value
-        );
+        return formatWithLocale("Node: prediction %s, featureIndex %s, splitValue %f", this.prediction, this.index, this.value);
     }
 
     /**
