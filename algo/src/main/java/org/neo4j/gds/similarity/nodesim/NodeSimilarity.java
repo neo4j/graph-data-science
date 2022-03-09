@@ -80,7 +80,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             this.similarityComputer = MetricSimilarityComputer.create(Metric.OVERLAP, config.similarityCutoff());
         } else {
             throw new IllegalArgumentException(config.similarityMetric() + " is not a valid metric. Available metrics include Jaccard and Overlap");
-            throw new IllegalArgumentException(config.metric() + " is not a valid metric" );
         }
     }
 

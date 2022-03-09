@@ -59,6 +59,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
@@ -699,8 +701,8 @@ final class NodeSimilarityTest {
             .fixed("this.instance", thisInstance)
             .fixed("node filter", nodeFilterRange)
             .fixed("vectors", vectorsRange)
-            .fixed("weights", weightsRange);
-
+            .fixed("weights", weightsRange)
+            .fixed("similarityComputer", 8);
 
         long topKMapRangeMin;
         long topKMapRangeMax;
@@ -760,7 +762,8 @@ final class NodeSimilarityTest {
             .fixed("node filter", nodeFilterRange)
             .fixed("vectors", vectorsRange)
             .fixed("weights", weightsRange)
-            .fixed("topNList", topNListRange);
+            .fixed("topNList", topNListRange)
+            .fixed("similarityComputer", 8);
 
         long topKMapRangeMin;
         long topKMapRangeMax;
@@ -842,4 +845,68 @@ final class NodeSimilarityTest {
                 "NodeSimilarity :: compare node pairs :: Finished"
             );
     }
+
+    @Test
+    void shouldThrowOnWrongMetric() {
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            new NodeSimilarity(
+                naturalGraph,
+                configBuilder().concurrency(1).similarityMetric("ovErLaPPPPP").build(),
+                Pools.DEFAULT,
+                ProgressTracker.NULL_TRACKER
+            );
+        });
+
+        assertTrue(exception.getMessage().contains("ovErLaPPPPP is not a valid metric"));
+
+    }
+
+    @Test
+    void shouldGiveCorrectResultsWithOverlap() {
+        var gdl =
+            "CREATE" +
+            "  (a:Person)" +
+            ", (c:Person)" +
+            ", (i1:Item)" +
+            ", (i2:Item)" +
+            ", (i3:Item)" +
+            ", (i4:Item)" +
+            ", (a)-[:LIKES {prop: 1.0}]->(i1)" +
+            ", (a)-[:LIKES {prop: 2.0}]->(i4)" +
+            ", (c)-[:LIKES {prop: 3.0}]->(i3)" +
+            ", (c)-[:LIKES {prop: 4.0}]->(i1)";
+
+        Graph graph = fromGdl(gdl);
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
+            graph,
+            configBuilder().concurrency(1).similarityMetric("ovErLaP").build(),
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        Set<String> result = nodeSimilarity
+            .computeToStream()
+            .map(NodeSimilarityTest::resultString)
+            .collect(Collectors.toSet());
+
+        assertThat(result).contains("0,1 0.500000\n" );
+
+        nodeSimilarity = new NodeSimilarity(
+            graph,
+            configBuilder().relationshipWeightProperty("LIKES").concurrency(1).similarityMetric("ovErLaP").build(),
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        result = nodeSimilarity
+            .computeToStream()
+            .map(NodeSimilarityTest::resultString)
+            .collect(Collectors.toSet());
+
+        assertThat(result).contains("0,1 0.333333\n" );
+
+    }
+
 }
