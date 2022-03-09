@@ -23,7 +23,8 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTION> {
 
@@ -50,12 +51,12 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     }
 
     public DecisionTreePredict<PREDICTION> train(HugeLongArray sampledFeatureVectors) {
-        var stack = new Stack<StackRecord<PREDICTION>>();
+        var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
         root = splitAndPush(stack, sampledFeatureVectors, sampledFeatureVectors.size(), 1);
 
-        while (!stack.empty()) {
+        while (!stack.isEmpty()) {
             var record = stack.pop();
             var split = record.split();
 
@@ -89,7 +90,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     protected abstract PREDICTION toTerminal(HugeLongArray group, long groupSize);
 
     private TreeNode<PREDICTION> splitAndPush(
-        Stack<StackRecord<PREDICTION>> stack,
+        Deque<StackRecord<PREDICTION>> stack,
         HugeLongArray group,
         long groupSize,
         int depth
