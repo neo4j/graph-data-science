@@ -21,6 +21,8 @@ package org.neo4j.gds.impl.traverse;
 
 public interface Aggregator {
 
+    Aggregator NO_AGGREGATION = (s, t, w) -> .0;
+
     /**
      * aggregate weight between source and current node
      *

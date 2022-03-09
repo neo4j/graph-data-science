@@ -17,22 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
-
-import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.traverse.BfsStreamProc;
+package org.neo4j.gds.impl.traverse;
 
 import java.util.List;
 
-public class BfsDocTest extends DocTestBase {
+public class TargetExitPredicate implements ExitPredicate {
+    private final List<Long> targets;
+
+    public TargetExitPredicate(List<Long> targets) {this.targets = targets;}
 
     @Override
-    protected List<Class<?>> procedures() {
-        return List.of(BfsStreamProc.class, GraphProjectProc.class);
-    }
-
-    @Override
-    protected String adocFile() {
-        return "algorithms/algorithms-bfs.adoc";
+    public Result test(long sourceNode, long currentNode, double weightAtSource) {
+        return targets.contains(currentNode) ? Result.BREAK : Result.FOLLOW;
     }
 }

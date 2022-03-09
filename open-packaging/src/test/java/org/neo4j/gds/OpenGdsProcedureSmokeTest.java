@@ -47,9 +47,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.alpha.allShortestPaths.stream",
 
-        "gds.alpha.bfs.stream",
-        "gds.alpha.bfs.stream.estimate",
-
         "gds.alpha.collapsePath.mutate",
 
         "gds.alpha.conductance.stream",
@@ -235,6 +232,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.betweenness.stream.estimate",
         "gds.betweenness.write",
         "gds.betweenness.write.estimate",
+
+        "gds.bfs.stream",
+        "gds.bfs.stream.estimate",
 
         "gds.debug.sysInfo",
 

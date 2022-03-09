@@ -17,22 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.impl.traverse;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.traverse.BfsStreamProc;
+public class MaxDepthExitPredicate implements ExitPredicate {
 
-import java.util.List;
+    private final long maxDepth;
 
-public class BfsDocTest extends DocTestBase {
-
-    @Override
-    protected List<Class<?>> procedures() {
-        return List.of(BfsStreamProc.class, GraphProjectProc.class);
-    }
+    public MaxDepthExitPredicate(long maxDepth) {this.maxDepth = maxDepth;}
 
     @Override
-    protected String adocFile() {
-        return "algorithms/algorithms-bfs.adoc";
+    public Result test(long sourceNode, long currentNode, double weightAtSource) {
+        return weightAtSource > maxDepth ? ExitPredicate.Result.CONTINUE : ExitPredicate.Result.FOLLOW;
     }
 }

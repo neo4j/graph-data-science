@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -72,6 +73,8 @@ class BFSTask implements Runnable {
     // Used in the synchronization phase, keeps track of the current index in the `localNodes`.
     private int indexOfLocalNodes;
 
+    private final ProgressTracker progressTracker;
+
     BFSTask(
         Graph graph,
         HugeLongArray traversedNodes,
@@ -85,7 +88,8 @@ class BFSTask implements Runnable {
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
         int delta,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker
     ) {
         this.graph = graph.concurrentCopy();
         this.traversedNodesIndex = traversedNodesIndex;
@@ -100,6 +104,7 @@ class BFSTask implements Runnable {
         this.aggregatorFunction = aggregatorFunction;
         this.delta = delta;
         this.terminationFlag = terminationFlag;
+        this.progressTracker = progressTracker;
 
         this.localNodes = new LongArrayList();
         this.localWeights = new DoubleArrayList();
@@ -124,6 +129,7 @@ class BFSTask implements Runnable {
     public void run() {
         resetChunks();
 
+        long examined = 0L;
         int offset;
         while ((offset = traversedNodesIndex.getAndAdd(delta)) < traversedNodesLength.get()) {
             int chunkLimit = Math.min(offset + delta, traversedNodesLength.get());
@@ -133,11 +139,14 @@ class BFSTask implements Runnable {
                 var sourceId = predecessors.get(idx);
                 var weight = weights.get(idx);
                 relaxNode(idx, nodeId, sourceId, weight);
+                examined++;
             }
             // Add a chunk separator.
             localNodes.add(BFS.IGNORE_NODE);
             localWeights.add(BFS.IGNORE_NODE);
         }
+
+        progressTracker.logProgress(examined);
     }
 
     void syncNextChunk() {

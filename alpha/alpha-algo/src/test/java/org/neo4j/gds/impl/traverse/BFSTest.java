@@ -22,7 +22,11 @@ package org.neo4j.gds.impl.traverse;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -33,6 +37,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
 
 /**
@@ -163,5 +169,35 @@ class BFSTest {
             concurrency,
             ProgressTracker.NULL_TRACKER
         ).compute();
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void shouldLogProgress(int concurrency) {
+        var progressTask = Tasks.leaf("BFS", naturalGraph.relationshipCount());
+        var testLog = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+        BFS.create(
+            naturalGraph,
+            0,
+            (s, t, w) -> Result.FOLLOW,
+            Traverse.DEFAULT_AGGREGATOR,
+            concurrency,
+            progressTracker
+        ).compute();
+        var messagesInOrder = testLog.getMessages(INFO);
+
+        assertThat(messagesInOrder)
+            .extracting(removingThreadId())
+            .containsSequence(
+                "BFS :: Start",
+                "BFS 12%",
+                "BFS 37%",
+                "BFS 50%",
+                "BFS 75%",
+                "BFS 87%",
+                "BFS 100%",
+                "BFS :: Finished"
+            );
     }
 }

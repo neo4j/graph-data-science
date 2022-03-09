@@ -21,6 +21,8 @@ package org.neo4j.gds.impl.traverse;
 
 public interface ExitPredicate {
 
+    ExitPredicate FOLLOW = (s, t, w) -> ExitPredicate.Result.FOLLOW;
+
     enum Result {
         /**
          * add current node to the result set and visit all neighbors
@@ -46,4 +48,5 @@ public interface ExitPredicate {
      * @return a result
      */
     Result test(long sourceNode, long currentNode, double weightAtSource);
+
 }

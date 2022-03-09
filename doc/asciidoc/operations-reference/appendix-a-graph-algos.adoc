@@ -165,6 +165,9 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.knn.stream.estimate`
 | `gds.knn.write`
 | `gds.knn.write.estimate`
+.2+<.^|<<algorithms-bfs, BFS>>
+| `gds.bfs.stream`
+| `gds.bfs.stream.estimate`
 |===
 
 [[beta-tier]]
@@ -228,9 +231,6 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.maxkcut.mutate.estimate`
 | `gds.alpha.maxkcut.stream`
 | `gds.alpha.maxkcut.stream.estimate`
-.2+<.^|<<algorithms-bfs, Breadth First Search>>
-| `gds.alpha.bfs.stream`
-| `gds.alpha.bfs.stream.estimate`
 .5+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
 | `gds.alpha.closeness.mutate`
 | `gds.alpha.closeness.stream`
