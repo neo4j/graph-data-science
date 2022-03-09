@@ -27,6 +27,7 @@ import org.neo4j.gds.core.MissingParameterExceptions;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
+import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collections;
@@ -120,7 +121,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
         }
         var knnBuilder = ImmutableKnnBaseConfig.builder()
             .sampleRate(sampleRate())
-            .nodeProperties(List.of("NotUsedInLP"))
+            .nodeProperties(List.of(new KnnNodePropertySpec("NotUsedInLP")))
             .concurrency(concurrency());
 
         topK().ifPresent(knnBuilder::topK);

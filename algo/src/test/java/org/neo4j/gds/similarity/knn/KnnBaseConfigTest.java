@@ -21,13 +21,62 @@ package org.neo4j.gds.similarity.knn;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.similarity.knn.metrics.SimilarityMetric;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class KnnBaseConfigTest {
+
+    @Test
+    void nodePropertiesShouldAcceptString() {
+        var userInput = CypherMapWrapper.create(
+            Map.of(
+                "nodeProperties", "property"
+            )
+        );
+        assertThat(new KnnBaseConfigImpl(userInput).nodeProperties())
+            .singleElement()
+            .extracting(KnnNodePropertySpec::name)
+            .isEqualTo("property");
+    }
+
+    @Test
+    void nodePropertiesShouldAcceptList() {
+        var userInput = CypherMapWrapper.create(
+            Map.of(
+                "nodeProperties", List.of("property1", "property2")
+            )
+        );
+        assertThat(new KnnBaseConfigImpl(userInput).nodeProperties())
+            .extracting(KnnNodePropertySpec::name)
+            .containsExactlyInAnyOrder("property1", "property2");
+    }
+
+    @Test
+    void nodePropertiesShouldAcceptMap() {
+        var userInput = CypherMapWrapper.create(
+            Map.of(
+                "nodeProperties", Map.of(
+                    "property1", "JACCARD",
+                    "property2", "PEARSON"
+                )
+            )
+        );
+        assertThat(new KnnBaseConfigImpl(userInput).nodeProperties())
+            .hasSize(2)
+            .satisfies((list) -> {
+                var spec1 = list.get(0);
+                var spec2 = list.get(1);
+                assertThat(List.of(spec1.name(), spec2.name()))
+                    .containsExactlyInAnyOrder("property1", "property2");
+                assertThat(List.of(spec1.metric().get(), spec2.metric().get()))
+                    .containsExactlyInAnyOrder(SimilarityMetric.JACCARD, SimilarityMetric.PEARSON);
+            });
+    }
 
     @Test
     void shouldThrowIfUserProvidesEmptyNodeProperties() {
@@ -51,4 +100,13 @@ class KnnBaseConfigTest {
             .hasMessageContaining("must not end or begin with whitespace");
     }
 
+    @Test
+    void shouldThrowIfUserProvidesInvalidSimilarityMetric() {
+        var map = CypherMapWrapper.create(Map.of(
+            "nodeProperties", Map.of("property", "INVALID")
+        ));
+        assertThatThrownBy(() -> new KnnBaseConfigImpl(map))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("No valid similarity metric for user input INVALID");
+    }
 }

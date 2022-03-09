@@ -100,7 +100,7 @@ class KnnTest {
     @Test
     void shouldRun() {
         var knnConfig = ImmutableKnnBaseConfig.builder()
-            .nodeProperties(List.of("knn"))
+            .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
             .concurrency(1)
             .randomSeed(19L)
             .topK(1)
@@ -125,7 +125,7 @@ class KnnTest {
     @Test
     void shouldHaveEachNodeConnected() {
         var knnConfig = ImmutableKnnBaseConfig.builder()
-            .nodeProperties(List.of("knn"))
+            .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
             .topK(2)
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
@@ -164,7 +164,7 @@ class KnnTest {
     void shouldWorkWithMultipleProperties() {
 
         var knnConfig = ImmutableKnnBaseConfig.builder()
-            .nodeProperties(List.of("knn", "prop"))
+            .nodeProperties(List.of(new KnnNodePropertySpec("knn"), new KnnNodePropertySpec("prop")))
             .concurrency(1)
             .randomSeed(19L)
             .topK(1)
@@ -201,7 +201,7 @@ class KnnTest {
     void shouldWorkWithMultiplePropertiesEvenIfSomeAreMissing() {
 
         var knnConfig = ImmutableKnnBaseConfig.builder()
-            .nodeProperties(List.of("prop1", "prop2"))
+            .nodeProperties(List.of(new KnnNodePropertySpec("prop1"), new KnnNodePropertySpec("prop2")))
             .concurrency(1)
             .randomSeed(19L)
             .topK(2)
@@ -235,7 +235,7 @@ class KnnTest {
     void shouldFilterResultsOfLowSimilarity() {
 
         var knnConfig = ImmutableKnnBaseConfig.builder()
-            .nodeProperties(List.of("age"))
+            .nodeProperties(List.of(new KnnNodePropertySpec("age")))
             .concurrency(1)
             .randomSeed(19L)
             .similarityCutoff(0.14)
@@ -269,7 +269,7 @@ class KnnTest {
     @MethodSource("emptyProperties")
     void testNonExistingProperties(NodeProperties nodeProperties) {
         var knnConfig = ImmutableKnnBaseConfig.builder()
-            .nodeProperties(List.of("knn"))
+            .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
             .topK(2)
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
@@ -303,7 +303,7 @@ class KnnTest {
             graph,
             ImmutableKnnBaseConfig
                 .builder()
-                .nodeProperties(List.of("knn"))
+                .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
                 .topK(1)
                 .concurrency(1)
                 .randomSeed(42L)
@@ -401,7 +401,7 @@ class KnnTest {
         var graph = GdlFactory.of("({weight: [1.0, 2.0]}), ({weight: [3.0, -10.0]})").build().getUnion();
 
         var knnConfig = ImmutableKnnBaseConfig.builder()
-            .nodeProperties(List.of("weight"))
+            .nodeProperties(List.of(new KnnNodePropertySpec("weight")))
             .topK(1)
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
@@ -417,7 +417,7 @@ class KnnTest {
     @Test
     void shouldLogProgress() {
         var config = ImmutableKnnBaseConfig.builder()
-            .nodeProperties(List.of("knn"))
+            .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
             .randomSeed(42L)
             .topK(1)
             .concurrency(1)
@@ -478,7 +478,7 @@ class KnnTest {
         @Test
         void shouldRespectIterationLimit() {
             var config = ImmutableKnnBaseConfig.builder()
-                .nodeProperties(List.of("knn"))
+                .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
                 .deltaThreshold(0)
                 .topK(1)
                 .maxIterations(1)
@@ -507,7 +507,7 @@ class KnnTest {
         @Test
         void shouldReturnCorrectNumberIterationsWhenConverging() {
             var config = ImmutableKnnBaseConfig.builder()
-                .nodeProperties(List.of("knn"))
+                .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
                 .deltaThreshold(1.0)
                 .maxIterations(5)
                 .build();
@@ -525,7 +525,7 @@ class KnnTest {
     @Test
     void invalidRandomParameters() {
         var configBuilder = ImmutableKnnBaseConfig.builder()
-            .nodeProperties(List.of("dummy"))
+            .nodeProperties(List.of(new KnnNodePropertySpec("dummy")))
             .concurrency(4)
             .randomSeed(1337L);
         assertThrows(IllegalArgumentException.class, configBuilder::build);
@@ -565,7 +565,7 @@ class KnnTest {
         @Test
         void testReasonableTopKWithRandomWalk(SoftAssertions softly) {
             var config = ImmutableKnnBaseConfig.builder()
-                .nodeProperties(List.of("knn"))
+                .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
                 .topK(4)
                 .randomJoins(0)
                 .maxIterations(1)
