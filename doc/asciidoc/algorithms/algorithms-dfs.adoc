@@ -1,5 +1,4 @@
 [[algorithms-dfs]]
-[.alpha]
 = Depth First Search
 
 [abstract]
@@ -7,7 +6,6 @@
 This section describes the Depth First Search traversal algorithm in the Neo4j Graph Data Science library.
 --
 
-include::alpha-note.adoc[]
 
 [[algorithms-dfs-intro]]
 == Introduction
@@ -24,26 +22,26 @@ The output of the procedure contains information about which nodes were visited 
 .The following describes the API for running the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.dfs.stream(
+CALL gds.dfs.stream(
   graphName: String,
   configuration: Map
 )
 YIELD
   // general stream return columns
-  startNodeId: Integer,
+  sourceNode: Integer,
   nodeIds: Integer,
   path: Path
 ----
 
-include::../common-configuration/common-parameters.adoc[]
+include::common-configuration/common-parameters.adoc[]
 
-include::../common-configuration/common-configuration.adoc[]
+include::common-configuration/common-configuration.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name        | Type      | Default    | Optional | Description
-| startNodeId | Integer   | n/a        | no       | The node id of the node where to start the traversal.
+| sourceNode  | Integer   | n/a        | no       | The node id of the node where to start the traversal.
 | targetNodes | List of Integer | empty list | yes      | Ids for target nodes. Traversal terminates when any target node is visited.
 | maxDepth    | Integer   | -1         | yes      | The maximum distance from the start node at which nodes are visited.
 |===
@@ -52,7 +50,7 @@ include::../common-configuration/common-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name        | Type      | Description
-| startNodeId | Integer   | The node id of the node where to start the traversal.
+| sourceNode  | Integer   | The node id of the node where to start the traversal.
 | nodeIds     | List of Integer | The ids of all nodes that were visited during the traversal.
 | path        | Path      | A path containing all the nodes that were visited during the traversal.
 |===
@@ -93,8 +91,8 @@ If we do not specify any of the options for early termination, the whole graph i
 [source, cypher, role=noplay]
 ----
 MATCH (a:Node{tag:'a'})
-WITH id(a) AS startNode
-CALL gds.alpha.dfs.stream('myGraph', {startNode: startNode})
+WITH id(a) AS sourceNode
+CALL gds.dfs.stream('myGraph', {sourceNode: sourceNode})
 YIELD path
 UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
@@ -121,8 +119,8 @@ If specifying d and e as target nodes, not all nodes at distance 1 will be visit
 [source, cypher, role=noplay]
 ----
 MATCH (a:Node{tag:'a'}), (d:Node{tag:'d'}), (e:Node{tag:'e'})
-WITH id(a) AS startNode, [id(d), id(e)] AS targetNodes
-CALL gds.alpha.dfs.stream('myGraph', {startNode: startNode, targetNodes: targetNodes})
+WITH id(a) AS sourceNode, [id(d), id(e)] AS targetNodes
+CALL gds.dfs.stream('myGraph', {sourceNode: sourceNode, targetNodes: targetNodes})
 YIELD path
 UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
@@ -146,8 +144,8 @@ ORDER BY tags
 [source, cypher, role=noplay]
 ----
 MATCH (a:Node{tag:'a'})
-WITH id(a) AS startNode
-CALL gds.alpha.dfs.stream('myGraph', {startNode: startNode, maxDepth: 1})
+WITH id(a) AS sourceNode
+CALL gds.dfs.stream('myGraph', {sourceNode: sourceNode, maxDepth: 1})
 YIELD path
 UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
