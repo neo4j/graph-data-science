@@ -174,21 +174,18 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         return new LifecycleAdapter() {
             @Override
             public void init() {
-                graphStore
+                var propertyKeys = graphStore
                     .nodePropertyKeys()
                     .values()
                     .stream()
                     .flatMap(Set::stream)
-                    .distinct()
-                    .forEach(propertyKey -> tokenHolders
+                    .collect(Collectors.toSet());
+                propertyKeys.addAll(graphStore.relationshipPropertyKeys());
+                propertyKeys.forEach(propertyKey ->
+                    tokenHolders
                         .propertyKeyTokens()
-                        .addToken(new NamedToken(propertyKey, propertyCounter.getAndIncrement())));
-
-                graphStore
-                    .relationshipPropertyKeys()
-                    .forEach(propertyKey -> tokenHolders
-                        .propertyKeyTokens()
-                        .addToken(new NamedToken(propertyKey, propertyCounter.getAndIncrement())));
+                        .addToken(new NamedToken(propertyKey, propertyCounter.getAndIncrement()))
+                );
 
                 graphStore
                     .nodeLabels()
