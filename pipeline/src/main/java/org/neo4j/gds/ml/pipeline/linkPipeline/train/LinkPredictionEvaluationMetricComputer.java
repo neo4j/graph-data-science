@@ -22,11 +22,11 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
+import org.neo4j.gds.models.Classifier;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -54,11 +54,13 @@ public final class LinkPredictionEvaluationMetricComputer {
         var targets = inputData.labels();
         var features = inputData.features();
 
+        int positiveClassId = classifier.classIdMap().toMapped((long) EdgeSplitter.POSITIVE);
         evaluationQueue.parallelConsume(trainConfig.concurrency(), thread -> (batch) -> {
+                var probabilityMatrix = classifier.predictProbabilities(batch, features);
+                var offset = 0;
                 for (Long relationshipIdx : batch.nodeIds()) {
-                    double[] classProbabilities = classifier.predictProbabilities(relationshipIdx, features);
-                    int positiveClassId = classifier.classIdMap().toMapped((long) EdgeSplitter.POSITIVE);
-                    double probabilityOfPositiveEdge = classProbabilities[positiveClassId];
+                    double probabilityOfPositiveEdge = probabilityMatrix.dataAt(offset, positiveClassId);
+                    offset += 1;
                     boolean isEdge = targets.get(relationshipIdx) == EdgeSplitter.POSITIVE;
 
                     var signedProbability = isEdge ? probabilityOfPositiveEdge : -1 * probabilityOfPositiveEdge;
