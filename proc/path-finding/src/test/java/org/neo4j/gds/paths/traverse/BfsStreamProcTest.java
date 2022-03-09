@@ -26,6 +26,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +88,7 @@ class BfsStreamProcTest extends BaseProcTest {
     }
 
     @Test
-    void testBfsPath() {
+    void testPath() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withNodeLabel("Node")
@@ -97,7 +98,7 @@ class BfsStreamProcTest extends BaseProcTest {
 
         long id = id("g");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.bfs")
+            .algo("bfs")
             .streamMode()
             .addParameter("sourceNode", id)
             .yields("sourceNode, nodeIds");
@@ -128,7 +129,7 @@ class BfsStreamProcTest extends BaseProcTest {
 
         long id = id("a");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.bfs")
+            .algo("bfs")
             .streamMode()
             .addParameter("sourceNode", id)
             .yields("sourceNode, nodeIds");
@@ -146,5 +147,31 @@ class BfsStreamProcTest extends BaseProcTest {
 
             assertOrder(expectedOrder, nodeIds);
         });
+    }
+
+
+    @Test
+    void failOnInvalidSourceNode() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("bfs")
+            .streamMode()
+            .addParameter("sourceNode", 42)
+            .yields();
+
+        assertError(query, "Source node does not exist in the in-memory graph: `42`");
+    }
+
+    @Test
+    void failOnInvalidEndNode() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("bfs")
+            .streamMode()
+            .addParameter("sourceNode", 0)
+            .addParameter("targetNodes", Arrays.asList(0, 42, 1))
+            .yields();
+
+        assertError(query, "Target nodes do not exist in the in-memory graph: ['42']");
     }
 }
