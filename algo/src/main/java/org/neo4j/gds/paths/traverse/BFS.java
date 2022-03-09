@@ -268,7 +268,7 @@ public final class BFS extends Algorithm<long[]> {
                 aggregatorFunction,
                 delta,
                 startNodeId,
-                terminationFlag
+                terminationFlag,
                 progressTracker
             ));
         }

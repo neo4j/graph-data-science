@@ -85,7 +85,7 @@ class BFSTask implements Runnable {
         Aggregator aggregatorFunction,
         int delta,
         long startNodeId,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
         this.graph = graph.concurrentCopy();
