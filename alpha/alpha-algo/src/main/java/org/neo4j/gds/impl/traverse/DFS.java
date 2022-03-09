@@ -102,6 +102,7 @@ public class DFS extends Algorithm<long[]> {
             );
         }
 
+        progressTracker.endSubTask();
         return result.toArray();
     }
 
