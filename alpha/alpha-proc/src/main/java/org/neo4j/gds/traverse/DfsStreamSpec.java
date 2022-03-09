@@ -23,9 +23,9 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.impl.traverse.DFS;
-import org.neo4j.gds.impl.traverse.DfsStreamConfig;
 import org.neo4j.gds.paths.PathFactory;
+import org.neo4j.gds.paths.traverse.DFS;
+import org.neo4j.gds.paths.traverse.DfsStreamConfig;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

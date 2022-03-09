@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.config.SourceNodeConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.impl.traverse.BfsStreamConfig;
+import org.neo4j.gds.paths.traverse.BfsStreamConfig;
 
 import java.util.Map;
 

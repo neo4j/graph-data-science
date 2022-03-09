@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.traverse;
+package org.neo4j.gds.paths.traverse;
 
 import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.LongArrayList;
@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.neo4j.gds.impl.Converters.longToIntConsumer;
+import static org.neo4j.gds.Converters.longToIntConsumer;
 
 /**
  * A task that will compute BFS for portion of the graph.

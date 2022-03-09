@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.traverse;
+package org.neo4j.gds.paths.traverse;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -31,7 +31,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.impl.traverse.ExitPredicate.Result;
+import org.neo4j.gds.paths.traverse.ExitPredicate.Result;
 
 import java.util.stream.Stream;
 
@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
-import static org.neo4j.gds.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
+import static org.neo4j.gds.paths.traverse.Traverse.DEFAULT_AGGREGATOR;
 
 /**
  * Graph:

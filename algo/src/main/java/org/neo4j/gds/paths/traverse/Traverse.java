@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.traverse;
+package org.neo4j.gds.paths.traverse;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayDeque;
@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.ObjLongConsumer;
 
-import static org.neo4j.gds.impl.Converters.longToIntConsumer;
+import static org.neo4j.gds.Converters.longToIntConsumer;
 
 public final class Traverse extends Algorithm<Traverse> {
 
