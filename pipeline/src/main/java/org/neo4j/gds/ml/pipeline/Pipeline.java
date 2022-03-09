@@ -24,9 +24,13 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.utils.TimeUtil;
+import org.neo4j.gds.models.TrainerConfig;
+import org.neo4j.gds.models.TrainingMethod;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,18 +41,34 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG extends ToMapConvertible> implements ToMapConvertible {
+public abstract class Pipeline<FEATURE_STEP extends FeatureStep> implements ToMapConvertible {
 
     protected final List<ExecutableNodePropertyStep> nodePropertySteps;
     protected final List<FEATURE_STEP> featureSteps;
     private final ZonedDateTime creationTime;
 
-    protected List<TRAINING_CONFIG> trainingParameterSpace;
+    protected Map<TrainingMethod, List<TrainerConfig>> trainingParameterSpace;
 
-    protected Pipeline(List<TRAINING_CONFIG> initialTrainingParameterSpace) {
+    public static Map<TrainingMethod, List<TrainerConfig>> defaultTrainingSpace() {
+        var trainingSpace = new EnumMap<TrainingMethod, List<TrainerConfig>>(TrainingMethod.class);
+        trainingSpace.put(TrainingMethod.LogisticRegression, List.of(LogisticRegressionTrainConfig.defaultConfig()));
+        return trainingSpace;
+    }
+
+    public static Map<String, List<Map<String, Object>>> toMapParameterSpace(Map<TrainingMethod, List<TrainerConfig>> parameterSpace) {
+        return parameterSpace.entrySet().stream()
+            .collect(Collectors.toMap(
+                entry -> entry.getKey().name(),
+                entry -> entry.getValue().stream()
+                    .map(ToMapConvertible::toMap)
+                    .collect(Collectors.toList())
+            ));
+    }
+
+    protected Pipeline() {
         this.nodePropertySteps = new ArrayList<>();
         this.featureSteps = new ArrayList<>();
-        this.trainingParameterSpace = initialTrainingParameterSpace;
+        this.trainingParameterSpace = Pipeline.defaultTrainingSpace();
         this.creationTime = TimeUtil.now();
     }
 
@@ -59,7 +79,7 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
         map.put("featurePipeline", featurePipelineDescription());
         map.put(
             "trainingParameterSpace",
-            trainingParameterSpace.stream().map(ToMapConvertible::toMap).collect(Collectors.toList())
+            toMapParameterSpace(trainingParameterSpace)
         );
         map.putAll(additionalEntries());
         return map;
@@ -127,12 +147,12 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
         return this.featureSteps;
     }
 
-    public List<TRAINING_CONFIG> trainingParameterSpace() {
+    public Map<TrainingMethod, List<TrainerConfig>> trainingParameterSpace() {
         return trainingParameterSpace;
     }
 
-    public void setTrainingParameterSpace(List<TRAINING_CONFIG> trainingConfigs) {
-        this.trainingParameterSpace = trainingConfigs;
+    public void setTrainingParameterSpace(TrainingMethod method, List<TrainerConfig> trainingConfigs) {
+        this.trainingParameterSpace.put(method, trainingConfigs);
     }
 
     private void validateUniqueMutateProperty(NodePropertyStep step) {

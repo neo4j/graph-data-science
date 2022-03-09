@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.models.TrainingMethod;
 
 import java.util.List;
 import java.util.Map;
@@ -54,15 +55,16 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
-                "parameterSpace", List.of(Map.of(
+                "parameterSpace", Map.of(TrainingMethod.LogisticRegression.name(), List.of(Map.of(
                     "useBiasFeature", true,
                     "maxEpochs", 100,
                     "minEpochs", 42,
+                    "methodName", TrainingMethod.LogisticRegression.name(),
                     "penalty", 0.0,
                     "patience", 1,
                     "batchSize", 100,
                     "tolerance", 0.001
-                ))
+                )))
             ))
         );
     }
@@ -78,15 +80,16 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
-                "parameterSpace", List.of(Map.of(
+                "parameterSpace", Map.of(TrainingMethod.LogisticRegression.name(), List.of(Map.of(
                     "useBiasFeature", true,
                     "maxEpochs", 100,
                     "minEpochs", 4,
+                    "methodName", TrainingMethod.LogisticRegression.name(),
                     "penalty", 0.0,
                     "patience", 1,
                     "batchSize", 100,
                     "tolerance", 0.001
-                ))
+                )))
             ))
         );
     }

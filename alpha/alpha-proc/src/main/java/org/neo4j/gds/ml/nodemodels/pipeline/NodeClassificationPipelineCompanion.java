@@ -21,10 +21,11 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.models.TrainingMethod;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -33,8 +34,9 @@ public final class NodeClassificationPipelineCompanion {
     public static final String PREDICT_DESCRIPTION = "Predicts classes for all nodes based on a previously trained pipeline model";
     public static final String ESTIMATE_PREDICT_DESCRIPTION = "Estimates memory for predicting classes for all nodes based on a previously trained pipeline model";
     static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("testFraction", 0.3, "validationFolds", 3);
-    static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(
-        LogisticRegressionTrainConfig.defaultConfig().toMap()
+    static final Map<String, List<Map<String, Object>>> DEFAULT_PARAM_CONFIG = Map.of(
+        TrainingMethod.LogisticRegression.name(),
+        List.of(LogisticRegressionTrainConfig.defaultConfig().toMap())
     );
 
     private NodeClassificationPipelineCompanion() {}

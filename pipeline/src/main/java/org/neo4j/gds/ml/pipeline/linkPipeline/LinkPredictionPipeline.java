@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.Pipeline;
 
 import java.util.ArrayList;
@@ -31,14 +30,14 @@ import java.util.Optional;
 
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 
-public class LinkPredictionPipeline extends Pipeline<LinkFeatureStep, LogisticRegressionTrainConfig> {
+public class LinkPredictionPipeline extends Pipeline<LinkFeatureStep> {
 
     public static final String PIPELINE_TYPE = "Link prediction training pipeline";
 
     private LinkPredictionSplitConfig splitConfig;
 
     public LinkPredictionPipeline() {
-        super(List.of(LogisticRegressionTrainConfig.defaultConfig()));
+        super();
         this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
     }
 
@@ -46,7 +45,11 @@ public class LinkPredictionPipeline extends Pipeline<LinkFeatureStep, LogisticRe
         var copied = new LinkPredictionPipeline();
         copied.featureSteps.addAll(featureSteps);
         copied.nodePropertySteps.addAll(nodePropertySteps);
-        copied.setTrainingParameterSpace(new ArrayList<>(trainingParameterSpace));
+
+        trainingParameterSpace().forEach((key, value) ->
+            copied.setTrainingParameterSpace(key, new ArrayList<>(value))
+        );
+
         copied.setSplitConfig(splitConfig);
         return copied;
     }

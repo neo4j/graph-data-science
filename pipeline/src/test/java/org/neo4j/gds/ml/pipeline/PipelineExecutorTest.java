@@ -27,7 +27,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -166,9 +165,9 @@ class PipelineExecutorTest {
         }
     }
 
-    private class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<FeatureStep, ToMapConvertible>, String> {
+    private class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<FeatureStep>, String> {
         SucceedingPipelineExecutor(
-            Pipeline<FeatureStep, ToMapConvertible> pipelineStub,
+            Pipeline<FeatureStep> pipelineStub,
             AlgoBaseConfig config,
             ProgressTracker progressTracker
         ) {
@@ -196,7 +195,7 @@ class PipelineExecutorTest {
 
     private class FailingPipelineExecutor extends SucceedingPipelineExecutor {
         FailingPipelineExecutor(
-            Pipeline<FeatureStep, ToMapConvertible> pipelineStub,
+            Pipeline<FeatureStep> pipelineStub,
             AlgoBaseConfig config,
             ProgressTracker progressTracker
         ) {
@@ -284,9 +283,9 @@ class PipelineExecutorTest {
         }
     }
 
-    private class BogusNodePropertyPipeline extends Pipeline<FeatureStep, ToMapConvertible> {
+    private class BogusNodePropertyPipeline extends Pipeline<FeatureStep> {
 
-        BogusNodePropertyPipeline() {super(List.of());}
+        BogusNodePropertyPipeline() {super();}
 
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {
@@ -315,9 +314,9 @@ class PipelineExecutorTest {
         public void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {}
     }
 
-    private class FailingNodePropertyPipeline extends Pipeline<FeatureStep, ToMapConvertible> {
+    private class FailingNodePropertyPipeline extends Pipeline<FeatureStep> {
 
-        FailingNodePropertyPipeline() {super(List.of());}
+        FailingNodePropertyPipeline() {super();}
 
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {

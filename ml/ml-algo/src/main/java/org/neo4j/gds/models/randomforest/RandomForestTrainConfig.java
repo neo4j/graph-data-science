@@ -22,10 +22,16 @@ package org.neo4j.gds.models.randomforest;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.RandomSeedConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.decisiontree.DecisionTreeTrainConfig;
+import org.neo4j.gds.models.TrainerConfig;
+import org.neo4j.gds.models.TrainingMethod;
+
+import java.util.Collection;
+import java.util.Map;
 
 @Configuration
-public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, RandomSeedConfig {
+public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, RandomSeedConfig, TrainerConfig {
 
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     double featureBaggingRatio();
@@ -38,4 +44,24 @@ public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, Random
 
     @Configuration.IntegerRange(min = 1)
     int numberOfDecisionTrees();
+
+    @Override
+    default String methodName() {
+        return TrainingMethod.RandomForest.name();
+    }
+
+    static RandomForestTrainConfig of(Map<String, Object> params) {
+        var cypherMapWrapper = CypherMapWrapper.create(params);
+
+        var config = new RandomForestTrainConfigImpl(cypherMapWrapper);
+
+        cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
+        return config;
+    }
+
+    @Configuration.CollectKeys
+    Collection<String> configKeys();
+
+    @Configuration.ToMap
+    Map<String, Object> toMap();
 }

@@ -21,20 +21,20 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.gradientdescent.GradientDescentConfig;
+import org.neo4j.gds.models.TrainerConfig;
 
 import java.util.Comparator;
 import java.util.Map;
 
 @ValueClass
-public interface ModelStats<CONFIG extends GradientDescentConfig> {
-    Comparator<ModelStats<?>> COMPARE_AVERAGE = Comparator.comparingDouble(ModelStats::avg);
+public interface ModelStats {
+    Comparator<ModelStats> COMPARE_AVERAGE = Comparator.comparingDouble(ModelStats::avg);
 
     /**
      * The input params representing a model candidate
      * @return
      */
-    CONFIG params();
+    TrainerConfig params();
 
     /**
      * The average of the metric of the model candidate over (inner) folds

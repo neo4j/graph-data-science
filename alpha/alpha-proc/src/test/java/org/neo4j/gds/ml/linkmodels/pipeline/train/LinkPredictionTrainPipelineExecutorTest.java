@@ -46,8 +46,6 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -59,6 +57,9 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.ImmutableLinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.models.TrainingMethod;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
 
@@ -147,7 +148,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .testFraction(0.5)
             .build());
 
-        pipeline.setTrainingParameterSpace(List.of(
+        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
             LogisticRegressionTrainConfig.of(Map.of("patience", 5, "tolerance", 0.00001, "penalty", 100)),
             LogisticRegressionTrainConfig.of(Map.of("patience", 5, "tolerance", 0.00001, "penalty", 1))
         ));
@@ -315,7 +316,10 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .testFraction(0.2)
             .build());
 
-        pipeline.setTrainingParameterSpace(List.of(LogisticRegressionTrainConfig.of(Map.of("penalty", 1))));
+        pipeline.setTrainingParameterSpace(
+            TrainingMethod.LogisticRegression,
+            List.of(LogisticRegressionTrainConfig.of(Map.of("penalty", 1)))
+        );
 
         pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
             "degree",

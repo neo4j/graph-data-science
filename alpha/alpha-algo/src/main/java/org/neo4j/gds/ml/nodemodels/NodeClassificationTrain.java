@@ -47,6 +47,7 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.neo4j.gds.models.Features;
 import org.neo4j.gds.models.FeaturesFactory;
+import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
@@ -357,10 +358,10 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
         return ModelSelectResult.of(bestModelStats.params(), trainStats, validationStats);
     }
 
-    private Map<Metric, MetricData<LogisticRegressionTrainConfig>> evaluateBestModel(
+    private Map<Metric, MetricData> evaluateBestModel(
         TrainingExamplesSplit outerSplit,
         ModelSelectResult modelSelectResult,
-        LogisticRegressionTrainConfig bestParameters
+        TrainerConfig bestParameters
     ) {
         progressTracker.beginSubTask("TrainSelectedOnRemainder");
         var bestClassifier = trainModel(outerSplit.trainSet(), bestParameters);
@@ -374,7 +375,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
         return mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
     }
 
-    private LogisticRegressionClassifier retrainBestModel(LogisticRegressionTrainConfig bestParameters) {
+    private LogisticRegressionClassifier retrainBestModel(TrainerConfig bestParameters) {
         progressTracker.beginSubTask("RetrainSelectedModel");
         var retrainedClassifier = trainModel(nodeIds, bestParameters);
         progressTracker.endSubTask("RetrainSelectedModel");
@@ -382,8 +383,8 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
     }
 
     private Model<LogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> createModel(
-        LogisticRegressionTrainConfig bestParameters,
-        Map<Metric, MetricData<LogisticRegressionTrainConfig>> metricResults,
+        TrainerConfig bestParameters,
+        Map<Metric, MetricData> metricResults,
         LogisticRegressionClassifier classifier
     ) {
         var modelInfo = NodeClassificationModelInfo.of(
@@ -403,7 +404,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
         );
     }
 
-    private Map<Metric, MetricData<LogisticRegressionTrainConfig>> mergeMetricResults(
+    private Map<Metric, MetricData> mergeMetricResults(
         ModelSelectResult modelSelectResult,
         Map<Metric, Double> outerTrainMetrics,
         Map<Metric, Double> testMetrics
@@ -422,12 +423,12 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
 
     private LogisticRegressionClassifier trainModel(
         HugeLongArray trainSet,
-        LogisticRegressionTrainConfig lrConfig
+        TrainerConfig lrConfig
     ) {
         var trainer = new LogisticRegressionTrainer(
             ReadOnlyHugeLongArray.of(trainSet),
             config.concurrency(),
-            lrConfig,
+            (LogisticRegressionTrainConfig) lrConfig,
             classIdMap,
             false,
             terminationFlag,
@@ -438,12 +439,12 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
 
     @ValueClass
     public interface ModelSelectResult {
-        LogisticRegressionTrainConfig bestParameters();
-        Map<Metric, List<ModelStats<LogisticRegressionTrainConfig>>> trainStats();
-        Map<Metric, List<ModelStats<LogisticRegressionTrainConfig>>> validationStats();
+        TrainerConfig bestParameters();
+        Map<Metric, List<ModelStats>> trainStats();
+        Map<Metric, List<ModelStats>> validationStats();
 
         static ModelSelectResult of(
-            LogisticRegressionTrainConfig bestConfig,
+            TrainerConfig bestConfig,
             StatsMap trainStats,
             StatsMap validationStats
         ) {
@@ -452,7 +453,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
 
         @Value.Derived
         default Map<String, Object> toMap() {
-            Function<Map<Metric, List<ModelStats<LogisticRegressionTrainConfig>>>, Map<String, Object>> statsConverter = stats ->
+            Function<Map<Metric, List<ModelStats>>, Map<String, Object>> statsConverter = stats ->
                 stats.entrySet().stream().collect(Collectors.toMap(
                     entry -> entry.getKey().name(),
                     value -> value.getValue().stream().map(ModelStats::toMap)
@@ -488,7 +489,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
             sum.merge(metric, value, Double::sum);
         }
 
-        ModelStats<LogisticRegressionTrainConfig> build(Metric metric) {
+        ModelStats build(Metric metric) {
             return ImmutableModelStats.of(
                 modelParams,
                 sum.get(metric) / numberOfSplits,

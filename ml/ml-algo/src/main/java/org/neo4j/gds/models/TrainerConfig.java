@@ -17,42 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels;
+package org.neo4j.gds.models;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.ToMapConvertible;
 
-import java.util.Map;
-
-@ValueClass
-public interface BestModelStats {
-
-    /**
-     * The average of the metric of the winning model
-     * @return
-     */
-    double avg();
-    /**
-     * The minimum of the metric of the winning model
-     * @return
-     */
-    double min();
-    /**
-     * The maximum of the metric of the winning model
-     * @return
-     */
-    double max();
+public interface TrainerConfig extends ToMapConvertible {
 
     @Value.Derived
-    default Map<String, Object> toMap() {
-        return Map.of(
-            "avg", avg(),
-            "min", min(),
-            "max", max()
-        );
-    }
-
-    static BestModelStats of(ModelStats modelStats) {
-        return ImmutableBestModelStats.of(modelStats.avg(), modelStats.min(), modelStats.max());
-    }
+    @Configuration.Ignore
+    String methodName();
 }

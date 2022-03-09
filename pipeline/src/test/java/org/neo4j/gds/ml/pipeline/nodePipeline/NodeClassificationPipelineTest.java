@@ -22,9 +22,11 @@ package org.neo4j.gds.ml.pipeline.nodePipeline;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
+import org.neo4j.gds.models.TrainerConfig;
+import org.neo4j.gds.models.TrainingMethod;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -43,7 +45,7 @@ class NodeClassificationPipelineTest {
             .returns(List.of(), NodeClassificationPipeline::nodePropertySteps)
             .returns(NodeClassificationSplitConfig.DEFAULT_CONFIG, NodeClassificationPipeline::splitConfig);
 
-        assertThat(pipeline.trainingParameterSpace())
+        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression))
             .usingRecursiveComparison()
             .isEqualTo(List.of(LogisticRegressionTrainConfig.defaultConfig()));
     }
@@ -93,11 +95,9 @@ class NodeClassificationPipelineTest {
         var config = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
 
         var pipeline = new NodeClassificationPipeline();
-        pipeline.setTrainingParameterSpace(List.of(
-            config
-        ));
+        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config));
 
-        assertThat(pipeline.trainingParameterSpace()).containsExactly(config);
+        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)).containsExactly(config);
     }
 
     @Test
@@ -107,16 +107,11 @@ class NodeClassificationPipelineTest {
         var config3 = LogisticRegressionTrainConfig.of(Map.of("penalty", 42));
 
         var pipeline = new NodeClassificationPipeline();
-        pipeline.setTrainingParameterSpace(List.of(
-            config1
-        ));
-        pipeline.setTrainingParameterSpace(List.of(
-            config2,
-            config3
-        ));
+        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config1));
+        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config2, config3));
 
         var parameterSpace = pipeline.trainingParameterSpace();
-        assertThat(parameterSpace).containsExactly(config2, config3);
+        assertThat(parameterSpace.get(TrainingMethod.LogisticRegression)).containsExactly(config2, config3);
     }
 
     @Test
@@ -162,7 +157,7 @@ class NodeClassificationPipelineTest {
                 )
                 .returns(
                     List.of(LogisticRegressionTrainConfig.defaultConfig().toMap()),
-                    pipelineMap -> pipelineMap.get("trainingParameterSpace")
+                    pipelineMap -> ((Map<String, Object>) pipelineMap.get("trainingParameterSpace")).get(TrainingMethod.LogisticRegression.name())
                 );
         }
 
@@ -178,7 +173,7 @@ class NodeClassificationPipelineTest {
             var fooStep = new NodeClassificationFeatureStep("foo");
             pipeline.addFeatureStep(fooStep);
 
-            pipeline.setTrainingParameterSpace(List.of(
+            pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
                 LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
                 LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
             ));
@@ -205,11 +200,11 @@ class NodeClassificationPipelineTest {
                     pipelineMap -> pipelineMap.get("splitConfig")
                 )
                 .returns(
-                    pipeline.trainingParameterSpace()
+                    pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)
                         .stream()
-                        .map(LogisticRegressionTrainConfig::toMap)
+                        .map(TrainerConfig::toMap)
                         .collect(Collectors.toList()),
-                    pipelineMap -> pipelineMap.get("trainingParameterSpace")
+                    pipelineMap -> ((Map<String, Object>) pipelineMap.get("trainingParameterSpace")).get(TrainingMethod.LogisticRegression.name())
                 );
         }
     }
@@ -264,7 +259,7 @@ class NodeClassificationPipelineTest {
         @Test
         void deepCopiesParameterSpace() {
             var pipeline = new NodeClassificationPipeline();
-            pipeline.setTrainingParameterSpace(List.of(
+            pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
                 LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
                 LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
             ));
@@ -276,10 +271,10 @@ class NodeClassificationPipelineTest {
                 .satisfies(copiedPipeline -> {
                     var copiedParameterSpace = copiedPipeline.trainingParameterSpace();
                     var originalParameterSpace = pipeline.trainingParameterSpace();
-                    assertThat(copiedParameterSpace)
+                    assertThat(copiedParameterSpace.get(TrainingMethod.LogisticRegression))
                         // Look at the pipeline because there are some defaults are added behind the scene.
                         .isNotSameAs(originalParameterSpace)
-                        .containsExactlyInAnyOrderElementsOf(originalParameterSpace);
+                        .containsExactlyInAnyOrderElementsOf(originalParameterSpace.get(TrainingMethod.LogisticRegression));
                 });
         }
 
