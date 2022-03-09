@@ -41,7 +41,7 @@ class GraphStoreValidationTest {
 
 
             assertThatThrownBy(() -> GraphStoreValidation.validate(graphStore, config))
-                .hasMessageContaining("Seed property `foo` not found in graph with node properties: [[bar]]");
+                .hasMessageContaining("Seed property `foo` not found in graph with node properties: [bar]");
         }
 
         @ValueClass

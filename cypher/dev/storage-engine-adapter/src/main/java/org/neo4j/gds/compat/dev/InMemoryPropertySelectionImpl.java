@@ -19,27 +19,37 @@
  */
 package org.neo4j.gds.compat.dev;
 
-import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
-import org.neo4j.gds.core.cypher.CypherGraphStore;
-import org.neo4j.storageengine.api.LongReference;
+import org.neo4j.gds.compat.InMemoryPropertySelection;
 import org.neo4j.storageengine.api.PropertySelection;
-import org.neo4j.storageengine.api.Reference;
-import org.neo4j.token.TokenHolders;
 
-public class InMemoryNodePropertyCursor extends AbstractInMemoryNodePropertyCursor {
+public class InMemoryPropertySelectionImpl implements InMemoryPropertySelection {
 
-    public InMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
-        super(graphStore, tokenHolders);
+    private final PropertySelection propertySelection;
+
+    public InMemoryPropertySelectionImpl(PropertySelection propertySelection) {this.propertySelection = propertySelection;}
+
+    @Override
+    public boolean isLimited() {
+        return propertySelection.isLimited();
     }
 
     @Override
-    public void initNodeProperties(Reference reference, PropertySelection selection, long ownerReference) {
-        reset();
-        setId(((LongReference) reference).id);
-        setPropertySelection(new InMemoryPropertySelectionImpl(selection));
+    public int numberOfKeys() {
+        return propertySelection.numberOfKeys();
     }
 
     @Override
-    public void initRelationshipProperties(Reference reference, PropertySelection selection, long ownerReference) {
+    public int key(int index) {
+        return propertySelection.key(index);
+    }
+
+    @Override
+    public boolean test(int key) {
+        return propertySelection.test(key);
+    }
+
+    @Override
+    public boolean isKeysOnly() {
+        return propertySelection.isKeysOnly();
     }
 }
