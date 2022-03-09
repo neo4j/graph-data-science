@@ -68,7 +68,7 @@ public interface GraphStore {
         }
         // intersection of propertyKeys
         Iterator<NodeLabel> iterator = labels.iterator();
-        Set<String> result = nodePropertyKeys(iterator.next());
+        var result = new HashSet<>(nodePropertyKeys(iterator.next()));
         while (iterator.hasNext()) {
             result.retainAll(nodePropertyKeys(iterator.next()));
         }
