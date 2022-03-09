@@ -34,6 +34,7 @@ import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -72,7 +73,15 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.executorService = executorService;
         this.nodeFilter = new BitSet(graph.nodeCount());
         this.weighted = config.hasRelationshipWeightProperty();
-        this.similarityComputer = MetricSimilarityComputer.create(Metric.JACCARD, config.similarityCutoff());
+        var metricUsed = config.similarityMetric().toUpperCase(Locale.ROOT);
+        if (metricUsed.equals("JACCARD" )) {
+            this.similarityComputer = MetricSimilarityComputer.create(Metric.JACCARD, config.similarityCutoff());
+        } else if (metricUsed.equals("OVERLAP" )) {
+            this.similarityComputer = MetricSimilarityComputer.create(Metric.OVERLAP, config.similarityCutoff());
+        } else {
+            throw new IllegalArgumentException(config.similarityMetric() + " is not a valid metric. Available metrics include Jaccard and Overlap");
+            throw new IllegalArgumentException(config.metric() + " is not a valid metric" );
+        }
     }
 
     @Override

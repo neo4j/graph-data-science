@@ -47,6 +47,11 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     }
 
     @Value.Default
+    default String similarityMetric() {
+        return "JACCARD";
+    }
+
+    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int degreeCutoff() {
         return 1;
@@ -142,4 +147,6 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
             ));
         }
     }
+
+
 }
