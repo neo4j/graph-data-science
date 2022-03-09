@@ -313,7 +313,10 @@ public final class UnionGraph implements CSRGraph {
             .flatMap(Collection::stream)
             .map(Relationships.Topology::adjacencyList)
             .collect(Collectors.toList());
-        return new CompositeAdjacencyList(adjacencies);
+        if (isNodeFilteredGraph()) {
+            return CompositeAdjacencyList.withFilteredIdMap(adjacencies, first);
+        }
+        return CompositeAdjacencyList.of(adjacencies);
     }
 
     @Override
@@ -334,6 +337,10 @@ public final class UnionGraph implements CSRGraph {
     @Override
     public boolean hasLabel(long nodeId, NodeLabel label) {
         return first.hasLabel(nodeId, label);
+    }
+
+    public boolean isNodeFilteredGraph() {
+        return first instanceof NodeFilteredGraph;
     }
 
     private static class ParallelRelationshipDegreeCounter implements RelationshipConsumer {
