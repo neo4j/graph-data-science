@@ -273,7 +273,8 @@ public final class BFS extends Algorithm<long[]> {
                 exitPredicate,
                 aggregatorFunction,
                 delta,
-                terminationFlag,
+                startNodeId,
+                terminationFlag
                 progressTracker
             ));
         }

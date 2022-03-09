@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -52,14 +51,13 @@ class BFSTask implements Runnable {
     private final HugeAtomicLongArray minimumChunk;
     private final ExitPredicate exitPredicate;
     private final Aggregator aggregatorFunction;
+    private final long startNodeId;
 
     // variables local to the task
     // Chunk(s) of `traversedNodes` that a single task operates on; each chunk
     // ends with `BFS.IGNORE_NODE` which acts as a separator.
     private final LongArrayList localNodes;
-    // Chunk(s) of `weights` that a single task operates on; each chunk
-    // ends with `BFS.IGNORE_NODE` which acts as a separator.
-    private final DoubleArrayList localWeights;
+
     // IDs of the chunk(s) processed by a single task, ordered in ascending order.
     private final LongArrayList chunks;
     // Maximum size of a single chunk.
@@ -88,7 +86,8 @@ class BFSTask implements Runnable {
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
         int delta,
-        TerminationFlag terminationFlag,
+        long startNodeId,
+        TerminationFlag terminationFlag
         ProgressTracker progressTracker
     ) {
         this.graph = graph.concurrentCopy();
@@ -103,11 +102,11 @@ class BFSTask implements Runnable {
         this.exitPredicate = exitPredicate;
         this.aggregatorFunction = aggregatorFunction;
         this.delta = delta;
+        this.startNodeId = startNodeId;
         this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
 
         this.localNodes = new LongArrayList();
-        this.localWeights = new DoubleArrayList();
         this.chunks = new LongArrayList();
     }
 
@@ -136,14 +135,20 @@ class BFSTask implements Runnable {
             chunks.add(offset);
             for (int idx = offset; idx < chunkLimit; idx++) {
                 var nodeId = traversedNodes.get(idx);
-                var sourceId = predecessors.get(idx);
-                var weight = weights.get(idx);
+                long sourceId = startNodeId;
+                double weight = 0;
+                if (nodeId != startNodeId) {
+                    long minimumChunkIndex = minimumChunk.get(nodeId);
+                    sourceId = predecessors.get(idx);
+                    weight = aggregatorFunction.apply(sourceId, nodeId, weights.get(minimumChunkIndex));
+                    weights.set(idx, weight);
+                }
+
                 relaxNode(idx, nodeId, sourceId, weight);
                 examined++;
             }
             // Add a chunk separator.
             localNodes.add(BFS.IGNORE_NODE);
-            localWeights.add(BFS.IGNORE_NODE);
         }
 
         progressTracker.logProgress(examined);
@@ -165,7 +170,6 @@ class BFSTask implements Runnable {
                 if (!visited.getAndSet(nodeId)) {
                     traversedNodes.set(index, nodeId);
                     predecessors.set(index, traversedNodes.get(minimumChunkIndex));
-                    weights.set(index, localWeights.get(indexOfLocalNodes));
                     index++;
                     nodesTraversed++;
                 }
@@ -208,7 +212,6 @@ class BFSTask implements Runnable {
                     minimumChunk.update(targetNodeId, currentValue -> Math.min(currentValue, nodeIndex));
                     if (minimumChunk.get(targetNodeId) == nodeIndex) {
                         localNodes.add(targetNodeId);
-                        localWeights.add(aggregatorFunction.apply(s, targetNodeId, weight));
                     }
                 }
                 return terminationFlag.running();
@@ -218,7 +221,6 @@ class BFSTask implements Runnable {
 
     private void resetLocalState() {
         localNodes.elementsCount = 0;
-        localWeights.elementsCount = 0;
         indexOfLocalNodes = 0;
     }
 
