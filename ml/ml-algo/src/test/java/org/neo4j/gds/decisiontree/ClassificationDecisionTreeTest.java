@@ -157,7 +157,7 @@ class ClassificationDecisionTreeTest {
             .minSplitSize(1);
 
         var sampledVectors = HugeLongArray.newArray(1);
-        sampledVectors.set(0 ,1);
+        sampledVectors.set(0, 1);
 
         var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
@@ -174,7 +174,7 @@ class ClassificationDecisionTreeTest {
         assertThat(decisionTreePredict.predict(features)).isEqualTo(1337L);
 
         var otherSampledVectors = HugeLongArray.newArray(1);
-        otherSampledVectors.set(0 ,allFeatureVectors.size() - 1);
+        otherSampledVectors.set(0, allFeatureVectors.size() - 1);
 
         decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
