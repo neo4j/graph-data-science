@@ -135,6 +135,34 @@ The stream procedure will yield a node pair only once.
 ====
 
 
+[[algorithms-link-prediction-pipelines-predict-examples-estimate]]
+==== Memory Estimation
+
+:mode: stream
+include::../../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for applying the model:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.predict.stream.estimate('myGraph', {
+  modelName: 'lp-pipeline-model',
+  topN: 5,
+  threshold: 0.45
+})
+YIELD requiredMemory
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| requiredMemory
+| "24 KiB"
+|===
+--
+
+
 [[algorithms-link-prediction-pipelines-predict-examples-stream]]
 ==== Stream
 
