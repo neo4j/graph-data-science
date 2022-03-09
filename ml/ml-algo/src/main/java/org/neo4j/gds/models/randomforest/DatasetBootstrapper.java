@@ -35,7 +35,6 @@ final class DatasetBootstrapper {
         final BitSet cachedBootstrappedDataset
     ) {
         assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
-        assert !cachedBootstrappedDataset.isEmpty();
 
         long numVectors = (long) Math.ceil(numFeatureVectorsRatio * totalNumVectors);
         var bootstrappedVectors = HugeLongArray.newArray(numVectors);
