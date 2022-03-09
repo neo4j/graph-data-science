@@ -74,9 +74,6 @@ public final class BFS extends Algorithm<long[]> {
     // It is initialized with the total number of nodes, but may contain less than that.
     private HugeLongArray traversedNodes;
 
-    // An array to store the predecessors for a given nodeId.
-    // It is initialized with the total number of nodes but may contain less than that.
-    private final HugeLongArray predecessors;
 
     // An array to keep the weight/depth of the node at the same position in `traversedNodes`.
     // It is initialized with the total number of nodes, but may contain less than that.
@@ -164,7 +161,6 @@ public final class BFS extends Algorithm<long[]> {
         this.delta = delta;
 
         this.traversedNodes = traversedNodes;
-        this.predecessors = predecessors;
         this.weights = weights;
         this.visited = visited;
     }
@@ -189,7 +185,6 @@ public final class BFS extends Algorithm<long[]> {
 
         visited.set(startNodeId);
         traversedNodes.set(0, startNodeId);
-        predecessors.set(0, startNodeId);
         weights.set(0, 0);
 
         var bfsTaskList = initializeBfsTasks(
@@ -266,7 +261,6 @@ public final class BFS extends Algorithm<long[]> {
                 traversedNodesIndex,
                 traversedNodesLength,
                 visited,
-                predecessors,
                 weights,
                 targetFoundIndex,
                 minimumChunk,

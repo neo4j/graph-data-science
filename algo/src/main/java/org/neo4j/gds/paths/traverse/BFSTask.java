@@ -44,7 +44,6 @@ class BFSTask implements Runnable {
     private final AtomicInteger traversedNodesIndex;
     private final HugeAtomicBitSet visited;
     private final HugeLongArray traversedNodes;
-    private final HugeLongArray predecessors;
     private final HugeDoubleArray weights;
     private final AtomicLong targetFoundIndex;
     private final AtomicInteger traversedNodesLength;
@@ -79,7 +78,6 @@ class BFSTask implements Runnable {
         AtomicInteger traversedNodesIndex,
         AtomicInteger traversedNodesLength,
         HugeAtomicBitSet visited,
-        HugeLongArray predecessors,
         HugeDoubleArray weights,
         AtomicLong targetFoundIndex,
         HugeAtomicLongArray minimumChunk,
@@ -95,7 +93,6 @@ class BFSTask implements Runnable {
         this.traversedNodesLength = traversedNodesLength;
         this.visited = visited;
         this.traversedNodes = traversedNodes;
-        this.predecessors = predecessors;
         this.weights = weights;
         this.targetFoundIndex = targetFoundIndex;
         this.minimumChunk = minimumChunk;
@@ -139,7 +136,7 @@ class BFSTask implements Runnable {
                 double weight = 0;
                 if (nodeId != startNodeId) {
                     long minimumChunkIndex = minimumChunk.get(nodeId);
-                    sourceId = predecessors.get(idx);
+                    sourceId = traversedNodes.get(minimumChunkIndex);
                     weight = aggregatorFunction.apply(sourceId, nodeId, weights.get(minimumChunkIndex));
                     weights.set(idx, weight);
                 }
@@ -169,7 +166,6 @@ class BFSTask implements Runnable {
                 // the if check will be false and not added to traversedNodes again.
                 if (!visited.getAndSet(nodeId)) {
                     traversedNodes.set(index, nodeId);
-                    predecessors.set(index, traversedNodes.get(minimumChunkIndex));
                     index++;
                     nodesTraversed++;
                 }
