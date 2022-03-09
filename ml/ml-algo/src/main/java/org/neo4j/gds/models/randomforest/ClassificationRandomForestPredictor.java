@@ -29,12 +29,12 @@ import org.neo4j.gds.models.Features;
 
 import java.util.List;
 
-public class ClassificationRandomForestPredict implements Classifier {
+public class ClassificationRandomForestPredictor implements Classifier {
 
     private final List<DecisionTreePredict<Long>> decisionTrees;
     private final LocalIdMap classMapping;
 
-    public ClassificationRandomForestPredict(
+    public ClassificationRandomForestPredictor(
         List<DecisionTreePredict<Long>> decisionTrees,
         LocalIdMap classMapping
     ) {

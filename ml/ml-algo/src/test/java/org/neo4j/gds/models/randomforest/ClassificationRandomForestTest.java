@@ -72,7 +72,7 @@ class ClassificationRandomForestTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void usingOneTree(int concurrency) {
-        var randomForestTrain = new ClassificationRandomForestTrain<>(
+        var randomForestTrainer = new ClassificationRandomForestTrainer<>(
             giniIndexLoss,
             concurrency,
             CLASS_MAPPING,
@@ -87,13 +87,13 @@ class ClassificationRandomForestTest {
             false
         );
 
-        var randomForestPredictor = randomForestTrain.train(allFeatureVectors, allLabels);
+        var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels);
 
         var featureVector = new double[]{8.0, 0.0};
 
         assertThrows(
             IllegalAccessError.class,
-            randomForestTrain::outOfBagError
+            randomForestTrainer::outOfBagError
         );
         assertThat(randomForestPredictor.predictLabel(featureVector)).isEqualTo(42);
         assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.0, 1.0);
@@ -102,7 +102,7 @@ class ClassificationRandomForestTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void usingTwentyTrees(int concurrency) {
-        var randomForestTrain = new ClassificationRandomForestTrain<>(
+        var randomForestTrainer = new ClassificationRandomForestTrainer<>(
             giniIndexLoss,
             concurrency,
             CLASS_MAPPING,
@@ -118,13 +118,13 @@ class ClassificationRandomForestTest {
             false
         );
 
-        var randomForestPredictor = randomForestTrain.train(allFeatureVectors, allLabels);
+        var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels);
 
         var featureVector = new double[]{8.0, 3.2};
 
         assertThrows(
             IllegalAccessError.class,
-            randomForestTrain::outOfBagError
+            randomForestTrainer::outOfBagError
         );
         assertThat(randomForestPredictor.predictLabel(featureVector)).isEqualTo(42);
         assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.45, 0.55);
@@ -133,7 +133,7 @@ class ClassificationRandomForestTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldMakeSaneErrorEstimation(int concurrency) {
-        var randomForestTrain = new ClassificationRandomForestTrain<>(
+        var randomForestTrainer = new ClassificationRandomForestTrainer<>(
             giniIndexLoss,
             concurrency,
             CLASS_MAPPING,
@@ -148,8 +148,8 @@ class ClassificationRandomForestTest {
             true
         );
 
-        randomForestTrain.train(allFeatureVectors, allLabels);
+        randomForestTrainer.train(allFeatureVectors, allLabels);
 
-        assertThat(randomForestTrain.outOfBagError()).isCloseTo(0.2, Offset.offset(0.000001D));
+        assertThat(randomForestTrainer.outOfBagError()).isCloseTo(0.2, Offset.offset(0.000001D));
     }
 }

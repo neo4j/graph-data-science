@@ -40,7 +40,7 @@ import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> implements Trainer {
+public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> implements Trainer {
 
     private final LOSS lossFunction;
     private final LocalIdMap classIdMap;
@@ -50,7 +50,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> impl
     private final SplittableRandom random;
     private Optional<Double> outOfBagError = Optional.empty();
 
-    public ClassificationRandomForestTrain(
+    public ClassificationRandomForestTrainer(
         LOSS lossFunction,
         int concurrency,
         LocalIdMap classIdMap,
@@ -67,7 +67,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> impl
             .orElseGet(SplittableRandom::new);
     }
 
-    public ClassificationRandomForestPredict train(Features allFeatureVectors, HugeLongArray allLabels) {
+    public ClassificationRandomForestPredictor train(Features allFeatureVectors, HugeLongArray allLabels) {
         Optional<HugeAtomicLongArray> maybePredictions = computeOutOfBagError
             ? Optional.of(HugeAtomicLongArray.newArray(classIdMap.size() * allFeatureVectors.size()))
             : Optional.empty();
@@ -102,7 +102,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> impl
 
         var decisionTrees = tasks.stream().map(DecisionTreeTrainer::trainedTree).collect(Collectors.toList());
 
-        return new ClassificationRandomForestPredict(decisionTrees, classIdMap);
+        return new ClassificationRandomForestPredictor(decisionTrees, classIdMap);
     }
 
     double outOfBagError() {
