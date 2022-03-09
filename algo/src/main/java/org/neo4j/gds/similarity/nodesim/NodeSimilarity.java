@@ -25,7 +25,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
-import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -53,7 +52,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private final ExecutorService executorService;
     private final BitSet nodeFilter;
-
+    private final MetricSimilarityComputer similarityComputer;
     private HugeObjectArray<long[]> vectors;
     private HugeObjectArray<double[]> weights;
     private long nodesToCompare;
@@ -73,6 +72,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.executorService = executorService;
         this.nodeFilter = new BitSet(graph.nodeCount());
         this.weighted = config.hasRelationshipWeightProperty();
+        this.similarityComputer = MetricSimilarityComputer.create(Metric.JACCARD, config.similarityCutoff());
     }
 
     @Override
@@ -227,8 +227,13 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 nodeStream(node1 + 1)
                     .forEach(node2 -> {
                         double similarity = weighted
-                            ? weightedJaccard(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
-                            : jaccard(vector1, vectors.get(node2));
+                            ? computeWeightedSimilarity(
+                            vector1,
+                            vectors.get(node2),
+                            weights.get(node1),
+                            weights.get(node2)
+                        )
+                            : computeSimilarity(vector1, vectors.get(node2));
                         if (!Double.isNaN(similarity)) {
                             topKMap.put(node1, node2, similarity);
                             topKMap.put(node2, node1, similarity);
@@ -261,8 +266,13 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                         .filter(node2 -> node1 != node2)
                         .forEach(node2 -> {
                             double similarity = weighted
-                                ? weightedJaccard(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
-                                : jaccard(vector1, vectors.get(node2));
+                                ? computeWeightedSimilarity(
+                                vector1,
+                                vectors.get(node2),
+                                weights.get(node1),
+                                weights.get(node2)
+                            )
+                                : computeSimilarity(vector1, vectors.get(node2));
                             if (!Double.isNaN(similarity)) {
                                 topKMap.put(node1, node2, similarity);
                             }
@@ -285,8 +295,13 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 nodeStream(node1 + 1)
                     .forEach(node2 -> {
                         double similarity = weighted
-                            ? weightedJaccard(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
-                            : jaccard(vector1, vectors.get(node2));
+                            ? computeWeightedSimilarity(
+                            vector1,
+                            vectors.get(node2),
+                            weights.get(node1),
+                            weights.get(node2)
+                        )
+                            : computeSimilarity(vector1, vectors.get(node2));
                         if (!Double.isNaN(similarity)) {
                             topNList.add(node1, node2, similarity);
                         }
@@ -303,58 +318,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         return topNList.stream();
     }
 
-    private double jaccard(long[] vector1, long[] vector2) {
-        long intersection = Intersections.intersection3(vector1, vector2);
-        double union = vector1.length + vector2.length - intersection;
-        double similarity = union == 0 ? 0 : intersection / union;
-        progressTracker.logProgress();
-        return similarity >= config.similarityCutoff() ? similarity : Double.NaN;
-
-    }
-
-    private double weightedJaccard(long[] vector1, long[] vector2, double[] weights1, double[] weights2) {
-        assert vector1.length == weights1.length;
-        assert vector2.length == weights2.length;
-
-        int offset1 = 0;
-        int offset2 = 0;
-        int length1 = weights1.length;
-        int length2 = weights2.length;
-        double max = 0;
-        double min = 0;
-        while (offset1 < length1 && offset2 < length2) {
-            long target1 = vector1[offset1];
-            long target2 = vector2[offset2];
-            if (target1 == target2) {
-                double w1 = weights1[offset1];
-                double w2 = weights2[offset2];
-                if (w1 > w2) {
-                    max += w1;
-                    min += w2;
-                } else {
-                    min += w1;
-                    max += w2;
-                }
-                offset1++;
-                offset2++;
-            } else if (target1 < target2) {
-                max += weights1[offset1];
-                offset1++;
-            } else {
-                max += weights2[offset2];
-                offset2++;
-            }
-        }
-        for (; offset1 < length1; offset1++) {
-            max += weights1[offset1];
-        }
-        for (; offset2 < length2; offset2++) {
-            max += weights2[offset2];
-        }
-        double similarity = min / max;
-        progressTracker.logProgress();
-        return similarity >= config.similarityCutoff() ? similarity : Double.NaN;
-    }
 
     private LongStream nodeStream() {
         return nodeStream(0);
@@ -362,6 +325,18 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private LongStream loggableAndTerminatableNodeStream() {
         return checkProgress(nodeStream());
+    }
+
+    private double computeWeightedSimilarity(long[] vector1, long[] vector2, double[] weights1, double[] weights2) {
+        double similarity = similarityComputer.computeWeightedSimilarity(vector1, vector2, weights1, weights2);
+        progressTracker.logProgress();
+        return similarity;
+    }
+
+    private double computeSimilarity(long[] vector1, long[] vector2) {
+        double similarity = similarityComputer.computeSimilarity(vector1, vector2);
+        progressTracker.logProgress();
+        return similarity;
     }
 
     private LongStream checkProgress(LongStream stream) {
@@ -389,8 +364,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         return nodeStream(node1 + 1)
             .mapToObj(node2 -> {
                 double similarity = weighted
-                    ? weightedJaccard(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
-                    : jaccard(vector1, vectors.get(node2));
+                    ? computeWeightedSimilarity(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
+                    : computeSimilarity(vector1, vectors.get(node2));
                 return Double.isNaN(similarity) ? null : new SimilarityResult(
                     node1,
                     node2,

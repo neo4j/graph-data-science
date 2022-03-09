@@ -701,6 +701,7 @@ final class NodeSimilarityTest {
             .fixed("vectors", vectorsRange)
             .fixed("weights", weightsRange);
 
+
         long topKMapRangeMin;
         long topKMapRangeMax;
         if (topK == TOP_K_DEFAULT) {
