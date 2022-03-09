@@ -19,64 +19,82 @@
  */
 package org.neo4j.gds.similarity.knn.metrics;
 
+/**
+ * Here we compute Pearson correlation coefficient and turn that into a metric.
+ *
+ * We use the formula from https://en.wikipedia.org/wiki/Pearson_correlation_coefficient#For_a_sample for the Pearson
+ * computation.
+ *
+ * If input arrays are of different length we ignore the longer tail.
+ *
+ * In the end we turn Pearson's r into a metric moving it to the range 0..1
+ */
 public final class Pearson {
     private Pearson() {}
 
-    public static double floatMetric(float[] left, float[] right) {
-        int len = Math.min(left.length, right.length);
+    public static double floatMetric(float[] a, float[] b) {
+        int n = Math.min(a.length, b.length);
 
-        double leftSum = 0.0;
-        double rightSum = 0.0;
-        for (int i = 0; i < len; i++) {
-            leftSum += left[i];
-            rightSum += right[i];
+        // compute sample means
+        double sumA = 0d;
+        double sumB = 0d;
+        for (int i = 0; i < n; i++) {
+            sumA += a[i];
+            sumB += b[i];
+        }
+        double meanA = sumA / n;
+        double meanB = sumB / n;
+
+        // compute sums
+        double sumOfProductOfADeltaBDelta = 0d;
+        double sumOfADeltaSquared = 0d;
+        double sumOfBDeltaSquared = 0d;
+        for (int i = 0; i < n; i++) {
+            double aDelta = a[i] - meanA;
+            double bDelta = b[i] - meanB;
+
+            sumOfProductOfADeltaBDelta += aDelta * bDelta;
+            sumOfADeltaSquared += aDelta * aDelta;
+            sumOfBDeltaSquared += bDelta * bDelta;
         }
 
-        double leftMean = leftSum / len;
-        double rightMean = rightSum / len;
+        // final formula
+        double r = sumOfProductOfADeltaBDelta/ (Math.sqrt(sumOfADeltaSquared * sumOfBDeltaSquared));
 
-        double dotProductMinusMean = 0D;
-        double xLength = 0D;
-        double yLength = 0D;
-        for (int i = 0; i < len; i++) {
-            double leftDelta = left[i] - leftMean;
-            double rightDelta = right[i] - rightMean;
-
-            dotProductMinusMean += leftDelta * rightDelta;
-            xLength += leftDelta * leftDelta;
-            yLength += rightDelta * rightDelta;
-        }
-
-        double result = dotProductMinusMean / Math.sqrt(xLength * yLength);
-        return Math.max(result, 0);
+        // now turn it into a metric; Pearson's r is in the range -1..1 and we want to land it in 0..1
+        return (r+1)/ 2;
     }
 
-    public static double doubleMetric(double[] left, double[] right) {
-        int len = Math.min(left.length, right.length);
+    public static double doubleMetric(double[] a, double[] b) {
+        int n = Math.min(a.length, b.length);
 
-        double leftSum = 0.0;
-        double rightSum = 0.0;
-        for (int i = 0; i < len; i++) {
-            leftSum += left[i];
-            rightSum += right[i];
+        // compute sample means
+        double sumA = 0d;
+        double sumB = 0d;
+        for (int i = 0; i < n; i++) {
+            sumA += a[i];
+            sumB += b[i];
+        }
+        double meanA = sumA / n;
+        double meanB = sumB / n;
+
+        // compute sums
+        double sumOfProductOfADeltaBDelta = 0d;
+        double sumOfADeltaSquared = 0d;
+        double sumOfBDeltaSquared = 0d;
+        for (int i = 0; i < n; i++) {
+            double aDelta = a[i] - meanA;
+            double bDelta = b[i] - meanB;
+
+            sumOfProductOfADeltaBDelta += aDelta * bDelta;
+            sumOfADeltaSquared += aDelta * aDelta;
+            sumOfBDeltaSquared += bDelta * bDelta;
         }
 
-        double leftMean = leftSum / len;
-        double rightMean = rightSum / len;
+        // final formula
+        double r = sumOfProductOfADeltaBDelta/ (Math.sqrt(sumOfADeltaSquared * sumOfBDeltaSquared));
 
-        double dotProductMinusMean = 0D;
-        double xLength = 0D;
-        double yLength = 0D;
-        for (int i = 0; i < len; i++) {
-            double leftDelta = left[i] - leftMean;
-            double rightDelta = right[i] - rightMean;
-
-            dotProductMinusMean += leftDelta * rightDelta;
-            xLength += leftDelta * leftDelta;
-            yLength += rightDelta * rightDelta;
-        }
-
-        double result = dotProductMinusMean / Math.sqrt(xLength * yLength);
-        return Math.max(result, 0);
+        // now turn it into a metric; Pearson's r is in the range -1..1 and we want to land it in 0..1
+        return (r+1)/ 2;
     }
 }
