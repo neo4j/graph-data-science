@@ -22,7 +22,7 @@ package org.neo4j.gds.models.logisticregression;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.gradientdescent.TrainingConfig;
+import org.neo4j.gds.gradientdescent.GradientDescentConfig;
 
 import java.util.Collection;
 import java.util.Map;
@@ -30,7 +30,7 @@ import java.util.Map;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LogisticRegressionTrainConfig extends TrainingConfig {
+public interface LogisticRegressionTrainConfig extends GradientDescentConfig {
 
     @Value.Default
     @Configuration.DoubleRange(min = 0.0)

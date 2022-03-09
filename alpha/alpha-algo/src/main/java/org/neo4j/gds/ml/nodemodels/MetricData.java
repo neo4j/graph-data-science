@@ -21,14 +21,14 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.gradientdescent.TrainingConfig;
+import org.neo4j.gds.gradientdescent.GradientDescentConfig;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @ValueClass
-public interface MetricData<CONFIG extends TrainingConfig> {
+public interface MetricData<CONFIG extends GradientDescentConfig> {
 
 
     /**
@@ -65,7 +65,7 @@ public interface MetricData<CONFIG extends TrainingConfig> {
         );
     }
 
-    static <CONFIG extends TrainingConfig> MetricData<CONFIG> of(List<ModelStats<CONFIG>> train, List<ModelStats<CONFIG>> validation, double outerTrain, double test) {
+    static <CONFIG extends GradientDescentConfig> MetricData<CONFIG> of(List<ModelStats<CONFIG>> train, List<ModelStats<CONFIG>> validation, double outerTrain, double test) {
         return ImmutableMetricData.of(train, validation, outerTrain, test);
     }
 }

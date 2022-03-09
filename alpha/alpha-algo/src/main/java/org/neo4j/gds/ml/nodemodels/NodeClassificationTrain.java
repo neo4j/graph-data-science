@@ -36,21 +36,21 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.gradientdescent.GradientDescentConfig;
 import org.neo4j.gds.gradientdescent.Training;
-import org.neo4j.gds.gradientdescent.TrainingConfig;
-import org.neo4j.gds.models.Features;
-import org.neo4j.gds.models.FeaturesFactory;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.util.ShuffleUtil;
+import org.neo4j.gds.models.Features;
+import org.neo4j.gds.models.FeaturesFactory;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainer;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.HashMap;
@@ -85,7 +85,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
     public static MemoryEstimation estimate(NodeClassificationTrainConfig config) {
         var maxBatchSize = config.paramsConfig()
             .stream()
-            .mapToInt(TrainingConfig::batchSize)
+            .mapToInt(GradientDescentConfig::batchSize)
             .max()
             .getAsInt();
         var fudgedClassCount = 1000;

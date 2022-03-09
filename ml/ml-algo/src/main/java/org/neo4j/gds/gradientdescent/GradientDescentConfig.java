@@ -23,7 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.ToMapConvertible;
 
-public interface TrainingConfig extends ToMapConvertible {
+public interface GradientDescentConfig extends ToMapConvertible {
 
     int DEFAULT_BATCH_SIZE = 100;
     int MAX_EPOCHS = 100;

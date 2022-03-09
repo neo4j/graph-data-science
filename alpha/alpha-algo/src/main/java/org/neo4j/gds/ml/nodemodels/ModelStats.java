@@ -21,13 +21,13 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.gradientdescent.TrainingConfig;
+import org.neo4j.gds.gradientdescent.GradientDescentConfig;
 
 import java.util.Comparator;
 import java.util.Map;
 
 @ValueClass
-public interface ModelStats<CONFIG extends TrainingConfig> {
+public interface ModelStats<CONFIG extends GradientDescentConfig> {
     Comparator<ModelStats<?>> COMPARE_AVERAGE = Comparator.comparingDouble(ModelStats::avg);
 
     /**
