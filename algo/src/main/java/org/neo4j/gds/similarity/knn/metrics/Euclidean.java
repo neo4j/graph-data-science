@@ -19,6 +19,16 @@
  */
 package org.neo4j.gds.similarity.knn.metrics;
 
+/**
+ * Here we calculate Euclidean similarity metrics using Euclidean dictance as described in e.g.
+ * https://en.wikipedia.org/wiki/Euclidean_distance
+ *
+ * We specifically calculate the Euclidean squared distance for the overlap of the arrays, potentially ignoring the
+ * tail of one of them.
+ *
+ * We then normalise this squared distance in order to clamp the number into the range (0,1] so that the metric can be
+ * used for comparisons up stream.
+ */
 public final class Euclidean {
     private Euclidean() {}
 
