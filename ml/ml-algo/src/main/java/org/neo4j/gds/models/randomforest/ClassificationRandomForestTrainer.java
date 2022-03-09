@@ -25,6 +25,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.decisiontree.ClassificationDecisionTreeTrain;
 import org.neo4j.gds.decisiontree.DecisionTreeLoss;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
@@ -67,9 +68,9 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
             .orElseGet(SplittableRandom::new);
     }
 
-    public ClassificationRandomForestPredictor train(Features allFeatureVectors, HugeLongArray allLabels) {
+    public ClassificationRandomForestPredictor train(Features allFeatureVectors, HugeLongArray allLabels, ReadOnlyHugeLongArray trainSet) {
         Optional<HugeAtomicLongArray> maybePredictions = computeOutOfBagError
-            ? Optional.of(HugeAtomicLongArray.newArray(classIdMap.size() * allFeatureVectors.size()))
+            ? Optional.of(HugeAtomicLongArray.newArray(classIdMap.size() * trainSet.size()))
             : Optional.empty();
 
         var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
@@ -87,13 +88,14 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
                 allFeatureVectors,
                 allLabels,
                 classIdMap,
-                lossFunction
+                lossFunction,
+                trainSet
             )
         ).collect(Collectors.toList());
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
         outOfBagError = maybePredictions.map(predictions -> OutOfBagErrorMetric.evaluate(
-            allFeatureVectors.size(),
+            trainSet,
             classIdMap,
             allLabels,
             concurrency,
@@ -120,6 +122,7 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
         private final HugeLongArray allLabels;
         private final LocalIdMap classIdMap;
         private final LOSS lossFunction;
+        private final ReadOnlyHugeLongArray trainSet;
 
         DecisionTreeTrainer(
             Optional<HugeAtomicLongArray> maybePredictions,
@@ -129,7 +132,8 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
             Features allFeatureVectors,
             HugeLongArray allLabels,
             LocalIdMap classIdMap,
-            LOSS lossFunction
+            LOSS lossFunction,
+            ReadOnlyHugeLongArray trainSet
         ) {
             this.maybePredictions = maybePredictions;
             this.decisionTreeTrainConfig = decisionTreeTrainConfig;
@@ -139,6 +143,7 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
             this.allLabels = allLabels;
             this.classIdMap = classIdMap;
             this.lossFunction = lossFunction;
+            this.trainSet = trainSet;
         }
 
         public DecisionTreePredict<Long> trainedTree() {
@@ -164,47 +169,46 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
 
             var bootstrappedDataset = bootstrappedDataset();
 
-            trainedTree = decisionTree.train(bootstrappedDataset.indices());
+            trainedTree = decisionTree.train(bootstrappedDataset.allVectorsIndices());
 
             maybePredictions.ifPresent(predictionsCache -> OutOfBagErrorMetric.addPredictionsForTree(
                 trainedTree,
                 classIdMap,
-                bootstrappedDataset.bitSet(),
                 allFeatureVectors,
+                trainSet,
+                bootstrappedDataset.trainSetIndices(),
                 predictionsCache
             ));
         }
 
         private BootstrappedDataset bootstrappedDataset() {
-            BitSet bitSet = new BitSet(allFeatureVectors.size());
-            HugeLongArray indices;
+            BitSet trainSetIndices = new BitSet(trainSet.size());
+            ReadOnlyHugeLongArray allVectorsIndices;
 
             if (Double.compare(randomForestTrainConfig.numberOfSamplesRatio(), 0.0d) == 0) {
                 // 0 => no sampling but take every vector
-                var allVectors = HugeLongArray.newArray(allFeatureVectors.size());
-                allVectors.setAll(i -> i);
-                bitSet.set(0, allFeatureVectors.size());
-                indices = allVectors;
+                allVectorsIndices = trainSet;
+                trainSetIndices.set(1, trainSet.size());
             } else {
-                indices = DatasetBootstrapper.bootstrap(
+                allVectorsIndices = DatasetBootstrapper.bootstrap(
                     random,
                     randomForestTrainConfig.numberOfSamplesRatio(),
-                    allFeatureVectors.size(),
-                    bitSet
+                    trainSet,
+                    trainSetIndices
                 );
             }
 
             return ImmutableBootstrappedDataset.of(
-                bitSet,
-                indices
+                trainSetIndices,
+                allVectorsIndices
             );
         }
 
         @ValueClass
         interface BootstrappedDataset {
-            BitSet bitSet();
+            BitSet trainSetIndices();
 
-            HugeLongArray indices();
+            ReadOnlyHugeLongArray allVectorsIndices();
         }
     }
 }

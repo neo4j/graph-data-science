@@ -21,8 +21,12 @@ package org.neo4j.gds.models.randomforest;
 
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
+import java.util.HashSet;
 import java.util.SplittableRandom;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,12 +36,16 @@ class DatasetBootstrapperTest {
 
     @Test
     void shouldSampleCorrectNumElements() {
-        int numVectors = 20;
+        long numVectors = 20;
+        HugeLongArray mutableTrainSet = HugeLongArray.newArray(numVectors);
+        mutableTrainSet.setAll(idx -> idx);
+        var trainSet = ReadOnlyHugeLongArray.of(mutableTrainSet);
+
         var cachedBootstrappedDataset = new BitSet(numVectors);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             RANDOM,
             0.5,
-            numVectors,
+            trainSet,
             cachedBootstrappedDataset
         );
 
@@ -46,12 +54,16 @@ class DatasetBootstrapperTest {
 
     @Test
     void shouldSampleConsistentlyWithCache() {
-        int numVectors = 20;
+        long numVectors = 20;
+        HugeLongArray mutableTrainSet = HugeLongArray.newArray(numVectors);
+        mutableTrainSet.setAll(idx -> idx);
+        var trainSet = ReadOnlyHugeLongArray.of(mutableTrainSet);
+
         var cachedBootstrappedDataset = new BitSet(numVectors);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             RANDOM,
             0.5,
-            numVectors,
+            trainSet,
             cachedBootstrappedDataset
         );
 
@@ -73,12 +85,16 @@ class DatasetBootstrapperTest {
 
     @Test
     void shouldSampleCorrectInterval() {
-        int numVectors = 20;
+        long numVectors = 20;
+        HugeLongArray mutableTrainSet = HugeLongArray.newArray(numVectors);
+        mutableTrainSet.setAll(idx -> idx);
+        var trainSet = ReadOnlyHugeLongArray.of(mutableTrainSet);
+
         var cachedBootstrappedDataset = new BitSet(numVectors);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             RANDOM,
             0.5,
-            numVectors,
+            trainSet,
             cachedBootstrappedDataset
         );
 
@@ -92,12 +108,17 @@ class DatasetBootstrapperTest {
     @Test
     void shouldSampleWithReplacement() {
         var random = new SplittableRandom(1337);
-        int numVectors = 4;
+
+        long numVectors = 4;
+        HugeLongArray mutableTrainSet = HugeLongArray.newArray(numVectors);
+        mutableTrainSet.setAll(idx -> idx);
+        var trainSet = ReadOnlyHugeLongArray.of(mutableTrainSet);
+
         var cachedBootstrappedDataset = new BitSet(numVectors);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             random,
             1.0,
-            numVectors,
+            trainSet,
             cachedBootstrappedDataset
         );
 
@@ -106,4 +127,40 @@ class DatasetBootstrapperTest {
         assertThat(bootstrappedVectors.get(2)).isEqualTo(2);
         assertThat(bootstrappedVectors.get(3)).isEqualTo(2);
     }
+
+    @Test
+    void shouldOnlySampleFromTrainsSet() {
+        long numberOfAllVectors = 40;
+        double trainFraction = 0.1;
+        HugeLongArray mutableTrainSet = HugeLongArray.newArray((long) (numberOfAllVectors / trainFraction));
+        mutableTrainSet.setAll(idx -> 5 * idx);
+        var trainSetArray = mutableTrainSet.toArray();
+        var trainSet = ReadOnlyHugeLongArray.of(mutableTrainSet);
+
+        var cachedBootstrappedDataset = new BitSet(trainSet.size());
+        var bootstrappedVectors = DatasetBootstrapper.bootstrap(
+            RANDOM,
+            1.0,
+            trainSet,
+            cachedBootstrappedDataset
+        );
+
+        var distinctBootstrappedVectors = new HashSet<>();
+        for (long i = 0; i < bootstrappedVectors.size(); i++) {
+            long sampledAllVectorsIdx = bootstrappedVectors.get(i);
+            assertThat(trainSetArray).contains(sampledAllVectorsIdx);
+
+            var trainSetIdx = IntStream.range(0, trainSetArray.length)
+                .filter(idx -> trainSetArray[idx] == sampledAllVectorsIdx)
+                .findFirst()
+                .orElseThrow();
+
+            assertThat(cachedBootstrappedDataset.get(trainSetIdx)).isTrue();
+            distinctBootstrappedVectors.add(trainSetIdx);
+        }
+
+        // exactly one bit set for each distinct sampled vector
+        assertThat(cachedBootstrappedDataset.cardinality()).isEqualTo(distinctBootstrappedVectors.size());
+    }
+
 }

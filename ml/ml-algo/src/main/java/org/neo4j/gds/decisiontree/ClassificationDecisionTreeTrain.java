@@ -20,6 +20,7 @@
 package org.neo4j.gds.decisiontree;
 
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.models.Features;
 
@@ -49,7 +50,7 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
     }
 
     @Override
-    protected Long toTerminal(final HugeLongArray group, final long groupSize) {
+    protected Long toTerminal(final ReadOnlyHugeLongArray group, final long groupSize) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
 

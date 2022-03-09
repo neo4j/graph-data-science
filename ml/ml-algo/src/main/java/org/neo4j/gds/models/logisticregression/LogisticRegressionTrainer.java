@@ -27,11 +27,11 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.gradientdescent.Training;
-import org.neo4j.gds.models.Features;
-import org.neo4j.gds.models.Trainer;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.models.Features;
+import org.neo4j.gds.models.Trainer;
 
 import java.util.function.Supplier;
 
@@ -40,7 +40,6 @@ import static org.neo4j.gds.models.logisticregression.LogisticRegressionData.wit
 
 public final class LogisticRegressionTrainer implements Trainer {
 
-    private final ReadOnlyHugeLongArray trainSet;
     private final LogisticRegressionTrainConfig trainConfig;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
@@ -82,7 +81,6 @@ public final class LogisticRegressionTrainer implements Trainer {
 
 
     public LogisticRegressionTrainer(
-        ReadOnlyHugeLongArray trainSet,
         int concurrency,
         LogisticRegressionTrainConfig trainConfig,
         LocalIdMap classIdMap,
@@ -90,7 +88,6 @@ public final class LogisticRegressionTrainer implements Trainer {
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
-        this.trainSet = trainSet;
         this.concurrency = concurrency;
         this.trainConfig = trainConfig;
         this.classIdMap = classIdMap;
@@ -100,7 +97,7 @@ public final class LogisticRegressionTrainer implements Trainer {
     }
 
     @Override
-    public LogisticRegressionClassifier train(Features features, HugeLongArray labels) {
+    public LogisticRegressionClassifier train(Features features, HugeLongArray labels, ReadOnlyHugeLongArray trainSet) {
         var data = reduceClassCount
             ? withReducedClassCount(features.get(0).length, trainConfig.useBiasFeature(), classIdMap)
             : standard(features.get(0).length, trainConfig.useBiasFeature(), classIdMap);

@@ -50,7 +50,6 @@ class LogisticRegressionTrainerTest {
     @Test
     void withBias() {
         var trainer = new LogisticRegressionTrainer(
-            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
             LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
@@ -65,7 +64,11 @@ class LogisticRegressionTrainerTest {
                 features[i][j] = ((double) i) / (j + 1);
             }
         }
-        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
+        var classifier = trainer.train(
+            new TestFeatures(features),
+            FOUR_CLASSES,
+            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4))
+        );
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
         assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(0) != 0D);
@@ -87,7 +90,6 @@ class LogisticRegressionTrainerTest {
         HugeLongArray labels = HugeLongArray.newArray(20_000);
         labels.setAll(i -> i % 4);
         var trainer = new LogisticRegressionTrainer(
-            ReadOnlyHugeLongArray.of(labels),
             4,
             LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
@@ -102,7 +104,7 @@ class LogisticRegressionTrainerTest {
                 features[i][j] = ((double) i) / (j + 1);
             }
         }
-        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
+        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES, ReadOnlyHugeLongArray.of(labels));
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
         assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(0) != 0D);
@@ -122,7 +124,6 @@ class LogisticRegressionTrainerTest {
     @Test
     void withoutBias() {
         var trainer = new LogisticRegressionTrainer(
-            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
             LogisticRegressionTrainConfig.of(Map.of("useBiasFeature", false)),
             fourClassIdMap(),
@@ -137,7 +138,11 @@ class LogisticRegressionTrainerTest {
                 features[i][j] = ((double) i) / (j + 1);
             }
         }
-        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
+        var classifier = trainer.train(
+            new TestFeatures(features),
+            FOUR_CLASSES,
+            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4))
+        );
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
         assertThat(classifier.data().bias()).isEmpty();
@@ -156,7 +161,6 @@ class LogisticRegressionTrainerTest {
     @Test
     void usingStandardWeights() {
         var trainer = new LogisticRegressionTrainer(
-            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
             LogisticRegressionTrainConfig.of(Map.of("useBiasFeature", false)),
             fourClassIdMap(),
@@ -172,7 +176,11 @@ class LogisticRegressionTrainerTest {
                 features[i][j] = random.nextDouble();
             }
         }
-        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
+        var classifier = trainer.train(
+            new TestFeatures(features),
+            FOUR_CLASSES,
+            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4))
+        );
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
         assertThat(classifier.data().bias()).isEmpty();
@@ -193,7 +201,6 @@ class LogisticRegressionTrainerTest {
     @Test
     void usingPenaltyShouldGiveSmallerAbsoluteValueWeights() {
         var trainer = new LogisticRegressionTrainer(
-            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
             LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "maxEpochs", 100)),
             fourClassIdMap(),
@@ -208,7 +215,11 @@ class LogisticRegressionTrainerTest {
                 features[i][j] = ((double) i + 1) / (j + 1);
             }
         }
-        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
+        var classifier = trainer.train(
+            new TestFeatures(features),
+            FOUR_CLASSES,
+            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4))
+        );
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
         assertThat(classifier.data().bias()).isNotEmpty();
@@ -226,7 +237,6 @@ class LogisticRegressionTrainerTest {
     @Test
     void shouldHandleLargeValuedFeatures() {
         var trainer = new LogisticRegressionTrainer(
-            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4)),
             1,
             LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
@@ -242,7 +252,11 @@ class LogisticRegressionTrainerTest {
                 features[i][j] = Math.pow(-1, i) * factor * ((double) i + 1) / (j + 1);
             }
         }
-        var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES);
+        var classifier = trainer.train(
+            new TestFeatures(features),
+            FOUR_CLASSES,
+            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4))
+        );
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
         assertThat(classifier.data().bias()).isNotEmpty();
@@ -260,12 +274,17 @@ class LogisticRegressionTrainerTest {
     @Test
     void shouldApplyPenaltyScaledWithTrainSetSize() {
         // different train set sizes
-        var trainer1 = trainer(ReadOnlyHugeLongArray.of(HugeLongArray.of(0)));
-        var trainer2 = trainer(ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 0, 0)));
-
         // same training
-        var classifier1 = trainer1.train(TestFeatures.singleConstant(1.0), HugeLongArray.of(0));
-        var classifier2 = trainer2.train(TestFeatures.singleConstant(1.0), HugeLongArray.of(0));
+        var classifier1 = trainer().train(
+            TestFeatures.singleConstant(1.0),
+            HugeLongArray.of(0),
+            ReadOnlyHugeLongArray.of(HugeLongArray.of(0))
+        );
+        var classifier2 = trainer().train(
+            TestFeatures.singleConstant(1.0),
+            HugeLongArray.of(0),
+            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 0, 0))
+        );
 
         // same weights; penalty is scaled accordingly
         assertThat(classifier1.data().weights().data().data()).containsExactly(classifier2
@@ -276,9 +295,8 @@ class LogisticRegressionTrainerTest {
     }
 
     @NotNull
-    private LogisticRegressionTrainer trainer(ReadOnlyHugeLongArray trainSetLarge) {
+    private LogisticRegressionTrainer trainer() {
         return new LogisticRegressionTrainer(
-            trainSetLarge,
             1,
             LogisticRegressionTrainConfig.of(Map.of("penalty", 1L)),
             TestLocalIdMap.identityMapOf(0),
