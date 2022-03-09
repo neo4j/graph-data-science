@@ -61,6 +61,10 @@ public final class RelationshipIds {
         this.tokenHolders = tokenHolders;
     }
 
+    public List<RelationshipIdContext> relationshipIdContexts() {
+        return relationshipIdContexts;
+    }
+
     public CypherRelationshipCursor relationshipForId(long relationshipId) {
         return resolveRelationshipId(relationshipId, (nodeId, offsetInAdjacency, relationshipIdContext) -> relationshipIdContext
             .graph()
@@ -108,7 +112,7 @@ public final class RelationshipIds {
         return new RelationshipWithIdCursorIterator(relationshipIdContexts, nodeId, relationshipSelectionPredicate);
     }
 
-    private <T> T resolveRelationshipId(long relationshipId, ResolvedRelationshipIdFunction<T> relationshipIdConsumer) {
+    public <T> T resolveRelationshipId(long relationshipId, ResolvedRelationshipIdFunction<T> relationshipIdConsumer) {
         long graphLocalRelationshipId = relationshipId;
         // Find the correct RelationshipIdContext given a relationship id.
         // Relationship ids are created consecutively for each topology stored
