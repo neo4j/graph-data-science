@@ -20,7 +20,6 @@
 package org.neo4j.gds.paths.traverse;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -214,7 +213,6 @@ class DfsStreamProcTest extends BaseProcTest {
         assertError(query, "Source node does not exist in the in-memory graph: `42`");
     }
 
-    @Disabled("Until we figure out a good way to check the target nodes")
     @Test
     void failOnInvalidEndNode() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
@@ -225,6 +223,6 @@ class DfsStreamProcTest extends BaseProcTest {
             .addParameter("targetNodes", Arrays.asList(0, 42, 1))
             .yields();
 
-        assertError(query, "endNode with id 42 was not loaded");
+        assertError(query, "Target nodes do not exist in the in-memory graph: ['42']");
     }
 }

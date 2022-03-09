@@ -25,11 +25,11 @@ import org.neo4j.gds.annotation.Configuration;
 import java.util.Collections;
 import java.util.List;
 
-public interface SourceNodesConfig {
+public interface TargetNodesConfig {
 
     @Value.Default
     @Configuration.ConvertWith("org.neo4j.gds.config.NodeIdsParser#parseNodeIds")
-    default List<Long> sourceNodes() {
+    default List<Long> targetNodes() {
         return Collections.emptyList();
     }
 

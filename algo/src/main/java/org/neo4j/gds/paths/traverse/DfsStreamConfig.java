@@ -25,22 +25,15 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
+import org.neo4j.gds.config.TargetNodesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-
-import java.util.Collections;
-import java.util.List;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface DfsStreamConfig extends AlgoBaseConfig, SourceNodeConfig, ConcurrencyConfig {
+public interface DfsStreamConfig extends AlgoBaseConfig, SourceNodeConfig, TargetNodesConfig, ConcurrencyConfig {
 
     long NO_MAX_DEPTH = -1L;
-
-    @Value.Default
-    default List<Long> targetNodes() {
-        return Collections.emptyList();
-    }
 
     @Value.Default
     default long maxDepth() {
