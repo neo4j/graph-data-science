@@ -42,13 +42,16 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
+    enum Metric {
+        JACCARD,
+        OVERLAP
+    }
 
     private final Graph graph;
     private final boolean sortVectors;
     private final NodeSimilarityBaseConfig config;
 
     private final ExecutorService executorService;
-
     private final BitSet nodeFilter;
 
     private HugeObjectArray<long[]> vectors;
