@@ -33,6 +33,7 @@ import org.neo4j.gds.models.FeaturesFactory;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ClassificationRandomForestTest {
     private static final long NUM_SAMPLES = 10;
@@ -73,10 +74,8 @@ class ClassificationRandomForestTest {
     void usingOneTree(int concurrency) {
         var randomForestTrain = new ClassificationRandomForestTrain<>(
             giniIndexLoss,
-            allFeatureVectors,
             concurrency,
             CLASS_MAPPING,
-            allLabels,
             RandomForestTrainConfigImpl
                 .builder()
                 .maxDepth(1)
@@ -88,14 +87,16 @@ class ClassificationRandomForestTest {
             false
         );
 
-        var trainResult = randomForestTrain.train();
-        var randomForestPredict = trainResult.predictor();
+        var randomForestPredictor = randomForestTrain.train(allFeatureVectors, allLabels);
 
-        var features = new double[]{8.0, 0.0};
+        var featureVector = new double[]{8.0, 0.0};
 
-        assertThat(trainResult.outOfBagError()).isEmpty();
-        assertThat(randomForestPredict.predictLabel(features)).isEqualTo(42);
-        assertThat(randomForestPredict.predictProbabilities(features)).containsExactly(0.0, 1.0);
+        assertThrows(
+            IllegalAccessError.class,
+            randomForestTrain::outOfBagError
+        );
+        assertThat(randomForestPredictor.predictLabel(featureVector)).isEqualTo(42);
+        assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.0, 1.0);
     }
 
     @ParameterizedTest
@@ -103,10 +104,8 @@ class ClassificationRandomForestTest {
     void usingTwentyTrees(int concurrency) {
         var randomForestTrain = new ClassificationRandomForestTrain<>(
             giniIndexLoss,
-            allFeatureVectors,
             concurrency,
             CLASS_MAPPING,
-            allLabels,
             RandomForestTrainConfigImpl
                 .builder()
                 .maxDepth(2)
@@ -119,11 +118,16 @@ class ClassificationRandomForestTest {
             false
         );
 
-        var randomForestPredict = randomForestTrain.train().predictor();
+        var randomForestPredictor = randomForestTrain.train(allFeatureVectors, allLabels);
 
-        var features = new double[]{8.0, 3.2};
-        assertThat(randomForestPredict.predictLabel(features)).isEqualTo(42);
-        assertThat(randomForestPredict.predictProbabilities(features)).containsExactly(0.45, 0.55);
+        var featureVector = new double[]{8.0, 3.2};
+
+        assertThrows(
+            IllegalAccessError.class,
+            randomForestTrain::outOfBagError
+        );
+        assertThat(randomForestPredictor.predictLabel(featureVector)).isEqualTo(42);
+        assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.45, 0.55);
     }
 
     @ParameterizedTest
@@ -131,10 +135,8 @@ class ClassificationRandomForestTest {
     void shouldMakeSaneErrorEstimation(int concurrency) {
         var randomForestTrain = new ClassificationRandomForestTrain<>(
             giniIndexLoss,
-            allFeatureVectors,
             concurrency,
             CLASS_MAPPING,
-            allLabels,
             RandomForestTrainConfigImpl
                 .builder()
                 .maxDepth(2)
@@ -146,8 +148,8 @@ class ClassificationRandomForestTest {
             true
         );
 
-        var trainResult = randomForestTrain.train();
+        randomForestTrain.train(allFeatureVectors, allLabels);
 
-        assertThat(trainResult.outOfBagError().orElseThrow()).isCloseTo(0.2, Offset.offset(0.000001D));
+        assertThat(randomForestTrain.outOfBagError()).isCloseTo(0.2, Offset.offset(0.000001D));
     }
 }

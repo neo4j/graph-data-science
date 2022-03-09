@@ -33,45 +33,41 @@ import org.neo4j.gds.decisiontree.DecisionTreeTrainConfigImpl;
 import org.neo4j.gds.decisiontree.FeatureBagger;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.models.Features;
+import org.neo4j.gds.models.Trainer;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
+public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> implements Trainer {
 
     private final LOSS lossFunction;
-    private final Features allFeatureVectors;
     private final LocalIdMap classIdMap;
     private final RandomForestTrainConfig config;
     private final int concurrency;
-    private final HugeLongArray allLabels;
     private final boolean computeOutOfBagError;
     private final SplittableRandom random;
+    private Optional<Double> outOfBagError = Optional.empty();
 
     public ClassificationRandomForestTrain(
         LOSS lossFunction,
-        Features allFeatureVectors,
         int concurrency,
         LocalIdMap classIdMap,
-        HugeLongArray allLabels,
         RandomForestTrainConfig config,
         boolean computeOutOfBagError
     ) {
         this.lossFunction = lossFunction;
-        this.allFeatureVectors = allFeatureVectors;
         this.classIdMap = classIdMap;
         this.config = config;
         this.concurrency = concurrency;
-        this.allLabels = allLabels;
         this.computeOutOfBagError = computeOutOfBagError;
         this.random = config.randomSeed()
             .map(SplittableRandom::new)
             .orElseGet(SplittableRandom::new);
     }
 
-    public ClassificationRandomForestTrainResult train() {
+    public ClassificationRandomForestPredict train(Features allFeatureVectors, HugeLongArray allLabels) {
         Optional<HugeAtomicLongArray> maybePredictions = computeOutOfBagError
             ? Optional.of(HugeAtomicLongArray.newArray(classIdMap.size() * allFeatureVectors.size()))
             : Optional.empty();
@@ -96,7 +92,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
         ).collect(Collectors.toList());
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
-        var outOfBagError = maybePredictions.map(predictions -> OutOfBagErrorMetric.evaluate(
+        outOfBagError = maybePredictions.map(predictions -> OutOfBagErrorMetric.evaluate(
             allFeatureVectors.size(),
             classIdMap,
             allLabels,
@@ -106,10 +102,11 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
 
         var decisionTrees = tasks.stream().map(DecisionTreeTrainer::trainedTree).collect(Collectors.toList());
 
-        return ImmutableClassificationRandomForestTrainResult.of(
-            new ClassificationRandomForestPredict(decisionTrees, classIdMap),
-            outOfBagError
-        );
+        return new ClassificationRandomForestPredict(decisionTrees, classIdMap);
+    }
+
+    double outOfBagError() {
+        return outOfBagError.orElseThrow(() -> new IllegalAccessError("Out of bag error has not been computed."));
     }
 
     static class DecisionTreeTrainer<LOSS extends DecisionTreeLoss> implements Runnable {
