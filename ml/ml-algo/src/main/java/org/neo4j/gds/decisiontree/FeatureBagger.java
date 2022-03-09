@@ -30,7 +30,7 @@ public class FeatureBagger {
     private final int[] featureBag;
 
     public FeatureBagger(Random random, int totalNumberOfFeatures, double featureBaggingRatio) {
-        assert featureBaggingRatio != 0: "Invalid featureBaggingRatio";
+        assert Double.compare(featureBaggingRatio, 0) != 0: "Invalid featureBaggingRatio";
 
         this.random = random;
         this.totalNumberOfFeatures = totalNumberOfFeatures;

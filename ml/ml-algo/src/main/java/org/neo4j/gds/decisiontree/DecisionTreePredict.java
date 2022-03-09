@@ -33,10 +33,10 @@ public class DecisionTreePredict<PREDICTION> {
         TreeNode<PREDICTION> node = root;
 
         while (node.leftChild != null) {
-            assert features.length > node.index;
+            assert features.length > node.featureIndex;
             assert node.rightChild != null;
 
-            if (features[node.index] < node.value) {
+            if (features[node.featureIndex] < node.thresholdValue) {
                 node = node.leftChild;
             } else {
                 node = node.rightChild;

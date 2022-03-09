@@ -25,10 +25,13 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Optional;
+import java.util.concurrent.atomic.LongAdder;
 
 public final class OutOfBagErrorMetric {
 
@@ -59,19 +62,39 @@ public final class OutOfBagErrorMetric {
         int concurrency,
         HugeAtomicLongArray predictions
     ) {
-        var numClasses = classMapping.size();
-        var totalMistakes = new AtomicLong(0);
-        var totalOutOfAnyBagVectors = new AtomicLong(0);
-        long batchSize = totalNumVectors / concurrency;
-        long remainder = Math.floorMod(totalNumVectors, concurrency);
+        var totalMistakes = new LongAdder();
+        var totalOutOfAnyBagVectors = new LongAdder();
 
-        var majorityVoteTasks = ParallelUtil.tasks(concurrency, index -> () -> {
+        var tasks = PartitionUtils.rangePartition(concurrency, totalNumVectors, partition ->
+                accumulationTask(
+                    partition,
+                    classMapping,
+                    predictions,
+                    expectedLabels,
+                    totalMistakes,
+                    totalOutOfAnyBagVectors
+                )
+            , Optional.empty());
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+
+        return totalMistakes.doubleValue() / totalOutOfAnyBagVectors.doubleValue();
+    }
+
+    private static Runnable accumulationTask(
+        Partition partition,
+        LocalIdMap classMapping,
+        HugeAtomicLongArray predictions,
+        HugeLongArray expectedLabels,
+        LongAdder totalMistakes,
+        LongAdder totalOutOfAnyBagVectors
+    ) {
+
+        return () -> {
+            int numClasses = classMapping.size();
             long numMistakes = 0;
             long numOutOfAnyBagVectors = 0;
-            final long startOffset = index * batchSize;
-            final long endOffset = index == concurrency - 1
-                ? startOffset + batchSize + remainder
-                : startOffset + batchSize;
+            final long startOffset = partition.startNode();
+            final long endOffset = startOffset + partition.nodeCount();
 
             for (long i = startOffset; i < endOffset; i++) {
                 final long innerOffset = i * numClasses;
@@ -96,11 +119,8 @@ public final class OutOfBagErrorMetric {
                 }
             }
 
-            totalMistakes.addAndGet(numMistakes);
-            totalOutOfAnyBagVectors.addAndGet(numOutOfAnyBagVectors);
-        });
-        ParallelUtil.runWithConcurrency(concurrency, majorityVoteTasks, Pools.DEFAULT);
-
-        return totalMistakes.doubleValue() / totalOutOfAnyBagVectors.doubleValue();
+            totalMistakes.add(numMistakes);
+            totalOutOfAnyBagVectors.add(numOutOfAnyBagVectors);
+        };
     }
 }

@@ -22,17 +22,17 @@ package org.neo4j.gds.decisiontree;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class TreeNode<PREDICTION> {
-    public PREDICTION prediction;
-    public int index = -1;
-    public double value;
-    public TreeNode<PREDICTION> leftChild = null;
-    public TreeNode<PREDICTION> rightChild = null;
+    PREDICTION prediction;
+    int featureIndex = -1;
+    double thresholdValue;
+    TreeNode<PREDICTION> leftChild = null;
+    TreeNode<PREDICTION> rightChild = null;
 
     TreeNode(int index, double value) {
         assert index >= 0;
 
-        this.index = index;
-        this.value = value;
+        this.featureIndex = index;
+        this.thresholdValue = value;
     }
 
     TreeNode(PREDICTION prediction) {
@@ -41,7 +41,7 @@ class TreeNode<PREDICTION> {
 
     @Override
     public String toString() {
-        return formatWithLocale("Node: prediction %s, featureIndex %s, splitValue %f", this.prediction, this.index, this.value);
+        return formatWithLocale("Node: prediction %s, featureIndex %s, splitValue %f", this.prediction, this.featureIndex, this.thresholdValue);
     }
 
     /**
