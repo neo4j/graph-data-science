@@ -22,13 +22,13 @@ package org.neo4j.gds.models.randomforest;
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DatasetBootstrapperTest {
 
-    private static final Random RANDOM = new Random();
+    private static final SplittableRandom RANDOM = new SplittableRandom();
 
     @Test
     void shouldSampleCorrectNumElements() {
@@ -91,7 +91,7 @@ class DatasetBootstrapperTest {
 
     @Test
     void shouldSampleWithReplacement() {
-        var random = new Random(1337);
+        var random = new SplittableRandom(1337);
         int numVectors = 4;
         var cachedBootstrappedDataset = new BitSet(numVectors);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
@@ -101,9 +101,9 @@ class DatasetBootstrapperTest {
             cachedBootstrappedDataset
         );
 
-        assertThat(bootstrappedVectors.get(0)).isEqualTo(0);
-        assertThat(bootstrappedVectors.get(1)).isEqualTo(0);
-        assertThat(bootstrappedVectors.get(2)).isEqualTo(3);
-        assertThat(bootstrappedVectors.get(3)).isEqualTo(3);
+        assertThat(bootstrappedVectors.get(0)).isEqualTo(3);
+        assertThat(bootstrappedVectors.get(1)).isEqualTo(1);
+        assertThat(bootstrappedVectors.get(2)).isEqualTo(2);
+        assertThat(bootstrappedVectors.get(3)).isEqualTo(2);
     }
 }

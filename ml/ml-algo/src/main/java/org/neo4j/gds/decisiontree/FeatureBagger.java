@@ -21,15 +21,15 @@ package org.neo4j.gds.decisiontree;
 
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Random;
+import java.util.SplittableRandom;
 
 public class FeatureBagger {
 
-    private final Random random;
+    private final SplittableRandom random;
     private final int totalNumberOfFeatures;
     private final int[] featureBag;
 
-    public FeatureBagger(Random random, int totalNumberOfFeatures, double featureBaggingRatio) {
+    public FeatureBagger(SplittableRandom random, int totalNumberOfFeatures, double featureBaggingRatio) {
         assert Double.compare(featureBaggingRatio, 0) != 0: "Invalid featureBaggingRatio";
 
         this.random = random;

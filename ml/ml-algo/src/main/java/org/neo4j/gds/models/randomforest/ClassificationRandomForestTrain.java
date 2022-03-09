@@ -28,12 +28,15 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.decisiontree.ClassificationDecisionTreeTrain;
 import org.neo4j.gds.decisiontree.DecisionTreeLoss;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.decisiontree.DecisionTreeTrainConfig;
 import org.neo4j.gds.decisiontree.DecisionTreeTrainConfigImpl;
 import org.neo4j.gds.decisiontree.FeatureBagger;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.Optional;
-import java.util.Random;
+import java.util.SplittableRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
 
@@ -44,6 +47,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
     private final int concurrency;
     private final HugeLongArray allLabels;
     private final boolean computeOutOfBagError;
+    private final SplittableRandom random;
 
     public ClassificationRandomForestTrain(
         LOSS lossFunction,
@@ -61,27 +65,96 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
         this.concurrency = concurrency;
         this.allLabels = allLabels;
         this.computeOutOfBagError = computeOutOfBagError;
+        this.random = config.randomSeed()
+            .map(SplittableRandom::new)
+            .orElseGet(SplittableRandom::new);
     }
 
     public ClassificationRandomForestTrainResult train() {
-        int numberOfDecisionTrees = config.numberOfDecisionTrees();
-        var decisionTrees = new DecisionTreePredict[numberOfDecisionTrees];
-
         Optional<HugeAtomicLongArray> maybePredictions = computeOutOfBagError
             ? Optional.of(HugeAtomicLongArray.newArray(classIdMap.size() * allFeatureVectors.size()))
             : Optional.empty();
 
-        var tasks = ParallelUtil.tasks(numberOfDecisionTrees, index -> () -> {
-            var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
-                .maxDepth(config.maxDepth())
-                .minSplitSize(config.minSplitSize())
-                .randomSeed(config.randomSeed().map(seed -> seed + index)).build();
+        var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
+            .maxDepth(config.maxDepth())
+            .minSplitSize(config.minSplitSize())
+            .build();
 
-            var random = config.randomSeed()
-                .map(seed -> new Random(seed + index))
-                .orElseGet(Random::new);
+        int numberOfDecisionTrees = config.numberOfDecisionTrees();
+        var tasks = IntStream.range(0, numberOfDecisionTrees).mapToObj(unused ->
+            new DecisionTreeTrainer<>(
+                maybePredictions,
+                decisionTreeTrainConfig,
+                config,
+                random.split(),
+                allFeatureVectors,
+                allLabels,
+                classIdMap,
+                lossFunction
+            )
+        ).collect(Collectors.toList());
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
-            var featureBagger = new FeatureBagger(random, allFeatureVectors.get(0).length, config.featureBaggingRatio());
+        var outOfBagError = maybePredictions.map(predictions -> OutOfBagErrorMetric.evaluate(
+            allFeatureVectors.size(),
+            classIdMap,
+            allLabels,
+            concurrency,
+            predictions
+        ));
+
+        var decisionTrees = tasks.stream().map(DecisionTreeTrainer::trainedTree).collect(Collectors.toList());
+
+        return ImmutableClassificationRandomForestTrainResult.of(
+            new ClassificationRandomForestPredict(decisionTrees, classIdMap),
+            outOfBagError
+        );
+    }
+
+
+    static class DecisionTreeTrainer<LOSS extends DecisionTreeLoss> implements Runnable {
+
+        private DecisionTreePredict<Long> trainedTree;
+        private final Optional<HugeAtomicLongArray> maybePredictions;
+        private final DecisionTreeTrainConfig decisionTreeTrainConfig;
+        private final RandomForestTrainConfig randomForestTrainConfig;
+        private final SplittableRandom random;
+        private final HugeObjectArray<double[]> allFeatureVectors;
+        private final HugeLongArray allLabels;
+        private final LocalIdMap classIdMap;
+        private final LOSS lossFunction;
+
+        DecisionTreeTrainer(
+            Optional<HugeAtomicLongArray> maybePredictions,
+            DecisionTreeTrainConfig decisionTreeTrainConfig,
+            RandomForestTrainConfig randomForestTrainConfig,
+            SplittableRandom random,
+            HugeObjectArray<double[]> allFeatureVectors,
+            HugeLongArray allLabels,
+            LocalIdMap classIdMap,
+            LOSS lossFunction
+        ) {
+            this.maybePredictions = maybePredictions;
+            this.decisionTreeTrainConfig = decisionTreeTrainConfig;
+            this.randomForestTrainConfig = randomForestTrainConfig;
+            this.random = random;
+            this.allFeatureVectors = allFeatureVectors;
+            this.allLabels = allLabels;
+            this.classIdMap = classIdMap;
+            this.lossFunction = lossFunction;
+        }
+
+        public DecisionTreePredict<Long> trainedTree() {
+            return trainedTree;
+        }
+
+        @Override
+        public void run() {
+            var featureBagger = new FeatureBagger(
+                random.split(),
+                allFeatureVectors.get(0).length,
+                randomForestTrainConfig.featureBaggingRatio()
+            );
 
             var decisionTree = new ClassificationDecisionTreeTrain<>(
                 lossFunction,
@@ -95,7 +168,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
             BitSet bootstrappedDataset = new BitSet(allFeatureVectors.size());
             HugeLongArray sampledFeatureVectors;
 
-            if (Double.compare(config.numberOfSamplesRatio(), 0.0d) == 0) {
+            if (Double.compare(randomForestTrainConfig.numberOfSamplesRatio(), 0.0d) == 0) {
                 // 0 => no sampling but take every vector
                 var allVectors = HugeLongArray.newArray(allFeatureVectors.size());
                 allVectors.setAll(i -> i);
@@ -104,14 +177,13 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
             } else {
                 sampledFeatureVectors = DatasetBootstrapper.bootstrap(
                     random,
-                    config.numberOfSamplesRatio(),
+                    randomForestTrainConfig.numberOfSamplesRatio(),
                     allFeatureVectors.size(),
                     bootstrappedDataset
                 );
             }
 
-            DecisionTreePredict<Long> trainedTree = decisionTree.train(sampledFeatureVectors);
-            decisionTrees[index] = trainedTree;
+            trainedTree = decisionTree.train(sampledFeatureVectors);
 
             maybePredictions.ifPresent(predictionsCache -> OutOfBagErrorMetric.addPredictionsForTree(
                 trainedTree,
@@ -120,21 +192,6 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
                 allFeatureVectors,
                 predictionsCache
             ));
-        });
-
-        ParallelUtil.runWithConcurrency(this.concurrency, tasks, Pools.DEFAULT);
-
-        var outOfBagError = maybePredictions.map(predictions -> OutOfBagErrorMetric.evaluate(
-            allFeatureVectors.size(),
-            classIdMap,
-            allLabels,
-            concurrency,
-            predictions
-        ));
-
-        return ImmutableClassificationRandomForestTrainResult.of(
-            new ClassificationRandomForestPredict(decisionTrees, classIdMap),
-            outOfBagError
-        );
+        }
     }
 }

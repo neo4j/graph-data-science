@@ -29,7 +29,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,7 +97,7 @@ class ClassificationDecisionTreeTest {
                 .maxDepth(maxDepth)
                 .minSplitSize(minSize)
                 .build(),
-            new FeatureBagger(new Random(), features.length, 1)
+            new FeatureBagger(new SplittableRandom(), features.length, 1)
         );
 
         HugeLongArray activeFeatureVectors = HugeLongArray.newArray(allFeatureVectors.size());
@@ -110,9 +110,10 @@ class ClassificationDecisionTreeTest {
 
     @Test
     void indexSamplingShouldWork() {
-        var decisionTreeTrainConfigBuilder = DecisionTreeTrainConfigImpl.builder()
+        var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
             .maxDepth(1)
-            .minSplitSize(1);
+            .minSplitSize(1)
+            .build();
 
         HugeLongArray activeFeatureVectors = HugeLongArray.newArray(allFeatureVectors.size());
         activeFeatureVectors.setAll(idx -> idx);
@@ -122,10 +123,8 @@ class ClassificationDecisionTreeTest {
             allFeatureVectors,
             allLabels,
             CLASS_MAPPING,
-            decisionTreeTrainConfigBuilder
-                .randomSeed(-6938002729576536314L)
-                .build(),
-            new FeatureBagger(new Random(-6938002729576536314L), allFeatureVectors.get(0).length, 0.5D)
+            decisionTreeTrainConfig,
+            new FeatureBagger(new SplittableRandom(-6938002729576536314L), allFeatureVectors.get(0).length, 0.5D)
         );
 
         var features = new double[]{8.0, 0.0};
@@ -138,10 +137,8 @@ class ClassificationDecisionTreeTest {
             allFeatureVectors,
             allLabels,
             CLASS_MAPPING,
-            decisionTreeTrainConfigBuilder
-                .randomSeed(42L)
-                .build(),
-            new FeatureBagger(new Random(42L), features.length, 0.5D) // Only one feature is used.
+            decisionTreeTrainConfig,
+            new FeatureBagger(new SplittableRandom(1337L), features.length, 0.5D) // Only one feature is used.
         );
 
         decisionTreePredict = decisionTree.train(activeFeatureVectors);
@@ -152,9 +149,10 @@ class ClassificationDecisionTreeTest {
     void considersSampledVectors() {
         var features = new double[]{8.0, 0.0};
 
-        var decisionTreeTrainConfigBuilder = DecisionTreeTrainConfigImpl.builder()
+        var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
             .maxDepth(1)
-            .minSplitSize(1);
+            .minSplitSize(1)
+            .build();
 
         var sampledVectors = HugeLongArray.newArray(1);
         sampledVectors.set(0, 1);
@@ -164,10 +162,8 @@ class ClassificationDecisionTreeTest {
             allFeatureVectors,
             allLabels,
             CLASS_MAPPING,
-            decisionTreeTrainConfigBuilder
-                .randomSeed(5677377167946646799L)
-                .build(),
-            new FeatureBagger(new Random(5677377167946646799L), features.length, 1)
+            decisionTreeTrainConfig,
+            new FeatureBagger(new SplittableRandom(5677377167946646799L), features.length, 1)
         );
 
         var decisionTreePredict = decisionTree.train(sampledVectors);
@@ -181,8 +177,8 @@ class ClassificationDecisionTreeTest {
             allFeatureVectors,
             allLabels,
             CLASS_MAPPING,
-            decisionTreeTrainConfigBuilder.randomSeed(321328L).build(),
-            new FeatureBagger(new Random(321328L), features.length, 1)
+            decisionTreeTrainConfig,
+            new FeatureBagger(new SplittableRandom(321328L), features.length, 1)
         );
 
         decisionTreePredict = decisionTree.train(otherSampledVectors);

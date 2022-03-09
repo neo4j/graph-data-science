@@ -22,14 +22,14 @@ package org.neo4j.gds.models.randomforest;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 
 final class DatasetBootstrapper {
 
     private DatasetBootstrapper() {}
 
     static HugeLongArray bootstrap(
-        final Random random,
+        final SplittableRandom random,
         double numFeatureVectorsRatio,
         long totalNumVectors,
         final BitSet cachedBootstrappedDataset
@@ -40,25 +40,11 @@ final class DatasetBootstrapper {
         var bootstrappedVectors = HugeLongArray.newArray(numVectors);
 
         for (long i = 0; i < numVectors; i++) {
-            long sampledVectorIdx = randomNonNegativeLong(random, 0, totalNumVectors);
+            long sampledVectorIdx = random.nextLong(0, totalNumVectors);
             bootstrappedVectors.set(i, sampledVectorIdx);
             cachedBootstrappedDataset.set(sampledVectorIdx);
         }
 
         return bootstrappedVectors;
-    }
-
-    // Handle that `Math.abs(Long.MIN_VALUE) == Long.MIN_VALUE`.
-    // `min` is inclusive, and `max` is exclusive.
-    private static long randomNonNegativeLong(Random random, long min, long max) {
-        assert min >= 0;
-        assert max > min;
-
-        long randomNum;
-        do {
-            randomNum = random.nextLong();
-        } while (randomNum == Long.MIN_VALUE);
-
-        return (Math.abs(randomNum) % (max - min)) + min;
     }
 }

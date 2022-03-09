@@ -22,14 +22,14 @@ package org.neo4j.gds.decisiontree;
 import org.junit.jupiter.api.Test;
 
 import java.util.BitSet;
-import java.util.Random;
+import java.util.SplittableRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class FeatureBaggerTest {
 
     private static final int TOTAL_INDICES = 20;
-    private static final FeatureBagger featureBagger = new FeatureBagger(new Random(), TOTAL_INDICES, 0.5);
+    private static final FeatureBagger featureBagger = new FeatureBagger(new SplittableRandom(), TOTAL_INDICES, 0.5);
 
     @Test
     void shouldSampleValidInterval() {

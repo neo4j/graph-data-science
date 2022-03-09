@@ -21,7 +21,6 @@ package org.neo4j.gds.decisiontree;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.RandomSeedConfig;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -29,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public interface DecisionTreeTrainConfig extends RandomSeedConfig {
+public interface DecisionTreeTrainConfig {
 
     @Configuration.IntegerRange(min = 1)
     int maxDepth();
