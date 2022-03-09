@@ -145,7 +145,7 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
     @Value.Check
     void checkForAggregationMixing() {
         long noneStrategyCount = stream()
-            .filter(d -> d.aggregation() == Aggregation.NONE)
+            .filter(d -> d.aggregation() == Aggregation.NONE || d.aggregation() == Aggregation.DEFAULT)
             .count();
 
         if (noneStrategyCount > 0 && noneStrategyCount < numberOfMappings()) {
