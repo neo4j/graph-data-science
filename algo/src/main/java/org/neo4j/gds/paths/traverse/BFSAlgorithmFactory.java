@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.traverse;
+package org.neo4j.gds.paths.traverse;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
@@ -29,20 +29,10 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.paths.traverse.Aggregator;
-import org.neo4j.gds.paths.traverse.BFS;
-import org.neo4j.gds.paths.traverse.BfsStreamConfig;
-import org.neo4j.gds.paths.traverse.ExitPredicate;
-import org.neo4j.gds.paths.traverse.MaxDepthExitPredicate;
-import org.neo4j.gds.paths.traverse.OneHopAggregator;
-import org.neo4j.gds.paths.traverse.TargetExitPredicate;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.InputNodeValidator.validateEndNode;
-import static org.neo4j.gds.utils.InputNodeValidator.validateStartNode;
 
 class BFSAlgorithmFactory extends GraphAlgorithmFactory<BFS, BfsStreamConfig> {
 
@@ -50,8 +40,8 @@ class BFSAlgorithmFactory extends GraphAlgorithmFactory<BFS, BfsStreamConfig> {
     public BFS build(
         Graph graph, BfsStreamConfig configuration, ProgressTracker progressTracker
     ) {
-        validateStartNode(configuration.sourceNode(), graph);
-        configuration.targetNodes().forEach(neoId -> validateEndNode(neoId, graph));
+        // TODO: Fix this, the check for the sourceNode is based on the config, we should do the same for targetNodes
+//        configuration.targetNodes().forEach(neoId -> validateEndNode(neoId, graph));
 
         ExitPredicate exitFunction;
         Aggregator aggregatorFunction;

@@ -17,14 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.traverse;
+package org.neo4j.gds.paths.traverse;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.paths.traverse.DFS;
-import org.neo4j.gds.paths.traverse.DfsStreamConfig;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -42,21 +40,20 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class DfsStreamProc extends AlgoBaseProc<DFS, long[], DfsStreamConfig, DfsStreamProc.DfsStreamResult> {
+public class BfsStreamProc extends AlgoBaseProc<BFS, long[], BfsStreamConfig, BfsStreamProc.BfsStreamResult> {
     static final RelationshipType NEXT = RelationshipType.withName("NEXT");
 
     static final String DESCRIPTION =
-        "Depth-first search (DFS) is an algorithm for traversing or searching tree or graph data structures. " +
-        "The algorithm starts at the root node (selecting some arbitrary node as the root node in the case of a graph) " +
-        "and explores as far as possible along each branch before backtracking.";
+        "BFS is a traversal algorithm, which explores all of the neighbor nodes at " +
+        "the present depth prior to moving on to the nodes at the next depth level.";
 
-    @Procedure(name = "gds.dfs.stream", mode = READ)
+    @Procedure(name = "gds.bfs.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<DfsStreamResult> stream(
+    public Stream<BfsStreamResult> bfs(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var streamSpec = new DfsStreamSpec();
+        var streamSpec = new BfsStreamSpec();
 
         return new ProcedureExecutor<>(
             streamSpec,
@@ -64,41 +61,40 @@ public class DfsStreamProc extends AlgoBaseProc<DFS, long[], DfsStreamConfig, Df
         ).compute(graphName, configuration, true, true);
     }
 
-    @Procedure(name = "gds.dfs.stream.estimate", mode = READ)
+    @Procedure(name = "gds.bfs.stream.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var streamSpec = new DfsStreamSpec();
+        var streamSpec = new BfsStreamSpec();
 
         return new MemoryEstimationExecutor<>(
             streamSpec,
             executionContext()
-        ).computeEstimate(graphName, configuration);
+        ).computeEstimate(graphName, configuration);    }
+
+    @Override
+    public GraphAlgorithmFactory<BFS, BfsStreamConfig> algorithmFactory() {
+        return new BfsStreamSpec().algorithmFactory();
     }
 
     @Override
-    public GraphAlgorithmFactory<DFS, DfsStreamConfig> algorithmFactory() {
-        return new DfsStreamSpec().algorithmFactory();
+    protected BfsStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return new BfsStreamSpec().newConfigFunction().apply(username, config);
     }
 
     @Override
-    protected DfsStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return new DfsStreamSpec().newConfigFunction().apply(username, config);
+    public ComputationResultConsumer<BFS, long[], BfsStreamConfig, Stream<BfsStreamResult>> computationResultConsumer() {
+        return new BfsStreamSpec().computationResultConsumer();
     }
 
-    @Override
-    public ComputationResultConsumer<DFS, long[], DfsStreamConfig, Stream<DfsStreamResult>> computationResultConsumer() {
-        return new DfsStreamSpec().computationResultConsumer();
-    }
-
-    public static class DfsStreamResult {
+    public static class BfsStreamResult {
         public Long sourceNode;
         public List<Long> nodeIds;
         public Path path;
 
-        DfsStreamResult(long sourceNode, long[] nodes, Path path) {
+        public BfsStreamResult(long sourceNode, long[] nodes, Path path) {
             this.sourceNode = sourceNode;
             this.nodeIds = Arrays.stream(nodes)
                 .boxed()

@@ -20,7 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.traverse.BfsStreamProc;
+import org.neo4j.gds.paths.traverse.BfsStreamProc;
 
 import java.util.List;
 
