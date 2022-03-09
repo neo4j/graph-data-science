@@ -79,6 +79,12 @@ public class LogisticRegressionClassifier implements Classifier {
         return ctx.forward(predictionsVariable(batchFeatureMatrix(batch, features))).data();
     }
 
+    @Override
+    public Matrix predictProbabilities(Batch batch, Features features) {
+        ComputationContext ctx = new ComputationContext();
+        return ctx.forward(predictionsVariable(batchFeatureMatrix(batch, features)));
+    }
+
     Variable<Matrix> predictionsVariable(Constant<Matrix> batchFeatures) {
         var weights = data.weights();
         var weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.of(

@@ -22,10 +22,11 @@ package org.neo4j.gds.ml.nodemodels;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.models.Features;
-import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
+import org.neo4j.gds.ml.core.batch.MappedBatch;
+import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.models.Features;
 
 import java.util.function.Consumer;
 
@@ -63,18 +64,18 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
     @Override
     public void accept(Batch batch) {
         var numberOfClasses = classifier.numberOfClasses();
+        var probabilityMatrix = classifier.predictProbabilities(new MappedBatch(batch, nodeIds), features);
+        var currentRow = 0;
         for (long nodeIndex : batch.nodeIds()) {
-            var nodeId = nodeIds.apply(nodeIndex);
-            var predictedProbabilitiesForNode = classifier.predictProbabilities(nodeId, features);
             if (predictedProbabilities != null) {
-                predictedProbabilities.set(nodeIndex, predictedProbabilitiesForNode);
+                predictedProbabilities.set(nodeIndex, probabilityMatrix.getRow(currentRow));
             }
             var bestClassId = -1;
             var maxProbability = -1d;
 
             // TODO: replace with a generic DoubleMatrixOperations.maxWithIndex (lookup correct name)
             for (int classId = 0; classId < numberOfClasses; classId++) {
-                var probability = predictedProbabilitiesForNode[classId];
+                var probability = probabilityMatrix.dataAt(currentRow, classId);
                 if (probability > maxProbability) {
                     maxProbability = probability;
                     bestClassId = classId;
@@ -83,6 +84,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
 
             long bestClass = classifier.classIdMap().toOriginal(bestClassId);
             predictedClasses.set(nodeIndex, bestClass);
+            currentRow++;
         }
         progressTracker.logProgress(batch.size());
     }

@@ -25,10 +25,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestFeatures;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.models.FeaturesFactory;
 
+import java.util.Arrays;
+import java.util.Random;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -80,5 +85,38 @@ class LogisticRegressionClassifierTest {
         )[1];
 
         assertThat(result).isCloseTo(expectedResult, Offset.offset(1e-8));
+    }
+
+    @Test
+    void batchingGivesEquivalentResults() {
+
+        var classIdMap = new LocalIdMap();
+        classIdMap.toMapped(0L);
+        classIdMap.toMapped(1L);
+        var featureCount = 4;
+        var classCount = classIdMap.size();
+        var modelData = ImmutableLogisticRegressionData.of(
+            new Weights<>(new Matrix(new double[]{
+                -0.5, -0.6, -0.7, -0.8,
+                0.4, -1.2, -0.4, 0.0
+            }, 2, featureCount)),
+            Weights.ofVector(-2.1, 0.2),
+            classIdMap
+        );
+
+        var classifier = new LogisticRegressionClassifier(modelData);
+        var random = new Random();
+        var featureData = HugeObjectArray.newArray(double[].class, 10);
+        for (int i = 0; i < 10; i++) {
+            featureData.set(i, random.doubles(featureCount).toArray());
+        }
+        var features = FeaturesFactory.wrap(featureData);
+
+        var probabilityMatrix = classifier.predictProbabilities(new LazyBatch(0, 10, 10), features);
+        for (int i = 0; i < 10; i++) {
+            var singlePrediction = classifier.predictProbabilities(i, features);
+            var batchPrediction = Arrays.copyOfRange(probabilityMatrix.data(), classCount * i, classCount * (i + 1));
+            assertThat(singlePrediction).containsExactly(batchPrediction);
+        }
     }
 }

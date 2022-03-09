@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.models;
 
+import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 public interface Classifier {
     default int numberOfClasses() {
@@ -29,6 +31,16 @@ public interface Classifier {
     LocalIdMap classIdMap();
 
     double[] predictProbabilities(long id, Features features);
+    default Matrix predictProbabilities(Batch batch, Features features) {
+        double[] predictedProbabilities = new double[batch.size() * numberOfClasses()];
+        var offset = 0;
+        for (long id : batch.nodeIds()) {
+            var predictionsForNode = predictProbabilities(id, features);
+            System.arraycopy(predictionsForNode, 0, predictedProbabilities, offset * numberOfClasses(), numberOfClasses());
+            offset++;
+        }
+        return new Matrix(predictedProbabilities, batch.size(), numberOfClasses());
+    }
 
     ClassifierData data();
 
