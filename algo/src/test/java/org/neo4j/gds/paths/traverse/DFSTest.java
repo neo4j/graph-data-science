@@ -31,7 +31,6 @@ import org.neo4j.gds.paths.traverse.ExitPredicate.Result;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.paths.traverse.Traverse.DEFAULT_AGGREGATOR;
 
 /**
  *
@@ -98,7 +97,7 @@ class DFSTest {
             naturalGraph,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
-            DEFAULT_AGGREGATOR,
+            Aggregator.NO_AGGREGATION,
             ProgressTracker.NULL_TRACKER
         ).compute();
 
@@ -118,7 +117,7 @@ class DFSTest {
             naturalGraph,
             source,
             (s, t, w) -> Result.FOLLOW,
-            DEFAULT_AGGREGATOR,
+            Aggregator.NO_AGGREGATION,
             ProgressTracker.NULL_TRACKER
         ).compute();
 
@@ -139,7 +138,7 @@ class DFSTest {
             reverseGraph,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
-            DEFAULT_AGGREGATOR,
+            Aggregator.NO_AGGREGATION,
             ProgressTracker.NULL_TRACKER
         ).compute();
 
@@ -153,7 +152,7 @@ class DFSTest {
             loopGraph,
             0,
             (s, t, w) -> Result.FOLLOW,
-            Traverse.DEFAULT_AGGREGATOR,
+            Aggregator.NO_AGGREGATION,
             ProgressTracker.NULL_TRACKER
         ).compute();
     }

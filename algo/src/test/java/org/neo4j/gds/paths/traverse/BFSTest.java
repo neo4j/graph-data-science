@@ -39,7 +39,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
-import static org.neo4j.gds.paths.traverse.Traverse.DEFAULT_AGGREGATOR;
 
 /**
  * Graph:
@@ -128,7 +127,7 @@ class BFSTest {
             reverseGraph,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
-            DEFAULT_AGGREGATOR,
+            Aggregator.NO_AGGREGATION,
             concurrency,
             ProgressTracker.NULL_TRACKER
         ).compute();
@@ -165,7 +164,7 @@ class BFSTest {
     void testBfsOnLoopGraph(int concurrency) {
         BFS.create(loopGraph, 0,
             (s, t, w) -> Result.FOLLOW,
-            Traverse.DEFAULT_AGGREGATOR,
+            Aggregator.NO_AGGREGATION,
             concurrency,
             ProgressTracker.NULL_TRACKER
         ).compute();
@@ -181,7 +180,7 @@ class BFSTest {
             naturalGraph,
             0,
             (s, t, w) -> Result.FOLLOW,
-            Traverse.DEFAULT_AGGREGATOR,
+            Aggregator.NO_AGGREGATION,
             concurrency,
             progressTracker
         ).compute();
