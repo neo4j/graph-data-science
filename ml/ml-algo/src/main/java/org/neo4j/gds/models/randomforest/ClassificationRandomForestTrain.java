@@ -20,6 +20,7 @@
 package org.neo4j.gds.models.randomforest;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
@@ -165,33 +166,49 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
                 featureBagger
             );
 
-            BitSet bootstrappedDataset = new BitSet(allFeatureVectors.size());
-            HugeLongArray sampledFeatureVectors;
+            var bootstrappedDataset = bootstrappedDataset();
+
+            trainedTree = decisionTree.train(bootstrappedDataset.indices());
+
+            maybePredictions.ifPresent(predictionsCache -> OutOfBagErrorMetric.addPredictionsForTree(
+                trainedTree,
+                classIdMap,
+                bootstrappedDataset.bitSet(),
+                allFeatureVectors,
+                predictionsCache
+            ));
+        }
+
+        private BootstrappedDataset bootstrappedDataset() {
+            BitSet bitSet = new BitSet(allFeatureVectors.size());
+            HugeLongArray indices;
 
             if (Double.compare(randomForestTrainConfig.numberOfSamplesRatio(), 0.0d) == 0) {
                 // 0 => no sampling but take every vector
                 var allVectors = HugeLongArray.newArray(allFeatureVectors.size());
                 allVectors.setAll(i -> i);
-                bootstrappedDataset.set(0, bootstrappedDataset.size());
-                sampledFeatureVectors = allVectors;
+                bitSet.set(0, allFeatureVectors.size());
+                indices = allVectors;
             } else {
-                sampledFeatureVectors = DatasetBootstrapper.bootstrap(
+                indices = DatasetBootstrapper.bootstrap(
                     random,
                     randomForestTrainConfig.numberOfSamplesRatio(),
                     allFeatureVectors.size(),
-                    bootstrappedDataset
+                    bitSet
                 );
             }
 
-            trainedTree = decisionTree.train(sampledFeatureVectors);
+            return ImmutableBootstrappedDataset.of(
+                bitSet,
+                indices
+            );
+        }
 
-            maybePredictions.ifPresent(predictionsCache -> OutOfBagErrorMetric.addPredictionsForTree(
-                trainedTree,
-                classIdMap,
-                bootstrappedDataset,
-                allFeatureVectors,
-                predictionsCache
-            ));
+        @ValueClass
+        interface BootstrappedDataset {
+            BitSet bitSet();
+
+            HugeLongArray indices();
         }
     }
 }
