@@ -45,14 +45,14 @@ public class FeatureBagger {
     }
 
     int[] sample() {
-        var tmpAvailableIndices = new Integer[totalNumberOfFeatures];
-        Arrays.setAll(tmpAvailableIndices, i -> i);
-        final var availableIndices = new LinkedList<>(Arrays.asList(tmpAvailableIndices));
-
         if (totalNumberOfFeatures == featureBag.length) {
             // everything is sampled
             return featureBag;
         }
+
+        var tmpAvailableIndices = new Integer[totalNumberOfFeatures];
+        Arrays.setAll(tmpAvailableIndices, i -> i);
+        final var availableIndices = new LinkedList<>(Arrays.asList(tmpAvailableIndices));
 
         for (int i = 0; i < featureBag.length; i++) {
             int j = random.nextInt(availableIndices.size());
