@@ -20,8 +20,8 @@
 package org.neo4j.gds.decisiontree;
 
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.models.Features;
 
 public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> extends DecisionTreeTrain<LOSS, Long> {
 
@@ -30,22 +30,22 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
 
     public ClassificationDecisionTreeTrain(
         LOSS lossFunction,
-        HugeObjectArray<double[]> allFeatures,
-        HugeLongArray allLabels,
+        Features features,
+        HugeLongArray labels,
         LocalIdMap classIdMap,
         DecisionTreeTrainConfig config,
         FeatureBagger featureBagger
         ) {
         super(
-            allFeatures,
+            features,
             config,
             lossFunction,
             featureBagger
         );
         this.classIdMap = classIdMap;
 
-        assert allLabels.size() == allFeatures.size();
-        this.allLabels = allLabels;
+        assert labels.size() == features.size();
+        this.allLabels = labels;
     }
 
     @Override

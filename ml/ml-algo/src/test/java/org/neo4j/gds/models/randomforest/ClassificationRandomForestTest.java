@@ -27,6 +27,8 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.decisiontree.GiniIndex;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.models.Features;
+import org.neo4j.gds.models.FeaturesFactory;
 
 import java.util.Optional;
 
@@ -37,7 +39,7 @@ class ClassificationRandomForestTest {
     private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
 
     private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
-    private final HugeObjectArray<double[]> allFeatureVectors = HugeObjectArray.newArray(double[].class, NUM_SAMPLES);
+    private Features allFeatureVectors;
 
     private GiniIndex giniIndexLoss;
 
@@ -45,19 +47,23 @@ class ClassificationRandomForestTest {
     void setup() {
         allLabels.setAll(idx -> idx >= 5 ? 42 : 1337);
 
+        HugeObjectArray<double[]> featureVectorArray = HugeObjectArray.newArray(double[].class, NUM_SAMPLES);
+
         // Class 1337 feature vectors.
-        allFeatureVectors.set(0, new double[]{2.771244718, 1.784783929});
-        allFeatureVectors.set(1, new double[]{1.728571309, 1.169761413});
-        allFeatureVectors.set(2, new double[]{3.678319846, 3.31281357});
-        allFeatureVectors.set(3, new double[]{6.961043357, 2.61995032});
-        allFeatureVectors.set(4, new double[]{6.999208922, 2.209014212});
+        featureVectorArray.set(0, new double[]{2.771244718, 1.784783929});
+        featureVectorArray.set(1, new double[]{1.728571309, 1.169761413});
+        featureVectorArray.set(2, new double[]{3.678319846, 3.31281357});
+        featureVectorArray.set(3, new double[]{6.961043357, 2.61995032});
+        featureVectorArray.set(4, new double[]{6.999208922, 2.209014212});
 
         // Class 42 feature vectors.
-        allFeatureVectors.set(5, new double[]{7.497545867, 3.162953546});
-        allFeatureVectors.set(6, new double[]{9.00220326, 3.339047188});
-        allFeatureVectors.set(7, new double[]{7.444542326, 0.476683375});
-        allFeatureVectors.set(8, new double[]{10.12493903, 3.234550982});
-        allFeatureVectors.set(9, new double[]{6.642287351, 3.319983761});
+        featureVectorArray.set(5, new double[]{7.497545867, 3.162953546});
+        featureVectorArray.set(6, new double[]{9.00220326, 3.339047188});
+        featureVectorArray.set(7, new double[]{7.444542326, 0.476683375});
+        featureVectorArray.set(8, new double[]{10.12493903, 3.234550982});
+        featureVectorArray.set(9, new double[]{6.642287351, 3.319983761});
+
+        allFeatureVectors = FeaturesFactory.wrap(featureVectorArray);
 
         giniIndexLoss = new GiniIndex(allLabels, CLASS_MAPPING);
     }

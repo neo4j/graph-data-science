@@ -25,7 +25,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.decisiontree.ClassificationDecisionTreeTrain;
 import org.neo4j.gds.decisiontree.DecisionTreeLoss;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
@@ -33,6 +32,7 @@ import org.neo4j.gds.decisiontree.DecisionTreeTrainConfig;
 import org.neo4j.gds.decisiontree.DecisionTreeTrainConfigImpl;
 import org.neo4j.gds.decisiontree.FeatureBagger;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.models.Features;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
@@ -42,7 +42,7 @@ import java.util.stream.IntStream;
 public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
 
     private final LOSS lossFunction;
-    private final HugeObjectArray<double[]> allFeatureVectors;
+    private final Features allFeatureVectors;
     private final LocalIdMap classIdMap;
     private final RandomForestTrainConfig config;
     private final int concurrency;
@@ -52,7 +52,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
 
     public ClassificationRandomForestTrain(
         LOSS lossFunction,
-        HugeObjectArray<double[]> allFeatureVectors,
+        Features allFeatureVectors,
         int concurrency,
         LocalIdMap classIdMap,
         HugeLongArray allLabels,
@@ -112,7 +112,6 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
         );
     }
 
-
     static class DecisionTreeTrainer<LOSS extends DecisionTreeLoss> implements Runnable {
 
         private DecisionTreePredict<Long> trainedTree;
@@ -120,7 +119,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
         private final DecisionTreeTrainConfig decisionTreeTrainConfig;
         private final RandomForestTrainConfig randomForestTrainConfig;
         private final SplittableRandom random;
-        private final HugeObjectArray<double[]> allFeatureVectors;
+        private final Features allFeatureVectors;
         private final HugeLongArray allLabels;
         private final LocalIdMap classIdMap;
         private final LOSS lossFunction;
@@ -130,7 +129,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
             DecisionTreeTrainConfig decisionTreeTrainConfig,
             RandomForestTrainConfig randomForestTrainConfig,
             SplittableRandom random,
-            HugeObjectArray<double[]> allFeatureVectors,
+            Features allFeatureVectors,
             HugeLongArray allLabels,
             LocalIdMap classIdMap,
             LOSS lossFunction

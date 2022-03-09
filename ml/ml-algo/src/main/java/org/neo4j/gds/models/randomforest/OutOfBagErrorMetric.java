@@ -24,11 +24,11 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.models.Features;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
@@ -41,7 +41,7 @@ public final class OutOfBagErrorMetric {
         DecisionTreePredict<Long> decisionTree,
         LocalIdMap classMapping,
         final BitSet sampledFeatureVectors,
-        final HugeObjectArray<double[]> allFeatureVectors,
+        final Features allFeatureVectors,
         HugeAtomicLongArray predictions
     ) {
         var totalNumVectors = allFeatureVectors.size();
@@ -73,8 +73,10 @@ public final class OutOfBagErrorMetric {
                     expectedLabels,
                     totalMistakes,
                     totalOutOfAnyBagVectors
-                )
-            , Optional.empty());
+                ),
+            Optional.empty()
+        );
+
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
         return totalMistakes.doubleValue() / totalOutOfAnyBagVectors.doubleValue();
