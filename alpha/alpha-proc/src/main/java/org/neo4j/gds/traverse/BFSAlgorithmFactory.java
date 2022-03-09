@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.traverse.Aggregator;
 import org.neo4j.gds.impl.traverse.BFS;
-import org.neo4j.gds.impl.traverse.BfsConfig;
+import org.neo4j.gds.impl.traverse.BfsStreamConfig;
 import org.neo4j.gds.impl.traverse.ExitPredicate;
 import org.neo4j.gds.impl.traverse.MaxDepthExitPredicate;
 import org.neo4j.gds.impl.traverse.OneHopAggregator;
@@ -44,11 +44,11 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.utils.InputNodeValidator.validateEndNode;
 import static org.neo4j.gds.utils.InputNodeValidator.validateStartNode;
 
-class BFSAlgorithmFactory extends GraphAlgorithmFactory<BFS, BfsConfig> {
+class BFSAlgorithmFactory extends GraphAlgorithmFactory<BFS, BfsStreamConfig> {
 
     @Override
     public BFS build(
-        Graph graph, BfsConfig configuration, ProgressTracker progressTracker
+        Graph graph, BfsStreamConfig configuration, ProgressTracker progressTracker
     ) {
         validateStartNode(configuration.sourceNode(), graph);
         configuration.targetNodes().forEach(neoId -> validateEndNode(neoId, graph));
@@ -90,7 +90,7 @@ class BFSAlgorithmFactory extends GraphAlgorithmFactory<BFS, BfsConfig> {
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(BfsConfig configuration) {
+    public MemoryEstimation memoryEstimation(BfsStreamConfig configuration) {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(BFS.class);
 
         builder.perNode("visited ", HugeAtomicBitSet::memoryEstimation) //global variables

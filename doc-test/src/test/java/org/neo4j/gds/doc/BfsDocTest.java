@@ -20,7 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.traverse.BfsProc;
+import org.neo4j.gds.traverse.BfsStreamProc;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class BfsDocTest extends DocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(BfsProc.class, GraphProjectProc.class);
+        return List.of(BfsStreamProc.class, GraphProjectProc.class);
     }
 
     @Override

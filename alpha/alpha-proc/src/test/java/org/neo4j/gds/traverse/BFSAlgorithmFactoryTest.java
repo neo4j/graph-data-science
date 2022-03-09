@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.config.SourceNodeConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.impl.traverse.BfsConfig;
+import org.neo4j.gds.impl.traverse.BfsStreamConfig;
 
 import java.util.Map;
 
@@ -39,7 +39,7 @@ class BFSAlgorithmFactoryTest {
 
         var userInput = CypherMapWrapper.create(Map.of(SourceNodeConfig.SOURCE_NODE_KEY, 0));
 
-        var memoryEstimation = algorithmFactory.memoryEstimation(BfsConfig.of(userInput));
+        var memoryEstimation = algorithmFactory.memoryEstimation(BfsStreamConfig.of(userInput));
         var dimensions = GraphDimensions.builder().nodeCount(nodeCount).relCountUpperBound(relationshipCount).build();
         var actual = memoryEstimation.estimate(dimensions, 1).memoryUsage();
 

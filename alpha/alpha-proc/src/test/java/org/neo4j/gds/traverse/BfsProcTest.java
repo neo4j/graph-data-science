@@ -66,7 +66,7 @@ class BfsProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(BfsProc.class, GraphProjectProc.class);
+        registerProcedures(BfsStreamProc.class, GraphProjectProc.class);
         runQuery(DB_CYPHER);
     }
 

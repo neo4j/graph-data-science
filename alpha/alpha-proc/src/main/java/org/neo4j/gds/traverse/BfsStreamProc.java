@@ -25,7 +25,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.traverse.BFS;
-import org.neo4j.gds.impl.traverse.BfsConfig;
+import org.neo4j.gds.impl.traverse.BfsStreamConfig;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphdb.Path;
@@ -41,11 +41,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.traverse.BfsProc.DESCRIPTION;
+import static org.neo4j.gds.traverse.BfsStreamProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.bfs.stream", description = DESCRIPTION, executionMode = STREAM)
-public class BfsProc extends AlgoBaseProc<BFS, long[], BfsConfig, BfsProc.BfsResult> {
+public class BfsStreamProc extends AlgoBaseProc<BFS, long[], BfsStreamConfig, BfsStreamProc.BfsStreamResult> {
     private static final RelationshipType NEXT = RelationshipType.withName("NEXT");
 
     static final String DESCRIPTION =
@@ -54,7 +54,7 @@ public class BfsProc extends AlgoBaseProc<BFS, long[], BfsConfig, BfsProc.BfsRes
 
     @Procedure(name = "gds.bfs.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<BfsResult> bfs(
+    public Stream<BfsStreamResult> bfs(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -72,17 +72,17 @@ public class BfsProc extends AlgoBaseProc<BFS, long[], BfsConfig, BfsProc.BfsRes
     }
 
     @Override
-    public GraphAlgorithmFactory<BFS, BfsConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<BFS, BfsStreamConfig> algorithmFactory() {
         return new BFSAlgorithmFactory();
     }
 
     @Override
-    protected BfsConfig newConfig(String username, CypherMapWrapper config) {
-        return BfsConfig.of(config);
+    protected BfsStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return BfsStreamConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<BFS, long[], BfsConfig, Stream<BfsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BFS, long[], BfsStreamConfig, Stream<BfsStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var graph = computationResult.graph();
             if (graph.isEmpty()) {
@@ -92,7 +92,7 @@ public class BfsProc extends AlgoBaseProc<BFS, long[], BfsConfig, BfsProc.BfsRes
             long[] nodes = computationResult.result();
             var nodeList = Arrays.stream(nodes).boxed().map(graph::toOriginalNodeId).collect(Collectors.toList());
             var startNode = computationResult.config().sourceNode();
-            return Stream.of(new BfsResult(
+            return Stream.of(new BfsStreamResult(
                 startNode,
                 nodes,
                 PathFactory.create(transaction.internalTransaction(), nodeList, NEXT)
@@ -100,12 +100,12 @@ public class BfsProc extends AlgoBaseProc<BFS, long[], BfsConfig, BfsProc.BfsRes
         };
     }
 
-    public static class BfsResult {
+    public static class BfsStreamResult {
         public Long sourceNode;
         public List<Long> nodeIds;
         public Path path;
 
-        public BfsResult(long sourceNode, long[] nodes, Path path) {
+        public BfsStreamResult(long sourceNode, long[] nodes, Path path) {
             this.sourceNode = sourceNode;
             this.nodeIds = Arrays.stream(nodes)
                 .boxed()

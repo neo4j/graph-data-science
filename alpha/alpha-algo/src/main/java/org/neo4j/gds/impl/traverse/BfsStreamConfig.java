@@ -33,7 +33,7 @@ import java.util.List;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface BfsConfig extends AlgoBaseConfig, SourceNodeConfig, ConcurrencyConfig {
+public interface BfsStreamConfig extends AlgoBaseConfig, SourceNodeConfig, ConcurrencyConfig {
 
     @Value.Default
     default List<Long> targetNodes() {
@@ -45,7 +45,7 @@ public interface BfsConfig extends AlgoBaseConfig, SourceNodeConfig, Concurrency
         return -1L;
     }
 
-    static BfsConfig of(CypherMapWrapper userInput) {
-        return new BfsConfigImpl(userInput);
+    static BfsStreamConfig of(CypherMapWrapper userInput) {
+        return new BfsStreamConfigImpl(userInput);
     }
 }
