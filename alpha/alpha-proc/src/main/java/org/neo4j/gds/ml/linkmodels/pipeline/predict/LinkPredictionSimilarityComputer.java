@@ -20,13 +20,17 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.models.FeaturesFactory;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
+import org.neo4j.gds.ml.core.batch.Batch;
+import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
+import org.neo4j.gds.models.FeaturesFactory;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 import org.neo4j.gds.similarity.knn.NeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
+
+import java.util.ArrayList;
 
 class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
@@ -47,6 +51,22 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
     public double similarity(long sourceId, long targetId) {
         var features = linkFeatureExtractor.extractFeatures(sourceId, targetId);
         return classifier.predictProbabilities(0L, FeaturesFactory.wrap(features))[positiveClassLocalId];
+    }
+
+    public double[] similarity(long sourceId, Batch targetIds) {
+        var features = new ArrayList<double[]>();
+        for (long targetId : targetIds.nodeIds()) {
+            features.add(linkFeatureExtractor.extractFeatures(sourceId, targetId));
+        }
+        var predictionsMatrix = classifier.predictProbabilities(
+            new LazyBatch(0, features.size(), features.size()),
+            FeaturesFactory.wrap(features)
+        );
+        var similarities = new double[targetIds.size()];
+        for (int i = 0; i < targetIds.size(); i++) {
+            similarities[i] = predictionsMatrix.dataAt(i, positiveClassLocalId);
+        }
+        return similarities;
     }
 
     static final class LinkFilter implements NeighborFilter {
