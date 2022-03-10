@@ -47,4 +47,8 @@ public interface AlgorithmSpec<
     default AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ALGO_FACTORY> withModelCatalog(ModelCatalog modelCatalog) {
         return this;
     }
+
+    default ProcedureExecutorSpec<ALGO, ALGO_RESULT, CONFIG> createExecutorSpec() {
+        return new ProcedureExecutorSpec<>();
+    }
 }

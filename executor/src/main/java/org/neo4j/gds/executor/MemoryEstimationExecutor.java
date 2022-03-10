@@ -59,6 +59,14 @@ public class MemoryEstimationExecutor<
         this.executionContext = executionContext;
     }
 
+    public MemoryEstimationExecutor(
+        AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec,
+        ExecutionContext executionContext
+    ) {
+        this(algoSpec, algoSpec.createExecutorSpec(), executionContext);
+    }
+
+
     public Stream<MemoryEstimateResult> computeEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration

@@ -54,6 +54,13 @@ public class ProcedureExecutor<
         this.executionContext = executionContext;
     }
 
+    public ProcedureExecutor(
+        AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ?> algoSpec,
+        ExecutionContext executionContext
+    ) {
+        this(algoSpec, algoSpec.createExecutorSpec(), executionContext);
+    }
+
     public RESULT compute(
         String graphName,
         Map<String, Object> configuration,
