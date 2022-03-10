@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CSRGraphAdapter;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.ImmutableRelationshipCursor;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
@@ -40,6 +41,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -54,21 +56,28 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     private final NodeMapping filteredIdMap;
     private long relationshipCount;
     private final HugeIntArray degreeCache;
+    private final CloseableThreadLocal<Graph> threadLocalGraph;
 
     public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap, AllocationTracker allocationTracker) {
-        super(originalGraph);
-        this.relationshipCount = -1;
-        this.filteredIdMap = filteredIdMap;
-        this.degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount(), allocationTracker);
-
-        degreeCache.fill(NO_DEGREE);
+        this(originalGraph, filteredIdMap, emptyDegreeCache(filteredIdMap, allocationTracker),-1);
     }
 
-    public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap, HugeIntArray degreeCache) {
+    private NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap, HugeIntArray degreeCache, long relationshipCount) {
         super(originalGraph);
 
         this.degreeCache = degreeCache;
         this.filteredIdMap = filteredIdMap;
+        this.relationshipCount = relationshipCount;
+        this.threadLocalGraph = CloseableThreadLocal.withInitial(this::concurrentCopy);
+    }
+
+    private static HugeIntArray emptyDegreeCache(
+        IdMapping filteredIdMap,
+        AllocationTracker allocationTracker
+    ) {
+        var degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount(), allocationTracker);
+        degreeCache.fill(NO_DEGREE);
+        return degreeCache;
     }
 
     public NodeMapping nodeMapping() {
@@ -104,7 +113,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
         var degree = new MutableInt();
 
-        forEachRelationship(nodeId, (s, t) -> {
+        threadLocalGraph.get().forEachRelationship(nodeId, (s, t) -> {
             degree.increment();
             return true;
         });
@@ -232,7 +241,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public CSRGraph concurrentCopy() {
-        return new NodeFilteredGraph(graph.concurrentCopy(), filteredIdMap, degreeCache);
+        return new NodeFilteredGraph(graph.concurrentCopy(), filteredIdMap, degreeCache, relationshipCount);
     }
 
     @Override
