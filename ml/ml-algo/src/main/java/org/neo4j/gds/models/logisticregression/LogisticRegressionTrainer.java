@@ -99,8 +99,8 @@ public final class LogisticRegressionTrainer implements Trainer {
     @Override
     public LogisticRegressionClassifier train(Features features, HugeLongArray labels, ReadOnlyHugeLongArray trainSet) {
         var data = reduceClassCount
-            ? withReducedClassCount(features.get(0).length, trainConfig.useBiasFeature(), classIdMap)
-            : standard(features.get(0).length, trainConfig.useBiasFeature(), classIdMap);
+            ? withReducedClassCount(features.featureDimension(), trainConfig.useBiasFeature(), classIdMap)
+            : standard(features.featureDimension(), trainConfig.useBiasFeature(), classIdMap);
         var classifier = new LogisticRegressionClassifier(data);
         var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);
         var training = new Training(trainConfig, progressTracker, trainSet.size(), terminationFlag);

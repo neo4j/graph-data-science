@@ -121,7 +121,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     ) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
-        assert index >= 0 && index < features.get(0).length;
+        assert index >= 0 && index < features.featureDimension();
 
         long leftGroupSize = 0;
         long rightGroupSize = 0;
