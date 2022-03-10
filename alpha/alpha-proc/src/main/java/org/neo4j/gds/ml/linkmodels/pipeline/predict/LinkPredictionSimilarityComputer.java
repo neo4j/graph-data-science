@@ -53,7 +53,7 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
         return classifier.predictProbabilities(0L, FeaturesFactory.wrap(features))[positiveClassLocalId];
     }
 
-    public double[] similarity(long sourceId, Batch targetIds) {
+    public double[] similarities(long sourceId, Batch targetIds) {
         var features = new ArrayList<double[]>();
         for (long targetId : targetIds.nodeIds()) {
             features.add(linkFeatureExtractor.extractFeatures(sourceId, targetId));

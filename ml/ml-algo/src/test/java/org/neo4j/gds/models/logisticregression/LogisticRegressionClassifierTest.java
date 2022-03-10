@@ -32,7 +32,6 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.models.FeaturesFactory;
 
-import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -89,7 +88,6 @@ class LogisticRegressionClassifierTest {
 
     @Test
     void batchingGivesEquivalentResults() {
-
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(0L);
         classIdMap.toMapped(1L);
@@ -115,7 +113,7 @@ class LogisticRegressionClassifierTest {
         var probabilityMatrix = classifier.predictProbabilities(new LazyBatch(0, 10, 10), features);
         for (int i = 0; i < 10; i++) {
             var singlePrediction = classifier.predictProbabilities(i, features);
-            var batchPrediction = Arrays.copyOfRange(probabilityMatrix.data(), classCount * i, classCount * (i + 1));
+            var batchPrediction = probabilityMatrix.getRow(i);
             assertThat(singlePrediction).containsExactly(batchPrediction);
         }
     }

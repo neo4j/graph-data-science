@@ -92,7 +92,6 @@ public final class FeaturesFactory {
         };
     }
 
-    // intended for batch of features whose length is far less than Integer.MAX_VALUE
     public static Features wrap(List<double[]> features) {
         return new Features() {
             @Override

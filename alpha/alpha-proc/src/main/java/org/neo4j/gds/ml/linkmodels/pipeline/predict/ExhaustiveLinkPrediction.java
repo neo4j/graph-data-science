@@ -148,7 +148,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
 
         private void flushBuffer(long sourceId) {
             if (targetIdsBatchBuffer.isEmpty()) return;
-            var similarities = linkPredictionSimilarityComputer.similarity(sourceId, new ListBatch(targetIdsBatchBuffer));
+            var similarities = linkPredictionSimilarityComputer.similarities(sourceId, new ListBatch(targetIdsBatchBuffer));
             linksConsidered += targetIdsBatchBuffer.size();
             var offset = 0;
             for (long targetId : targetIdsBatchBuffer) {

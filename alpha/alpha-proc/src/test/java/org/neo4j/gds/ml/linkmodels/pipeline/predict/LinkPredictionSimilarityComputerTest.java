@@ -85,7 +85,7 @@ class LinkPredictionSimilarityComputerTest {
             0.7098853299317623, Offset.offset(1e-9));
 
         var batch = new ListBatch(List.of(graph.toMappedNodeId("b"), graph.toMappedNodeId("c")));
-        assertThat(lpSimComputer.similarity(graph.toMappedNodeId("a"), batch))
+        assertThat(lpSimComputer.similarities(graph.toMappedNodeId("a"), batch))
             .containsExactly(new double[]{0.5099986668799655, 0.7098853299317623}, Offset.offset(1e-9));
     }
 
