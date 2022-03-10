@@ -23,10 +23,10 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.impl.traverse.BFS;
 import org.neo4j.gds.impl.traverse.BfsStreamConfig;
-import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
@@ -40,13 +40,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.traverse.BfsStreamProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.bfs.stream", description = DESCRIPTION, executionMode = STREAM)
 public class BfsStreamProc extends AlgoBaseProc<BFS, long[], BfsStreamConfig, BfsStreamProc.BfsStreamResult> {
-    private static final RelationshipType NEXT = RelationshipType.withName("NEXT");
+    static final RelationshipType NEXT = RelationshipType.withName("NEXT");
 
     static final String DESCRIPTION =
         "BFS is a traversal algorithm, which explores all of the neighbor nodes at " +
@@ -58,8 +55,12 @@ public class BfsStreamProc extends AlgoBaseProc<BFS, long[], BfsStreamConfig, Bf
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
-        return computationResultConsumer().consume(computationResult, executionContext());
+        var streamSpec = new BfsStreamSpec();
+
+        return new ProcedureExecutor<>(
+            streamSpec,
+            executionContext()
+        ).compute(graphName, configuration, true, true);
     }
 
     @Procedure(name = "gds.bfs.stream.estimate", mode = READ)
@@ -68,36 +69,26 @@ public class BfsStreamProc extends AlgoBaseProc<BFS, long[], BfsStreamConfig, Bf
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeEstimate(graphName, configuration);
-    }
+        var streamSpec = new BfsStreamSpec();
+
+        return new MemoryEstimationExecutor<>(
+            streamSpec,
+            executionContext()
+        ).computeEstimate(graphName, configuration);    }
 
     @Override
     public GraphAlgorithmFactory<BFS, BfsStreamConfig> algorithmFactory() {
-        return new BFSAlgorithmFactory();
+        return new BfsStreamSpec().algorithmFactory();
     }
 
     @Override
     protected BfsStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return BfsStreamConfig.of(config);
+        return new BfsStreamSpec().newConfigFunction().apply(username, config);
     }
 
     @Override
     public ComputationResultConsumer<BFS, long[], BfsStreamConfig, Stream<BfsStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var graph = computationResult.graph();
-            if (graph.isEmpty()) {
-                return Stream.empty();
-            }
-
-            long[] nodes = computationResult.result();
-            var nodeList = Arrays.stream(nodes).boxed().map(graph::toOriginalNodeId).collect(Collectors.toList());
-            var startNode = computationResult.config().sourceNode();
-            return Stream.of(new BfsStreamResult(
-                startNode,
-                nodes,
-                PathFactory.create(transaction.internalTransaction(), nodeList, NEXT)
-            ));
-        };
+        return new BfsStreamSpec().computationResultConsumer();
     }
 
     public static class BfsStreamResult {

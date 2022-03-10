@@ -43,7 +43,7 @@ import static org.neo4j.gds.compat.MapUtil.map;
  *   1\ 2/ 1\ 2/
  *    (c)   (f)
  */
-class BfsProcTest extends BaseProcTest {
+class BfsStreamProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
