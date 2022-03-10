@@ -61,12 +61,12 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
             classesInGroup[classIdMap.toMapped(label)]++;
         }
 
-        long max = -1;
+        long maxClassCountInGroup = -1;
         int maxClassIdx = 0;
         for (int i = 0; i < classesInGroup.length; i++) {
-            if (classesInGroup[i] <= max) continue;
+            if (classesInGroup[i] <= maxClassCountInGroup) continue;
 
-            max = classesInGroup[i];
+            maxClassCountInGroup = classesInGroup[i];
             maxClassIdx = i;
         }
 
