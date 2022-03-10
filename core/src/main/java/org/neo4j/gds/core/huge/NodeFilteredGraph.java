@@ -39,6 +39,7 @@ import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -54,7 +55,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     private final IdMap filteredIdMap;
     private long relationshipCount;
     private final HugeIntArray degreeCache;
-    private final ThreadLocal<Graph> threadLocalGraph;
+    private final CloseableThreadLocal<Graph> threadLocalGraph;
 
     public NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap) {
         this(originalGraph, filteredIdMap, emptyDegreeCache(filteredIdMap),-1);
@@ -66,7 +67,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
         this.degreeCache = degreeCache;
         this.filteredIdMap = filteredIdMap;
         this.relationshipCount = relationshipCount;
-        this.threadLocalGraph = ThreadLocal.withInitial(this::concurrentCopy);
+        this.threadLocalGraph = CloseableThreadLocal.withInitial(this::concurrentCopy);
     }
 
     private static HugeIntArray emptyDegreeCache(IdMap filteredIdMap) {
@@ -194,7 +195,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
-        return super.streamRelationships(filteredIdMap.toRootNodeId(nodeId), fallbackValue)
+        return super.streamRelationships(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue)
             .filter(rel -> filteredIdMap.contains(rel.sourceId()) && filteredIdMap.contains(rel.targetId()))
             .map(rel -> ImmutableRelationshipCursor.of(filteredIdMap.toMappedNodeId(rel.sourceId()), filteredIdMap.toMappedNodeId(rel.targetId()), rel.property()));
     }
