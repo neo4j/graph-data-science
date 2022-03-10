@@ -50,13 +50,14 @@ public class FeatureBagger {
             return featureBag;
         }
 
+        // TODO: Can we replace with UniformSamplerByRange?
         var tmpAvailableIndices = new Integer[totalNumberOfFeatures];
         Arrays.setAll(tmpAvailableIndices, i -> i);
         final var availableIndices = new LinkedList<>(Arrays.asList(tmpAvailableIndices));
 
         for (int i = 0; i < featureBag.length; i++) {
             int j = random.nextInt(availableIndices.size());
-            featureBag[i] = (availableIndices.get(j));
+            featureBag[i] = availableIndices.get(j);
             availableIndices.remove(j);
         }
 
