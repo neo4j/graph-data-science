@@ -35,6 +35,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
@@ -428,8 +429,8 @@ class NodeClassificationTrainTest {
         var firstResult = algoSupplier.get().compute();
         var secondResult = algoSupplier.get().compute();
 
-        assertThat(firstResult.data().weights().data())
-            .matches(matrix -> matrix.equals(secondResult.data().weights().data(), 1e-10));
+        assertThat(((LogisticRegressionData)firstResult.data()).weights().data())
+            .matches(matrix -> matrix.equals(((LogisticRegressionData)secondResult.data()).weights().data(), 1e-10));
     }
 
     private NodeClassificationTrainConfig createConfig(

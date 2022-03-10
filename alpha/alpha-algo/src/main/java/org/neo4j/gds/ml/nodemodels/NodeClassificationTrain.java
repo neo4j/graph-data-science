@@ -45,11 +45,13 @@ import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.util.ShuffleUtil;
+import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.Features;
 import org.neo4j.gds.models.FeaturesFactory;
+import org.neo4j.gds.models.Trainer;
 import org.neo4j.gds.models.TrainerConfig;
+import org.neo4j.gds.models.TrainerFactory;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainer;
 import org.openjdk.jol.util.Multiset;
@@ -68,7 +70,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
-public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
+public final class NodeClassificationTrain extends Algorithm<Model<Classifier.ClassifierData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
 
     public static final String MODEL_TYPE = "nodeLogisticRegression";
 
@@ -286,7 +288,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
     public void release() {}
 
     @Override
-    public Model<LogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> compute() {
+    public Model<Classifier.ClassifierData, NodeClassificationTrainConfig, NodeClassificationModelInfo> compute() {
         progressTracker.beginSubTask();
 
         progressTracker.beginSubTask();
@@ -375,17 +377,18 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
         return mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
     }
 
-    private LogisticRegressionClassifier retrainBestModel(TrainerConfig bestParameters) {
+    private Classifier retrainBestModel(TrainerConfig bestParameters) {
         progressTracker.beginSubTask("RetrainSelectedModel");
         var retrainedClassifier = trainModel(nodeIds, bestParameters);
         progressTracker.endSubTask("RetrainSelectedModel");
+
         return retrainedClassifier;
     }
 
-    private Model<LogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> createModel(
+    private Model<Classifier.ClassifierData, NodeClassificationTrainConfig, NodeClassificationModelInfo> createModel(
         TrainerConfig bestParameters,
         Map<Metric, MetricData> metricResults,
-        LogisticRegressionClassifier classifier
+        Classifier classifier
     ) {
         var modelInfo = NodeClassificationModelInfo.of(
             classifier.classIdMap().originalIdsList(),
@@ -421,18 +424,19 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
         ));
     }
 
-    private LogisticRegressionClassifier trainModel(
+    private Classifier trainModel(
         HugeLongArray trainSet,
-        TrainerConfig lrConfig
+        TrainerConfig trainerConfig
     ) {
-        var trainer = new LogisticRegressionTrainer(
-            config.concurrency(),
-            (LogisticRegressionTrainConfig) lrConfig,
+        Trainer trainer = TrainerFactory.create(
+            trainerConfig,
+            targets,
             classIdMap,
-            false,
             terminationFlag,
-            progressTracker
+            progressTracker,
+            config.concurrency()
         );
+
         return trainer.train(features, targets, ReadOnlyHugeLongArray.of(trainSet));
     }
 
