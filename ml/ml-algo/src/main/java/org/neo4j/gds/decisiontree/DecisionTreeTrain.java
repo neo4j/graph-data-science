@@ -87,7 +87,6 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         return new DecisionTreePredict<>(root);
     }
 
-    // TODO comment to explain this name could be useful
     protected abstract PREDICTION toTerminal(ReadOnlyHugeLongArray group, long groupSize);
 
     private TreeNode<PREDICTION> splitAndPush(
