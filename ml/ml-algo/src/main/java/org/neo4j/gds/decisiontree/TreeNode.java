@@ -21,21 +21,21 @@ package org.neo4j.gds.decisiontree;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class TreeNode<PREDICTION> {
+public class TreeNode<PREDICTION> {
     PREDICTION prediction;
     int featureIndex = -1;
     double thresholdValue;
     TreeNode<PREDICTION> leftChild = null;
     TreeNode<PREDICTION> rightChild = null;
 
-    TreeNode(int index, double value) {
+    public TreeNode(int index, double value) {
         assert index >= 0;
 
         this.featureIndex = index;
         this.thresholdValue = value;
     }
 
-    TreeNode(PREDICTION prediction) {
+    public TreeNode(PREDICTION prediction) {
         this.prediction = prediction;
     }
 

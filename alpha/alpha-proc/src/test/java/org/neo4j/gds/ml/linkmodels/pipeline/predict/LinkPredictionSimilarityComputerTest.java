@@ -67,13 +67,14 @@ class LinkPredictionSimilarityComputerTest {
         );
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, linkFeatureSteps);
         var modelData = ImmutableLogisticRegressionData.of(
+            LinkPredictionTrain.makeClassIdMap(),
+            2,
             new Weights<>(new Matrix(
                 new double[]{-1, -0.0001},
                 1,
                 2
             )),
-            Optional.empty(),
-            LinkPredictionTrain.makeClassIdMap()
+            Optional.empty()
         );
         var lpSimComputer = new LinkPredictionSimilarityComputer(
             linkFeatureExtractor,

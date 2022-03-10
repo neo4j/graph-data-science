@@ -40,6 +40,8 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.decisiontree.TreeNode;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -52,7 +54,10 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.models.logisticregression.ImmutableLogisticRegressionData;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.randomforest.ClassificationRandomForestPredictor;
+import org.neo4j.gds.models.randomforest.ImmutableRandomForestData;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.ArrayList;
@@ -126,19 +131,63 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
             var modelData = ImmutableLogisticRegressionData.of(
+                LinkPredictionTrain.makeClassIdMap(),
+                3,
                 new Weights<>(
                     new Matrix(
                         new double[]{2.0, 1.0, -3.0},
                         1,
                         3
                     )),
-                Optional.empty(),
-                LinkPredictionTrain.makeClassIdMap()
+                Optional.empty()
             );
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
-                modelData,
+                new LogisticRegressionClassifier(modelData),
+                config,
+                caller.executionContext(),
+                graphStore,
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            );
+
+            var predictionResult = pipelineExecutor.compute();
+
+
+            var predictedLinks = predictionResult.stream().collect(Collectors.toList());
+            assertThat(predictedLinks).hasSize(3);
+
+            assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
+            assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
+        });
+    }
+
+    @Test
+    void shouldPredictWithRandomForest() {
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var config = LinkPredictionPredictPipelineStreamConfig.of(
+                "",
+                CypherMapWrapper.empty()
+                    .withEntry("modelName", "model")
+                    .withEntry("topN", 3)
+                    .withEntry("graphName", GRAPH_NAME)
+            );
+
+            var pipeline = new LinkPredictionPipeline();
+            pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
+
+            var root = new TreeNode<>(0L);
+            var modelData = ImmutableRandomForestData
+                .builder()
+                .addDecisionTree(new DecisionTreePredict<>(root))
+                .featureDimension(3)
+                .classIdMap(LinkPredictionTrain.makeClassIdMap())
+                .build();
+
+            var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+                pipeline,
+                new ClassificationRandomForestPredictor(modelData),
                 config,
                 caller.executionContext(),
                 graphStore,
@@ -176,19 +225,20 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 
             var modelData = ImmutableLogisticRegressionData.of(
+                LinkPredictionTrain.makeClassIdMap(),
+                4,
                 new Weights<>(
                     new Matrix(
                         new double[]{2.0, 1.0, -3.0, -1.0},
                         1,
                         4
                     )),
-                Optional.empty(),
-                LinkPredictionTrain.makeClassIdMap()
+                Optional.empty()
             );
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
-                modelData,
+                new LogisticRegressionClassifier(modelData),
                 config,
                 caller.executionContext(),
                 graphStore,
@@ -224,14 +274,15 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 
             var modelData = ImmutableLogisticRegressionData.of(
+                LinkPredictionTrain.makeClassIdMap(),
+                4,
                 new Weights<>(
                     new Matrix(
                         new double[]{2.0, 1.0, -3.0, -1.0},
                         1,
                         4
                     )),
-                Optional.empty(),
-                LinkPredictionTrain.makeClassIdMap()
+                Optional.empty()
             );
 
             modelCatalog.set(Model.of(
@@ -259,7 +310,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
-                modelData,
+                new LogisticRegressionClassifier(modelData),
                 config,
                 caller.executionContext(),
                 graphStore,

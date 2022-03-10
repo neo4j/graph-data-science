@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.models.randomforest;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.models.TrainingMethod;
 
 import java.util.List;
 
@@ -29,4 +31,9 @@ import java.util.List;
 public interface RandomForestData extends Classifier.ClassifierData {
 
     List<DecisionTreePredict<Long>> decisionTrees();
+
+    @Value.Derived
+    default TrainingMethod trainerMethodName() {
+        return TrainingMethod.RandomForest;
+    }
 }

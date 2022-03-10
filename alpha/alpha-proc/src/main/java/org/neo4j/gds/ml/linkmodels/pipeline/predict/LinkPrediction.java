@@ -23,19 +23,18 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
+import org.neo4j.gds.models.Classifier;
 
 public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
 
-    private final LogisticRegressionData modelData;
+    private final Classifier classifier;
     private final LinkFeatureExtractor linkFeatureExtractor;
     private final Graph graph;
     protected final int concurrency;
 
     LinkPrediction(
-        LogisticRegressionData modelData,
+        Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
         int concurrency,
@@ -43,7 +42,7 @@ public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
     ) {
         super(progressTracker);
 
-        this.modelData = modelData;
+        this.classifier = classifier;
         this.linkFeatureExtractor = linkFeatureExtractor;
         this.graph = graph;
         this.concurrency = concurrency;
@@ -61,16 +60,9 @@ public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
     }
 
     private LinkPredictionResult predict() {
-        assert linkFeatureExtractor.featureDimension() == modelData
-            .weights()
-            .data()
-            .totalSize() : "Model must contain a weight for each feature.";
-
-        var predictor = new LogisticRegressionClassifier(modelData);
-
         var linkPredictionSimilarityComputer = new LinkPredictionSimilarityComputer(
             linkFeatureExtractor,
-            predictor
+            classifier
         );
 
         return predictLinks(graph, linkPredictionSimilarityComputer);

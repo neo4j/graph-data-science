@@ -33,13 +33,22 @@ public class ClassificationRandomForestPredictor implements Classifier {
 
     private final List<DecisionTreePredict<Long>> decisionTrees;
     private final LocalIdMap classMapping;
+    private final int featureDimension;
 
     public ClassificationRandomForestPredictor(
         List<DecisionTreePredict<Long>> decisionTrees,
-        LocalIdMap classMapping
+        LocalIdMap classMapping,
+        int featureDimension
     ) {
         this.decisionTrees = decisionTrees;
         this.classMapping = classMapping;
+        this.featureDimension = featureDimension;
+    }
+
+    public ClassificationRandomForestPredictor(RandomForestData data) {
+        this.decisionTrees = data.decisionTrees();
+        this.classMapping = data.classIdMap();
+        this.featureDimension = data.featureDimension();
     }
 
     @Override
@@ -49,7 +58,7 @@ public class ClassificationRandomForestPredictor implements Classifier {
 
     @Override
     public ClassifierData data() {
-        return ImmutableRandomForestData.of(decisionTrees);
+        return ImmutableRandomForestData.of(classMapping, featureDimension, decisionTrees);
     }
 
     @Override

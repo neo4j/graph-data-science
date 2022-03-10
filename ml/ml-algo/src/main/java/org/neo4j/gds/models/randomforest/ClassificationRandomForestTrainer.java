@@ -104,7 +104,7 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
 
         var decisionTrees = tasks.stream().map(DecisionTreeTrainer::trainedTree).collect(Collectors.toList());
 
-        return new ClassificationRandomForestPredictor(decisionTrees, classIdMap);
+        return new ClassificationRandomForestPredictor(decisionTrees, classIdMap, allFeatureVectors.get(0).length);
     }
 
     double outOfBagError() {

@@ -43,6 +43,7 @@ import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.TrainingMethod;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.randomforest.RandomForestTrainConfigImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -148,6 +149,12 @@ class LinkPredictionTrainTest {
         LinkPredictionTrainConfig trainConfig = trainingConfig(modelName);
 
         var result = runLinkPrediction(trainConfig);
+
+        assertThat(result.modelSelectionStatistics().trainStats().get(LinkMetric.AUCPR).size()).isEqualTo(result
+            .model()
+            .customInfo()
+            .trainingPipeline()
+            .numberOfModelCandidates());
 
         var actualModel = result.model();
 
@@ -330,6 +337,16 @@ class LinkPredictionTrainTest {
         pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
             LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)),
             LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "patience", 5, "tolerance", 0.00001))
+        ));
+        pipeline.setTrainingParameterSpace(TrainingMethod.RandomForest, List.of(
+            RandomForestTrainConfigImpl
+                .builder()
+                .minSplitSize(1)
+                .maxDepth(10)
+                .numberOfDecisionTrees(20)
+                .featureBaggingRatio(0.8)
+                .randomSeed(42L) // FIXME: Remove me!
+                .build()
         ));
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));

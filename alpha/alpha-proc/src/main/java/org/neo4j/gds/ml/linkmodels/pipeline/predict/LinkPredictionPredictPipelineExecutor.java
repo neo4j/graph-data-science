@@ -27,11 +27,11 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
+import org.neo4j.gds.models.Classifier;
 
 import java.util.List;
 import java.util.Map;
@@ -42,11 +42,11 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     LinkPredictionPipeline,
     LinkPredictionResult
     > {
-    private final LogisticRegressionData logisticRegressionData;
+    private final Classifier classifier;
 
     public LinkPredictionPredictPipelineExecutor(
         LinkPredictionPipeline pipeline,
-        LogisticRegressionData logisticRegressionData,
+        Classifier classifier,
         LinkPredictionPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
@@ -54,7 +54,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         ProgressTracker progressTracker
     ) {
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
-        this.logisticRegressionData = logisticRegressionData;
+        this.classifier = classifier;
     }
 
     @Override
@@ -111,7 +111,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     ) {
         if (isApproximateStrategy) {
             return new ApproximateLinkPrediction(
-                logisticRegressionData,
+                classifier,
                 linkFeatureExtractor,
                 graph,
                 config.approximateConfig(),
@@ -119,7 +119,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
             );
         } else {
             return new ExhaustiveLinkPrediction(
-                logisticRegressionData,
+                classifier,
                 linkFeatureExtractor,
                 graph,
                 config.concurrency(),

@@ -27,8 +27,8 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPredictPipelineBaseConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.TrainingMethod;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.util.List;
@@ -56,11 +56,11 @@ public final class LinkPredictionPipelineCompanion {
         };
     }
 
-    public static Model<LogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> getTrainedLPPipelineModel(
+    public static Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> getTrainedLPPipelineModel(
         ModelCatalog modelCatalog,
         String pipelineName,
         String username
     ) {
-        return modelCatalog.get(username, pipelineName, LogisticRegressionData.class, LinkPredictionTrainConfig.class, LinkPredictionModelInfo.class);
+        return modelCatalog.get(username, pipelineName, Classifier.ClassifierData.class, LinkPredictionTrainConfig.class, LinkPredictionModelInfo.class);
     }
 }

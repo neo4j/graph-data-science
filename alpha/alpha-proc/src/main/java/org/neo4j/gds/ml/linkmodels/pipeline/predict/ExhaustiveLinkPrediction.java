@@ -34,7 +34,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.batch.ListBatch;
 import org.neo4j.gds.ml.linkmodels.ExhaustiveLinkPredictionResult;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.models.Classifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
     private final double threshold;
 
     public ExhaustiveLinkPrediction(
-        LogisticRegressionData modelData,
+        Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
         int concurrency,
@@ -55,7 +55,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         ProgressTracker progressTracker
     ) {
         super(
-            modelData,
+            classifier,
             linkFeatureExtractor,
             graph,
             concurrency,

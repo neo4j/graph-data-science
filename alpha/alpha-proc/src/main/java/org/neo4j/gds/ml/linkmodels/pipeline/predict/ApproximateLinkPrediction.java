@@ -28,8 +28,8 @@ import org.neo4j.gds.core.write.ImmutableRelationship;
 import org.neo4j.gds.core.write.Relationship;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
+import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
@@ -44,14 +44,14 @@ public class ApproximateLinkPrediction extends LinkPrediction {
     private final KnnBaseConfig knnConfig;
 
     public ApproximateLinkPrediction(
-        LogisticRegressionData modelData,
+        Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
         KnnBaseConfig knnConfig,
         ProgressTracker progressTracker
     ) {
         super(
-            modelData,
+            classifier,
             linkFeatureExtractor,
             graph,
             knnConfig.concurrency(),

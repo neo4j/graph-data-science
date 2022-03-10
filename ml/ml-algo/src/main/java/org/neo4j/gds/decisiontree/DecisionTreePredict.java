@@ -23,7 +23,7 @@ public class DecisionTreePredict<PREDICTION> {
 
     private final TreeNode<PREDICTION> root;
 
-    DecisionTreePredict(TreeNode<PREDICTION> root) {
+    public DecisionTreePredict(TreeNode<PREDICTION> root) {
         this.root = root;
     }
 

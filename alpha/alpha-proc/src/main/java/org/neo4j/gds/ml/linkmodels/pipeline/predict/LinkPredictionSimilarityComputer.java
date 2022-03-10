@@ -24,8 +24,8 @@ import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
+import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.FeaturesFactory;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 import org.neo4j.gds.similarity.knn.NeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
@@ -35,12 +35,12 @@ import java.util.ArrayList;
 class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
     private final LinkFeatureExtractor linkFeatureExtractor;
-    private final LogisticRegressionClassifier classifier;
+    private final Classifier classifier;
     private final int positiveClassLocalId;
 
     LinkPredictionSimilarityComputer(
         LinkFeatureExtractor linkFeatureExtractor,
-        LogisticRegressionClassifier classifier
+        Classifier classifier
     ) {
         this.linkFeatureExtractor = linkFeatureExtractor;
         this.classifier = classifier;

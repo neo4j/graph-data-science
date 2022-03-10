@@ -42,6 +42,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.models.logisticregression.ImmutableLogisticRegressionData;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 
 import java.util.List;
 import java.util.Map;
@@ -93,14 +94,15 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         var featureStep = new L2FeatureStep(List.of("a", "b", "c"));
 
         var modelData = ImmutableLogisticRegressionData.of(
+            LinkPredictionTrain.makeClassIdMap(),
+            WEIGHTS.length,
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
                     1,
                     WEIGHTS.length
                 )),
-            Optional.empty(),
-            LinkPredictionTrain.makeClassIdMap()
+            Optional.empty()
         );
 
         var graph = graphStore.getGraph(
@@ -110,7 +112,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         );
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, List.of(featureStep));
         var linkPrediction = new ExhaustiveLinkPrediction(
-            modelData,
+            new LogisticRegressionClassifier(modelData),
             linkFeatureExtractor,
             graph,
             concurrency,
@@ -152,14 +154,15 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         var featureStep = new L2FeatureStep(List.of("a", "b", "c"));
 
         var modelData = ImmutableLogisticRegressionData.of(
+            LinkPredictionTrain.makeClassIdMap(),
+            WEIGHTS.length,
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
                     1,
                     WEIGHTS.length
                 )),
-            Optional.empty(),
-            LinkPredictionTrain.makeClassIdMap()
+            Optional.empty()
         );
 
         var graph = graphStore.getGraph(
@@ -171,7 +174,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, List.of(featureStep));
 
         var linkPrediction = new ExhaustiveLinkPrediction(
-            modelData,
+            new LogisticRegressionClassifier(modelData),
             linkFeatureExtractor,
             graph,
             4,

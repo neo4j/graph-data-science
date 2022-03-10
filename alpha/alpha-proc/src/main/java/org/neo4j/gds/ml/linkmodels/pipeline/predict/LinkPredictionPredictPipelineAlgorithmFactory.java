@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.models.ClassifierFactory;
 import org.neo4j.gds.similarity.knn.KnnFactory;
 
 import java.util.List;
@@ -81,7 +82,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
         var linkPredictionPipeline = model.customInfo().trainingPipeline();
         return new LinkPredictionPredictPipelineExecutor(
             linkPredictionPipeline,
-            model.data(),
+            ClassifierFactory.create(model.data()),
             configuration,
             executionContext,
             graphStore,
@@ -98,13 +99,12 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             configuration.username()
         );
         var linkPredictionPipeline = model.customInfo().trainingPipeline();
-        var linkFeatureDimension = model.data().weights().data().totalSize();
 
         return LinkPredictionPredictPipelineExecutor.estimate(
             modelCatalog,
             linkPredictionPipeline,
             configuration,
-            linkFeatureDimension
+            model.data().featureDimension()
         );
     }
 }

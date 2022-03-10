@@ -31,6 +31,8 @@ import org.neo4j.gds.models.randomforest.RandomForestTrainConfig;
 
 public class TrainerFactory {
 
+    private TrainerFactory() {}
+
     public static Trainer create(
         TrainerConfig config,
         HugeLongArray targets,

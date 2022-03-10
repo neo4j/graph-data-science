@@ -93,13 +93,14 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
         var modelData = ImmutableLogisticRegressionData.of(
+            LinkPredictionTrain.makeClassIdMap(),
+            weights.length,
             new Weights<>(new Matrix(
                 weights,
                 1,
                 weights.length
             )),
-            Optional.empty(),
-            LinkPredictionTrain.makeClassIdMap()
+            Optional.empty()
         );
 
         modelCatalog.set(Model.of(

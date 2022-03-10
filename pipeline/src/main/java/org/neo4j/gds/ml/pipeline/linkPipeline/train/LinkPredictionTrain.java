@@ -189,9 +189,9 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
 
-        var linkLogisticRegressionTrainConfigs = pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression);
-        progressTracker.setVolume(linkLogisticRegressionTrainConfigs.size());
-        linkLogisticRegressionTrainConfigs.forEach(modelParams -> {
+        progressTracker.setVolume(pipeline.numberOfModelCandidates());
+
+        pipeline.trainingParameterSpace().values().stream().flatMap(List::stream).forEach(modelParams -> {
             var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
             var validationStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
             for (TrainingExamplesSplit relSplit : validationSplits) {
@@ -208,7 +208,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                     .forEach(validationStatsBuilder::update);
             }
 
-            // insert the candidates metrics into trainStats and validationStats
+            // insert the candidates' metrics into trainStats and validationStats
             trainConfig.metrics().forEach(metric -> {
                 validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
                 trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
@@ -421,6 +421,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var splitConfig = pipeline.splitConfig();
         var maxEstimationOverModelCandidates = maxEstimation(
             "Max over model candidates",
+            // There's no memory estimation support for Random forest yet.
             pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression).stream()
                 .map(llrConfig -> MemoryEstimations.builder("Train and evaluate model")
                     .fixed("Stats map builder train", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))

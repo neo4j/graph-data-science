@@ -42,6 +42,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.models.logisticregression.ImmutableLogisticRegressionData;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 
 import java.util.Comparator;
@@ -94,18 +95,19 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
     @CsvSource(value = {"1, 44, 1", "2, 59, 1"})
     void shouldPredictWithTopK(int topK, long expectedLinksConsidered, int ranIterations) {
         var modelData = ImmutableLogisticRegressionData.of(
+            LinkPredictionTrain.makeClassIdMap(),
+            WEIGHTS.length,
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
                     1,
                     WEIGHTS.length
                 )),
-            Optional.empty(),
-            LinkPredictionTrain.makeClassIdMap()
+            Optional.empty()
         );
 
         var linkPrediction = new ApproximateLinkPrediction(
-            modelData,
+            new LogisticRegressionClassifier(modelData),
             LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
             graph,
             ImmutableKnnBaseConfig.builder()
@@ -158,13 +160,14 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         double[] weights = {2.0, 1.0, -3.0};
 
         var modelData = ImmutableLogisticRegressionData.of(
+            LinkPredictionTrain.makeClassIdMap(),
+            weights.length,
             new Weights<>(new Matrix(
                 weights,
                 1,
                 weights.length
             )),
-            Optional.empty(),
-            LinkPredictionTrain.makeClassIdMap()
+            Optional.empty()
         );
 
         var expectedLinks = List.of(
@@ -177,7 +180,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
         for (int i = 0; i < 2; i++) {
             var linkPrediction = new ApproximateLinkPrediction(
-                modelData,
+                new LogisticRegressionClassifier(modelData),
                 LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
                 graph,
                 ImmutableKnnBaseConfig.builder()
@@ -210,18 +213,19 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
         var modelData = ImmutableLogisticRegressionData.of(
+            LinkPredictionTrain.makeClassIdMap(),
+            WEIGHTS.length,
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
                     1,
                     WEIGHTS.length
                 )),
-            Optional.empty(),
-            LinkPredictionTrain.makeClassIdMap()
+            Optional.empty()
         );
 
         var linkPrediction = new ApproximateLinkPrediction(
-            modelData,
+            new LogisticRegressionClassifier(modelData),
             LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
             graph,
             ImmutableKnnBaseConfig.builder()

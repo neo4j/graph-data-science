@@ -19,15 +19,17 @@
  */
 package org.neo4j.gds.models.logisticregression;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
+import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.models.TrainingMethod;
 
 import java.util.Optional;
 
@@ -36,7 +38,11 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
 
     Weights<Matrix> weights();
     Optional<Weights<Vector>> bias();
-    LocalIdMap classIdMap();
+
+    @Value.Derived
+    default TrainingMethod trainerMethodName() {
+        return TrainingMethod.LogisticRegression;
+    }
 
     static LogisticRegressionData standard(int featureCount, boolean useBias, LocalIdMap classIdMap) {
         return create(classIdMap.size(), featureCount, useBias, classIdMap);
@@ -54,7 +60,13 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
             ? Optional.of(new Weights<>(new Vector(classCount)))
             : Optional.<Weights<Vector>>empty();
 
-        return ImmutableLogisticRegressionData.builder().weights(weights).classIdMap(classIdMap).bias(bias).build();
+        return ImmutableLogisticRegressionData
+            .builder()
+            .weights(weights)
+            .classIdMap(classIdMap)
+            .bias(bias)
+            .featureDimension(featureCount)
+            .build();
     }
 
     static LogisticRegressionData create(Weights<Matrix> weights, Optional<Weights<Vector>> bias, LocalIdMap classIdMap) {
@@ -87,7 +99,6 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
             .fixed("weights", Weights.sizeInBytes(numberOfClasses, numberOfFeatures))
             .build();
     }
-
 
     static ImmutableLogisticRegressionData.Builder builder() {
         return ImmutableLogisticRegressionData.builder();

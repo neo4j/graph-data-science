@@ -111,6 +111,14 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep> implements ToMa
         }
     }
 
+    public int numberOfModelCandidates() {
+        return this.trainingParameterSpace()
+            .values()
+            .stream()
+            .mapToInt(List::size)
+            .sum();
+    }
+
     @NotNull
     private Set<String> featurePropertiesMissingFromGraph(GraphStore graphStore, AlgoBaseConfig config) {
         var graphProperties = graphStore.nodePropertyKeys(config.nodeLabelIdentifiers(graphStore));
