@@ -46,11 +46,11 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         this.featureBagger = featureBagger;
     }
 
-    public DecisionTreePredict<PREDICTION> train(ReadOnlyHugeLongArray sampledFeatureVectors) {
+    public DecisionTreePredict<PREDICTION> train(ReadOnlyHugeLongArray trainSetIndices) {
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
-        root = splitAndPush(stack, sampledFeatureVectors, sampledFeatureVectors.size(), 1);
+        root = splitAndPush(stack, trainSetIndices, trainSetIndices.size(), 1);
 
         int maxDepth = config.maxDepth();
         int minSize = config.minSplitSize();
