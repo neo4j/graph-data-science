@@ -37,7 +37,8 @@ public class TrainerFactory {
         LocalIdMap classIdMap,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
-        int concurrency
+        int concurrency,
+        boolean reduceClassCount
     ) {
         switch (TrainingMethod.valueOf(config.methodName())) {
             case LogisticRegression: {
@@ -45,7 +46,7 @@ public class TrainerFactory {
                     concurrency,
                     (LogisticRegressionTrainConfig) config,
                     classIdMap,
-                    false,
+                    reduceClassCount,
                     terminationFlag,
                     progressTracker
                 );

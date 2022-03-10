@@ -434,7 +434,8 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
             classIdMap,
             terminationFlag,
             progressTracker,
-            config.concurrency()
+            config.concurrency(),
+            false
         );
 
         return trainer.train(features, targets, ReadOnlyHugeLongArray.of(trainSet));

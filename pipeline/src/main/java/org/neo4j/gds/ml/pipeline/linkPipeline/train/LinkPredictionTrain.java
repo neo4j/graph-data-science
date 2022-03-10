@@ -52,6 +52,7 @@ import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.TrainerConfig;
+import org.neo4j.gds.models.TrainerFactory;
 import org.neo4j.gds.models.TrainingMethod;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainer;
@@ -165,16 +166,17 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     private Classifier trainModel(
         FeaturesAndLabels featureAndLabels,
         ReadOnlyHugeLongArray trainSet,
-        TrainerConfig modelConfig,
+        TrainerConfig trainerConfig,
         ProgressTracker customProgressTracker
     ) {
-        return new LogisticRegressionTrainer(
-            trainConfig.concurrency(),
-            (LogisticRegressionTrainConfig) modelConfig,
+        return TrainerFactory.create(
+            trainerConfig,
+            featureAndLabels.labels(),
             classIdMap,
-            true,
             terminationFlag,
-            customProgressTracker
+            customProgressTracker,
+            trainConfig.concurrency(),
+            true
         ).train(featureAndLabels.features(), featureAndLabels.labels(), trainSet);
     }
 
