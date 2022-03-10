@@ -23,10 +23,10 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.impl.traverse.DFS;
 import org.neo4j.gds.impl.traverse.DfsStreamConfig;
-import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
@@ -40,13 +40,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.traverse.DfsStreamProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.dfs.stream", description = DESCRIPTION, executionMode = STREAM)
 public class DfsStreamProc extends AlgoBaseProc<DFS, long[], DfsStreamConfig, DfsStreamProc.DfsStreamResult> {
-    private static final RelationshipType NEXT = RelationshipType.withName("NEXT");
+    static final RelationshipType NEXT = RelationshipType.withName("NEXT");
 
     static final String DESCRIPTION =
         "DFS is a traversal algorithm, which explores all of the children nodes of " +
@@ -58,8 +55,12 @@ public class DfsStreamProc extends AlgoBaseProc<DFS, long[], DfsStreamConfig, Df
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
-        return computationResultConsumer().consume(computationResult, executionContext());
+        var streamSpec = new DfsStreamSpec();
+
+        return new ProcedureExecutor<>(
+            streamSpec,
+            executionContext()
+        ).compute(graphName, configuration, true, true);
     }
 
     @Procedure(name = "gds.dfs.stream.estimate", mode = READ)
@@ -68,36 +69,27 @@ public class DfsStreamProc extends AlgoBaseProc<DFS, long[], DfsStreamConfig, Df
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeEstimate(graphName, configuration);
+        var streamSpec = new DfsStreamSpec();
+
+        return new MemoryEstimationExecutor<>(
+            streamSpec,
+            executionContext()
+        ).computeEstimate(graphName, configuration);
     }
 
     @Override
     public GraphAlgorithmFactory<DFS, DfsStreamConfig> algorithmFactory() {
-        return new DFSAlgorithmFactory();
+        return new DfsStreamSpec().algorithmFactory();
     }
 
     @Override
     protected DfsStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return DfsStreamConfig.of(config);
+        return new DfsStreamSpec().newConfigFunction().apply(username, config);
     }
 
     @Override
     public ComputationResultConsumer<DFS, long[], DfsStreamConfig, Stream<DfsStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var graph = computationResult.graph();
-            long[] nodes = computationResult.result();
-            if (graph.isEmpty() || null == nodes) {
-                return Stream.empty();
-            }
-
-            var nodeList = Arrays.stream(nodes).boxed().map(graph::toOriginalNodeId).collect(Collectors.toList());
-            var startNode = computationResult.config().sourceNode();
-            return Stream.of(new DfsStreamResult(
-                startNode,
-                nodes,
-                PathFactory.create(transaction.internalTransaction(), nodeList, NEXT)
-            ));
-        };
+        return new DfsStreamSpec().computationResultConsumer();
     }
 
     public static class DfsStreamResult {
