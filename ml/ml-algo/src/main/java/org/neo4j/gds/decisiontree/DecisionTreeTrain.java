@@ -41,13 +41,10 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         LOSS lossFunction,
         FeatureBagger featureBagger
     ) {
-        assert features.size() > 0;
-
         this.lossFunction = lossFunction;
         this.features = features;
         this.maxDepth = config.maxDepth();
         this.minSize = config.minSplitSize();
-
         this.featureBagger = featureBagger;
     }
 
