@@ -202,7 +202,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             var offset = propertiesAllocator.write(property, degree);
             offsets[i].set(nodeId, offset);
         }
-
     }
 
     private static final class Factory extends AbstractAdjacencyCompressorFactory<byte[], long[]> {
