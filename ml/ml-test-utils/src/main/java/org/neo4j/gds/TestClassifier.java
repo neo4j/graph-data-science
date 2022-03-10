@@ -17,25 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.models;
+package org.neo4j.gds;
 
 import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.models.Features;
 
-public interface Classifier {
-    default int numberOfClasses() {
-        return classIdMap().size();
-    }
-
-    LocalIdMap classIdMap();
-
-    double[] predictProbabilities(long id, Features features);
-    Matrix predictProbabilities(Batch batch, Features features);
-
-    ClassifierData data();
-
-    // placeholder
-    interface ClassifierData {
+public abstract class TestClassifier implements Classifier {
+    public Matrix predictProbabilities(Batch batch, Features features) {
+        var predictedProbabilities = new Matrix(batch.size(), numberOfClasses());
+        var offset = 0;
+        for (long id : batch.nodeIds()) {
+            double[] predictionsForNode = predictProbabilities(id, features);
+            predictedProbabilities.setRow(offset++, predictionsForNode);
+        }
+        return predictedProbabilities;
     }
 }

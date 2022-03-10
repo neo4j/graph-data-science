@@ -24,12 +24,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.TestClassifier;
 import org.neo4j.gds.TestFeatures;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.Features;
 import org.openjdk.jol.util.Multiset;
 
@@ -70,7 +70,7 @@ class ClassificationMetricComputerTest {
             TerminationFlag.RUNNING_TRUE
         );
 
-        var classifier = new Classifier() {
+        var classifier = new TestClassifier() {
             @Override
             public LocalIdMap classIdMap() {
                 return idMap;
