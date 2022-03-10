@@ -19,48 +19,62 @@
  */
 package org.neo4j.gds.models.randomforest;
 
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.models.Features;
 
-import java.util.concurrent.atomic.AtomicIntegerArray;
-import java.util.concurrent.atomic.AtomicLong;
-
-public class ClassificationRandomForestPredict {
+public class ClassificationRandomForestPredict implements Classifier {
 
     private final DecisionTreePredict<Long>[] decisionTrees;
     private final LocalIdMap classMapping;
-    private final int concurrency;
 
     public ClassificationRandomForestPredict(
         DecisionTreePredict<Long>[] decisionTrees,
-        LocalIdMap classMapping,
-        int concurrency
+        LocalIdMap classMapping
     ) {
         this.decisionTrees = decisionTrees;
         this.classMapping = classMapping;
-        this.concurrency = concurrency;
     }
 
-    public long predict(final double[] features) {
-        final var predictionsPerClass = new AtomicIntegerArray(classMapping.size());
-        var tasks = ParallelUtil.tasks(decisionTrees.length, index -> () -> {
-            var tree = decisionTrees[index];
-            var prediction = tree.predict(features);
-            predictionsPerClass.incrementAndGet(classMapping.toMapped(prediction));
-        });
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+    @Override
+    public LocalIdMap classIdMap() {
+        return classMapping;
+    }
+
+    @Override
+    public ClassifierData data() {
+        return ImmutableRandomForestData.of(decisionTrees);
+    }
+
+    @Override
+    public double[] predictProbabilities(long id, Features features) {
+        return predictProbabilities(features.get(id));
+    }
+
+    public double[] predictProbabilities(double[] features) {
+        int[] votesPerClass = gatherTreePredictions(features);
+
+        double[] probabilities = new double[votesPerClass.length];
+
+        for (int classIdx = 0; classIdx < votesPerClass.length; classIdx++) {
+            int voteForClass = votesPerClass[classIdx];
+            probabilities[classIdx] = (double) voteForClass / decisionTrees.length;
+        }
+
+        return probabilities;
+    }
+
+    @TestOnly
+    long predictLabel(final double[] features) {
+        final int[] predictionsPerClass = gatherTreePredictions(features);
 
         int max = -1;
         int maxClassIdx = 0;
 
-        for (int i = 0; i < predictionsPerClass.length(); i++) {
-            var numPredictions = predictionsPerClass.get(i);
+        for (int i = 0; i < predictionsPerClass.length; i++) {
+            var numPredictions = predictionsPerClass[i];
 
             if (numPredictions <= max) continue;
 
@@ -71,74 +85,13 @@ public class ClassificationRandomForestPredict {
         return classMapping.toOriginal(maxClassIdx);
     }
 
-    public double outOfBagError(
-        final HugeByteArray[] bootstrappedDatasets,
-        final HugeObjectArray<double[]> allFeatureVectors,
-        final HugeLongArray expectedLabels
-    ) {
-        assert bootstrappedDatasets.length == decisionTrees.length;
-        assert allFeatureVectors.size() == expectedLabels.size();
+    private int[] gatherTreePredictions(double[] features) {
+        final var predictionsPerClass = new int[classMapping.size()];
 
-        final var totalNumVectors = allFeatureVectors.size();
-        final var numClasses = classMapping.size();
-        final var predictions = HugeAtomicLongArray.newArray(
-            classMapping.size() * bootstrappedDatasets[0].size()
-        );
-
-        var predictionTasks = ParallelUtil.tasks(decisionTrees.length, index -> () -> {
-            final var tree = decisionTrees[index];
-            final var bootstrappedDataset = bootstrappedDatasets[index];
-
-            for (long i = 0; i < totalNumVectors; i++) {
-                if (bootstrappedDataset.get(i) == (byte) 1) continue;
-
-                Long prediction = tree.predict(allFeatureVectors.get(i));
-                predictions.getAndAdd(i * numClasses + classMapping.toMapped(prediction), 1);
-            }
-        });
-        ParallelUtil.runWithConcurrency(concurrency, predictionTasks, Pools.DEFAULT);
-
-        var totalMistakes = new AtomicLong(0);
-        var totalOutOfAnyBagVectors = new AtomicLong(0);
-        long batchSize = totalNumVectors / concurrency;
-        long remainder = Math.floorMod(totalNumVectors, concurrency);
-
-        var majorityVoteTasks = ParallelUtil.tasks(concurrency, index -> () -> {
-            long numMistakes = 0;
-            long numOutOfAnyBagVectors = 0;
-            final long startOffset = index * batchSize;
-            final long endOffset = index == concurrency - 1
-                ? startOffset + batchSize + remainder
-                : startOffset + batchSize;
-
-            for (long i = startOffset; i < endOffset; i++) {
-                final long innerOffset = i * numClasses;
-                long max = 0;
-                int maxClassIdx = 0;
-
-                for (int j = 0; j < numClasses; j++) {
-                    var numPredictions = predictions.get(innerOffset + j);
-
-                    if (numPredictions <= max) continue;
-
-                    max = numPredictions;
-                    maxClassIdx = j;
-                }
-
-                if (max == 0) continue;
-
-                // The ith feature vector was in at least one out-of-bag dataset.
-                numOutOfAnyBagVectors++;
-                if (classMapping.toOriginal(maxClassIdx) != expectedLabels.get(i)) {
-                    numMistakes++;
-                }
-            }
-
-            totalMistakes.addAndGet(numMistakes);
-            totalOutOfAnyBagVectors.addAndGet(numOutOfAnyBagVectors);
-        });
-        ParallelUtil.runWithConcurrency(concurrency, majorityVoteTasks, Pools.DEFAULT);
-
-        return totalMistakes.doubleValue() / totalOutOfAnyBagVectors.doubleValue();
+        for (DecisionTreePredict<Long> decisionTree : decisionTrees) {
+            long predictedClass = decisionTree.predict(features);
+            predictionsPerClass[classMapping.toMapped(predictedClass)]++;
+        }
+        return predictionsPerClass;
     }
 }

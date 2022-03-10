@@ -20,11 +20,12 @@
 package org.neo4j.gds.models.randomforest;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
+
+import java.util.Optional;
 
 @ValueClass
 public interface ClassificationRandomForestTrainResult {
     ClassificationRandomForestPredict predictor();
 
-    HugeByteArray[] bootstrappedDatasets();
+    Optional<Double> outOfBagError();
 }

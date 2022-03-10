@@ -20,78 +20,40 @@
 package org.neo4j.gds.decisiontree;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
-import java.util.Arrays;
-import java.util.Random;
 import java.util.Stack;
 
 public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTION> {
 
-    private final Random random;
     private final LOSS lossFunction;
     private final HugeObjectArray<double[]> allFeatureVectors;
     private final int maxDepth;
     private final int minSize;
-    private final double numFeatureVectorsRatio;
-    private final int[] featureBag;
-    // TODO: Implement HugeBitSet and use that instead of HugeByteArray.
-    private final HugeByteArray bootstrappedDataset;
-    private FeatureBagger featureBagger = null;
+    private final FeatureBagger featureBagger;
 
     DecisionTreeTrain(
         HugeObjectArray<double[]> allFeatureVectors,
         DecisionTreeTrainConfig config,
         LOSS lossFunction,
-        double featureBaggingRatio,
-        double numFeatureVectorsRatio
+        FeatureBagger featureBagger
     ) {
         assert allFeatureVectors.size() > 0;
-        assert featureBaggingRatio >= 0.0 && featureBaggingRatio <= 1.0;
-        assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
 
         this.lossFunction = lossFunction;
         this.allFeatureVectors = allFeatureVectors;
         this.maxDepth = config.maxDepth();
         this.minSize = config.minSplitSize();
-        this.random = config.randomSeed().map(Random::new).orElseGet(Random::new);
 
-        this.numFeatureVectorsRatio = numFeatureVectorsRatio;
-        this.bootstrappedDataset = HugeByteArray.newArray(allFeatureVectors.size());
-
-        int totalNumFeatures = allFeatureVectors.get(0).length;
-        if (Double.compare(featureBaggingRatio, 0.0d) == 0) {
-            this.featureBag = new int[totalNumFeatures];
-            Arrays.setAll(this.featureBag, i -> i);
-        } else {
-            int numActiveFeatures = (int) Math.ceil(featureBaggingRatio * totalNumFeatures);
-            this.featureBag = new int[numActiveFeatures];
-            this.featureBagger = new FeatureBagger(this.random, totalNumFeatures);
-        }
+        this.featureBagger = featureBagger;
     }
 
-    public DecisionTreePredict<PREDICTION> train() {
+    public DecisionTreePredict<PREDICTION> train(HugeLongArray sampledFeatureVectors) {
         var stack = new Stack<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
-        {
-            HugeLongArray activeFeatureVectors;
-            if (Double.compare(numFeatureVectorsRatio, 0.0d) == 0) {
-                var allVectors = HugeLongArray.newArray(allFeatureVectors.size());
-                allVectors.setAll(i -> i);
-                bootstrappedDataset.fill((byte) 1);
-                activeFeatureVectors = allVectors;
-            } else {
-                activeFeatureVectors = DatasetBootstrapper.bootstrap(
-                    random,
-                    numFeatureVectorsRatio,
-                    bootstrappedDataset
-                );
-            }
-            root = splitAndPush(stack, activeFeatureVectors, activeFeatureVectors.size(), 1);
-        }
+        root = splitAndPush(stack, sampledFeatureVectors, sampledFeatureVectors.size(), 1);
 
         while (!stack.empty()) {
             var record = stack.pop();
@@ -121,10 +83,6 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         }
 
         return new DecisionTreePredict<>(root);
-    }
-
-    public HugeByteArray bootstrappedDataset() {
-        return bootstrappedDataset;
     }
 
     // TODO comment to explain this name could be useful
@@ -201,9 +159,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         );
         var bestGroupSizes = ImmutableGroupSizes.of(-1, -1);
 
-        if (featureBagger != null) {
-            featureBagger.sample(featureBag);
-        }
+        int[] featureBag = featureBagger.sample();
 
         for (long j = 0; j < groupSize; j++) {
             for (int i : featureBag) {

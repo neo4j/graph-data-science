@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.decisiontree;
+package org.neo4j.gds.models.randomforest;
 
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Random;
@@ -31,19 +31,18 @@ final class DatasetBootstrapper {
     static HugeLongArray bootstrap(
         final Random random,
         double numFeatureVectorsRatio,
-        final HugeByteArray cachedBootstrappedDataset
+        long totalNumVectors,
+        final BitSet cachedBootstrappedDataset
     ) {
         assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
-        assert cachedBootstrappedDataset.size() > 0;
 
-        final long totalNumFeatureVectors = cachedBootstrappedDataset.size();
-        final long numVectors = (long) Math.ceil(numFeatureVectorsRatio * totalNumFeatureVectors);
-        final var bootstrappedVectors = HugeLongArray.newArray(numVectors);
+        long numVectors = (long) Math.ceil(numFeatureVectorsRatio * totalNumVectors);
+        var bootstrappedVectors = HugeLongArray.newArray(numVectors);
 
         for (long i = 0; i < numVectors; i++) {
-            long j = randomNonNegativeLong(random, 0, totalNumFeatureVectors);
-            bootstrappedVectors.set(i, j);
-            cachedBootstrappedDataset.set(j, (byte) 1);
+            long sampledVectorIdx = randomNonNegativeLong(random, 0, totalNumVectors);
+            bootstrappedVectors.set(i, sampledVectorIdx);
+            cachedBootstrappedDataset.set(sampledVectorIdx);
         }
 
         return bootstrappedVectors;

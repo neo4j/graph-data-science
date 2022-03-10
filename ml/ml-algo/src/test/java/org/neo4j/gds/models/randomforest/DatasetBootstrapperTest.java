@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.decisiontree;
+package org.neo4j.gds.models.randomforest;
 
+import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.paged.HugeByteArray;
 
 import java.util.Random;
 
@@ -32,10 +32,12 @@ class DatasetBootstrapperTest {
 
     @Test
     void shouldSampleCorrectNumElements() {
-        var cachedBootstrappedDataset = HugeByteArray.newArray(20);
+        int numVectors = 20;
+        var cachedBootstrappedDataset = new BitSet(numVectors);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             RANDOM,
             0.5,
+            numVectors,
             cachedBootstrappedDataset
         );
 
@@ -44,16 +46,16 @@ class DatasetBootstrapperTest {
 
     @Test
     void shouldSampleConsistentlyWithCache() {
-        var cachedBootstrappedDataset = HugeByteArray.newArray(20);
+        int numVectors = 20;
+        var cachedBootstrappedDataset = new BitSet(numVectors);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             RANDOM,
             0.5,
+            numVectors,
             cachedBootstrappedDataset
         );
 
         for (long i = 0; i < cachedBootstrappedDataset.size(); i++) {
-            byte sampleIdx = cachedBootstrappedDataset.get(i);
-
             boolean found = false;
             for (long j = 0; j < bootstrappedVectors.size(); j++) {
                 if (bootstrappedVectors.get(j) == i) {
@@ -61,7 +63,7 @@ class DatasetBootstrapperTest {
                 }
             }
 
-            if (sampleIdx == (byte) 1) {
+            if (cachedBootstrappedDataset.get(i)) {
                 assertThat(found).isTrue();
             } else {
                 assertThat(found).isFalse();
@@ -71,10 +73,12 @@ class DatasetBootstrapperTest {
 
     @Test
     void shouldSampleCorrectInterval() {
-        var cachedBootstrappedDataset = HugeByteArray.newArray(20);
+        int numVectors = 20;
+        var cachedBootstrappedDataset = new BitSet(numVectors);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             RANDOM,
             0.5,
+            numVectors,
             cachedBootstrappedDataset
         );
 
@@ -88,10 +92,12 @@ class DatasetBootstrapperTest {
     @Test
     void shouldSampleWithReplacement() {
         var random = new Random(1337);
-        var cachedBootstrappedDataset = HugeByteArray.newArray(4);
+        int numVectors = 4;
+        var cachedBootstrappedDataset = new BitSet(numVectors);
         var bootstrappedVectors = DatasetBootstrapper.bootstrap(
             random,
             1.0,
+            numVectors,
             cachedBootstrappedDataset
         );
 

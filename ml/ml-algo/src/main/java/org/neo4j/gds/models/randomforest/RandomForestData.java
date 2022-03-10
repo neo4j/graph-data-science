@@ -19,20 +19,12 @@
  */
 package org.neo4j.gds.models.randomforest;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.decisiontree.DecisionTreeTrainConfig;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.models.Classifier;
 
-@Configuration
-public interface RandomForestTrainConfig extends DecisionTreeTrainConfig {
+@ValueClass
+public interface RandomForestData extends Classifier.ClassifierData {
 
-    @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
-    double featureBaggingRatio();
-
-    @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
-    default double numberOfSamplesRatio() {
-        return 1;
-    };
-
-    @Configuration.IntegerRange(min = 1)
-    int numberOfDecisionTrees();
+    DecisionTreePredict<Long>[] decisionTrees();
 }

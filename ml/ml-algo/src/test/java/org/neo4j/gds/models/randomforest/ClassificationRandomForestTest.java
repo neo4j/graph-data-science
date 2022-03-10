@@ -75,17 +75,21 @@ class ClassificationRandomForestTest {
                 .builder()
                 .maxDepth(1)
                 .minSplitSize(1)
-                .randomSeed(Optional.empty())
-                .numFeatureVectorsRatio(0.0D)
-                .featureBaggingRatio(0.0D)
+                .randomSeed(42L)
+                .featureBaggingRatio(1.0D)
                 .numberOfDecisionTrees(1)
-                .build()
+                .build(),
+            false
         );
 
-        var randomForestPredict = randomForestTrain.train().predictor();
+        var trainResult = randomForestTrain.train();
+        var randomForestPredict = trainResult.predictor();
 
         var features = new double[]{8.0, 0.0};
-        assertThat(randomForestPredict.predict(features)).isEqualTo(42);
+
+        assertThat(trainResult.outOfBagError()).isEmpty();
+        assertThat(randomForestPredict.predictLabel(features)).isEqualTo(42);
+        assertThat(randomForestPredict.predictProbabilities(features)).containsExactly(0.0, 1.0);
     }
 
     @ParameterizedTest
@@ -102,16 +106,18 @@ class ClassificationRandomForestTest {
                 .maxDepth(2)
                 .minSplitSize(1)
                 .randomSeed(Optional.of(1337L))
-                .numFeatureVectorsRatio(0.5D)
-                .featureBaggingRatio(0.0D)
+                .numberOfSamplesRatio(0.5D)
+                .featureBaggingRatio(1.0D)
                 .numberOfDecisionTrees(20)
-                .build()
+                .build(),
+            false
         );
 
         var randomForestPredict = randomForestTrain.train().predictor();
 
         var features = new double[]{8.0, 3.2};
-        assertThat(randomForestPredict.predict(features)).isEqualTo(42);
+        assertThat(randomForestPredict.predictLabel(features)).isEqualTo(42);
+        assertThat(randomForestPredict.predictProbabilities(features)).containsExactly(0.45, 0.55);
     }
 
     @ParameterizedTest
@@ -128,19 +134,14 @@ class ClassificationRandomForestTest {
                 .maxDepth(2)
                 .minSplitSize(1)
                 .randomSeed(Optional.of(1337L))
-                .numFeatureVectorsRatio(1.0D)
-                .featureBaggingRatio(0.0D)
+                .featureBaggingRatio(1.0D)
                 .numberOfDecisionTrees(20)
-                .build()
+                .build(),
+            true
         );
 
         var trainResult = randomForestTrain.train();
-        var randomForestPredict = trainResult.predictor();
-        var bootstrappedDatasets = trainResult.bootstrappedDatasets();
 
-        assertThat(randomForestPredict.outOfBagError(bootstrappedDatasets, allFeatureVectors, allLabels)).isCloseTo(
-            0.2,
-            Offset.offset(0.000001D)
-        );
+        assertThat(trainResult.outOfBagError().orElseThrow()).isCloseTo(0.2, Offset.offset(0.000001D));
     }
 }
