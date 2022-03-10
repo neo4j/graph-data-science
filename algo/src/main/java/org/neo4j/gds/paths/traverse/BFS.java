@@ -32,11 +32,10 @@ import org.neo4j.gds.core.utils.paged.LongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Parallel implementation of the BFS algorithm.
@@ -59,7 +58,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * descendants from the nodes of a chunk, appear together before those from a later
  * chunk.
  */
-public final class BFS extends Algorithm<long[]> {
+public final class BFS extends Algorithm<HugeLongArray> {
 
     private static final int DEFAULT_DELTA = 64;
     static final int IGNORE_NODE = -1;
@@ -73,6 +72,7 @@ public final class BFS extends Algorithm<long[]> {
     // An array to keep the node ids that were already traversed in the correct order.
     // It is initialized with the total number of nodes, but may contain less than that.
     private HugeLongArray traversedNodes;
+    private final LongAdder ignoredNodesCount = new LongAdder();
 
     // An array to keep the weight/depth of the node at the same position in `traversedNodes`.
     // It is initialized with the total number of nodes, but may contain less than that.
@@ -162,13 +162,13 @@ public final class BFS extends Algorithm<long[]> {
     }
 
     @Override
-    public long[] compute() {
+    public HugeLongArray compute() {
         progressTracker.beginSubTask(graph.relationshipCount());
 
         // This is used to read from `traversedNodes` in chunks, updated in `BFSTask`.
-        var traversedNodesIndex = new AtomicInteger(0);
+        var traversedNodesIndex = new AtomicLong(0);
         // This keeps the current length of the `traversedNodes`, updated in `BFSTask.syncNextChunk`.
-        var traversedNodesLength = new AtomicInteger(1);
+        var traversedNodesLength = new AtomicLong(1);
         // Used for early exit when target node is reached (if specified by the user), updated in `BFSTask`.
         var targetFoundIndex = new AtomicLong(Long.MAX_VALUE);
 
@@ -200,7 +200,7 @@ public final class BFS extends Algorithm<long[]> {
             }
 
             // Synchronize the results sequentially
-            int previousTraversedNodesLength = traversedNodesLength.get();
+            var previousTraversedNodesLength = traversedNodesLength.get();
             int numberOfFinishedTasks = 0;
             int numberOfTasksWithChunks = countTasksWithChunks(bfsTaskList);
             while (numberOfFinishedTasks != numberOfTasksWithChunks && running()) {
@@ -232,19 +232,28 @@ public final class BFS extends Algorithm<long[]> {
         }
 
         // Find the portion of `traversedNodes` that contains the actual result, doesn't account for target node, hence the `if` statement.
-        int nodesLengthToRetain = traversedNodesLength.get();
+        var nodesLengthToRetain = traversedNodesLength.get();
         if (targetFoundIndex.get() != Long.MAX_VALUE) {
             nodesLengthToRetain = targetFoundIndex.intValue() + 1;
         }
-        long[] resultNodes = traversedNodes.copyOf(nodesLengthToRetain).toArray();
-        resultNodes = Arrays.stream(resultNodes).filter(node -> node != IGNORE_NODE).toArray();
+
+        var result = HugeLongArray.newArray(nodesLengthToRetain - ignoredNodesCount.longValue());
+        long resultIndex = 0;
+        for (long i = 0; i < nodesLengthToRetain; i++) {
+            long traversedNodeId = traversedNodes.get(i);
+            if (traversedNodeId != IGNORE_NODE) {
+                result.set(resultIndex, traversedNodeId);
+                resultIndex++;
+            }
+        }
+
         progressTracker.endSubTask();
-        return resultNodes;
+        return result;
     }
 
     private List<BFSTask> initializeBfsTasks(
-        AtomicInteger traversedNodesIndex,
-        AtomicInteger traversedNodesLength,
+        AtomicLong traversedNodesIndex,
+        AtomicLong traversedNodesLength,
         AtomicLong targetFoundIndex,
         HugeAtomicLongArray minimumChunk,
         int delta
@@ -264,6 +273,7 @@ public final class BFS extends Algorithm<long[]> {
                 aggregatorFunction,
                 delta,
                 sourceNodeId,
+                ignoredNodesCount,
                 terminationFlag,
                 progressTracker
             ));

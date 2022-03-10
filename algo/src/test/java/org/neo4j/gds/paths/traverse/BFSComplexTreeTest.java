@@ -112,7 +112,7 @@ class BFSComplexTreeTest {
             concurrency,
             ProgressTracker.NULL_TRACKER,
             delta
-        ).compute();
+        ).compute().toArray();
 
         assertThat(nodes)
             .isEqualTo(Stream.of(

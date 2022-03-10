@@ -95,7 +95,7 @@ class BFSTridentGraphTest {
             concurrency,
             ProgressTracker.NULL_TRACKER,
             delta
-        ).compute();
+        ).compute().toArray();
 
         assertThat(nodes)
             .isEqualTo(Arrays.stream(new String[]{
