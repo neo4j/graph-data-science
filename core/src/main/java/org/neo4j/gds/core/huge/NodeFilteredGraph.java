@@ -41,6 +41,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -55,7 +56,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     private final NodeMapping filteredIdMap;
     private long relationshipCount;
     private final HugeIntArray degreeCache;
-    private final ThreadLocal<Graph> threadLocalGraph;
+    private final CloseableThreadLocal<Graph> threadLocalGraph;
 
     public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap, AllocationTracker allocationTracker) {
         this(originalGraph, filteredIdMap, emptyDegreeCache(filteredIdMap, allocationTracker),-1);
@@ -67,7 +68,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
         this.degreeCache = degreeCache;
         this.filteredIdMap = filteredIdMap;
         this.relationshipCount = relationshipCount;
-        this.threadLocalGraph = ThreadLocal.withInitial(this::concurrentCopy);
+        this.threadLocalGraph = CloseableThreadLocal.withInitial(this::concurrentCopy);
     }
 
     private static HugeIntArray emptyDegreeCache(
