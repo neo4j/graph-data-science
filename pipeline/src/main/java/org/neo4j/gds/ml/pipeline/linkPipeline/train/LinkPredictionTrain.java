@@ -169,14 +169,13 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         ProgressTracker customProgressTracker
     ) {
         return new LogisticRegressionTrainer(
-            trainSet,
             trainConfig.concurrency(),
             (LogisticRegressionTrainConfig) modelConfig,
             classIdMap,
             true,
             terminationFlag,
             customProgressTracker
-        ).train(featureAndLabels.features(), featureAndLabels.labels());
+        ).train(featureAndLabels.features(), featureAndLabels.labels(), trainSet);
     }
 
     private LinkPredictionTrain.ModelSelectResult modelSelect(
