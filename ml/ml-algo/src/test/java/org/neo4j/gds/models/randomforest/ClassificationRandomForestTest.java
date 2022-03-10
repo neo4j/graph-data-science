@@ -17,34 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core.randomforest;
+package org.neo4j.gds.models.randomforest;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.ml.core.decisiontree.GiniIndex;
+import org.neo4j.gds.decisiontree.GiniIndex;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ClassificationRandomForestTest {
+class ClassificationRandomForestTest {
     private static final long NUM_SAMPLES = 10;
-    private static final int[] CLASSES = {1337, 42};
-    private static final Map<Integer, Integer> CLASS_TO_IDX = Map.of(
-        1337, 0,
-        42, 1
-    );
+    private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
 
-    private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES);
-    private final HugeObjectArray<double[]> allFeatureVectors = HugeObjectArray.newArray(
-        double[].class,
-        NUM_SAMPLES
-    );
+    private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
+    private final HugeObjectArray<double[]> allFeatureVectors = HugeObjectArray.newArray(double[].class, NUM_SAMPLES);
 
     private GiniIndex giniIndexLoss;
 
@@ -66,24 +59,27 @@ public class ClassificationRandomForestTest {
         allFeatureVectors.set(8, new double[]{10.12493903, 3.234550982});
         allFeatureVectors.set(9, new double[]{6.642287351, 3.319983761});
 
-        giniIndexLoss = new GiniIndex(CLASSES, allLabels, CLASS_TO_IDX);
+        giniIndexLoss = new GiniIndex(allLabels, CLASS_MAPPING);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void usingOneTree(int concurrency) {
-        var randomForestTrain = new ClassificationRandomForestTrain(
+        var randomForestTrain = new ClassificationRandomForestTrain<>(
             giniIndexLoss,
             allFeatureVectors,
-            1,
-            1,
-            0.0D,
-            0.0D,
-            Optional.empty(),
-            1,
             concurrency,
-            CLASSES,
-            allLabels
+            CLASS_MAPPING,
+            allLabels,
+            RandomForestTrainConfigImpl
+                .builder()
+                .maxDepth(1)
+                .minSplitSize(1)
+                .randomSeed(Optional.empty())
+                .numFeatureVectorsRatio(0.0D)
+                .featureBaggingRatio(0.0D)
+                .numberOfDecisionTrees(1)
+                .build()
         );
 
         var randomForestPredict = randomForestTrain.train().predictor();
@@ -95,18 +91,21 @@ public class ClassificationRandomForestTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void usingTwentyTrees(int concurrency) {
-        var randomForestTrain = new ClassificationRandomForestTrain(
+        var randomForestTrain = new ClassificationRandomForestTrain<>(
             giniIndexLoss,
             allFeatureVectors,
-            2,
-            1,
-            0.0D,
-            0.5D,
-            Optional.of(1337L),
-            20,
             concurrency,
-            CLASSES,
-            allLabels
+            CLASS_MAPPING,
+            allLabels,
+            RandomForestTrainConfigImpl
+                .builder()
+                .maxDepth(2)
+                .minSplitSize(1)
+                .randomSeed(Optional.of(1337L))
+                .numFeatureVectorsRatio(0.5D)
+                .featureBaggingRatio(0.0D)
+                .numberOfDecisionTrees(20)
+                .build()
         );
 
         var randomForestPredict = randomForestTrain.train().predictor();
@@ -118,25 +117,30 @@ public class ClassificationRandomForestTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldMakeSaneErrorEstimation(int concurrency) {
-        var randomForestTrain = new ClassificationRandomForestTrain(
+        var randomForestTrain = new ClassificationRandomForestTrain<>(
             giniIndexLoss,
             allFeatureVectors,
-            2,
-            1,
-            0.0D,
-            1.0D,
-            Optional.of(1337L),
-            20,
             concurrency,
-            CLASSES,
-            allLabels
+            CLASS_MAPPING,
+            allLabels,
+            RandomForestTrainConfigImpl
+                .builder()
+                .maxDepth(2)
+                .minSplitSize(1)
+                .randomSeed(Optional.of(1337L))
+                .numFeatureVectorsRatio(1.0D)
+                .featureBaggingRatio(0.0D)
+                .numberOfDecisionTrees(20)
+                .build()
         );
 
         var trainResult = randomForestTrain.train();
         var randomForestPredict = trainResult.predictor();
         var bootstrappedDatasets = trainResult.bootstrappedDatasets();
 
-        assertThat(randomForestPredict.outOfBagError(bootstrappedDatasets, allFeatureVectors, allLabels))
-            .isCloseTo(0.2, Offset.offset(0.000001D));
+        assertThat(randomForestPredict.outOfBagError(bootstrappedDatasets, allFeatureVectors, allLabels)).isCloseTo(
+            0.2,
+            Offset.offset(0.000001D)
+        );
     }
 }

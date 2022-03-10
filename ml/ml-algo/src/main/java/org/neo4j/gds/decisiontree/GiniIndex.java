@@ -17,31 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core.decisiontree;
+package org.neo4j.gds.decisiontree;
 
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-
-import java.util.Map;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 public class GiniIndex implements DecisionTreeLoss {
 
-    private final int[] classes;
-    private final HugeIntArray allLabels;
-    private final Map<Integer, Integer> classToIdx;
+    private final HugeLongArray expectedLabels;
+    private final LocalIdMap classMapping;
 
     public GiniIndex(
-        int[] classes,
-        HugeIntArray allLabels,
-        Map<Integer, Integer> classToIdx
+        HugeLongArray expectedLabels,
+        LocalIdMap classMapping
     ) {
-        assert classes.length > 0;
-        assert allLabels.size() > 0;
-        assert classToIdx.keySet().size() == classes.length;
+        this.classMapping = classMapping;
+        assert expectedLabels.size() > 0;
 
-        this.classes = classes;
-        this.allLabels = allLabels;
-        this.classToIdx = classToIdx;
+        this.expectedLabels = expectedLabels;
     }
 
     @Override
@@ -65,10 +58,10 @@ public class GiniIndex implements DecisionTreeLoss {
 
         if (groupSize == 0) return 0;
 
-        final var groupClassCounts = new long[classes.length];
+        final var groupClassCounts = new long[classMapping.size()];
         for (long i = 0; i < groupSize; i++) {
-            var label = allLabels.get(group.get(i));
-            groupClassCounts[classToIdx.get(label)]++;
+            var expectedLabel = expectedLabels.get(group.get(i));
+            groupClassCounts[classMapping.toMapped(expectedLabel)]++;
         }
 
         double score = 0.0;

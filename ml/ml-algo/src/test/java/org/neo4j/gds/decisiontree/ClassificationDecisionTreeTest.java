@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core.decisiontree;
+package org.neo4j.gds.decisiontree;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,10 +25,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,13 +36,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ClassificationDecisionTreeTest {
 
     private static final long NUM_SAMPLES = 10;
-    private static final int[] CLASSES = {1337, 42};
-    private static final Map<Integer, Integer> CLASS_TO_IDX = Map.of(
-            1337, 0,
-            42, 1
-        );
+    private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
 
-    private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES);
+    private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
     private final HugeObjectArray<double[]> allFeatureVectors = HugeObjectArray.newArray(
         double[].class,
         NUM_SAMPLES
@@ -67,7 +63,7 @@ class ClassificationDecisionTreeTest {
         allFeatureVectors.set(8, new double[]{10.12493903, 3.234550982});
         allFeatureVectors.set(9, new double[]{6.642287351, 3.319983761});
 
-        giniIndexLoss = new GiniIndex(CLASSES, allLabels, CLASS_TO_IDX);
+        giniIndexLoss = new GiniIndex(allLabels, CLASS_MAPPING);
     }
 
     private static Stream<Arguments> predictionWithoutSamplingParameters() {
@@ -91,18 +87,18 @@ class ClassificationDecisionTreeTest {
         int maxDepth,
         int minSize
     ) {
-        var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
+        var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
             allFeatureVectors,
-            maxDepth,
-            CLASSES,
             allLabels,
-            CLASS_TO_IDX
+            CLASS_MAPPING,
+            DecisionTreeTrainConfigImpl.builder()
+                .maxDepth(maxDepth)
+                .minSplitSize(minSize)
+                .build(),
+            0.0,
+            0.0
         );
-
-        var decisionTree = decisionTreeBuilder
-            .withMinSize(minSize)
-            .build();
 
         var decisionTreePredict = decisionTree.train();
 
@@ -111,54 +107,78 @@ class ClassificationDecisionTreeTest {
 
     @Test
     void indexSamplingShouldWork() {
-        var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
+        var decisionTreeTrainConfigBuilder = DecisionTreeTrainConfigImpl.builder()
+            .maxDepth(1)
+            .minSplitSize(1);
+
+        var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
             allFeatureVectors,
-            1,
-            CLASSES,
             allLabels,
-            CLASS_TO_IDX
+            CLASS_MAPPING,
+            decisionTreeTrainConfigBuilder
+                .randomSeed(-6938002729576536314L)
+                .build(),
+            0.5D, // Only one feature is used.
+            0.0
         );
 
         var features = new double[]{8.0, 0.0};
 
-        var decisionTree = decisionTreeBuilder
-            .withFeatureBaggingRatio(0.5D) // Only one feature is used.
-            .withRandomSeed(-6938002729576536314L)
-            .build();
         var decisionTreePredict = decisionTree.train();
         assertThat(decisionTreePredict.predict(features)).isEqualTo(42);
 
-        decisionTree = decisionTreeBuilder
-            .withRandomSeed(42L)
-            .build();
+        decisionTree = new ClassificationDecisionTreeTrain<>(
+            giniIndexLoss,
+            allFeatureVectors,
+            allLabels,
+            CLASS_MAPPING,
+            decisionTreeTrainConfigBuilder
+                .randomSeed(42L)
+                .build(),
+            0.5D, // Only one feature is used.
+            0.0
+        );
+
         decisionTreePredict = decisionTree.train();
         assertThat(decisionTreePredict.predict(features)).isEqualTo(1337);
     }
 
     @Test
     void vectorSamplingShouldWork() {
-        var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
-            giniIndexLoss,
-            allFeatureVectors,
-            1,
-            CLASSES,
-            allLabels,
-            CLASS_TO_IDX
-        );
-
         var features = new double[]{8.0, 0.0};
 
-        var decisionTree = decisionTreeBuilder
-            .withNumFeatureVectorsRatio(0.4D) // Use 40% of all training examples.
-            .withRandomSeed(5677377167946646799L)
-            .build();
+        var decisionTreeTrainConfigBuilder = DecisionTreeTrainConfigImpl.builder()
+            .maxDepth(1)
+            .minSplitSize(1);
+
+        var decisionTree = new ClassificationDecisionTreeTrain<>(
+            giniIndexLoss,
+            allFeatureVectors,
+            allLabels,
+            CLASS_MAPPING,
+            decisionTreeTrainConfigBuilder
+                .randomSeed(5677377167946646799L)
+                .build(),
+            0.0,
+            0.4D // Use 40% of all training examples.
+        );
+
         var decisionTreePredict = decisionTree.train();
         assertThat(decisionTreePredict.predict(features)).isEqualTo(42);
 
-        decisionTree = decisionTreeBuilder
-            .withRandomSeed(321328L)
-            .build();
+        decisionTree = new ClassificationDecisionTreeTrain<>(
+            giniIndexLoss,
+            allFeatureVectors,
+            allLabels,
+            CLASS_MAPPING,
+            decisionTreeTrainConfigBuilder
+                .randomSeed(321328L)
+                .build(),
+            0.0,
+            0.4D // Use 40% of all training examples.
+        );
+
         decisionTreePredict = decisionTree.train();
         assertThat(decisionTreePredict.predict(features)).isEqualTo(1337);
     }

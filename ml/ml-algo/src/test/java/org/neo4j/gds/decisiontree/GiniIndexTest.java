@@ -17,27 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core.decisiontree;
+package org.neo4j.gds.decisiontree;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GiniIndexTest {
 
-    private static final int[] CLASSES = {0, 1};
-    private static final Map<Integer, Integer> CLASS_TO_IDX = Map.of(
-        5, 0,
-        1, 1
-    );
+    private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(5, 1);
 
     private static Stream<Arguments> giniParameters() {
         return Stream.of(
@@ -77,7 +72,7 @@ class GiniIndexTest {
     @ParameterizedTest
     @MethodSource("giniParameters")
     void shouldComputeCorrectLoss(int[] allLabels, long[][] groups, GroupSizes groupSizes, double expectedLoss) {
-        var hugeLabels = HugeIntArray.newArray(allLabels.length);
+        var hugeLabels = HugeLongArray.newArray(allLabels.length);
         for (int i = 0; i < allLabels.length; i++) {
             hugeLabels.set(i, allLabels[i]);
         }
@@ -92,7 +87,7 @@ class GiniIndexTest {
             rightGroup.set(i, groups[1][i]);
         }
 
-        var giniIndexLoss = new GiniIndex(CLASSES, hugeLabels, CLASS_TO_IDX);
+        var giniIndexLoss = new GiniIndex(hugeLabels, CLASS_MAPPING);
 
         assertThat(giniIndexLoss.splitLoss(ImmutableGroups.of(leftGroup, rightGroup), groupSizes))
             .isCloseTo(expectedLoss, Offset.offset(0.00001D));
