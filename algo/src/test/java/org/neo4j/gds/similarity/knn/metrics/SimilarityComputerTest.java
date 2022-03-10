@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.knn;
+package org.neo4j.gds.similarity.knn.metrics;
 
 import com.carrotsearch.hppc.FloatArrayList;
 import net.jqwik.api.Arbitraries;
@@ -32,6 +32,7 @@ import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;
@@ -75,7 +76,10 @@ class SimilarityComputerTest {
     }
 
     @Property
-    void floatArrayPropertySimilarityReturns1ForEqualValues(@ForAll @Positive long id) {
+    void floatArrayPropertySimilarityReturns1ForEqualValues(
+        @ForAll @Positive long id,
+        @ForAll @From("floatArrayMetrics") SimilarityMetric similarityMetric
+    ) {
         NodeProperties props = new FloatArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0)
             .boxed()
             .reduce(new FloatArrayList(42), (floats, value) -> {
@@ -84,13 +88,16 @@ class SimilarityComputerTest {
             }, (f1, f2) -> f1)
             .toArray()
         );
-        var sim = SimilarityComputer.ofFloatArrayProperty(props);
+        var sim = SimilarityComputer.ofFloatArrayProperty(props, similarityMetric);
 
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
     }
 
     @Property
-    void floatArrayPropertySimilarityReturnsValuesBetween0And1(@ForAll @From("differentValues") LongLongPair ids) {
+    void floatArrayPropertySimilarityReturnsValuesBetween0And1(
+        @ForAll @From("differentValues") LongLongPair ids,
+        @ForAll @From("floatArrayMetrics") SimilarityMetric similarityMetric
+    ) {
         NodeProperties props = new FloatArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0)
             .boxed()
             .reduce(new FloatArrayList(42), (floats, value) -> {
@@ -99,12 +106,15 @@ class SimilarityComputerTest {
             }, (f1, f2) -> f1)
             .toArray()
         );
-        var sim = SimilarityComputer.ofFloatArrayProperty(props);
-        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
+        var sim = SimilarityComputer.ofFloatArrayProperty(props, similarityMetric);
+        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
 
     @Property
-    void floatArrayPropertySimilarityReturns0ForNegativeValues(@ForAll @From("differentValues") LongLongPair ids) {
+    void floatArrayPropertySimilarityReturns0ForNegativeValues(
+        @ForAll @From("differentValues") LongLongPair ids,
+        @ForAll @From("floatArrayMetrics") SimilarityMetric similarityMetric
+    ) {
         NodeProperties props = new FloatArrayTestProperties(nodeId -> new Random(nodeId)
             .doubles(42, -10.0, 10.0)
             .boxed()
@@ -114,53 +124,71 @@ class SimilarityComputerTest {
             }, (f1, f2) -> f1)
             .toArray());
 
-        var sim = SimilarityComputer.ofFloatArrayProperty(props);
+        var sim = SimilarityComputer.ofFloatArrayProperty(props, similarityMetric);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
 
     @Property
-    void doubleArrayPropertySimilarityReturns1ForEqualValues(@ForAll @Positive long id) {
+    void doubleArrayPropertySimilarityReturns1ForEqualValues(
+        @ForAll @Positive long id,
+        @ForAll @From("doubleArrayMetrics") SimilarityMetric similarityMetric
+    ) {
         NodeProperties props = new DoubleArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0).toArray());
-        var sim = SimilarityComputer.ofDoubleArrayProperty(props);
+        var sim = SimilarityComputer.ofDoubleArrayProperty(props, similarityMetric);
 
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
     }
 
     @Property
-    void doubleArrayPropertySimilarityReturnsValuesBetween0And1(@ForAll @From("differentValues") LongLongPair ids) {
+    void doubleArrayPropertySimilarityReturnsValuesBetween0And1(
+        @ForAll @From("differentValues") LongLongPair ids,
+        @ForAll @From("doubleArrayMetrics") SimilarityMetric similarityMetric
+    ) {
         NodeProperties props = new DoubleArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0).toArray());
-        var sim = SimilarityComputer.ofDoubleArrayProperty(props);
-        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
+        var sim = SimilarityComputer.ofDoubleArrayProperty(props, similarityMetric);
+        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
 
     @Property
-    void doubleArrayPropertySimilarityReturns0ForNegativeValues(@ForAll @From("differentValues") LongLongPair ids) {
+    void doubleArrayPropertySimilarityReturns0ForNegativeValues(
+        @ForAll @From("differentValues") LongLongPair ids,
+        @ForAll @From("doubleArrayMetrics") SimilarityMetric similarityMetric
+    ) {
         NodeProperties props = new DoubleArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, -10.0, 10.0).toArray());
 
-        var sim = SimilarityComputer.ofDoubleArrayProperty(props);
+        var sim = SimilarityComputer.ofDoubleArrayProperty(props, similarityMetric);
 
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
 
     @Property
-    void longArrayPropertySimilarityReturns1ForEqualValues(@ForAll @Positive long id) {
+    void longArrayPropertySimilarityReturns1ForEqualValues(
+        @ForAll @Positive long id,
+        @ForAll @From("longArrayMetrics") SimilarityMetric similarityMetric
+    ) {
         NodeProperties props = new LongArrayTestProperties(nodeId -> new Random(nodeId).longs(42, 0, 1337).toArray());
-        var sim = SimilarityComputer.ofLongArrayProperty(props);
+        var sim = SimilarityComputer.ofLongArrayProperty(props, similarityMetric);
 
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
     }
 
     @Property
-    void longArrayPropertySimilarityReturnsValuesBetween0And1(@ForAll @From("differentValues") LongLongPair ids) {
+    void longArrayPropertySimilarityReturnsValuesBetween0And1(
+        @ForAll @From("differentValues") LongLongPair ids,
+        @ForAll @From("longArrayMetrics") SimilarityMetric similarityMetric
+    ) {
         NodeProperties props = new LongArrayTestProperties(nodeId -> new Random(nodeId).longs(42, 0, 1337).toArray());
-        var sim = SimilarityComputer.ofLongArrayProperty(props);
-        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
+        var sim = SimilarityComputer.ofLongArrayProperty(props, similarityMetric);
+        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
 
     @Property
-    void longArrayPropertySimilarityReturns0ForNegativeValues(@ForAll @From("differentValues") LongLongPair ids) {
+    void longArrayPropertySimilarityReturns0ForNegativeValues(
+        @ForAll @From("differentValues") LongLongPair ids,
+        @ForAll @From("longArrayMetrics") SimilarityMetric similarityMetric
+    ) {
         NodeProperties props = new LongArrayTestProperties(nodeId -> new Random(nodeId).longs(42, -10, 10).toArray());
-        var sim = SimilarityComputer.ofLongArrayProperty(props);
+        var sim = SimilarityComputer.ofLongArrayProperty(props, similarityMetric);
 
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
@@ -179,7 +207,10 @@ class SimilarityComputerTest {
             }
             return new double[0];
         });
-        var sim = SimilarityComputer.ofDoubleArrayProperty(props);
+        var sim = SimilarityComputer.ofDoubleArrayProperty(
+            props,
+            SimilarityMetric.defaultMetricForType(ValueType.DOUBLE_ARRAY)
+        );
 
         assertThat(sim.similarity(0, 1)).isCloseTo(1.0D, within(0.05));
     }
@@ -196,8 +227,14 @@ class SimilarityComputerTest {
             SimilarityComputer.ofDoubleProperty(new DoubleTestProperties(nodeId -> Double.NaN)),
             SimilarityComputer.ofDoubleProperty(new DoubleTestProperties(nodeId -> Double.POSITIVE_INFINITY)),
             SimilarityComputer.ofDoubleProperty(new DoubleTestProperties(nodeId -> Double.NEGATIVE_INFINITY)),
-            SimilarityComputer.ofFloatArrayProperty(new FloatArrayTestProperties(nodeId -> new float[]{})),
-            SimilarityComputer.ofDoubleArrayProperty(new DoubleArrayTestProperties(nodeId -> new double[]{}))
+            SimilarityComputer.ofFloatArrayProperty(
+                new FloatArrayTestProperties(nodeId -> new float[]{}),
+                SimilarityMetric.defaultMetricForType(ValueType.FLOAT_ARRAY)
+            ),
+            SimilarityComputer.ofDoubleArrayProperty(
+                new DoubleArrayTestProperties(nodeId -> new double[]{}),
+                SimilarityMetric.defaultMetricForType(ValueType.DOUBLE_ARRAY)
+            )
         );
     }
 
@@ -206,5 +243,20 @@ class SimilarityComputerTest {
         return Arbitraries.longs().between(0L, Long.MAX_VALUE).flatMap(n1 -> Arbitraries.longs().between(0L, Long.MAX_VALUE)
             .filter(n2 -> n1.longValue() != n2.longValue())
             .map(n2 -> PrimitiveTuples.pair((long) n1, (long) n2)));
+    }
+
+    @Provide("longArrayMetrics")
+    final Arbitrary<SimilarityMetric> longArrayMetrics() {
+        return Arbitraries.of(SimilarityMetric.JACCARD, SimilarityMetric.OVERLAP);
+    }
+
+    @Provide("doubleArrayMetrics")
+    final Arbitrary<SimilarityMetric> doubleArrayMetrics() {
+        return Arbitraries.of(SimilarityMetric.COSINE, SimilarityMetric.EUCLIDEAN, SimilarityMetric.PEARSON);
+    }
+
+    @Provide("floatArrayMetrics")
+    final Arbitrary<SimilarityMetric> floatArrayMetrics() {
+        return Arbitraries.of(SimilarityMetric.COSINE, SimilarityMetric.EUCLIDEAN, SimilarityMetric.PEARSON);
     }
 }

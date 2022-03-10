@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.knn;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 import java.util.SplittableRandom;
 
@@ -82,7 +83,7 @@ final class GenerateRandomNeighbors implements Runnable {
             var neighbors = new NeighborList(k);
             for (long candidate : chosen) {
                 neighbors.add(candidate, computer.safeSimilarity(nodeId, candidate), rng, 0.0);
-            };
+            }
 
             assert neighbors.size() >= Math.min(neighborFilter.lowerBoundOfPotentialNeighbours(nodeId), boundedK);
             assert neighbors.size() <= k;

@@ -27,6 +27,8 @@ import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
+import org.neo4j.gds.similarity.knn.metrics.SimilarityMetric;
 
 import java.util.SplittableRandom;
 import java.util.stream.LongStream;
@@ -59,7 +61,11 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             }
         };
 
-        var similarityComputer = SimilarityComputer.ofProperty(nodeProperties, "myProperty");
+        var similarityComputer = SimilarityComputer.ofProperty(
+            nodeProperties,
+            "myProperty",
+            SimilarityMetric.DUMMY_LONG_PROPERTY_METRIC
+        );
 
         var random = new SplittableRandom();
         var generateRandomNeighbors = new GenerateRandomNeighbors(
