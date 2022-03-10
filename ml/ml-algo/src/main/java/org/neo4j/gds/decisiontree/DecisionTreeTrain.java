@@ -31,8 +31,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
 
     private final LOSS lossFunction;
     private final Features features;
-    private final int maxDepth;
-    private final int minSize;
+    private final DecisionTreeTrainConfig config;
     private final FeatureBagger featureBagger;
 
     DecisionTreeTrain(
@@ -43,8 +42,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     ) {
         this.lossFunction = lossFunction;
         this.features = features;
-        this.maxDepth = config.maxDepth();
-        this.minSize = config.minSplitSize();
+        this.config = config;
         this.featureBagger = featureBagger;
     }
 
@@ -53,6 +51,9 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         TreeNode<PREDICTION> root;
 
         root = splitAndPush(stack, sampledFeatureVectors, sampledFeatureVectors.size(), 1);
+
+        int maxDepth = config.maxDepth();
+        int minSize = config.minSplitSize();
 
         while (!stack.isEmpty()) {
             var record = stack.pop();
