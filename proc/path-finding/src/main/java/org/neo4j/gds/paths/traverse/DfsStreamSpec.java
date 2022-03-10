@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.traverse;
 
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
@@ -34,7 +35,7 @@ import static org.neo4j.gds.paths.traverse.DfsStreamProc.DESCRIPTION;
 import static org.neo4j.gds.paths.traverse.DfsStreamProc.NEXT;
 
 @GdsCallable(name = "gds.dfs.stream", description = DESCRIPTION, executionMode = STREAM)
-public class DfsStreamSpec implements AlgorithmSpec<DFS, long[], DfsStreamConfig, Stream<DfsStreamProc.DfsStreamResult>, DFSAlgorithmFactory> {
+public class DfsStreamSpec implements AlgorithmSpec<DFS, HugeLongArray, DfsStreamConfig, Stream<DfsStreamProc.DfsStreamResult>, DFSAlgorithmFactory> {
     @Override
     public String name() {
         return "DfsStream";
@@ -50,19 +51,20 @@ public class DfsStreamSpec implements AlgorithmSpec<DFS, long[], DfsStreamConfig
         return (__, config) -> DfsStreamConfig.of(config);
     }
     @Override
-    public ComputationResultConsumer<DFS, long[], DfsStreamConfig, Stream<DfsStreamProc.DfsStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DFS, HugeLongArray, DfsStreamConfig, Stream<DfsStreamProc.DfsStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var graph = computationResult.graph();
-            long[] nodes = computationResult.result();
+            var nodes = computationResult.result();
             if (graph.isEmpty() || null == nodes) {
                 return Stream.empty();
             }
 
-            var nodeList = Arrays.stream(nodes).boxed().map(graph::toOriginalNodeId).collect(Collectors.toList());
+            var nodesArray = nodes.toArray();
+            var nodeList = Arrays.stream(nodesArray).boxed().map(graph::toOriginalNodeId).collect(Collectors.toList());
             var startNode = computationResult.config().sourceNode();
             return Stream.of(new DfsStreamProc.DfsStreamResult(
                 startNode,
-                nodes,
+                nodesArray,
                 PathFactory.create(executionContext.transaction().internalTransaction(), nodeList, NEXT)
             ));
         };

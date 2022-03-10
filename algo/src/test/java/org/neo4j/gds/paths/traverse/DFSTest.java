@@ -99,7 +99,7 @@ class DFSTest {
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
             ProgressTracker.NULL_TRACKER
-        ).compute();
+        ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
             Stream.of("a", "c", "d", "f", "g").mapToLong(naturalGraph::toOriginalNodeId).toArray()
@@ -119,7 +119,7 @@ class DFSTest {
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
             ProgressTracker.NULL_TRACKER
-        ).compute();
+        ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
             Stream.of("a", "c", "d", "f", "g", "e", "b").mapToLong(naturalGraph::toOriginalNodeId).toArray()
@@ -140,7 +140,7 @@ class DFSTest {
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
             ProgressTracker.NULL_TRACKER
-        ).compute();
+        ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
             Stream.of("g", "f", "d", "c", "a").mapToLong(naturalGraph::toOriginalNodeId).toArray()
