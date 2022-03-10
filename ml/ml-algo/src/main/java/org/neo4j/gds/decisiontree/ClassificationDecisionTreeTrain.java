@@ -36,7 +36,7 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         LocalIdMap classIdMap,
         DecisionTreeTrainConfig config,
         FeatureBagger featureBagger
-        ) {
+    ) {
         super(
             features,
             config,
