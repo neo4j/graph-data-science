@@ -21,7 +21,9 @@ package org.neo4j.gds.models.randomforest;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.Features;
 
@@ -51,6 +53,20 @@ public class ClassificationRandomForestPredict implements Classifier {
     @Override
     public double[] predictProbabilities(long id, Features features) {
         return predictProbabilities(features.get(id));
+    }
+
+    @Override
+    public Matrix predictProbabilities(
+        Batch batch, Features features
+    ) {
+        var predictedProbabilities = new Matrix(batch.size(), numberOfClasses());
+        var offset = 0;
+
+        for (long id : batch.nodeIds()) {
+            predictedProbabilities.setRow(offset++, predictProbabilities(id, features));
+        }
+
+        return predictedProbabilities;
     }
 
     public double[] predictProbabilities(double[] features) {
