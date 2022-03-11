@@ -69,6 +69,10 @@ public final class BumpAllocator<PAGE> {
         return new LocalAllocator<>(this);
     }
 
+    LocalPositionalAllocator<PAGE> newLocalPositionalAllocator() {
+        return new LocalPositionalAllocator<>(this);
+    }
+
     PAGE[] intoPages() {
         return pages;
     }
@@ -77,6 +81,34 @@ public final class BumpAllocator<PAGE> {
         int pageIndex = (int) ALLOCATED_PAGES.getAndAdd(this, 1);
         grow(pageIndex + 1, NO_SKIP);
         return PageUtil.capacityFor(pageIndex, PAGE_SHIFT);
+    }
+
+    private long insertMultiplePages(int uptoPage, PAGE page) {
+        var currentPageId = (int) ALLOCATED_PAGES.get(this);
+        if (currentPageId < uptoPage) {
+            int pageToSkip = page == null ? NO_SKIP : uptoPage;
+            grow(uptoPage, pageToSkip);
+        }
+
+        if (page != null) {
+            growLock.lock();
+            try {
+                this.pages[uptoPage] = page;
+            } finally {
+                growLock.unlock();
+            }
+        }
+
+        while (currentPageId < uptoPage) {
+            int allocatedPage = (int) ALLOCATED_PAGES.compareAndExchange(this, currentPageId, uptoPage);
+            if (allocatedPage == currentPageId) {
+                currentPageId = uptoPage;
+                break;
+            }
+            currentPageId = allocatedPage;
+        }
+
+        return PageUtil.capacityFor(currentPageId, PAGE_SHIFT);
     }
 
     private long insertExistingPage(PAGE page) {
@@ -160,6 +192,10 @@ public final class BumpAllocator<PAGE> {
             this.offset = PAGE_SIZE;
         }
 
+        public LocalPositionalAllocator<PAGE> asPositionalAllocator() {
+            return new LocalPositionalAllocator<>(this.globalAllocator);
+        }
+
         /**
          * Inserts slice into the allocator, returns global address
          */
@@ -168,12 +204,17 @@ public final class BumpAllocator<PAGE> {
             // This value can be greater than `length` if the provided array is some sort of a buffer.
             // We need this to determine if we need to make a slice-copy of the targets array or not.
             var targetLength = globalAllocator.pageFactory.lengthOfPage(targets);
-            return insertData(targets, Math.min(length, targetLength), top, targetLength);
+            return insertData(targets, Math.min(length, targetLength), this.top, targetLength);
+        }
+
+        public void insertAt(long address, PAGE targets, int length) {
+            long top = this.top;
+
         }
 
         private long insertData(PAGE targets, int length, long address, int targetsLength) {
             int maxOffset = PAGE_SIZE - length;
-            if (maxOffset >= offset) {
+            if (maxOffset >= this.offset) {
                 doAllocate(targets, length);
                 return address;
             }
@@ -220,6 +261,64 @@ public final class BumpAllocator<PAGE> {
             System.arraycopy(targets, 0, page, offset, length);
             offset += length;
             top += length;
+        }
+    }
+
+    public static final class LocalPositionalAllocator<PAGE> {
+
+        private final BumpAllocator<PAGE> globalAllocator;
+        private long capacity;
+
+        private LocalPositionalAllocator(BumpAllocator<PAGE> globalAllocator) {
+            this.globalAllocator = globalAllocator;
+            this.capacity = 0;
+        }
+
+        /**
+         * Inserts slice into the allocator at the given position
+         */
+        public void insertAt(long offset, PAGE targets, int length) {
+            // targetLength is the length of the array that is provided ({@code == targets.length}).
+            // This value can be greater than `length` if the provided array is some sort of a buffer.
+            // We need this to determine if we need to make a slice-copy of the targets array or not.
+            var targetLength = globalAllocator.pageFactory.lengthOfPage(targets);
+            insertData(offset, targets, Math.min(length, targetLength), this.capacity, targetLength);
+        }
+
+        private void insertData(long offset, PAGE targets, int length, long capacity, int targetsLength) {
+            if (offset + length > capacity) {
+                targets = allocateNewPages(offset, targets, length, targetsLength);
+            }
+
+            if (targets != null) {
+                int pageId = PageUtil.pageIndex(offset, PAGE_SHIFT);
+                int pageOffset = PageUtil.indexInPage(offset, PAGE_MASK);
+                PAGE page = this.globalAllocator.pages[pageId];
+
+                //noinspection SuspiciousSystemArraycopy
+                System.arraycopy(targets, 0, page, pageOffset, length);
+            }
+        }
+
+        private PAGE allocateNewPages(long offset, PAGE targets, int length, int targetsLength) {
+            int pageId = PageUtil.pageIndex(offset, PAGE_SHIFT);
+
+            PAGE existingPage = null;
+            if (length > PAGE_SIZE) {
+                if (length < targetsLength) {
+                    // need to create a smaller slice
+                    targets = globalAllocator.pageFactory.copyOfPage(targets, length);
+                }
+                existingPage = targets;
+            }
+
+            this.capacity = globalAllocator.insertMultiplePages(pageId, existingPage);
+
+            if (existingPage != null) {
+                // we already inserted that page
+                return null;
+            }
+            return targets;
         }
     }
 }

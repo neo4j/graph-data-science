@@ -28,11 +28,13 @@ public interface AdjacencyListBuilder<PAGE, T> {
 
     Allocator<PAGE> newAllocator();
 
+    Allocator<PAGE> newPositionalAllocator();
+
     T build(HugeIntArray degrees, HugeLongArray offsets);
 
     interface Allocator<PAGE> extends AutoCloseable {
 
-        long write(PAGE targets, int length);
+        long write(PAGE targets, int length, long desiredAddress);
 
         @Override
         void close();

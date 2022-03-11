@@ -39,6 +39,11 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
     }
 
     @Override
+    public AdjacencyListBuilder.Allocator<long[]> newPositionalAllocator() {
+        return new PositionalAllocator(this.builder.newLocalPositionalAllocator());
+    }
+
+    @Override
     public UncompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
         var intoPages = builder.intoPages();
         reorder(intoPages, offsets, degrees);
@@ -82,8 +87,27 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
         }
 
         @Override
-        public long write(long[] properties, int length) {
+        public long write(long[] properties, int length, long desiredAddress) {
             return allocator.insert(properties, length);
+        }
+    }
+
+    public static final class PositionalAllocator implements AdjacencyListBuilder.Allocator<long[]> {
+
+        private final BumpAllocator.LocalPositionalAllocator<long[]> allocator;
+
+        private PositionalAllocator(BumpAllocator.LocalPositionalAllocator<long[]> allocator) {
+            this.allocator = allocator;
+        }
+
+        @Override
+        public void close() {
+        }
+
+        @Override
+        public long write(long[] properties, int length, long desiredAddress) {
+            allocator.insertAt(desiredAddress, properties, length);
+            return desiredAddress;
         }
     }
 }

@@ -39,6 +39,11 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
     }
 
     @Override
+    public Allocator newPositionalAllocator() {
+        return newAllocator();
+    }
+
+    @Override
     public CompressedAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
         var intoPages = builder.intoPages();
         reorder(intoPages, offsets, degrees);
@@ -82,7 +87,7 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
         }
 
         @Override
-        public long write(byte[] targets, int length) {
+        public long write(byte[] targets, int length, long desiredAddress) {
             return allocator.insert(targets, length);
         }
     }
