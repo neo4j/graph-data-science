@@ -19,13 +19,14 @@
  */
 package org.neo4j.gds.compat;
 
-import org.bouncycastle.util.Arrays;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.values.storable.Value;
 
+import java.util.Arrays;
 import java.util.Map;
 
 public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor<NodeLabel, PropertySchema> {
@@ -69,7 +70,7 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
         graphStore.nodes().forEachNodeLabel(nodeId, label -> {
             for (String nodePropertyKey : graphStore.nodePropertyKeys(label)) {
                 int propertyId = tokenHolders.propertyKeyTokens().getIdByName(nodePropertyKey);
-                if (propertySelection.test(propertyId) && !Arrays.contains(nodePropertyKeyMapping, propertyId)) {
+                if (propertySelection.test(propertyId) && !ArrayUtil.linearSearch(nodePropertyKeyMapping, nodePropertyKeyMapping.length, propertyId)) {
                     int propertyIndex = nodePropertyCount++;
                     nodePropertyKeyMapping[propertyIndex] = propertyId;
 

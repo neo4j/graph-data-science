@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.api;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.Collections;
@@ -46,8 +47,9 @@ public interface NodePropertyStore {
         return nodeProperties().isEmpty();
     }
 
+    @Value.Derived
     default Set<String> keySet() {
-        return nodeProperties().keySet();
+        return Collections.unmodifiableSet(nodeProperties().keySet());
     }
 
     default boolean containsKey(String propertyKey) {

@@ -31,10 +31,6 @@ public class InMemoryPropertyCursor extends AbstractInMemoryPropertyCursor {
 
     @Override
     public void initNodeProperties(long reference, long ownerReference) {
-//        var delegate = new InMemoryNodePropertyCursor(graphStore, tokenHolders);
-//        delegate.initNodeProperties(reference);
-//        this.delegate = delegate;
-
         if (this.delegate == null || !(this.delegate instanceof InMemoryNodePropertyCursor)) {
             this.delegate = new InMemoryNodePropertyCursor(graphStore, tokenHolders);
         }
