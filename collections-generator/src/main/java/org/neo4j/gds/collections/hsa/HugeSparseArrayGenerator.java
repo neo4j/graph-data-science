@@ -430,7 +430,7 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
                     .addStatement("int indexInPage = $T.indexInPage(index, $N)", PAGE_UTIL, pageMask)
                     .addStatement("$T page = getPage(pageIndex)", ArrayTypeName.of(valueType))
                     .addStatement(
-                        "$T expectedCurrentValue = ($T) $N.getVolatile(page, indexInPage)",
+                        "$T expectedCurrentValue = ($T) $N.getAcquire(page, indexInPage)",
                         valueType,
                         valueType,
                         arrayHandle
@@ -438,7 +438,7 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
                     .beginControlFlow("while (true)")
                     .addStatement("$1T newValueToStore = ($1T) (expectedCurrentValue + value)", valueType)
                     .addStatement(
-                        "$T actualCurrentValue = ($T) $N.compareAndExchange(page, indexInPage, expectedCurrentValue, newValueToStore)",
+                        "$T actualCurrentValue = ($T) $N.compareAndExchangeRelease(page, indexInPage, expectedCurrentValue, newValueToStore)",
                         valueType,
                         valueType,
                         arrayHandle
