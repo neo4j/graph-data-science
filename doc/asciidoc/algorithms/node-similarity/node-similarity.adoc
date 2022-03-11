@@ -433,7 +433,7 @@ However, they are just two directed relationships that have been independently p
 [[algorithms-node-similarity-examples-write]]
 === Write
 
-The `write` execution mode extends the `stats` mode with an important side effect: for each pair of nodes we create a relationship with the similarity score as a property to the Neo4j database.
+The `write` execution mode for each pair of nodes creates a relationship with their similarity score as a property to the Neo4j database.
 The type of the new relationship is specified using the mandatory configuration parameter `writeRelationshipType`.
 The name of the new property is specified using the mandatory configuration parameter `writeProperty`.
 The result is a single summary row, similar to `stats`, but with some additional metrics.
