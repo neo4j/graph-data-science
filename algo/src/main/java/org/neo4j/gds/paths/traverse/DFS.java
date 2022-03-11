@@ -20,22 +20,20 @@
 package org.neo4j.gds.paths.traverse;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.DoubleStack;
-import com.carrotsearch.hppc.LongArrayList;
-import com.carrotsearch.hppc.LongStack;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArrayStack;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import static org.neo4j.gds.Converters.longToIntConsumer;
-
-public class DFS extends Algorithm<long[]> {
+public class DFS extends Algorithm<HugeLongArray> {
 
     private final Graph graph;
     private final long startNodeId;
     private final ExitPredicate exitPredicate;
     private final Aggregator aggregatorFunction;
-    private final int nodeCount;
+    private final long nodeCount;
 
     public DFS(
         Graph graph,
@@ -47,27 +45,28 @@ public class DFS extends Algorithm<long[]> {
 
         super(progressTracker);
         this.graph = graph;
-        this.nodeCount = Math.toIntExact(graph.nodeCount());
+        this.nodeCount = graph.nodeCount();
         this.startNodeId = startNodeId;
         this.exitPredicate = exitPredicate;
         this.aggregatorFunction = aggregatorFunction;
     }
 
     @Override
-    public long[] compute() {
+    public HugeLongArray compute() {
         progressTracker.beginSubTask();
-        var result = new LongArrayList(nodeCount);
+        var result = HugeLongArray.newArray(nodeCount);
         var inResult = new BitSet(nodeCount);
 
-        var nodes = new LongStack(nodeCount);
-        var sources = new LongStack(nodeCount);
-        var weights = new DoubleStack(nodeCount);
+        var nodes = HugeLongArrayStack.newStack(nodeCount);
+        var sources = HugeLongArrayStack.newStack(nodeCount);
+        var weights = HugeDoubleArrayStack.newStack(nodeCount);
         var visited = new BitSet(nodeCount);
         nodes.push(startNodeId);
         sources.push(startNodeId);
         weights.push(.0);
         visited.set(startNodeId);
 
+        long resultIndex = 0L;
         while (!nodes.isEmpty() && running()) {
             final long source = sources.pop();
             final long node = nodes.pop();
@@ -78,7 +77,8 @@ public class DFS extends Algorithm<long[]> {
                 continue;
             } else {
                 if (!inResult.getAndSet(node)) {
-                    result.add(node);
+                    result.set(resultIndex, node);
+                    resultIndex++;
                 }
                 if (exitPredicateResult == ExitPredicate.Result.BREAK) {
                     break;
@@ -90,7 +90,7 @@ public class DFS extends Algorithm<long[]> {
 
             graph.forEachRelationship(
                 node,
-                longToIntConsumer((s, t) -> {
+                (s, t) -> {
                     if (!visited.get(t)) {
                         visited.set(t);
                         sources.push(s);
@@ -98,12 +98,12 @@ public class DFS extends Algorithm<long[]> {
                         weights.push(aggregatorFunction.apply(s, t, weight));
                     }
                     return running();
-                })
+                }
             );
         }
 
         progressTracker.endSubTask();
-        return result.toArray();
+        return result.copyOf(resultIndex);
     }
 
     @Override
