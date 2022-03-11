@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.Containers;
 import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.HashContainers;
+import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongHashSet;
@@ -253,6 +254,10 @@ public final class MemoryUsage {
 
     public static long sizeOfLongArrayList(long length) {
         return sizeOfInstance(LongArrayList.class) + length * Long.BYTES;
+    }
+
+    public static long sizeOfIntArrayList(long length) {
+        return sizeOfInstance(IntArrayList.class) + length * Integer.BYTES;
     }
 
     public static long sizeOfDoubleArrayList(long length) {
