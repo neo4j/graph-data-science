@@ -48,7 +48,7 @@ public interface AlgorithmSpec<
         return this;
     }
 
-    default ProcedureExecutorSpec<ALGO, ALGO_RESULT, CONFIG> createExecutorSpec() {
+    default ProcedureExecutorSpec<ALGO, ALGO_RESULT, CONFIG> createDefaultExecutorSpec() {
         return new ProcedureExecutorSpec<>();
     }
 }

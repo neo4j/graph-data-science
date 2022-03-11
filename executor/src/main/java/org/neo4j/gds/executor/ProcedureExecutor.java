@@ -58,7 +58,7 @@ public class ProcedureExecutor<
         AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ?> algoSpec,
         ExecutionContext executionContext
     ) {
-        this(algoSpec, algoSpec.createExecutorSpec(), executionContext);
+        this(algoSpec, algoSpec.createDefaultExecutorSpec(), executionContext);
     }
 
     public RESULT compute(

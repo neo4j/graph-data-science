@@ -63,7 +63,7 @@ public class MemoryEstimationExecutor<
         AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec,
         ExecutionContext executionContext
     ) {
-        this(algoSpec, algoSpec.createExecutorSpec(), executionContext);
+        this(algoSpec, algoSpec.createDefaultExecutorSpec(), executionContext);
     }
 
 
