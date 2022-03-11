@@ -168,7 +168,9 @@ include::../algorithms/algorithm-tiers.adoc[]
 .2+<.^|<<algorithms-bfs, BFS>>
 | `gds.bfs.stream`
 | `gds.bfs.stream.estimate`
-.2+<.^|<<algorithms-dfs, Depth First Search>>
+.4+<.^|<<algorithms-dfs, Depth First Search>>
+| `gds.dfs.mutate`
+| `gds.dfs.mutate.estimate`
 | `gds.dfs.stream`
 | `gds.dfs.stream.estimate`
 |===
