@@ -29,12 +29,12 @@ import org.neo4j.gds.mem.MemoryUsage;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class DFSAlgorithmFactory extends GraphAlgorithmFactory<DFS, DfsStreamConfig> {
+class DfsAlgorithmFactory<CONFIG extends DfsBaseConfig> extends GraphAlgorithmFactory<DFS, CONFIG> {
 
     @Override
     public DFS build(
         Graph graph,
-        DfsStreamConfig configuration,
+        CONFIG configuration,
         ProgressTracker progressTracker
     ) {
         ExitPredicate exitFunction;
@@ -73,7 +73,7 @@ class DFSAlgorithmFactory extends GraphAlgorithmFactory<DFS, DfsStreamConfig> {
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(DfsStreamConfig configuration) {
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(DFS.class);
         builder.perNode("visited ", MemoryUsage::sizeOfBitset);
         builder.perNode("nodes", MemoryUsage::sizeOfLongArrayList);

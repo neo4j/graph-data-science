@@ -35,15 +35,15 @@ import static org.neo4j.gds.paths.traverse.DfsStreamProc.DESCRIPTION;
 import static org.neo4j.gds.paths.traverse.DfsStreamProc.NEXT;
 
 @GdsCallable(name = "gds.dfs.stream", description = DESCRIPTION, executionMode = STREAM)
-public class DfsStreamSpec implements AlgorithmSpec<DFS, HugeLongArray, DfsStreamConfig, Stream<DfsStreamProc.DfsStreamResult>, DFSAlgorithmFactory> {
+public class DfsStreamSpec implements AlgorithmSpec<DFS, HugeLongArray, DfsStreamConfig, Stream<DfsStreamProc.DfsStreamResult>, DfsAlgorithmFactory<DfsStreamConfig>> {
     @Override
     public String name() {
         return "DfsStream";
     }
 
     @Override
-    public DFSAlgorithmFactory algorithmFactory() {
-        return new DFSAlgorithmFactory();
+    public DfsAlgorithmFactory<DfsStreamConfig> algorithmFactory() {
+        return new DfsAlgorithmFactory<>();
     }
 
     @Override
