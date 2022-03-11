@@ -21,18 +21,22 @@ package org.neo4j.gds.similarity.knn.metrics;
 
 import org.neo4j.gds.core.utils.Intersections;
 
+/**
+ * We compute cosine similarity (normalised dot product) and turn it into a similarity metric by moving and
+ * clamping -1..1 into 0..1 using linear transformation.
+ */
 public final class Cosine {
     private Cosine() {}
 
     public static double floatMetric(float[] left, float[] right) {
         var len = Math.min(left.length, right.length);
         var cosine = Intersections.cosine(left, right, len);
-        return Math.max(cosine, 0);
+        return (cosine+1)/ 2;
     }
 
     public static double doubleMetric(double[] left, double[] right) {
         var len = Math.min(left.length, right.length);
         var cosine = Intersections.cosine(left, right, len);
-        return Math.max(cosine, 0);
+        return (cosine+1)/ 2;
     }
 }
