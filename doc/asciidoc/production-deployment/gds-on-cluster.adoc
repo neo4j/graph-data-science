@@ -12,12 +12,6 @@ Since GDS performs large computations with the full resources of the system it i
 We make use of a _Read Replica_ instance to deploy the GDS library and process analytical workloads.
 Calls to GDS `write` procedures are internally directed to the cluster `LEADER` instance via _server-side routing_.
 
-[NOTE]
-====
-GDS on Clusters works on **Neo4j 4.3+**.
-There is no intention to support earlier versions of the database.
-====
-
 
 == Deployment
 

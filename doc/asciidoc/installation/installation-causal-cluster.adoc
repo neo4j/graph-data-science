@@ -6,10 +6,4 @@ In a Neo4j Causal Cluster, GDS should only be installed on a _Read Replica_ inst
 In order to install the GDS library on a _Read Replica_ you can follow the steps from <<neo4j-server>>.
 Additionally, the Neo4j Causal Cluster must be configured to use https://neo4j.com/docs/operations-manual/current/clustering/internals/#clustering-routing[server-side routing].
 
-[NOTE]
-====
-GDS on Clusters works on **Neo4j 4.3+**.
-There is no intention to support earlier versions of the database.
-====
-
 For more details, see <<cluster>>.
