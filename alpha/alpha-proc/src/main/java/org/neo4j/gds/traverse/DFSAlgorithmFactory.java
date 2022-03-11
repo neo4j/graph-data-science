@@ -51,14 +51,14 @@ class DFSAlgorithmFactory extends GraphAlgorithmFactory<DFS, DfsStreamConfig> {
         ExitPredicate exitFunction;
         Aggregator aggregatorFunction;
         // target node given; terminate if target is reached
-        if (!configuration.targetNodes().isEmpty()) {
+        if (configuration.hasTargetNodes()) {
             List<Long> mappedTargets = configuration.targetNodes().stream()
                 .map(graph::safeToMappedNodeId)
                 .collect(Collectors.toList());
             exitFunction = new TargetExitPredicate(mappedTargets);
             aggregatorFunction = Aggregator.NO_AGGREGATION;
             // maxDepth given; continue to aggregate nodes with lower depth until no more nodes left
-        } else if (configuration.maxDepth() != -1) {
+        } else if (configuration.hasMaxDepth()) {
             exitFunction = new MaxDepthExitPredicate(configuration.maxDepth());
             aggregatorFunction = new OneHopAggregator();
             // do complete DFS until all nodes have been visited
@@ -67,11 +67,11 @@ class DFSAlgorithmFactory extends GraphAlgorithmFactory<DFS, DfsStreamConfig> {
             aggregatorFunction = Aggregator.NO_AGGREGATION;
         }
 
-        var mappedStartNodeId = graph.toMappedNodeId(configuration.sourceNode());
+        var mappedSourceNodeId = graph.toMappedNodeId(configuration.sourceNode());
 
         return new DFS(
             graph,
-            mappedStartNodeId,
+            mappedSourceNodeId,
             exitFunction,
             aggregatorFunction,
             progressTracker

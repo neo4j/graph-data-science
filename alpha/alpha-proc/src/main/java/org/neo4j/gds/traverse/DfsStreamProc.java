@@ -46,12 +46,13 @@ public class DfsStreamProc extends AlgoBaseProc<DFS, long[], DfsStreamConfig, Df
     static final RelationshipType NEXT = RelationshipType.withName("NEXT");
 
     static final String DESCRIPTION =
-        "DFS is a traversal algorithm, which explores all of the children nodes of " +
-        "the present node prior to moving on to the next neighbour.";
+        "Depth-first search (DFS) is an algorithm for traversing or searching tree or graph data structures. " +
+        "The algorithm starts at the root node (selecting some arbitrary node as the root node in the case of a graph) " +
+        "and explores as far as possible along each branch before backtracking.";
 
     @Procedure(name = "gds.dfs.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<DfsStreamResult> dfs(
+    public Stream<DfsStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
