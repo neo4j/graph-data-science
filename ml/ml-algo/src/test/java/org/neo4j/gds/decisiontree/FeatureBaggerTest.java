@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FeatureBaggerTest {
 
     private static final int TOTAL_INDICES = 20;
-    private static final FeatureBagger FEATURE_BAGGER = FeatureBagger.of(new SplittableRandom(), TOTAL_INDICES, 0.5);
+    private static final FeatureBagger FEATURE_BAGGER = new FeatureBagger(new SplittableRandom(), TOTAL_INDICES, 0.5);
 
     @Test
     void shouldSampleValidInterval() {
@@ -55,7 +55,7 @@ class FeatureBaggerTest {
     @Test
     void shouldSampleCorrectlyForSuperHighRatio() {
         var sampledIndices = new BitSet(TOTAL_INDICES);
-        var featureBagger = FeatureBagger.of(new SplittableRandom(), TOTAL_INDICES, 0.99999);
+        var featureBagger = new FeatureBagger(new SplittableRandom(), TOTAL_INDICES, 0.99999);
 
         var bag = featureBagger.sample();
 

@@ -105,7 +105,7 @@ class ClassificationDecisionTreeTest {
                 .maxDepth(maxDepth)
                 .minSplitSize(minSize)
                 .build(),
-            FeatureBagger.of(new SplittableRandom(), featureVector.length, 1)
+            new FeatureBagger(new SplittableRandom(), featureVector.length, 1)
         );
 
         HugeLongArray mutableFeatureVectors = HugeLongArray.newArray(features.size());
@@ -135,7 +135,7 @@ class ClassificationDecisionTreeTest {
             allLabels,
             CLASS_MAPPING,
             decisionTreeTrainConfig,
-            FeatureBagger.of(new SplittableRandom(-6938002729576536314L), features.get(0).length, 0.5D)
+            new FeatureBagger(new SplittableRandom(-6938002729576536314L), features.get(0).length, 0.5D)
         );
 
         var featureVector = new double[]{8.0, 0.0};
@@ -149,7 +149,7 @@ class ClassificationDecisionTreeTest {
             allLabels,
             CLASS_MAPPING,
             decisionTreeTrainConfig,
-            FeatureBagger.of(new SplittableRandom(1337L), featureVector.length, 0.5D) // Only one feature is used.
+            new FeatureBagger(new SplittableRandom(1337L), featureVector.length, 0.5D) // Only one feature is used.
         );
 
         decisionTreePredict = decisionTree.train(featureVectors);
@@ -175,7 +175,7 @@ class ClassificationDecisionTreeTest {
             allLabels,
             CLASS_MAPPING,
             decisionTreeTrainConfig,
-            FeatureBagger.of(new SplittableRandom(5677377167946646799L), featureVector.length, 1)
+            new FeatureBagger(new SplittableRandom(5677377167946646799L), featureVector.length, 1)
         );
 
         var decisionTreePredict = decisionTree.train(sampledVectors);
@@ -191,7 +191,7 @@ class ClassificationDecisionTreeTest {
             allLabels,
             CLASS_MAPPING,
             decisionTreeTrainConfig,
-            FeatureBagger.of(new SplittableRandom(321328L), featureVector.length, 1)
+            new FeatureBagger(new SplittableRandom(321328L), featureVector.length, 1)
         );
 
         decisionTreePredict = decisionTree.train(otherSampledVectors);
