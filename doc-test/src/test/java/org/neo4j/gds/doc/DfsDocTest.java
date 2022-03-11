@@ -21,7 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.traverse.DfsStreamProc;
+import org.neo4j.gds.paths.traverse.DfsStreamProc;
 
 import java.util.List;
 

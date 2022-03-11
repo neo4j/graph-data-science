@@ -17,26 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.traverse;
+package org.neo4j.gds.paths.traverse;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.impl.traverse.Aggregator;
-import org.neo4j.gds.impl.traverse.DFS;
-import org.neo4j.gds.impl.traverse.DfsStreamConfig;
-import org.neo4j.gds.impl.traverse.ExitPredicate;
-import org.neo4j.gds.impl.traverse.MaxDepthExitPredicate;
-import org.neo4j.gds.impl.traverse.OneHopAggregator;
-import org.neo4j.gds.impl.traverse.TargetExitPredicate;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.InputNodeValidator.validateEndNode;
 
 class DFSAlgorithmFactory extends GraphAlgorithmFactory<DFS, DfsStreamConfig> {
 
@@ -46,8 +37,6 @@ class DFSAlgorithmFactory extends GraphAlgorithmFactory<DFS, DfsStreamConfig> {
         DfsStreamConfig configuration,
         ProgressTracker progressTracker
     ) {
-        configuration.targetNodes().forEach(neoId -> validateEndNode(neoId, graph));
-
         ExitPredicate exitFunction;
         Aggregator aggregatorFunction;
         // target node given; terminate if target is reached

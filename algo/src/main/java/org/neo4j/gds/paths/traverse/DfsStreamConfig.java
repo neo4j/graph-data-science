@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.traverse;
+package org.neo4j.gds.paths.traverse;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
@@ -25,27 +25,34 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
+import org.neo4j.gds.config.TargetNodesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-
-import java.util.Collections;
-import java.util.List;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface BfsStreamConfig extends AlgoBaseConfig, SourceNodeConfig, ConcurrencyConfig {
+public interface DfsStreamConfig extends AlgoBaseConfig, SourceNodeConfig, TargetNodesConfig, ConcurrencyConfig {
 
-    @Value.Default
-    default List<Long> targetNodes() {
-        return Collections.emptyList();
-    }
+    long NO_MAX_DEPTH = -1L;
 
     @Value.Default
     default long maxDepth() {
-        return -1L;
+        return NO_MAX_DEPTH;
     }
 
-    static BfsStreamConfig of(CypherMapWrapper userInput) {
-        return new BfsStreamConfigImpl(userInput);
+    @Configuration.Ignore
+    @Value.Derived
+    default boolean hasTargetNodes() {
+        return !targetNodes().isEmpty();
+    }
+
+    @Configuration.Ignore
+    @Value.Derived
+    default boolean hasMaxDepth() {
+        return maxDepth() != NO_MAX_DEPTH;
+    }
+
+    static DfsStreamConfig of(CypherMapWrapper userInput) {
+        return new DfsStreamConfigImpl(userInput);
     }
 }

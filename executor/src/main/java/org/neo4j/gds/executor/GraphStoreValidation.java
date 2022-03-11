@@ -33,6 +33,7 @@ import org.neo4j.gds.config.SourceNodeConfig;
 import org.neo4j.gds.config.SourceNodesConfig;
 import org.neo4j.gds.config.TargetNodeConfig;
 import org.neo4j.gds.config.TargetNodePropertyConfig;
+import org.neo4j.gds.config.TargetNodesConfig;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.ArrayList;
@@ -63,13 +64,15 @@ public final class GraphStoreValidation {
         }
         if (config instanceof SourceNodesConfig) {
             validateSourceNodes(graphStore, (SourceNodesConfig) config, filterLabels);
-
         }
         if (config instanceof SourceNodeConfig) {
             validateSourceNode(graphStore, (SourceNodeConfig) config, filterLabels);
         }
         if (config instanceof TargetNodeConfig) {
             validateTargetNode(graphStore, (TargetNodeConfig) config, filterLabels);
+        }
+        if (config instanceof TargetNodesConfig) {
+            validateTargetNodes(graphStore, (TargetNodesConfig) config, filterLabels);
         }
         if (config instanceof TargetNodePropertyConfig) {
             validateTargetNodeProperty(graphStore, (TargetNodePropertyConfig) config, filterLabels);
@@ -169,23 +172,7 @@ public final class GraphStoreValidation {
     }
 
     private static void validateSourceNodes(GraphStore graphStore, SourceNodesConfig config, Collection<NodeLabel> filteredNodeLabels) {
-        if (!config.sourceNodes().isEmpty()) {
-
-            var missingNodes = config
-                .sourceNodes()
-                .stream()
-                .filter(sourceNode -> labelFilteredGraphContainsNode(filteredNodeLabels, graphStore.nodes(), sourceNode))
-                .map(Object::toString)
-                .collect(Collectors.toList());
-
-            if (!missingNodes.isEmpty()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Source nodes do not exist in the in-memory graph%s: %s",
-                    nodeLabelFilterDescription(filteredNodeLabels, graphStore),
-                    StringJoining.join(missingNodes)
-                ));
-            }
-        }
+        validateNodes(graphStore, config.sourceNodes(), filteredNodeLabels, "Source");
     }
 
     private static void validateTargetNode(
@@ -201,6 +188,33 @@ public final class GraphStoreValidation {
                 nodeLabelFilterDescription(filterLabels, graphStore),
                 targetNodeId
             ));
+        }
+    }
+
+    private static void validateTargetNodes(
+        GraphStore graphStore,
+        TargetNodesConfig config,
+        Collection<NodeLabel> filteredNodeLabels
+    ) {
+        validateNodes(graphStore, config.targetNodes(), filteredNodeLabels, "Target");
+    }
+
+    private static void validateNodes(GraphStore graphStore, Collection<Long> nodesToValidate, Collection<NodeLabel> filteredNodeLabels, String nodeDescription) {
+        if (!nodesToValidate.isEmpty()) {
+            var missingNodes = nodesToValidate
+                .stream()
+                .filter(targetNode -> labelFilteredGraphContainsNode(filteredNodeLabels, graphStore.nodes(), targetNode))
+                .map(Object::toString)
+                .collect(Collectors.toList());
+
+            if (!missingNodes.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "%s nodes do not exist in the in-memory graph%s: %s",
+                    nodeDescription,
+                    nodeLabelFilterDescription(filteredNodeLabels, graphStore),
+                    StringJoining.join(missingNodes)
+                ));
+            }
         }
     }
 

@@ -17,16 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.traverse;
+package org.neo4j.gds.paths.traverse;
 
-public class MaxDepthExitPredicate implements ExitPredicate {
+import java.util.List;
 
-    private final long maxDepth;
+public class TargetExitPredicate implements ExitPredicate {
+    private final List<Long> targets;
 
-    public MaxDepthExitPredicate(long maxDepth) {this.maxDepth = maxDepth;}
+    public TargetExitPredicate(List<Long> targets) {this.targets = targets;}
 
     @Override
     public Result test(long sourceNode, long currentNode, double weightAtSource) {
-        return weightAtSource > maxDepth ? ExitPredicate.Result.CONTINUE : ExitPredicate.Result.FOLLOW;
+        return targets.contains(currentNode) ? Result.BREAK : Result.FOLLOW;
     }
 }

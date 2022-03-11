@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.traverse;
+package org.neo4j.gds.paths.traverse;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
@@ -25,8 +25,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.impl.traverse.DFS;
-import org.neo4j.gds.impl.traverse.DfsStreamConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;

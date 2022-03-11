@@ -17,14 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.traverse;
+package org.neo4j.gds.paths.traverse;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.impl.traverse.BFS;
-import org.neo4j.gds.impl.traverse.BfsStreamConfig;
 import org.neo4j.gds.paths.PathFactory;
 
 import java.util.Arrays;
@@ -32,8 +30,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.traverse.BfsStreamProc.DESCRIPTION;
-import static org.neo4j.gds.traverse.BfsStreamProc.NEXT;
+import static org.neo4j.gds.paths.traverse.BfsStreamProc.DESCRIPTION;
+import static org.neo4j.gds.paths.traverse.BfsStreamProc.NEXT;
 
 @GdsCallable(name = "gds.bfs.stream", description = DESCRIPTION, executionMode = STREAM)
 public class BfsStreamSpec implements AlgorithmSpec<BFS, long[], BfsStreamConfig, Stream<BfsStreamProc.BfsStreamResult>, BFSAlgorithmFactory> {

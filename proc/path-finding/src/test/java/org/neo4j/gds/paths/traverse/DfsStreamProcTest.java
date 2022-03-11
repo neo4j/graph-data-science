@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.traverse;
+package org.neo4j.gds.paths.traverse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -223,6 +223,6 @@ class DfsStreamProcTest extends BaseProcTest {
             .addParameter("targetNodes", Arrays.asList(0, 42, 1))
             .yields();
 
-        assertError(query, "endNode with id 42 was not loaded");
+        assertError(query, "Target nodes do not exist in the in-memory graph: ['42']");
     }
 }

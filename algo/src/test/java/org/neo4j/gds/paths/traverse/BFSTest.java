@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.traverse;
+package org.neo4j.gds.paths.traverse;
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -31,31 +31,27 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.impl.traverse.ExitPredicate.Result;
+import org.neo4j.gds.paths.traverse.ExitPredicate.Result;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
-import static org.neo4j.gds.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
 
 /**
- *
  * Graph:
  *
- *     (b)   (e)
- *   2/ 1\ 2/ 1\
+ * (b)   (e)
+ * 2/ 1\ 2/ 1\
  * >(a)  (d)  ((g))
- *   1\ 2/ 1\ 2/
- *    (c)   (f)
+ * 1\ 2/ 1\ 2/
+ * (c)   (f)
  */
-@GdlExtension
-class TraverseTest {
 
+@GdlExtension
+class BFSTest {
 
     @GdlGraph(graphNamePrefix = "natural")
     @GdlGraph(graphNamePrefix = "reverse", orientation = Orientation.REVERSE)
@@ -98,74 +94,23 @@ class TraverseTest {
     /**
      * bfs on outgoing rels. until target 'd' is reached
      */
-    @Test
-    void testBfsToTargetOut() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void testBfsToTargetOut(int concurrency) {
         long source = naturalGraph.toMappedNodeId("a");
         long target = naturalGraph.toMappedNodeId("d");
-        long[] nodes = Traverse.bfs(
+        long[] nodes = BFS.create(
             naturalGraph,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             (s, t, w) -> 1.,
+            concurrency,
             ProgressTracker.NULL_TRACKER
-        ).compute().resultNodes();
+        ).compute();
 
-        Assertions.assertThat(nodes)
-            .isEqualTo(Stream.of("a", "b", "c", "d").mapToLong(naturalGraph::toMappedNodeId).toArray());
-    }
-
-    /**
-     * dfs on outgoing rels. until taregt 'a' is reached. the exit function
-     * immediately exits if target is reached
-     */
-    @Test
-    void testDfsToTargetOut() {
-        long source = naturalGraph.toMappedNodeId("a");
-        long target = naturalGraph.toMappedNodeId("g");
-        long[] nodes = Traverse.dfs(
-            naturalGraph,
-            source,
-            (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
-            DEFAULT_AGGREGATOR,
-            ProgressTracker.NULL_TRACKER
-        ).compute().resultNodes();
-
-        assertEquals(5, nodes.length);
-    }
-
-    /**
-     * dfs on outgoing rels. until taregt 'a' is reached. the exit function
-     * immediately exits if target is reached
-     */
-    @Test
-    void testExitConditionNeverTerminates() {
-        long source = naturalGraph.toMappedNodeId("a");
-        long[] nodes = Traverse.dfs(
-            naturalGraph,
-            source,
-            (s, t, w) -> Result.FOLLOW,
-            DEFAULT_AGGREGATOR,
-            ProgressTracker.NULL_TRACKER
-        ).compute().resultNodes();
-        assertEquals(7, nodes.length); // should contain all nodes
-    }
-
-    /**
-     * dfs on incoming rels. from 'g' until 'a' is reached. exit function
-     * immediately returns if target is reached
-     */
-    @Test
-    void testDfsToTargetIn() {
-        long source = reverseGraph.toMappedNodeId("g");
-        long target = reverseGraph.toMappedNodeId("a");
-        long[] nodes = Traverse.dfs(
-            reverseGraph,
-            source,
-            (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
-            DEFAULT_AGGREGATOR,
-            ProgressTracker.NULL_TRACKER
-        ).compute().resultNodes();
-        assertEquals(5, nodes.length);
+        assertThat(nodes).isEqualTo(
+            Stream.of("a", "b", "c", "d").mapToLong(naturalGraph::toOriginalNodeId).toArray()
+        );
     }
 
     /**
@@ -173,17 +118,19 @@ class TraverseTest {
      * result set should contain all nodes since both nodes lie
      * on the ends of the graph
      */
-    @Test
-    void testBfsToTargetIn() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void testBfsToTargetIn(int concurrency) {
         long source = reverseGraph.toMappedNodeId("g");
         long target = reverseGraph.toMappedNodeId("a");
-        long[] nodes = Traverse.bfs(
+        long[] nodes = BFS.create(
             reverseGraph,
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
-            DEFAULT_AGGREGATOR,
+            Aggregator.NO_AGGREGATION,
+            concurrency,
             ProgressTracker.NULL_TRACKER
-        ).compute().resultNodes();
+        ).compute();
         assertEquals(7, nodes.length);
     }
 
@@ -193,72 +140,63 @@ class TraverseTest {
      * continues to check the other nodes that might have
      * lower depth
      */
-    @Test
-    void testBfsMaxDepthOut() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void testBfsMaxDepthOut(int concurrency) {
         long source = naturalGraph.toMappedNodeId("a");
-        double maxHops = 3.;
-        long[] nodes = Traverse.bfs(
+        double maxHops = 4.;
+        long[] nodes = BFS.create(
             naturalGraph,
             source,
             (s, t, w) -> w >= maxHops ? Result.CONTINUE : Result.FOLLOW,
             (s, t, w) -> w + 1.,
+            concurrency,
             ProgressTracker.NULL_TRACKER
-        ).compute().resultNodes();
-        Assertions.assertThat(nodes)
-            .isEqualTo(Stream.of("a", "b", "c", "d").mapToLong(naturalGraph::toMappedNodeId).toArray());
+        ).compute();
+
+        assertThat(nodes).isEqualTo(
+            Stream.of("a", "b", "c", "d", "e", "f").mapToLong(naturalGraph::toOriginalNodeId).toArray()
+        );
     }
 
-    @Test
-    void testBfsOnLoopGraph() {
-        Traverse.bfs(loopGraph, 0,
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void testBfsOnLoopGraph(int concurrency) {
+        BFS.create(loopGraph, 0,
             (s, t, w) -> Result.FOLLOW,
-            Traverse.DEFAULT_AGGREGATOR,
+            Aggregator.NO_AGGREGATION,
+            concurrency,
             ProgressTracker.NULL_TRACKER
         ).compute();
     }
 
-    @Test
-    void testDfsOnLoopGraph() {
-        Traverse.dfs(
-            loopGraph,
-            0,
-            (s, t, w) -> Result.FOLLOW,
-            Traverse.DEFAULT_AGGREGATOR,
-            ProgressTracker.NULL_TRACKER
-        ).compute();
-    }
-
-    @Test
-    void shouldLogProgress() {
-        //TODO:  Replace with TraverseFactory call
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void shouldLogProgress(int concurrency) {
         var progressTask = Tasks.leaf("BFS", naturalGraph.relationshipCount());
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
-        Traverse.bfs(
+        BFS.create(
             naturalGraph,
             0,
             (s, t, w) -> Result.FOLLOW,
-            Traverse.DEFAULT_AGGREGATOR,
+            Aggregator.NO_AGGREGATION,
+            concurrency,
             progressTracker
         ).compute();
-        List<AtomicLong> progresses = progressTracker.getProgresses();
-        assertEquals(1, progresses.size());
-        assertEquals(naturalGraph.relationshipCount(), progresses.get(0).get());
         var messagesInOrder = testLog.getMessages(INFO);
 
         assertThat(messagesInOrder)
             .extracting(removingThreadId())
             .containsSequence(
                 "BFS :: Start",
-                "BFS 25%",  //a-> b,a->c | 2 = 2/8 = 0.25
-                "BFS 37%",  //b-> d      |+1 = 3/8 = 0.375
-                "BFS 50%",  //c-> d      |+1 = 4/8 = 0.5
-                "BFS 75%",  //d-> e,d->f |+2 = 6/8 = 0.75
-                "BFS 87%",  //e->g       |+1 = 7/8 = 0.87
-                "BFS 100%", //f->g       |+1 = 8/8 = 1.00
+                "BFS 12%",
+                "BFS 37%",
+                "BFS 50%",
+                "BFS 75%",
+                "BFS 87%",
+                "BFS 100%",
                 "BFS :: Finished"
             );
-
-
     }
 }
