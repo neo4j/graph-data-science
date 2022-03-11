@@ -37,9 +37,6 @@ class DFSAlgorithmFactory extends GraphAlgorithmFactory<DFS, DfsStreamConfig> {
         DfsStreamConfig configuration,
         ProgressTracker progressTracker
     ) {
-        // TODO: Fix this, the check for the sourceNode is based on the config, we should do the same for targetNodes
-//        configuration.targetNodes().forEach(neoId -> validateEndNode(neoId, graph));
-
         ExitPredicate exitFunction;
         Aggregator aggregatorFunction;
         // target node given; terminate if target is reached
