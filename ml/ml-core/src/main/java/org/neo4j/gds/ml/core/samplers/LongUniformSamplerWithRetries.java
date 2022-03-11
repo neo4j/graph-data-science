@@ -30,18 +30,18 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongHashSet;
 
-public class UniformSamplerWithRetries {
+public class LongUniformSamplerWithRetries {
     private final SplittableRandom rng;
     private final LongHashSet sampledValuesCache;
 
-    public UniformSamplerWithRetries(SplittableRandom rng) {
+    public LongUniformSamplerWithRetries(SplittableRandom rng) {
         this.rng = rng;
         this.sampledValuesCache = new LongHashSet();
     }
 
     public static MemoryRange memoryEstimation(long numberOfSamples) {
         return MemoryRange.of(
-            sizeOfInstance(UniformSamplerWithRetries.class) +
+            sizeOfInstance(LongUniformSamplerWithRetries.class) +
             sizeOfLongHashSet(numberOfSamples) +
             sizeOfLongArray(numberOfSamples)
         );

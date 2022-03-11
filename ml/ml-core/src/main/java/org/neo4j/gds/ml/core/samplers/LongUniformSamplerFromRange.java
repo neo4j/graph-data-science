@@ -27,26 +27,26 @@ import java.util.function.LongPredicate;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class UniformSamplerFromRange {
+public class LongUniformSamplerFromRange {
     public static final double RETRY_SAMPLING_RATIO = 0.6;
-    private final UniformSamplerWithRetries retryBasedSampler;
-    private final UniformSamplerByExclusion exclusionBasedSampler;
+    private final LongUniformSamplerWithRetries retryBasedSampler;
+    private final LongUniformSamplerByExclusion exclusionBasedSampler;
 
-    public UniformSamplerFromRange(SplittableRandom random) {
-        this.retryBasedSampler = new UniformSamplerWithRetries(random);
-        this.exclusionBasedSampler = new UniformSamplerByExclusion(random);
+    public LongUniformSamplerFromRange(SplittableRandom random) {
+        this.retryBasedSampler = new LongUniformSamplerWithRetries(random);
+        this.exclusionBasedSampler = new LongUniformSamplerByExclusion(random);
     }
 
     public static MemoryRange memoryEstimation(long numberOfSamples) {
-        var samplerWithRetriesEstimation = UniformSamplerWithRetries.memoryEstimation(numberOfSamples);
-        var samplerByExclusionEstimation = UniformSamplerByExclusion.memoryEstimation(
+        var samplerWithRetriesEstimation = LongUniformSamplerWithRetries.memoryEstimation(numberOfSamples);
+        var samplerByExclusionEstimation = LongUniformSamplerByExclusion.memoryEstimation(
             numberOfSamples,
             (long) Math.ceil(numberOfSamples / RETRY_SAMPLING_RATIO)
         );
 
         return samplerWithRetriesEstimation
             .add(samplerByExclusionEstimation)
-            .add(MemoryRange.of(sizeOfInstance(UniformSamplerFromRange.class)))
+            .add(MemoryRange.of(sizeOfInstance(LongUniformSamplerFromRange.class)))
             // Since only one of the samplers will be used at single point in time we can deduct the cost of one of the
             // samplers return value.
             .subtract(sizeOfLongArray(numberOfSamples));

@@ -22,8 +22,8 @@ package org.neo4j.gds.similarity.knn;
 import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.ml.core.samplers.LongUniformSamplerFromRange;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
-import org.neo4j.gds.ml.core.samplers.UniformSamplerFromRange;
 
 import java.util.Optional;
 import java.util.Random;
@@ -40,7 +40,7 @@ class RandomWalkKnnSampler implements KnnSampler {
     private static final int WALK_LENGTH_MULTIPLIER = 3;
 
     private final RandomWalkSampler randomWalkSampler;
-    private final UniformSamplerFromRange uniformSamplerFromRange;
+    private final LongUniformSamplerFromRange uniformSamplerFromRange;
     private final long exclusiveMax;
     private final LongHashSet sampledValuesCache;
 
@@ -63,7 +63,7 @@ class RandomWalkKnnSampler implements KnnSampler {
             graph,
             new Random(randomSeed.orElseGet(() -> new Random().nextLong()))
         );
-        this.uniformSamplerFromRange = new UniformSamplerFromRange(random);
+        this.uniformSamplerFromRange = new LongUniformSamplerFromRange(random);
         this.exclusiveMax = graph.nodeCount();
         this.sampledValuesCache = new LongHashSet();
     }
@@ -77,8 +77,8 @@ class RandomWalkKnnSampler implements KnnSampler {
             ));
 
         return baseEstimation
-            .add(UniformSamplerFromRange.memoryEstimation(0))
-            .union(baseEstimation.add(UniformSamplerFromRange.memoryEstimation(boundedK)));
+            .add(LongUniformSamplerFromRange.memoryEstimation(0))
+            .union(baseEstimation.add(LongUniformSamplerFromRange.memoryEstimation(boundedK)));
     }
 
     @Override

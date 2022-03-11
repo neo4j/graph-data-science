@@ -33,7 +33,7 @@ import java.util.function.LongPredicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class UniformSamplerWithRetriesTest {
+class LongUniformSamplerByExclusionTest {
 
     @Property(tries = 50)
     void sample(@ForAll @From("n and k") IntIntPair nAndK) {
@@ -41,7 +41,7 @@ class UniformSamplerWithRetriesTest {
         int k = nAndK.getTwo();
         var rng = new SplittableRandom(19L);
 
-        var sampler = new UniformSamplerWithRetries(rng);
+        var sampler = new LongUniformSamplerByExclusion(rng);
         LongPredicate isOdd = l -> l % 2 != 0;
         var samples= sampler.sample(0, n, n / 2, k, isOdd);
 
