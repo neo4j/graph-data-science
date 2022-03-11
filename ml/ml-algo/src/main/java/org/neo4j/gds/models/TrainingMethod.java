@@ -17,21 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.decisiontree;
+package org.neo4j.gds.models;
 
-import org.neo4j.gds.annotation.Configuration;
-
-@Configuration
-public interface DecisionTreeTrainConfig {
-
-    @Configuration.IntegerRange(min = 1)
-    int maxDepth();
-
-    @Configuration.IntegerRange(min = 0)
-    int minSplitSize();
-
-    @Configuration.Ignore
-    default String lossFunction() {
-        return "GiniIndex";
-    }
+public enum TrainingMethod {
+    LogisticRegression, RandomForest
 }

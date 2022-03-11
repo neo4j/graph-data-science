@@ -24,7 +24,7 @@ public interface TrainingStopper {
     boolean terminated();
     boolean converged();
 
-    static TrainingStopper defaultStopper(TrainingConfig config) {
+    static TrainingStopper defaultStopper(GradientDescentConfig config) {
         return new StreakStopper(
             config.minEpochs(),
             config.patience(),

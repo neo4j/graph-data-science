@@ -36,13 +36,10 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gradientdescent.Training;
-import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.nodemodels.BestMetricData;
 import org.neo4j.gds.ml.nodemodels.BestModelStats;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
@@ -53,6 +50,11 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
+import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.models.TrainerConfig;
+import org.neo4j.gds.models.TrainingMethod;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -163,13 +165,13 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     private Classifier trainModel(
         FeaturesAndLabels featureAndLabels,
         ReadOnlyHugeLongArray trainSet,
-        LogisticRegressionTrainConfig modelConfig,
+        TrainerConfig modelConfig,
         ProgressTracker customProgressTracker
     ) {
         return new LogisticRegressionTrainer(
             trainSet,
             trainConfig.concurrency(),
-            modelConfig,
+            (LogisticRegressionTrainConfig) modelConfig,
             classIdMap,
             true,
             terminationFlag,
@@ -186,7 +188,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
 
-        var linkLogisticRegressionTrainConfigs = pipeline.trainingParameterSpace();
+        var linkLogisticRegressionTrainConfigs = pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression);
         progressTracker.setVolume(linkLogisticRegressionTrainConfigs.size());
         linkLogisticRegressionTrainConfigs.forEach(modelParams -> {
             var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
@@ -267,8 +269,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     }
 
     private static BestModelStats findBestModelStats(
-        List<ModelStats<LogisticRegressionTrainConfig>> metricStatsForModels,
-        LogisticRegressionTrainConfig bestParams
+        List<ModelStats> metricStatsForModels,
+        TrainerConfig bestParams
     ) {
         return metricStatsForModels.stream()
             .filter(metricStatsForModel -> metricStatsForModel.params() == bestParams)
@@ -290,8 +292,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         return splitter.splits();
     }
 
-    private static Map<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>> initStatsMap() {
-        var statsMap = new HashMap<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>>();
+    private static Map<LinkMetric, List<ModelStats>> initStatsMap() {
+        var statsMap = new HashMap<LinkMetric, List<ModelStats>>();
         statsMap.put(LinkMetric.AUCPR, new ArrayList<>());
         return statsMap;
     }
@@ -299,23 +301,23 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     @ValueClass
     public interface ModelSelectResult {
 
-        LogisticRegressionTrainConfig bestParameters();
+        TrainerConfig bestParameters();
 
-        Map<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>> trainStats();
+        Map<LinkMetric, List<ModelStats>> trainStats();
 
-        Map<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>> validationStats();
+        Map<LinkMetric, List<ModelStats>> validationStats();
 
         static LinkPredictionTrain.ModelSelectResult of(
-            LogisticRegressionTrainConfig bestConfig,
-            Map<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>> trainStats,
-            Map<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>> validationStats
+            TrainerConfig bestConfig,
+            Map<LinkMetric, List<ModelStats>> trainStats,
+            Map<LinkMetric, List<ModelStats>> validationStats
         ) {
             return ImmutableModelSelectResult.of(bestConfig, trainStats, validationStats);
         }
 
         @Value.Derived
         default Map<String, Object> toMap() {
-            Function<Map<LinkMetric, List<ModelStats<LogisticRegressionTrainConfig>>>, Map<String, Object>> statsConverter = stats ->
+            Function<Map<LinkMetric, List<ModelStats>>, Map<String, Object>> statsConverter = stats ->
                 stats.entrySet().stream().collect(Collectors.toMap(
                     entry -> entry.getKey().name(),
                     value -> value.getValue().stream().map(ModelStats::toMap)
@@ -347,7 +349,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     }
 
     private Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
-        LogisticRegressionTrainConfig bestParameters,
+        TrainerConfig bestParameters,
         Classifier.ClassifierData classifierData,
         Map<LinkMetric, BestMetricData> winnerMetrics
     ) {
@@ -418,12 +420,12 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var splitConfig = pipeline.splitConfig();
         var maxEstimationOverModelCandidates = maxEstimation(
             "Max over model candidates",
-            pipeline.trainingParameterSpace().stream()
+            pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression).stream()
                 .map(llrConfig -> MemoryEstimations.builder("Train and evaluate model")
                     .fixed("Stats map builder train", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
                     .fixed("Stats map builder validation", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
                     .max("Train model and compute train metrics", List.of(
-                            LogisticRegressionTrainer.estimate(llrConfig, linkFeatureDimension),
+                            LogisticRegressionTrainer.estimate((LogisticRegressionTrainConfig) llrConfig, linkFeatureDimension),
                             estimateComputeTrainMetrics(pipeline.splitConfig())
                         )
                     ).build()

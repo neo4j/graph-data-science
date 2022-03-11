@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.gradientdescent.TrainingConfig;
 
 import java.util.Map;
 
@@ -53,7 +52,7 @@ public interface BestModelStats {
         );
     }
 
-    static <TRAIN_CONFIG extends TrainingConfig> BestModelStats of(ModelStats<TRAIN_CONFIG> modelStats) {
+    static BestModelStats of(ModelStats modelStats) {
         return ImmutableBestModelStats.of(modelStats.avg(), modelStats.min(), modelStats.max());
     }
 }

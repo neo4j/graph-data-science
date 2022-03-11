@@ -26,7 +26,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.gradientdescent.TrainingConfig;
+import org.neo4j.gds.gradientdescent.GradientDescentConfig;
 import org.neo4j.gds.models.Features;
 import org.neo4j.gds.models.FeaturesFactory;
 
@@ -84,7 +84,7 @@ public final class LinkFeatureExtractor {
             graph,
             concurrency,
             Function.identity(),
-            Optional.of(TrainingConfig.DEFAULT_BATCH_SIZE)
+            Optional.of(GradientDescentConfig.DEFAULT_BATCH_SIZE)
         );
 
         var linkFeatureWriters = new ArrayList<BatchLinkFeatureExtractor>();

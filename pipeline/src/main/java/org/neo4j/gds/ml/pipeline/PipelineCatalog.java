@@ -43,7 +43,7 @@ public final class PipelineCatalog {
 
     private PipelineCatalog() { }
 
-    public static void set(String user, String pipelineName, Pipeline<?, ?> pipeline) {
+    public static void set(String user, String pipelineName, Pipeline<?> pipeline) {
         userCatalogs.computeIfAbsent(user, ignore -> new PipelineUserCatalog()).set(pipelineName, pipeline);
     }
 
@@ -51,14 +51,14 @@ public final class PipelineCatalog {
         return userCatalogs.getOrDefault(user, PipelineUserCatalog.EMPTY).exists(pipelineName);
     }
 
-    public static Pipeline<?, ?> get(String user, String pipelineName) {
+    public static Pipeline<?> get(String user, String pipelineName) {
         return userCatalogs.getOrDefault(user, PipelineUserCatalog.EMPTY)
             .get(pipelineName)
             .orElseThrow(() -> createPipelineNotFoundException(user, pipelineName));
     }
 
-    public static <PIPELINE extends Pipeline<?, ?>> PIPELINE getTyped(String user, String pipelineName, Class<PIPELINE> expectedClass) {
-        Pipeline<?, ?> pipeline = get(user, pipelineName);
+    public static <PIPELINE extends Pipeline<?>> PIPELINE getTyped(String user, String pipelineName, Class<PIPELINE> expectedClass) {
+        Pipeline<?> pipeline = get(user, pipelineName);
 
         if (!expectedClass.isInstance(pipeline)) {
             throw new IllegalArgumentException(formatWithLocale(
@@ -72,7 +72,7 @@ public final class PipelineCatalog {
         return (PIPELINE) pipeline;
     }
 
-    public static Pipeline<?, ?> drop(String user, String pipelineName) {
+    public static Pipeline<?> drop(String user, String pipelineName) {
         return userCatalogs.getOrDefault(user, PipelineUserCatalog.EMPTY)
             .drop(pipelineName)
             .orElseThrow(() -> createPipelineNotFoundException(user, pipelineName));
@@ -99,12 +99,12 @@ public final class PipelineCatalog {
     public interface PipelineCatalogEntry {
         String pipelineName();
 
-        Pipeline<?, ?> pipeline();
+        Pipeline<?> pipeline();
     }
 
     static class PipelineUserCatalog {
 
-        private final Map<String, Pipeline<?, ?>> pipelineByName;
+        private final Map<String, Pipeline<?>> pipelineByName;
 
         private static final PipelineUserCatalog EMPTY = new PipelineUserCatalog();
 
@@ -112,7 +112,7 @@ public final class PipelineCatalog {
             this.pipelineByName = new ConcurrentHashMap<>();
         }
 
-        public void set(String pipelineName, Pipeline<?, ?> pipeline) {
+        public void set(String pipelineName, Pipeline<?> pipeline) {
             if (pipelineByName.containsKey(pipelineName)) {
                 throw new IllegalStateException(formatWithLocale(
                     "Pipeline named `%s` already exists.",
@@ -127,11 +127,11 @@ public final class PipelineCatalog {
             return pipelineByName.containsKey(pipelineName);
         }
 
-        public Optional<Pipeline<?, ?>> get(String pipelineName) {
+        public Optional<Pipeline<?>> get(String pipelineName) {
             return Optional.ofNullable(pipelineByName.get(pipelineName));
         }
 
-        public Optional<Pipeline<?, ?>> drop(String pipelineName) {
+        public Optional<Pipeline<?>> drop(String pipelineName) {
             return Optional.ofNullable(pipelineByName.remove(pipelineName));
         }
 

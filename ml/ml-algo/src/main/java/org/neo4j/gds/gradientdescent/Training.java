@@ -47,13 +47,13 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.ml.core.tensor.TensorFunctions.averageTensors;
 
 public class Training {
-    private final TrainingConfig config;
+    private final GradientDescentConfig config;
     private final ProgressTracker progressTracker;
     private final long trainSize;
     private final TerminationFlag terminationFlag;
 
     public Training(
-        TrainingConfig config,
+        GradientDescentConfig config,
         ProgressTracker progressTracker,
         long trainSize,
         TerminationFlag terminationFlag

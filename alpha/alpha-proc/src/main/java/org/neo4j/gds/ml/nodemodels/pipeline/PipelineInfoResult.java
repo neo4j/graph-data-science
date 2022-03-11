@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
+import org.neo4j.gds.ml.pipeline.Pipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 
 import java.util.List;
@@ -34,17 +34,15 @@ public class PipelineInfoResult {
     public final Map<String, Object> splitConfig;
     public final Object parameterSpace;
 
-    PipelineInfoResult(String pipelineName, NodeClassificationPipeline info) {
+    PipelineInfoResult(String pipelineName, NodeClassificationPipeline pipeline) {
         this.name = pipelineName;
-        this.nodePropertySteps = info
+        this.nodePropertySteps = pipeline
             .nodePropertySteps()
             .stream()
             .map(ExecutableNodePropertyStep::toMap)
             .collect(Collectors.toList());
-        this.featureProperties = info.featureProperties();
-        this.splitConfig = info.splitConfig().toMap();
-        this.parameterSpace = info.trainingParameterSpace()
-            .stream()
-            .map(LogisticRegressionTrainConfig::toMap).collect(Collectors.toList());
+        this.featureProperties = pipeline.featureProperties();
+        this.splitConfig = pipeline.splitConfig().toMap();
+        this.parameterSpace = Pipeline.toMapParameterSpace(pipeline.trainingParameterSpace());
     }
 }

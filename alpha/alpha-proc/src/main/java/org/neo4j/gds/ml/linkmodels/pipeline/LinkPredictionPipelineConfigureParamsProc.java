@@ -23,7 +23,8 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.TrainerConfig;
+import org.neo4j.gds.models.TrainingMethod;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -43,7 +44,7 @@ public class LinkPredictionPipelineConfigureParamsProc extends BaseProc {
     public Stream<PipelineInfoResult> configureParams(@Name("pipelineName") String pipelineName, @Name("parameterSpace") List<Map<String, Object>> parameterSpace) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionPipeline.class);
 
-        List<LogisticRegressionTrainConfig> trainConfigs = parameterSpace
+        List<TrainerConfig> trainConfigs = parameterSpace
             .stream()
             .map(CypherMapWrapper::create)
             .map(rawConfig -> {
@@ -53,7 +54,7 @@ public class LinkPredictionPipelineConfigureParamsProc extends BaseProc {
             })
             .collect(Collectors.toList());
 
-        pipeline.setTrainingParameterSpace(trainConfigs);
+        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, trainConfigs);
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }

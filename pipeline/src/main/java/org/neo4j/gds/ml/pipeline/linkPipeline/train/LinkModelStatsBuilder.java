@@ -21,9 +21,9 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
+import org.neo4j.gds.models.TrainerConfig;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -35,10 +35,10 @@ class LinkModelStatsBuilder {
     private final Map<LinkMetric, Double> min;
     private final Map<LinkMetric, Double> max;
     private final Map<LinkMetric, Double> sum;
-    private final LogisticRegressionTrainConfig modelParams;
+    private final TrainerConfig modelParams;
     private final int numberOfSplits;
 
-    LinkModelStatsBuilder(LogisticRegressionTrainConfig modelParams, int numberOfSplits) {
+    LinkModelStatsBuilder(TrainerConfig modelParams, int numberOfSplits) {
         this.modelParams = modelParams;
         this.numberOfSplits = numberOfSplits;
         this.min = new EnumMap<>(LinkMetric.class);
@@ -58,7 +58,7 @@ class LinkModelStatsBuilder {
         sum.merge(metric, value, Double::sum);
     }
 
-    ModelStats<LogisticRegressionTrainConfig> modelStats(LinkMetric metric) {
+    ModelStats modelStats(LinkMetric metric) {
         return ImmutableModelStats.of(
             modelParams,
             sum.get(metric) / numberOfSplits,

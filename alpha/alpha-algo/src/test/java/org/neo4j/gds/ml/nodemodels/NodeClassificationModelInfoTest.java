@@ -97,6 +97,7 @@ class NodeClassificationModelInfoTest {
             "batchSize", 100,
             "maxEpochs", 100,
             "minEpochs", 1,
+            "methodName", "LogisticRegression",
             "patience", 1,
             "penalty", 1.0,
             "tolerance", 0.001

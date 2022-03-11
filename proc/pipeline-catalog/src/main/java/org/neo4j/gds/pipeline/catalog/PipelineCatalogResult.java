@@ -30,7 +30,7 @@ public class PipelineCatalogResult {
     public final String pipelineType;
     public final ZonedDateTime creationTime;
 
-    public PipelineCatalogResult(Pipeline<?, ?> pipeline, String pipelineName) {
+    public PipelineCatalogResult(Pipeline<?> pipeline, String pipelineName) {
         this.pipelineName = pipelineName;
         pipelineInfo = pipeline.toMap();
         pipelineType = pipeline.type();

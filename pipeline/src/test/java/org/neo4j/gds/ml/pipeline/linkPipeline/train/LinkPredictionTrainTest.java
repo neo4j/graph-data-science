@@ -35,12 +35,14 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.models.TrainerConfig;
+import org.neo4j.gds.models.TrainingMethod;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -135,7 +137,7 @@ class LinkPredictionTrainTest {
         return Stream.of(
             Arguments.of("LLR batchSize 10", List.of(llrConfigs.get(0)), MemoryRange.of(34_600, 1_026_360)),
             Arguments.of("LLR batchSize 100", List.of(llrConfigs.get(1)), MemoryRange.of(83_560, 2_486_520)),
-            Arguments.of("LLR batchSize 10,100", llrConfigs, MemoryRange.of(83_656, 2_486_616))
+            Arguments.of("LLR batchSize 10,100", llrConfigs, MemoryRange.of(83_560, 2_486_520))
         );
     }
 
@@ -255,7 +257,7 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("paramsForEstimationsWithParamSpace")
-    void estimateWithParameterSpace(String desc, List<LogisticRegressionTrainConfig> parameterSpace, MemoryRange expectedRange) {
+    void estimateWithParameterSpace(String desc, List<TrainerConfig> parameterSpace, MemoryRange expectedRange) {
         var trainConfig = LinkPredictionTrainConfig
             .builder()
             .modelName("DUMMY")
@@ -264,7 +266,7 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionPipeline();
-        pipeline.setTrainingParameterSpace(parameterSpace);
+        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, parameterSpace);
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
@@ -325,7 +327,7 @@ class LinkPredictionTrainTest {
             .testFraction(0.5)
             .build());
 
-        pipeline.setTrainingParameterSpace(List.of(
+        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
             LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)),
             LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "patience", 5, "tolerance", 0.00001))
         ));

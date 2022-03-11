@@ -17,21 +17,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.decisiontree;
+package org.neo4j.gds.gradientdescent;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.ToMapConvertible;
 
-@Configuration
-public interface DecisionTreeTrainConfig {
+public interface GradientDescentConfig extends ToMapConvertible {
 
+    int DEFAULT_BATCH_SIZE = 100;
+    int MAX_EPOCHS = 100;
+
+    @Value.Default
     @Configuration.IntegerRange(min = 1)
-    int maxDepth();
+    default int batchSize() {
+        return DEFAULT_BATCH_SIZE;
+    }
 
-    @Configuration.IntegerRange(min = 0)
-    int minSplitSize();
+    @Value.Default
+    @Configuration.IntegerRange(min = 1)
+    default int minEpochs() {
+        return 1;
+    }
 
-    @Configuration.Ignore
-    default String lossFunction() {
-        return "GiniIndex";
+    @Value.Default
+    @Configuration.IntegerRange(min = 1)
+    default int patience() {
+        return 1;
+    }
+
+    @Value.Default
+    @Configuration.IntegerRange(min = 1)
+    default int maxEpochs() {
+        return MAX_EPOCHS;
+    }
+
+    @Value.Default
+    @Configuration.DoubleRange(min = 0)
+    default double tolerance() {
+        return 1e-3;
     }
 }

@@ -26,7 +26,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.BestMetricData;
 import org.neo4j.gds.ml.nodemodels.BestModelStats;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelSelectResult;
@@ -42,6 +41,8 @@ import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.models.TrainerConfig;
+import org.neo4j.gds.models.TrainingMethod;
 
 import java.util.List;
 import java.util.Map;
@@ -144,14 +145,14 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     }
 
 
-    private Map<Metric, List<ModelStats<LogisticRegressionTrainConfig>>> getTrainingStats(NodeClassificationModelInfo innerInfo) {
+    private Map<Metric, List<ModelStats>> getTrainingStats(NodeClassificationModelInfo innerInfo) {
         return innerInfo.metrics().entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             metricStats -> metricStats.getValue().train())
         );
     }
 
-    private Map<Metric, List<ModelStats<LogisticRegressionTrainConfig>>> getValidationStats(NodeClassificationModelInfo innerInfo) {
+    private Map<Metric, List<ModelStats>> getValidationStats(NodeClassificationModelInfo innerInfo) {
         return innerInfo.metrics().entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             metricStats -> metricStats.getValue().validation())
@@ -159,8 +160,8 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     }
 
     private BestMetricData extractWinningModelStats(
-        MetricData<LogisticRegressionTrainConfig> oldStats,
-        LogisticRegressionTrainConfig bestParams
+        MetricData oldStats,
+        TrainerConfig bestParams
     ) {
         return BestMetricData.of(
             findBestModelStats(oldStats.train(), bestParams),
@@ -172,8 +173,8 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     }
 
     static NodeClassificationTrainConfig innerConfig(NodeClassificationPipeline pipeline, NodeClassificationPipelineTrainConfig config) {
-        var params = pipeline.trainingParameterSpace().stream()
-            .map(LogisticRegressionTrainConfig::toMap).collect(Collectors.toList());
+        var params = pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression).stream()
+            .map(TrainerConfig::toMap).collect(Collectors.toList());
         return NodeClassificationTrainConfigImpl.builder()
             .modelName(config.modelName())
             .concurrency(config.concurrency())
@@ -191,8 +192,8 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     }
 
     private static BestModelStats findBestModelStats(
-        List<ModelStats<LogisticRegressionTrainConfig>> metricStatsForModels,
-        LogisticRegressionTrainConfig bestParams
+        List<ModelStats> metricStatsForModels,
+        TrainerConfig bestParams
     ) {
         return metricStatsForModels.stream()
             .filter(metricStatsForModel -> metricStatsForModel.params() == bestParams)

@@ -102,7 +102,7 @@ CALL gds.beta.pipeline.nodeClassification.create('pipe')
 | name     | nodePropertySteps | featureProperties | splitConfig | parameterSpace
 | "pipe"   | []                | []
            | {testFraction=0.3, validationFolds=3}
-           | [{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}]
+           | {LogisticRegression=[{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
 |===
 --
 
@@ -398,7 +398,7 @@ CALL gds.beta.pipeline.nodeClassification.configureParams('pipe',
 [opts="header",cols="1"]
 |===
 | parameterSpace
-| [{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, batchSize=100, tolerance=0.001}, {useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.01}, {useBiasFeature=true, maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}]
+| {LogisticRegression=[{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}, {useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.01}, {useBiasFeature=true, maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
 |===
 
 The `parameterSpace` in the pipeline now contains the three different model parameters, expanded with the default values.

@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline;
 
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.Pipeline;
 
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatureStep, LogisticRegressionTrainConfig> {
+public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatureStep> {
     public static final String PIPELINE_TYPE = "Node classification training pipeline";
     public static final String MODEL_TYPE = "NodeClassification";
 
@@ -36,7 +35,7 @@ public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatu
     private NodeClassificationSplitConfig splitConfig;
 
     public NodeClassificationPipeline() {
-        super(List.of(LogisticRegressionTrainConfig.defaultConfig()));
+        super();
         this.splitConfig = NodeClassificationSplitConfig.DEFAULT_CONFIG;
     }
 
@@ -44,7 +43,11 @@ public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatu
         var copied = new NodeClassificationPipeline();
         copied.featureSteps.addAll(featureSteps);
         copied.nodePropertySteps.addAll(nodePropertySteps);
-        copied.setTrainingParameterSpace(new ArrayList<>(trainingParameterSpace));
+
+        trainingParameterSpace().forEach((key, value) ->
+            copied.setTrainingParameterSpace(key, new ArrayList<>(value))
+        );
+
         copied.setSplitConfig(splitConfig);
         return copied;
     }

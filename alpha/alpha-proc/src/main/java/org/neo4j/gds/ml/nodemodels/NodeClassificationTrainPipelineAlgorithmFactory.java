@@ -90,6 +90,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
     @Override
     public Task progressTask(GraphStore graphStore, NodeClassificationPipelineTrainConfig config) {
         var pipeline = PipelineCatalog.getTyped(config.username(), config.pipeline(), NodeClassificationPipeline.class);
+        int numberOfModelCandidates = pipeline.trainingParameterSpace().values().stream().mapToInt(List::size).sum();
 
         return Tasks.task(
             taskName(),
@@ -100,7 +101,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
             ),
             NodeClassificationTrain.progressTask(
                 pipeline.splitConfig().validationFolds(),
-                pipeline.trainingParameterSpace().size()
+                numberOfModelCandidates
             )
         );
     }

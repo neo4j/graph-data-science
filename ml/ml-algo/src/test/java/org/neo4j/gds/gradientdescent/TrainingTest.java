@@ -124,7 +124,7 @@ class TrainingTest {
 
     @ValueClass
     @SuppressWarnings("immutables:subtype")
-    public interface TestTrainingConfig extends TrainingConfig {
+    public interface TestTrainingConfig extends GradientDescentConfig {
         static ImmutableTestTrainingConfig.Builder builder() {
             return ImmutableTestTrainingConfig.builder();
         }

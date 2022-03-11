@@ -41,7 +41,7 @@ public class PipelineDropProc extends PipelineCatalogProc {
     ) {
         validatePipelineName(pipelineName);
 
-        Pipeline<?, ?> pipeline = null;
+        Pipeline<?> pipeline = null;
 
         if (failIfMissing) {
             pipeline = PipelineCatalog.drop(username(), pipelineName);

@@ -37,7 +37,6 @@ import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFactory;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
@@ -49,6 +48,8 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.models.TrainingMethod;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
@@ -121,7 +122,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var metricSpecification = MetricSpecification.parse("F1(class=1)");
         var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
 
-        pipeline.setTrainingParameterSpace(List.of(LogisticRegressionTrainConfig.of(
+        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(LogisticRegressionTrainConfig.of(
             Map.of("penalty", 1, "maxEpochs", 1)
         )));
 
@@ -190,14 +191,6 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var pipeline = new NodeClassificationPipeline();
-            NodeClassificationTrainPipelineExecutor executor = new NodeClassificationTrainPipelineExecutor(
-                pipeline,
-                config,
-                caller.executionContext(),
-                graphStore,
-                "g",
-                ProgressTracker.NULL_TRACKER
-            );
 
             NodeClassificationTrainConfig actualConfig = NodeClassificationTrainPipelineExecutor.innerConfig(pipeline, config);
 

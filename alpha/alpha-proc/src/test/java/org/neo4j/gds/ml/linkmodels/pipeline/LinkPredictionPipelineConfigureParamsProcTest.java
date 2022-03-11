@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.models.TrainingMethod;
 
 import java.util.List;
 import java.util.Map;
@@ -53,16 +54,17 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
-                "parameterSpace", List.of(Map.of(
-                    "maxEpochs", 100,
-                    "minEpochs", 42,
-                    "penalty", 0.0,
-                    "patience", 1,
-                    "batchSize", 100,
-                    "useBiasFeature", true,
-                    "tolerance", 0.001
+                "parameterSpace", Map.of(TrainingMethod.LogisticRegression.name(), List.of(Map.of(
+                        "maxEpochs", 100,
+                        "minEpochs", 42,
+                        "penalty", 0.0,
+                        "patience", 1,
+                        "methodName", TrainingMethod.LogisticRegression.name(),
+                        "batchSize", 100,
+                        "useBiasFeature", true,
+                        "tolerance", 0.001
+                    )))
                 ))
-            ))
         );
     }
 
@@ -77,15 +79,16 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
-                "parameterSpace", List.of(Map.of(
+                "parameterSpace", Map.of(TrainingMethod.LogisticRegression.name(), List.of(Map.of(
                     "maxEpochs", 100,
                     "minEpochs", 4,
                     "penalty", 0.0,
                     "patience", 1,
+                    "methodName", TrainingMethod.LogisticRegression.name(),
                     "batchSize", 100,
                     "tolerance", 0.001,
                     "useBiasFeature", true
-                ))
+                )))
             ))
         );
     }

@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.nodemodels;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfigImpl;
 
 import java.util.List;
@@ -44,8 +44,8 @@ public interface NodeClassificationModelInfo extends ToMapConvertible {
      * for the selection metric.
      * @return
      */
-    LogisticRegressionTrainConfig bestParameters();
-    Map<Metric, MetricData<LogisticRegressionTrainConfig>> metrics();
+    TrainerConfig bestParameters();
+    Map<Metric, MetricData> metrics();
 
     @Override
     @Value.Auxiliary
@@ -63,8 +63,8 @@ public interface NodeClassificationModelInfo extends ToMapConvertible {
 
     static NodeClassificationModelInfo of(
         List<Long> classes,
-        LogisticRegressionTrainConfig bestParameters,
-        Map<Metric, MetricData<LogisticRegressionTrainConfig>> metrics
+        TrainerConfig bestParameters,
+        Map<Metric, MetricData> metrics
     ) {
         return ImmutableNodeClassificationModelInfo.of(classes, bestParameters, metrics);
     }

@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,28 +49,28 @@ public final class StatsMap {
             .build();
     }
 
-    private final Map<Metric, List<ModelStats<LogisticRegressionTrainConfig>>> map;
+    private final Map<Metric, List<ModelStats>> map;
 
     static StatsMap create(List<Metric> metrics) {
-        Map<Metric, List<ModelStats<LogisticRegressionTrainConfig>>> map = new HashMap<>();
+        Map<Metric, List<ModelStats>> map = new HashMap<>();
         metrics.forEach(metric -> map.put(metric, new ArrayList<>()));
         return new StatsMap(map);
     }
 
-    private StatsMap(Map<Metric, List<ModelStats<LogisticRegressionTrainConfig>>> map) {
+    private StatsMap(Map<Metric, List<ModelStats>> map) {
         this.map = map;
     }
 
-    void add(Metric metric, ModelStats<LogisticRegressionTrainConfig> modelStats) {
+    void add(Metric metric, ModelStats modelStats) {
         map.get(metric).add(modelStats);
     }
 
-    ModelStats<LogisticRegressionTrainConfig> pickBestModelStats(Metric metric) {
+    ModelStats pickBestModelStats(Metric metric) {
         var modelStats = map.get(metric);
         return Collections.max(modelStats, COMPARE_AVERAGE);
     }
 
-    Map<Metric, List<ModelStats<LogisticRegressionTrainConfig>>> getMap() {
+    Map<Metric, List<ModelStats>> getMap() {
         return map;
     }
 }
