@@ -32,7 +32,7 @@ public final class FeatureBagger {
     public static FeatureBagger of(SplittableRandom random, int totalNumberOfFeatures, double featureBaggingRatio) {
         var featureBagger = new FeatureBagger(random, totalNumberOfFeatures, featureBaggingRatio);
 
-        if (Double.compare(featureBaggingRatio, 1.0D) == 0) {
+        if (featureBagger.featureBag.length == totalNumberOfFeatures) {
             // cache everything is sampled
             for (int i = 0; i < featureBagger.featureBag.length; i++) {
                 featureBagger.featureBag[i] = i;
