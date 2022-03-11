@@ -23,25 +23,31 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.SplittableRandom;
 
-public class FeatureBagger {
+public final class FeatureBagger {
 
     private final SplittableRandom random;
     private final int totalNumberOfFeatures;
     private final int[] featureBag;
 
-    public FeatureBagger(SplittableRandom random, int totalNumberOfFeatures, double featureBaggingRatio) {
+    public static FeatureBagger of(SplittableRandom random, int totalNumberOfFeatures, double featureBaggingRatio) {
+        var featureBagger = new FeatureBagger(random, totalNumberOfFeatures, featureBaggingRatio);
+
+        if (Double.compare(featureBaggingRatio, 1.0D) == 0) {
+            // cache everything is sampled
+            for (int i = 0; i < featureBagger.featureBag.length; i++) {
+                featureBagger.featureBag[i] = i;
+            }
+        }
+
+        return featureBagger;
+    }
+
+    private FeatureBagger(SplittableRandom random, int totalNumberOfFeatures, double featureBaggingRatio) {
         assert Double.compare(featureBaggingRatio, 0) != 0: "Invalid featureBaggingRatio";
 
         this.random = random;
         this.totalNumberOfFeatures = totalNumberOfFeatures;
         this.featureBag = new int[(int) Math.ceil(featureBaggingRatio * totalNumberOfFeatures)];
-
-        if (Double.compare(featureBaggingRatio, 1.0D) == 0) {
-            // cache everything is sampled
-            for (int i = 0; i < featureBag.length; i++) {
-                featureBag[i] = i;
-            }
-        }
     }
 
     int[] sample() {

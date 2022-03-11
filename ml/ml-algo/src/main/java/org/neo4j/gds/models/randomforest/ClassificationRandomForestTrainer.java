@@ -152,7 +152,7 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
 
         @Override
         public void run() {
-            var featureBagger = new FeatureBagger(
+            var featureBagger = FeatureBagger.of(
                 random.split(),
                 allFeatureVectors.featureDimension(),
                 randomForestTrainConfig.featureBaggingRatio()
