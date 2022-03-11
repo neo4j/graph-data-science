@@ -60,25 +60,25 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
             var split = record.split();
 
             if (record.depth() >= maxDepth || split.sizes().left() <= minSize) {
-                record.node().leftChild = new TreeNode<>(toTerminal(split.groups().left(), split.sizes().left()));
+                record.node().setLeftChild(new TreeNode<>(toTerminal(split.groups().left(), split.sizes().left())));
             } else {
-                record.node().leftChild = splitAndPush(
+                record.node().setLeftChild(splitAndPush(
                     stack,
                     split.groups().left(),
                     split.sizes().left(),
                     record.depth() + 1
-                );
+                ));
             }
 
             if (record.depth() >= maxDepth || split.sizes().right() <= minSize) {
-                record.node().rightChild = new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right()));
+                record.node().setRightChild(new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right())));
             } else {
-                record.node().rightChild = splitAndPush(
+                record.node().setRightChild(splitAndPush(
                     stack,
                     split.groups().right(),
                     split.sizes().right(),
                     record.depth() + 1
-                );
+                ));
             }
         }
 

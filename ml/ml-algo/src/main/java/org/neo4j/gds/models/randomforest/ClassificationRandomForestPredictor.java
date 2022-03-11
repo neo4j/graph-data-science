@@ -78,7 +78,7 @@ public class ClassificationRandomForestPredictor implements Classifier {
         int[] votesPerClass = gatherTreePredictions(features);
         int numberOfTrees = data.decisionTrees().size();
 
-        double[] probabilities = new double[votesPerClass.length];
+        double[] probabilities = new double[classMapping.size()];
 
         for (int classIdx = 0; classIdx < votesPerClass.length; classIdx++) {
             int voteForClass = votesPerClass[classIdx];
