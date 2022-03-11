@@ -21,6 +21,7 @@ package org.neo4j.gds.decisiontree;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.models.Features;
 
 import java.util.ArrayDeque;
@@ -50,7 +51,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         this.featureBagger = featureBagger;
     }
 
-    public DecisionTreePredict<PREDICTION> train(HugeLongArray sampledFeatureVectors) {
+    public DecisionTreePredict<PREDICTION> train(ReadOnlyHugeLongArray sampledFeatureVectors) {
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
@@ -87,11 +88,11 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     }
 
     // TODO comment to explain this name could be useful
-    protected abstract PREDICTION toTerminal(HugeLongArray group, long groupSize);
+    protected abstract PREDICTION toTerminal(ReadOnlyHugeLongArray group, long groupSize);
 
     private TreeNode<PREDICTION> splitAndPush(
         Deque<StackRecord<PREDICTION>> stack,
-        HugeLongArray group,
+        ReadOnlyHugeLongArray group,
         long groupSize,
         int depth
     ) {
@@ -115,7 +116,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     private GroupSizes createSplit(
         final int index,
         final double value,
-        HugeLongArray group,
+        ReadOnlyHugeLongArray group,
         final long groupSize,
         Groups groups
     ) {
@@ -142,7 +143,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         return ImmutableGroupSizes.of(leftGroupSize, rightGroupSize);
     }
 
-    private Split findBestSplit(final HugeLongArray group, final long groupSize) {
+    private Split findBestSplit(final ReadOnlyHugeLongArray group, final long groupSize) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
 
@@ -187,7 +188,10 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         return ImmutableSplit.of(
             bestIdx,
             bestValue,
-            bestChildGroups,
+            ImmutableReadOnlyGroups.of(
+                ReadOnlyHugeLongArray.of(bestChildGroups.left()),
+                ReadOnlyHugeLongArray.of(bestChildGroups.right())
+            ),
             bestGroupSizes
         );
 
@@ -199,7 +203,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
 
         double value();
 
-        Groups groups();
+        ReadOnlyGroups groups();
 
         GroupSizes sizes();
     }

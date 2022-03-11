@@ -21,6 +21,7 @@ package org.neo4j.gds.models.randomforest;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
 import java.util.SplittableRandom;
 
@@ -28,23 +29,25 @@ final class DatasetBootstrapper {
 
     private DatasetBootstrapper() {}
 
-    static HugeLongArray bootstrap(
+    static ReadOnlyHugeLongArray bootstrap(
         final SplittableRandom random,
         double numFeatureVectorsRatio,
-        long totalNumVectors,
-        final BitSet cachedBootstrappedDataset
+        ReadOnlyHugeLongArray trainSet,
+        final BitSet bootstrappedTrainSetIndices
     ) {
         assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
 
-        long numVectors = (long) Math.ceil(numFeatureVectorsRatio * totalNumVectors);
+        long numVectors = (long) Math.ceil(numFeatureVectorsRatio * trainSet.size());
         var bootstrappedVectors = HugeLongArray.newArray(numVectors);
 
         for (long i = 0; i < numVectors; i++) {
-            long sampledVectorIdx = random.nextLong(0, totalNumVectors);
-            bootstrappedVectors.set(i, sampledVectorIdx);
-            cachedBootstrappedDataset.set(sampledVectorIdx);
+            long sampledTrainingIdx = random.nextLong(0, trainSet.size());
+
+            // we are translating the train set idx to avoid another indirection during the training
+            bootstrappedVectors.set(i, trainSet.get(sampledTrainingIdx));
+            bootstrappedTrainSetIndices.set(sampledTrainingIdx);
         }
 
-        return bootstrappedVectors;
+        return ReadOnlyHugeLongArray.of(bootstrappedVectors);
     }
 }

@@ -24,6 +24,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
@@ -40,23 +41,24 @@ public final class OutOfBagErrorMetric {
     static void addPredictionsForTree(
         DecisionTreePredict<Long> decisionTree,
         LocalIdMap classMapping,
-        final BitSet sampledFeatureVectors,
         final Features allFeatureVectors,
+        ReadOnlyHugeLongArray trainSet,
+        final BitSet sampledTrainSet,
         HugeAtomicLongArray predictions
     ) {
-        var totalNumVectors = allFeatureVectors.size();
         var numClasses = classMapping.size();
 
-        for (long i = 0; i < totalNumVectors; i++) {
-            if (sampledFeatureVectors.get(i)) continue;
+        for (long trainSetIdx = 0; trainSetIdx < trainSet.size(); trainSetIdx++) {
+            if (sampledTrainSet.get(trainSetIdx)) continue;
 
-            Long prediction = decisionTree.predict(allFeatureVectors.get(i));
-            predictions.getAndAdd(i * numClasses + classMapping.toMapped(prediction), 1);
+            double[] featureVector = allFeatureVectors.get(trainSet.get(trainSetIdx));
+            Long prediction = decisionTree.predict(featureVector);
+            predictions.getAndAdd(trainSetIdx * numClasses + classMapping.toMapped(prediction), 1);
         }
     }
 
     public static double evaluate(
-        long totalNumVectors,
+        ReadOnlyHugeLongArray trainSet,
         LocalIdMap classMapping,
         HugeLongArray expectedLabels,
         int concurrency,
@@ -65,10 +67,11 @@ public final class OutOfBagErrorMetric {
         var totalMistakes = new LongAdder();
         var totalOutOfAnyBagVectors = new LongAdder();
 
-        var tasks = PartitionUtils.rangePartition(concurrency, totalNumVectors, partition ->
+        var tasks = PartitionUtils.rangePartition(concurrency, trainSet.size(), partition ->
                 accumulationTask(
                     partition,
                     classMapping,
+                    trainSet,
                     predictions,
                     expectedLabels,
                     totalMistakes,
@@ -85,6 +88,7 @@ public final class OutOfBagErrorMetric {
     private static Runnable accumulationTask(
         Partition partition,
         LocalIdMap classMapping,
+        ReadOnlyHugeLongArray trainSet,
         HugeAtomicLongArray predictions,
         HugeLongArray expectedLabels,
         LongAdder totalMistakes,
@@ -116,7 +120,7 @@ public final class OutOfBagErrorMetric {
 
                 // The ith feature vector was in at least one out-of-bag dataset.
                 numOutOfAnyBagVectors++;
-                if (classMapping.toOriginal(maxClassIdx) != expectedLabels.get(i)) {
+                if (classMapping.toOriginal(maxClassIdx) != expectedLabels.get(trainSet.get(i))) {
                     numMistakes++;
                 }
             }

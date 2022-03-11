@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.models;
+package org.neo4j.gds.decisiontree;
 
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
-public interface Trainer {
+@ValueClass
+interface ReadOnlyGroups {
+    ReadOnlyHugeLongArray left();
 
-    Classifier train(Features features, HugeLongArray labels, ReadOnlyHugeLongArray trainSet);
-
+    ReadOnlyHugeLongArray right();
 }

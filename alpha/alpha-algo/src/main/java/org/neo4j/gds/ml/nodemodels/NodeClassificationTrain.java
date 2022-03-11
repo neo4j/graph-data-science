@@ -426,7 +426,6 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
         TrainerConfig lrConfig
     ) {
         var trainer = new LogisticRegressionTrainer(
-            ReadOnlyHugeLongArray.of(trainSet),
             config.concurrency(),
             (LogisticRegressionTrainConfig) lrConfig,
             classIdMap,
@@ -434,7 +433,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<LogisticRegre
             terminationFlag,
             progressTracker
         );
-        return trainer.train(features, targets);
+        return trainer.train(features, targets, ReadOnlyHugeLongArray.of(trainSet));
     }
 
     @ValueClass

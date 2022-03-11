@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.decisiontree.GiniIndex;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.models.Features;
@@ -40,6 +41,7 @@ class ClassificationRandomForestTest {
     private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
 
     private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
+    private ReadOnlyHugeLongArray trainSet;
     private Features allFeatureVectors;
 
     private GiniIndex giniIndexLoss;
@@ -47,6 +49,10 @@ class ClassificationRandomForestTest {
     @BeforeEach
     void setup() {
         allLabels.setAll(idx -> idx >= 5 ? 42 : 1337);
+
+        HugeLongArray mutableTrainSet = HugeLongArray.newArray(NUM_SAMPLES);
+        mutableTrainSet.setAll(idx -> idx);
+        trainSet = ReadOnlyHugeLongArray.of(mutableTrainSet);
 
         HugeObjectArray<double[]> featureVectorArray = HugeObjectArray.newArray(double[].class, NUM_SAMPLES);
 
@@ -87,7 +93,7 @@ class ClassificationRandomForestTest {
             false
         );
 
-        var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels);
+        var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
 
         var featureVector = new double[]{8.0, 0.0};
 
@@ -118,7 +124,7 @@ class ClassificationRandomForestTest {
             false
         );
 
-        var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels);
+        var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
 
         var featureVector = new double[]{8.0, 3.2};
 
@@ -148,8 +154,43 @@ class ClassificationRandomForestTest {
             true
         );
 
-        randomForestTrainer.train(allFeatureVectors, allLabels);
+        randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
 
         assertThat(randomForestTrainer.outOfBagError()).isCloseTo(0.2, Offset.offset(0.000001D));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void considerTrainSet(int concurrency) {
+        var randomForestTrainer = new ClassificationRandomForestTrainer<>(
+            giniIndexLoss,
+            concurrency,
+            CLASS_MAPPING,
+            RandomForestTrainConfigImpl
+                .builder()
+                .maxDepth(2)
+                .minSplitSize(1)
+                .randomSeed(Optional.of(1337L))
+                .numberOfSamplesRatio(0.5D)
+                .featureBaggingRatio(1.0D)
+                .numberOfDecisionTrees(5)
+                .build(),
+            false
+        );
+
+        HugeLongArray mutableTrainSet = HugeLongArray.newArray(NUM_SAMPLES / 2);
+        // Use only class 1337 vectors => all predictions should be 1337
+        mutableTrainSet.setAll(idx -> idx);
+        trainSet = ReadOnlyHugeLongArray.of(mutableTrainSet);
+        var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
+
+        // 42 example (see setup above)
+        var featureVector = new double[]{7.444542326, 0.476683375};
+
+        assertThrows(
+            IllegalAccessError.class,
+            randomForestTrainer::outOfBagError
+        );
+        assertThat(randomForestPredictor.predictLabel(featureVector)).isEqualTo(1337);
     }
 }

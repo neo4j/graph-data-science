@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.models.Features;
 import org.neo4j.gds.models.FeaturesFactory;
@@ -107,10 +108,12 @@ class ClassificationDecisionTreeTest {
             new FeatureBagger(new SplittableRandom(), featureVector.length, 1)
         );
 
-        HugeLongArray activeFeatureVectors = HugeLongArray.newArray(features.size());
-        activeFeatureVectors.setAll(idx -> idx);
+        HugeLongArray mutableFeatureVectors = HugeLongArray.newArray(features.size());
+        mutableFeatureVectors.setAll(idx -> idx);
+        var featureVectors = ReadOnlyHugeLongArray.of(mutableFeatureVectors);
 
-        var decisionTreePredict = decisionTree.train(activeFeatureVectors);
+
+        var decisionTreePredict = decisionTree.train(featureVectors);
 
         assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(expectedPrediction);
     }
@@ -122,8 +125,9 @@ class ClassificationDecisionTreeTest {
             .minSplitSize(1)
             .build();
 
-        HugeLongArray activeFeatureVectors = HugeLongArray.newArray(features.size());
-        activeFeatureVectors.setAll(idx -> idx);
+        HugeLongArray mutableFeatureVectors = HugeLongArray.newArray(features.size());
+        mutableFeatureVectors.setAll(idx -> idx);
+        var featureVectors = ReadOnlyHugeLongArray.of(mutableFeatureVectors);
 
         var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
@@ -136,7 +140,7 @@ class ClassificationDecisionTreeTest {
 
         var featureVector = new double[]{8.0, 0.0};
 
-        var decisionTreePredict = decisionTree.train(activeFeatureVectors);
+        var decisionTreePredict = decisionTree.train(featureVectors);
         assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(42);
 
         decisionTree = new ClassificationDecisionTreeTrain<>(
@@ -148,7 +152,7 @@ class ClassificationDecisionTreeTest {
             new FeatureBagger(new SplittableRandom(1337L), featureVector.length, 0.5D) // Only one feature is used.
         );
 
-        decisionTreePredict = decisionTree.train(activeFeatureVectors);
+        decisionTreePredict = decisionTree.train(featureVectors);
         assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(1337);
     }
 
@@ -161,8 +165,9 @@ class ClassificationDecisionTreeTest {
             .minSplitSize(1)
             .build();
 
-        var sampledVectors = HugeLongArray.newArray(1);
-        sampledVectors.set(0, 1);
+        var mutableSampledVectors = HugeLongArray.newArray(1);
+        mutableSampledVectors.set(0, 1);
+        var sampledVectors = ReadOnlyHugeLongArray.of(mutableSampledVectors);
 
         var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
@@ -176,8 +181,9 @@ class ClassificationDecisionTreeTest {
         var decisionTreePredict = decisionTree.train(sampledVectors);
         assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(1337L);
 
-        var otherSampledVectors = HugeLongArray.newArray(1);
-        otherSampledVectors.set(0, features.size() - 1);
+        var mutableOtherSampledVectors = HugeLongArray.newArray(1);
+        mutableOtherSampledVectors.set(0, features.size() - 1);
+        var otherSampledVectors = ReadOnlyHugeLongArray.of(mutableOtherSampledVectors);
 
         decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
