@@ -7,7 +7,7 @@
 [abstract]
 --
 This section describes the Node Similarity algorithm in the Neo4j Graph Data Science library.
-The algorithm is based on the Jaccard Similarity score.
+The algorithm is based on the Jaccard and Overlap similarity metrics.
 --
 
 :directed:
@@ -23,7 +23,7 @@ include::../shared/algorithm-traits.adoc[]
 
 The Node Similarity algorithm compares a set of nodes based on the nodes they are connected to.
 Two nodes are considered similar if they share many of the same neighbors.
-Node Similarity computes pair-wise similarities based on the Jaccard metric, also known as the Jaccard Similarity Score.
+Node Similarity computes pair-wise similarities based on either the Jaccard metric, also known as the Jaccard Similarity Score, or the Overlap coefficient, also known as the Szymkiewicz–Simpson coefficient.
 
 Given two sets `A` and `B`, the Jaccard Similarity is computed using the following formula:
 
@@ -31,12 +31,18 @@ image::jaccard.png[role="middle"]
 // This is the raw information for this image:
 // // J(A,B) = ∣A ∩ B∣ / ∣(A ∪ B)∣ // = ∣A ∩ B∣ / ∣A∣ + ∣B∣ - ∣A ∩ B| //
 
+The Overlap coefficient is computed using the following formula:
+
+image::overlap.png[role="middle"]
+// This is the raw information for this image:
+// // O(A,B) = ∣A ∩ B∣ / min(|A|, |B|∣
+
 The input of this algorithm is a bipartite, connected graph containing two disjoint node sets.
 Each relationship starts from a node in the first node set and ends at a node in the second node set.
 
 The Node Similarity algorithm compares each node that has outgoing relationships with each other such node.
 For every node `n`, we collect the outgoing neighborhood `N(n)` of that node, that is, all nodes `m` such that there is a relationship from `n` to `m`.
-For each pair `n`, `m`, the algorithm computes a similarity for that pair which is the Jaccard similarity of `N(n)` and `N(m)`.
+For each pair `n`, `m`, the algorithm computes a similarity for that pair that equals the outcome of the selected similarity metric for `N(n)` and `N(m)`.
 
 The complexity of this comparison grows quadratically with the number of nodes to compare.
 The algorithm reduces the complexity by ignoring disconnected nodes.
@@ -49,12 +55,13 @@ It can be set to any value, except 0.
 The output of the algorithm are new relationships between pairs of the first node set.
 Similarity scores are expressed via relationship properties.
 
-A related function for computing Jaccard similarity is described in <<alpha-algorithms-similarity-jaccard>>.
+Related functions for computing Jaccard similarity and the Overlap coefficient are described in <<alpha-algorithms-similarity-jaccard>> and <<alpha-algorithms-similarity-overlap>> respectively.
 
 For more information on this algorithm, see:
 
 * https://en.wikipedia.org/wiki/Similarity_(network_science)#Structural_equivalence[Structural equivalence (Wikipedia)]
 * https://en.wikipedia.org/wiki/Jaccard_index[The Jaccard index (Wikipedia)].
+* https://en.wikipedia.org/wiki/Overlap_coefficient[The Overlap Coefficient (Wikipedia)].
 * https://en.wikipedia.org/wiki/Bipartite_graph[Bipartite graphs (Wikipedia)]
 
 [NOTE]
@@ -423,22 +430,20 @@ If `a -> b` is topK for `a` and symmetrically `b -> a` is topK for `b` (or both 
 However, they are just two directed relationships that have been independently produced.
 ====
 
-
 [[algorithms-node-similarity-examples-write]]
 === Write
 
-The `write` execution mode extends the `stats` mode with an important side effect: for each pair of nodes we create a relationship with the Jaccard similarity score as a property to the Neo4j database.
+The `write` execution mode for each pair of nodes creates a relationship with their similarity score as a property to the Neo4j database.
 The type of the new relationship is specified using the mandatory configuration parameter `writeRelationshipType`.
 The name of the new property is specified using the mandatory configuration parameter `writeProperty`.
 The result is a single summary row, similar to `stats`, but with some additional metrics.
 
 For more details on the `write` mode in general, see <<running-algos-write>>.
 
-
 [role=query-example]
 --
 .The following will run the algorithm, and write back results:
-[source, cypher, role=noplay]
+[source,cypher,role=noplay]
 ----
 CALL gds.nodeSimilarity.write('myGraph', {
     writeRelationshipType: 'SIMILAR',
@@ -633,22 +638,21 @@ ORDER BY Person1
 |===
 --
 
-
 [[algorithms-node-similarity-examples-weighted]]
-=== Weighted Jaccard Similarity
+=== Weighted Similarity
 
 Relationship properties can be used to modify the similarity induced by certain relationships.
-For example a relationship value of 2 is equal to counting that relationship twice while computing the jaccard similarity.
+For example a relationship value of 2 is equal to counting that relationship twice while computing the similarity.
 
 [NOTE]
 ====
-Weighted jaccard similarity is only defined for values greater or equal to 0.
+Weighted similarity metrics are only defined for values greater or equal to 0.
 ====
 
 [role=query-example]
 --
 .The following query will respect relationship properties in the similarity computation:
-[source, cypher, role=noplay]
+[source,cypher,role=noplay]
 ----
 CALL gds.nodeSimilarity.stream('myGraph', { relationshipWeightProperty: 'strength', similarityCutoff: 0.5 })
 YIELD node1, node2, similarity
