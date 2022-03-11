@@ -32,8 +32,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BFSAlgorithmFactoryTest {
 
     @ParameterizedTest
-    @CsvSource({"10_000,100_000,564268,2004268", "100_000,1_000_000,5639418,20039418"})
-    void testMemoryEstimation(long nodeCount, long relationshipCount, long expectedMin, long expectedMax) {
+    @CsvSource({"10_000,100_000,402_956,402_956,482_940", "100_000,1_000_000,4_026_858,4026858,4_826_842"})
+    void testMemoryEstimation(
+        long nodeCount,
+        long relationshipCount,
+        long expectedMin,
+        long expectedMax,
+        long expectedMaxWithConcurrency2
+    ) {
         var algorithmFactory = new BFSAlgorithmFactory();
 
         var userInput = CypherMapWrapper.create(Map.of(SourceNodeConfig.SOURCE_NODE_KEY, 0));
@@ -44,5 +50,10 @@ class BFSAlgorithmFactoryTest {
 
         assertThat(actual.min).isEqualTo(expectedMin);
         assertThat(actual.max).isEqualTo(expectedMax);
+
+        var actualWithConcurrency2 = memoryEstimation.estimate(dimensions, 2).memoryUsage();
+
+        assertThat(actualWithConcurrency2.min).isEqualTo(expectedMin);
+        assertThat(actualWithConcurrency2.max).isEqualTo(expectedMaxWithConcurrency2);
     }
 }
