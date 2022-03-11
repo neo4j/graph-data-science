@@ -33,7 +33,7 @@ public class ClassificationRandomForestPredictor implements Classifier {
     private final RandomForestData data;
 
     public ClassificationRandomForestPredictor(
-        List<DecisionTreePredict<Long>> decisionTrees,
+        List<DecisionTreePredict<Integer>> decisionTrees,
         LocalIdMap classMapping,
         int featureDimension
     ) {
@@ -87,15 +87,13 @@ public class ClassificationRandomForestPredictor implements Classifier {
         return probabilities;
     }
 
-
     int[] gatherTreePredictions(double[] features) {
         var classMapping = data.classIdMap();
         final var predictionsPerClass = new int[classMapping.size()];
-        var decisionTrees = data.decisionTrees();
 
-        for (DecisionTreePredict<Long> decisionTree : decisionTrees) {
-            long predictedClass = decisionTree.predict(features);
-            predictionsPerClass[classMapping.toMapped(predictedClass)]++;
+        for (DecisionTreePredict<Integer> decisionTree : data.decisionTrees()) {
+            int predictedClass = decisionTree.predict(features);
+            predictionsPerClass[predictedClass]++;
         }
         return predictionsPerClass;
     }

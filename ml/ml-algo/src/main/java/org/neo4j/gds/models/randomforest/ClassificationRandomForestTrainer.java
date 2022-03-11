@@ -113,7 +113,7 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
 
     static class TrainDecisionTreeTask<LOSS extends DecisionTreeLoss> implements Runnable {
 
-        private DecisionTreePredict<Long> trainedTree;
+        private DecisionTreePredict<Integer> trainedTree;
         private final Optional<HugeAtomicLongArray> maybePredictions;
         private final DecisionTreeTrainConfig decisionTreeTrainConfig;
         private final RandomForestTrainConfig randomForestTrainConfig;
@@ -146,7 +146,7 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
             this.trainSet = trainSet;
         }
 
-        public DecisionTreePredict<Long> trainedTree() {
+        public DecisionTreePredict<Integer> trainedTree() {
             return trainedTree;
         }
 

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -41,7 +42,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
     private final Features features;
     private final BatchTransformer nodeIds;
     private final Classifier classifier;
-    private final HugeObjectArray<double[]> predictedProbabilities;
+    private final @Nullable HugeObjectArray<double[]> predictedProbabilities;
     private final HugeLongArray predictedClasses;
     private final ProgressTracker progressTracker;
 
@@ -49,7 +50,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
         Features features,
         BatchTransformer nodeIds,
         Classifier classifier,
-        HugeObjectArray<double[]> predictedProbabilities,
+        @Nullable HugeObjectArray<double[]> predictedProbabilities,
         HugeLongArray predictedClasses,
         ProgressTracker progressTracker
     ) {

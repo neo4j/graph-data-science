@@ -24,7 +24,7 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.models.Features;
 
-public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> extends DecisionTreeTrain<LOSS, Long> {
+public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> extends DecisionTreeTrain<LOSS, Integer> {
 
     private final HugeLongArray allLabels;
     private final LocalIdMap classIdMap;
@@ -50,7 +50,7 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
     }
 
     @Override
-    protected Long toTerminal(final ReadOnlyHugeLongArray group, final long groupSize) {
+    protected Integer toTerminal(final ReadOnlyHugeLongArray group, final long groupSize) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
 
@@ -62,14 +62,14 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         }
 
         long maxClassCountInGroup = -1;
-        int maxClassIdx = 0;
+        int maxMappedClass = 0;
         for (int i = 0; i < classesInGroup.length; i++) {
             if (classesInGroup[i] <= maxClassCountInGroup) continue;
 
             maxClassCountInGroup = classesInGroup[i];
-            maxClassIdx = i;
+            maxMappedClass = i;
         }
 
-        return classIdMap.toOriginal(maxClassIdx);
+        return maxMappedClass;
     }
 }
