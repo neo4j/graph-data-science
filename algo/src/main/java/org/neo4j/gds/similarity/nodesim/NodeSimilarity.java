@@ -42,10 +42,6 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
-    enum Metric {
-        JACCARD,
-        OVERLAP
-    }
 
     private final Graph graph;
     private final boolean sortVectors;
@@ -74,13 +70,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.nodeFilter = new BitSet(graph.nodeCount());
         this.weighted = config.hasRelationshipWeightProperty();
         var metricUsed = config.similarityMetric().toUpperCase(Locale.ROOT);
-        if (metricUsed.equals("JACCARD" )) {
-            this.similarityComputer = MetricSimilarityComputer.create(Metric.JACCARD, config.similarityCutoff());
-        } else if (metricUsed.equals("OVERLAP" )) {
-            this.similarityComputer = MetricSimilarityComputer.create(Metric.OVERLAP, config.similarityCutoff());
-        } else {
-            throw new IllegalArgumentException(config.similarityMetric() + " is not a valid metric. Available metrics include Jaccard and Overlap");
-        }
+
+        var metric = MetricSimilarityComputer.valueOf(config.similarityMetric());
+        this.similarityComputer = MetricSimilarityComputer.create(metric, config.similarityCutoff());
     }
 
     @Override
@@ -235,12 +227,10 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 nodeStream(node1 + 1)
                     .forEach(node2 -> {
                         double similarity = weighted
-                            ? computeWeightedSimilarity(
-                            vector1,
-                            vectors.get(node2),
-                            weights.get(node1),
-                            weights.get(node2)
-                        )
+                            ?
+                            computeWeightedSimilarity(
+                                vector1, vectors.get(node2), weights.get(node1), weights.get(node2)
+                            )
                             : computeSimilarity(vector1, vectors.get(node2));
                         if (!Double.isNaN(similarity)) {
                             topKMap.put(node1, node2, similarity);
@@ -274,12 +264,10 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                         .filter(node2 -> node1 != node2)
                         .forEach(node2 -> {
                             double similarity = weighted
-                                ? computeWeightedSimilarity(
-                                vector1,
-                                vectors.get(node2),
-                                weights.get(node1),
-                                weights.get(node2)
-                            )
+                                ?
+                                computeWeightedSimilarity(
+                                    vector1, vectors.get(node2), weights.get(node1), weights.get(node2)
+                                )
                                 : computeSimilarity(vector1, vectors.get(node2));
                             if (!Double.isNaN(similarity)) {
                                 topKMap.put(node1, node2, similarity);
@@ -303,12 +291,10 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 nodeStream(node1 + 1)
                     .forEach(node2 -> {
                         double similarity = weighted
-                            ? computeWeightedSimilarity(
-                            vector1,
-                            vectors.get(node2),
-                            weights.get(node1),
-                            weights.get(node2)
-                        )
+                            ?
+                            computeWeightedSimilarity(
+                                vector1, vectors.get(node2), weights.get(node1), weights.get(node2)
+                            )
                             : computeSimilarity(vector1, vectors.get(node2));
                         if (!Double.isNaN(similarity)) {
                             topNList.add(node1, node2, similarity);

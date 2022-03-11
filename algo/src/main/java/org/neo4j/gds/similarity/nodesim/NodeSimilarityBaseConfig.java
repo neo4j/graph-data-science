@@ -48,7 +48,7 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
 
     @Value.Default
     default String similarityMetric() {
-        return "JACCARD";
+        return NodeSimilarityMetric.JACCARD.name();
     }
 
     @Value.Default
@@ -147,6 +147,5 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
             ));
         }
     }
-
 
 }
