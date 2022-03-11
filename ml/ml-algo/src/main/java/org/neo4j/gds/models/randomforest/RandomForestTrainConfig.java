@@ -19,19 +19,22 @@
  */
 package org.neo4j.gds.models.randomforest;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.decisiontree.DecisionTreeTrainConfig;
 
 @Configuration
-public interface RandomForestTrainConfig extends DecisionTreeTrainConfig {
+public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, RandomSeedConfig {
 
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     double featureBaggingRatio();
 
+    @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     default double numberOfSamplesRatio() {
         return 1;
-    };
+    }
 
     @Configuration.IntegerRange(min = 1)
     int numberOfDecisionTrees();

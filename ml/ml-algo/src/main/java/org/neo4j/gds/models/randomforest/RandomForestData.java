@@ -23,8 +23,10 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.models.Classifier;
 
+import java.util.List;
+
 @ValueClass
 public interface RandomForestData extends Classifier.ClassifierData {
 
-    DecisionTreePredict<Long>[] decisionTrees();
+    List<DecisionTreePredict<Long>> decisionTrees();
 }

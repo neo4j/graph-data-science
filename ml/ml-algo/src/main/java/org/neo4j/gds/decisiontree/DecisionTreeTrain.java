@@ -21,28 +21,29 @@ package org.neo4j.gds.decisiontree;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.models.Features;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTION> {
 
     private final LOSS lossFunction;
-    private final HugeObjectArray<double[]> allFeatureVectors;
+    private final Features features;
     private final int maxDepth;
     private final int minSize;
     private final FeatureBagger featureBagger;
 
     DecisionTreeTrain(
-        HugeObjectArray<double[]> allFeatureVectors,
+        Features features,
         DecisionTreeTrainConfig config,
         LOSS lossFunction,
         FeatureBagger featureBagger
     ) {
-        assert allFeatureVectors.size() > 0;
+        assert features.size() > 0;
 
         this.lossFunction = lossFunction;
-        this.allFeatureVectors = allFeatureVectors;
+        this.features = features;
         this.maxDepth = config.maxDepth();
         this.minSize = config.minSplitSize();
 
@@ -50,12 +51,12 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     }
 
     public DecisionTreePredict<PREDICTION> train(HugeLongArray sampledFeatureVectors) {
-        var stack = new Stack<StackRecord<PREDICTION>>();
+        var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
         root = splitAndPush(stack, sampledFeatureVectors, sampledFeatureVectors.size(), 1);
 
-        while (!stack.empty()) {
+        while (!stack.isEmpty()) {
             var record = stack.pop();
             var split = record.split();
 
@@ -89,7 +90,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     protected abstract PREDICTION toTerminal(HugeLongArray group, long groupSize);
 
     private TreeNode<PREDICTION> splitAndPush(
-        Stack<StackRecord<PREDICTION>> stack,
+        Deque<StackRecord<PREDICTION>> stack,
         HugeLongArray group,
         long groupSize,
         int depth
@@ -120,7 +121,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     ) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
-        assert index >= 0 && index < allFeatureVectors.get(0).length;
+        assert index >= 0 && index < features.get(0).length;
 
         long leftGroupSize = 0;
         long rightGroupSize = 0;
@@ -130,8 +131,8 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
 
         for (int i = 0; i < groupSize; i++) {
             var featuresIdx = group.get(i);
-            var features = allFeatureVectors.get(featuresIdx);
-            if (features[index] < value) {
+            double[] featureVector = features.get(featuresIdx);
+            if (featureVector[index] < value) {
                 leftGroup.set(leftGroupSize++, featuresIdx);
             } else {
                 rightGroup.set(rightGroupSize++, featuresIdx);
@@ -163,15 +164,15 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
 
         for (long j = 0; j < groupSize; j++) {
             for (int i : featureBag) {
-                var features = allFeatureVectors.get(group.get(j));
+                double[] featureVector = features.get(group.get(j));
 
-                var groupSizes = createSplit(i, features[i], group, groupSize, childGroups);
+                var groupSizes = createSplit(i, featureVector[i], group, groupSize, childGroups);
 
                 var loss = lossFunction.splitLoss(childGroups, groupSizes);
 
                 if (loss < bestLoss) {
                     bestIdx = i;
-                    bestValue = features[i];
+                    bestValue = featureVector[i];
                     bestLoss = loss;
 
                     var tmpGroups = bestChildGroups;

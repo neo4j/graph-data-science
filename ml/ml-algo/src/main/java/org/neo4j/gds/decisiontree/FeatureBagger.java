@@ -21,16 +21,16 @@ package org.neo4j.gds.decisiontree;
 
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Random;
+import java.util.SplittableRandom;
 
 public class FeatureBagger {
 
-    private final Random random;
+    private final SplittableRandom random;
     private final int totalNumberOfFeatures;
     private final int[] featureBag;
 
-    public FeatureBagger(Random random, int totalNumberOfFeatures, double featureBaggingRatio) {
-        assert featureBaggingRatio != 0: "Invalid featureBaggingRatio";
+    public FeatureBagger(SplittableRandom random, int totalNumberOfFeatures, double featureBaggingRatio) {
+        assert Double.compare(featureBaggingRatio, 0) != 0: "Invalid featureBaggingRatio";
 
         this.random = random;
         this.totalNumberOfFeatures = totalNumberOfFeatures;
@@ -45,14 +45,14 @@ public class FeatureBagger {
     }
 
     int[] sample() {
-        var tmpAvailableIndices = new Integer[totalNumberOfFeatures];
-        Arrays.setAll(tmpAvailableIndices, i -> i);
-        final var availableIndices = new LinkedList<>(Arrays.asList(tmpAvailableIndices));
-
         if (totalNumberOfFeatures == featureBag.length) {
             // everything is sampled
             return featureBag;
         }
+
+        var tmpAvailableIndices = new Integer[totalNumberOfFeatures];
+        Arrays.setAll(tmpAvailableIndices, i -> i);
+        final var availableIndices = new LinkedList<>(Arrays.asList(tmpAvailableIndices));
 
         for (int i = 0; i < featureBag.length; i++) {
             int j = random.nextInt(availableIndices.size());

@@ -27,13 +27,15 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.Features;
 
-public class ClassificationRandomForestPredict implements Classifier {
+import java.util.List;
 
-    private final DecisionTreePredict<Long>[] decisionTrees;
+public class ClassificationRandomForestPredictor implements Classifier {
+
+    private final List<DecisionTreePredict<Long>> decisionTrees;
     private final LocalIdMap classMapping;
 
-    public ClassificationRandomForestPredict(
-        DecisionTreePredict<Long>[] decisionTrees,
+    public ClassificationRandomForestPredictor(
+        List<DecisionTreePredict<Long>> decisionTrees,
         LocalIdMap classMapping
     ) {
         this.decisionTrees = decisionTrees;
@@ -76,7 +78,7 @@ public class ClassificationRandomForestPredict implements Classifier {
 
         for (int classIdx = 0; classIdx < votesPerClass.length; classIdx++) {
             int voteForClass = votesPerClass[classIdx];
-            probabilities[classIdx] = (double) voteForClass / decisionTrees.length;
+            probabilities[classIdx] = (double) voteForClass / decisionTrees.size();
         }
 
         return probabilities;
