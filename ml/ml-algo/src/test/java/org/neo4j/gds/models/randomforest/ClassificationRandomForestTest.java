@@ -133,7 +133,7 @@ class ClassificationRandomForestTest {
             randomForestTrainer::outOfBagError
         );
         assertThat(randomForestPredictor.predictLabel(featureVector)).isEqualTo(42);
-        assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.45, 0.55);
+        assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.4, 0.6);
     }
 
     @ParameterizedTest
