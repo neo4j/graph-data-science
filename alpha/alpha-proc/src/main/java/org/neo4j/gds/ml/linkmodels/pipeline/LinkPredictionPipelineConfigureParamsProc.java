@@ -26,6 +26,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.TrainingMethod;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.models.randomforest.RandomForestTrainConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -55,6 +56,19 @@ public class LinkPredictionPipelineConfigureParamsProc extends BaseProc {
             .collect(Collectors.toList());
 
         pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, trainConfigs);
+
+        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+    }
+
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.addRandomForest", mode = READ)
+    @Description("Add random forest configuration to parameter space of the link prediction train pipeline.")
+    public Stream<PipelineInfoResult> addRandomForest(@Name("pipelineName") String pipelineName, @Name("randomForestConfig") Map<String, Object> randomForestConfig) {
+        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionPipeline.class);
+
+        var trainConfig = RandomForestTrainConfig.of(randomForestConfig);
+        validateConfig(CypherMapWrapper.create(randomForestConfig), trainConfig.configKeys());
+
+        pipeline.setTrainingParameterSpace(TrainingMethod.RandomForest, List.of(trainConfig));
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }
