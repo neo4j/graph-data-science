@@ -42,7 +42,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor
 {
     private final NodeLogisticRegressionData modelData;
 
-    NodeClassificationPredictPipelineExecutor(
+    public NodeClassificationPredictPipelineExecutor(
         NodeClassificationPipeline pipeline,
         NodeClassificationPredictPipelineBaseConfig config,
         BaseProc caller,
