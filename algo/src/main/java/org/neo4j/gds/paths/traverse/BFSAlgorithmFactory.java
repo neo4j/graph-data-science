@@ -90,7 +90,6 @@ class BFSAlgorithmFactory extends GraphAlgorithmFactory<BFS, BfsStreamConfig> {
             // lower-bound: each node is in exactly one localNode array
             var lowerBound = MemoryUsage.sizeOfLongArrayList(dimensions.nodeCount() + dimensions.nodeCount() / 64);
 
-
             //In the upper bound, we can consider two scenarios:
             //  -each node except the starting will be added by every thread exactly once
             //  -traversing each relationship creates an entry in any localNodes array of one of the threads

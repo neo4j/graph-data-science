@@ -50,7 +50,7 @@ class BFSTask implements Runnable {
     private final HugeAtomicLongArray minimumChunk;
     private final ExitPredicate exitPredicate;
     private final Aggregator aggregatorFunction;
-    private final long startNodeId;
+    private final long sourceNodeId;
 
     // variables local to the task
     // Chunk(s) of `traversedNodes` that a single task operates on; each chunk
@@ -84,7 +84,7 @@ class BFSTask implements Runnable {
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
         int delta,
-        long startNodeId,
+        long sourceNodeId,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
@@ -99,7 +99,7 @@ class BFSTask implements Runnable {
         this.exitPredicate = exitPredicate;
         this.aggregatorFunction = aggregatorFunction;
         this.delta = delta;
-        this.startNodeId = startNodeId;
+        this.sourceNodeId = sourceNodeId;
         this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
 
@@ -132,9 +132,9 @@ class BFSTask implements Runnable {
             chunks.add(offset);
             for (int idx = offset; idx < chunkLimit; idx++) {
                 var nodeId = traversedNodes.get(idx);
-                long sourceId = startNodeId;
+                long sourceId = sourceNodeId;
                 double weight = 0;
-                if (nodeId != startNodeId) {
+                if (nodeId != sourceNodeId) {
                     long minimumChunkIndex = minimumChunk.get(nodeId);
                     sourceId = traversedNodes.get(minimumChunkIndex);
                     weight = aggregatorFunction.apply(sourceId, nodeId, weights.get(minimumChunkIndex));
@@ -158,7 +158,6 @@ class BFSTask implements Runnable {
             int index = traversedNodesLength.get();
             while (localNodes.get(indexOfLocalNodes) != BFS.IGNORE_NODE) {
                 long nodeId = localNodes.get(indexOfLocalNodes);
-                long minimumChunkIndex = minimumChunk.get(nodeId);
                 // The chunks are ordered and processed  sequentially,
                 // the first time, we encounter `nodeId` in localNodes,
                 // `nodeId` is set to visited and added to traversedNodes.

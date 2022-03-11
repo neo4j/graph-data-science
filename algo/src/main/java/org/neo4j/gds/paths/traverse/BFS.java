@@ -64,7 +64,7 @@ public final class BFS extends Algorithm<long[]> {
     private static final int DEFAULT_DELTA = 64;
     static final int IGNORE_NODE = -1;
 
-    private final long startNodeId;
+    private final long sourceNodeId;
     private final ExitPredicate exitPredicate;
     private final Aggregator aggregatorFunction;
     private final Graph graph;
@@ -73,7 +73,6 @@ public final class BFS extends Algorithm<long[]> {
     // An array to keep the node ids that were already traversed in the correct order.
     // It is initialized with the total number of nodes, but may contain less than that.
     private HugeLongArray traversedNodes;
-
 
     // An array to keep the weight/depth of the node at the same position in `traversedNodes`.
     // It is initialized with the total number of nodes, but may contain less than that.
@@ -120,7 +119,6 @@ public final class BFS extends Algorithm<long[]> {
         var nodeCount = Math.toIntExact(graph.nodeCount());
 
         var traversedNodes = HugeLongArray.newArray(nodeCount);
-        var sources = HugeLongArray.newArray(nodeCount);
         var weights = HugeDoubleArray.newArray(nodeCount);
         var visited = HugeAtomicBitSet.create(nodeCount);
 
@@ -128,7 +126,6 @@ public final class BFS extends Algorithm<long[]> {
             graph,
             startNodeId,
             traversedNodes,
-            sources,
             weights,
             visited,
             exitPredicate,
@@ -141,9 +138,8 @@ public final class BFS extends Algorithm<long[]> {
 
     private BFS(
         Graph graph,
-        long startNodeId,
+        long sourceNodeId,
         HugeLongArray traversedNodes,
-        HugeLongArray predecessors,
         HugeDoubleArray weights,
         HugeAtomicBitSet visited,
         ExitPredicate exitPredicate,
@@ -154,7 +150,7 @@ public final class BFS extends Algorithm<long[]> {
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.startNodeId = startNodeId;
+        this.sourceNodeId = sourceNodeId;
         this.exitPredicate = exitPredicate;
         this.aggregatorFunction = aggregatorFunction;
         this.concurrency = concurrency;
@@ -183,8 +179,8 @@ public final class BFS extends Algorithm<long[]> {
             LongPageCreator.of(concurrency, l -> Long.MAX_VALUE)
         );
 
-        visited.set(startNodeId);
-        traversedNodes.set(0, startNodeId);
+        visited.set(sourceNodeId);
+        traversedNodes.set(0, sourceNodeId);
         weights.set(0, 0);
 
         var bfsTaskList = initializeBfsTasks(
@@ -267,7 +263,7 @@ public final class BFS extends Algorithm<long[]> {
                 exitPredicate,
                 aggregatorFunction,
                 delta,
-                startNodeId,
+                sourceNodeId,
                 terminationFlag,
                 progressTracker
             ));
