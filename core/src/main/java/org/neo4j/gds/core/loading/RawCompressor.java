@@ -40,7 +40,7 @@ public final class RawCompressor implements AdjacencyCompressor {
     private final AdjacencyListBuilder.Allocator<long[]>[] propertiesAllocators;
     private final HugeIntArray adjacencyDegrees;
     private final HugeLongArray adjacencyOffsets;
-    private final HugeLongArray propertyOffsets;
+    private final HugeLongArray[] propertyOffsets;
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
 
@@ -69,7 +69,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         AdjacencyListBuilder.Allocator<long[]>[] propertiesAllocators,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
-        HugeLongArray propertyOffsets,
+        HugeLongArray[] propertyOffsets,
         boolean noAggregation,
         Aggregation[] aggregations
     ) {
@@ -247,16 +247,13 @@ public final class RawCompressor implements AdjacencyCompressor {
         return degree;
     }
 
-    private void copyProperties(long[][] properties, int degree, long nodeId, HugeLongArray offsets) {
-        long address = 0;
+    private void copyProperties(long[][] properties, int degree, long nodeId, HugeLongArray[] offsets) {
         for (int i = 0; i < properties.length; i++) {
             long[] property = properties[i];
             var propertiesAllocator = propertiesAllocators[i];
-            // the address should be the same for every property, because we do not compress and thus the address is
-            // bound by the degree.
-            address = copy(property, degree, propertiesAllocator);
+            var offset = copy(property, degree, propertiesAllocator);
+            offsets[i].set(nodeId, offset);
         }
-        offsets.set(nodeId, address);
     }
 
     private long copy(long[] data, int degree, AdjacencyListBuilder.Allocator<long[]> allocator) {

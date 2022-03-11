@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.loading;
 
+import com.carrotsearch.hppc.LongDoubleHashMap;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,6 +46,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -324,8 +327,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             else if (!labelABits.contains(neoId) && labelBBits.contains(neoId)) {
                 assertThat(nodeLabels).doesNotContain(labelA.name());
                 assertThat(nodeLabels).contains(labelB.name());
-            }
-            else if (labelABits.contains(neoId) && labelBBits.contains(neoId)) {
+            } else if (labelABits.contains(neoId) && labelBBits.contains(neoId)) {
                 assertThat(nodeLabels).contains(labelA.name());
                 assertThat(nodeLabels).contains(labelB.name());
             } else {
@@ -334,5 +336,45 @@ final class HugeGraphLoadingTest extends BaseTest {
 
             return true;
         });
+    }
+
+    @Test
+    void testMultipleRelationshipPropertiesAcrossMultiplePages() {
+        var fooRelType = org.neo4j.graphdb.RelationshipType.withName("FOO");
+        int nodeCount = BumpAllocator.PAGE_SIZE * 2;
+        var centerNeoNodeId = new MutableLong();
+        var expectedProperties = new LongDoubleHashMap();
+
+        runInTransaction(db, tx -> {
+            var center = tx.createNode();
+            centerNeoNodeId.setValue(center.getId());
+
+            for (int i = 0; i < nodeCount; i++) {
+                var node = tx.createNode();
+                var edge = node.createRelationshipTo(center, fooRelType);
+                double property = 42.0 + i;
+                edge.setProperty("weight", property);
+                expectedProperties.put(node.getId(), property);
+            }
+        });
+
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addRelationshipProperty(PropertyMapping.of("p1", "weight", 1.0))
+            .addRelationshipProperty(PropertyMapping.of("p2", "weight", 1.0))
+            .concurrency(4)
+            .build()
+            .graph();
+
+        long centerNodeId = graph.toMappedNodeId(centerNeoNodeId.longValue());
+
+        for (var expectedCursor : expectedProperties) {
+            long source = graph.toMappedNodeId(expectedCursor.key);
+            graph.forEachRelationship(source, 2.0, (s, t, property) -> {
+                assertThat(t).isEqualTo(centerNodeId);
+                assertThat(property).isEqualTo(expectedCursor.value, within(1e-5));
+                return true;
+            });
+        }
     }
 }
