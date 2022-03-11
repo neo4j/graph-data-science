@@ -55,7 +55,7 @@ public class TrainerFactory {
             }
             case RandomForest: {
                 return new ClassificationRandomForestTrainer<>(
-                    new GiniIndex(targets, classIdMap),
+                    GiniIndex.of(targets, classIdMap),
                     concurrency,
                     classIdMap,
                     (RandomForestTrainConfig) config,
