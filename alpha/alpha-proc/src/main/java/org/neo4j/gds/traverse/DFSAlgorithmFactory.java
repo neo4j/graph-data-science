@@ -24,93 +24,73 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.impl.traverse.Aggregator;
+import org.neo4j.gds.impl.traverse.DFS;
+import org.neo4j.gds.impl.traverse.DfsStreamConfig;
 import org.neo4j.gds.impl.traverse.ExitPredicate;
-import org.neo4j.gds.impl.traverse.Traverse;
-import org.neo4j.gds.impl.traverse.TraverseConfig;
+import org.neo4j.gds.impl.traverse.MaxDepthExitPredicate;
+import org.neo4j.gds.impl.traverse.OneHopAggregator;
+import org.neo4j.gds.impl.traverse.TargetExitPredicate;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.InputNodeValidator.validateEndNode;
-import static org.neo4j.gds.utils.InputNodeValidator.validateStartNode;
 
-public class TraverseFactory<CONFIG extends TraverseConfig> extends GraphAlgorithmFactory<Traverse, CONFIG> {
-
-    public TraverseFactory() {
-        super();
-    }
+class DFSAlgorithmFactory extends GraphAlgorithmFactory<DFS, DfsStreamConfig> {
 
     @Override
-    public Traverse build(
-        Graph graphOrGraphStore,
-        CONFIG configuration,
+    public DFS build(
+        Graph graph,
+        DfsStreamConfig configuration,
         ProgressTracker progressTracker
     ) {
+        configuration.targetNodes().forEach(neoId -> validateEndNode(neoId, graph));
+
         ExitPredicate exitFunction;
         Aggregator aggregatorFunction;
         // target node given; terminate if target is reached
-        if (!configuration.targetNodes().isEmpty()) {
+        if (configuration.hasTargetNodes()) {
             List<Long> mappedTargets = configuration.targetNodes().stream()
-                .map(graphOrGraphStore::safeToMappedNodeId)
+                .map(graph::safeToMappedNodeId)
                 .collect(Collectors.toList());
-            exitFunction = (s, t, w) -> mappedTargets.contains(t) ? ExitPredicate.Result.BREAK : ExitPredicate.Result.FOLLOW;
-            aggregatorFunction = (s, t, w) -> .0;
+            exitFunction = new TargetExitPredicate(mappedTargets);
+            aggregatorFunction = Aggregator.NO_AGGREGATION;
             // maxDepth given; continue to aggregate nodes with lower depth until no more nodes left
-        } else if (configuration.maxDepth() != -1) {
-            exitFunction = (s, t, w) -> w > configuration.maxDepth() ? ExitPredicate.Result.CONTINUE : ExitPredicate.Result.FOLLOW;
-            aggregatorFunction = (s, t, w) -> w + 1.;
-            // do complete BFS until all nodes have been visited
+        } else if (configuration.hasMaxDepth()) {
+            exitFunction = new MaxDepthExitPredicate(configuration.maxDepth());
+            aggregatorFunction = new OneHopAggregator();
+            // do complete DFS until all nodes have been visited
         } else {
-            exitFunction = (s, t, w) -> ExitPredicate.Result.FOLLOW;
-            aggregatorFunction = (s, t, w) -> .0;
+            exitFunction = ExitPredicate.FOLLOW;
+            aggregatorFunction = Aggregator.NO_AGGREGATION;
         }
 
-        validateStartNode(configuration.startNode(), graphOrGraphStore);
-        configuration.targetNodes().forEach(neoId -> validateEndNode(neoId, graphOrGraphStore));
+        var mappedSourceNodeId = graph.toMappedNodeId(configuration.sourceNode());
 
-        var mappedStartNodeId = graphOrGraphStore.toMappedNodeId(configuration.startNode());
-
-        return configuration.isBfs()
-            ? Traverse.bfs(
-            graphOrGraphStore,
-            mappedStartNodeId,
+        return new DFS(
+            graph,
+            mappedSourceNodeId,
             exitFunction,
             aggregatorFunction,
             progressTracker
-        )
-            : Traverse.dfs(
-                graphOrGraphStore,
-                mappedStartNodeId,
-                exitFunction,
-                aggregatorFunction,
-                progressTracker
-            );
+        );
     }
 
     @Override
     public String taskName() {
-        return "Traverse";
-    }
-
-
-    @Override
-    public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.leaf(taskName(), graph.relationshipCount());
+        return "DFS";
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        MemoryEstimations.Builder builder = MemoryEstimations.builder(Traverse.class);
+    public MemoryEstimation memoryEstimation(DfsStreamConfig configuration) {
+        MemoryEstimations.Builder builder = MemoryEstimations.builder(DFS.class);
         builder.perNode("visited ", MemoryUsage::sizeOfBitset);
         builder.perNode("nodes", MemoryUsage::sizeOfLongArrayList);
         builder.perNode("sources", MemoryUsage::sizeOfLongArrayList);
         builder.perNode("weights", MemoryUsage::sizeOfDoubleArrayList);
         builder.perNode("resultNodes", MemoryUsage::sizeOfLongArray);
-
 
         return builder.build();
     }

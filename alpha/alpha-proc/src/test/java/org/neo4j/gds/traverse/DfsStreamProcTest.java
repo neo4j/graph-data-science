@@ -44,7 +44,7 @@ import static org.neo4j.gds.compat.MapUtil.map;
  *   1\ 2/ 1\ 2/
  *    (c)   (f)
  */
-class TraverseProcTest extends BaseProcTest {
+class DfsStreamProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -67,7 +67,7 @@ class TraverseProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(TraverseProcDFS.class, GraphProjectProc.class);
+        registerProcedures(DfsStreamProc.class, GraphProjectProc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -111,14 +111,14 @@ class TraverseProcTest extends BaseProcTest {
         runQuery(createQuery);
         long id = id("a");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.dfs")
+            .algo("dfs")
             .streamMode()
-            .addParameter("startNode", id)
+            .addParameter("sourceNode", id)
             .addParameter("targetNodes", Arrays.asList(id("e"), id("f")))
-            .yields("startNodeId, nodeIds");
+            .yields("sourceNode, nodeIds");
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(row.getNumber("startNodeId").longValue(), id);
+            assertEquals(row.getNumber("sourceNode").longValue(), id);
             @SuppressWarnings("unchecked") List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertEquals(4, nodeIds.size());
         });
@@ -134,13 +134,13 @@ class TraverseProcTest extends BaseProcTest {
         runQuery(createQuery);
         long id = id("a");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.dfs")
+            .algo("dfs")
             .streamMode()
-            .addParameter("startNode", id)
+            .addParameter("sourceNode", id)
             .addParameter("maxDepth", 2)
-            .yields("startNodeId, nodeIds");
+            .yields("sourceNode, nodeIds");
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(row.getNumber("startNodeId").longValue(), id);
+            assertEquals(row.getNumber("sourceNode").longValue(), id);
             @SuppressWarnings("unchecked") List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"a", "b", "c", "d"}, nodeIds);
         });
@@ -157,20 +157,20 @@ class TraverseProcTest extends BaseProcTest {
 
         long id = id("g");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.dfs")
+            .algo("dfs")
             .streamMode()
-            .addParameter("startNode", id)
+            .addParameter("sourceNode", id)
             .addParameter("maxDepth", 2)
-            .yields("startNodeId, nodeIds");
+            .yields("sourceNode, nodeIds");
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(row.getNumber("startNodeId").longValue(), id);
+            assertEquals(row.getNumber("sourceNode").longValue(), id);
             @SuppressWarnings("unchecked") List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"g", "e", "f", "d"}, nodeIds);
         });
     }
 
     @Test
-    void testDfsPath() {
+    void testPath() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withNodeLabel("Node")
@@ -180,12 +180,12 @@ class TraverseProcTest extends BaseProcTest {
 
         long id = id("g");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.dfs")
+            .algo("dfs")
             .streamMode()
-            .addParameter("startNode", id)
-            .yields("startNodeId, nodeIds");
+            .addParameter("sourceNode", id)
+            .yields("sourceNode, nodeIds");
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(row.getNumber("startNodeId").longValue(), id);
+            assertEquals(row.getNumber("sourceNode").longValue(), id);
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
 
             var expectedOrder = new HashMap<String, List<Integer>>();
@@ -202,24 +202,24 @@ class TraverseProcTest extends BaseProcTest {
     }
 
     @Test
-    void failOnInvalidStartNode() {
+    void failOnInvalidSourceNode() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.dfs")
+            .algo("dfs")
             .streamMode()
-            .addParameter("startNode", 42)
+            .addParameter("sourceNode", 42)
             .yields();
 
-        assertError(query, "startNode with id 42 was not loaded");
+        assertError(query, "Source node does not exist in the in-memory graph: `42`");
     }
 
     @Test
     void failOnInvalidEndNode() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.dfs")
+            .algo("dfs")
             .streamMode()
-            .addParameter("startNode", 0)
+            .addParameter("sourceNode", 0)
             .addParameter("targetNodes", Arrays.asList(0, 42, 1))
             .yields();
 

@@ -63,9 +63,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.maxkcut.stream",
         "gds.alpha.maxkcut.stream.estimate",
 
-        "gds.alpha.dfs.stream",
-        "gds.alpha.dfs.stream.estimate",
-
         "gds.alpha.hits.mutate",
         "gds.alpha.hits.mutate.estimate",
         "gds.alpha.hits.stats",
@@ -246,6 +243,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.degree.stream.estimate",
         "gds.degree.write",
         "gds.degree.write.estimate",
+
+        "gds.dfs.stream",
+        "gds.dfs.stream.estimate",
 
         "gds.eigenvector.mutate",
         "gds.eigenvector.mutate.estimate",

@@ -41,4 +41,4 @@ include::alpha/alpha-all-pairs-shortest-path.adoc[leveloffset=+1]
 
 include::algorithms-bfs.adoc[leveloffset=+1]
 
-include::alpha/alpha-dfs.adoc[leveloffset=+1]
+include::algorithms-dfs.adoc[leveloffset=+1]

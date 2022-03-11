@@ -168,6 +168,9 @@ include::../algorithms/algorithm-tiers.adoc[]
 .2+<.^|<<algorithms-bfs, BFS>>
 | `gds.bfs.stream`
 | `gds.bfs.stream.estimate`
+.2+<.^|<<algorithms-dfs, Depth First Search>>
+| `gds.dfs.stream`
+| `gds.dfs.stream.estimate`
 |===
 
 [[beta-tier]]
@@ -239,9 +242,6 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.closeness.harmonic.write`
 .1+<.^|<<algorithms-collapse-path, Collapse Path>>
 | `gds.alpha.collapsePath.mutate`
-.2+<.^|<<algorithms-dfs, Depth First Search>>
-| `gds.alpha.dfs.stream`
-| `gds.alpha.dfs.stream.estimate`
 .8+<.^|<<algorithms-hits, HITS>>
 | `gds.alpha.hits.mutate`
 | `gds.alpha.hits.mutate.estimate`
