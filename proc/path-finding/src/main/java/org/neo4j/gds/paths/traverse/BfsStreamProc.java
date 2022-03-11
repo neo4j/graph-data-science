@@ -22,6 +22,7 @@ package org.neo4j.gds.paths.traverse;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -40,7 +41,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class BfsStreamProc extends AlgoBaseProc<BFS, long[], BfsStreamConfig, BfsStreamProc.BfsStreamResult> {
+public class BfsStreamProc extends AlgoBaseProc<BFS, HugeLongArray, BfsStreamConfig, BfsStreamProc.BfsStreamResult> {
     static final RelationshipType NEXT = RelationshipType.withName("NEXT");
 
     static final String DESCRIPTION =
@@ -85,7 +86,7 @@ public class BfsStreamProc extends AlgoBaseProc<BFS, long[], BfsStreamConfig, Bf
     }
 
     @Override
-    public ComputationResultConsumer<BFS, long[], BfsStreamConfig, Stream<BfsStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BFS, HugeLongArray, BfsStreamConfig, Stream<BfsStreamResult>> computationResultConsumer() {
         return new BfsStreamSpec().computationResultConsumer();
     }
 
@@ -94,7 +95,7 @@ public class BfsStreamProc extends AlgoBaseProc<BFS, long[], BfsStreamConfig, Bf
         public List<Long> nodeIds;
         public Path path;
 
-        public BfsStreamResult(long sourceNode, long[] nodes, Path path) {
+        BfsStreamResult(long sourceNode, long[] nodes, Path path) {
             this.sourceNode = sourceNode;
             this.nodeIds = Arrays.stream(nodes)
                 .boxed()

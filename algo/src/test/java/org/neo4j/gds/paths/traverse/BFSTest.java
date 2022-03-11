@@ -106,7 +106,7 @@ class BFSTest {
             (s, t, w) -> 1.,
             concurrency,
             ProgressTracker.NULL_TRACKER
-        ).compute();
+        ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
             Stream.of("a", "b", "c", "d").mapToLong(naturalGraph::toOriginalNodeId).toArray()
@@ -130,7 +130,7 @@ class BFSTest {
             Aggregator.NO_AGGREGATION,
             concurrency,
             ProgressTracker.NULL_TRACKER
-        ).compute();
+        ).compute().toArray();
         assertEquals(7, nodes.length);
     }
 
@@ -152,7 +152,7 @@ class BFSTest {
             (s, t, w) -> w + 1.,
             concurrency,
             ProgressTracker.NULL_TRACKER
-        ).compute();
+        ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
             Stream.of("a", "b", "c", "d", "e", "f").mapToLong(naturalGraph::toOriginalNodeId).toArray()

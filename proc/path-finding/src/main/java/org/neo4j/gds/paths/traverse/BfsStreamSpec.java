@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.traverse;
 
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
@@ -34,7 +35,7 @@ import static org.neo4j.gds.paths.traverse.BfsStreamProc.DESCRIPTION;
 import static org.neo4j.gds.paths.traverse.BfsStreamProc.NEXT;
 
 @GdsCallable(name = "gds.bfs.stream", description = DESCRIPTION, executionMode = STREAM)
-public class BfsStreamSpec implements AlgorithmSpec<BFS, long[], BfsStreamConfig, Stream<BfsStreamProc.BfsStreamResult>, BFSAlgorithmFactory> {
+public class BfsStreamSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStreamConfig, Stream<BfsStreamProc.BfsStreamResult>, BFSAlgorithmFactory> {
     @Override
     public String name() {
         return "BfsStream";
@@ -51,14 +52,15 @@ public class BfsStreamSpec implements AlgorithmSpec<BFS, long[], BfsStreamConfig
     }
 
     @Override
-    public ComputationResultConsumer<BFS, long[], BfsStreamConfig, Stream<BfsStreamProc.BfsStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BFS, HugeLongArray, BfsStreamConfig, Stream<BfsStreamProc.BfsStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var graph = computationResult.graph();
-            if (graph.isEmpty()) {
+            var result = computationResult.result();
+            if (graph.isEmpty() || null == result) {
                 return Stream.empty();
             }
 
-            long[] nodes = computationResult.result();
+            var nodes = result.toArray();
             var nodeList = Arrays.stream(nodes).boxed().map(graph::toOriginalNodeId).collect(Collectors.toList());
             var startNode = computationResult.config().sourceNode();
             return Stream.of(new BfsStreamProc.BfsStreamResult(
