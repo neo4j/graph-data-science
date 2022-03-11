@@ -144,7 +144,7 @@ RETURN nodesCompared, relationshipsWritten, similarityDistribution.mean as meanS
 [opts="header", cols="1,1,1"]
 |===
 | nodesCompared | relationshipsWritten | meanSimilarity
-| 13            | 26                   | 0.8341259589562049
+| 13            | 26                   | 0.917060998769907
 |===
 --
 
@@ -172,11 +172,11 @@ ORDER BY similarity DESCENDING, person1, person2
 [opts="header", cols="1,1,1"]
 |===
 | person1 | person2 | similarity
-| "Annie" | "Matt"  | 0.9661740064620972
-| "Matt"  | "Annie" | 0.9661740064620972
-| "Dan"   | "Elsa"  | 0.9606010317802429
-| "Elsa"  | "Dan"   | 0.9606010317802429
-| "Jeff"  | "Annie" | 0.6309423446655273
+| "Annie" | "Matt"  | 0.983087003231049
+| "Matt"  | "Annie" | 0.983087003231049
+| "Dan"   | "Elsa"  | 0.980300545692444
+| "Elsa"  | "Dan"   | 0.980300545692444
+| "Jeff"  | "Annie" | 0.815471172332764
 |===
 --
 
