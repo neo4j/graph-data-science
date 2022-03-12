@@ -20,12 +20,16 @@
 package org.neo4j.gds.ml.decisiontree;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.models.Features;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 
 public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTION> {
 
@@ -46,6 +50,31 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         this.featureBagger = featureBagger;
     }
 
+    // Does not include the class itself as it will be inherited anyway.
+    public static MemoryRange memoryEstimation(
+        int maxDepth,
+        long numTrainingExamples,
+        long numBaggedFeatures
+    ) {
+        var predictorEstimation = DecisionTreePredict.memoryEstimation(maxDepth, numTrainingExamples);
+
+        // Stack implies DFS so will at most have 2 * maxDepth entries.
+        long maxItemsOnStack = 2L * maxDepth;
+        var maxStackSize = MemoryRange.of(sizeOfInstance(ArrayDeque.class))
+            .add(MemoryRange.of(1, maxItemsOnStack).times(sizeOfInstance(ImmutableStackRecord.class)))
+            .add(MemoryRange.of(
+                0, // Only the input trainSet array ever resides in stack
+                HugeLongArray.memoryEstimation(numTrainingExamples / maxItemsOnStack) * maxItemsOnStack
+            ));
+
+        var findBestSplitEstimation = MemoryRange.of(HugeLongArray.memoryEstimation(numTrainingExamples) * 4)
+            .add(sizeOfIntArray(numBaggedFeatures));
+
+        return predictorEstimation
+            .add(maxStackSize)
+            .add(findBestSplitEstimation);
+    }
+
     public DecisionTreePredict<PREDICTION> train(ReadOnlyHugeLongArray trainSetIndices) {
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
@@ -62,23 +91,27 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
             if (record.depth() >= maxDepth || split.sizes().left() < minSplitSize) {
                 record.node().setLeftChild(new TreeNode<>(toTerminal(split.groups().left(), split.sizes().left())));
             } else {
-                record.node().setLeftChild(splitAndPush(
-                    stack,
-                    split.groups().left(),
-                    split.sizes().left(),
-                    record.depth() + 1
-                ));
+                record.node().setLeftChild(
+                    splitAndPush(
+                        stack,
+                        split.groups().left(),
+                        split.sizes().left(),
+                        record.depth() + 1
+                    )
+                );
             }
 
             if (record.depth() >= maxDepth || split.sizes().right() < minSplitSize) {
                 record.node().setRightChild(new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right())));
             } else {
-                record.node().setRightChild(splitAndPush(
-                    stack,
-                    split.groups().right(),
-                    split.sizes().right(),
-                    record.depth() + 1
-                ));
+                record.node().setRightChild(
+                    splitAndPush(
+                        stack,
+                        split.groups().right(),
+                        split.sizes().right(),
+                        record.depth() + 1
+                    )
+                );
             }
         }
 

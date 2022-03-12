@@ -22,7 +22,9 @@ package org.neo4j.gds.ml.decisiontree;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
@@ -91,5 +93,15 @@ class GiniIndexTest {
 
         assertThat(giniIndexLoss.splitLoss(ImmutableGroups.of(leftGroup, rightGroup), groupSizes))
             .isCloseTo(expectedLoss, Offset.offset(0.00001D));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "  10,  104",
+        " 100,  464"
+    })
+    void memoryEstimationShouldScaleWithSampleCount(long numberOfTrainingSamples, long expectedBytes) {
+        assertThat(GiniIndex.memoryEstimation(numberOfTrainingSamples))
+            .isEqualTo(MemoryRange.of(expectedBytes));
     }
 }

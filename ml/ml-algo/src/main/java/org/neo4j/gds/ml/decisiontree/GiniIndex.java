@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 public class GiniIndex implements DecisionTreeLoss {
 
@@ -43,6 +46,11 @@ public class GiniIndex implements DecisionTreeLoss {
         mappedLabels.setAll(idx -> classMapping.toMapped(expectedOriginalLabels.get(idx)));
 
         return new GiniIndex(mappedLabels, classMapping.size());
+    }
+
+    public static MemoryRange memoryEstimation(long numberOfTrainingSamples) {
+        return MemoryRange.of(HugeIntArray.memoryEstimation(numberOfTrainingSamples))
+            .add(MemoryRange.of(sizeOfInstance(GiniIndex.class)));
     }
 
     @Override

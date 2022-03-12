@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -196,5 +197,31 @@ class ClassificationDecisionTreeTest {
 
         decisionTreePredict = decisionTree.train(otherSampledVectors);
         assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(42L));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "     6, 100_000, 56,  5_096",
+        "    10, 100_000, 56, 81_896",
+        " 8_000,     500, 56, 39_976"
+    })
+    void predictMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
+        var range = DecisionTreePredict.memoryEstimation(maxDepth, numberOfTrainingSamples);
+
+        assertThat(range.min).isEqualTo(expectedMin);
+        assertThat(range.max).isEqualTo(expectedMax);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "  6,  1_000,  32_456,    46_208",
+        "  6, 10_000, 320_456,   406_208",
+        " 20, 10_000, 320_456, 1_202_912"
+    })
+    void trainMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
+        var range = ClassificationDecisionTreeTrain.memoryEstimation(maxDepth, numberOfTrainingSamples, 10, 10);
+
+        assertThat(range.min).isEqualTo(expectedMin);
+        assertThat(range.max).isEqualTo(expectedMax);
     }
 }

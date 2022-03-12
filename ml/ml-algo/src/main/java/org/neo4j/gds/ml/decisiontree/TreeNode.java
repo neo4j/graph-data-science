@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class TreeNode<PREDICTION> {
@@ -33,6 +34,10 @@ public class TreeNode<PREDICTION> {
 
         this.featureIndex = index;
         this.thresholdValue = value;
+    }
+
+    public static long memoryEstimation() {
+        return sizeOfInstance(TreeNode.class);
     }
 
     public TreeNode(PREDICTION prediction) {

@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.samplers.IntUniformSamplerFromRange;
 
 import java.util.SplittableRandom;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 // NOTE: This class is not thead safe.
 public final class FeatureBagger {
@@ -29,6 +32,11 @@ public final class FeatureBagger {
     private final IntUniformSamplerFromRange sampler;
     private final int totalNumberOfFeatures;
     private final int numberOfSamples;
+
+    public static MemoryRange memoryEstimation(int numberOfSamples) {
+        return IntUniformSamplerFromRange.memoryEstimation(numberOfSamples)
+            .add(MemoryRange.of(sizeOfInstance(FeatureBagger.class)));
+    }
 
     public FeatureBagger(SplittableRandom random, int totalNumberOfFeatures, double maxFeaturesRatio) {
         assert Double.compare(maxFeaturesRatio, 0) != 0 : "Invalid maxFeaturesRatio";

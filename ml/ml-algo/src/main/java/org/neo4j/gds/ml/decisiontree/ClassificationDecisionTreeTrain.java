@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> extends DecisionTreeTrain<LOSS, Integer> {
 
@@ -47,6 +51,17 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
 
         assert labels.size() == features.size();
         this.allLabels = labels;
+    }
+
+    public static MemoryRange memoryEstimation(
+        int maxDepth,
+        long numTrainingExamples,
+        long numBaggedFeatures,
+        int numClasses
+    ) {
+        return MemoryRange.of(sizeOfInstance(ClassificationDecisionTreeTrain.class))
+            .add(DecisionTreeTrain.memoryEstimation(maxDepth, numTrainingExamples, numBaggedFeatures))
+            .add(sizeOfLongArray(numClasses));
     }
 
     @Override
