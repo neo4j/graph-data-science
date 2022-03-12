@@ -22,7 +22,9 @@ package org.neo4j.gds.ml.models.randomforest;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -209,5 +211,84 @@ class ClassificationRandomForestTest {
             randomForestTrainer::outOfBagError
         );
         assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(1337);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "     6, 100_000,  10,   1,   248,     5_288",
+        "     6, 100_000,  10, 100, 5_792,   509_792",
+        "    10, 100_000,  10,  10,   752,   819_152",
+        "    10, 100_000,  10,  20, 1_312, 1_638_112",
+        " 8_000,     500,  10,   1,   248,    40_168",
+        " 8_000,     500,  10,  10,   752,   399_952",
+        "    10, 100_000, 100,  10,  1_832,  820_232",
+    })
+    void predictMemoryEstimation(
+        int maxDepth,
+        long numberOfTrainingSamples,
+        int numberOfClasses,
+        int numTrees,
+        long expectedMin,
+        long expectedMax
+    ) {
+        var config = RandomForestTrainConfigImpl.builder()
+            .maxDepth(maxDepth)
+            .numberOfDecisionTrees(numTrees)
+            .build();
+        var estimation = ClassificationRandomForestPredictor.memoryEstimation(
+            numberOfTrainingSamples,
+            numberOfClasses,
+            config
+        );
+
+        assertThat(estimation.min).isEqualTo(expectedMin);
+        assertThat(estimation.max).isEqualTo(expectedMax);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "     6, 100_000,  10, 10, 1,   1, 0.1, 1.0,   4_501_194,     5_312_002",
+        // Should increase fairly little with more trees if training set big.
+        "    10, 100_000,  10, 10, 1,  10, 0.1, 1.0,   4_501_698,   6_203_210",
+        // Should be capped by number of training examples, despite high max depth.
+        " 8_000,     500,  10, 10, 1,   1, 0.1, 1.0,   23_694,    1_127_526",
+        // Should increase very little when having more classes.
+        "    10, 100_000, 100, 10, 1,  10, 0.1, 1.0,  4_503_498,  6_205_010",
+        // Should increase very little when using more features for splits.
+        "    10, 100_000, 100, 10, 1,  10, 0.9, 1.0,  4_503_570,  6_205_174",
+        // Should decrease a lot when sampling fewer training examples per tree.
+        "    10, 100_000, 100, 10, 1,  10, 0.1, 0.2,  1_223_498,  2_285_010",
+        // Should almost be x4 when concurrency * 4.
+        "    10, 100_000, 100, 10, 4,  10, 0.1, 1.0,  16_808_184,  21_159_032",
+    })
+    void trainMemoryEstimation(
+        int maxDepth,
+        long numberOfTrainingSamples,
+        int numberOfClasses,
+        int featureDimension,
+        int concurrency,
+        int numTrees,
+        double maxFeaturesRatio,
+        double numberOfSamplesRatio,
+        long expectedMin,
+        long expectedMax
+    ) {
+        var config = RandomForestTrainConfigImpl.builder()
+            .maxDepth(maxDepth)
+            .numberOfDecisionTrees(numTrees)
+            .maxFeaturesRatio(maxFeaturesRatio)
+            .numberOfSamplesRatio(numberOfSamplesRatio)
+            .build();
+        var estimator = ClassificationRandomForestTrainer.memoryEstimation(
+            numberOfTrainingSamples,
+            numberOfClasses,
+            featureDimension,
+            config
+        );
+        // Does not depend on node count, only indirectly so with the size of the training set.
+        var estimation = estimator.estimate(GraphDimensions.of(10), concurrency).memoryUsage();
+
+        assertThat(estimation.min).isEqualTo(expectedMin);
+        assertThat(estimation.max).isEqualTo(expectedMax);
     }
 }

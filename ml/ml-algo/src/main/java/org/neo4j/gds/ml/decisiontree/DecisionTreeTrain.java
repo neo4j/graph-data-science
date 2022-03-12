@@ -53,10 +53,10 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     // Does not include the class itself as it will be inherited anyway.
     public static MemoryRange memoryEstimation(
         int maxDepth,
-        long numTrainingExamples,
-        long numBaggedFeatures
+        long numberOfTrainingSamples,
+        long numberOfBaggedFeatures
     ) {
-        var predictorEstimation = DecisionTreePredict.memoryEstimation(maxDepth, numTrainingExamples);
+        var predictorEstimation = DecisionTreePredict.memoryEstimation(maxDepth, numberOfTrainingSamples);
 
         // Stack implies DFS so will at most have 2 * maxDepth entries.
         long maxItemsOnStack = 2L * maxDepth;
@@ -64,11 +64,11 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
             .add(MemoryRange.of(1, maxItemsOnStack).times(sizeOfInstance(ImmutableStackRecord.class)))
             .add(MemoryRange.of(
                 0, // Only the input trainSet array ever resides in stack
-                HugeLongArray.memoryEstimation(numTrainingExamples / maxItemsOnStack) * maxItemsOnStack
+                HugeLongArray.memoryEstimation(numberOfTrainingSamples / maxItemsOnStack) * maxItemsOnStack
             ));
 
-        var findBestSplitEstimation = MemoryRange.of(HugeLongArray.memoryEstimation(numTrainingExamples) * 4)
-            .add(sizeOfIntArray(numBaggedFeatures));
+        var findBestSplitEstimation = MemoryRange.of(HugeLongArray.memoryEstimation(numberOfTrainingSamples) * 4)
+            .add(sizeOfIntArray(numberOfBaggedFeatures));
 
         return predictorEstimation
             .add(maxStackSize)

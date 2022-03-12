@@ -23,6 +23,9 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -44,6 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class ClassificationRandomForestTrainer implements Trainer {
@@ -70,6 +74,35 @@ public class ClassificationRandomForestTrainer implements Trainer {
         this.computeOutOfBagError = computeOutOfBagError;
         this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
         this.progressTracker = progressTracker;
+    }
+
+    public static MemoryEstimation memoryEstimation(
+        long numberOfTrainingSamples,
+        int numberOfClasses,
+        int featureDimension,
+        RandomForestTrainConfig config
+    ) {
+        // Since we don't expose Out-of-bag-error (yet) we do not take it into account here either.
+
+        int numberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio(featureDimension) * featureDimension);
+
+        return MemoryEstimations.builder("Training", ClassificationRandomForestTrainer.class)
+            .add(MemoryEstimations.of(
+                "Classifier",
+                ClassificationRandomForestPredictor.memoryEstimation(numberOfTrainingSamples, numberOfClasses, config)
+            ))
+            .add(MemoryEstimations.of("GiniIndex Loss", GiniIndex.memoryEstimation(numberOfTrainingSamples)))
+            .perThread(
+                "Decision tree training",
+                TrainDecisionTreeTask.memoryEstimation(
+                    config.maxDepth(),
+                    numberOfTrainingSamples,
+                    numberOfClasses,
+                    numberOfBaggedFeatures,
+                    config.numberOfSamplesRatio()
+                )
+            )
+            .build();
     }
 
     public ClassificationRandomForestPredictor train(
@@ -167,6 +200,31 @@ public class ClassificationRandomForestTrainer implements Trainer {
             this.numberOfTreesTrained = numberOfTreesTrained;
         }
 
+        public static MemoryRange memoryEstimation(
+            int maxDepth,
+            long numberOfTrainingSamples,
+            int numberOfClasses,
+            int numberOfBaggedFeatures,
+            double numberOfSamplesRatio
+        ) {
+            long usedNumberOfTrainingSamples = (long) Math.ceil(numberOfSamplesRatio * numberOfTrainingSamples);
+
+            var bootstrappedDatasetEstimation = MemoryRange
+                .of(HugeLongArray.memoryEstimation(usedNumberOfTrainingSamples))
+                .add(sizeOfInstance(BitSet.class))
+                .add(usedNumberOfTrainingSamples);
+
+            return MemoryRange.of(sizeOfInstance(TrainDecisionTreeTask.class))
+                .add(FeatureBagger.memoryEstimation(numberOfBaggedFeatures))
+                .add(ClassificationDecisionTreeTrain.memoryEstimation(
+                    maxDepth,
+                    usedNumberOfTrainingSamples,
+                    numberOfBaggedFeatures,
+                    numberOfClasses
+                ))
+                .add(bootstrappedDatasetEstimation);
+        }
+
         public DecisionTreePredict<Integer> trainedTree() {
             return trainedTree;
         }
@@ -203,7 +261,8 @@ public class ClassificationRandomForestTrainer implements Trainer {
 
             progressTracker.logProgress(
                 1,
-                formatWithLocale(":: trained decision tree %d out of %d",
+                formatWithLocale(
+                    ":: trained decision tree %d out of %d",
                     numberOfTreesTrained.incrementAndGet(),
                     randomForestTrainConfig.numberOfDecisionTrees()
                 )

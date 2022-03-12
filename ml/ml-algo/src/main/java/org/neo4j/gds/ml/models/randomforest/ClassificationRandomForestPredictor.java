@@ -19,14 +19,20 @@
  */
 package org.neo4j.gds.ml.models.randomforest;
 
+import com.carrotsearch.hppc.ObjectArrayList;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Features;
 
 import java.util.List;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 
 public class ClassificationRandomForestPredictor implements Classifier {
 
@@ -42,6 +48,21 @@ public class ClassificationRandomForestPredictor implements Classifier {
 
     public ClassificationRandomForestPredictor(RandomForestData data) {
         this.data = data;
+    }
+
+    public static MemoryRange memoryEstimation(
+        long numberOfTrainingSamples,
+        int numberOfClasses,
+        RandomForestTrainConfig config
+    ) {
+        var sizeOfDecisionTreesList = MemoryRange.of(sizeOfInstance(ObjectArrayList.class))
+            .add(DecisionTreePredict.memoryEstimation(config.maxDepth(), numberOfTrainingSamples).times(config.numberOfDecisionTrees()));
+        var predictionsCacheSize = MemoryRange.of(sizeOfDoubleArray(numberOfClasses))
+            .add(sizeOfIntArray(numberOfClasses));
+
+        return MemoryRange.of(sizeOfInstance(ClassificationRandomForestPredictor.class))
+            .add(sizeOfDecisionTreesList)
+            .add(predictionsCacheSize);
     }
 
     @Override
