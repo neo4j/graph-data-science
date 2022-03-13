@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Parallel implementation of the BFS algorithm.
@@ -72,7 +71,6 @@ public final class BFS extends Algorithm<HugeLongArray> {
     // An array to keep the node ids that were already traversed in the correct order.
     // It is initialized with the total number of nodes, but may contain less than that.
     private HugeLongArray traversedNodes;
-    private final LongAdder ignoredNodesCount = new LongAdder();
 
     // An array to keep the weight/depth of the node at the same position in `traversedNodes`.
     // It is initialized with the total number of nodes, but may contain less than that.
@@ -246,15 +244,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
             nodesLengthToRetain = targetFoundIndex.intValue() + 1;
         }
 
-        var result = HugeLongArray.newArray(nodesLengthToRetain - ignoredNodesCount.longValue());
-        long resultIndex = 0;
-        for (long i = 0; i < nodesLengthToRetain; i++) {
-            long traversedNodeId = traversedNodes.get(i);
-            if (traversedNodeId != IGNORE_NODE) {
-                result.set(resultIndex, traversedNodeId);
-                resultIndex++;
-            }
-        }
+        var result = traversedNodes.copyOf(nodesLengthToRetain);
 
         progressTracker.endSubTask();
         return result;
@@ -282,7 +272,6 @@ public final class BFS extends Algorithm<HugeLongArray> {
                 aggregatorFunction,
                 delta,
                 sourceNodeId,
-                ignoredNodesCount,
                 terminationFlag,
                 progressTracker
             ));

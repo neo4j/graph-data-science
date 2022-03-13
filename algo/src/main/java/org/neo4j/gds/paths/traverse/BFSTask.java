@@ -29,7 +29,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.LongAdder;
 
 /**
  * A task that will compute BFS for portion of the graph.
@@ -63,7 +62,6 @@ class BFSTask implements Runnable {
     // Maximum size of a single chunk.
     private final int delta;
 
-    private final LongAdder ignoredNodesCount;
     private final TerminationFlag terminationFlag;
 
     // Used in the synchronization phase, keeps track of the current chunk index.
@@ -87,7 +85,6 @@ class BFSTask implements Runnable {
         Aggregator aggregatorFunction,
         int delta,
         long sourceNodeId,
-        LongAdder ignoredNodesCount,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
@@ -103,7 +100,6 @@ class BFSTask implements Runnable {
         this.aggregatorFunction = aggregatorFunction;
         this.delta = delta;
         this.sourceNodeId = sourceNodeId;
-        this.ignoredNodesCount = ignoredNodesCount;
         this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
 
