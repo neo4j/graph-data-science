@@ -65,7 +65,8 @@ class BfsAlgorithmFactory<CONFIG extends BfsBaseConfig> extends GraphAlgorithmFa
             exitFunction,
             aggregatorFunction,
             configuration.concurrency(),
-            progressTracker
+            progressTracker,
+            configuration.maxDepth()
         );
     }
 

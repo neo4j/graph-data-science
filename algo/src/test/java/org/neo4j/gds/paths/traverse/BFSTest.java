@@ -105,7 +105,8 @@ class BFSTest {
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             (s, t, w) -> 1.,
             concurrency,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            -1
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
@@ -129,7 +130,8 @@ class BFSTest {
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
             concurrency,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            -1
         ).compute().toArray();
         assertEquals(7, nodes.length);
     }
@@ -151,7 +153,8 @@ class BFSTest {
             (s, t, w) -> w >= maxHops ? Result.CONTINUE : Result.FOLLOW,
             (s, t, w) -> w + 1.,
             concurrency,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            4
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
@@ -166,7 +169,8 @@ class BFSTest {
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
             concurrency,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            -1
         ).compute();
     }
 
@@ -183,6 +187,7 @@ class BFSTest {
             Aggregator.NO_AGGREGATION,
             concurrency,
             progressTracker
+            ,-1
         ).compute();
         var messagesInOrder = testLog.getMessages(INFO);
 

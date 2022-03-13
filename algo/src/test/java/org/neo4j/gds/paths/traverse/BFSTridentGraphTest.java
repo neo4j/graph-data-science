@@ -94,7 +94,8 @@ class BFSTridentGraphTest {
             (s, t, w) -> 1.,
             concurrency,
             ProgressTracker.NULL_TRACKER,
-            delta
+            delta,
+            -1
         ).compute().toArray();
 
         assertThat(nodes)
