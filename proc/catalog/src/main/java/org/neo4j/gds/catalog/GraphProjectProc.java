@@ -97,17 +97,6 @@ public class GraphProjectProc extends CatalogProc {
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.graph.create", mode = READ, deprecatedBy = "gds.graph.project")
-    @Description(DESCRIPTION)
-    public Stream<GraphProjectNativeResult> projectSubgraph(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "nodeProjection") @Nullable Object nodeProjection,
-        @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return project(graphName, nodeProjection, relationshipProjection, configuration);
-    }
-
     @Procedure(name = "gds.graph.project.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> projectEstimate(
@@ -127,16 +116,6 @@ public class GraphProjectProc extends CatalogProc {
         );
         validateConfig(cypherConfig, config);
         return estimateGraph(config);
-    }
-
-    @Procedure(name = "gds.graph.create.estimate", mode = READ, deprecatedBy = "gds.graph.project.estimate")
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> createEstimate(
-        @Name(value = "nodeProjection") @Nullable Object nodeProjection,
-        @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return projectEstimate(nodeProjection, relationshipProjection, configuration);
     }
 
     @Procedure(name = "gds.graph.project.cypher", mode = READ)
@@ -170,17 +149,6 @@ public class GraphProjectProc extends CatalogProc {
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.graph.create.cypher", mode = READ, deprecatedBy = "gds.graph.project.cypher")
-    @Description(DESCRIPTION)
-    public Stream<GraphProjectCypherResult> createCypher(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "nodeQuery") String nodeQuery,
-        @Name(value = "relationshipQuery") String relationshipQuery,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return projectCypher(graphName, nodeQuery, relationshipQuery, configuration);
-    }
-
     @Procedure(name = "gds.graph.project.cypher.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> projectCypherEstimate(
@@ -201,16 +169,6 @@ public class GraphProjectProc extends CatalogProc {
 
         validateConfig(cypherConfig, config);
         return estimateGraph(config);
-    }
-
-    @Procedure(name = "gds.graph.create.cypher.estimate", mode = READ, deprecatedBy = "gds.graph.project.cypher.estimate")
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> createCypherEstimate(
-        @Name(value = "nodeQuery") String nodeQuery,
-        @Name(value = "relationshipQuery") String relationshipQuery,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return projectCypherEstimate(nodeQuery, relationshipQuery, configuration);
     }
 
     @Procedure(name = "gds.beta.graph.project.subgraph", mode = READ)
@@ -247,18 +205,6 @@ public class GraphProjectProc extends CatalogProc {
         );
 
         return Stream.of(result);
-    }
-
-    @Procedure(name = "gds.beta.graph.create.subgraph", mode = READ, deprecatedBy = "gds.beta.graph.project.subgraph")
-    @Description(DESCRIPTION)
-    public Stream<GraphProjectSubgraphResult> createSubgraph(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "fromGraphName") String fromGraphName,
-        @Name(value = "nodeFilter") String nodeFilter,
-        @Name(value = "relationshipFilter") String relationshipFilter,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return projectSubgraph(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
     }
 
     private GraphProjectSubgraphResult projectGraphFromGraphStore(
