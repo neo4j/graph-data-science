@@ -107,7 +107,7 @@ class BfsAlgorithmFactory<CONFIG extends BfsBaseConfig> extends GraphAlgorithmFa
             MemoryRange.of(dimensions.nodeCount() / 64)
         );
 
-        builder.perNode("resultNodes", MemoryUsage::sizeOfLongArray);
+        builder.perNode("resultNodes", HugeLongArray::memoryEstimation);
 
 
         return builder.build();
