@@ -187,16 +187,10 @@ class BFSTask implements Runnable {
 
     private void relaxNode(long nodeIndex, long nodeId, long sourceNodeId, double weight) {
         var exitPredicateResult = exitPredicate.test(sourceNodeId, nodeId, weight);
-        if (exitPredicateResult == ExitPredicate.Result.CONTINUE) {
-            traversedNodes.set(nodeIndex, BFS.IGNORE_NODE);
-            ignoredNodesCount.increment();
+        if (exitPredicateResult == ExitPredicate.Result.BREAK) {
+            // Update the global `targetFoundIndex` so other tasks will know a target is reached and terminate as well.
+            targetFoundIndex.getAndAccumulate(nodeIndex, Math::min);
             return;
-        } else {
-            if (exitPredicateResult == ExitPredicate.Result.BREAK) {
-                // Update the global `targetFoundIndex` so other tasks will know a target is reached and terminate as well.
-                targetFoundIndex.getAndAccumulate(nodeIndex, Math::min);
-                return;
-            }
         }
 
         this.graph.forEachRelationship(
