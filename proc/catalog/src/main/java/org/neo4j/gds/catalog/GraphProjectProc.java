@@ -310,7 +310,6 @@ public class GraphProjectProc extends CatalogProc {
         public final long nodeCount;
         public final long relationshipCount;
         public final long projectMillis;
-        public final long createMillis;
 
         GraphProjectResult(
             String graphName,
@@ -322,8 +321,6 @@ public class GraphProjectProc extends CatalogProc {
             this.nodeCount = nodeCount;
             this.relationshipCount = relationshipCount;
             this.projectMillis = projectMillis;
-            // kept for backwards compatibility
-            this.createMillis = projectMillis;
         }
 
         protected abstract static class Builder {

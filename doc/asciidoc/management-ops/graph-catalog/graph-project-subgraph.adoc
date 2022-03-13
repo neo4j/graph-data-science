@@ -36,8 +36,7 @@ CALL gds.beta.graph.project.subgraph(
   relationshipFilter: String,
   nodeCount: Integer,
   relationshipCount: Integer,
-  projectMillis: Integer,
-  createMillis: Integer
+  projectMillis: Integer
 ----
 
 .Parameters
@@ -69,7 +68,6 @@ CALL gds.beta.graph.project.subgraph(
 | nodeCount              | Integer  | Number of nodes in the subgraph.
 | relationshipCount      | Integer  | Number of relationships in the subgraph.
 | projectMillis          | Integer  | Milliseconds for projecting the subgraph.
-| createMillis           | Integer  | Deprecated - Milliseconds for projecting the subgraph.
 |===
 --
 
