@@ -87,7 +87,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.beta.pipeline.nodeClassification.selectFeatures",
         "gds.beta.pipeline.nodeClassification.addNodeProperty",
-        "gds.beta.pipeline.nodeClassification.configureParams",
+        "gds.beta.pipeline.nodeClassification.addLogisticRegression",
         "gds.beta.pipeline.nodeClassification.configureSplit",
         "gds.beta.pipeline.nodeClassification.create",
         "gds.beta.pipeline.nodeClassification.predict.mutate",
