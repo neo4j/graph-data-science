@@ -267,11 +267,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `_gds.alpha.similarity.euclideanDistance_`
 | Jaccard Similarity | `_gds.alpha.similarity.jaccard_`
 | Overlap Similarity | `_gds.alpha.similarity.overlap_`
-.4+<.^|Pearson Similarity
-| `gds.alpha.similarity.pearson.stats`
-| `gds.alpha.similarity.pearson.stream`
-| `gds.alpha.similarity.pearson.write`
-| `_gds.alpha.similarity.pearson_`
+| Pearson Similarity | `_gds.alpha.similarity.pearson_`
 .8+<.^|<<algorithms-sllpa, Speaker-Listener Label Propagation>>
 | `gds.alpha.sllpa.mutate`
 | `gds.alpha.sllpa.mutate.estimate`
