@@ -43,8 +43,11 @@ public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, Random
         return 1;
     }
 
+    @Value.Default
     @Configuration.IntegerRange(min = 1)
-    int numberOfDecisionTrees();
+    default int numberOfDecisionTrees() {
+        return 100;
+    }
 
     @Override
     default String methodName() {
