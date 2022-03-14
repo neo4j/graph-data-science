@@ -50,6 +50,7 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.StatsMap;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
@@ -60,6 +61,7 @@ import org.neo4j.gds.models.FeaturesFactory;
 import org.neo4j.gds.models.Trainer;
 import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.TrainerFactory;
+import org.neo4j.gds.models.TrainingMethod;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainer;
@@ -94,16 +96,17 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
     private final StatsMap validationStats;
     private final MetricComputer metricComputer;
 
-    public static MemoryEstimation estimate(NodeClassificationTrainConfig config) {
-        var maxBatchSize = config.paramsConfig()
+    public static MemoryEstimation estimate(NodeClassificationPipeline pipeline, NodeClassificationPipelineTrainConfig config) {
+        var maxBatchSize = pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)
             .stream()
-            .mapToInt(GradientDescentConfig::batchSize)
+            .mapToInt(trainConfig -> ((GradientDescentConfig) trainConfig).batchSize())
             .max()
-            .getAsInt();
+            .orElseThrow();
+
         var fudgedClassCount = 1000;
         var fudgedFeatureCount = 500;
-        var holdoutFraction = config.holdoutFraction();
-        var validationFolds = config.validationFolds();
+        var holdoutFraction = pipeline.splitConfig().testFraction();
+        var validationFolds = pipeline.splitConfig().validationFolds();
 
         var modelSelection = modelTrainAndEvaluateMemoryUsage(
             maxBatchSize,
@@ -130,8 +133,8 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
             .perNode("node IDs", HugeLongArray::memoryEstimation)
             .add("outer split", FractionSplitter.estimate(1 - holdoutFraction))
             .add("inner split", StratifiedKFoldSplitter.memoryEstimationForNodeSet(validationFolds, 1 - holdoutFraction))
-            .add("stats map train", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
-            .add("stats map validation", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
+            .add("stats map train", StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates()))
+            .add("stats map validation", StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates()))
             .add("max of model selection and best model evaluation", maxOfModelSelectionAndBestModelEvaluation)
             .build();
     }

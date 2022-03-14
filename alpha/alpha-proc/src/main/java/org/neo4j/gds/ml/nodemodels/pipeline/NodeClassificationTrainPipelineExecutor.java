@@ -38,8 +38,8 @@ import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.ImmutableModelSelectResult;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationTrain;
 import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.TrainingMethod;
@@ -82,7 +82,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
 
         var trainingEstimation = MemoryEstimations
             .builder()
-            .add("Pipeline Train", NodeClassificationTrain.estimate(innerConfig(pipeline, configuration)))
+            .add("Pipeline Train", NodeClassificationTrain.estimate(pipeline, configuration))
             .build();
 
         return MemoryEstimations.maxEstimation(
