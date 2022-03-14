@@ -19,14 +19,19 @@
  */
 package org.neo4j.gds.decisiontree;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 
 @Configuration
 public interface DecisionTreeTrainConfig {
 
+    @Value.Default
     @Configuration.IntegerRange(min = 1)
-    int maxDepth();
+    default int maxDepth() {
+        return Integer.MAX_VALUE;
+    }
 
+    @Value.Default
     @Configuration.IntegerRange(min = 2)
     default int minSplitSize() {
         return 2;
