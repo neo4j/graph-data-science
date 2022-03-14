@@ -223,9 +223,6 @@
             <d:tocentry linkend="alpha-algorithms-similarity-overlap">
                 <?dbhtml filename="alpha-algorithms/overlap/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="alpha-algorithms-approximate-nearest-neighbors">
-                <?dbhtml filename="alpha-algorithms/approximate-nearest-neighbors/index.html"?>
-            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="algorithms-path-finding">
