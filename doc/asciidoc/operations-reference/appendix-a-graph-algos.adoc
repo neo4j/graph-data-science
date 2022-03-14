@@ -278,7 +278,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.similarity.overlap.stream`
 | `gds.alpha.similarity.overlap.write`
 | `_gds.alpha.similarity.overlap_`
-.4+<.^|<<alpha-algorithms-similarity-pearson, Pearson Similarity>>
+.4+<.^|Pearson Similarity
 | `gds.alpha.similarity.pearson.stats`
 | `gds.alpha.similarity.pearson.stream`
 | `gds.alpha.similarity.pearson.write`
