@@ -30,7 +30,10 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionPipelineTrainProc;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -43,6 +46,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Neo4jModelCatalogExtension
 public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
 
     private static final String GRAPH_NAME = "g";
@@ -94,6 +98,9 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
 
     private GraphStore graphStore;
 
+    @Inject
+    ModelCatalog modelCatalog;
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
@@ -128,13 +135,62 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
     }
 
     @Test
-    void trainAndPredict() {
+    void trainAndPredictLR() {
         var topN = 4;
 
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('pipe', [{penalty: 1}, {penalty: 2}] )");
+
+        var modelName = "trainedModel";
+
+        assertCypherResult(
+            "CALL gds.beta.pipeline.linkPrediction.train(" +
+            "   $graphName, " +
+            "   { pipeline: 'pipe', modelName: $modelName, negativeClassWeight: 1.0, randomSeed: 1337 }" +
+            ")" +
+            " YIELD modelInfo" +
+            " RETURN modelInfo.modelType AS modelType",
+            Map.of("graphName", GRAPH_NAME, "modelName", modelName),
+            List.of(Map.of("modelType", "LinkPrediction"))
+        );
+
+        assertCypherResult(
+            "CALL gds.beta.pipeline.linkPrediction.predict.mutate($graphName, {" +
+            " modelName: $modelName," +
+            " mutateRelationshipType: 'PREDICTED'," +
+            " threshold: 0," +
+            " topN: $topN," +
+            " concurrency: $concurrency" +
+            "})",
+            Map.of("graphName", GRAPH_NAME, "modelName", modelName,"topN", topN, "concurrency", 4),
+            List.of(Map.of(
+                "preProcessingMillis", greaterThan(-1L),
+                "computeMillis", greaterThan(-1L),
+                "mutateMillis", greaterThan(-1L),
+                "postProcessingMillis", 0L,
+                // we are writing undirected rels so we get 2x topN
+                "relationshipsWritten", 2L * topN,
+                "configuration", isA(Map.class),
+                "samplingStats", isA(Map.class),
+                "probabilityDistribution", isA(Map.class)
+            ))
+        );
+
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED"), "probability"));
+    }
+
+    @Test
+    void trainAndPredictRF() {
+        var topN = 4;
+
+        runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addRandomForest('pipe', {" +
+                 "featureBaggingRatio: 1.0, numberOfDecisionTrees: 2, maxDepth: 5, minSplitSize: 1" +
+                 "})");
 
         var modelName = "trainedModel";
 

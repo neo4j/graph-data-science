@@ -71,7 +71,7 @@ class ClassificationDecisionTreeTest {
 
         features = FeaturesFactory.wrap(featureVectorArray);
 
-        giniIndexLoss = new GiniIndex(allLabels, CLASS_MAPPING);
+        giniIndexLoss = GiniIndex.fromOriginalLabels(allLabels, CLASS_MAPPING);
 
     }
 

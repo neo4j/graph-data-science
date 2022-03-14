@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.models.TrainingMethod;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.randomforest.RandomForestTrainConfigImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -89,6 +91,32 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
                     "tolerance", 0.001,
                     "useBiasFeature", true
                 )))
+            ))
+        );
+    }
+
+    @Test
+    void addRandomForest() {
+        assertCypherResult(
+            "CALL gds.beta.pipeline.linkPrediction.addRandomForest('myPipeline', {maxDepth: 42, featureBaggingRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 1})",
+            List.of(Map.of("name",
+                "myPipeline",
+                "splitConfig", DEFAULT_SPLIT_CONFIG,
+                "nodePropertySteps", List.of(),
+                "featureSteps", List.of(),
+                "parameterSpace", Map.of(
+                    TrainingMethod.RandomForest.name(),
+                    List.of(RandomForestTrainConfigImpl
+                        .builder()
+                        .maxDepth(42)
+                        .featureBaggingRatio(0.5)
+                        .numberOfDecisionTrees(10)
+                        .minSplitSize(1)
+                        .build()
+                        .toMap()),
+                    TrainingMethod.LogisticRegression.name(),
+                    List.of(LogisticRegressionTrainConfig.defaultConfig().toMap())
+                )
             ))
         );
     }

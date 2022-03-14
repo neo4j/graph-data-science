@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,6 +33,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
@@ -136,9 +136,34 @@ class LinkPredictionTrainTest {
             .collect(Collectors.toList());
 
         return Stream.of(
-            Arguments.of("LLR batchSize 10", List.of(llrConfigs.get(0)), MemoryRange.of(34_600, 1_026_360)),
-            Arguments.of("LLR batchSize 100", List.of(llrConfigs.get(1)), MemoryRange.of(83_560, 2_486_520)),
-            Arguments.of("LLR batchSize 10,100", llrConfigs, MemoryRange.of(83_560, 2_486_520))
+            Arguments.of("LLR batchSize 10",
+                TrainingMethod.LogisticRegression, List.of(llrConfigs.get(0)), MemoryRange.of(34_600, 1_026_360)
+            ),
+            Arguments.of(
+                "LLR batchSize 100",
+                TrainingMethod.LogisticRegression,
+                List.of(llrConfigs.get(1)),
+                MemoryRange.of(83_560, 2_486_520)
+            ),
+            Arguments.of(
+                "LLR batchSize 10,100",
+                TrainingMethod.LogisticRegression,
+                llrConfigs,
+                MemoryRange.of(83_560, 2_486_520)
+            ),
+            Arguments.of(
+                "RF",
+                TrainingMethod.RandomForest,
+                List.of(RandomForestTrainConfigImpl
+                    .builder()
+                    .maxDepth(3)
+                    .minSplitSize(1)
+                    .randomSeed(42L)
+                    .featureBaggingRatio(1.0D)
+                    .numberOfDecisionTrees(1)
+                    .build()),
+                MemoryRange.of(83_656, 2_486_616)
+            )
         );
     }
 
@@ -162,8 +187,8 @@ class LinkPredictionTrainTest {
         assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrain.MODEL_TYPE);
         assertThat(actualModel.trainConfig()).isEqualTo(trainConfig);
         // length of the linkFeatures
-        assertThat(actualModel.data())
-            .asInstanceOf(InstanceOfAssertFactories.type(LogisticRegressionData.class))
+
+        assertThat((LogisticRegressionData) actualModel.data())
             .extracting(llrData -> llrData.weights().data().totalSize())
             .isEqualTo(6);
 
@@ -184,20 +209,17 @@ class LinkPredictionTrainTest {
 
         LinkPredictionTrainConfig trainConfig = trainingConfig(modelName);
 
-        var modelData = ((LogisticRegressionData) runLinkPrediction(trainConfig)
+        var modelData = runLinkPrediction(trainConfig)
             .model()
-            .data());
-        var modelDataRepeated = ((LogisticRegressionData) runLinkPrediction(trainConfig)
+            .data();
+        var modelDataRepeated = runLinkPrediction(trainConfig)
             .model()
-            .data());
+            .data();
 
-        var modelWeights = modelData.weights().data();
-        var modelBias = modelData.bias().get().data().data();
-        var modelWeightsRepeated = modelDataRepeated.weights().data();
-        var modelBiasRepeated = modelDataRepeated.bias().get().data().data();
-
-        assertThat(modelWeights).matches(modelWeightsRepeated::equals);
-        assertThat(modelBias).containsExactly(modelBiasRepeated);
+        assertThat(modelData)
+            .usingRecursiveComparison()
+            .withEqualsForType(LocalIdMap::equals, LocalIdMap.class)
+            .isEqualTo(modelDataRepeated);
     }
 
     @ParameterizedTest
@@ -264,7 +286,7 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("paramsForEstimationsWithParamSpace")
-    void estimateWithParameterSpace(String desc, List<TrainerConfig> parameterSpace, MemoryRange expectedRange) {
+    void estimateWithParameterSpace(String desc, TrainingMethod trainerMethod, List<TrainerConfig> parameterSpace, MemoryRange expectedRange) {
         var trainConfig = LinkPredictionTrainConfig
             .builder()
             .modelName("DUMMY")
@@ -273,7 +295,7 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionPipeline();
-        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, parameterSpace);
+        pipeline.setTrainingParameterSpace(trainerMethod, parameterSpace);
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)

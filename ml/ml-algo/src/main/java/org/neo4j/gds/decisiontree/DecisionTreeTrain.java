@@ -99,7 +99,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
 
         var split = findBestSplit(group, groupSize);
         if (split.sizes().right() == 0) {
-            return new TreeNode<>(toTerminal(split.groups().left(), split.sizes().right()));
+            return new TreeNode<>(toTerminal(split.groups().left(), split.sizes().left()));
         } else if (split.sizes().left() == 0) {
             return new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right()));
         }

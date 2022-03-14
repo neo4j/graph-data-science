@@ -19,22 +19,30 @@
  */
 package org.neo4j.gds.decisiontree;
 
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 public class GiniIndex implements DecisionTreeLoss {
 
-    private final HugeLongArray expectedLabels;
-    private final LocalIdMap classMapping;
+    private final HugeIntArray expectedMappedLabels;
+    private final int numberOfClasses;
 
-    public GiniIndex(
-        HugeLongArray expectedLabels,
+    public GiniIndex(HugeIntArray expectedMappedLabels, int numberOfClasses) {
+        this.expectedMappedLabels = expectedMappedLabels;
+        this.numberOfClasses = numberOfClasses;
+    }
+
+    public static GiniIndex fromOriginalLabels(
+        HugeLongArray expectedOriginalLabels,
         LocalIdMap classMapping
     ) {
-        this.classMapping = classMapping;
-        assert expectedLabels.size() > 0;
+        assert expectedOriginalLabels.size() > 0;
 
-        this.expectedLabels = expectedLabels;
+        var mappedLabels = HugeIntArray.newArray(expectedOriginalLabels.size());
+        mappedLabels.setAll(idx -> classMapping.toMapped(expectedOriginalLabels.get(idx)));
+
+        return new GiniIndex(mappedLabels, classMapping.size());
     }
 
     @Override
@@ -58,10 +66,10 @@ public class GiniIndex implements DecisionTreeLoss {
 
         if (groupSize == 0) return 0;
 
-        final var groupClassCounts = new long[classMapping.size()];
+        final var groupClassCounts = new long[numberOfClasses];
         for (long i = 0; i < groupSize; i++) {
-            var expectedLabel = expectedLabels.get(group.get(i));
-            groupClassCounts[classMapping.toMapped(expectedLabel)]++;
+            int expectedLabel = expectedMappedLabels.get(group.get(i));
+            groupClassCounts[expectedLabel]++;
         }
 
         double score = 0.0;
