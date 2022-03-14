@@ -61,6 +61,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
 
     private static final int DEFAULT_DELTA = 64;
     static final int IGNORE_NODE = -1;
+    public static final int ALL_DEPTHS_ALLOWED = -1;
 
     private final long sourceNodeId;
     private final ExitPredicate exitPredicate;
@@ -158,7 +159,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         this.aggregatorFunction = aggregatorFunction;
         this.concurrency = concurrency;
         this.delta = delta;
-        this.maximumDepth=maximumDepth;
+        this.maximumDepth = maximumDepth;
         this.traversedNodes = traversedNodes;
         this.weights = weights;
         this.visited = visited;
@@ -196,7 +197,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         int bfsTaskListSize = bfsTaskList.size();
         long currentDepth=0;
         while (running()) {
-            if (currentDepth==maximumDepth-1){
+            if (currentDepth == maximumDepth) {
                 break;
             }
             ParallelUtil.run(bfsTaskList, Pools.DEFAULT);
