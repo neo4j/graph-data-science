@@ -28,6 +28,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -79,6 +80,46 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
         LouvainBaseConfig louvainConfig = LouvainStreamConfig.of(CypherMapWrapper.empty());
         assertEquals(false, louvainConfig.includeIntermediateCommunities());
         assertEquals(10, louvainConfig.maxLevels());
+    }
+
+    @Test
+    void testStreamNodeFiltered() {
+        var graphName = "multi_label";
+
+        runQuery("CREATE (:Ignored)");
+
+        long totalNodeCount = runQuery(
+            "MATCH (n) RETURN count(n) AS count",
+            result -> (Long) result.next().get("count")
+        );
+        long filteredNodeCount = runQuery(
+            "MATCH (n:Node) RETURN count(n) AS count",
+            result -> (Long) result.next().get("count")
+        );
+
+        assertThat(totalNodeCount).isGreaterThan(filteredNodeCount);
+
+        // project graph including the to-be-ignored label
+        runQuery(GdsCypher.call(graphName)
+            .graphProject()
+            .withNodeLabel("Node")
+            .withNodeLabel("Ignored")
+            .withAnyRelationshipType()
+            .yields());
+
+        @Language("Cypher") String query = GdsCypher.call(graphName)
+            .algo("louvain")
+            .streamMode()
+            // execute Louvain on node subset
+            .addParameter("nodeLabels", List.of("Node"))
+            .yields("nodeId");
+
+        var actualFilteredCount = runQuery(
+            query + " RETURN count(nodeId) AS count",
+            result -> (Long) result.next().get("count")
+        );
+
+        assertThat(actualFilteredCount).isEqualTo(filteredNodeCount);
     }
 
     @Override
