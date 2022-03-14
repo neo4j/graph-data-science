@@ -34,11 +34,16 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationTrainConfig;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfigImpl;
+import org.neo4j.gds.models.TrainingMethod;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfigImpl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -75,6 +80,12 @@ class NodeClassificationTrainTest {
         ", (:N {bananas: 100.0, arrayProperty: [4.0, 5.8], a: 4.0, b: 5.8, t: 1})" +
         ", (:N {bananas: 100.0, arrayProperty: [1.0, 0.9], a: 1.0, b: 0.9, t: 1})";
 
+    static final NodeClassificationSplitConfig SPLIT_CONFIG = NodeClassificationSplitConfigImpl
+        .builder()
+        .testFraction(0.33)
+        .validationFolds(2)
+        .build();
+
     @Inject
     TestGraph graph;
 
@@ -84,21 +95,30 @@ class NodeClassificationTrainTest {
 
         var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
 
-        // to keep same expectation as before bugfix in this commit
-        Map<String, Object> model1 = Map.of("penalty", 1 * 2.0/3.0 * 0.5, "maxEpochs", 1);
-        Map<String, Object> model2 = Map.of("penalty", 1 * 2.0/3.0 * 0.5, "maxEpochs", 10000, "tolerance", 1e-5);
+        var pipeline = new NodeClassificationPipeline();
+        pipeline.setSplitConfig(SPLIT_CONFIG);
+        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
+        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
 
-        var config = createConfig(
-            List.of(model1, model2),
-            "model",
-            List.of("a", "b"),
-            metricSpecification,
-            1L
+        // to keep same expectation as before bugfix in this commit
+        pipeline.addTrainerConfig(
+            TrainingMethod.LogisticRegression,
+            LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
         );
-        var expectedWinner = config.paramsConfig().stream().filter(c -> c.maxEpochs() == 10000).findFirst().get();
+        LogisticRegressionTrainConfig expectedWinner = LogisticRegressionTrainConfigImpl
+            .builder()
+            .penalty(1 * 2.0 / 3.0 * 0.5)
+            .maxEpochs(10000)
+            .tolerance(1e-5)
+            .build();
+
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, expectedWinner);
+
+        var config = createConfig("model", metricSpecification, 1L);
 
         var ncTrain = NodeClassificationTrain.create(
             graph,
+            pipeline,
             config,
             ProgressTracker.NULL_TRACKER
         );
@@ -121,8 +141,12 @@ class NodeClassificationTrainTest {
     @ParameterizedTest
     @MethodSource("metricArguments")
     void shouldProduceDifferentMetricsForDifferentTrainings(MetricSpecification metricSpecification) {
-
         var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
+
+        var bananasPipeline = new NodeClassificationPipeline();
+        bananasPipeline.setSplitConfig(SPLIT_CONFIG);
+
+        bananasPipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));
 
         var modelCandidates = List.of(
             Map.<String, Object>of("penalty", 0.0625, "maxEpochs", 1000),
@@ -134,28 +158,39 @@ class NodeClassificationTrainTest {
             Map.<String, Object>of("penalty", 4.0, "maxEpochs", 1000)
         );
 
-        var bananasConfig = createConfig(
-            modelCandidates,
-            "bananasModel",
-            List.of("bananas"),
-            metricSpecification,
-            1337L
-        );
+        modelCandidates
+            .stream()
+            .map(LogisticRegressionTrainConfig::of)
+            .forEach(candidate -> bananasPipeline.addTrainerConfig(TrainingMethod.LogisticRegression, candidate));
+
+        var bananasConfig = createConfig("bananasModel", metricSpecification, 1337L);
+
         var bananasTrain = NodeClassificationTrain.create(
             graph,
+            bananasPipeline,
             bananasConfig,
             ProgressTracker.NULL_TRACKER
         );
 
+        var arrayPipeline = new NodeClassificationPipeline();
+        arrayPipeline.setSplitConfig(SPLIT_CONFIG);
+
+        arrayPipeline.addFeatureStep(NodeClassificationFeatureStep.of("arrayProperty"));
+
+        modelCandidates
+            .stream()
+            .map(LogisticRegressionTrainConfig::of)
+            .forEach(candidate -> arrayPipeline.addTrainerConfig(TrainingMethod.LogisticRegression, candidate));
+
+
         var arrayPropertyConfig = createConfig(
-            modelCandidates,
             "arrayPropertyModel",
-            List.of("arrayProperty"),
             metricSpecification,
             42L
         );
         var arrayPropertyTrain = NodeClassificationTrain.create(
             graph,
+            arrayPipeline,
             arrayPropertyConfig,
             ProgressTracker.NULL_TRACKER
         );
@@ -188,23 +223,25 @@ class NodeClassificationTrainTest {
     @ParameterizedTest
     @MethodSource("metricArguments")
     void shouldLogProgress(MetricSpecification metricSpecification) {
-        var modelCandidates = List.of(
-            Map.<String, Object>of("penalty", 0.0625 * 2.0/3.0 * 0.5, "maxEpochs", 100),
-            Map.<String, Object>of("penalty", 0.125 * 2.0/3.0 * 0.5, "maxEpochs", 100)
+        var pipeline = new NodeClassificationPipeline();
+        pipeline.setSplitConfig(SPLIT_CONFIG);
+        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));
+
+        pipeline.addTrainerConfig(
+            TrainingMethod.LogisticRegression,
+            LogisticRegressionTrainConfig.of(Map.of("penalty", 0.0625 * 2.0 / 3.0 * 0.5, "maxEpochs", 100))
+        );
+        pipeline.addTrainerConfig(
+            TrainingMethod.LogisticRegression,
+            LogisticRegressionTrainConfig.of(Map.of("penalty", 0.125 * 2.0 / 3.0 * 0.5, "maxEpochs", 100))
         );
 
-        var config = createConfig(
-            modelCandidates,
-            "bananasModel",
-            List.of("bananas"),
-            metricSpecification,
-            42L
-        );
+        var config = createConfig("bananasModel", metricSpecification, 42L);
 
-        var progressTask = NodeClassificationTrain.progressTask(config.validationFolds(), config.paramsConfig().size());
+        var progressTask = NodeClassificationTrain.progressTask(pipeline.splitConfig().validationFolds(), pipeline.numberOfModelCandidates());
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
-        NodeClassificationTrain.create(graph, config, progressTracker).compute();
+        NodeClassificationTrain.create(graph, pipeline, config, progressTracker).compute();
 
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
@@ -404,20 +441,29 @@ class NodeClassificationTrainTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void seededNodeClassification(int concurrency) {
-        var config = ImmutableNodeClassificationTrainConfig.builder()
+        var pipeline = new NodeClassificationPipeline();
+
+        pipeline.setSplitConfig(SPLIT_CONFIG);
+        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));
+        pipeline.addTrainerConfig(
+            TrainingMethod.LogisticRegression,
+            LogisticRegressionTrainConfig.of(Map.of("penalty", 0.0625, "maxEpochs", 100, "batchSize", 1))
+        );
+
+        var config = NodeClassificationPipelineTrainConfigImpl.builder()
+            .graphName("IGNORE")
+            .pipeline("IGNORE")
+            .username("IGNORE")
             .modelName("model")
-            .featureProperties(List.of("bananas"))
-            .holdoutFraction(0.33)
-            .validationFolds(2)
             .randomSeed(42L)
             .targetProperty("t")
             .metrics(List.of(MetricSpecification.parse("Accuracy")))
-            .params(List.of(Map.of("penalty", 0.0625, "maxEpochs", 100, "batchSize", 1)))
             .concurrency(concurrency)
             .build();
 
         Supplier<NodeClassificationTrain> algoSupplier = () -> NodeClassificationTrain.create(
             graph,
+            pipeline,
             config,
             ProgressTracker.NULL_TRACKER
         );
@@ -429,23 +475,20 @@ class NodeClassificationTrainTest {
             .matches(matrix -> matrix.equals(((LogisticRegressionData)secondResult.data()).weights().data(), 1e-10));
     }
 
-    private NodeClassificationTrainConfig createConfig(
-        Iterable<Map<String, Object>> modelCandidates,
+    private NodeClassificationPipelineTrainConfig createConfig(
         String modelName,
-        Iterable<String> featureProperties,
         MetricSpecification metricSpecification,
         long randomSeed
     ) {
-        return ImmutableNodeClassificationTrainConfig.builder()
+        return NodeClassificationPipelineTrainConfigImpl.builder()
+            .graphName("IGNORE")
+            .pipeline("IGNORE")
+            .username("IGNORE")
             .modelName(modelName)
-            .featureProperties(featureProperties)
-            .holdoutFraction(0.33)
-            .validationFolds(2)
             .concurrency(1)
             .randomSeed(randomSeed)
             .targetProperty("t")
             .metrics(List.of(metricSpecification))
-            .params(modelCandidates)
             .build();
     }
 

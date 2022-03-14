@@ -47,10 +47,10 @@ import org.neo4j.gds.ml.nodemodels.MetricComputer;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.StatsMap;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
@@ -63,7 +63,6 @@ import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.TrainerFactory;
 import org.neo4j.gds.models.TrainingMethod;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainer;
 import org.openjdk.jol.util.Multiset;
 
@@ -81,12 +80,13 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
-public final class NodeClassificationTrain extends Algorithm<Model<Classifier.ClassifierData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
+public final class NodeClassificationTrain extends Algorithm<Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationModelInfo>> {
 
     public static final String MODEL_TYPE = "nodeLogisticRegression";
 
     private final Graph graph;
-    private final NodeClassificationTrainConfig config;
+    private final NodeClassificationPipelineTrainConfig config;
+    private final NodeClassificationPipeline pipeline;
     private final Features features;
     private final HugeLongArray targets;
     private final LocalIdMap classIdMap;
@@ -202,7 +202,8 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
 
     public static NodeClassificationTrain create(
         Graph graph,
-        NodeClassificationTrainConfig config,
+        NodeClassificationPipeline pipeline,
+        NodeClassificationPipelineTrainConfig config,
         ProgressTracker progressTracker
     ) {
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
@@ -215,10 +216,11 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
         nodeIds.setAll(i -> i);
         var trainStats = StatsMap.create(metrics);
         var validationStats = StatsMap.create(metrics);
-        var features = FeaturesFactory.extractLazyFeatures(graph, config.featureProperties());
+        var features = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
 
         return new NodeClassificationTrain(
             graph,
+            pipeline,
             config,
             features,
             targets,
@@ -255,7 +257,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
         return Tuples.pair(targets, classCounts);
     }
 
-    private static List<Metric> createMetrics(NodeClassificationTrainConfig config, Multiset<Long> globalClassCounts) {
+    private static List<Metric> createMetrics(NodeClassificationPipelineTrainConfig config, Multiset<Long> globalClassCounts) {
         return config.metrics()
             .stream()
             .flatMap(spec -> spec.createMetrics(globalClassCounts.keys()))
@@ -264,7 +266,8 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
 
     private NodeClassificationTrain(
         Graph graph,
-        NodeClassificationTrainConfig config,
+        NodeClassificationPipeline pipeline,
+        NodeClassificationPipelineTrainConfig config,
         Features features,
         HugeLongArray targets,
         LocalIdMap classIdMap,
@@ -277,6 +280,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
     ) {
         super(progressTracker);
         this.graph = graph;
+        this.pipeline = pipeline;
         this.config = config;
         this.features = features;
         this.targets = targets;
@@ -300,14 +304,15 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
     public void release() {}
 
     @Override
-    public Model<Classifier.ClassifierData, NodeClassificationTrainConfig, NodeClassificationModelInfo> compute() {
+    public Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationModelInfo> compute() {
         progressTracker.beginSubTask();
 
         progressTracker.beginSubTask();
         ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
-        var outerSplit = new FractionSplitter().split(nodeIds, 1 - config.holdoutFraction());
+        NodeClassificationSplitConfig splitConfig = pipeline.splitConfig();
+        var outerSplit = new FractionSplitter().split(nodeIds, 1 - splitConfig.testFraction());
         var innerSplits = new StratifiedKFoldSplitter(
-            config.validationFolds(),
+            splitConfig.validationFolds(),
             ReadOnlyHugeLongArray.of(outerSplit.trainSet()),
             ReadOnlyHugeLongArray.of(targets),
             config.randomSeed()
@@ -316,7 +321,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
         warnForSmallNodeSets(
             outerSplit.trainSet().size(),
             outerSplit.testSet().size(),
-            config.validationFolds(),
+            splitConfig.validationFolds(),
             progressTracker
         );
 
@@ -334,7 +339,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
 
     private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
         progressTracker.beginSubTask();
-        for (LogisticRegressionTrainConfig modelParams : config.paramsConfig()) {
+        for (TrainerConfig modelParams : pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)) {
             progressTracker.beginSubTask();
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
@@ -397,7 +402,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
         return retrainedClassifier;
     }
 
-    private Model<Classifier.ClassifierData, NodeClassificationTrainConfig, NodeClassificationModelInfo> createModel(
+    private Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationModelInfo> createModel(
         TrainerConfig bestParameters,
         Map<Metric, MetricData> metricResults,
         Classifier classifier
@@ -488,10 +493,10 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
         private final Map<Metric, Double> min;
         private final Map<Metric, Double> max;
         private final Map<Metric, Double> sum;
-        private final LogisticRegressionTrainConfig modelParams;
+        private final TrainerConfig modelParams;
         private final int numberOfSplits;
 
-        ModelStatsBuilder(LogisticRegressionTrainConfig modelParams, int numberOfSplits) {
+        ModelStatsBuilder(TrainerConfig modelParams, int numberOfSplits) {
             this.modelParams = modelParams;
             this.numberOfSplits = numberOfSplits;
             this.min = new HashMap<>();
