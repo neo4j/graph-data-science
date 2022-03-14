@@ -24,9 +24,9 @@ import org.neo4j.graphdb.Path;
 import java.util.List;
 
 public class BfsStreamResult {
-    public Long sourceNode;
-    public List<Long> nodeIds;
-    public Path path;
+    public final Long sourceNode;
+    public final List<Long> nodeIds;
+    public final Path path;
 
     BfsStreamResult(long sourceNode, List<Long> nodes, Path path) {
         this.sourceNode = sourceNode;
