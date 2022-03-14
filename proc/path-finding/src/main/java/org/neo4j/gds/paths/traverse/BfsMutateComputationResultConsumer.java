@@ -20,18 +20,11 @@
 package org.neo4j.gds.paths.traverse;
 
 import org.neo4j.gds.MutateComputationResultConsumer;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.MutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
-
-import java.util.Optional;
 
 public class BfsMutateComputationResultConsumer extends MutateComputationResultConsumer<BFS, HugeLongArray, BfsMutateConfig, MutateResult> {
     BfsMutateComputationResultConsumer() {
@@ -49,38 +42,13 @@ public class BfsMutateComputationResultConsumer extends MutateComputationResultC
     ) {
         var result = computationResult.result();
         if (result != null) {
-            var config = computationResult.config();
-
-            var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
-
-            var relationshipsBuilder = GraphFactory
-                .initRelationshipsBuilder()
-                .nodes(computationResult.graph())
-                .orientation(Orientation.NATURAL)
-                .build();
-
-            Relationships relationships;
-
-            try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                var source = result.get(0);
-                for (long i = 1; i < result.size(); i++) {
-                    var target = result.get(i);
-                    relationshipsBuilder.addFromInternal(source, target);
-                    source = target;
-                }
-
-                relationships = relationshipsBuilder.build();
-                resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
-            }
-
-            computationResult
-                .graphStore()
-                .addRelationshipType(
-                    mutateRelationshipType,
-                    Optional.empty(),
-                    Optional.empty(),
-                    relationships
-                );
+            TraverseMutateResultConsumer.updateGraphStore(
+                computationResult.graph(),
+                resultBuilder,
+                result,
+                computationResult.config().mutateRelationshipType(),
+                computationResult.graphStore()
+            );
         }
     }
 }
