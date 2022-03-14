@@ -24,10 +24,8 @@ import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.neo4j.gds.core.utils.Intersections;
-import org.neo4j.gds.impl.similarity.SimilarityVectorAggregator;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
-import org.neo4j.procedure.UserAggregationFunction;
 import org.neo4j.procedure.UserFunction;
 import org.neo4j.values.storable.Values;
 
@@ -70,12 +68,6 @@ public class SimilaritiesFunc {
         }
 
         return Intersections.cosine(weights1, weights2, len);
-    }
-
-    @UserAggregationFunction("gds.alpha.similarity.asVector")
-    @Description("RETURN gds.alpha.similarity.asVector(map) - Builds a vector of maps containing items and weights")
-    public SimilarityVectorAggregator asVector() {
-        return new SimilarityVectorAggregator();
     }
 
     @UserFunction("gds.alpha.similarity.pearson")
