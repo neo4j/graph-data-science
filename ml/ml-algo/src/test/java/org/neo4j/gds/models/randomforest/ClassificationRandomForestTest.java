@@ -72,7 +72,7 @@ class ClassificationRandomForestTest {
 
         allFeatureVectors = FeaturesFactory.wrap(featureVectorArray);
 
-        giniIndexLoss = GiniIndex.of(allLabels, CLASS_MAPPING);
+        giniIndexLoss = GiniIndex.fromOriginalLabels(allLabels, CLASS_MAPPING);
     }
 
     long predictLabel(

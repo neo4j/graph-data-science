@@ -87,7 +87,7 @@ class GiniIndexTest {
             rightGroup.set(i, groups[1][i]);
         }
 
-        var giniIndexLoss = GiniIndex.of(hugeLabels, CLASS_MAPPING);
+        var giniIndexLoss = GiniIndex.fromOriginalLabels(hugeLabels, CLASS_MAPPING);
 
         assertThat(giniIndexLoss.splitLoss(ImmutableGroups.of(leftGroup, rightGroup), groupSizes))
             .isCloseTo(expectedLoss, Offset.offset(0.00001D));

@@ -33,14 +33,14 @@ public class GiniIndex implements DecisionTreeLoss {
         this.numberOfClasses = numberOfClasses;
     }
 
-    public static GiniIndex of(
-        HugeLongArray expectedLabels,
+    public static GiniIndex fromOriginalLabels(
+        HugeLongArray expectedOriginalLabels,
         LocalIdMap classMapping
     ) {
-        assert expectedLabels.size() > 0;
+        assert expectedOriginalLabels.size() > 0;
 
-        var mappedLabels = HugeIntArray.newArray(expectedLabels.size());
-        mappedLabels.setAll(idx -> classMapping.toMapped(expectedLabels.get(idx)));
+        var mappedLabels = HugeIntArray.newArray(expectedOriginalLabels.size());
+        mappedLabels.setAll(idx -> classMapping.toMapped(expectedOriginalLabels.get(idx)));
 
         return new GiniIndex(mappedLabels, classMapping.size());
     }
