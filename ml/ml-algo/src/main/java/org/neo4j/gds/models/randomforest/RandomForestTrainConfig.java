@@ -20,7 +20,6 @@
 package org.neo4j.gds.models.randomforest;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.decisiontree.DecisionTreeTrainConfig;
 import org.neo4j.gds.models.TrainerConfig;
@@ -31,7 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Configuration
-public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, RandomSeedConfig, TrainerConfig {
+public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, TrainerConfig {
 
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     Optional<Double> maxFeaturesRatio();

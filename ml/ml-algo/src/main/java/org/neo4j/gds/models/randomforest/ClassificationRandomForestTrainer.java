@@ -56,16 +56,15 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
         int concurrency,
         LocalIdMap classIdMap,
         RandomForestTrainConfig config,
-        boolean computeOutOfBagError
+        boolean computeOutOfBagError,
+        Optional<Long> randomSeed
     ) {
         this.lossFunction = lossFunction;
         this.classIdMap = classIdMap;
         this.config = config;
         this.concurrency = concurrency;
         this.computeOutOfBagError = computeOutOfBagError;
-        this.random = config.randomSeed()
-            .map(SplittableRandom::new)
-            .orElseGet(SplittableRandom::new);
+        this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
     }
 
     public ClassificationRandomForestPredictor train(

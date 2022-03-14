@@ -158,7 +158,6 @@ class LinkPredictionTrainTest {
                     .builder()
                     .maxDepth(3)
                     .minSplitSize(2)
-                    .randomSeed(42L)
                     .maxFeaturesRatio(1.0D)
                     .numberOfDecisionTrees(1)
                     .build()),
@@ -374,7 +373,6 @@ class LinkPredictionTrainTest {
                 .maxDepth(1)
                 .numberOfDecisionTrees(1)
                 .maxFeaturesRatio(0.1)
-                .randomSeed(42L) // FIXME: Remove me!
                 .build()
         ));
 

@@ -107,11 +107,11 @@ class ClassificationRandomForestTest {
                 .builder()
                 .maxDepth(1)
                 .minSplitSize(2)
-                .randomSeed(42L)
                 .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(1)
                 .build(),
-            false
+            false,
+            Optional.of(42L)
         );
 
         var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -137,12 +137,12 @@ class ClassificationRandomForestTest {
                 .builder()
                 .maxDepth(2)
                 .minSplitSize(2)
-                .randomSeed(Optional.of(1337L))
                 .numberOfSamplesRatio(0.5D)
                 .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(20)
                 .build(),
-            false
+            false,
+            Optional.of(1337L)
         );
 
         var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -168,11 +168,11 @@ class ClassificationRandomForestTest {
                 .builder()
                 .maxDepth(2)
                 .minSplitSize(2)
-                .randomSeed(Optional.of(1337L))
                 .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(20)
                 .build(),
-            true
+            true,
+            Optional.of(1337L)
         );
 
         randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -191,12 +191,12 @@ class ClassificationRandomForestTest {
                 .builder()
                 .maxDepth(2)
                 .minSplitSize(2)
-                .randomSeed(Optional.of(1337L))
                 .numberOfSamplesRatio(0.5D)
                 .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(5)
                 .build(),
-            false
+            false,
+            Optional.of(1337L)
         );
 
         HugeLongArray mutableTrainSet = HugeLongArray.newArray(NUM_SAMPLES / 2);
