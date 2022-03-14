@@ -208,9 +208,6 @@
             <d:tocentry linkend="algorithms-knn">
                 <?dbhtml filename="algorithms/knn/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="alpha-algorithms-similarity-jaccard">
-                <?dbhtml filename="alpha-algorithms/jaccard/index.html"?>
-            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="algorithms-path-finding">
