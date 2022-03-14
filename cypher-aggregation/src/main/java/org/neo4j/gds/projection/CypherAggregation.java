@@ -356,7 +356,9 @@ public final class CypherAggregation extends BaseProc {
         @ReturnType(AggregationResult.class)
         public @Nullable Map<String, Object> result() {
 
-            if (this.graphName == null) {
+            var graphName = this.graphName;
+
+            if (graphName == null) {
                 // Nothing aggregated
                 return null;
             }
@@ -367,7 +369,7 @@ public final class CypherAggregation extends BaseProc {
 
             // in case something else has written something with the same graph name
             // validate again before doing the heavier graph building
-            validateGraphName(this.graphName);
+            validateGraphName(graphName);
 
             var graphStoreBuilder = new GraphStoreBuilder()
                 .concurrency(4)
@@ -379,7 +381,7 @@ public final class CypherAggregation extends BaseProc {
             var graphStore = graphStoreBuilder.build();
 
             var config = ImmutableGraphProjectFromCypherAggregation.builder()
-                .graphName(this.graphName)
+                .graphName(graphName)
                 .username(this.username)
                 .build();
 
@@ -388,7 +390,7 @@ public final class CypherAggregation extends BaseProc {
             var projectMillis = this.progressTimer.stop().getDuration();
 
             this.result = Map.of(
-                "graphName", this.graphName,
+                "graphName", graphName,
                 "nodeCount", graphStore.nodeCount(),
                 "relationshipCount", graphStore.relationshipCount(),
                 "projectMillis", projectMillis
