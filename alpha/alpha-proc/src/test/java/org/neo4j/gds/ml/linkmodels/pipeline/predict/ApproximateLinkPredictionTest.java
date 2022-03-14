@@ -96,7 +96,6 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
     void shouldPredictWithTopK(int topK, long expectedLinksConsidered, int ranIterations) {
         var modelData = ImmutableLogisticRegressionData.of(
             LinkPredictionTrain.makeClassIdMap(),
-            WEIGHTS.length,
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
@@ -161,7 +160,6 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
         var modelData = ImmutableLogisticRegressionData.of(
             LinkPredictionTrain.makeClassIdMap(),
-            weights.length,
             new Weights<>(new Matrix(
                 weights,
                 1,
@@ -214,7 +212,6 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
         var modelData = ImmutableLogisticRegressionData.of(
             LinkPredictionTrain.makeClassIdMap(),
-            WEIGHTS.length,
             new Weights<>(
                 new Matrix(
                     WEIGHTS,

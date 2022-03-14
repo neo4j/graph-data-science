@@ -24,6 +24,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -42,6 +43,11 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
     @Value.Derived
     default TrainingMethod trainerMethod() {
         return TrainingMethod.LogisticRegression;
+    }
+
+    @Value.Derived
+    default int featureDimension() {
+        return weights().dimension(Dimensions.COLUMNS_INDEX);
     }
 
     static LogisticRegressionData standard(int featureCount, boolean useBias, LocalIdMap classIdMap) {
@@ -65,7 +71,6 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
             .weights(weights)
             .classIdMap(classIdMap)
             .bias(bias)
-            .featureDimension(featureCount)
             .build();
     }
 

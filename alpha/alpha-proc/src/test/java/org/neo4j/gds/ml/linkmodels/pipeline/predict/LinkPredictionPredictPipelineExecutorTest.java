@@ -132,7 +132,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var modelData = ImmutableLogisticRegressionData.of(
                 LinkPredictionTrain.makeClassIdMap(),
-                3,
                 new Weights<>(
                     new Matrix(
                         new double[]{2.0, 1.0, -3.0},
@@ -226,7 +225,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var modelData = ImmutableLogisticRegressionData.of(
                 LinkPredictionTrain.makeClassIdMap(),
-                4,
                 new Weights<>(
                     new Matrix(
                         new double[]{2.0, 1.0, -3.0, -1.0},
@@ -275,7 +273,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var modelData = ImmutableLogisticRegressionData.of(
                 LinkPredictionTrain.makeClassIdMap(),
-                4,
                 new Weights<>(
                     new Matrix(
                         new double[]{2.0, 1.0, -3.0, -1.0},

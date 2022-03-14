@@ -94,7 +94,6 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
 
         var modelData = ImmutableLogisticRegressionData.of(
             LinkPredictionTrain.makeClassIdMap(),
-            weights.length,
             new Weights<>(new Matrix(
                 weights,
                 1,

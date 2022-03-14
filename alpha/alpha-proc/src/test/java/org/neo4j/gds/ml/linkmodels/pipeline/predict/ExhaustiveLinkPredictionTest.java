@@ -95,7 +95,6 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
 
         var modelData = ImmutableLogisticRegressionData.of(
             LinkPredictionTrain.makeClassIdMap(),
-            WEIGHTS.length,
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
@@ -155,7 +154,6 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
 
         var modelData = ImmutableLogisticRegressionData.of(
             LinkPredictionTrain.makeClassIdMap(),
-            WEIGHTS.length,
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
