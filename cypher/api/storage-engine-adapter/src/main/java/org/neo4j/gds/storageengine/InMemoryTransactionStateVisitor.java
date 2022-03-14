@@ -56,8 +56,14 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
     ) {
         visitAddedOrChangedNodeProperties(nodeId, added, changed);
         visitDeletedNodeProperties(nodeId, removed);
-        // when removing node properties we need to update the token holders and the
-        // property cache. This also need to happen when we remove properties via the graph store
+    }
+
+    public void removeNodeProperty(String propertyKey) {
+        var propertyToken = tokenHolders.propertyKeyTokens().getIdByName(propertyKey);
+        var usedByOtherLabels = graphStore.nodeLabels().stream().anyMatch(label -> graphStore.hasNodeProperty(label, propertyKey));
+        if (!usedByOtherLabels) {
+            this.nodePropertiesCache.remove(propertyToken);
+        }
     }
 
     private void visitAddedOrChangedNodeProperties(long nodeId, Iterable<StorageProperty> added, Iterable<StorageProperty> changed) {

@@ -24,11 +24,14 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.token.TokenHolders;
 
+import java.util.function.Consumer;
+
 public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpdater {
 
     private final CypherIdMap cypherIdMap;
 
     private RelationshipIds relationshipIds;
+    private Consumer<String> propertyRemovalCallback;
 
     public CypherGraphStore(GraphStore graphStore) {
         super(graphStore);
@@ -37,6 +40,10 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
 
     public void initialize(TokenHolders tokenHolders) {
         this.relationshipIds = RelationshipIds.fromGraphStore(innerGraphStore(), tokenHolders);
+    }
+
+    public void registerPropertyRemovalCallback(Consumer<String> propertyRemovalCallback) {
+        this.propertyRemovalCallback = propertyRemovalCallback;
     }
 
     @Override
@@ -52,6 +59,12 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
     @Override
     public void addLabelToNode(long nodeId, NodeLabel nodeLabel) {
         this.cypherIdMap.addLabelToNode(nodeId, nodeLabel);
+    }
+
+    @Override
+    public void removeNodeProperty(NodeLabel nodeLabel, String propertyKey) {
+        super.removeNodeProperty(nodeLabel, propertyKey);
+        propertyRemovalCallback.accept(propertyKey);
     }
 
     public RelationshipIds relationshipIds() {

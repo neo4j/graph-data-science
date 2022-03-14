@@ -26,6 +26,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
 import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.internal.diagnostics.DiagnosticsLogger;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
@@ -51,7 +52,7 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders,
         BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn,
-        BiFunction<CypherGraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
+        BiFunction<CypherGraphStore, TokenHolders, InMemoryTransactionStateVisitor> txStateVisitorFn,
         MetadataProvider metadataProvider,
         Supplier<CommandCreationContext> commandCreationContextSupplier,
         TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn

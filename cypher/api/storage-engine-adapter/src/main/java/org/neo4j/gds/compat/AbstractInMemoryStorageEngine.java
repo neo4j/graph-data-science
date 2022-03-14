@@ -29,6 +29,7 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
+import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.KernelVersion;
@@ -50,7 +51,6 @@ import org.neo4j.storageengine.api.StoreFileMetadata;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.TransactionApplicationMode;
 import org.neo4j.storageengine.api.txstate.ReadableTransactionState;
-import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
 
@@ -66,7 +66,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     private final TokenHolders tokenHolders;
-    private final TxStateVisitor txStateVisitor;
+    private final InMemoryTransactionStateVisitor txStateVisitor;
     private final Supplier<CommandCreationContext> commandCreationContextSupplier;
     private final TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
     private final CountsStore countsStore;
@@ -77,7 +77,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders,
         BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn,
-        BiFunction<CypherGraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
+        BiFunction<CypherGraphStore, TokenHolders, InMemoryTransactionStateVisitor> txStateVisitorFn,
         MetadataProvider metadataProvider,
         Supplier<CommandCreationContext> commandCreationContextSupplier,
         TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
@@ -90,6 +90,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         this.storageReaderFn = storageReaderFn;
         initializeTokenHolders();
         graphStore.initialize(tokenHolders);
+        graphStore.registerPropertyRemovalCallback(txStateVisitor::removeNodeProperty);
         this.countsStore = countsStoreFn.apply(graphStore, tokenHolders);
         this.metadataProvider = metadataProvider;
     }

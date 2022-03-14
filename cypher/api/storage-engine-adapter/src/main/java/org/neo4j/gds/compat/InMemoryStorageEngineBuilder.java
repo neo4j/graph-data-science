@@ -23,11 +23,11 @@ import org.neo4j.counts.CountsStore;
 import org.neo4j.function.TriFunction;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageReader;
-import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
 
 import java.util.function.BiFunction;
@@ -40,7 +40,7 @@ public abstract class InMemoryStorageEngineBuilder<T extends AbstractInMemorySto
     protected final MetadataProvider metadataProvider;
 
     protected BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn;
-    protected BiFunction<CypherGraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
+    protected BiFunction<CypherGraphStore, TokenHolders, InMemoryTransactionStateVisitor> txStateVisitorFn;
     protected Supplier<CommandCreationContext> commandCreationContextSupplier;
     protected TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
 
@@ -59,7 +59,7 @@ public abstract class InMemoryStorageEngineBuilder<T extends AbstractInMemorySto
         return this;
     }
 
-    public InMemoryStorageEngineBuilder<T> withTxStateVisitorFn(BiFunction<CypherGraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn) {
+    public InMemoryStorageEngineBuilder<T> withTxStateVisitorFn(BiFunction<CypherGraphStore, TokenHolders, InMemoryTransactionStateVisitor> txStateVisitorFn) {
         this.txStateVisitorFn = txStateVisitorFn;
         return this;
     }
