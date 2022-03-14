@@ -33,7 +33,7 @@ public interface RandomForestData extends Classifier.ClassifierData {
     List<DecisionTreePredict<Long>> decisionTrees();
 
     @Value.Derived
-    default TrainingMethod trainerMethodName() {
+    default TrainingMethod trainerMethod() {
         return TrainingMethod.RandomForest;
     }
 }

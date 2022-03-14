@@ -40,7 +40,7 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
     Optional<Weights<Vector>> bias();
 
     @Value.Derived
-    default TrainingMethod trainerMethodName() {
+    default TrainingMethod trainerMethod() {
         return TrainingMethod.LogisticRegression;
     }
 

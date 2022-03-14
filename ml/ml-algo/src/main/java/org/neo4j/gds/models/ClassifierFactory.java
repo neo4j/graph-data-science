@@ -31,7 +31,7 @@ public class ClassifierFactory {
     public static Classifier create(
         Classifier.ClassifierData classifierData
     ) {
-        switch (classifierData.trainerMethodName()) {
+        switch (classifierData.trainerMethod()) {
             case LogisticRegression:
                 return new LogisticRegressionClassifier((LogisticRegressionData) classifierData);
             case RandomForest:

@@ -36,7 +36,7 @@ public interface Classifier {
     ClassifierData data();
 
     interface ClassifierData {
-        TrainingMethod trainerMethodName();
+        TrainingMethod trainerMethod();
         LocalIdMap classIdMap();
         int featureDimension();
     }
