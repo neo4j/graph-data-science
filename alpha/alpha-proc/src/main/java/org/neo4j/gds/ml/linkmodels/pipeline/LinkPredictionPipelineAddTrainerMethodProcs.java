@@ -23,39 +23,30 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
-import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.TrainingMethod;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.models.randomforest.RandomForestTrainConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LinkPredictionPipelineConfigureParamsProc extends BaseProc {
+public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
 
-    @Procedure(name = "gds.beta.pipeline.linkPrediction.configureParams", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.linkPrediction.addLogisticRegression", mode = READ)
     @Description("Configures the parameters of the link prediction train pipeline.")
-    public Stream<PipelineInfoResult> configureParams(@Name("pipelineName") String pipelineName, @Name("parameterSpace") List<Map<String, Object>> parameterSpace) {
+    public Stream<PipelineInfoResult> configureParams(@Name("pipelineName") String pipelineName, @Name("config") Map<String, Object> config) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionPipeline.class);
 
-        List<TrainerConfig> trainConfigs = parameterSpace
-            .stream()
-            .map(CypherMapWrapper::create)
-            .map(rawConfig -> {
-                var config = new LogisticRegressionTrainConfigImpl(rawConfig);
-                validateConfig(rawConfig, config.configKeys());
-                return config;
-            })
-            .collect(Collectors.toList());
+        var lrConfig = LogisticRegressionTrainConfig.of(config);
 
-        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, trainConfigs);
+        validateConfig(CypherMapWrapper.create(config), lrConfig.configKeys());
+
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, lrConfig);
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }
@@ -68,7 +59,7 @@ public class LinkPredictionPipelineConfigureParamsProc extends BaseProc {
         var trainConfig = RandomForestTrainConfig.of(randomForestConfig);
         validateConfig(CypherMapWrapper.create(randomForestConfig), trainConfig.configKeys());
 
-        pipeline.setTrainingParameterSpace(TrainingMethod.RandomForest, List.of(trainConfig));
+        pipeline.addTrainerConfig(TrainingMethod.RandomForest, trainConfig);
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }

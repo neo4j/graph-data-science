@@ -51,7 +51,10 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep> implements ToMa
 
     public static Map<TrainingMethod, List<TrainerConfig>> defaultTrainingSpace() {
         var trainingSpace = new EnumMap<TrainingMethod, List<TrainerConfig>>(TrainingMethod.class);
-        trainingSpace.put(TrainingMethod.LogisticRegression, List.of(LogisticRegressionTrainConfig.defaultConfig()));
+        // FIXME: remove default
+        var lrSpace = new ArrayList<TrainerConfig>();
+        lrSpace.add(LogisticRegressionTrainConfig.defaultConfig());
+        trainingSpace.put(TrainingMethod.LogisticRegression, lrSpace);
         return trainingSpace;
     }
 
@@ -161,6 +164,11 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep> implements ToMa
 
     public void setTrainingParameterSpace(TrainingMethod method, List<TrainerConfig> trainingConfigs) {
         this.trainingParameterSpace.put(method, trainingConfigs);
+    }
+
+    public void addTrainerConfig(TrainingMethod method, TrainerConfig trainingConfigs) {
+        this.trainingParameterSpace.putIfAbsent(method, new ArrayList<>());
+        this.trainingParameterSpace.get(method).add(trainingConfigs);
     }
 
     private void validateUniqueMutateProperty(NodePropertyStep step) {

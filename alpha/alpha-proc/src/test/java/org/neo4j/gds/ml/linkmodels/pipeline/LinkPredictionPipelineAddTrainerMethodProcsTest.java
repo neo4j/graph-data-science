@@ -33,11 +33,11 @@ import java.util.Map;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcsTest.DEFAULT_SPLIT_CONFIG;
 
-class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
+class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(LinkPredictionPipelineConfigureParamsProc.class, LinkPredictionPipelineCreateProc.class);
+        registerProcedures(LinkPredictionPipelineAddTrainerMethodProcs.class, LinkPredictionPipelineCreateProc.class);
 
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('myPipeline')");
     }
@@ -50,7 +50,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void shouldSetParams() {
         assertCypherResult(
-            "CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 42}])",
+            "CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {minEpochs: 42})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
@@ -72,10 +72,10 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
 
     @Test
     void shouldOnlyKeepLastOverride() {
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 42}])");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {minEpochs: 42})");
 
         assertCypherResult(
-            "CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 4}])",
+            "CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {minEpochs: 4})",
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
@@ -124,7 +124,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void failOnInvalidParameterValues() {
         assertError(
-            "CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 0.5, batchSize: 0.51}])",
+            "CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {minEpochs: 0.5, batchSize: 0.51})",
             "Multiple errors in configuration arguments:\n" +
             "\t\t\t\tThe value of `batchSize` must be of type `Integer` but was `Double`.\n" +
             "\t\t\t\tThe value of `minEpochs` must be of type `Integer` but was `Double`."
@@ -134,7 +134,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void failOnInvalidKeys() {
         assertError(
-            "CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{invalidKey: 42, penaltE: -0.51}])",
+            "CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {invalidKey: 42, penaltE: -0.51])",
             "Unexpected configuration keys: invalidKey, penaltE (Did you mean one of [penalty, patience]?)"
         );
     }

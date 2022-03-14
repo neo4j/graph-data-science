@@ -24,7 +24,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcs;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProc;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddTrainerMethodProcs;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc;
@@ -55,7 +55,7 @@ class LinkPredictionPipelineDocTest extends DocTestBase {
             LinkPredictionPipelineTrainProc.class,
             LinkPredictionPipelineAddStepProcs.class,
             LinkPredictionPipelineConfigureSplitProc.class,
-            LinkPredictionPipelineConfigureParamsProc.class,
+            LinkPredictionPipelineAddTrainerMethodProcs.class,
             GraphStreamRelationshipPropertiesProc.class,
             GraphProjectProc.class
         );

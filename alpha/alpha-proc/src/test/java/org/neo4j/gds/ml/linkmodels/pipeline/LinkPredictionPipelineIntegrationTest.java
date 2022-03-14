@@ -110,7 +110,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
             LinkPredictionPipelineTrainProc.class,
             LinkPredictionPipelineCreateProc.class,
             LinkPredictionPipelineAddStepProcs.class,
-            LinkPredictionPipelineConfigureParamsProc.class,
+            LinkPredictionPipelineAddTrainerMethodProcs.class,
             LinkPredictionPipelineConfigureSplitProc.class
         );
 
@@ -141,7 +141,8 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('pipe', [{penalty: 1}, {penalty: 2}] )");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {penalty: 1})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {penalty: 2})");
 
         var modelName = "trainedModel";
 
