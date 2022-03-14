@@ -23,41 +23,31 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
-import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.TrainingMethod;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeClassificationPipelineConfigureParamsProc extends BaseProc {
+public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
 
-    @Procedure(name = "gds.beta.pipeline.nodeClassification.configureParams", mode = READ)
+    @Procedure(name = "gds.beta.pipeline.nodeClassification.addLogisticRegression", mode = READ)
     @Description("Configures the parameters of the node classification train pipeline.")
     public Stream<PipelineInfoResult> configureParams(
         @Name("pipelineName") String pipelineName,
-        @Name("parameterSpace") List<Map<String, Object>> parameterSpace
+        @Name(value = "parameterSpace", defaultValue = "{}") Map<String, Object> config
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationPipeline.class);
 
-        List<TrainerConfig> trainConfigs = parameterSpace
-            .stream()
-            .map(CypherMapWrapper::create)
-            .map(rawConfig -> {
-                var config = new LogisticRegressionTrainConfigImpl(rawConfig);
-                validateConfig(rawConfig, config.configKeys());
-                return config;
-            })
-            .collect(Collectors.toList());
+        var lrConfig = LogisticRegressionTrainConfig.of(config);
+        validateConfig(CypherMapWrapper.create(config), lrConfig.configKeys());
 
-        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, trainConfigs);
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, lrConfig);
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }

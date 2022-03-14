@@ -191,6 +191,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var pipeline = new NodeClassificationPipeline();
+            pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
 
             NodeClassificationTrainConfig actualConfig = NodeClassificationTrainPipelineExecutor.innerConfig(pipeline, config);
 
@@ -220,6 +221,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("array"));
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
 
         var metricSpecification = MetricSpecification.parse("F1(class=1)");
 
@@ -316,6 +318,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             Map.of("mutateProperty", "myNewProp", "threshold", 0.42F, "relationshipWeightProperty", "weight")
         ));
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
 
         var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
             .pipeline(PIPELINE_NAME)

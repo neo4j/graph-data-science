@@ -105,7 +105,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
             NodeClassificationPipelineCreateProc.class,
             NodeClassificationPipelineAddStepProcs.class,
             NodeClassificationPipelineConfigureSplitProc.class,
-            NodeClassificationPipelineConfigureParamsProc.class,
+            NodeClassificationPipelineAddTrainerMethodProcs.class,
             NodeClassificationPipelineTrainProc.class,
             NodeClassificationPipelineStreamProc.class,
             WccMutateProc.class,
@@ -140,10 +140,8 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
                  "  testFraction: 0.2, " +
                  "  validationFolds: 5" +
                  "})");
-        runQuery("CALL gds.beta.pipeline.nodeClassification.configureParams('p', [" +
-                 "    {penalty: 0.0625, maxEpochs: 1000}, " +
-                 "    {penalty: 4.0, maxEpochs: 100}" +
-                 "  ])");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('p', {penalty: 0.0625, maxEpochs: 1000})");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('p', {penalty: 4.0, maxEpochs: 100})");
 
         runQuery("CALL gds.beta.pipeline.nodeClassification.train('g', {" +
                  " nodeLabels: ['N']," +
@@ -203,6 +201,8 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
 
         // let's try both list and single string syntaxes
         runQuery("CALL gds.beta.pipeline.nodeClassification.selectFeatures('p', 'embedding')");
+
+        runQuery("CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('p')");
 
         runQuery("CALL gds.beta.pipeline.nodeClassification.train('g', {" +
                  " nodeLabels: ['N']," +

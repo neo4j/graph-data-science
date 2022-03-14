@@ -32,11 +32,11 @@ import java.util.Map;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG;
 
 
-class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
+class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(NodeClassificationPipelineConfigureParamsProc.class, NodeClassificationPipelineCreateProc.class);
+        registerProcedures(NodeClassificationPipelineAddTrainerMethodProcs.class, NodeClassificationPipelineCreateProc.class);
 
         runQuery("CALL gds.beta.pipeline.nodeClassification.create('myPipeline')");
     }
@@ -49,47 +49,64 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void shouldSetParams() {
         assertCypherResult(
-            "CALL gds.beta.pipeline.nodeClassification.configureParams('myPipeline', [{minEpochs: 42}])",
+            "CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('myPipeline', {minEpochs: 42})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
-                "parameterSpace", Map.of(TrainingMethod.LogisticRegression.name(), List.of(Map.of(
-                    "useBiasFeature", true,
-                    "maxEpochs", 100,
-                    "minEpochs", 42,
-                    "methodName", TrainingMethod.LogisticRegression.name(),
-                    "penalty", 0.0,
-                    "patience", 1,
-                    "batchSize", 100,
-                    "tolerance", 0.001
-                )))
+                "parameterSpace", Map.of(
+                    TrainingMethod.RandomForest.name(), List.of(),
+                    TrainingMethod.LogisticRegression.name(), List.of(Map.of(
+                            "useBiasFeature", true,
+                            "maxEpochs", 100,
+                            "minEpochs", 42,
+                            "methodName", TrainingMethod.LogisticRegression.name(),
+                            "penalty", 0.0,
+                            "patience", 1,
+                            "batchSize", 100,
+                            "tolerance", 0.001
+                        ))
+                )
             ))
         );
     }
 
     @Test
     void shouldOnlyKeepLastOverride() {
-        runQuery("CALL gds.beta.pipeline.nodeClassification.configureParams('myPipeline', [{minEpochs: 42}])");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('myPipeline', {minEpochs: 42})");
 
         assertCypherResult(
-            "CALL gds.beta.pipeline.nodeClassification.configureParams('myPipeline', [{minEpochs: 4}])",
+            "CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('myPipeline', {minEpochs: 4})",
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
-                "parameterSpace", Map.of(TrainingMethod.LogisticRegression.name(), List.of(Map.of(
-                    "useBiasFeature", true,
-                    "maxEpochs", 100,
-                    "minEpochs", 4,
-                    "methodName", TrainingMethod.LogisticRegression.name(),
-                    "penalty", 0.0,
-                    "patience", 1,
-                    "batchSize", 100,
-                    "tolerance", 0.001
-                )))
+                "parameterSpace", Map.of(
+                    TrainingMethod.RandomForest.name(), List.of(),
+                    TrainingMethod.LogisticRegression.name(), List.of(
+                        Map.of(
+                            "maxEpochs", 100,
+                            "minEpochs", 42,
+                            "penalty", 0.0,
+                            "patience", 1,
+                            "methodName", TrainingMethod.LogisticRegression.name(),
+                            "batchSize", 100,
+                            "tolerance", 0.001,
+                            "useBiasFeature", true
+                        ),
+                        Map.of(
+                            "maxEpochs", 100,
+                            "minEpochs", 4,
+                            "penalty", 0.0,
+                            "patience", 1,
+                            "methodName", TrainingMethod.LogisticRegression.name(),
+                            "batchSize", 100,
+                            "tolerance", 0.001,
+                            "useBiasFeature", true
+                        )
+                    ))
             ))
         );
     }
@@ -97,7 +114,7 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void failOnInvalidParameterValues() {
         assertError(
-            "CALL gds.beta.pipeline.nodeClassification.configureParams('myPipeline', [{minEpochs: 0.5, batchSize: 0.51}])",
+            "CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('myPipeline', {minEpochs: 0.5, batchSize: 0.51})",
             "Multiple errors in configuration arguments:\n" +
             "\t\t\t\tThe value of `batchSize` must be of type `Integer` but was `Double`.\n" +
             "\t\t\t\tThe value of `minEpochs` must be of type `Integer` but was `Double`."
@@ -107,7 +124,7 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void failOnInvalidKeys() {
         assertError(
-            "CALL gds.beta.pipeline.nodeClassification.configureParams('myPipeline', [{invalidKey: 42, penaltE: -0.51}])",
+            "CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('myPipeline', {invalidKey: 42, penaltE: -0.51})",
             "Unexpected configuration keys: invalidKey, penaltE (Did you mean one of [penalty, patience]?)"
         );
     }
