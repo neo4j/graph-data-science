@@ -93,14 +93,14 @@ class LogisticRegressionClassifierTest {
         classIdMap.toMapped(0L);
         classIdMap.toMapped(1L);
         var featureCount = 4;
-        var classCount = classIdMap.size();
         var modelData = ImmutableLogisticRegressionData.of(
+            classIdMap,
+            featureCount,
             new Weights<>(new Matrix(new double[]{
                 -0.5, -0.6, -0.7, -0.8,
                 0.4, -1.2, -0.4, 0.0
             }, 2, featureCount)),
-            Weights.ofVector(-2.1, 0.2),
-            classIdMap
+            Weights.ofVector(-2.1, 0.2)
         );
 
         var classifier = new LogisticRegressionClassifier(modelData);

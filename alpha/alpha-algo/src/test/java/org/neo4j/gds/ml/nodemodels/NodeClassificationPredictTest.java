@@ -107,6 +107,7 @@ class NodeClassificationPredictTest {
                 -3.39978931
             ))
             .classIdMap(classIdMap)
+            .featureDimension(5)
             .build();
 
         var result = new NodeClassificationPredict(
@@ -163,6 +164,7 @@ class NodeClassificationPredictTest {
             }, 1, 2)))
             .bias(Weights.ofVector(0.93216654))
             .classIdMap(classIdMap)
+            .featureDimension(2)
             .build();
 
         var result = new NodeClassificationPredict(
@@ -227,6 +229,7 @@ class NodeClassificationPredictTest {
                     0.93216654
                 ))
                 .classIdMap(classIdMap)
+                .featureDimension(2)
                 .build(),
             ImmutableNodeClassificationTrainConfig
                 .builder()
