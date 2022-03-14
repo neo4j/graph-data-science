@@ -106,7 +106,7 @@ CALL gds.beta.pipeline.linkPrediction.create('pipe')
 | name     | nodePropertySteps | featureSteps | splitConfig | parameterSpace
 | "pipe"   | []                | []
            | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
-           | {LogisticRegression=[{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
+           | {RandomForest=[], LogisticRegression=[]}
 |===
 --
 
@@ -179,7 +179,7 @@ CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
 | "pipe"   | [{name=gds.fastRP.mutate, config={randomSeed=42, embeddingDimension=256, mutateProperty=embedding}}]
 | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
-| {LogisticRegression=[{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
+| {RandomForest=[], LogisticRegression=[]}
 |===
 
 The pipeline will now execute the <<algorithms-embeddings-fastrp,fastRP algorithm>> in mutate mode both before <<algorithms-ml-linkprediction-pipelines-train, training>> a model, and when the trained model is <<algorithms-link-prediction-pipelines-predict, applied for prediction>>.
@@ -457,7 +457,7 @@ YIELD parameterSpace
 [opts="header",cols="1"]
 |===
 | parameterSpace
-| {LogisticRegression=[{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}, {useBiasFeature=true, maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
+| {RandomForest=[], LogisticRegression=[{useBiasFeature=true, maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
 |===
 
 The `parameterSpace` in the pipeline now contains the three different model parameters, expanded with the default values.

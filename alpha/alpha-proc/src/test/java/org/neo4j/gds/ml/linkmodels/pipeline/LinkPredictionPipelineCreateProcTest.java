@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcsTest.DEFAULT_SPLIT_CONFIG;
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_CONFIG;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_SPACE;
 
 class LinkPredictionPipelineCreateProcTest extends BaseProcTest {
 
@@ -52,7 +52,7 @@ class LinkPredictionPipelineCreateProcTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
-                "parameterSpace", DEFAULT_PARAM_CONFIG
+                "parameterSpace", DEFAULT_PARAM_SPACE
             ))
         );
     }

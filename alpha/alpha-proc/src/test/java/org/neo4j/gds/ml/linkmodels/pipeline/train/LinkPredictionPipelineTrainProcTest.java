@@ -147,8 +147,8 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe1')");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe1', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe1', 'L2', {nodeProperties: ['pr']})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('pipe1', {penalty: 1})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('pipe1', {penalty: 2})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe1', {penalty: 1})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe1', {penalty: 2})");
 
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.train(" +
@@ -257,7 +257,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe5', 'L2', {nodeProperties: ['pr']})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe5', {trainFraction: 0.45, testFraction: 0.45})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe5', {penalty: 1})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('pipe5', {penalty: 2})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe5', {penalty: 2})");
 
         String trainQuery =
             "CALL gds.beta.pipeline.linkPrediction.train(" +
@@ -335,6 +335,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     void estimate() {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')");
 
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.train.estimate(" +

@@ -162,7 +162,7 @@ class LinkPredictionTrainTest {
                     .featureBaggingRatio(1.0D)
                     .numberOfDecisionTrees(1)
                     .build()),
-                MemoryRange.of(83_656, 2_486_616)
+                MemoryRange.of(26_032, 81_0032)
             )
         );
     }
@@ -238,6 +238,8 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionPipeline();
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
+
         var graphDim = GraphDimensions.of(nodeCount, relationshipCount);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
@@ -266,7 +268,9 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionPipeline();
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
         pipeline.setSplitConfig(splitConfig);
+
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
@@ -329,6 +333,8 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionPipeline();
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
+
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)

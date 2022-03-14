@@ -39,7 +39,7 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.addLogisticRegression", mode = READ)
     @Description("Configures the parameters of the link prediction train pipeline.")
-    public Stream<PipelineInfoResult> configureParams(@Name("pipelineName") String pipelineName, @Name("config") Map<String, Object> config) {
+    public Stream<PipelineInfoResult> configureParams(@Name("pipelineName") String pipelineName, @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionPipeline.class);
 
         var lrConfig = LogisticRegressionTrainConfig.of(config);
@@ -53,7 +53,7 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.addRandomForest", mode = READ)
     @Description("Add random forest configuration to parameter space of the link prediction train pipeline.")
-    public Stream<PipelineInfoResult> addRandomForest(@Name("pipelineName") String pipelineName, @Name("randomForestConfig") Map<String, Object> randomForestConfig) {
+    public Stream<PipelineInfoResult> addRandomForest(@Name("pipelineName") String pipelineName, @Name(value = "config") Map<String, Object> randomForestConfig) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionPipeline.class);
 
         var trainConfig = RandomForestTrainConfig.of(randomForestConfig);

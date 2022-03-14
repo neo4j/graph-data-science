@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_CONFIG;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_SPACE;
 
 class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
 
@@ -54,7 +54,7 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
                 "splitConfig", Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 42, "trainFraction", 0.1),
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
-                "parameterSpace", DEFAULT_PARAM_CONFIG
+                "parameterSpace", DEFAULT_PARAM_SPACE
             ))
         );
     }
@@ -70,7 +70,7 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
                 "splitConfig", Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.5, "validationFolds", 3, "trainFraction", 0.1),
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
-                "parameterSpace", DEFAULT_PARAM_CONFIG
+                "parameterSpace", DEFAULT_PARAM_SPACE
             ))
         );
     }

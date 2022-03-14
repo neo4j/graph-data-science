@@ -26,10 +26,10 @@ import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.utils.TimeUtil;
 import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.TrainingMethod;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -49,15 +49,6 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep> implements ToMa
 
     protected Map<TrainingMethod, List<TrainerConfig>> trainingParameterSpace;
 
-    public static Map<TrainingMethod, List<TrainerConfig>> defaultTrainingSpace() {
-        var trainingSpace = new EnumMap<TrainingMethod, List<TrainerConfig>>(TrainingMethod.class);
-        // FIXME: remove default
-        var lrSpace = new ArrayList<TrainerConfig>();
-        lrSpace.add(LogisticRegressionTrainConfig.defaultConfig());
-        trainingSpace.put(TrainingMethod.LogisticRegression, lrSpace);
-        return trainingSpace;
-    }
-
     public static Map<String, List<Map<String, Object>>> toMapParameterSpace(Map<TrainingMethod, List<TrainerConfig>> parameterSpace) {
         return parameterSpace.entrySet().stream()
             .collect(Collectors.toMap(
@@ -71,8 +62,11 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep> implements ToMa
     protected Pipeline() {
         this.nodePropertySteps = new ArrayList<>();
         this.featureSteps = new ArrayList<>();
-        this.trainingParameterSpace = Pipeline.defaultTrainingSpace();
         this.creationTime = TimeUtil.now();
+
+        this.trainingParameterSpace = new EnumMap<>(TrainingMethod.class);
+
+        Arrays.stream(TrainingMethod.values()).forEach(method -> trainingParameterSpace.put(method, new ArrayList<>()));
     }
 
     @Override
@@ -167,7 +161,6 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep> implements ToMa
     }
 
     public void addTrainerConfig(TrainingMethod method, TrainerConfig trainingConfigs) {
-        this.trainingParameterSpace.putIfAbsent(method, new ArrayList<>());
         this.trainingParameterSpace.get(method).add(trainingConfigs);
     }
 
