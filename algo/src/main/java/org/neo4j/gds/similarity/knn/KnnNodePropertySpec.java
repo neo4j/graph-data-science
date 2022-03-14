@@ -23,7 +23,7 @@ import org.neo4j.gds.similarity.knn.metrics.SimilarityMetric;
 
 public class KnnNodePropertySpec {
     private final String propertyName;
-    private final SimilarityMetric similarityMetric;
+    private SimilarityMetric similarityMetric;
 
     public KnnNodePropertySpec(String propertyName) {
         this(propertyName, SimilarityMetric.DEFAULT);
@@ -40,5 +40,12 @@ public class KnnNodePropertySpec {
 
     public SimilarityMetric metric() {
         return similarityMetric;
+    }
+
+    // Once we are able to look up the actual default value, in the Similarity Computer,
+    // we set that value here. This allows us to include the actual metric used when returning
+    // the config to the user.
+    public void setMetric(SimilarityMetric similarityMetric) {
+        this.similarityMetric = similarityMetric;
     }
 }

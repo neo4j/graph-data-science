@@ -138,4 +138,8 @@ public final class KnnNodePropertySpecParser {
     private static String validatePropertyName(String input) {
         return validateNoWhiteCharacter(emptyToNull(input), "nodeProperties");
     }
+
+    public static Map<String, String> render(List<KnnNodePropertySpec> specs) {
+        return specs.stream().collect(Collectors.toMap(KnnNodePropertySpec::name, (spec) -> spec.metric().name()));
+    }
 }

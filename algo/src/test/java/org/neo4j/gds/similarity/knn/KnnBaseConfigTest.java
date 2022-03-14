@@ -128,4 +128,20 @@ class KnnBaseConfigTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("No valid similarity metric for user input INVALID");
     }
+
+    @Test
+    void shouldRenderNodeProperties() {
+        var userInput = CypherMapWrapper.create(
+            Map.of(
+                "nodeProperties", List.of("property1", Map.of("property2", "PEARSON"))
+            )
+        );
+        var renderedConfig = new KnnBaseConfigImpl(userInput).toMap().get("nodeProperties");
+        assertThat(renderedConfig).isEqualTo(
+            Map.of(
+                "property1", "DEFAULT",
+                "property2", "PEARSON"
+            )
+        );
+    }
 }

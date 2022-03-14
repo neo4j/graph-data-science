@@ -54,10 +54,10 @@ public interface SimilarityComputer {
             () -> formatWithLocale("The property `%s` has not been loaded", propertyName)
         );
 
-        var similarityMetric = knnNodePropertySpec.metric() == SimilarityMetric.DEFAULT
-            ? SimilarityMetric.defaultMetricForType(nodeProperties.valueType())
-            : knnNodePropertySpec.metric();
-        return ofProperty(nodeProperties, propertyName, similarityMetric);
+        if (knnNodePropertySpec.metric() == SimilarityMetric.DEFAULT) {
+            knnNodePropertySpec.setMetric(SimilarityMetric.defaultMetricForType(nodeProperties.valueType()));
+        }
+        return ofProperty(nodeProperties, propertyName, knnNodePropertySpec.metric());
     }
 
     static SimilarityComputer ofProperty(NodeProperties nodeProperties, String propertyName) {

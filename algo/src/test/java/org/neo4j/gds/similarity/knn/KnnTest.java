@@ -31,6 +31,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.NullPropertyMap;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -45,9 +46,11 @@ import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
+import org.neo4j.gds.similarity.knn.metrics.SimilarityMetric;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -459,6 +462,35 @@ class KnnTest {
             );
     }
 
+    @Test
+    void shouldRenderNodePropertiesWithResolvedDefaultMetrics() {
+        var userInput = CypherMapWrapper.create(
+            Map.of(
+                "nodeProperties", List.of("knn")
+            )
+        );
+        var knnConfig = new KnnBaseConfigImpl(userInput);
+        var knnContext = ImmutableKnnContext.builder().build();
+
+        // Initializing KNN will cause the default metric to be resolved
+        Knn.createWithDefaults(graph, knnConfig, knnContext);
+
+        assertThat(knnConfig.toMap().get("nodeProperties")).isEqualTo(
+            Map.of(
+                "knn", SimilarityMetric.DUMMY_DOUBLE_PROPERTY_METRIC.name()
+            )
+        );
+    }
+
+    @Test
+    void invalidRandomParameters() {
+        var configBuilder = ImmutableKnnBaseConfig.builder()
+            .nodeProperties(List.of(new KnnNodePropertySpec("dummy")))
+            .concurrency(4)
+            .randomSeed(1337L);
+        assertThrows(IllegalArgumentException.class, configBuilder::build);
+    }
+
     @Nested
     class IterationsLimitTest {
 
@@ -520,15 +552,6 @@ class KnnTest {
             assertEquals(1, result.ranIterations());
         }
 
-    }
-
-    @Test
-    void invalidRandomParameters() {
-        var configBuilder = ImmutableKnnBaseConfig.builder()
-            .nodeProperties(List.of(new KnnNodePropertySpec("dummy")))
-            .concurrency(4)
-            .randomSeed(1337L);
-        assertThrows(IllegalArgumentException.class, configBuilder::build);
     }
 
     @Nested

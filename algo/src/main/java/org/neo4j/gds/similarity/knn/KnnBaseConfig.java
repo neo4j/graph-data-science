@@ -39,6 +39,7 @@ import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteChar
 public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleThreadedRandomSeedConfig {
 
     @Configuration.ConvertWith("org.neo4j.gds.similarity.knn.KnnNodePropertySpecParser#create")
+    @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnNodePropertySpecParser#render")
     List<KnnNodePropertySpec> nodeProperties();
 
     @Value.Default
