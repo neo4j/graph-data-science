@@ -92,7 +92,7 @@ class LinkPredictionPipelineTest {
     void canSetParameterSpace() {
         var lrConfig = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
         var rfConfg = RandomForestTrainConfigImpl.builder()
-            .featureBaggingRatio(0.5)
+            .maxFeaturesRatio(0.5)
             .numberOfDecisionTrees(1)
             .minSplitSize(2)
             .maxDepth(19)
@@ -202,7 +202,7 @@ class LinkPredictionPipelineTest {
                 RandomForestTrainConfigImpl
                     .builder()
                     .maxDepth(2)
-                    .featureBaggingRatio(0.5)
+                    .maxFeaturesRatio(0.5)
                     .minSplitSize(2)
                     .numberOfDecisionTrees(1)
                     .build()

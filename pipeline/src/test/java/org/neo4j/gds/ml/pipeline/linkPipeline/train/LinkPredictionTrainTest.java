@@ -159,7 +159,7 @@ class LinkPredictionTrainTest {
                     .maxDepth(3)
                     .minSplitSize(2)
                     .randomSeed(42L)
-                    .featureBaggingRatio(1.0D)
+                    .maxFeaturesRatio(1.0D)
                     .numberOfDecisionTrees(1)
                     .build()),
                 MemoryRange.of(26_128, 810_128)
@@ -373,7 +373,7 @@ class LinkPredictionTrainTest {
                 .minSplitSize(2)
                 .maxDepth(1)
                 .numberOfDecisionTrees(1)
-                .featureBaggingRatio(0.1)
+                .maxFeaturesRatio(0.1)
                 .randomSeed(42L) // FIXME: Remove me!
                 .build()
         ));

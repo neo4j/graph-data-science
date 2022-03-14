@@ -108,7 +108,7 @@ class ClassificationRandomForestTest {
                 .maxDepth(1)
                 .minSplitSize(2)
                 .randomSeed(42L)
-                .featureBaggingRatio(1.0D)
+                .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(1)
                 .build(),
             false
@@ -139,7 +139,7 @@ class ClassificationRandomForestTest {
                 .minSplitSize(2)
                 .randomSeed(Optional.of(1337L))
                 .numberOfSamplesRatio(0.5D)
-                .featureBaggingRatio(1.0D)
+                .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(20)
                 .build(),
             false
@@ -169,7 +169,7 @@ class ClassificationRandomForestTest {
                 .maxDepth(2)
                 .minSplitSize(2)
                 .randomSeed(Optional.of(1337L))
-                .featureBaggingRatio(1.0D)
+                .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(20)
                 .build(),
             true
@@ -193,7 +193,7 @@ class ClassificationRandomForestTest {
                 .minSplitSize(2)
                 .randomSeed(Optional.of(1337L))
                 .numberOfSamplesRatio(0.5D)
-                .featureBaggingRatio(1.0D)
+                .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(5)
                 .build(),
             false

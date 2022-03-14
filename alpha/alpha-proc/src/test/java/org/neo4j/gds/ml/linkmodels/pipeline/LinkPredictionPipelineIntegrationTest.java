@@ -190,7 +190,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
         runQuery("CALL gds.alpha.pipeline.linkPrediction.addRandomForest('pipe', {" +
-                 "featureBaggingRatio: 1.0, numberOfDecisionTrees: 2, maxDepth: 5, minSplitSize: 1" +
+                 "numberOfDecisionTrees: 2, maxDepth: 5, minSplitSize: 1" +
                  "})");
 
         var modelName = "trainedModel";

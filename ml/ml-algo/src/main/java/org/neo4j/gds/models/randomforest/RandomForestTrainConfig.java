@@ -29,12 +29,13 @@ import org.neo4j.gds.models.TrainingMethod;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 @Configuration
 public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, RandomSeedConfig, TrainerConfig {
 
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
-    double featureBaggingRatio();
+    Optional<Double> maxFeaturesRatio();
 
     @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)

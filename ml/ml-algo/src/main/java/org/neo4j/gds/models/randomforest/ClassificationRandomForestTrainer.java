@@ -68,7 +68,11 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
             .orElseGet(SplittableRandom::new);
     }
 
-    public ClassificationRandomForestPredictor train(Features allFeatureVectors, HugeLongArray allLabels, ReadOnlyHugeLongArray trainSet) {
+    public ClassificationRandomForestPredictor train(
+        Features allFeatureVectors,
+        HugeLongArray allLabels,
+        ReadOnlyHugeLongArray trainSet
+    ) {
         Optional<HugeAtomicLongArray> maybePredictions = computeOutOfBagError
             ? Optional.of(HugeAtomicLongArray.newArray(classIdMap.size() * trainSet.size()))
             : Optional.empty();
@@ -155,7 +159,7 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
             var featureBagger = new FeatureBagger(
                 random,
                 allFeatureVectors.featureDimension(),
-                randomForestTrainConfig.featureBaggingRatio()
+                randomForestTrainConfig.maxFeaturesRatio().orElse(1.0D / Math.sqrt(allFeatureVectors.featureDimension()))
             );
 
             var decisionTree = new ClassificationDecisionTreeTrain<>(
