@@ -58,6 +58,11 @@ public final class FeaturesFactory {
                 });
                 return features;
             }
+
+            @Override
+            public int featureDimension() {
+                return numberOfFeatures;
+            }
         };
 
         return features;

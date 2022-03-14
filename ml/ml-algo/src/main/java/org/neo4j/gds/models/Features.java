@@ -24,4 +24,7 @@ public interface Features {
 
     double[] get(long id);
 
+    default int featureDimension() {
+        return this.get(0).length;
+    }
 }

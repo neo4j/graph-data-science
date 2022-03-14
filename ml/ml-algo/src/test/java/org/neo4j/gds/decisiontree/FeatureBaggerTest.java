@@ -29,11 +29,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FeatureBaggerTest {
 
     private static final int TOTAL_INDICES = 20;
-    private static final FeatureBagger featureBagger = new FeatureBagger(new SplittableRandom(), TOTAL_INDICES, 0.5);
+    private static final FeatureBagger FEATURE_BAGGER = new FeatureBagger(new SplittableRandom(), TOTAL_INDICES, 0.5);
 
     @Test
     void shouldSampleValidInterval() {
-        var bag = featureBagger.sample();
+        var bag = FEATURE_BAGGER.sample();
 
         for (int i : bag) {
             assertThat(i).isBetween(0, TOTAL_INDICES - 1);
@@ -43,6 +43,19 @@ class FeatureBaggerTest {
     @Test
     void shouldSampleWithoutReplacement() {
         var sampledIndices = new BitSet(TOTAL_INDICES);
+
+        var bag = FEATURE_BAGGER.sample();
+
+        for (int i : bag) {
+            assertThat(sampledIndices.get(i)).isFalse();
+            sampledIndices.set(i);
+        }
+    }
+
+    @Test
+    void shouldSampleCorrectlyForSuperHighRatio() {
+        var sampledIndices = new BitSet(TOTAL_INDICES);
+        var featureBagger = new FeatureBagger(new SplittableRandom(), TOTAL_INDICES, 0.99999);
 
         var bag = featureBagger.sample();
 

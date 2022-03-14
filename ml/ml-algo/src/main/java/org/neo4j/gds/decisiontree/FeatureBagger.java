@@ -19,47 +19,26 @@
  */
 package org.neo4j.gds.decisiontree;
 
-import java.util.Arrays;
-import java.util.LinkedList;
+import org.neo4j.gds.ml.core.samplers.IntUniformSamplerFromRange;
+
 import java.util.SplittableRandom;
 
-public class FeatureBagger {
+// NOTE: This class is not thead safe.
+public final class FeatureBagger {
 
-    private final SplittableRandom random;
+    private final IntUniformSamplerFromRange sampler;
     private final int totalNumberOfFeatures;
-    private final int[] featureBag;
+    private final int numberOfSamples;
 
     public FeatureBagger(SplittableRandom random, int totalNumberOfFeatures, double featureBaggingRatio) {
-        assert Double.compare(featureBaggingRatio, 0) != 0: "Invalid featureBaggingRatio";
+        assert Double.compare(featureBaggingRatio, 0) != 0 : "Invalid featureBaggingRatio";
 
-        this.random = random;
         this.totalNumberOfFeatures = totalNumberOfFeatures;
-        this.featureBag = new int[(int) Math.ceil(featureBaggingRatio * totalNumberOfFeatures)];
-
-        if (Double.compare(featureBaggingRatio, 1.0D) == 0) {
-            // cache everything is sampled
-            for (int i = 0; i < featureBag.length; i++) {
-                featureBag[i] = i;
-            }
-        }
+        this.numberOfSamples = (int) Math.ceil(featureBaggingRatio * totalNumberOfFeatures);
+        this.sampler = new IntUniformSamplerFromRange(random);
     }
 
-    int[] sample() {
-        if (totalNumberOfFeatures == featureBag.length) {
-            // everything is sampled
-            return featureBag;
-        }
-
-        var tmpAvailableIndices = new Integer[totalNumberOfFeatures];
-        Arrays.setAll(tmpAvailableIndices, i -> i);
-        final var availableIndices = new LinkedList<>(Arrays.asList(tmpAvailableIndices));
-
-        for (int i = 0; i < featureBag.length; i++) {
-            int j = random.nextInt(availableIndices.size());
-            featureBag[i] = (availableIndices.get(j));
-            availableIndices.remove(j);
-        }
-
-        return featureBag;
+    public int[] sample() {
+        return sampler.sample(0, totalNumberOfFeatures, totalNumberOfFeatures, numberOfSamples, i -> false);
     }
 }

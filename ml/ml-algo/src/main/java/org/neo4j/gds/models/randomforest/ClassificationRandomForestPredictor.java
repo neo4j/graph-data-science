@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.models.randomforest;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -78,7 +77,7 @@ public class ClassificationRandomForestPredictor implements Classifier {
         int[] votesPerClass = gatherTreePredictions(features);
         int numberOfTrees = data.decisionTrees().size();
 
-        double[] probabilities = new double[votesPerClass.length];
+        double[] probabilities = new double[data.classIdMap().size()];
 
         for (int classIdx = 0; classIdx < votesPerClass.length; classIdx++) {
             int voteForClass = votesPerClass[classIdx];
@@ -88,30 +87,11 @@ public class ClassificationRandomForestPredictor implements Classifier {
         return probabilities;
     }
 
-    @TestOnly
-    long predictLabel(final double[] features) {
-        final int[] predictionsPerClass = gatherTreePredictions(features);
 
-        int max = -1;
-        int maxClassIdx = 0;
-
-        for (int i = 0; i < predictionsPerClass.length; i++) {
-            var numPredictions = predictionsPerClass[i];
-
-            if (numPredictions <= max) continue;
-
-            max = numPredictions;
-            maxClassIdx = i;
-        }
-
-        return data.classIdMap().toOriginal(maxClassIdx);
-    }
-
-    private int[] gatherTreePredictions(double[] features) {
-        var decisionTrees = data.decisionTrees();
+    int[] gatherTreePredictions(double[] features) {
         var classMapping = data.classIdMap();
-
         final var predictionsPerClass = new int[classMapping.size()];
+        var decisionTrees = data.decisionTrees();
 
         for (DecisionTreePredict<Long> decisionTree : decisionTrees) {
             long predictedClass = decisionTree.predict(features);

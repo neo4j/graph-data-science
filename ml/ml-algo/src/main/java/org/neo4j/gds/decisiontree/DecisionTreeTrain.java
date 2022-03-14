@@ -31,8 +31,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
 
     private final LOSS lossFunction;
     private final Features features;
-    private final int maxDepth;
-    private final int minSize;
+    private final DecisionTreeTrainConfig config;
     private final FeatureBagger featureBagger;
 
     DecisionTreeTrain(
@@ -41,53 +40,51 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         LOSS lossFunction,
         FeatureBagger featureBagger
     ) {
-        assert features.size() > 0;
-
         this.lossFunction = lossFunction;
         this.features = features;
-        this.maxDepth = config.maxDepth();
-        this.minSize = config.minSplitSize();
-
+        this.config = config;
         this.featureBagger = featureBagger;
     }
 
-    public DecisionTreePredict<PREDICTION> train(ReadOnlyHugeLongArray sampledFeatureVectors) {
+    public DecisionTreePredict<PREDICTION> train(ReadOnlyHugeLongArray trainSetIndices) {
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
-        root = splitAndPush(stack, sampledFeatureVectors, sampledFeatureVectors.size(), 1);
+        root = splitAndPush(stack, trainSetIndices, trainSetIndices.size(), 1);
+
+        int maxDepth = config.maxDepth();
+        int minSize = config.minSplitSize();
 
         while (!stack.isEmpty()) {
             var record = stack.pop();
             var split = record.split();
 
             if (record.depth() >= maxDepth || split.sizes().left() <= minSize) {
-                record.node().leftChild = new TreeNode<>(toTerminal(split.groups().left(), split.sizes().left()));
+                record.node().setLeftChild(new TreeNode<>(toTerminal(split.groups().left(), split.sizes().left())));
             } else {
-                record.node().leftChild = splitAndPush(
+                record.node().setLeftChild(splitAndPush(
                     stack,
                     split.groups().left(),
                     split.sizes().left(),
                     record.depth() + 1
-                );
+                ));
             }
 
             if (record.depth() >= maxDepth || split.sizes().right() <= minSize) {
-                record.node().rightChild = new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right()));
+                record.node().setRightChild(new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right())));
             } else {
-                record.node().rightChild = splitAndPush(
+                record.node().setRightChild(splitAndPush(
                     stack,
                     split.groups().right(),
                     split.sizes().right(),
                     record.depth() + 1
-                );
+                ));
             }
         }
 
         return new DecisionTreePredict<>(root);
     }
 
-    // TODO comment to explain this name could be useful
     protected abstract PREDICTION toTerminal(ReadOnlyHugeLongArray group, long groupSize);
 
     private TreeNode<PREDICTION> splitAndPush(
@@ -122,7 +119,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     ) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
-        assert index >= 0 && index < features.get(0).length;
+        assert index >= 0 && index < features.featureDimension();
 
         long leftGroupSize = 0;
         long rightGroupSize = 0;

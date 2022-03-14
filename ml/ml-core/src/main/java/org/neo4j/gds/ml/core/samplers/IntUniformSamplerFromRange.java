@@ -22,42 +22,42 @@ package org.neo4j.gds.ml.core.samplers;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.SplittableRandom;
-import java.util.function.LongPredicate;
+import java.util.function.IntPredicate;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class UniformSamplerFromRange {
+public class IntUniformSamplerFromRange {
     public static final double RETRY_SAMPLING_RATIO = 0.6;
-    private final UniformSamplerWithRetries retryBasedSampler;
-    private final UniformSamplerByExclusion exclusionBasedSampler;
+    private final IntUniformSamplerWithRetries retryBasedSampler;
+    private final IntUniformSamplerByExclusion exclusionBasedSampler;
 
-    public UniformSamplerFromRange(SplittableRandom random) {
-        this.retryBasedSampler = new UniformSamplerWithRetries(random);
-        this.exclusionBasedSampler = new UniformSamplerByExclusion(random);
+    public IntUniformSamplerFromRange(SplittableRandom random) {
+        this.retryBasedSampler = new IntUniformSamplerWithRetries(random);
+        this.exclusionBasedSampler = new IntUniformSamplerByExclusion(random);
     }
 
-    public static MemoryRange memoryEstimation(long numberOfSamples) {
-        var samplerWithRetriesEstimation = UniformSamplerWithRetries.memoryEstimation(numberOfSamples);
-        var samplerByExclusionEstimation = UniformSamplerByExclusion.memoryEstimation(
+    public static MemoryRange memoryEstimation(int numberOfSamples) {
+        var samplerWithRetriesEstimation = IntUniformSamplerWithRetries.memoryEstimation(numberOfSamples);
+        var samplerByExclusionEstimation = IntUniformSamplerByExclusion.memoryEstimation(
             numberOfSamples,
             (long) Math.ceil(numberOfSamples / RETRY_SAMPLING_RATIO)
         );
 
         return samplerWithRetriesEstimation
             .add(samplerByExclusionEstimation)
-            .add(MemoryRange.of(sizeOfInstance(UniformSamplerFromRange.class)))
+            .add(MemoryRange.of(sizeOfInstance(IntUniformSamplerFromRange.class)))
             // Since only one of the samplers will be used at single point in time we can deduct the cost of one of the
             // samplers return value.
             .subtract(sizeOfLongArray(numberOfSamples));
     }
 
-    public long[] sample(
-        long inclusiveMin,
-        long exclusiveMax,
-        long lowerBoundOnValidSamplesInRange,
+    public int[] sample(
+        int inclusiveMin,
+        int exclusiveMax,
+        int lowerBoundOnValidSamplesInRange,
         int numberOfSamples,
-        LongPredicate isInvalidSample
+        IntPredicate isInvalidSample
     ) {
         // If the number of potential neighbors are close in number to how many we want to sample, we can use retries.
         // Otherwise, we use an exclusion based method to avoid a possibly large number of retries.

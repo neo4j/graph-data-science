@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.ml.core.samplers.UniformSamplerFromRange;
+import org.neo4j.gds.ml.core.samplers.LongUniformSamplerFromRange;
 
 import java.util.SplittableRandom;
 import java.util.function.LongPredicate;
@@ -29,16 +29,16 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 class UniformKnnSampler implements KnnSampler {
 
-    private final UniformSamplerFromRange uniformSamplerFromRange;
+    private final LongUniformSamplerFromRange uniformSamplerFromRange;
     private final long exclusiveMax;
 
     UniformKnnSampler(SplittableRandom random, long exclusiveMax) {
-        this.uniformSamplerFromRange = new UniformSamplerFromRange(random);
+        this.uniformSamplerFromRange = new LongUniformSamplerFromRange(random);
         this.exclusiveMax = exclusiveMax;
     }
 
     public static MemoryRange memoryEstimation(long boundedK) {
-        return UniformSamplerFromRange.memoryEstimation(boundedK)
+        return LongUniformSamplerFromRange.memoryEstimation(boundedK)
             .add(MemoryRange.of(sizeOfInstance(UniformKnnSampler.class)));
     }
 

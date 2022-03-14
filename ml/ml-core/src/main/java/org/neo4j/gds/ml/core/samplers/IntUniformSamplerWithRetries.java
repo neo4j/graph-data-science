@@ -19,29 +19,29 @@
  */
 package org.neo4j.gds.ml.core.samplers;
 
-import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.IntHashSet;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.SplittableRandom;
-import java.util.function.LongPredicate;
-import java.util.stream.LongStream;
+import java.util.function.IntPredicate;
+import java.util.stream.IntStream;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongHashSet;
 
-public class UniformSamplerWithRetries {
+public class IntUniformSamplerWithRetries {
     private final SplittableRandom rng;
-    private final LongHashSet sampledValuesCache;
+    private final IntHashSet sampledValuesCache;
 
-    public UniformSamplerWithRetries(SplittableRandom rng) {
+    public IntUniformSamplerWithRetries(SplittableRandom rng) {
         this.rng = rng;
-        this.sampledValuesCache = new LongHashSet();
+        this.sampledValuesCache = new IntHashSet();
     }
 
     public static MemoryRange memoryEstimation(long numberOfSamples) {
         return MemoryRange.of(
-            sizeOfInstance(UniformSamplerWithRetries.class) +
+            sizeOfInstance(IntUniformSamplerWithRetries.class) +
             sizeOfLongHashSet(numberOfSamples) +
             sizeOfLongArray(numberOfSamples)
         );
@@ -55,24 +55,24 @@ public class UniformSamplerWithRetries {
      *
      * @return array of {@literal >=} max(k, lowerBoundOnValidSamplesInRange) unique samples
      */
-    public long[] sample(
-        long inclusiveMin,
-        long exclusiveMax,
-        long lowerBoundOnValidSamplesInRange,
+    public int[] sample(
+        int inclusiveMin,
+        int exclusiveMax,
+        int lowerBoundOnValidSamplesInRange,
         int numberOfSamples,
-        LongPredicate isInvalidSample
+        IntPredicate isInvalidSample
     ) {
         if (numberOfSamples >= lowerBoundOnValidSamplesInRange) {
-            return LongStream.range(inclusiveMin, exclusiveMax).filter(l -> !isInvalidSample.test(l)).toArray();
+            return IntStream.range(inclusiveMin, exclusiveMax).filter(l -> !isInvalidSample.test(l)).toArray();
         }
 
-        var samples = new long[numberOfSamples];
+        var samples = new int[numberOfSamples];
         int currentNumSamples = 0;
 
         sampledValuesCache.clear();
 
         while (currentNumSamples < numberOfSamples) {
-            long sample = rng.nextLong(inclusiveMin, exclusiveMax);
+            int sample = rng.nextInt(inclusiveMin, exclusiveMax);
 
             if (isInvalidSample.test(sample)) continue;
 

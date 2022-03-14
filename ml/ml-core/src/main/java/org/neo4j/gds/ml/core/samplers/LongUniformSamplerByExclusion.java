@@ -31,26 +31,26 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArrayList;
 
-public class UniformSamplerByExclusion {
-    private final UniformSamplerWithRetries samplerWithRetries;
+public class LongUniformSamplerByExclusion {
+    private final LongUniformSamplerWithRetries samplerWithRetries;
 
-    public UniformSamplerByExclusion(SplittableRandom rng) {
-        this.samplerWithRetries = new UniformSamplerWithRetries(rng);
+    public LongUniformSamplerByExclusion(SplittableRandom rng) {
+        this.samplerWithRetries = new LongUniformSamplerWithRetries(rng);
     }
 
     public static MemoryRange memoryEstimation(long numberOfSamples, long maxLowerBoundOnValidSamples) {
         var samplerWithRetriesEstimation =
-            UniformSamplerWithRetries.memoryEstimation(Math.min(
+            LongUniformSamplerWithRetries.memoryEstimation(Math.min(
             numberOfSamples,
             maxLowerBoundOnValidSamples - numberOfSamples
-        )).union(UniformSamplerWithRetries.memoryEstimation(0));
+        )).union(LongUniformSamplerWithRetries.memoryEstimation(0));
 
         return samplerWithRetriesEstimation.add(
             MemoryRange.of(
-                sizeOfInstance(UniformSamplerByExclusion.class) +
+                sizeOfInstance(LongUniformSamplerByExclusion.class) +
                 sizeOfLongArray(numberOfSamples) +
                 sizeOfLongArrayList(0),
-                sizeOfInstance(UniformSamplerByExclusion.class) +
+                sizeOfInstance(LongUniformSamplerByExclusion.class) +
                 sizeOfLongArray(numberOfSamples) +
                 sizeOfLongArrayList(maxLowerBoundOnValidSamples)
             )

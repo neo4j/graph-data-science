@@ -37,7 +37,8 @@ public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, Random
     double featureBaggingRatio();
 
     @Value.Default
-    @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
+    @Configuration.DoubleRange(min = 0, max = 1)
+    // A value of 0 means "sampling off": Do not sample, rather use all training examples given.
     default double numberOfSamplesRatio() {
         return 1;
     }

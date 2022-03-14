@@ -75,6 +75,27 @@ class ClassificationRandomForestTest {
         giniIndexLoss = new GiniIndex(allLabels, CLASS_MAPPING);
     }
 
+    long predictLabel(
+        final double[] features,
+        ClassificationRandomForestPredictor randomForestPredictor
+    ) {
+        final int[] predictionsPerClass = randomForestPredictor.gatherTreePredictions(features);
+
+        int max = -1;
+        int maxClassIdx = 0;
+
+        for (int i = 0; i < predictionsPerClass.length; i++) {
+            var numPredictions = predictionsPerClass[i];
+
+            if (numPredictions <= max) continue;
+
+            max = numPredictions;
+            maxClassIdx = i;
+        }
+
+        return ClassificationRandomForestTest.CLASS_MAPPING.toOriginal(maxClassIdx);
+    }
+
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void usingOneTree(int concurrency) {
@@ -101,7 +122,7 @@ class ClassificationRandomForestTest {
             IllegalAccessError.class,
             randomForestTrainer::outOfBagError
         );
-        assertThat(randomForestPredictor.predictLabel(featureVector)).isEqualTo(42);
+        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(42);
         assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.0, 1.0);
     }
 
@@ -132,8 +153,8 @@ class ClassificationRandomForestTest {
             IllegalAccessError.class,
             randomForestTrainer::outOfBagError
         );
-        assertThat(randomForestPredictor.predictLabel(featureVector)).isEqualTo(42);
-        assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.45, 0.55);
+        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(42);
+        assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.4, 0.6);
     }
 
     @ParameterizedTest
@@ -191,6 +212,6 @@ class ClassificationRandomForestTest {
             IllegalAccessError.class,
             randomForestTrainer::outOfBagError
         );
-        assertThat(randomForestPredictor.predictLabel(featureVector)).isEqualTo(1337);
+        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(1337);
     }
 }

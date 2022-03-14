@@ -80,7 +80,7 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
 
         int numberOfDecisionTrees = config.numberOfDecisionTrees();
         var tasks = IntStream.range(0, numberOfDecisionTrees).mapToObj(unused ->
-            new DecisionTreeTrainer<>(
+            new TrainDecisionTreeTask<>(
                 maybePredictions,
                 decisionTreeTrainConfig,
                 config,
@@ -102,16 +102,16 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
             predictions
         ));
 
-        var decisionTrees = tasks.stream().map(DecisionTreeTrainer::trainedTree).collect(Collectors.toList());
+        var decisionTrees = tasks.stream().map(TrainDecisionTreeTask::trainedTree).collect(Collectors.toList());
 
-        return new ClassificationRandomForestPredictor(decisionTrees, classIdMap, allFeatureVectors.get(0).length);
+        return new ClassificationRandomForestPredictor(decisionTrees, classIdMap, allFeatureVectors.featureDimension());
     }
 
     double outOfBagError() {
         return outOfBagError.orElseThrow(() -> new IllegalAccessError("Out of bag error has not been computed."));
     }
 
-    static class DecisionTreeTrainer<LOSS extends DecisionTreeLoss> implements Runnable {
+    static class TrainDecisionTreeTask<LOSS extends DecisionTreeLoss> implements Runnable {
 
         private DecisionTreePredict<Long> trainedTree;
         private final Optional<HugeAtomicLongArray> maybePredictions;
@@ -124,7 +124,7 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
         private final LOSS lossFunction;
         private final ReadOnlyHugeLongArray trainSet;
 
-        DecisionTreeTrainer(
+        TrainDecisionTreeTask(
             Optional<HugeAtomicLongArray> maybePredictions,
             DecisionTreeTrainConfig decisionTreeTrainConfig,
             RandomForestTrainConfig randomForestTrainConfig,
@@ -153,8 +153,8 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
         @Override
         public void run() {
             var featureBagger = new FeatureBagger(
-                random.split(),
-                allFeatureVectors.get(0).length,
+                random,
+                allFeatureVectors.featureDimension(),
                 randomForestTrainConfig.featureBaggingRatio()
             );
 
