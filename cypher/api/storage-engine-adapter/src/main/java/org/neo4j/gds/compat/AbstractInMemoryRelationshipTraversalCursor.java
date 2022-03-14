@@ -45,6 +45,7 @@ public abstract class AbstractInMemoryRelationshipTraversalCursor extends InMemo
     @Override
     public void init(long nodeReference, long reference, RelationshipSelection selection) {
         reset();
-        sourceId = nodeReference;
+        this.sourceId = nodeReference;
+        this.selection = selection;
     }
 }

@@ -22,6 +22,7 @@ package org.neo4j.gds.compat;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.storageengine.InMemoryRelationshipCursor;
 import org.neo4j.storageengine.api.AllRelationshipsScan;
+import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.StorageRelationshipScanCursor;
 import org.neo4j.token.TokenHolders;
 
@@ -35,32 +36,14 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
     @Override
     public void scan() {
         reset();
-        sourceId = 0;
-    }
-
-    @Override
-    public boolean next() {
-        if (super.next()) {
-            return true;
-        } else {
-            this.sourceId++;
-            if (this.sourceId >= graphStore.nodeCount()) {
-                return false;
-            } else {
-               resetCursors();
-               return next();
-            }
-        }
-    }
-
-    @Override
-    public boolean scanBatch(AllRelationshipsScan scan, int sizeHint) {
-        return false;
+        this.sourceId = 0;
+        this.selection = RelationshipSelection.ALL_RELATIONSHIPS;
     }
 
     @Override
     public void single(long reference) {
         reset();
+        this.selection = RelationshipSelection.ALL_RELATIONSHIPS;
 
         graphStore.relationshipIds().resolveRelationshipId(reference, (nodeId, offset, context) -> {
             this.sourceId = nodeId;
@@ -72,5 +55,25 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
 
             return null;
         });
+    }
+
+    @Override
+    public boolean next() {
+        if (super.next()) {
+            return true;
+        } else {
+            this.sourceId++;
+            if (this.sourceId >= graphStore.nodeCount()) {
+                return false;
+            } else {
+                resetCursors();
+                return next();
+            }
+        }
+    }
+
+    @Override
+    public boolean scanBatch(AllRelationshipsScan scan, int sizeHint) {
+        throw new UnsupportedOperationException();
     }
 }

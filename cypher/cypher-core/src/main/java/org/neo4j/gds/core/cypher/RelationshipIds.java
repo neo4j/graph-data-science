@@ -19,97 +19,66 @@
  */
 package org.neo4j.gds.core.cypher;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.immutables.value.Value;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.AdjacencyProperties;
+import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.token.TokenHolders;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class RelationshipIds {
 
-    private final GraphStore graphStore;
-    private final List<RelationshipIdContext> relationshipIdContexts;
-    private final TokenHolders tokenHolders;
+    private final RelationshipIdContext[] relationshipIdContexts;
 
     static RelationshipIds fromGraphStore(GraphStore graphStore, TokenHolders tokenHolders) {
-        var relationshipIdContexts = new ArrayList<RelationshipIdContext>();
+        var relationshipIdContexts = new RelationshipIdContext[graphStore.relationshipTypes().size()];
+        var index = new MutableInt(0);
+
         graphStore.relationshipTypes().forEach(relType -> {
             var relCount = graphStore.relationshipCount(relType);
-            var graph = graphStore.getGraph(relType);
+            var graph = (CSRGraph) graphStore.getGraph(relType);
             var offsets = computeAccumulatedOffsets(graph);
-            relationshipIdContexts.add(ImmutableRelationshipIdContext.of(relType, relCount, graph, offsets));
+            int relTypeId = tokenHolders.relationshipTypeTokens().getIdByName(relType.name);
+
+            List<RelationshipProperty> relationshipProperties = graphStore.relationshipPropertyKeys(relType)
+                .stream()
+                .map(relProperty -> graphStore.relationshipPropertyValues(relType, relProperty))
+                .collect(Collectors.toList());
+
+            int[] propertyIds = relationshipProperties
+                .stream()
+                .mapToInt(relationshipProperty -> tokenHolders
+                    .propertyKeyTokens()
+                    .getIdByName(relationshipProperty.key()))
+                .toArray();
+
+            AdjacencyProperties[] adjacencyProperties = relationshipProperties
+                .stream()
+                .map(relationshipProperty -> relationshipProperty.values().propertiesList())
+                .toArray(AdjacencyProperties[]::new);
+
+            relationshipIdContexts[index.getAndIncrement()] = ImmutableRelationshipIdContext.of(relType, relTypeId, relCount, graph, offsets, propertyIds, adjacencyProperties);
         });
-        return new RelationshipIds(graphStore, relationshipIdContexts, tokenHolders);
+        return new RelationshipIds(relationshipIdContexts);
     }
 
-    private RelationshipIds(
-        GraphStore graphStore,
-        List<RelationshipIdContext> relationshipIdContexts,
-        TokenHolders tokenHolders
-    ) {
-        this.graphStore = graphStore;
+    private RelationshipIds(RelationshipIdContext[] relationshipIdContexts) {
         this.relationshipIdContexts = relationshipIdContexts;
-        this.tokenHolders = tokenHolders;
     }
 
-    public List<RelationshipIdContext> relationshipIdContexts() {
+    public RelationshipIdContext[] relationshipIdContexts() {
         return relationshipIdContexts;
-    }
-
-    public CypherRelationshipCursor relationshipForId(long relationshipId) {
-        return resolveRelationshipId(relationshipId, (nodeId, offsetInAdjacency, relationshipIdContext) -> relationshipIdContext
-            .graph()
-            .streamRelationships(nodeId, Double.NaN)
-            .skip(offsetInAdjacency)
-            .findFirst()
-            .map(relCursor -> CypherRelationshipCursor.fromRelationshipCursor(relCursor, relationshipId, relationshipIdContext.relationshipType()))
-            .orElseThrow(
-                () -> new IllegalArgumentException(formatWithLocale(
-                    "No relationship with id %d was found for relationship type %s",
-                    relationshipId,
-                    relationshipIdContext.relationshipType()
-                ))
-            ));
-    }
-
-    public double propertyValueForId(long relationshipId, String propertyKey) {
-        return resolveRelationshipId(relationshipId, ((nodeId, offsetInAdjacency, relationshipIdContext) -> {
-            var properties = graphStore
-                .relationshipPropertyValues(relationshipIdContext.relationshipType(), propertyKey)
-                .values();
-            var propertyCursor = properties.propertiesList().propertyCursor(nodeId);
-            for (int i = 0; i < offsetInAdjacency - 1; i++) {
-                if (!propertyCursor.hasNextLong()) {
-                    return Double.NaN;
-                }
-                propertyCursor.nextLong();
-            }
-            if (propertyCursor.hasNextLong()) {
-                return Double.longBitsToDouble(propertyCursor.nextLong());
-            }
-            return Double.NaN;
-        }));
-    }
-
-    public RelationshipType relationshipTypeForId(long relationshipId) {
-        return resolveRelationshipId(relationshipId, ((nodeId, offsetInAdjacency, relationshipIdContext) -> relationshipIdContext.relationshipType()));
-    }
-
-    public Iterator<CypherRelationshipCursor> relationshipCursors(long nodeId, RelationshipSelection relationshipSelection) {
-        Predicate<RelationshipType> relationshipSelectionPredicate = relationshipType -> {
-            var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName(relationshipType.name());
-            return relationshipSelection.test(relTypeToken);
-        };
-        return new RelationshipWithIdCursorIterator(relationshipIdContexts, nodeId, relationshipSelectionPredicate);
     }
 
     public <T> T resolveRelationshipId(long relationshipId, ResolvedRelationshipIdFunction<T> relationshipIdConsumer) {
@@ -158,8 +127,16 @@ public final class RelationshipIds {
     @ValueClass
     public interface RelationshipIdContext {
         RelationshipType relationshipType();
+        int relationshipTypeId();
         long relationshipCount();
-        Graph graph();
+        CSRGraph graph();
         HugeLongArray offsets();
+        int[] propertyIds();
+        AdjacencyProperties[] adjacencyProperties();
+
+        @Value.Derived
+        default AdjacencyList adjacencyList() {
+            return graph().relationshipTopologies().get(relationshipType()).adjacencyList();
+        }
     }
 }

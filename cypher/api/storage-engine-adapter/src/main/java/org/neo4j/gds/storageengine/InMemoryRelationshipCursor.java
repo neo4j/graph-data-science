@@ -20,39 +20,59 @@
 package org.neo4j.gds.storageengine;
 
 import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.api.CSRGraph;
+import org.neo4j.gds.api.AdjacencyProperties;
+import org.neo4j.gds.api.PropertyCursor;
+import org.neo4j.gds.compat.AbstractInMemoryRelationshipPropertyCursor;
+import org.neo4j.gds.compat.InMemoryPropertySelection;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.cypher.RelationshipIds;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
+import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.RelationshipVisitor;
+import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageRelationshipCursor;
 import org.neo4j.token.TokenHolders;
 
-import java.util.List;
+import java.util.Arrays;
 
 public abstract class InMemoryRelationshipCursor extends RelationshipRecord implements RelationshipVisitor<RuntimeException>, StorageRelationshipCursor {
 
     protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
-    private final List<RelationshipIds.RelationshipIdContext> relationshipIdContexts;
+    private final RelationshipIds.RelationshipIdContext[] relationshipIdContexts;
     private final AdjacencyCursor[] adjacencyCursorCache;
+    private final PropertyCursor[][] propertyCursorCache;
 
     protected long sourceId;
     protected long targetId;
+    protected RelationshipSelection selection;
+
     private AdjacencyCursor adjacencyCursor;
+    private PropertyCursor[] propertyCursors;
+    private double[] propertyValuesCache;
     private int relationshipTypeOffset;
     private int relationshipContextIndex;
+    private int[] propertyIds;
 
     public InMemoryRelationshipCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID);
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
         this.relationshipIdContexts = this.graphStore.relationshipIds().relationshipIdContexts();
-        this.adjacencyCursorCache = relationshipIdContexts.stream().map(context -> {
-                var graph = (CSRGraph) context.graph();
-                return graph.relationshipTopologies().get(context.relationshipType()).adjacencyList().rawAdjacencyCursor();
-            }
-        ).toArray(AdjacencyCursor[]::new);
+        this.adjacencyCursorCache = Arrays.stream(relationshipIdContexts)
+            .map(context -> context.adjacencyList().rawAdjacencyCursor())
+            .toArray(AdjacencyCursor[]::new);
+
+        this.propertyCursorCache = Arrays.stream(relationshipIdContexts)
+            .map(context -> Arrays
+                .stream(context.adjacencyProperties())
+                .map(AdjacencyProperties::rawPropertyCursor)
+                .toArray(PropertyCursor[]::new)
+            )
+            .toArray(PropertyCursor[][]::new);
+
+        var maxPropertySize = Arrays.stream(propertyCursorCache).mapToInt(a -> a.length).max().orElse(0);
+        this.propertyValuesCache = new double[maxPropertySize];
     }
 
     @Override
@@ -76,7 +96,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
 
     @Override
     public boolean hasProperties() {
-        return relationshipIdContexts.get(relationshipContextIndex).graph().hasRelationshipProperty();
+        return relationshipIdContexts[relationshipContextIndex].graph().hasRelationshipProperty();
     }
 
     @Override
@@ -94,6 +114,11 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
             } else {
                 targetId = adjacencyCursor.nextVLong();
                 setId(getId() + 1);
+
+                for (int i = 0; i < propertyCursors.length; i++) {
+                    propertyValuesCache[i] = Double.longBitsToDouble(propertyCursors[i].nextLong());
+                }
+
                 return true;
             }
         }
@@ -101,11 +126,12 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
 
     @Override
     public void reset() {
-        relationshipContextIndex = -1;
-        relationshipTypeOffset = 0;
-        adjacencyCursor = null;
-        targetId = NO_ID;
-        sourceId = NO_ID;
+        this.relationshipContextIndex = -1;
+        this.relationshipTypeOffset = 0;
+        this.adjacencyCursor = null;
+        this.targetId = NO_ID;
+        this.sourceId = NO_ID;
+        this.selection = null;
         setId(NO_ID);
     }
 
@@ -126,31 +152,43 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
 
     }
 
+    public void properties(StoragePropertyCursor propertyCursor, InMemoryPropertySelection selection) {
+        var inMemoryCursor = (AbstractInMemoryRelationshipPropertyCursor) propertyCursor;
+        inMemoryCursor.initRelationshipPropertyCursor(this.sourceId, propertyIds, propertyValuesCache, selection);
+    }
+
     private boolean progressToNextContext() {
         relationshipContextIndex++;
 
-        if (relationshipContextIndex >= relationshipIdContexts.size()) {
+        if (relationshipContextIndex >= relationshipIdContexts.length) {
             return false;
         }
 
         if (relationshipContextIndex > 0) {
-            relationshipTypeOffset += relationshipIdContexts.get(relationshipContextIndex - 1).relationshipCount();
+            relationshipTypeOffset += relationshipIdContexts[relationshipContextIndex - 1].relationshipCount();
         }
 
-        var context = relationshipIdContexts.get(relationshipContextIndex);
+        var context = relationshipIdContexts[relationshipContextIndex];
 
-        var relationshipType = context.relationshipType();
+        if (!selection.test(context.relationshipTypeId())) {
+            return progressToNextContext();
+        }
 
-        setType(tokenHolders.relationshipTypeTokens().getIdByName(relationshipType.name));
+        setType(context.relationshipTypeId());
 
-        var graph = (CSRGraph) context.graph();
+        // initialize the adjacency cursor
         var reuseCursor = adjacencyCursorCache[relationshipContextIndex];
-
-        this.adjacencyCursor = graph
-            .relationshipTopologies()
-            .get(relationshipType)
+        this.adjacencyCursor = context
             .adjacencyList()
             .adjacencyCursor(reuseCursor, this.sourceId);
+
+        // initialize the property cursors
+        this.propertyIds = context.propertyIds();
+        this.propertyCursors = propertyCursorCache[relationshipContextIndex];
+        var adjacencyProperties = context.adjacencyProperties();
+        for (int i = 0; i < propertyCursors.length; i++) {
+                adjacencyProperties[i].propertyCursor(propertyCursors[i], this.sourceId);
+        }
 
         setId(relationshipTypeOffset + context.offsets().get(sourceId) - 1);
 

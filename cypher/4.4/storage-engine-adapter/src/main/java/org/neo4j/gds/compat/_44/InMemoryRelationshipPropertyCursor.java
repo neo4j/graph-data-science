@@ -21,9 +21,11 @@ package org.neo4j.gds.compat._44;
 
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipPropertyCursor;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.gds.storageengine.InMemoryRelationshipCursor;
 import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
+import org.neo4j.storageengine.api.StorageRelationshipCursor;
 import org.neo4j.token.TokenHolders;
 
 public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelationshipPropertyCursor {
@@ -33,18 +35,21 @@ public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelation
     }
 
     @Override
-    public void initNodeProperties(
-        Reference reference, PropertySelection propertySelection, long ownerReference
-    ) {
-
+    public void initNodeProperties(Reference reference, PropertySelection selection, long ownerReference) {
+        throw new UnsupportedOperationException("This is a relationship property cursor");
     }
 
     @Override
-    public void initRelationshipProperties(
-        Reference reference, PropertySelection propertySelection, long ownerReference
-    ) {
-        reset();
-        setId(((LongReference) reference).id);
-        setPropertySelection(new InMemoryPropertySelectionImpl(propertySelection));
+    public void initRelationshipProperties(Reference reference, PropertySelection selection, long ownerReference) {
+        var relationshipId = ((LongReference) reference).id;
+        var relationshipCursor = new InMemoryRelationshipScanCursor(graphStore, tokenHolders);
+        relationshipCursor.single(relationshipId);
+        relationshipCursor.properties(this, new InMemoryPropertySelectionImpl(selection));
+    }
+
+    @Override
+    public void initRelationshipProperties(StorageRelationshipCursor relationshipCursor, PropertySelection selection) {
+        var inMemoryRelationshipCursor = (InMemoryRelationshipCursor) relationshipCursor;
+        inMemoryRelationshipCursor.properties(this, selection);
     }
 }

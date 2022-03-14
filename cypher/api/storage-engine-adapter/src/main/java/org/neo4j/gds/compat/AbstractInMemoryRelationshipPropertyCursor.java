@@ -19,48 +19,90 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.ValueGroup;
 import org.neo4j.values.storable.Values;
 
-import java.util.Map;
+public abstract class AbstractInMemoryRelationshipPropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor {
 
-public abstract class AbstractInMemoryRelationshipPropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor<RelationshipType, RelationshipPropertySchema> {
+    protected final CypherGraphStore graphStore;
+    protected final TokenHolders tokenHolders;
+    private InMemoryPropertySelection selection;
+    private double[] propertyValues;
+    private int[] propertyIds;
+    private int index;
 
-    protected AbstractInMemoryRelationshipPropertyCursor(
-        CypherGraphStore graphStore,
-        TokenHolders tokenHolders
-    ) {
-        super(NO_ID, graphStore, tokenHolders);
+    protected AbstractInMemoryRelationshipPropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
+        super(NO_ID);
+        this.graphStore = graphStore;
+        this.tokenHolders = tokenHolders;
+        reset();
+    }
+
+    public void initRelationshipPropertyCursor(long id, int[] propertyIds, double[] propertyValues, InMemoryPropertySelection selection) {
+        setId(id);
+        setRelId(id);
+        this.index = -1;
+        this.propertyIds = propertyIds;
+        this.propertyValues = propertyValues;
+        this.selection = selection;
     }
 
     @Override
-    protected Map<RelationshipType, Map<String, RelationshipPropertySchema>> propertySchema() {
-        return graphStore.schema().relationshipSchema().properties();
+    public boolean next() {
+        if (getRelId() == NO_ID) {
+            throw new IllegalStateException("Property cursor is not initialized.");
+        }
+
+        while(true) {
+            index++;
+            if (index >= propertyIds.length) {
+                return false;
+            } else if (selection.test(propertyIds[index])) {
+                return true;
+            }
+        }
+    }
+
+    @Override
+    public int propertyKey() {
+        if (getRelId() != NO_ID && this.index < propertyIds.length) {
+            return propertyIds[index];
+        }
+        throw new IllegalStateException("Property cursor is not initialized.");
+    }
+
+    @Override
+    public ValueGroup propertyType() {
+        return ValueGroup.NUMBER;
     }
 
     @Override
     public Value propertyValue() {
-        if (currentPropertyKey != null) {
-            return Values.doubleValue(graphStore.relationshipIds().propertyValueForId(
-                getId(),
-                currentPropertyKey
-            ));
+        if (getRelId() != NO_ID && this.index < propertyIds.length) {
+            return Values.doubleValue(propertyValues[this.index]);
         }
-        throw new IllegalStateException(
-            "Property cursor is initialized as node and relationship cursor, maybe you forgot to `reset()`?");
+        throw new IllegalStateException("Property cursor is not initialized.");
     }
 
     @Override
-    protected void setPropertySelection(InMemoryPropertySelection propertySelection) {
-        var relationshipTypes = graphStore.relationshipIds().relationshipTypeForId(getId());
-        this.propertyIterator = graphStore
-            .relationshipPropertyKeys(relationshipTypes)
-            .stream()
-            .filter(label -> propertySelection.test(tokenHolders.propertyKeyTokens().getIdByName(label)))
-            .iterator();
+    public void reset() {
+        this.index = -1;
+        this.propertyIds = null;
+        this.propertyValues = null;
+        setId(NO_ID);
+        setRelId(NO_ID);
+    }
+
+    @Override
+    public void setForceLoad() {
+
+    }
+
+    @Override
+    public void close() {
+
     }
 }
