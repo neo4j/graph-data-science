@@ -55,8 +55,6 @@ It can be set to any value, except 0.
 The output of the algorithm are new relationships between pairs of the first node set.
 Similarity scores are expressed via relationship properties.
 
-Related functions for computing Jaccard similarity and the Overlap coefficient are described in <<alpha-algorithms-similarity-jaccard>> and <<alpha-algorithms-similarity-overlap>> respectively.
-
 For more information on this algorithm, see:
 
 * https://en.wikipedia.org/wiki/Similarity_(network_science)#Structural_equivalence[Structural equivalence (Wikipedia)]

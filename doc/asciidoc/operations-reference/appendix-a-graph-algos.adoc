@@ -273,7 +273,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `_gds.alpha.similarity.euclidean_`
 | `_gds.alpha.similarity.euclideanDistance_`
 | <<alpha-algorithms-similarity-jaccard>> | `_gds.alpha.similarity.jaccard_`
-.4+<.^|<<alpha-algorithms-similarity-overlap, Overlap Similarity>>
+.4+<.^|Overlap Similarity
 | `gds.alpha.similarity.overlap.stats`
 | `gds.alpha.similarity.overlap.stream`
 | `gds.alpha.similarity.overlap.write`
