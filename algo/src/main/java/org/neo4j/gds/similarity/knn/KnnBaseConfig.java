@@ -38,7 +38,7 @@ import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteChar
 @SuppressWarnings("immutables:subtype")
 public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleThreadedRandomSeedConfig {
 
-    @Configuration.ConvertWith("org.neo4j.gds.similarity.knn.KnnNodePropertySpecParser#create")
+    @Configuration.ConvertWith("org.neo4j.gds.similarity.knn.KnnNodePropertySpecParser#parse")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnNodePropertySpecParser#render")
     List<KnnNodePropertySpec> nodeProperties();
 

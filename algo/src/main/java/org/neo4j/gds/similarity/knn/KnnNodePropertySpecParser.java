@@ -52,7 +52,7 @@ public final class KnnNodePropertySpecParser {
      * @param userInput
      * @return
      */
-    public static List<KnnNodePropertySpec> create(@NotNull Object userInput) {
+    public static List<KnnNodePropertySpec> parse(@NotNull Object userInput) {
         if (userInput instanceof String) {
             return fromMap(Collections.singletonMap((String) userInput, null));
         }

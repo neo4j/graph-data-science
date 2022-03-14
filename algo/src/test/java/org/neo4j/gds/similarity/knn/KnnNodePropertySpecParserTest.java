@@ -33,7 +33,7 @@ class KnnNodePropertySpecParserTest {
     @Test
     void shouldParseString() {
         var input = "property";
-        assertThat(KnnNodePropertySpecParser.create(input))
+        assertThat(KnnNodePropertySpecParser.parse(input))
             .singleElement()
             .extracting(KnnNodePropertySpec::name)
             .isEqualTo("property");
@@ -42,7 +42,7 @@ class KnnNodePropertySpecParserTest {
     @Test
     void shouldParseListOfSingleString() {
         var input = List.of("property");
-        assertThat(KnnNodePropertySpecParser.create(input))
+        assertThat(KnnNodePropertySpecParser.parse(input))
             .singleElement()
             .extracting(KnnNodePropertySpec::name)
             .isEqualTo("property");
@@ -51,7 +51,7 @@ class KnnNodePropertySpecParserTest {
     @Test
     void shouldParseListOfMultipleStrings() {
         var input = List.of("property1", "property2", "property3");
-        assertThat(KnnNodePropertySpecParser.create(input))
+        assertThat(KnnNodePropertySpecParser.parse(input))
             .hasSize(3)
             .extracting(KnnNodePropertySpec::name)
             .containsExactlyInAnyOrder("property1", "property2", "property3");
@@ -65,7 +65,7 @@ class KnnNodePropertySpecParserTest {
             "property3",
             Map.of("property4", "PEARSON")
         );
-        var specs = KnnNodePropertySpecParser.create(input);
+        var specs = KnnNodePropertySpecParser.parse(input);
         assertThat(specs)
             .hasSize(4)
             .extracting(KnnNodePropertySpec::name)
@@ -88,7 +88,7 @@ class KnnNodePropertySpecParserTest {
             "property3", "EUCLIDEAN",
             "property4", "DEFAULT"
         );
-        var specs = KnnNodePropertySpecParser.create(input);
+        var specs = KnnNodePropertySpecParser.parse(input);
         assertThat(specs)
             .hasSize(4)
             .extracting(KnnNodePropertySpec::name)
@@ -106,7 +106,7 @@ class KnnNodePropertySpecParserTest {
     @Test
     void shouldRefuseToParseEmptyList() {
         var input = List.of();
-        assertThatThrownBy(() -> KnnNodePropertySpecParser.create(input))
+        assertThatThrownBy(() -> KnnNodePropertySpecParser.parse(input))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("must not be empty");
     }
@@ -114,7 +114,7 @@ class KnnNodePropertySpecParserTest {
     @Test
     void shouldShouldRefuseToParseInvalidPropertyName() {
         var input = List.of(" ");
-        assertThatThrownBy(() -> KnnNodePropertySpecParser.create(input))
+        assertThatThrownBy(() -> KnnNodePropertySpecParser.parse(input))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("must not end or begin with whitespace");
     }
@@ -122,7 +122,7 @@ class KnnNodePropertySpecParserTest {
     @Test
     void shouldRefuseToParseInvalidSimilarityMetric() {
         var input = Map.of("property", "INVALID");
-        assertThatThrownBy(() -> KnnNodePropertySpecParser.create(input))
+        assertThatThrownBy(() -> KnnNodePropertySpecParser.parse(input))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("No valid similarity metric for user input INVALID");
     }
@@ -130,7 +130,7 @@ class KnnNodePropertySpecParserTest {
     @Test
     void shouldRenderPropertySpecs() {
         var input = List.of("property1", Map.of("property2", "PEARSON"));
-        var specs = KnnNodePropertySpecParser.create(input);
+        var specs = KnnNodePropertySpecParser.parse(input);
         assertThat(KnnNodePropertySpecParser.render(specs)).isEqualTo(
             Map.of(
                 "property1", "DEFAULT",
