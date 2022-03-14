@@ -33,6 +33,7 @@ import java.util.Optional;
 public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, TrainerConfig {
 
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
+    // Defaults to 1.0/sqrt(featureDimension) if not set explicitly.
     Optional<Double> maxFeaturesRatio();
 
     @Configuration.Ignore
