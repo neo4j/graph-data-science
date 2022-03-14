@@ -262,10 +262,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.scaleProperties.mutate`
 | `gds.alpha.scaleProperties.stream`
 | Cosine Similarity | `_gds.alpha.similarity.cosine_`
-.5+<.^|Euclidean Similarity
-| `gds.alpha.similarity.euclidean.stats`
-| `gds.alpha.similarity.euclidean.stream`
-| `gds.alpha.similarity.euclidean.write`
+.2+<.^|Euclidean Similarity
 | `_gds.alpha.similarity.euclidean_`
 | `_gds.alpha.similarity.euclideanDistance_`
 | Jaccard Similarity | `_gds.alpha.similarity.jaccard_`
