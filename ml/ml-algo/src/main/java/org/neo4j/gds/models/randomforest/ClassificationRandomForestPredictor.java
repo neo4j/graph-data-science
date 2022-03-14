@@ -31,34 +31,28 @@ import java.util.List;
 
 public class ClassificationRandomForestPredictor implements Classifier {
 
-    private final List<DecisionTreePredict<Long>> decisionTrees;
-    private final LocalIdMap classMapping;
-    private final int featureDimension;
+    private final RandomForestData data;
 
     public ClassificationRandomForestPredictor(
         List<DecisionTreePredict<Long>> decisionTrees,
         LocalIdMap classMapping,
         int featureDimension
     ) {
-        this.decisionTrees = decisionTrees;
-        this.classMapping = classMapping;
-        this.featureDimension = featureDimension;
+        this(ImmutableRandomForestData.of(classMapping, featureDimension, decisionTrees));
     }
 
     public ClassificationRandomForestPredictor(RandomForestData data) {
-        this.decisionTrees = data.decisionTrees();
-        this.classMapping = data.classIdMap();
-        this.featureDimension = data.featureDimension();
+        this.data = data;
     }
 
     @Override
     public LocalIdMap classIdMap() {
-        return classMapping;
+        return data.classIdMap();
     }
 
     @Override
     public ClassifierData data() {
-        return ImmutableRandomForestData.of(classMapping, featureDimension, decisionTrees);
+        return data;
     }
 
     @Override
@@ -82,12 +76,13 @@ public class ClassificationRandomForestPredictor implements Classifier {
 
     public double[] predictProbabilities(double[] features) {
         int[] votesPerClass = gatherTreePredictions(features);
+        int numberOfTrees = data.decisionTrees().size();
 
         double[] probabilities = new double[votesPerClass.length];
 
         for (int classIdx = 0; classIdx < votesPerClass.length; classIdx++) {
             int voteForClass = votesPerClass[classIdx];
-            probabilities[classIdx] = (double) voteForClass / decisionTrees.size();
+            probabilities[classIdx] = (double) voteForClass / numberOfTrees;
         }
 
         return probabilities;
@@ -109,10 +104,13 @@ public class ClassificationRandomForestPredictor implements Classifier {
             maxClassIdx = i;
         }
 
-        return classMapping.toOriginal(maxClassIdx);
+        return data.classIdMap().toOriginal(maxClassIdx);
     }
 
     private int[] gatherTreePredictions(double[] features) {
+        var decisionTrees = data.decisionTrees();
+        var classMapping = data.classIdMap();
+
         final var predictionsPerClass = new int[classMapping.size()];
 
         for (DecisionTreePredict<Long> decisionTree : decisionTrees) {
