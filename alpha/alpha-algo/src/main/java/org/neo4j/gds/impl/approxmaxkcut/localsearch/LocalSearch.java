@@ -21,7 +21,6 @@ package org.neo4j.gds.impl.approxmaxkcut.localsearch;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.AtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
@@ -97,7 +96,7 @@ public class LocalSearch {
      */
     public void compute(
         HugeByteArray candidateSolution,
-        AtomicDoubleArray cost,
+        HugeAtomicDoubleArray cost,
         AtomicLongArray cardinalities,
         Supplier<Boolean> running
     ) {

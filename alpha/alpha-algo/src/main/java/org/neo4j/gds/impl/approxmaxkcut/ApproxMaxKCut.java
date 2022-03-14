@@ -23,7 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
-import org.neo4j.gds.core.utils.AtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
@@ -57,7 +57,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
     private final PlaceNodesRandomly placeNodesRandomly;
     private final LocalSearch localSearch;
     private final HugeByteArray[] candidateSolutions;
-    private final AtomicDoubleArray[] costs;
+    private final HugeAtomicDoubleArray[] costs;
     private VariableNeighborhoodSearch variableNeighborhoodSearch;
     private AtomicLongArray currentCardinalities;
 
@@ -79,9 +79,9 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
             HugeByteArray.newArray(graph.nodeCount())
         };
 
-        this.costs = new AtomicDoubleArray[]{
-            new AtomicDoubleArray(1),
-            new AtomicDoubleArray(1)
+        this.costs = new HugeAtomicDoubleArray[]{
+            HugeAtomicDoubleArray.newArray(1),
+            HugeAtomicDoubleArray.newArray(1),
         };
         costs[0].set(0, config.minimize() ? Double.MAX_VALUE : Double.MIN_VALUE);
         costs[1].set(0, config.minimize() ? Double.MAX_VALUE : Double.MIN_VALUE);
