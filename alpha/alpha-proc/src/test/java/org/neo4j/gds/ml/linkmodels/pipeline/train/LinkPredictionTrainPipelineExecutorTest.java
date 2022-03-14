@@ -454,4 +454,19 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .withFailMessage("Got %d, %d", actualRange.min, actualRange.max)
             .isEqualTo(expectedRange);
     }
+
+    @Test
+    void failEstimateOnEmptyParameterSpace() {
+        var config = LinkPredictionTrainConfig
+            .builder()
+            .modelName("DUMMY")
+            .graphName("DUMMY")
+            .pipeline("DUMMY")
+            .build();
+
+        LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
+
+        assertThatThrownBy(() -> LinkPredictionTrainPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config))
+            .hasMessage("Need at least one model candidate for training.");
+    }
 }

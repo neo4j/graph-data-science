@@ -343,8 +343,31 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             31742464L,
             31774424L
         );
-
     }
+
+    @Test
+    void failEstimateOnEmptyParameterSpace() {
+        var pipeline = insertPipelineIntoCatalog();
+        pipeline.featureProperties().addAll(List.of("array", "scalar"));
+
+        var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
+            .pipeline(PIPELINE_NAME)
+            .username("myUser")
+            .graphName(GRAPH_NAME)
+            .modelName("myModel")
+            .concurrency(1)
+            .randomSeed(42L)
+            .targetProperty("t")
+            .addRelationshipType("SOME_REL")
+            .addNodeLabel("SOME_LABEL")
+            .minBatchSize(1)
+            .metrics(List.of(MetricSpecification.parse("F1_WEIGHTED")))
+            .build();
+
+        assertThatThrownBy(() -> NodeClassificationTrainPipelineExecutor.estimate(pipeline, config, new OpenModelCatalog()))
+            .hasMessage("Need at least one model candidate for training.");
+    }
+
     private NodeClassificationPipeline insertPipelineIntoCatalog() {
         var info = new NodeClassificationPipeline();
         PipelineCatalog.set(getUsername(), PIPELINE_NAME, info);

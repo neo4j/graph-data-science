@@ -71,6 +71,8 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         NodeClassificationPipelineTrainConfig configuration,
         ModelCatalog modelCatalog
     ) {
+        PipelineExecutor.validateTrainingParameterSpace(pipeline);
+
         MemoryEstimation nodePropertyStepsEstimation = PipelineExecutor.estimateNodePropertySteps(
             modelCatalog,
             pipeline.nodePropertySteps(),
@@ -104,6 +106,8 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
 
     @Override
     protected NodeClassificationPipelineTrainResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+        PipelineExecutor.validateTrainingParameterSpace(pipeline);
+
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
         var relationshipTypes = config.internalRelationshipTypes(graphStore);
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.empty());
