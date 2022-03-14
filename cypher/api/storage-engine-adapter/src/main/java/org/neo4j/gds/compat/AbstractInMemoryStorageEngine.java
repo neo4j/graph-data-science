@@ -66,7 +66,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     private final TokenHolders tokenHolders;
-    private final BiFunction<CypherGraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
+    private final TxStateVisitor txStateVisitor;
     private final Supplier<CommandCreationContext> commandCreationContextSupplier;
     private final TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
     private final CountsStore countsStore;
@@ -85,7 +85,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         this.tokenHolders = tokenHolders;
         var graphName = InMemoryDatabaseCreationCatalog.getRegisteredDbCreationGraphName(databaseLayout.getDatabaseName());
         this.graphStore = getGraphStoreFromCatalog(graphName);
-        this.txStateVisitorFn = txStateVisitorFn;
+        this.txStateVisitor = txStateVisitorFn.apply(graphStore, tokenHolders);
         this.commandCreationContextSupplier = commandCreationContextSupplier;
         this.storageReaderFn = storageReaderFn;
         initializeTokenHolders();
@@ -95,9 +95,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
     }
 
     protected void createCommands(ReadableTransactionState txState) throws KernelException {
-        try (var txStateVisitor = txStateVisitorFn.apply(graphStore, tokenHolders)) {
-            txState.accept(txStateVisitor);
-        }
+        txState.accept(txStateVisitor);
     }
 
     @Override

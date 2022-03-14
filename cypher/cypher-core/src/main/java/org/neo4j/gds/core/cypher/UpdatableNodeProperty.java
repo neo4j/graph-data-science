@@ -28,6 +28,8 @@ public interface UpdatableNodeProperty extends NodeProperties {
 
     void updatePropertyValue(long nodeId, Value value);
 
+    void removePropertyValue(long nodeId);
+
     interface UpdatableLongNodeProperty extends UpdatableNodeProperty, LongNodeProperties {}
     interface UpdatableDoubleNodeProperty extends UpdatableNodeProperty, DoubleNodeProperties {}
 }
