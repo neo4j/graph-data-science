@@ -3,15 +3,15 @@
 
 [abstract]
 --
-This chapter provides explanations and examples for each of the similarity algorithms in the Neo4j Graph Data Science library.
+This chapter provides explanations and examples for the similarity algorithms in the Neo4j Graph Data Science library.
 --
 
-Similarity algorithms compute the similarity of pairs of nodes using different vector-based metrics.
-The Neo4j GDS library includes the following similarity algorithms, grouped by quality tier:
+Similarity algorithms compute the similarity of pairs of nodes based on their neighborhoods or their properties.
+Several similarity metrics can be used to compute a similarity score.
+The Neo4j GDS library includes the following similarity algorithms:
 
-* Production-quality
-** <<algorithms-node-similarity, Node Similarity>>
-** <<algorithms-knn, K-Nearest Neighbors>>
+* <<algorithms-node-similarity, Node Similarity>>
+* <<algorithms-knn, K-Nearest Neighbors>>
 
 include::node-similarity/node-similarity.adoc[leveloffset=+1]
 
