@@ -35,7 +35,6 @@ public interface Classifier {
 
     ClassifierData data();
 
-    // placeholder
     interface ClassifierData {
         TrainingMethod trainerMethodName();
         LocalIdMap classIdMap();
