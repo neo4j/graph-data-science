@@ -24,6 +24,16 @@ dependencies {
     testImplementation project(':config-api')
     testImplementation project(":test-utils")
     testImplementation project(':edition-api')
+
+    testImplementation(group: 'com.neo4j',  name: 'neo4j-enterprise',           version: ver.'neo4j') {
+        exclude group: 'com.neo4j',  module: 'neo4j-causal-clustering'
+    }
+    testImplementation(group: 'com.neo4j',  name: 'enterprise-it-test-support', version: ver.'neo4j') {
+        exclude group: 'com.neo4j',  module: 'neo4j-causal-clustering'
+    }
+    // We need to exclude this and re-add it here to get the main JAR only
+    // This is because we cannot exclude with a classifier ('tests') in Gradle
+    testImplementation(group: 'com.neo4j',  name: 'neo4j-causal-clustering', version: ver.'neo4j')
 }
 
 afterEvaluate {
