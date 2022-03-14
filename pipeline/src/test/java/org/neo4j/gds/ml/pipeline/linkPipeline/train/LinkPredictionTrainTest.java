@@ -338,13 +338,14 @@ class LinkPredictionTrainTest {
             LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)),
             LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "patience", 5, "tolerance", 0.00001))
         ));
+        // Should NOT be the winning model, so give it bad hyperparams.
         pipeline.setTrainingParameterSpace(TrainingMethod.RandomForest, List.of(
             RandomForestTrainConfigImpl
                 .builder()
                 .minSplitSize(1)
-                .maxDepth(10)
-                .numberOfDecisionTrees(20)
-                .featureBaggingRatio(0.8)
+                .maxDepth(1)
+                .numberOfDecisionTrees(1)
+                .featureBaggingRatio(0.1)
                 .randomSeed(42L) // FIXME: Remove me!
                 .build()
         ));
