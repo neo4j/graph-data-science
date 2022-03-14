@@ -33,4 +33,9 @@ public interface TargetNodesConfig {
         return Collections.emptyList();
     }
 
+    @Configuration.Ignore
+    @Value.Derived
+    default boolean hasTargetNodes() {
+        return !targetNodes().isEmpty();
+    }
 }

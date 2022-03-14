@@ -36,12 +36,6 @@ public interface DfsBaseConfig extends AlgoBaseConfig, SourceNodeConfig, TargetN
 
     @Configuration.Ignore
     @Value.Derived
-    default boolean hasTargetNodes() {
-        return !targetNodes().isEmpty();
-    }
-
-    @Configuration.Ignore
-    @Value.Derived
     default boolean hasMaxDepth() {
         return maxDepth() != NO_MAX_DEPTH;
     }
