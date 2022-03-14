@@ -26,8 +26,8 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.MutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
-public class DfsMutateComputationResultConsumer extends MutateComputationResultConsumer<DFS, HugeLongArray, DfsMutateConfig, MutateResult> {
-    DfsMutateComputationResultConsumer() {
+public class BfsMutateComputationResultConsumer extends MutateComputationResultConsumer<BFS, HugeLongArray, BfsMutateConfig, MutateResult> {
+    BfsMutateComputationResultConsumer() {
         super((computationResult, executionContext) -> new MutateResult.Builder()
             .withPreProcessingMillis(computationResult.preProcessingMillis())
             .withComputeMillis(computationResult.computeMillis())
@@ -37,7 +37,7 @@ public class DfsMutateComputationResultConsumer extends MutateComputationResultC
     @Override
     protected void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<DFS, HugeLongArray, DfsMutateConfig> computationResult,
+        ComputationResult<BFS, HugeLongArray, BfsMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
         var result = computationResult.result();

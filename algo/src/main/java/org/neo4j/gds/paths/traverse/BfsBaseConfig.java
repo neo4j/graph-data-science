@@ -17,25 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.paths.traverse;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.SourceNodeConfig;
+import org.neo4j.gds.config.TargetNodesConfig;
 
-import java.util.Collections;
-import java.util.List;
+@ValueClass
+@Configuration
+@SuppressWarnings("immutables:subtype")
+public interface BfsBaseConfig extends AlgoBaseConfig, SourceNodeConfig, TargetNodesConfig {
 
-public interface TargetNodesConfig {
+    long NO_MAX_DEPTH = -1L;
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.config.NodeIdsParser#parseNodeIds")
-    default List<Long> targetNodes() {
-        return Collections.emptyList();
+    default long maxDepth() {
+        return NO_MAX_DEPTH;
     }
 
     @Configuration.Ignore
     @Value.Derived
-    default boolean hasTargetNodes() {
-        return !targetNodes().isEmpty();
+    default boolean hasMaxDepth() {
+        return maxDepth() != NO_MAX_DEPTH;
     }
 }

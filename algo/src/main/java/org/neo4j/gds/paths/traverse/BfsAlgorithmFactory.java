@@ -34,23 +34,21 @@ import org.neo4j.gds.mem.MemoryUsage;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class BFSAlgorithmFactory extends GraphAlgorithmFactory<BFS, BfsStreamConfig> {
+class BfsAlgorithmFactory<CONFIG extends BfsBaseConfig> extends GraphAlgorithmFactory<BFS, CONFIG> {
 
     @Override
-    public BFS build(
-        Graph graph, BfsStreamConfig configuration, ProgressTracker progressTracker
-    ) {
+    public BFS build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
         ExitPredicate exitFunction;
         Aggregator aggregatorFunction;
         // target node given; terminate if target is reached
-        if (!configuration.targetNodes().isEmpty()) {
+        if (configuration.hasTargetNodes()) {
             List<Long> mappedTargets = configuration.targetNodes().stream()
                 .map(graph::safeToMappedNodeId)
                 .collect(Collectors.toList());
             exitFunction = new TargetExitPredicate(mappedTargets);
             aggregatorFunction = Aggregator.NO_AGGREGATION;
             // maxDepth given; continue to aggregate nodes with lower depth until no more nodes left
-        } else if (configuration.maxDepth() != -1) {
+        } else if (configuration.hasMaxDepth()) {
             exitFunction = new MaxDepthExitPredicate(configuration.maxDepth());
             aggregatorFunction = new OneHopAggregator();
             // do complete BFS until all nodes have been visited
@@ -77,7 +75,7 @@ class BFSAlgorithmFactory extends GraphAlgorithmFactory<BFS, BfsStreamConfig> {
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(BfsStreamConfig configuration) {
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(BFS.class);
 
         builder.perNode("visited ", HugeAtomicBitSet::memoryEstimation) //global variables

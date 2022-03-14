@@ -17,25 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.paths.traverse;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.graphdb.Path;
 
-import java.util.Collections;
 import java.util.List;
 
-public interface TargetNodesConfig {
+public class BfsStreamResult {
+    public final Long sourceNode;
+    public final List<Long> nodeIds;
+    public final Path path;
 
-    @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.config.NodeIdsParser#parseNodeIds")
-    default List<Long> targetNodes() {
-        return Collections.emptyList();
-    }
-
-    @Configuration.Ignore
-    @Value.Derived
-    default boolean hasTargetNodes() {
-        return !targetNodes().isEmpty();
+    BfsStreamResult(long sourceNode, List<Long> nodes, Path path) {
+        this.sourceNode = sourceNode;
+        this.nodeIds = nodes;
+        this.path = path;
     }
 }

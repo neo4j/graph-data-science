@@ -25,15 +25,14 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.compat.MapUtil.map;
 
 /**
  * Graph:
@@ -46,6 +45,7 @@ import static org.neo4j.gds.compat.MapUtil.map;
  */
 class BfsStreamProcTest extends BaseProcTest {
 
+    @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {name:'a'})" +
@@ -71,20 +71,79 @@ class BfsStreamProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
     }
 
-    private long id(String name) {
-        return runQuery("MATCH (n:Node) WHERE n.name = $name RETURN id(n) AS id", map("name", name), result -> result.<Long>columnAs("id").next());
+    @Test
+    void testFindAnyOf() {
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphProject()
+            .withNodeLabel("Node")
+            .withRelationshipType("TYPE")
+            .yields();
+        runQuery(createQuery);
+
+        long id = idFunction.of("a");
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("bfs")
+            .streamMode()
+            .addParameter("sourceNode", id)
+            .addParameter("targetNodes", List.of(idFunction.of("e"), idFunction.of("f")))
+            .yields("sourceNode, nodeIds");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(row.getNumber("sourceNode").longValue(), id);
+            var nodeIds = row.get("nodeIds");
+
+            assertThat(nodeIds)
+                .isEqualTo(Stream.of("a", "b", "c", "d", "e").map(idFunction::of).collect(Collectors.toList()));
+        });
     }
 
-    void assertOrder(Map<String, List<Integer>> expected, List<Long> nodeIds) {
-        assertEquals(expected.size(), nodeIds.size(), "expected " + expected + " | given [" + nodeIds + "]");
-        for (var ex : expected.entrySet()) {
-            long id = id(ex.getKey());
-            var expectedPositions = ex.getValue();
-            int actualPosition = nodeIds.indexOf(id);
-            if (!expectedPositions.contains(actualPosition)) {
-                fail(ex.getKey() + "(" + id + ") at " + actualPosition + " expected at " + expectedPositions);
-            }
-        }
+    @Test
+    void testMaxDepthOut() {
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphProject()
+            .withNodeLabel("Node")
+            .withRelationshipType("TYPE")
+            .yields();
+        runQuery(createQuery);
+        long id = idFunction.of("a");
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("bfs")
+            .streamMode()
+            .addParameter("sourceNode", id)
+            .addParameter("maxDepth", 2)
+            .yields("sourceNode, nodeIds");
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(row.getNumber("sourceNode").longValue(), id);
+            var nodeIds = row.get("nodeIds");
+            assertThat(nodeIds).isEqualTo(
+                Stream.of("a", "b", "c", "d").map(idFunction::of).collect(Collectors.toList())
+            );
+        });
+    }
+
+    @Test
+    void testMaxDepthIn() {
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphProject()
+            .withNodeLabel("Node")
+            .withRelationshipType("TYPE", Orientation.REVERSE)
+            .yields();
+        runQuery(createQuery);
+
+        long id = idFunction.of("g");
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("bfs")
+            .streamMode()
+            .addParameter("sourceNode", id)
+            .addParameter("maxDepth", 2)
+            .yields("sourceNode, nodeIds");
+        runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("sourceNode").longValue()).isEqualTo(id);
+            var nodeIds = row.get("nodeIds");
+            assertThat(nodeIds).isEqualTo(
+                Stream.of("g", "e", "f", "d").map(idFunction::of).collect(Collectors.toList())
+            );
+        });
     }
 
     @Test
@@ -96,59 +155,26 @@ class BfsStreamProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
 
-        long id = id("g");
+        long id = idFunction.of("g");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("bfs")
             .streamMode()
             .addParameter("sourceNode", id)
             .yields("sourceNode, nodeIds");
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(row.getNumber("sourceNode").longValue(), id);
-            List<Long> nodeIds = (List<Long>) row.get("nodeIds");
-            var expectedOrder = new HashMap<String, List<Integer>>();
-            expectedOrder.put("g", List.of(0));
-            expectedOrder.put("f", List.of(1, 2));
-            expectedOrder.put("e", List.of(1, 2));
-            expectedOrder.put("d", List.of(3));
-            expectedOrder.put("c", List.of(4, 5));
-            expectedOrder.put("b", List.of(4, 5));
-            expectedOrder.put("a", List.of(6));
+            assertThat(row.getNumber("sourceNode").longValue()).isEqualTo(id);
 
-            assertOrder(expectedOrder, nodeIds);
+            var nodeIds = row.get("nodeIds");
+
+            // We can't predict the traversal order deterministically => check the possible combinations
+            assertThat(nodeIds).isIn(
+                Stream.of("g", "e", "f", "d", "b", "c", "a").map(idFunction::of).collect(Collectors.toList()),
+                Stream.of("g", "e", "f", "d", "c", "b", "a").map(idFunction::of).collect(Collectors.toList()),
+                Stream.of("g", "f", "e", "d", "b", "c", "a").map(idFunction::of).collect(Collectors.toList()),
+                Stream.of("g", "f", "e", "d", "c", "b", "a").map(idFunction::of).collect(Collectors.toList())
+            );
         });
     }
-
-    @Test
-    void worksOnGraphWithLoop() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withAnyRelationshipType()
-            .yields();
-        runQuery(createQuery);
-
-        long id = id("a");
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("bfs")
-            .streamMode()
-            .addParameter("sourceNode", id)
-            .yields("sourceNode, nodeIds");
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(row.getNumber("sourceNode").longValue(), id);
-            List<Long> nodeIds = (List<Long>) row.get("nodeIds");
-            var expectedOrder = new HashMap<String, List<Integer>>();
-            expectedOrder.put("g", List.of(6));
-            expectedOrder.put("f", List.of(4, 5));
-            expectedOrder.put("e", List.of(4, 5));
-            expectedOrder.put("d", List.of(3));
-            expectedOrder.put("c", List.of(1, 2));
-            expectedOrder.put("b", List.of(1, 2));
-            expectedOrder.put("a", List.of(0));
-
-            assertOrder(expectedOrder, nodeIds);
-        });
-    }
-
 
     @Test
     void failOnInvalidSourceNode() {
@@ -169,7 +195,7 @@ class BfsStreamProcTest extends BaseProcTest {
             .algo("bfs")
             .streamMode()
             .addParameter("sourceNode", 0)
-            .addParameter("targetNodes", Arrays.asList(0, 42, 1))
+            .addParameter("targetNodes", List.of(0, 42, 1))
             .yields();
 
         assertError(query, "Target nodes do not exist in the in-memory graph: ['42']");

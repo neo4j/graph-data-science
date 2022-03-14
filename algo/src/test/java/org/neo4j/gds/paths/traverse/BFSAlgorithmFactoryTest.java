@@ -40,7 +40,7 @@ class BFSAlgorithmFactoryTest {
         long expectedMax,
         long expectedMaxWithConcurrency2
     ) {
-        var algorithmFactory = new BFSAlgorithmFactory();
+        var algorithmFactory = new BfsAlgorithmFactory<BfsStreamConfig>();
 
         var userInput = CypherMapWrapper.create(Map.of(SourceNodeConfig.SOURCE_NODE_KEY, 0));
 

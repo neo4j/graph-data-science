@@ -19,25 +19,14 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.config.SourceNodeConfig;
-import org.neo4j.gds.config.TargetNodesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface BfsStreamConfig extends AlgoBaseConfig, SourceNodeConfig, TargetNodesConfig, ConcurrencyConfig {
-
-    @Value.Default
-    default long maxDepth() {
-        return -1L;
-    }
-
+public interface BfsStreamConfig extends BfsBaseConfig {
     static BfsStreamConfig of(CypherMapWrapper userInput) {
         return new BfsStreamConfigImpl(userInput);
     }

@@ -35,15 +35,15 @@ import static org.neo4j.gds.paths.traverse.BfsStreamProc.DESCRIPTION;
 import static org.neo4j.gds.paths.traverse.BfsStreamProc.NEXT;
 
 @GdsCallable(name = "gds.bfs.stream", description = DESCRIPTION, executionMode = STREAM)
-public class BfsStreamSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStreamConfig, Stream<BfsStreamProc.BfsStreamResult>, BFSAlgorithmFactory> {
+public class BfsStreamSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStreamConfig, Stream<BfsStreamResult>, BfsAlgorithmFactory<BfsStreamConfig>> {
     @Override
     public String name() {
         return "BfsStream";
     }
 
     @Override
-    public BFSAlgorithmFactory algorithmFactory() {
-        return new BFSAlgorithmFactory();
+    public BfsAlgorithmFactory<BfsStreamConfig> algorithmFactory() {
+        return new BfsAlgorithmFactory<>();
     }
 
     @Override
@@ -52,7 +52,7 @@ public class BfsStreamSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStrea
     }
 
     @Override
-    public ComputationResultConsumer<BFS, HugeLongArray, BfsStreamConfig, Stream<BfsStreamProc.BfsStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BFS, HugeLongArray, BfsStreamConfig, Stream<BfsStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var graph = computationResult.graph();
             var result = computationResult.result();
@@ -61,11 +61,14 @@ public class BfsStreamSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStrea
             }
 
             var nodes = result.toArray();
-            var nodeList = Arrays.stream(nodes).boxed().map(graph::toOriginalNodeId).collect(Collectors.toList());
+            var nodeList = Arrays.stream(nodes)
+                .boxed()
+                .map(graph::toOriginalNodeId)
+                .collect(Collectors.toList());
             var startNode = computationResult.config().sourceNode();
-            return Stream.of(new BfsStreamProc.BfsStreamResult(
+            return Stream.of(new BfsStreamResult(
                 startNode,
-                nodes,
+                nodeList,
                 PathFactory.create(executionContext.transaction().internalTransaction(), nodeList, NEXT)
             ));
         };

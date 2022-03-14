@@ -27,21 +27,17 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class BfsStreamProc extends AlgoBaseProc<BFS, HugeLongArray, BfsStreamConfig, BfsStreamProc.BfsStreamResult> {
+public class BfsStreamProc extends AlgoBaseProc<BFS, HugeLongArray, BfsStreamConfig, BfsStreamResult> {
     static final RelationshipType NEXT = RelationshipType.withName("NEXT");
 
     static final String DESCRIPTION =
@@ -90,17 +86,4 @@ public class BfsStreamProc extends AlgoBaseProc<BFS, HugeLongArray, BfsStreamCon
         return new BfsStreamSpec().computationResultConsumer();
     }
 
-    public static class BfsStreamResult {
-        public Long sourceNode;
-        public List<Long> nodeIds;
-        public Path path;
-
-        BfsStreamResult(long sourceNode, long[] nodes, Path path) {
-            this.sourceNode = sourceNode;
-            this.nodeIds = Arrays.stream(nodes)
-                .boxed()
-                .collect(Collectors.toList());
-            this.path = path;
-        }
-    }
 }
