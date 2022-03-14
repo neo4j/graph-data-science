@@ -45,7 +45,7 @@ class KnnBaseConfigTest {
     }
 
     @Test
-    void nodePropertiesShouldAcceptList() {
+    void nodePropertiesShouldAcceptListOfStrings() {
         var userInput = CypherMapWrapper.create(
             Map.of(
                 "nodeProperties", List.of("property1", "property2")
@@ -54,6 +54,26 @@ class KnnBaseConfigTest {
         assertThat(new KnnBaseConfigImpl(userInput).nodeProperties())
             .extracting(KnnNodePropertySpec::name)
             .containsExactlyInAnyOrder("property1", "property2");
+    }
+
+    @Test
+    void nodePropertiesShouldAcceptListOfStringsAndMaps() {
+        var userInput = CypherMapWrapper.create(
+            Map.of(
+                "nodeProperties", List.of("property1", Map.of("property2", "PEARSON"))
+            )
+        );
+        assertThat(new KnnBaseConfigImpl(userInput).nodeProperties())
+            .hasSize(2)
+            .satisfies((list) -> {
+                var spec1 = list.get(0);
+                var spec2 = list.get(1);
+                assertThat(List.of(spec1.name(), spec2.name()))
+                    .containsExactlyInAnyOrder("property1", "property2");
+                // The entries happen to come back in reverse order, so that's what we assert on
+                assertThat(spec2.metric()).isEmpty();
+                assertThat(spec1.metric().get()).isEqualTo(SimilarityMetric.PEARSON);
+            });
     }
 
     @Test

@@ -61,6 +61,8 @@ public final class KnnNodePropertySpecParser {
             for (Object item : (Iterable) userInput) {
                 if (item instanceof String) {
                     data.put((String) item, null);
+                } else if (item instanceof Map) {
+                    data.putAll(parseMap((Map<?, ?>) item));
                 } else {
                     throw new IllegalArgumentException(
                         formatWithLocale(
@@ -73,20 +75,7 @@ public final class KnnNodePropertySpecParser {
             return fromMap(data);
         }
         if (userInput instanceof Map) {
-            var data = new HashMap<String, String>();
-            for (var item : ((Map<?, ?>) userInput).entrySet()) {
-                if (item.getKey() instanceof String && item.getValue() instanceof String) {
-                    data.put((String) item.getKey(), (String) item.getValue());
-                } else {
-                    throw new IllegalArgumentException(
-                        formatWithLocale(
-                            "Cannot construct KnnNodePropertySpec out of %s and %s",
-                            item.getKey().getClass().getName(),
-                            item.getValue().getClass().getName()
-                        )
-                    );
-                }
-            }
+            var data = parseMap((Map<?, ?>) userInput);
             return fromMap(data);
         }
         throw new IllegalArgumentException(
@@ -95,6 +84,24 @@ public final class KnnNodePropertySpecParser {
                 userInput.getClass().getName()
             )
         );
+    }
+
+    private static HashMap<String, String> parseMap(Map<?, ?> item) {
+        var data = new HashMap<String, String>();
+        for (var mapItem : item.entrySet()) {
+            if (mapItem.getKey() instanceof String && mapItem.getValue() instanceof String) {
+                data.put((String) mapItem.getKey(), (String) mapItem.getValue());
+            } else {
+                throw new IllegalArgumentException(
+                    formatWithLocale(
+                        "Cannot construct KnnNodePropertySpec out of %s and %s",
+                        mapItem.getKey().getClass().getName(),
+                        mapItem.getValue().getClass().getName()
+                    )
+                );
+            }
+        }
+        return data;
     }
 
     private static List<KnnNodePropertySpec> fromMap(Map<String, String> userInput) {
