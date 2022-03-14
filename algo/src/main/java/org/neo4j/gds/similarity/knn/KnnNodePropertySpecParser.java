@@ -107,8 +107,9 @@ public final class KnnNodePropertySpecParser {
     private static List<KnnNodePropertySpec> fromMap(Map<String, String> userInput) {
         validatePropertyNames(userInput.keySet());
         var knnNodeProperties = new ArrayList<KnnNodePropertySpec>();
-        for (var key : userInput.keySet()) {
-            var value = userInput.get(key);
+        for (var entry : userInput.entrySet()) {
+            var key = entry.getKey();
+            var value = entry.getValue();
             SimilarityMetric similarityMetric;
             if (value != null) {
                 try {
