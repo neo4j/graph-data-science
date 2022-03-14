@@ -77,7 +77,7 @@ When a property is a scalar number, the similarity is computed as one divided by
 
 image::equations/knn-scalar-similarity.svg[one divided by one plus the absolute difference of ps and pt,align="center"]
 
-This gives us a number in the range `0..1`.
+This gives us a number in the range `(0, 1]`.
 
 List of integers::
 
@@ -85,18 +85,18 @@ When a property is a list of integers, we select Jaccard similarity:
 
 image::equations/jaccard.png[size of intersection divided by size of union,align="center"]
 
-This naturally gives us a score in the range `0..1`
+This naturally gives us a score in the range `[0, 1]`
 
 List of floating-point numbers::
 
 When a property is a list of floating-point numbers, the similarity is computed using the cosine similarity metric.
 See the <<algorithms-similarity-cosine-context, Cosine Similarity>> algorithm for more details.
-We normalise the cosine similarity score into the range `0..1` by doing `consine metric = (cosine similarity + 1)/ 2`.
+We normalise the cosine similarity score into the range `[0, 1]` by doing `consine metric = (cosine similarity + 1)/ 2`.
 
 Multiple properties::
 
 Finally, when multiple properties are specified, the similarity of the two neighbors is the mean of the similarities of the individual properties,
-i.e. the simple mean of the numbers, each of which is in the range `0..1`, giving a total score also in the `0..1` range.
+i.e. the simple mean of the numbers, each of which is in the range `[0, 1]`, giving a total score also in the `[0, 1]` range.
 
 NB: The validity of this mean is highly context dependent, so take care when applying it to your data domain.
 
