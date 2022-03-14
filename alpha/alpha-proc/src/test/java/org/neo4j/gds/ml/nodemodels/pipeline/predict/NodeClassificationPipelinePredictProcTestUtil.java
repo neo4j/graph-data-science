@@ -140,6 +140,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 ))
             )
             .bias(new Weights<>(new Vector(bias)))
+            .featureDimension(weights.length)
             .classIdMap(idMap)
             .build();
     }
