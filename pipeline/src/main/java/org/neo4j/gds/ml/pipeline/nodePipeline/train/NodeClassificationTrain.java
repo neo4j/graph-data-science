@@ -40,13 +40,13 @@ import org.neo4j.gds.gradientdescent.GradientDescentConfig;
 import org.neo4j.gds.gradientdescent.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.nodemodels.BestMetricData;
+import org.neo4j.gds.ml.nodemodels.BestModelStats;
 import org.neo4j.gds.ml.nodemodels.ClassificationMetricComputer;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.Metric;
 import org.neo4j.gds.ml.nodemodels.MetricComputer;
-import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.StatsMap;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
@@ -80,7 +80,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
-public final class NodeClassificationTrain extends Algorithm<Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationModelInfo>> {
+public final class NodeClassificationTrain extends Algorithm<NodeClassificationTrainResult> {
 
     public static final String MODEL_TYPE = "nodeLogisticRegression";
 
@@ -304,7 +304,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
     public void release() {}
 
     @Override
-    public Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationModelInfo> compute() {
+    public NodeClassificationTrainResult compute() {
         progressTracker.beginSubTask();
 
         progressTracker.beginSubTask();
@@ -329,12 +329,16 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
 
         var modelSelectResult = selectBestModel(innerSplits);
         var bestParameters = modelSelectResult.bestParameters();
-        var metricResults = evaluateBestModel(outerSplit, modelSelectResult, bestParameters);
+        Map<Metric, BestMetricData> metricResults = evaluateBestModel(outerSplit, modelSelectResult, bestParameters);
 
-        var retrainedModelData = retrainBestModel(bestParameters);
+        Classifier retrainedModelData = retrainBestModel(bestParameters);
+
         progressTracker.endSubTask();
 
-        return createModel(bestParameters, metricResults, retrainedModelData);
+        return ImmutableNodeClassificationTrainResult.of(
+            createModel(retrainedModelData, modelSelectResult, metricResults),
+            modelSelectResult
+        );
     }
 
     private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
@@ -377,7 +381,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
         return ModelSelectResult.of(bestModelStats.params(), trainStats, validationStats);
     }
 
-    private Map<Metric, MetricData> evaluateBestModel(
+    private Map<Metric, BestMetricData> evaluateBestModel(
         TrainingExamplesSplit outerSplit,
         ModelSelectResult modelSelectResult,
         TrainerConfig bestParameters
@@ -402,16 +406,18 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
         return retrainedClassifier;
     }
 
-    private Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationModelInfo> createModel(
-        TrainerConfig bestParameters,
-        Map<Metric, MetricData> metricResults,
-        Classifier classifier
+    private Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
+        Classifier classifier,
+        ModelSelectResult modelSelectResult,
+        Map<Metric, BestMetricData> metricResults
     ) {
-        var modelInfo = NodeClassificationModelInfo.of(
-            classifier.classIdMap().originalIdsList(),
-            bestParameters,
-            metricResults
-        );
+
+        var modelInfo = NodeClassificationPipelineModelInfo.builder()
+            .classes(classIdMap.originalIdsList())
+            .bestParameters(modelSelectResult.bestParameters())
+            .metrics(metricResults)
+            .trainingPipeline(pipeline.copy())
+            .build();
 
         return Model.of(
             config.username(),
@@ -424,7 +430,7 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
         );
     }
 
-    private Map<Metric, MetricData> mergeMetricResults(
+    private static Map<Metric, BestMetricData> mergeMetricResults(
         ModelSelectResult modelSelectResult,
         Map<Metric, Double> outerTrainMetrics,
         Map<Metric, Double> testMetrics
@@ -432,9 +438,9 @@ public final class NodeClassificationTrain extends Algorithm<Model<Classifier.Cl
         return modelSelectResult.validationStats().keySet().stream().collect(Collectors.toMap(
             Function.identity(),
             metric ->
-                MetricData.of(
-                    modelSelectResult.trainStats().get(metric),
-                    modelSelectResult.validationStats().get(metric),
+                BestMetricData.of(
+                    BestModelStats.findBestModelStats(modelSelectResult.trainStats().get(metric), modelSelectResult.bestParameters()),
+                    BestModelStats.findBestModelStats(modelSelectResult.validationStats().get(metric), modelSelectResult.bestParameters()),
                     outerTrainMetrics.get(metric),
                     testMetrics.get(metric)
                 )

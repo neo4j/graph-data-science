@@ -41,7 +41,6 @@ import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.nodemodels.BestMetricData;
-import org.neo4j.gds.ml.nodemodels.BestModelStats;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.nodemodels.StatsMap;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
@@ -67,6 +66,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
+import static org.neo4j.gds.ml.nodemodels.BestModelStats.findBestModelStats;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndLabelsExtractor.extractFeaturesAndLabels;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionEvaluationMetricComputer.computeMetric;
@@ -267,17 +267,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 testMetrics.get(metric)
             )
         ));
-    }
-
-    private static BestModelStats findBestModelStats(
-        List<ModelStats> metricStatsForModels,
-        TrainerConfig bestParams
-    ) {
-        return metricStatsForModels.stream()
-            .filter(metricStatsForModel -> metricStatsForModel.params() == bestParams)
-            .findFirst()
-            .map(BestModelStats::of)
-            .orElseThrow();
     }
 
     private List<TrainingExamplesSplit> trainValidationSplits(

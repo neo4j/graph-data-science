@@ -34,6 +34,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
@@ -123,10 +124,11 @@ class NodeClassificationTrainTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var model = ncTrain.compute();
+        var result = ncTrain.compute();
+        var model = result.model();
 
         var customInfo = model.customInfo();
-        var validationScores = customInfo.metrics().get(metric).validation();
+        List<ModelStats> validationScores = result.modelSelectionStatistics().validationStats().get(metric);
 
         assertThat(validationScores).hasSize(2);
 
@@ -195,8 +197,10 @@ class NodeClassificationTrainTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var bananasModel = bananasTrain.compute();
-        var arrayPropertyModel = arrayPropertyTrain.compute();
+        var bananasModelTrainResult = bananasTrain.compute();
+        var bananasModel = bananasModelTrainResult.model();
+        var arrayModelTrainResult = arrayPropertyTrain.compute();
+        var arrayPropertyModel = arrayModelTrainResult.model();
 
         assertThat(arrayPropertyModel)
             .usingRecursiveComparison()
@@ -471,8 +475,8 @@ class NodeClassificationTrainTest {
         var firstResult = algoSupplier.get().compute();
         var secondResult = algoSupplier.get().compute();
 
-        assertThat(((LogisticRegressionData)firstResult.data()).weights().data())
-            .matches(matrix -> matrix.equals(((LogisticRegressionData)secondResult.data()).weights().data(), 1e-10));
+        assertThat(((LogisticRegressionData)firstResult.model().data()).weights().data())
+            .matches(matrix -> matrix.equals(((LogisticRegressionData)secondResult.model().data()).weights().data(), 1e-10));
     }
 
     private NodeClassificationPipelineTrainConfig createConfig(

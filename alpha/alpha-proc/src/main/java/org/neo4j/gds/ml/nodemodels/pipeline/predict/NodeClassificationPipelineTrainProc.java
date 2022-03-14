@@ -27,10 +27,10 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFactory;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainResult;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationTrain;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationTrainResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -46,7 +46,7 @@ import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
 @GdsCallable(name = "gds.beta.pipeline.nodeClassification.train", description = "Trains a node classification model based on a pipeline", executionMode = TRAIN)
 public class NodeClassificationPipelineTrainProc extends TrainProc<
     NodeClassificationTrainPipelineExecutor,
-    NodeClassificationPipelineTrainResult,
+    NodeClassificationTrainResult,
     NodeClassificationPipelineTrainConfig,
     NodeClassificationPipelineTrainProc.NCTrainResult
     > {
@@ -87,12 +87,12 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
     }
 
     @Override
-    protected NCTrainResult constructProcResult(ComputationResult<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainResult, NodeClassificationPipelineTrainConfig> computationResult) {
+    protected NCTrainResult constructProcResult(ComputationResult<NodeClassificationTrainPipelineExecutor, NodeClassificationTrainResult, NodeClassificationPipelineTrainConfig> computationResult) {
         return new NCTrainResult(computationResult.result(), computationResult.computeMillis());
     }
 
     @Override
-    protected Model<?, ?, ?> extractModel(NodeClassificationPipelineTrainResult algoResult) {
+    protected Model<?, ?, ?> extractModel(NodeClassificationTrainResult algoResult) {
         return algoResult.model();
     }
 
@@ -100,7 +100,7 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
 
         public final Map<String, Object> modelSelectionStats;
 
-        public NCTrainResult(NodeClassificationPipelineTrainResult algoResult, long trainMillis) {
+        public NCTrainResult(NodeClassificationTrainResult algoResult, long trainMillis) {
             super(algoResult.model(), trainMillis);
             this.modelSelectionStats = algoResult.modelSelectionStatistics().toMap();
         }

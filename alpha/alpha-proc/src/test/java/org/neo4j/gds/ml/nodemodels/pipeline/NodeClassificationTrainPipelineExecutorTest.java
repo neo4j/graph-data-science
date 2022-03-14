@@ -37,7 +37,6 @@ import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFactory;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
@@ -45,8 +44,8 @@ import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.ImmutableNodeClassificationSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.ImmutableNodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.models.TrainingMethod;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
@@ -54,7 +53,6 @@ import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -170,48 +168,6 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                 .isEqualTo(pipeline);
 
             assertThat(customInfo.trainingPipeline().toMap()).isEqualTo(pipeline.toMap());
-        });
-    }
-
-    @Test
-    void passesAllParameters() {
-        var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
-            .pipeline(PIPELINE_NAME)
-            .username("myUser")
-            .graphName(GRAPH_NAME)
-            .modelName("myModel")
-            .concurrency(1)
-            .randomSeed(42L)
-            .targetProperty("t")
-            .addRelationshipType("SOME_REL")
-            .addNodeLabel("SOME_LABEL")
-            .minBatchSize(1)
-            .metrics(List.of(MetricSpecification.parse("F1_WEIGHTED")))
-            .build();
-
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var pipeline = new NodeClassificationPipeline();
-            pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
-
-            NodeClassificationTrainConfig actualConfig = NodeClassificationTrainPipelineExecutor.innerConfig(pipeline, config);
-
-            assertThat(actualConfig)
-                .matches(innerConfig -> innerConfig.username().equals(config.username()))
-                .matches(innerConfig -> innerConfig.modelName().equals("myModel"))
-                .matches(innerConfig -> innerConfig.concurrency() == 1 )
-                .matches(innerConfig -> innerConfig.randomSeed().orElseThrow().equals(42L) )
-                .matches(innerConfig -> innerConfig.targetProperty().equals("t") )
-                .matches(
-                    innerConfig -> innerConfig.relationshipTypes().equals(List.of("SOME_REL")),
-                    actualConfig.relationshipTypes().toString()
-                )
-                .matches(innerConfig -> innerConfig.nodeLabels().equals(List.of("SOME_LABEL")) )
-                .matches(innerConfig -> {
-                    List<String> metricNames = innerConfig.metrics().stream()
-                        .map(MetricSpecification::asString)
-                        .collect(Collectors.toList());
-                    return metricNames.equals(List.of("F1_WEIGHTED"));
-                });
         });
     }
 

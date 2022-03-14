@@ -20,39 +20,26 @@
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.ml.nodemodels.BestMetricData;
-import org.neo4j.gds.ml.nodemodels.BestModelStats;
-import org.neo4j.gds.ml.nodemodels.Metric;
-import org.neo4j.gds.ml.nodemodels.MetricData;
-import org.neo4j.gds.ml.nodemodels.ModelStats;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfigImpl;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.pipeline.nodePipeline.train.ImmutableModelSelectResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationTrain;
-import org.neo4j.gds.models.TrainerConfig;
-import org.neo4j.gds.models.TrainingMethod;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationTrainResult;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     NodeClassificationPipelineTrainConfig,
     NodeClassificationPipeline,
-    NodeClassificationPipelineTrainResult
+    NodeClassificationTrainResult
 > {
 
     public NodeClassificationTrainPipelineExecutor(
@@ -105,7 +92,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    protected NodeClassificationPipelineTrainResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+    protected NodeClassificationTrainResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         PipelineExecutor.validateTrainingParameterSpace(pipeline);
 
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
@@ -114,95 +101,8 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
 
         this.pipeline.splitConfig().validateMinNumNodesInSplitSets(graph);
 
-        var innerModel = NodeClassificationTrain
-            .create(graph, innerConfig(pipeline, config), progressTracker)
+        return NodeClassificationTrain
+            .create(graph, pipeline, config, progressTracker)
             .compute();
-        var innerInfo = innerModel.customInfo();
-
-        var bestMetrics = innerInfo.metrics().entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            metricStats -> extractWinningModelStats(metricStats.getValue(), innerInfo.bestParameters())
-        ));
-        var modelInfo = NodeClassificationPipelineModelInfo.builder()
-            .classes(innerInfo.classes())
-            .bestParameters(innerInfo.bestParameters())
-            .metrics(bestMetrics)
-            .trainingPipeline(pipeline.copy())
-            .build();
-
-        return ImmutableNodeClassificationPipelineTrainResult.of(
-            Model.of(
-                innerModel.creator(),
-                innerModel.name(),
-                NodeClassificationPipeline.MODEL_TYPE,
-                innerModel.graphSchema(),
-                innerModel.data(),
-                config,
-                modelInfo
-            ),
-            ImmutableModelSelectResult.of(
-                innerInfo.bestParameters(),
-                getTrainingStats(innerInfo),
-                getValidationStats(innerInfo)
-            )
-        );
-    }
-
-
-    private Map<Metric, List<ModelStats>> getTrainingStats(NodeClassificationModelInfo innerInfo) {
-        return innerInfo.metrics().entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            metricStats -> metricStats.getValue().train())
-        );
-    }
-
-    private Map<Metric, List<ModelStats>> getValidationStats(NodeClassificationModelInfo innerInfo) {
-        return innerInfo.metrics().entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            metricStats -> metricStats.getValue().validation())
-        );
-    }
-
-    private BestMetricData extractWinningModelStats(
-        MetricData oldStats,
-        TrainerConfig bestParams
-    ) {
-        return BestMetricData.of(
-            findBestModelStats(oldStats.train(), bestParams),
-            findBestModelStats(oldStats.validation(), bestParams),
-            oldStats.outerTrain(),
-            oldStats.test()
-        );
-
-    }
-
-    static NodeClassificationTrainConfig innerConfig(NodeClassificationPipeline pipeline, NodeClassificationPipelineTrainConfig config) {
-        var params = pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression).stream()
-            .map(TrainerConfig::toMap).collect(Collectors.toList());
-        return NodeClassificationTrainConfigImpl.builder()
-            .modelName(config.modelName())
-            .concurrency(config.concurrency())
-            .username(config.username())
-            .metrics(config.metrics())
-            .targetProperty(config.targetProperty())
-            .featureProperties(pipeline.featureProperties())
-            .params(params)
-            .randomSeed(config.randomSeed())
-            .holdoutFraction(pipeline.splitConfig().testFraction())
-            .validationFolds(pipeline.splitConfig().validationFolds())
-            .nodeLabels(config.nodeLabels())
-            .relationshipTypes(config.relationshipTypes())
-            .build();
-    }
-
-    private static BestModelStats findBestModelStats(
-        List<ModelStats> metricStatsForModels,
-        TrainerConfig bestParams
-    ) {
-        return metricStatsForModels.stream()
-            .filter(metricStatsForModel -> metricStatsForModel.params() == bestParams)
-            .findFirst()
-            .map(BestModelStats::of)
-            .orElseThrow();
     }
 }
