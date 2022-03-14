@@ -188,12 +188,9 @@ class LinkPredictionTrainTest {
         assertThat(actualModel.trainConfig()).isEqualTo(trainConfig);
         // length of the linkFeatures
 
-        if (actualModel.data() instanceof LogisticRegressionData) {
-            assertThat((LogisticRegressionData) actualModel.data())
-                .extracting(llrData -> llrData.weights().data().totalSize())
-                .isEqualTo(6);
-        }
-
+        assertThat((LogisticRegressionData) actualModel.data())
+            .extracting(llrData -> llrData.weights().data().totalSize())
+            .isEqualTo(6);
 
         var customInfo = actualModel.customInfo();
         assertThat(result.modelSelectionStatistics().validationStats().get(LinkMetric.AUCPR))
@@ -203,15 +200,7 @@ class LinkPredictionTrainTest {
 
         assertThat(customInfo.bestParameters())
             .usingRecursiveComparison()
-            .isEqualTo(RandomForestTrainConfigImpl
-                .builder()
-                .minSplitSize(1)
-                .maxDepth(10)
-                .numberOfDecisionTrees(20)
-                .featureBaggingRatio(0.8)
-                .randomSeed(42L) // FIXME: Remove me!
-                .build()
-            );
+            .isEqualTo(LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
     }
 
     @Test
