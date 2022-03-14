@@ -126,7 +126,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                         .maxDepth(42)
                         .featureBaggingRatio(0.5)
                         .numberOfDecisionTrees(10)
-                        .minSplitSize(1)
+                        .minSplitSize(2)
                         .build()
                         .toMap()),
                     TrainingMethod.LogisticRegression.name(), List.of()

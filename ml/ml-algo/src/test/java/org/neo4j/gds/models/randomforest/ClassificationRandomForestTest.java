@@ -106,7 +106,7 @@ class ClassificationRandomForestTest {
             RandomForestTrainConfigImpl
                 .builder()
                 .maxDepth(1)
-                .minSplitSize(1)
+                .minSplitSize(2)
                 .randomSeed(42L)
                 .featureBaggingRatio(1.0D)
                 .numberOfDecisionTrees(1)
@@ -136,7 +136,7 @@ class ClassificationRandomForestTest {
             RandomForestTrainConfigImpl
                 .builder()
                 .maxDepth(2)
-                .minSplitSize(1)
+                .minSplitSize(2)
                 .randomSeed(Optional.of(1337L))
                 .numberOfSamplesRatio(0.5D)
                 .featureBaggingRatio(1.0D)
@@ -167,7 +167,7 @@ class ClassificationRandomForestTest {
             RandomForestTrainConfigImpl
                 .builder()
                 .maxDepth(2)
-                .minSplitSize(1)
+                .minSplitSize(2)
                 .randomSeed(Optional.of(1337L))
                 .featureBaggingRatio(1.0D)
                 .numberOfDecisionTrees(20)
@@ -190,7 +190,7 @@ class ClassificationRandomForestTest {
             RandomForestTrainConfigImpl
                 .builder()
                 .maxDepth(2)
-                .minSplitSize(1)
+                .minSplitSize(2)
                 .randomSeed(Optional.of(1337L))
                 .numberOfSamplesRatio(0.5D)
                 .featureBaggingRatio(1.0D)

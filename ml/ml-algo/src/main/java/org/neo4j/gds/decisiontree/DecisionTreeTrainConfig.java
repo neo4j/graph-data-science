@@ -27,8 +27,10 @@ public interface DecisionTreeTrainConfig {
     @Configuration.IntegerRange(min = 1)
     int maxDepth();
 
-    @Configuration.IntegerRange(min = 0)
-    int minSplitSize();
+    @Configuration.IntegerRange(min = 2)
+    default int minSplitSize() {
+        return 2;
+    }
 
     @Configuration.Ignore
     default String lossFunction() {
