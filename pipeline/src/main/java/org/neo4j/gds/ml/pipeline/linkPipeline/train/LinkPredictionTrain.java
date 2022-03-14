@@ -78,7 +78,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     private final Graph trainGraph;
     private final Graph validationGraph;
     private final LinkPredictionPipeline pipeline;
-    private final LinkPredictionTrainConfig trainConfig;
+    private final LinkPredictionTrainConfig config;
     private final LocalIdMap classIdMap;
 
     public static LocalIdMap makeClassIdMap() {
@@ -92,14 +92,14 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         Graph trainGraph,
         Graph validationGraph,
         LinkPredictionPipeline pipeline,
-        LinkPredictionTrainConfig trainConfig,
+        LinkPredictionTrainConfig config,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.trainGraph = trainGraph;
         this.validationGraph = validationGraph;
         this.pipeline = pipeline;
-        this.trainConfig = trainConfig;
+        this.config = config;
         this.classIdMap = makeClassIdMap();
     }
 
@@ -126,7 +126,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var trainData = extractFeaturesAndLabels(
             trainGraph,
             pipeline.featureSteps(),
-            trainConfig.concurrency(),
+            config.concurrency(),
             progressTracker
         );
         var trainRelationshipIds = new ReadOnlyHugeLongIdentityArray(trainData.size());
@@ -175,7 +175,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             classIdMap,
             terminationFlag,
             customProgressTracker,
-            trainConfig.concurrency(),
+            config.concurrency(),
             true
         ).train(featureAndLabels.features(), featureAndLabels.labels(), trainSet);
     }
@@ -209,7 +209,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             }
 
             // insert the candidates' metrics into trainStats and validationStats
-            trainConfig.metrics().forEach(metric -> {
+            config.metrics().forEach(metric -> {
                 validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
                 trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
             });
@@ -218,7 +218,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         });
 
         // 5. pick the best-scoring model candidate, according to the main metric
-        var mainMetric = trainConfig.metrics().get(0);
+        var mainMetric = config.metrics().get(0);
         var modelStats = validationStats.get(mainMetric);
         var winner = Collections.max(modelStats, COMPARE_AVERAGE);
 
@@ -232,7 +232,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var testData = extractFeaturesAndLabels(
             validationGraph,
             pipeline.featureSteps(),
-            trainConfig.concurrency(),
+            config.concurrency(),
             progressTracker
         );
         progressTracker.endSubTask("extract test features");
@@ -242,7 +242,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             testData,
             classifier,
             new BatchQueue(testData.size()),
-            trainConfig,
+            config,
             progressTracker,
             terminationFlag
         );
@@ -288,7 +288,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             pipeline.splitConfig().validationFolds(),
             trainRelationshipIds,
             ReadOnlyHugeLongArray.of(actualLabels),
-            trainConfig.randomSeed()
+            config.randomSeed()
         );
         return splitter.splits();
     }
@@ -343,7 +343,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             trainData,
             classifier,
             new HugeBatchQueue(evaluationSet),
-            trainConfig,
+            config,
             progressTracker,
             terminationFlag
         );
@@ -355,12 +355,12 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         Map<LinkMetric, BestMetricData> winnerMetrics
     ) {
         return Model.of(
-            trainConfig.username(),
-            trainConfig.modelName(),
+            config.username(),
+            config.modelName(),
             MODEL_TYPE,
             trainGraph.schema(),
             classifierData,
-            trainConfig,
+            config,
             LinkPredictionModelInfo.of(
                 bestParameters,
                 winnerMetrics,
