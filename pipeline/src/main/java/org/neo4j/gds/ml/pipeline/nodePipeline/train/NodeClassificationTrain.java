@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels;
+package org.neo4j.gds.ml.pipeline.nodePipeline.train;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
@@ -40,6 +40,15 @@ import org.neo4j.gds.gradientdescent.GradientDescentConfig;
 import org.neo4j.gds.gradientdescent.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.nodemodels.ClassificationMetricComputer;
+import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
+import org.neo4j.gds.ml.nodemodels.Metric;
+import org.neo4j.gds.ml.nodemodels.MetricComputer;
+import org.neo4j.gds.ml.nodemodels.MetricData;
+import org.neo4j.gds.ml.nodemodels.ModelStats;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.StatsMap;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;

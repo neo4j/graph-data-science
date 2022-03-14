@@ -31,6 +31,7 @@ import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecu
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationTrain;
 
 import java.util.List;
 

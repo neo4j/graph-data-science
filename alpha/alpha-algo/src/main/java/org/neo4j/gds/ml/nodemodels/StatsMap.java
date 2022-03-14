@@ -33,7 +33,7 @@ import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 
 public final class StatsMap {
 
-    static MemoryEstimation memoryEstimation(int numberOfMetricsSpecifications, int numberOfModelCandidates) {
+    public static MemoryEstimation memoryEstimation(int numberOfMetricsSpecifications, int numberOfModelCandidates) {
         int fudgedNumberOfClasses = 1000;
         return memoryEstimation(numberOfMetricsSpecifications, numberOfModelCandidates, fudgedNumberOfClasses);
     }
@@ -51,7 +51,7 @@ public final class StatsMap {
 
     private final Map<Metric, List<ModelStats>> map;
 
-    static StatsMap create(List<Metric> metrics) {
+    public static StatsMap create(List<Metric> metrics) {
         Map<Metric, List<ModelStats>> map = new HashMap<>();
         metrics.forEach(metric -> map.put(metric, new ArrayList<>()));
         return new StatsMap(map);
@@ -61,16 +61,16 @@ public final class StatsMap {
         this.map = map;
     }
 
-    void add(Metric metric, ModelStats modelStats) {
+    public void add(Metric metric, ModelStats modelStats) {
         map.get(metric).add(modelStats);
     }
 
-    ModelStats pickBestModelStats(Metric metric) {
+    public ModelStats pickBestModelStats(Metric metric) {
         var modelStats = map.get(metric);
         return Collections.max(modelStats, COMPARE_AVERAGE);
     }
 
-    Map<Metric, List<ModelStats>> getMap() {
+    public Map<Metric, List<ModelStats>> getMap() {
         return map;
     }
 }

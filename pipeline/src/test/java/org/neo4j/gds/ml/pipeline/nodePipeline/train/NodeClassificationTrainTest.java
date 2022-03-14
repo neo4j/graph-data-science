@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels;
+package org.neo4j.gds.ml.pipeline.nodePipeline.train;
 
 import org.assertj.core.api.iterable.ThrowingExtractor;
 import org.assertj.core.data.Percentage;
@@ -34,6 +34,8 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
