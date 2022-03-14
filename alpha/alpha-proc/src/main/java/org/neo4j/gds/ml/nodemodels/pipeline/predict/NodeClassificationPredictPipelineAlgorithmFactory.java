@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -29,9 +28,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictAlgorithmFactory;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConfig;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConfigImpl;
 
 import java.util.List;
 
@@ -44,12 +40,10 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
 
     private final ModelCatalog modelCatalog;
     private final ExecutionContext executionContext;
-    private final NodeClassificationPredictAlgorithmFactory<NodeClassificationPredictConfig> innerFactory;
 
     NodeClassificationPredictPipelineAlgorithmFactory(ExecutionContext executionContext, ModelCatalog modelCatalog) {
         super();
         this.modelCatalog = modelCatalog;
-        this.innerFactory = new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
         this.executionContext = executionContext;
     }
 
@@ -69,17 +63,8 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
                 () -> List.of(Tasks.leaf("step")),
                 trainingPipeline.nodePropertySteps().size()
             ),
-            innerFactory.progressTask(graphStore.getUnion(), innerConfig(config))
+            Tasks.leaf("Node classification predict", graphStore.getUnion().nodeCount())
         );
-    }
-
-    private NodeClassificationPredictConfig innerConfig(CONFIG configuration) {
-        return new NodeClassificationPredictConfigImpl(
-            configuration.username(),
-            CypherMapWrapper.create(configuration.toMap())
-                .withEntry("includePredictedProbabilities",configuration.includePredictedProbabilities())
-                .withoutEntry("predictedProbabilityProperty")
-            );
     }
 
     @Override
