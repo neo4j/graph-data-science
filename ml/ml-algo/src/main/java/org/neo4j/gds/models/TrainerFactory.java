@@ -20,9 +20,7 @@
 package org.neo4j.gds.models;
 
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.decisiontree.GiniIndex;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainer;
@@ -37,7 +35,6 @@ public class TrainerFactory {
 
     public static Trainer create(
         TrainerConfig config,
-        HugeLongArray targets,
         LocalIdMap classIdMap,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
@@ -57,8 +54,7 @@ public class TrainerFactory {
                 );
             }
             case RandomForest: {
-                return new ClassificationRandomForestTrainer<>(
-                    GiniIndex.fromOriginalLabels(targets, classIdMap),
+                return new ClassificationRandomForestTrainer(
                     concurrency,
                     classIdMap,
                     (RandomForestTrainConfig) config,

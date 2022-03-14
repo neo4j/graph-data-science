@@ -450,7 +450,6 @@ public final class NodeClassificationTrain {
     ) {
         Trainer trainer = TrainerFactory.create(
             trainerConfig,
-            targets,
             classIdMap,
             terminationFlag,
             progressTracker,

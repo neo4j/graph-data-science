@@ -32,6 +32,7 @@ import org.neo4j.gds.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.decisiontree.DecisionTreeTrainConfig;
 import org.neo4j.gds.decisiontree.DecisionTreeTrainConfigImpl;
 import org.neo4j.gds.decisiontree.FeatureBagger;
+import org.neo4j.gds.decisiontree.GiniIndex;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.models.Features;
 import org.neo4j.gds.models.Trainer;
@@ -41,9 +42,8 @@ import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> implements Trainer {
+public class ClassificationRandomForestTrainer implements Trainer {
 
-    private final LOSS lossFunction;
     private final LocalIdMap classIdMap;
     private final RandomForestTrainConfig config;
     private final int concurrency;
@@ -52,14 +52,12 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
     private Optional<Double> outOfBagError = Optional.empty();
 
     public ClassificationRandomForestTrainer(
-        LOSS lossFunction,
         int concurrency,
         LocalIdMap classIdMap,
         RandomForestTrainConfig config,
         boolean computeOutOfBagError,
         Optional<Long> randomSeed
     ) {
-        this.lossFunction = lossFunction;
         this.classIdMap = classIdMap;
         this.config = config;
         this.concurrency = concurrency;
@@ -82,6 +80,7 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
             .build();
 
         int numberOfDecisionTrees = config.numberOfDecisionTrees();
+        var lossFunction = GiniIndex.fromOriginalLabels(allLabels, classIdMap);
         var tasks = IntStream.range(0, numberOfDecisionTrees).mapToObj(unused ->
             new TrainDecisionTreeTask<>(
                 maybePredictions,

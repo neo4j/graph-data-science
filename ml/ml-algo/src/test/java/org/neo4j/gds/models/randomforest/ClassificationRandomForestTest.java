@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.decisiontree.GiniIndex;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.models.Features;
 import org.neo4j.gds.models.FeaturesFactory;
@@ -43,8 +42,6 @@ class ClassificationRandomForestTest {
     private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
     private ReadOnlyHugeLongArray trainSet;
     private Features allFeatureVectors;
-
-    private GiniIndex giniIndexLoss;
 
     @BeforeEach
     void setup() {
@@ -71,8 +68,6 @@ class ClassificationRandomForestTest {
         featureVectorArray.set(9, new double[]{6.642287351, 3.319983761});
 
         allFeatureVectors = FeaturesFactory.wrap(featureVectorArray);
-
-        giniIndexLoss = GiniIndex.fromOriginalLabels(allLabels, CLASS_MAPPING);
     }
 
     long predictLabel(
@@ -99,8 +94,7 @@ class ClassificationRandomForestTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void usingOneTree(int concurrency) {
-        var randomForestTrainer = new ClassificationRandomForestTrainer<>(
-            giniIndexLoss,
+        var randomForestTrainer = new ClassificationRandomForestTrainer(
             concurrency,
             CLASS_MAPPING,
             RandomForestTrainConfigImpl
@@ -129,8 +123,7 @@ class ClassificationRandomForestTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void usingTwentyTrees(int concurrency) {
-        var randomForestTrainer = new ClassificationRandomForestTrainer<>(
-            giniIndexLoss,
+        var randomForestTrainer = new ClassificationRandomForestTrainer(
             concurrency,
             CLASS_MAPPING,
             RandomForestTrainConfigImpl
@@ -160,8 +153,7 @@ class ClassificationRandomForestTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldMakeSaneErrorEstimation(int concurrency) {
-        var randomForestTrainer = new ClassificationRandomForestTrainer<>(
-            giniIndexLoss,
+        var randomForestTrainer = new ClassificationRandomForestTrainer(
             concurrency,
             CLASS_MAPPING,
             RandomForestTrainConfigImpl
@@ -183,8 +175,7 @@ class ClassificationRandomForestTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void considerTrainSet(int concurrency) {
-        var randomForestTrainer = new ClassificationRandomForestTrainer<>(
-            giniIndexLoss,
+        var randomForestTrainer = new ClassificationRandomForestTrainer(
             concurrency,
             CLASS_MAPPING,
             RandomForestTrainConfigImpl

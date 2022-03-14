@@ -171,7 +171,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     ) {
         return TrainerFactory.create(
             trainerConfig,
-            featureAndLabels.labels(),
             classIdMap,
             terminationFlag,
             customProgressTracker,
