@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.storageengine;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import org.eclipse.collections.api.IntIterable;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.collections.HugeSparseLongList;
@@ -38,6 +40,7 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
 
     private final CypherGraphStore graphStore;
     private final TokenHolders tokenHolders;
+    private final IntObjectMap<UpdatableNodeProperty> nodePropertiesCache;
 
     public InMemoryTransactionStateVisitor(
         CypherGraphStore graphStore,
@@ -45,6 +48,7 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
     ) {
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
+        this.nodePropertiesCache = new IntObjectHashMap<>();
     }
 
     @Override
@@ -54,19 +58,23 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
         var addedOrChangedProperties = Iterables.concat(added, changed);
         for (StorageProperty storageProperty : addedOrChangedProperties) {
             try {
-                var propertyName = tokenHolders.propertyKeyTokens().getTokenById(storageProperty.propertyKeyId()).name();
+                var propertyKeyId = storageProperty.propertyKeyId();
+                var propertyKey = tokenHolders.propertyKeyTokens().getTokenById(propertyKeyId).name();
                 var propertyValue = storageProperty.value();
+
+                var updatableNodeProperty = getOrCreateUpdatableNodeProperty(propertyKeyId, propertyValue);
 
                 graphStore.nodes().forEachNodeLabel(nodeId, nodeLabel -> {
                     UpdatableNodeProperty nodeProperties;
-                    if (graphStore.hasNodeProperty(nodeLabel, propertyName)) {
-                        var maybeNodeProperties = graphStore.nodePropertyValues(nodeLabel, propertyName);
+                    if (graphStore.hasNodeProperty(nodeLabel, propertyKey)) {
+                        var maybeNodeProperties = graphStore.nodePropertyValues(nodeLabel, propertyKey);
                         if (!(maybeNodeProperties instanceof UpdatableNodeProperty)) {
-                            throw new UnsupportedOperationException("foo");
+                            throw new UnsupportedOperationException(formatWithLocale("Cannot update immutable property %s", propertyKey));
                         }
                         nodeProperties = (UpdatableNodeProperty) maybeNodeProperties;
                     } else {
-                        nodeProperties = updatableNodePropertyFromValue(propertyValue);
+                        nodeProperties = updatableNodeProperty;
+                        graphStore.addNodeProperty(nodeLabel, propertyKey, nodeProperties);
                     }
 
                     nodeProperties.updatePropertyValue(nodeId, propertyValue);
@@ -74,9 +82,25 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
                     return true;
                 });
             } catch (TokenNotFoundException e) {
-                e.printStackTrace();
+                throw new IllegalStateException(formatWithLocale(
+                    "Did not find property for token with id %d",
+                    storageProperty.propertyKeyId()
+                ));
             }
         }
+
+        // when removing node properties we need to update the token holders and the
+        // property cache. This also need to happen when we remove properties via the graph store
+    }
+
+    private UpdatableNodeProperty getOrCreateUpdatableNodeProperty(int propertyKeyToken, Value value) {
+        if (this.nodePropertiesCache.containsKey(propertyKeyToken)) {
+            return this.nodePropertiesCache.get(propertyKeyToken);
+        }
+
+        var updatableNodeProperty = updatableNodePropertyFromValue(value);
+        this.nodePropertiesCache.put(propertyKeyToken, updatableNodeProperty);
+        return updatableNodeProperty;
     }
 
     private UpdatableNodeProperty updatableNodePropertyFromValue(Value value) {
