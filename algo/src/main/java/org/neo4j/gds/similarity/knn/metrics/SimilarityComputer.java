@@ -53,9 +53,10 @@ public interface SimilarityComputer {
             graph.nodeProperties(propertyName),
             () -> formatWithLocale("The property `%s` has not been loaded", propertyName)
         );
-        var similarityMetric = knnNodePropertySpec
-            .metric()
-            .orElse(SimilarityMetric.defaultMetricForType(nodeProperties.valueType()));
+
+        var similarityMetric = knnNodePropertySpec.metric() == SimilarityMetric.DEFAULT
+            ? SimilarityMetric.defaultMetricForType(nodeProperties.valueType())
+            : knnNodePropertySpec.metric();
         return ofProperty(nodeProperties, propertyName, similarityMetric);
     }
 

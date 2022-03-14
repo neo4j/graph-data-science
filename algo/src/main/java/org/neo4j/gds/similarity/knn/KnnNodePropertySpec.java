@@ -21,26 +21,24 @@ package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.similarity.knn.metrics.SimilarityMetric;
 
-import java.util.Optional;
-
 public class KnnNodePropertySpec {
     private final String propertyName;
-    private final Optional<SimilarityMetric> similarityMetric;
+    private final SimilarityMetric similarityMetric;
 
     public KnnNodePropertySpec(String propertyName) {
-        this(propertyName, null);
+        this(propertyName, SimilarityMetric.DEFAULT);
     }
 
     KnnNodePropertySpec(String propertyName, SimilarityMetric similarityMetric) {
         this.propertyName = propertyName;
-        this.similarityMetric = Optional.ofNullable(similarityMetric);
+        this.similarityMetric = similarityMetric;
     }
 
     public String name() {
         return propertyName;
     }
 
-    public Optional<SimilarityMetric> metric() {
+    public SimilarityMetric metric() {
         return similarityMetric;
     }
 }

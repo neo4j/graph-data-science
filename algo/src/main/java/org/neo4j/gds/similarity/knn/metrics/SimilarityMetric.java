@@ -24,7 +24,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public enum SimilarityMetric {
-    JACCARD, OVERLAP, COSINE, EUCLIDEAN, PEARSON, DUMMY_LONG_PROPERTY_METRIC, DUMMY_DOUBLE_PROPERTY_METRIC;
+    JACCARD, OVERLAP, COSINE, EUCLIDEAN, PEARSON, DUMMY_LONG_PROPERTY_METRIC, DUMMY_DOUBLE_PROPERTY_METRIC, DEFAULT;
 
     public static SimilarityMetric defaultMetricForType(ValueType valueType) {
         switch (valueType) {

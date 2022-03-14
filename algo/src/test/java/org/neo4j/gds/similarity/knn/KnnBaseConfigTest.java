@@ -70,9 +70,8 @@ class KnnBaseConfigTest {
                 var spec2 = list.get(1);
                 assertThat(List.of(spec1.name(), spec2.name()))
                     .containsExactlyInAnyOrder("property1", "property2");
-                // The entries happen to come back in reverse order, so that's what we assert on
-                assertThat(spec2.metric()).isEmpty();
-                assertThat(spec1.metric().get()).isEqualTo(SimilarityMetric.PEARSON);
+                assertThat(List.of(spec1.metric(), spec2.metric()))
+                    .containsExactlyInAnyOrder(SimilarityMetric.DEFAULT, SimilarityMetric.PEARSON);
             });
     }
 
@@ -93,7 +92,7 @@ class KnnBaseConfigTest {
                 var spec2 = list.get(1);
                 assertThat(List.of(spec1.name(), spec2.name()))
                     .containsExactlyInAnyOrder("property1", "property2");
-                assertThat(List.of(spec1.metric().get(), spec2.metric().get()))
+                assertThat(List.of(spec1.metric(), spec2.metric()))
                     .containsExactlyInAnyOrder(SimilarityMetric.JACCARD, SimilarityMetric.PEARSON);
             });
     }
