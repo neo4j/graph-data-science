@@ -66,7 +66,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     private final TokenHolders tokenHolders;
-    private final BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
+    private final BiFunction<CypherGraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
     private final Supplier<CommandCreationContext> commandCreationContextSupplier;
     private final TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
     private final CountsStore countsStore;
@@ -77,7 +77,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders,
         BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn,
-        BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
+        BiFunction<CypherGraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
         MetadataProvider metadataProvider,
         Supplier<CommandCreationContext> commandCreationContextSupplier,
         TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn

@@ -40,7 +40,7 @@ public abstract class InMemoryStorageEngineBuilder<T extends AbstractInMemorySto
     protected final MetadataProvider metadataProvider;
 
     protected BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn;
-    protected BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
+    protected BiFunction<CypherGraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
     protected Supplier<CommandCreationContext> commandCreationContextSupplier;
     protected TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
 
@@ -59,7 +59,7 @@ public abstract class InMemoryStorageEngineBuilder<T extends AbstractInMemorySto
         return this;
     }
 
-    public InMemoryStorageEngineBuilder<T> withTxStateVisitorFn(BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn) {
+    public InMemoryStorageEngineBuilder<T> withTxStateVisitorFn(BiFunction<CypherGraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn) {
         this.txStateVisitorFn = txStateVisitorFn;
         return this;
     }

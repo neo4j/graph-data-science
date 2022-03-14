@@ -51,7 +51,7 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders,
         BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn,
-        BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
+        BiFunction<CypherGraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
         MetadataProvider metadataProvider,
         Supplier<CommandCreationContext> commandCreationContextSupplier,
         TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn

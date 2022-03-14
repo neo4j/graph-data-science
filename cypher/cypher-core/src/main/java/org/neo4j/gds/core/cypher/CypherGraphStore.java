@@ -23,24 +23,16 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.token.TokenHolders;
-import org.neo4j.values.storable.Value;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpdater {
 
     private final CypherIdMap cypherIdMap;
-    private final Map<NodeLabel, Map<String, UpdatableNodeProperty>> updatableNodeProperties;
 
     private RelationshipIds relationshipIds;
 
     public CypherGraphStore(GraphStore graphStore) {
         super(graphStore);
         this.cypherIdMap = new CypherIdMap(super.nodes());
-        this.updatableNodeProperties = new HashMap<>();
     }
 
     public void initialize(TokenHolders tokenHolders) {
@@ -60,21 +52,6 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
     @Override
     public void addLabelToNode(long nodeId, NodeLabel nodeLabel) {
         this.cypherIdMap.addLabelToNode(nodeId, nodeLabel);
-    }
-
-    public void addNodePropertyToNode(long nodeId, String propertyKey, Value value) {
-        nodes().forEachNodeLabel(nodeId, nodeLabel -> {
-            var nodeProperty = nodeProperty(nodeLabel, propertyKey);
-            if (!(nodeProperty instanceof UpdatableNodeProperty)) {
-                throw new UnsupportedOperationException(formatWithLocale("Cannot update immutable property %s", propertyKey));
-            }
-            ((UpdatableNodeProperty) nodeProperty).updatePropertyValue(nodeId, value);
-            return true;
-        });
-    }
-
-    public Map<NodeLabel, Map<String, UpdatableNodeProperty>> updatableNodeProperties() {
-        return this.updatableNodeProperties;
     }
 
     public RelationshipIds relationshipIds() {

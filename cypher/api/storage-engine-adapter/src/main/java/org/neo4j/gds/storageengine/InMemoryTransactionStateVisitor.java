@@ -32,8 +32,6 @@ import org.neo4j.token.api.TokenNotFoundException;
 import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
 
-import java.util.HashMap;
-
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
@@ -60,10 +58,18 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
                 var propertyValue = storageProperty.value();
 
                 graphStore.nodes().forEachNodeLabel(nodeId, nodeLabel -> {
-                    graphStore.updatableNodeProperties()
-                        .computeIfAbsent(nodeLabel, __ -> new HashMap<>())
-                        .computeIfAbsent(propertyName, __ -> updatableNodePropertyFromValue(propertyValue))
-                        .updatePropertyValue(nodeId, propertyValue);
+                    UpdatableNodeProperty nodeProperties;
+                    if (graphStore.hasNodeProperty(nodeLabel, propertyName)) {
+                        var maybeNodeProperties = graphStore.nodePropertyValues(nodeLabel, propertyName);
+                        if (!(maybeNodeProperties instanceof UpdatableNodeProperty)) {
+                            throw new UnsupportedOperationException("foo");
+                        }
+                        nodeProperties = (UpdatableNodeProperty) maybeNodeProperties;
+                    } else {
+                        nodeProperties = updatableNodePropertyFromValue(propertyValue);
+                    }
+
+                    nodeProperties.updatePropertyValue(nodeId, propertyValue);
 
                     return true;
                 });
