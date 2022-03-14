@@ -173,7 +173,10 @@ class LinkPredictionPipelineTest {
                     pipelineMap -> pipelineMap.get("splitConfig")
                 )
                 .returns(
-                    Map.of(),
+                    Map.of(
+                        TrainingMethod.LogisticRegression.name(), List.of(),
+                        TrainingMethod.RandomForest.name(), List.of()
+                    ),
                     pipelineMap -> pipelineMap.get("trainingParameterSpace")
                 );
         }
