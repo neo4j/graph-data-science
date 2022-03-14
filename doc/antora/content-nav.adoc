@@ -75,7 +75,6 @@
 *** xref:alpha-algorithms/pearson/index.adoc[]
 *** xref:alpha-algorithms/euclidean/index.adoc[]
 *** xref:alpha-algorithms/overlap/index.adoc[]
-*** xref:alpha-algorithms/approximate-nearest-neighbors/index.adoc[]
 ** xref:algorithms/pathfinding/index.adoc[]
 *** xref:algorithms/delta-single-source/index.adoc[]
 *** xref:algorithms/dijkstra-source-target/index.adoc[]

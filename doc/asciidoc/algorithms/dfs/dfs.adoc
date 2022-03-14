@@ -1,5 +1,6 @@
 [[algorithms-dfs]]
 = Depth First Search
+:entity: relationship
 
 [abstract]
 --
@@ -18,8 +19,13 @@ The output of the procedure contains information about which nodes were visited 
 
 [[algorithms-dfs-syntax]]
 == Syntax
+.Breadth First Search syntax per mode
+[.tabbed-example, caption = ]
+====
 
-.The following describes the API for running the algorithm and stream results:
+[.include-with-stream]
+======
+.Run Depth First Search in stream mode:
 [source, cypher, role=noplay]
 ----
 CALL gds.dfs.stream(
@@ -27,24 +33,16 @@ CALL gds.dfs.stream(
   configuration: Map
 )
 YIELD
-  // general stream return columns
   sourceNode: Integer,
   nodeIds: Integer,
   path: Path
 ----
 
-include::common-configuration/common-parameters.adoc[]
+include::../common-configuration/common-parameters.adoc[]
 
-include::common-configuration/common-configuration.adoc[]
+include::../common-configuration/common-configuration.adoc[]
 
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name        | Type      | Default    | Optional | Description
-| sourceNode  | Integer   | n/a        | no       | The node id of the node where to start the traversal.
-| targetNodes | List of Integer | empty list | yes      | Ids for target nodes. Traversal terminates when any target node is visited.
-| maxDepth    | Integer   | -1         | yes      | The maximum distance from the start node at which nodes are visited.
-|===
+include::specific-configuration.adoc
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -54,7 +52,46 @@ include::common-configuration/common-configuration.adoc[]
 | nodeIds     | List of Integer | The ids of all nodes that were visited during the traversal.
 | path        | Path      | A path containing all the nodes that were visited during the traversal.
 |===
+======
 
+[.include-with-mutate]
+======
+.Run Depth First Search in stream mode:
+[source, cypher, role=noplay]
+----
+CALL gds.dfs.mutate(
+  graphName: string,
+  configuration: map
+)
+YIELD
+  relationshipsWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters.adoc[]
+
+include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Unused.
+| mutateMillis           | Integer   | Milliseconds for adding relationships to the projected graph.
+| relationshipsWritten   | Integer   | The number of relationships that were added.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+
+====
 
 [[algorithms-dfs-examples]]
 == Examples
