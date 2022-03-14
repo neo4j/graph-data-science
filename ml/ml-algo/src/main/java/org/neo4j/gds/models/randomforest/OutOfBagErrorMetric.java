@@ -39,7 +39,7 @@ public final class OutOfBagErrorMetric {
     private OutOfBagErrorMetric() {}
 
     static void addPredictionsForTree(
-        DecisionTreePredict<Long> decisionTree,
+        DecisionTreePredict<Integer> decisionTree,
         LocalIdMap classMapping,
         final Features allFeatureVectors,
         ReadOnlyHugeLongArray trainSet,
@@ -52,8 +52,8 @@ public final class OutOfBagErrorMetric {
             if (sampledTrainSet.get(trainSetIdx)) continue;
 
             double[] featureVector = allFeatureVectors.get(trainSet.get(trainSetIdx));
-            Long prediction = decisionTree.predict(featureVector);
-            predictions.getAndAdd(trainSetIdx * numClasses + classMapping.toMapped(prediction), 1);
+            Integer prediction = decisionTree.predict(featureVector);
+            predictions.getAndAdd(trainSetIdx * numClasses + prediction, 1);
         }
     }
 

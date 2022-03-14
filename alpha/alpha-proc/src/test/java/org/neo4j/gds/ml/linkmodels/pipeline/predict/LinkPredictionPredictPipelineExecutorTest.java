@@ -176,7 +176,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var pipeline = new LinkPredictionPipeline();
             pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
-            var root = new TreeNode<>(0L);
+            var root = new TreeNode<>(0);
             var modelData = ImmutableRandomForestData
                 .builder()
                 .addDecisionTree(new DecisionTreePredict<>(root))

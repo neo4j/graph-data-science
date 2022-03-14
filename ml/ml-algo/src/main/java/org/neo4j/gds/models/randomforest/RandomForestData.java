@@ -30,7 +30,7 @@ import java.util.List;
 @ValueClass
 public interface RandomForestData extends Classifier.ClassifierData {
 
-    List<DecisionTreePredict<Long>> decisionTrees();
+    List<DecisionTreePredict<Integer>> decisionTrees();
 
     @Value.Derived
     default TrainingMethod trainerMethod() {

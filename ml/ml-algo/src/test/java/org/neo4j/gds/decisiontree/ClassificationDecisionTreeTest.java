@@ -92,7 +92,7 @@ class ClassificationDecisionTreeTest {
     @MethodSource("predictionWithoutSamplingParameters")
     void shouldMakeSanePrediction(
         double[] featureVector,
-        int expectedPrediction,
+        long expectedPrediction,
         int maxDepth,
         int minSize
     ) {
@@ -115,7 +115,7 @@ class ClassificationDecisionTreeTest {
 
         var decisionTreePredict = decisionTree.train(featureVectors);
 
-        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(expectedPrediction);
+        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(expectedPrediction));
     }
 
     @Test
@@ -141,7 +141,7 @@ class ClassificationDecisionTreeTest {
         var featureVector = new double[]{8.0, 0.0};
 
         var decisionTreePredict = decisionTree.train(featureVectors);
-        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(42);
+        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(42));
 
         decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
@@ -153,7 +153,7 @@ class ClassificationDecisionTreeTest {
         );
 
         decisionTreePredict = decisionTree.train(featureVectors);
-        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(1337);
+        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(1337));
     }
 
     @Test
@@ -179,7 +179,7 @@ class ClassificationDecisionTreeTest {
         );
 
         var decisionTreePredict = decisionTree.train(sampledVectors);
-        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(1337L);
+        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(1337L));
 
         var mutableOtherSampledVectors = HugeLongArray.newArray(1);
         mutableOtherSampledVectors.set(0, features.size() - 1);
@@ -195,6 +195,6 @@ class ClassificationDecisionTreeTest {
         );
 
         decisionTreePredict = decisionTree.train(otherSampledVectors);
-        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(42L);
+        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(42L));
     }
 }
