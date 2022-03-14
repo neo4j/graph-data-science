@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.models.randomforest;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -37,14 +36,12 @@ public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, Random
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     Optional<Double> maxFeaturesRatio();
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
     // A value of 0 means "sampling off": Do not sample, rather use all training examples given.
     default double numberOfSamplesRatio() {
         return 1;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int numberOfDecisionTrees() {
         return 100;
