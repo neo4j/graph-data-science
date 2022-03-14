@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.NodePropertyContainer;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import org.neo4j.gds.similarity.knn.metrics.LongArrayPropertySimilarityComputer.SortedLongArrayProperties;
 
 import java.util.List;
@@ -39,19 +40,24 @@ public interface SimilarityComputer {
 
     double similarity(long firstNodeId, long secondNodeId);
 
-    static SimilarityComputer ofProperties(Graph graph, List<String> propertyNames) {
-        if (propertyNames.size() == 1) {
-            return ofProperty((graph), propertyNames.get(0));
+    static SimilarityComputer ofProperties(Graph graph, List<KnnNodePropertySpec> knnNodeProperties) {
+        if (knnNodeProperties.size() == 1) {
+            return ofProperty(graph, knnNodeProperties.get(0));
         }
-        return new CombinedSimilarityComputer(graph, propertyNames);
+        return new CombinedSimilarityComputer(graph, knnNodeProperties);
     }
 
-    static SimilarityComputer ofProperty(NodePropertyContainer graph, String propertyName) {
+    static SimilarityComputer ofProperty(NodePropertyContainer graph, KnnNodePropertySpec knnNodePropertySpec) {
+        var propertyName = knnNodePropertySpec.name();
         var nodeProperties = Objects.requireNonNull(
             graph.nodeProperties(propertyName),
             () -> formatWithLocale("The property `%s` has not been loaded", propertyName)
         );
-        return ofProperty(nodeProperties, propertyName);
+
+        if (knnNodePropertySpec.metric() == SimilarityMetric.DEFAULT) {
+            knnNodePropertySpec.setMetric(SimilarityMetric.defaultMetricForType(nodeProperties.valueType()));
+        }
+        return ofProperty(nodeProperties, propertyName, knnNodePropertySpec.metric());
     }
 
     static SimilarityComputer ofProperty(NodeProperties nodeProperties, String propertyName) {

@@ -24,14 +24,14 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public enum SimilarityMetric {
-    JACCARD, OVERLAP, COSINE, EUCLIDEAN, PEARSON, DUMMY_LONG_PROPERTY_METRIC, DUMMY_DOUBLE_PROPERTY_METRIC;
+    JACCARD, OVERLAP, COSINE, EUCLIDEAN, PEARSON, LONG_PROPERTY_METRIC, DOUBLE_PROPERTY_METRIC, DEFAULT;
 
     public static SimilarityMetric defaultMetricForType(ValueType valueType) {
         switch (valueType) {
             case LONG:
-                return DUMMY_LONG_PROPERTY_METRIC;
+                return LONG_PROPERTY_METRIC;
             case DOUBLE:
-                return DUMMY_DOUBLE_PROPERTY_METRIC;
+                return DOUBLE_PROPERTY_METRIC;
             case DOUBLE_ARRAY:
             case FLOAT_ARRAY:
                 return COSINE;

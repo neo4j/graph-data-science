@@ -44,6 +44,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
+import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 
 import java.util.Comparator;
 import java.util.List;
@@ -117,7 +118,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 .sampleRate(0.9)
                 .deltaThreshold(0)
                 .topK(topK)
-                .nodeProperties(List.of("DUMMY"))
+                .nodeProperties(List.of(new KnnNodePropertySpec("DUMMY")))
                 .build(),
             ProgressTracker.NULL_TRACKER
         );
@@ -189,7 +190,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                     .sampleRate(0.9)
                     .deltaThreshold(0)
                     .topK(1)
-                    .nodeProperties(List.of("DUMMY"))
+                    .nodeProperties(List.of(new KnnNodePropertySpec("DUMMY")))
                     .build(),
                 ProgressTracker.NULL_TRACKER
             );
@@ -233,7 +234,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 .sampleRate(0.9)
                 .deltaThreshold(0)
                 .topK(topK)
-                .nodeProperties(List.of("DUMMY"))
+                .nodeProperties(List.of(new KnnNodePropertySpec("DUMMY")))
                 .build(),
             ProgressTracker.NULL_TRACKER
         );
