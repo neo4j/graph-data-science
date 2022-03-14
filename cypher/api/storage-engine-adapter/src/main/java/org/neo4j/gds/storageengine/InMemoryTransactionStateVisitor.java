@@ -19,81 +19,80 @@
  */
 package org.neo4j.gds.storageengine;
 
-import org.eclipse.collections.api.set.primitive.LongSet;
-import org.neo4j.exceptions.KernelException;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.internal.schema.ConstraintDescriptor;
-import org.neo4j.internal.schema.IndexDescriptor;
+import org.eclipse.collections.api.IntIterable;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.collections.HugeSparseLongList;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.gds.core.cypher.UpdatableNodeProperty;
+import org.neo4j.internal.helpers.collection.Iterables;
+import org.neo4j.storageengine.api.StorageProperty;
 import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
+import org.neo4j.token.api.TokenNotFoundException;
+import org.neo4j.values.storable.LongValue;
+import org.neo4j.values.storable.Value;
+
+import java.util.HashMap;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
 
+    private final CypherGraphStore graphStore;
     private final TokenHolders tokenHolders;
 
-    public InMemoryTransactionStateVisitor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public InMemoryTransactionStateVisitor(
+        CypherGraphStore graphStore,
+        TokenHolders tokenHolders
+    ) {
+        this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
     }
 
     @Override
-    public void visitCreatedNode(long id) {
-
-    }
-
-    @Override
-    public void visitDeletedNode(long id) {
-
-    }
-
-    @Override
-    public void visitNodeLabelChanges(
-        long id, LongSet added, LongSet removed
+    public void visitNodePropertyChanges(
+        long nodeId, Iterable<StorageProperty> added, Iterable<StorageProperty> changed, IntIterable removed
     ) {
-        added.forEach(labelId -> {
-            var labelString = tokenHolders.labelGetName((int) labelId);
-            // TODO: implement this on graph store
-            // graphStore.addLabelToNode(id, NodeLabel.of(labelString));
-        });
+        var addedOrChangedProperties = Iterables.concat(added, changed);
+        for (StorageProperty storageProperty : addedOrChangedProperties) {
+            try {
+                var propertyName = tokenHolders.propertyKeyTokens().getTokenById(storageProperty.propertyKeyId()).name();
+                var propertyValue = storageProperty.value();
+
+                graphStore.nodes().forEachNodeLabel(nodeId, nodeLabel -> {
+                    graphStore.updatableNodeProperties()
+                        .computeIfAbsent(nodeLabel, __ -> new HashMap<>())
+                        .computeIfAbsent(propertyName, __ -> updatableNodePropertyFromValue(propertyValue))
+                        .updatePropertyValue(nodeId, propertyValue);
+
+                    return true;
+                });
+            } catch (TokenNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    @Override
-    public void visitAddedIndex(IndexDescriptor index) throws KernelException {
+    private UpdatableNodeProperty updatableNodePropertyFromValue(Value value) {
+        if (value instanceof LongValue) {
+            var hugeSparseLongList = HugeSparseLongList.of(DefaultValue.forLong().longValue());
+            return new UpdatableNodeProperty.UpdatableLongNodeProperty() {
+                @Override
+                public long size() {
+                    return graphStore.nodeCount();
+                }
 
-    }
+                @Override
+                public long longValue(long nodeId) {
+                    return hugeSparseLongList.get(nodeId);
+                }
 
-    @Override
-    public void visitRemovedIndex(IndexDescriptor index) {
-
-    }
-
-    @Override
-    public void visitAddedConstraint(ConstraintDescriptor element) throws KernelException {
-
-    }
-
-    @Override
-    public void visitRemovedConstraint(ConstraintDescriptor element) {
-
-    }
-
-    @Override
-    public void visitCreatedLabelToken(long id, String labelString, boolean internal) {
-        // TODO: implement this on graph store
-        // graphStore.addNodeLabel(NodeLabel.of(labelString));
-    }
-
-    @Override
-    public void visitCreatedPropertyKeyToken(long id, String name, boolean internal) {
-
-    }
-
-    @Override
-    public void visitCreatedRelationshipTypeToken(long id, String name, boolean internal) {
-
-    }
-
-    @Override
-    public void close() {
-        super.close();
+                @Override
+                public void updatePropertyValue(long nodeId, Value value) {
+                    hugeSparseLongList.set(nodeId, ((LongValue) value).longValue());
+                }
+            };
+        }
+        throw new IllegalArgumentException(formatWithLocale("Unsupported property type %s", value.getTypeName()));
     }
 }

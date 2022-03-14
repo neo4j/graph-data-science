@@ -112,7 +112,6 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     @Override
     public void apply(CommandsToApply batch, TransactionApplicationMode mode) {
-
     }
 
     @Override
