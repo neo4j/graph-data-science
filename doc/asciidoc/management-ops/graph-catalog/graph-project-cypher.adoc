@@ -50,8 +50,7 @@ CALL gds.graph.project.cypher(
     nodeCount: Integer,
     relationshipQuery: String,
     relationshipCount: Integer,
-    projectMillis: Integer,
-    createMillis: Integer,
+    projectMillis: Integer
 ----
 
 .Parameters
@@ -83,7 +82,6 @@ CALL gds.graph.project.cypher(
 | relationshipQuery      | String   | The Cypher query used to project the relationships in the graph.
 | relationshipCount      | Integer  | The number of relationships stored in the projected graph.
 | projectMillis          | Integer  | Milliseconds for projecting the graph.
-| createMillis           | Integer  | Deprecated - Milliseconds for projecting the graph.
 |===
 --
 
