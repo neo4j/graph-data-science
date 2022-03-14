@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -36,7 +37,6 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
-import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
 import java.util.List;
@@ -190,7 +190,6 @@ class NodeClassificationTrainTest {
             Map.<String, Object>of("penalty", 0.0625 * 2.0/3.0 * 0.5, "maxEpochs", 100),
             Map.<String, Object>of("penalty", 0.125 * 2.0/3.0 * 0.5, "maxEpochs", 100)
         );
-        var log = Neo4jProxy.testLog();
 
         var config = createConfig(
             modelCandidates,
@@ -199,17 +198,13 @@ class NodeClassificationTrainTest {
             metricSpecification,
             42L
         );
-        var factory = new NodeClassificationTrainAlgorithmFactory();
-        var algorithm = factory.build(
-            graph,
-            config,
-            log,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
 
-        algorithm.compute();
+        var progressTask = NodeClassificationTrain.progressTask(config.validationFolds(), config.paramsConfig().size());
+        var testLog = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+        NodeClassificationTrain.create(graph, config, progressTracker).compute();
 
-        assertThat(log.getMessages(INFO))
+        assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals())
             .containsExactly(
@@ -419,11 +414,10 @@ class NodeClassificationTrainTest {
             .concurrency(concurrency)
             .build();
 
-        Supplier<NodeClassificationTrain> algoSupplier = () -> new NodeClassificationTrainAlgorithmFactory().build(
+        Supplier<NodeClassificationTrain> algoSupplier = () -> NodeClassificationTrain.create(
             graph,
             config,
-            NullLog.getInstance(),
-            EmptyTaskRegistryFactory.INSTANCE
+            ProgressTracker.NULL_TRACKER
         );
 
         var firstResult = algoSupplier.get().compute();
