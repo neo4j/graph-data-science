@@ -266,7 +266,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.similarity.cosine.stream`
 | `gds.alpha.similarity.cosine.write`
 | `_gds.alpha.similarity.cosine_`
-.5+<.^|<<alpha-algorithms-similarity-euclidean, Euclidean Similarity>>
+.5+<.^|Euclidean Similarity
 | `gds.alpha.similarity.euclidean.stats`
 | `gds.alpha.similarity.euclidean.stream`
 | `gds.alpha.similarity.euclidean.write`

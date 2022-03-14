@@ -13,7 +13,6 @@ The Neo4j GDS library includes the following similarity algorithms, grouped by q
 ** <<algorithms-node-similarity, Node Similarity>>
 ** <<algorithms-knn, K-Nearest Neighbors>>
 * Alpha
-** <<alpha-algorithms-similarity-euclidean, Euclidean Similarity>>
 ** <<alpha-algorithms-similarity-jaccard, Jaccard Similarity>>
 ** <<alpha-algorithms-similarity-overlap, Overlap Similarity>>
 
@@ -22,7 +21,5 @@ include::node-similarity/node-similarity.adoc[leveloffset=+1]
 include::knn/knn.adoc[leveloffset=+1]
 
 include::alpha/alpha-similarity-jaccard.adoc[leveloffset=+1]
-
-include::alpha/alpha-similarity-euclidean.adoc[leveloffset=+1]
 
 include::alpha/alpha-similarity-overlap.adoc[leveloffset=+1]
