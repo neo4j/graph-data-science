@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -27,6 +28,7 @@ import java.util.Optional;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
+@ValueClass
 public interface LinkPredictionPredictPipelineStreamConfig extends LinkPredictionPredictPipelineBaseConfig {
     
     static LinkPredictionPredictPipelineStreamConfig of(

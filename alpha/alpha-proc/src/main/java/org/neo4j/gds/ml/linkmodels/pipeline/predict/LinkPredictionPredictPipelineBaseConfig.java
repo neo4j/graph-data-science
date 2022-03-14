@@ -107,7 +107,6 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default KnnBaseConfig approximateConfig() {
         if (!isApproximateStrategy()) {
             throw new IllegalStateException(formatWithLocale(
