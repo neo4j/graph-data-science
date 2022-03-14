@@ -477,7 +477,7 @@ class KnnTest {
 
         assertThat(knnConfig.toMap().get("nodeProperties")).isEqualTo(
             Map.of(
-                "knn", SimilarityMetric.DUMMY_DOUBLE_PROPERTY_METRIC.name()
+                "knn", SimilarityMetric.DOUBLE_PROPERTY_METRIC.name()
             )
         );
     }

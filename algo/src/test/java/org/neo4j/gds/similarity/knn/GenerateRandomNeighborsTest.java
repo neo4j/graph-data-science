@@ -64,7 +64,7 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
         var similarityComputer = SimilarityComputer.ofProperty(
             nodeProperties,
             "myProperty",
-            SimilarityMetric.DUMMY_LONG_PROPERTY_METRIC
+            SimilarityMetric.LONG_PROPERTY_METRIC
         );
 
         var random = new SplittableRandom();
