@@ -33,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
-import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST;
@@ -62,25 +61,6 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("enabled", false))
         );
         assertFalse(SKIP_ORPHANS.isEnabled());
-    }
-
-    @Test
-    void toggleusePreAggregation() {
-        var usePreAggregation = USE_PRE_AGGREGATION.isEnabled();
-        runQuery("CALL gds.features.importer.usePreAggregation($value)", Map.of("value", !usePreAggregation));
-        assertEquals(!usePreAggregation, USE_PRE_AGGREGATION.isEnabled());
-        runQuery("CALL gds.features.importer.usePreAggregation($value)", Map.of("value", usePreAggregation));
-        assertEquals(usePreAggregation, USE_PRE_AGGREGATION.isEnabled());
-    }
-
-    @Test
-    void resetUsePreAggregation() {
-        USE_PRE_AGGREGATION.reset();
-        assertCypherResult(
-            "CALL gds.features.importer.usePreAggregation.reset()",
-            List.of(Map.of("enabled", false))
-        );
-        assertFalse(USE_PRE_AGGREGATION.isEnabled());
     }
 
     @Test

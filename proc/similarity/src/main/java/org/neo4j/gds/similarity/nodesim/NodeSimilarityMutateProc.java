@@ -158,7 +158,6 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
                 .nodes(topKGraph)
                 .orientation(Orientation.NATURAL)
                 .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-                .preAggregate(false)
                 .concurrency(1)
                 .executorService(Pools.DEFAULT)
                 .build();

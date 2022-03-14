@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public enum GdsFeatureToggles {
 
-    USE_PRE_AGGREGATION(false),
     SKIP_ORPHANS(false),
     USE_PROPERTY_VALUE_INDEX(false),
     USE_PARALLEL_PROPERTY_VALUE_INDEX(false),

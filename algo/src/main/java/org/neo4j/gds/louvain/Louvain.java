@@ -203,7 +203,6 @@ public final class Louvain extends Algorithm<Louvain> {
             .nodes(idMap)
             .orientation(orientation)
             .addPropertyConfig(Aggregation.SUM, DefaultValue.forDouble())
-            .preAggregate(true)
             .executorService(executorService)
             .build();
 

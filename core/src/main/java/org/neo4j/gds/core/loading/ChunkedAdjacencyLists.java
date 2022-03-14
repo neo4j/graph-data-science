@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.gds.core.loading.VarLongEncoding.zigZag;
@@ -120,10 +119,6 @@ public final class ChunkedAdjacencyLists {
         long compressedValue;
         int requiredBytes = 0;
         for (int i = start; i < end; i++) {
-            if (values[i] == IGNORE_VALUE) {
-                continue;
-            }
-
             delta = values[i] - currentLastValue;
             compressedValue = zigZag(delta);
             currentLastValue = values[i];
@@ -154,8 +149,7 @@ public final class ChunkedAdjacencyLists {
     public void add(long index, long[] values, long[][] allProperties, int start, int end, int valuesToAdd) {
         // write properties
         for (int i = 0; i < allProperties.length; i++) {
-            long[] properties = allProperties[i];
-            addProperties(index, values, properties, start, end, i, valuesToAdd);
+            addProperties(index, allProperties[i], start, end, i, valuesToAdd);
         }
 
         // write values
@@ -164,7 +158,6 @@ public final class ChunkedAdjacencyLists {
 
     private void addProperties(
         long index,
-        long[] values,
         long[] properties,
         int start,
         int end,
@@ -180,9 +173,7 @@ public final class ChunkedAdjacencyLists {
         } else {
             var writePos = length;
             for (int i = 0; i < (end - start); i++) {
-                if (values[start + i] != IGNORE_VALUE) {
-                    currentProperties[writePos++] = properties[start + i];
-                }
+                currentProperties[writePos++] = properties[start + i];
             }
         }
     }

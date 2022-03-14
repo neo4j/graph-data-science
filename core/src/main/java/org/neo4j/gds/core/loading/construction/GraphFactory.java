@@ -207,7 +207,6 @@ public final class GraphFactory {
         Optional<Orientation> orientation,
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
-        Optional<Boolean> preAggregate,
         Optional<Boolean> validateRelationships,
         Optional<Integer> concurrency,
         Optional<ExecutorService> executorService
@@ -263,7 +262,6 @@ public final class GraphFactory {
             .propertyKeyIds(propertyKeyIds)
             .defaultValues(defaultValues)
             .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
-            .preAggregate(preAggregate.orElse(false))
             .build();
 
         var importerFactory = new SingleTypeRelationshipImporterBuilder()

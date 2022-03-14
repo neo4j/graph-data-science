@@ -153,9 +153,11 @@ public final class SingleTypeRelationshipImporter {
 
         int typeTokenId();
 
-        boolean preAggregate();
-
-        static ImportMetaData of(RelationshipProjection projection, int typeTokenId, Map<String, Integer> relationshipPropertyTokens, boolean preAggregate) {
+        static ImportMetaData of(
+            RelationshipProjection projection,
+            int typeTokenId,
+            Map<String, Integer> relationshipPropertyTokens
+        ) {
             return ImmutableImportMetaData
                 .builder()
                 .projection(projection)
@@ -163,7 +165,6 @@ public final class SingleTypeRelationshipImporter {
                 .propertyKeyIds(propertyKeyIds(projection, relationshipPropertyTokens))
                 .defaultValues(defaultValues(projection))
                 .typeTokenId(typeTokenId)
-                .preAggregate(preAggregate)
                 .build();
         }
 

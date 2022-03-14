@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
@@ -33,9 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 public abstract class AdjacencyListBuilderBaseTest {
@@ -53,7 +50,7 @@ public abstract class AdjacencyListBuilderBaseTest {
             .propertyKeyIds()
             .defaultValues()
             .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
-            .preAggregate(false).build();
+            .build();
 
 
         var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
@@ -107,35 +104,5 @@ public abstract class AdjacencyListBuilderBaseTest {
 
     void testValueMapper() {
         adjacencyListTest(Optional.of(10000L));
-    }
-
-    // TODO test single case
-    // TODO add testcase that sets a range
-    @Test
-    void testAggregation() {
-        var values = new long[]{3, 1, 2, 2, 3, 1};
-
-        var properties = new long[2][values.length];
-        properties[0] = new long[]{1, 1, 1, 1, 1, 1};
-        properties[1] = new long[]{1, 2, 3, 4, 5, 6};
-
-        var aggregations = new Aggregation[]{Aggregation.SUM, Aggregation.MAX};
-
-        AdjacencyPreAggregation.preAggregate(values, properties, 0, values.length, aggregations);
-
-        assertArrayEquals(
-            new long[]{3, 1, 2, IGNORE_VALUE, IGNORE_VALUE, IGNORE_VALUE},
-            values
-        );
-
-        assertArrayEquals(
-            new long[]{2, 2, 2, 1, 1, 1},
-            properties[0]
-        );
-
-        assertArrayEquals(
-            new long[]{5, 6, 4, 4, 5, 6},
-            properties[1]
-        );
     }
 }
