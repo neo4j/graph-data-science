@@ -261,7 +261,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 .2+<.^|<<algorithms-scale-properties, Scale Properties>>
 | `gds.alpha.scaleProperties.mutate`
 | `gds.alpha.scaleProperties.stream`
-.4+<.^|<<alpha-algorithms-similarity-cosine, Cosine Similarity>>
+.4+<.^|Cosine Similarity
 | `gds.alpha.similarity.cosine.stats`
 | `gds.alpha.similarity.cosine.stream`
 | `gds.alpha.similarity.cosine.write`
