@@ -19,7 +19,7 @@ The output of the procedure contains information about which nodes were visited 
 
 [[algorithms-dfs-syntax]]
 == Syntax
-.Breadth First Search syntax per mode
+.Depth First Search syntax per mode
 [.tabbed-example, caption = ]
 ====
 
@@ -47,10 +47,10 @@ include::specific-configuration.adoc
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name        | Type      | Description
-| sourceNode  | Integer   | The node id of the node where to start the traversal.
+| Name        | Type            | Description
+| sourceNode  | Integer         | The node id of the node where to start the traversal.
 | nodeIds     | List of Integer | The ids of all nodes that were visited during the traversal.
-| path        | Path      | A path containing all the nodes that were visited during the traversal.
+| path        | Path            | A path containing all the nodes that were visited during the traversal.
 |===
 ======
 
