@@ -51,7 +51,7 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }
 
-    @Procedure(name = "gds.beta.pipeline.linkPrediction.addRandomForest", mode = READ)
+    @Procedure(name = "gds.alpha.pipeline.linkPrediction.addRandomForest", mode = READ)
     @Description("Add random forest configuration to parameter space of the link prediction train pipeline.")
     public Stream<PipelineInfoResult> addRandomForest(@Name("pipelineName") String pipelineName, @Name(value = "config") Map<String, Object> randomForestConfig) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionPipeline.class);

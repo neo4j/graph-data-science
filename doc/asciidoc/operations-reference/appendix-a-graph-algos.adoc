@@ -303,7 +303,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.beta.pipeline.linkPrediction.addNodeProperty`
 | `gds.beta.pipeline.linkPrediction.addFeature`
 | `gds.beta.pipeline.linkPrediction.addLogisticRegression`
-| `gds.beta.pipeline.linkPrediction.addRandomForest`
+| `gds.alpha.pipeline.linkPrediction.addRandomForest`
 | `gds.beta.pipeline.linkPrediction.configureSplit`
 | `gds.beta.pipeline.linkPrediction.train`
 | `gds.beta.pipeline.linkPrediction.train.estimate`
