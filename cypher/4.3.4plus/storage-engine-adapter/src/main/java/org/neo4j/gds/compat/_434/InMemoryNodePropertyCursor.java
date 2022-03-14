@@ -20,6 +20,7 @@
 package org.neo4j.gds.compat._434;
 
 import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
+import org.neo4j.gds.compat.InMemoryPropertySelection;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
 
@@ -33,7 +34,7 @@ public class InMemoryNodePropertyCursor extends AbstractInMemoryNodePropertyCurs
     public void initNodeProperties(long reference, long ownerReference) {
         reset();
         setId(reference);
-        setPropertySelection(i -> true);
+        setPropertySelection(InMemoryPropertySelection.SELECT_ALL);
     }
 
     @Override

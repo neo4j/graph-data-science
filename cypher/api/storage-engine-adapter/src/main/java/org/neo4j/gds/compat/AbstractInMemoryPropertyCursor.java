@@ -28,15 +28,12 @@ import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.kernel.impl.store.record.PropertyRecord;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.token.TokenHolders;
-import org.neo4j.token.api.NamedToken;
-import org.neo4j.token.api.TokenNotFoundException;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.function.Predicate;
 
 public abstract class AbstractInMemoryPropertyCursor
     extends PropertyRecord implements StoragePropertyCursor {
@@ -105,36 +102,22 @@ public abstract class AbstractInMemoryPropertyCursor
 
         final Map<String, ValueGroup> propertyKeyToValueGroupMapping;
 
-        private final Iterator<NamedToken> namedTokensIterator;
+        Iterator<String> propertyIterator;
 
         @Nullable String currentPropertyKey;
-
-        private Predicate<Integer> propertySelection;
 
         DelegatePropertyCursor(long id, CypherGraphStore graphStore, TokenHolders tokenHolders) {
             super(id);
             this.graphStore = graphStore;
             this.tokenHolders = tokenHolders;
             this.propertyKeyToValueGroupMapping = new HashMap<>();
-            this.namedTokensIterator = tokenHolders.propertyKeyTokens().getAllTokens().iterator();
 
             populateKeyToValueGroupMapping();
         }
 
         protected abstract Map<IDENTIFIER, Map<String, PROP_SCHEMA>> propertySchema();
 
-        protected abstract boolean graphStoreContainsPropertyForElementType(NamedToken namedPropertyToken);
-
-        protected void setPropertySelection(Predicate<Integer> propertySelection) {
-            this.propertySelection = propertyToken -> {
-                try {
-                    var namedPropertyToken = tokenHolders.propertyKeyTokens().getTokenById(propertyToken);
-                    return propertySelection.test(propertyToken) && graphStoreContainsPropertyForElementType(namedPropertyToken);
-                } catch (TokenNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            };
-        }
+        protected abstract void setPropertySelection(InMemoryPropertySelection propertySelection);
 
         @Override
         public int propertyKey() {
@@ -154,12 +137,9 @@ public abstract class AbstractInMemoryPropertyCursor
                 // the property chain to the next property and so on.
                 // We try to mimic this behaviour by iterating through
                 // all available properties in the graph store.
-                while (namedTokensIterator.hasNext()) {
-                    var namedToken = namedTokensIterator.next();
-                    if (propertySelection.test(namedToken.id())) {
-                        this.currentPropertyKey = namedToken.name();
-                        return true;
-                    }
+                if (propertyIterator.hasNext()) {
+                    this.currentPropertyKey = propertyIterator.next();
+                    return true;
                 }
             }
             return false;

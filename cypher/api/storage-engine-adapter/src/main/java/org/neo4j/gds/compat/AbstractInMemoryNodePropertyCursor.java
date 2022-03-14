@@ -22,16 +22,29 @@ package org.neo4j.gds.compat;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.token.TokenHolders;
-import org.neo4j.token.api.NamedToken;
 import org.neo4j.values.storable.Value;
 
+import java.util.Arrays;
 import java.util.Map;
 
 public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor<NodeLabel, PropertySchema> {
 
+    private final int[] nodePropertyKeyMapping;
+    private final Value[] nodePropertyValues;
+
+    private int nodePropertyCount;
+    private int currentNodeProperty;
+
     public AbstractInMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID, graphStore, tokenHolders);
+
+        int propertyCount = graphStore.nodePropertyKeys().size();
+        this.nodePropertyKeyMapping = new int[propertyCount];
+        this.nodePropertyValues = new Value[propertyCount];
+        this.nodePropertyCount = 0;
+        this.currentNodeProperty = -1;
     }
 
     @Override
@@ -40,9 +53,9 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
     }
 
     @Override
-    public Value propertyValue() {
-        if (currentPropertyKey != null) {
-            return graphStore.nodePropertyValues(currentPropertyKey).value(getId());
+    public int propertyKey() {
+        if (currentNodeProperty >= 0) {
+            return nodePropertyKeyMapping[currentNodeProperty];
         } else {
             throw new IllegalStateException(
                 "Property cursor is initialized as node and relationship cursor, maybe you forgot to `reset()`?");
@@ -50,10 +63,57 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
     }
 
     @Override
-    protected boolean graphStoreContainsPropertyForElementType(NamedToken namedPropertyToken) {
-        return graphStore.hasNodeProperty(
-            graphStore.nodes().nodeLabels(getId()),
-            namedPropertyToken.name()
-        );
+    protected void setPropertySelection(InMemoryPropertySelection propertySelection) {
+        var nodeId = getId();
+        this.nodePropertyCount = 0;
+
+        graphStore.nodes().forEachNodeLabel(nodeId, label -> {
+            for (String nodePropertyKey : graphStore.nodePropertyKeys(label)) {
+                int propertyId = tokenHolders.propertyKeyTokens().getIdByName(nodePropertyKey);
+                if (propertySelection.test(propertyId) && !ArrayUtil.linearSearch(nodePropertyKeyMapping, nodePropertyKeyMapping.length, propertyId)) {
+                    int propertyIndex = nodePropertyCount++;
+                    nodePropertyKeyMapping[propertyIndex] = propertyId;
+
+                    if (!propertySelection.isKeysOnly()) {
+                        nodePropertyValues[propertyIndex] = graphStore
+                            .nodePropertyValues(label, nodePropertyKey)
+                            .value(nodeId);
+                    }
+
+                    if (propertySelection.isLimited() && nodePropertyCount == propertySelection.numberOfKeys()) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        });
+    }
+
+    @Override
+    public boolean next() {
+        if (getId() != NO_ID) {
+            currentNodeProperty++;
+            return currentNodeProperty < nodePropertyCount;
+        }
+        return false;
+    }
+
+    @Override
+    public Value propertyValue() {
+        if (currentNodeProperty >= 0) {
+            return nodePropertyValues[currentNodeProperty];
+        } else {
+            throw new IllegalStateException(
+                "Property cursor is initialized as node and relationship cursor, maybe you forgot to `reset()`?");
+        }
+    }
+
+    @Override
+    public void reset() {
+        clear();
+        this.setId(NO_ID);
+        this.nodePropertyCount = 0;
+        this.currentNodeProperty = -1;
+        Arrays.fill(this.nodePropertyKeyMapping, -1);
     }
 }

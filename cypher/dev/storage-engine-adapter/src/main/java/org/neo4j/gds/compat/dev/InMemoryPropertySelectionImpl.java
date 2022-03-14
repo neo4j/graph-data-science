@@ -17,28 +17,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._433;
+package org.neo4j.gds.compat.dev;
 
-import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
 import org.neo4j.gds.compat.InMemoryPropertySelection;
-import org.neo4j.gds.core.cypher.CypherGraphStore;
-import org.neo4j.token.TokenHolders;
+import org.neo4j.storageengine.api.PropertySelection;
 
-public class InMemoryNodePropertyCursor extends AbstractInMemoryNodePropertyCursor {
+public class InMemoryPropertySelectionImpl implements InMemoryPropertySelection {
 
-    InMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
-        super(graphStore, tokenHolders);
+    private final PropertySelection propertySelection;
+
+    public InMemoryPropertySelectionImpl(PropertySelection propertySelection) {this.propertySelection = propertySelection;}
+
+    @Override
+    public boolean isLimited() {
+        return propertySelection.isLimited();
     }
 
     @Override
-    public void initNodeProperties(long reference, long ownerReference) {
-        reset();
-        setId(reference);
-        setPropertySelection(InMemoryPropertySelection.SELECT_ALL);
+    public int numberOfKeys() {
+        return propertySelection.numberOfKeys();
     }
 
     @Override
-    public void initRelationshipProperties(long reference, long ownerReference) {
+    public int key(int index) {
+        return propertySelection.key(index);
+    }
 
+    @Override
+    public boolean test(int key) {
+        return propertySelection.test(key);
+    }
+
+    @Override
+    public boolean isKeysOnly() {
+        return propertySelection.isKeysOnly();
     }
 }

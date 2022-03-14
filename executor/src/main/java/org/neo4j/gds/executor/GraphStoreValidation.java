@@ -85,7 +85,7 @@ public final class GraphStoreValidation {
             throw new IllegalArgumentException(formatWithLocale(
                 "Seed property `%s` not found in graph with node properties: %s",
                 seedProperty,
-                graphStore.nodePropertyKeys().values()
+                graphStore.nodePropertyKeys().values().stream().flatMap(Collection::stream).sorted().collect(Collectors.toList())
             ));
         }
     }
@@ -97,7 +97,7 @@ public final class GraphStoreValidation {
                 "`%s`: `%s` not found in graph with node properties: %s",
                 config.propertyNameOverride(),
                 seedProperty,
-                graphStore.nodePropertyKeys().values()
+                graphStore.nodePropertyKeys().values().stream().flatMap(Collection::stream).sorted().collect(Collectors.toList())
             ));
         }
     }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.internal.recordstorage.InMemoryNodeScan;
@@ -30,6 +31,7 @@ import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import static java.lang.Math.min;
@@ -42,24 +44,30 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
     private final GraphStore graphStore;
     private final TokenHolders tokenHolders;
     private final boolean hasProperties;
+    private final long[] nodeLabelReadBuffer;
+    private final MutableInt nodeLabelCounter;
 
     public AbstractInMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID);
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
         this.hasProperties = !graphStore.nodePropertyKeys().values().stream().allMatch(Set::isEmpty);
+        nodeLabelReadBuffer = new long[graphStore.nodeLabels().size()];
+        nodeLabelCounter = new MutableInt();
     }
 
     public abstract void properties(StoragePropertyCursor propertyCursor);
 
-    protected abstract void setLabelField(NodeRecord record, long firstLabelToken);
-
     @Override
     public long[] labels() {
-        return graphStore.nodes().nodeLabels(getId())
-            .stream()
-            .mapToLong(nodeLabel -> tokenHolders.labelTokens().getIdByName(nodeLabel.name()))
-            .toArray();
+        nodeLabelCounter.setValue(0);
+
+        graphStore.nodes().forEachNodeLabel(getId(), nodeLabel -> {
+            nodeLabelReadBuffer[nodeLabelCounter.getAndIncrement()] = tokenHolders.labelTokens().getIdByName(nodeLabel.name());
+                return true;
+        });
+
+        return Arrays.copyOf(nodeLabelReadBuffer, nodeLabelCounter.getValue());
     }
 
     @Override
@@ -187,13 +195,5 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
 
     private void node(NodeRecord record, long nodeId) {
         record.setId(nodeId);
-
-        Set<NodeLabel> nodeLabels = graphStore.nodes().nodeLabels(nodeId);
-
-        var nodeLabelIterator = nodeLabels.iterator();
-        if (nodeLabelIterator.hasNext()) {
-            var firstLabelToken = tokenHolders.labelTokens().getIdByName(nodeLabelIterator.next().name());
-            setLabelField(record, firstLabelToken);
-        }
     }
 }

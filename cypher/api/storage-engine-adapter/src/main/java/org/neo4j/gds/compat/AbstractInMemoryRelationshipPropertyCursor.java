@@ -23,7 +23,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
-import org.neo4j.token.api.NamedToken;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -56,10 +55,12 @@ public abstract class AbstractInMemoryRelationshipPropertyCursor extends Abstrac
     }
 
     @Override
-    protected boolean graphStoreContainsPropertyForElementType(NamedToken namedPropertyToken) {
-        return graphStore.hasRelationshipProperty(
-            graphStore.relationshipIds().relationshipTypeForId(getId()),
-            namedPropertyToken.name()
-        );
+    protected void setPropertySelection(InMemoryPropertySelection propertySelection) {
+        var relationshipTypes = graphStore.relationshipIds().relationshipTypeForId(getId());
+        this.propertyIterator = graphStore
+            .relationshipPropertyKeys(relationshipTypes)
+            .stream()
+            .filter(label -> propertySelection.test(tokenHolders.propertyKeyTokens().getIdByName(label)))
+            .iterator();
     }
 }
