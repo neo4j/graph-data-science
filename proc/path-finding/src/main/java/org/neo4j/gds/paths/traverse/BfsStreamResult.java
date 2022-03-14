@@ -19,15 +19,18 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.graphdb.Path;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface BfsStreamConfig extends BfsBaseConfig {
-    static BfsStreamConfig of(CypherMapWrapper userInput) {
-        return new BfsStreamConfigImpl(userInput);
+import java.util.List;
+
+public class BfsStreamResult {
+    public Long sourceNode;
+    public List<Long> nodeIds;
+    public Path path;
+
+    BfsStreamResult(long sourceNode, List<Long> nodes, Path path) {
+        this.sourceNode = sourceNode;
+        this.nodeIds = nodes;
+        this.path = path;
     }
 }
