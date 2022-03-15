@@ -71,6 +71,7 @@ class DfsStreamComputationResultConsumerTest {
 
         when(executionContextMock.callContext()).thenReturn(procedureCallContextMock);
     }
+
     @Test
     void shouldNotComputePath() {
         when(procedureCallContextMock.outputFields()).thenReturn(Stream.of("sourceNode", "nodeIds"));
