@@ -21,13 +21,18 @@ package org.neo4j.gds.paths.traverse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,9 +43,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Graph:
  *
  *     (b)   (e)
- *   2/ 1\ 2/ 1\
+ *    /  \  /  \
  * >(a)  (d)  ((g))
- *   1\ 2/ 1\ 2/
+ *    \  /  \  /
  *    (c)   (f)
  */
 class BfsStreamProcTest extends BaseProcTest {
@@ -65,14 +70,15 @@ class BfsStreamProcTest extends BaseProcTest {
         ", (e)-[:TYPE]->(g)" +
         ", (f)-[:TYPE]->(g)";
 
+
+    private static final String REVERSE_GRAPH_NAME = DEFAULT_GRAPH_NAME + "_reverse";
+
+
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(BfsStreamProc.class, GraphProjectProc.class);
         runQuery(DB_CYPHER);
-    }
 
-    @Test
-    void testFindAnyOf() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withNodeLabel("Node")
@@ -80,16 +86,26 @@ class BfsStreamProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
 
+        var createReverseGraphQuery = GdsCypher.call(REVERSE_GRAPH_NAME)
+            .graphProject()
+            .withNodeLabel("Node")
+            .withRelationshipType("TYPE", Orientation.REVERSE)
+            .yields();
+        runQuery(createReverseGraphQuery);
+    }
+
+    @Test
+    void testFindAnyOf() {
         long id = idFunction.of("a");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("bfs")
             .streamMode()
             .addParameter("sourceNode", id)
             .addParameter("targetNodes", List.of(idFunction.of("e"), idFunction.of("f")))
-            .yields("sourceNode, nodeIds");
+            .yields("sourceNode", "nodeIds");
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(row.getNumber("sourceNode").longValue(), id);
+            assertThat(row.getNumber("sourceNode").longValue()).isEqualTo(id);
             var nodeIds = row.get("nodeIds");
 
             assertThat(nodeIds)
@@ -99,21 +115,16 @@ class BfsStreamProcTest extends BaseProcTest {
 
     @Test
     void testMaxDepthOut() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE")
-            .yields();
-        runQuery(createQuery);
-        long id = idFunction.of("a");
+        long source = idFunction.of("a");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("bfs")
             .streamMode()
-            .addParameter("sourceNode", id)
+            .addParameter("sourceNode", source)
             .addParameter("maxDepth", 2)
-            .yields("sourceNode, nodeIds");
+            .yields("sourceNode", "nodeIds");
+
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(row.getNumber("sourceNode").longValue(), id);
+            assertEquals(row.getNumber("sourceNode").longValue(), source);
             var nodeIds = row.get("nodeIds");
             assertThat(nodeIds).isEqualTo(
                 Stream.of("a", "b", "c", "d").map(idFunction::of).collect(Collectors.toList())
@@ -123,22 +134,15 @@ class BfsStreamProcTest extends BaseProcTest {
 
     @Test
     void testMaxDepthIn() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Orientation.REVERSE)
-            .yields();
-        runQuery(createQuery);
-
-        long id = idFunction.of("g");
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+        long source = idFunction.of("g");
+        String query = GdsCypher.call(REVERSE_GRAPH_NAME)
             .algo("bfs")
             .streamMode()
-            .addParameter("sourceNode", id)
+            .addParameter("sourceNode", source)
             .addParameter("maxDepth", 2)
             .yields("sourceNode, nodeIds");
         runQueryWithRowConsumer(query, row -> {
-            assertThat(row.getNumber("sourceNode").longValue()).isEqualTo(id);
+            assertThat(row.getNumber("sourceNode").longValue()).isEqualTo(source);
             var nodeIds = row.get("nodeIds");
             assertThat(nodeIds).isEqualTo(
                 Stream.of("g", "e", "f", "d").map(idFunction::of).collect(Collectors.toList())
@@ -147,38 +151,61 @@ class BfsStreamProcTest extends BaseProcTest {
     }
 
     @Test
-    void testPath() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Orientation.REVERSE)
-            .yields();
-        runQuery(createQuery);
-
-        long id = idFunction.of("g");
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+    void testWithoutEarlyTermination() {
+        long source = idFunction.of("g");
+        String query = GdsCypher.call(REVERSE_GRAPH_NAME)
             .algo("bfs")
             .streamMode()
-            .addParameter("sourceNode", id)
-            .yields("sourceNode, nodeIds");
+            .addParameter("sourceNode", source)
+            .yields("sourceNode", "nodeIds");
         runQueryWithRowConsumer(query, row -> {
-            assertThat(row.getNumber("sourceNode").longValue()).isEqualTo(id);
+            assertThat(row.getNumber("sourceNode").longValue()).isEqualTo(source);
 
             var nodeIds = row.get("nodeIds");
 
-            // We can't predict the traversal order deterministically => check the possible combinations
-            assertThat(nodeIds).isIn(
-                Stream.of("g", "e", "f", "d", "b", "c", "a").map(idFunction::of).collect(Collectors.toList()),
-                Stream.of("g", "e", "f", "d", "c", "b", "a").map(idFunction::of).collect(Collectors.toList()),
-                Stream.of("g", "f", "e", "d", "b", "c", "a").map(idFunction::of).collect(Collectors.toList()),
-                Stream.of("g", "f", "e", "d", "c", "b", "a").map(idFunction::of).collect(Collectors.toList())
-            );
+            assertThat(nodeIds)
+                .asList()
+                .containsExactlyElementsOf(
+                    Stream.of("g", "e", "f", "d", "b", "c", "a")
+                        .map(idFunction::of)
+                        .collect(Collectors.toList())
+                );
         });
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("pathQueryBuilders")
+    void testPathField(Function<GdsCypher.ParametersBuildStage, String> queryProvider, String displayName) {
+        var parametersBuildStage = GdsCypher.call(REVERSE_GRAPH_NAME)
+            .algo("bfs")
+            .streamMode()
+            .addParameter("sourceNode", idFunction.of("g"));
+        String query = queryProvider.apply(parametersBuildStage);
+
+        runQueryWithRowConsumer(query, row -> {
+            var path = row.getPath("path");
+
+            assertThat(path.length()).isEqualTo(6);
+
+            var nodeIds = new ArrayList<Long>();
+            path.nodes().forEach(node -> {
+                nodeIds.add(node.getId());
+            });
+
+            assertThat(nodeIds)
+                .containsExactlyElementsOf(Stream.of("g", "e", "f", "d", "b", "c", "a").map(idFunction::of).collect(Collectors.toList()));
+        });
+    }
+
+    static Stream<Arguments> pathQueryBuilders() {
+        return Stream.of(
+            Arguments.of((Function<GdsCypher.ParametersBuildStage, String>) GdsCypher.ParametersBuildStage::yields, "No yield fields specified"),
+            Arguments.of((Function<GdsCypher.ParametersBuildStage, String>) stage -> stage.yields("path"), "Only `path` yield field")
+        );
     }
 
     @Test
     void failOnInvalidSourceNode() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("bfs")
             .streamMode()
@@ -190,7 +217,6 @@ class BfsStreamProcTest extends BaseProcTest {
 
     @Test
     void failOnInvalidEndNode() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("bfs")
             .streamMode()

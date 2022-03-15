@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.PathFactory;
+import org.neo4j.graphdb.Path;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -33,6 +34,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.paths.traverse.BfsStreamProc.DESCRIPTION;
 import static org.neo4j.gds.paths.traverse.BfsStreamProc.NEXT;
+import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 @GdsCallable(name = "gds.bfs.stream", description = DESCRIPTION, executionMode = STREAM)
 public class BfsStreamSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStreamConfig, Stream<BfsStreamResult>, BfsAlgorithmFactory<BfsStreamConfig>> {
@@ -65,11 +67,25 @@ public class BfsStreamSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStrea
                 .boxed()
                 .map(graph::toOriginalNodeId)
                 .collect(Collectors.toList());
+
+            var shouldReturnPath = executionContext.callContext()
+                .outputFields()
+                .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
+
+            Path path = null;
+            if(shouldReturnPath) {
+                path = PathFactory.create(
+                    executionContext.transaction().internalTransaction(),
+                    nodeList,
+                    NEXT
+                );
+            }
+
             var startNode = computationResult.config().sourceNode();
             return Stream.of(new BfsStreamResult(
                 startNode,
                 nodeList,
-                PathFactory.create(executionContext.transaction().internalTransaction(), nodeList, NEXT)
+                path
             ));
         };
     }

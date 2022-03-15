@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.traverse;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphdb.Path;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class BfsStreamResult {
     public final List<Long> nodeIds;
     public final Path path;
 
-    BfsStreamResult(long sourceNode, List<Long> nodes, Path path) {
+    BfsStreamResult(long sourceNode, List<Long> nodes, @Nullable Path path) {
         this.sourceNode = sourceNode;
         this.nodeIds = nodes;
         this.path = path;
