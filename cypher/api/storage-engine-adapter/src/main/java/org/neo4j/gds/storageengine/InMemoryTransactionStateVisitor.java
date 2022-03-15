@@ -26,6 +26,7 @@ import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.cypher.UpdatableNodeProperty;
 import org.neo4j.gds.core.cypher.nodeproperties.UpdatableDoubleArrayNodeProperty;
 import org.neo4j.gds.core.cypher.nodeproperties.UpdatableDoubleNodeProperty;
+import org.neo4j.gds.core.cypher.nodeproperties.UpdatableFloatArrayNodeProperty;
 import org.neo4j.gds.core.cypher.nodeproperties.UpdatableLongArrayNodeProperty;
 import org.neo4j.gds.core.cypher.nodeproperties.UpdatableLongNodeProperty;
 import org.neo4j.gds.core.loading.ValueConverter;
@@ -129,7 +130,10 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
                 return new UpdatableLongArrayNodeProperty(nodeCount, defaultValue.longArrayValue());
             case DOUBLE_ARRAY:
                 return new UpdatableDoubleArrayNodeProperty(nodeCount, defaultValue.doubleArrayValue());
+            case FLOAT_ARRAY:
+                return new UpdatableFloatArrayNodeProperty(nodeCount, defaultValue.floatArrayValue());
+            default:
+                throw new IllegalArgumentException(formatWithLocale("Unsupported property type %s", value.getTypeName()));
         }
-        throw new IllegalArgumentException(formatWithLocale("Unsupported property type %s", value.getTypeName()));
     }
 }
