@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.MatrixVectorSum;
 import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
+import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.functions.Softmax;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -41,15 +42,52 @@ import static org.neo4j.gds.ml.core.Dimensions.matrix;
 public final class LogisticRegressionClassifier implements Classifier {
 
     private final LogisticRegressionData data;
+    private final LogisticRegressionPredictionStrategy predictionStrategy;
 
     private LogisticRegressionClassifier(
-        LogisticRegressionData data
+        LogisticRegressionData data,
+        LogisticRegressionPredictionStrategy predictionStrategy
     ) {
         this.data = data;
+        this.predictionStrategy = predictionStrategy;
+    }
+
+    interface LogisticRegressionPredictionStrategy {
+        double[] predictProbabilities(long id, Features features, LogisticRegressionClassifier classifier);
+
+        static LogisticRegressionPredictionStrategy binary() {
+            return (id, features, classifier) -> {
+                var affinity = 0D;
+                double[] featuresForNode = features.get(id);
+                for (int i = 0; i < features.featureDimension(); i++) {
+                    affinity += classifier.data().weights().data().dataAt(i) * featuresForNode[i];
+                }
+                var sigmoid = Sigmoid.sigmoid(affinity + classifier.data().bias().data().dataAt(0));
+
+                return new double[]{sigmoid, 1 - sigmoid};
+            };
+        }
+
+        static LogisticRegressionPredictionStrategy multiClass() {
+            return (id, features, classifier) -> {
+                var batch = new SingletonBatch(id);
+                ComputationContext ctx = new ComputationContext();
+                return ctx.forward(classifier.predictionsVariable(batchFeatureMatrix(batch, features))).data();
+            };
+        }
     }
 
     public static LogisticRegressionClassifier from(LogisticRegressionData data) {
-        return new LogisticRegressionClassifier(data);
+        LogisticRegressionPredictionStrategy predictionStrategy;
+        if (data.classIdMap().size() == 2 && data.weights().data().rows() == 1) {
+            // this case corresponds to 2 classes and 1 weight
+            // that 'happens to be' the LinkPrediction case
+            // it could also be used for NodeClassification if we use reduced weights matrix for it
+            predictionStrategy = LogisticRegressionPredictionStrategy.binary();
+        } else {
+            predictionStrategy = LogisticRegressionPredictionStrategy.multiClass();
+        }
+        return new LogisticRegressionClassifier(data, predictionStrategy);
     }
 
     public static long sizeOfPredictionsVariableInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {
@@ -78,9 +116,7 @@ public final class LogisticRegressionClassifier implements Classifier {
 
     @Override
     public double[] predictProbabilities(long id, Features features) {
-        var batch = new SingletonBatch(id);
-        ComputationContext ctx = new ComputationContext();
-        return ctx.forward(predictionsVariable(batchFeatureMatrix(batch, features))).data();
+        return predictionStrategy.predictProbabilities(id, features, this);
     }
 
     @Override

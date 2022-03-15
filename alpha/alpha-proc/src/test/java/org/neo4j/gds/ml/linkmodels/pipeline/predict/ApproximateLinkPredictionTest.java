@@ -149,6 +149,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         );
 
         assertThat(predictedLinks)
+            .usingElementComparator(compareWithPrecision(1e-10))
             .isSubsetOf(expectedLinks)
             .allMatch(prediction -> !graph.exists(prediction.sourceId(), prediction.targetId()));
 
