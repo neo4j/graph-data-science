@@ -81,11 +81,18 @@ This gives us a number in the range `(0, 1]`.
 
 List of integers::
 
-When a property is a list of integers, we select Jaccard similarity:
+When a property is a list of integers, similarity can be measured with either the Jaccard similarity or the Overlap coefficient.
 
-image::equations/jaccard.png[size of intersection divided by size of union,align="center"]
+Jaccard similarity is defined as follows:
 
-This naturally gives us a score in the range `[0, 1]`
+image::jaccard.png[size of intersection divided by size of union,align="center"]
+
+The Overlap coefficient is defined as follows:
+
+image::overlap.png[size of intersection divided by size of minimum set,align="center"]
+
+Both of these metrics give a score in the range `[0, 1]` and no normalization needs to be performed.
+The Jaccard similarity is used as the default option for comparing list of integers when the metric is not specified.
 
 List of floating-point numbers::
 
