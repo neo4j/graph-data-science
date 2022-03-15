@@ -27,13 +27,13 @@ Node Similarity computes pair-wise similarities based on either the Jaccard metr
 
 Given two sets `A` and `B`, the Jaccard Similarity is computed using the following formula:
 
-image::jaccard.png[role="middle"]
+image::nodesim-formulas/jacard_nodesim.svg[role="middle"]
 // This is the raw information for this image:
 // // J(A,B) = ∣A ∩ B∣ / ∣(A ∪ B)∣ // = ∣A ∩ B∣ / ∣A∣ + ∣B∣ - ∣A ∩ B| //
 
 The Overlap coefficient is computed using the following formula:
 
-image::overlap.png[role="middle"]
+image::nodesim-formulas/overlap_nodesim.svg[role="middle"]
 // This is the raw information for this image:
 // // O(A,B) = ∣A ∩ B∣ / min(|A|, |B|∣
 
