@@ -24,18 +24,14 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.paths.PathFactory;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.paths.traverse.DfsStreamProc.DESCRIPTION;
-import static org.neo4j.gds.paths.traverse.DfsStreamProc.NEXT;
 
 @GdsCallable(name = "gds.dfs.stream", description = DESCRIPTION, executionMode = STREAM)
-public class DfsStreamSpec implements AlgorithmSpec<DFS, HugeLongArray, DfsStreamConfig, Stream<DfsStreamProc.DfsStreamResult>, DfsAlgorithmFactory<DfsStreamConfig>> {
+public class DfsStreamSpec implements AlgorithmSpec<DFS, HugeLongArray, DfsStreamConfig, Stream<DfsStreamResult>, DfsAlgorithmFactory<DfsStreamConfig>> {
     @Override
     public String name() {
         return "DfsStream";
@@ -51,22 +47,8 @@ public class DfsStreamSpec implements AlgorithmSpec<DFS, HugeLongArray, DfsStrea
         return (__, config) -> DfsStreamConfig.of(config);
     }
     @Override
-    public ComputationResultConsumer<DFS, HugeLongArray, DfsStreamConfig, Stream<DfsStreamProc.DfsStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var graph = computationResult.graph();
-            var nodes = computationResult.result();
-            if (graph.isEmpty() || null == nodes) {
-                return Stream.empty();
-            }
-
-            var nodesArray = nodes.toArray();
-            var nodeList = Arrays.stream(nodesArray).boxed().map(graph::toOriginalNodeId).collect(Collectors.toList());
-            var startNode = computationResult.config().sourceNode();
-            return Stream.of(new DfsStreamProc.DfsStreamResult(
-                startNode,
-                nodesArray,
-                PathFactory.create(executionContext.transaction().internalTransaction(), nodeList, NEXT)
-            ));
-        };
+    public ComputationResultConsumer<DFS, HugeLongArray, DfsStreamConfig, Stream<DfsStreamResult>> computationResultConsumer() {
+        return new DfsStreamComputationResultConsumer();
     }
+
 }
