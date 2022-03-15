@@ -22,10 +22,10 @@ package org.neo4j.gds.storageengine;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.eclipse.collections.api.IntIterable;
-import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.collections.HugeSparseLongList;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.cypher.UpdatableNodeProperty;
+import org.neo4j.gds.core.cypher.nodeproperties.UpdatableLongNodeProperty;
+import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.internal.helpers.collection.Iterables;
 import org.neo4j.storageengine.api.StorageProperty;
 import org.neo4j.storageengine.api.txstate.TxStateVisitor;
@@ -114,30 +114,9 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
     }
 
     private UpdatableNodeProperty updatableNodePropertyFromValue(Value value) {
+        var defaultValue = ValueConverter.valueType(value).fallbackValue();
         if (value instanceof LongValue) {
-            var defaultValue = DefaultValue.forLong().longValue();
-            var hugeSparseLongList = HugeSparseLongList.of(defaultValue);
-            return new UpdatableNodeProperty.UpdatableLongNodeProperty() {
-                @Override
-                public long size() {
-                    return graphStore.nodeCount();
-                }
-
-                @Override
-                public long longValue(long nodeId) {
-                    return hugeSparseLongList.get(nodeId);
-                }
-
-                @Override
-                public void updatePropertyValue(long nodeId, Value value) {
-                    hugeSparseLongList.set(nodeId, ((LongValue) value).longValue());
-                }
-
-                @Override
-                public void removePropertyValue(long nodeId) {
-                    hugeSparseLongList.set(nodeId, defaultValue);
-                }
-            };
+            return new UpdatableLongNodeProperty(graphStore.nodeCount(), defaultValue.longValue());
         }
         throw new IllegalArgumentException(formatWithLocale("Unsupported property type %s", value.getTypeName()));
     }

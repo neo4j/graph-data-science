@@ -20,8 +20,6 @@
 package org.neo4j.gds.core.cypher;
 
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.values.storable.Value;
 
 public interface UpdatableNodeProperty extends NodeProperties {
@@ -29,7 +27,4 @@ public interface UpdatableNodeProperty extends NodeProperties {
     void updatePropertyValue(long nodeId, Value value);
 
     void removePropertyValue(long nodeId);
-
-    interface UpdatableLongNodeProperty extends UpdatableNodeProperty, LongNodeProperties {}
-    interface UpdatableDoubleNodeProperty extends UpdatableNodeProperty, DoubleNodeProperties {}
 }
