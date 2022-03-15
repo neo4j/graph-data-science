@@ -35,6 +35,11 @@ public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, Traine
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     Optional<Double> maxFeaturesRatio();
 
+    @Configuration.Ignore
+    default double maxFeaturesRatio(int featureDimension) {
+        return maxFeaturesRatio().orElse(1.0D / Math.sqrt(featureDimension));
+    }
+
     @Configuration.DoubleRange(min = 0, max = 1)
     // A value of 0 means "sampling off": Do not sample, rather use all training examples given.
     default double numberOfSamplesRatio() {

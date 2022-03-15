@@ -158,7 +158,7 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
             var featureBagger = new FeatureBagger(
                 random,
                 allFeatureVectors.featureDimension(),
-                randomForestTrainConfig.maxFeaturesRatio().orElse(1.0D / Math.sqrt(allFeatureVectors.featureDimension()))
+                randomForestTrainConfig.maxFeaturesRatio(allFeatureVectors.featureDimension())
             );
 
             var decisionTree = new ClassificationDecisionTreeTrain<>(
