@@ -385,10 +385,10 @@ We now reconfigured the splitting of the pipeline, which will be applied during 
 
 [[algorithms-ml-linkprediction-configure-model-parameters]]
 == Configuring the model parameters
-// TODO Improve description
-The `gds.beta.pipeline.linkPrediction.addLogisticRegression` mode is used to set up the train mode with a list of configurations of logistic regression models.
-The set of model configurations is called the _parameter space_ which parametrizes a set of model candidates.
-The parameter space can be configured by adding multiple logistic regession models.
+
+A pipeline contains a collection of configurations for model candidates which is initially empty.
+This collection is called the _parameter space_.
+Prior to training one or several model configurations can and should be added to the _parameter space_ with the `gds.beta.pipeline.linkPrediction.addLogisticRegression` and `gds.alpha.pipeline.linkPrediction.addRandomForest` modes.
 In <<algorithms-ml-linkprediction-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
 
 The allowed model parameters are listed in the table <<linkprediction-pipelines-model-configuration-table>>.
