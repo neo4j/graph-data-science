@@ -28,33 +28,24 @@ import org.neo4j.token.TokenHolders;
 
 public abstract class AbstractInMemoryRelationshipTraversalCursor extends InMemoryRelationshipCursor implements StorageRelationshipTraversalCursor, RelationshipVisitor<RuntimeException> {
 
-    private long originNodeReference;
-
     public AbstractInMemoryRelationshipTraversalCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
-        super(graphStore, tokenHolders, NO_ID);
+        super(graphStore, tokenHolders);
     }
 
     @Override
     public long neighbourNodeReference() {
-        long source = sourceNodeReference();
-        long target = targetNodeReference();
-        if (source == originNodeReference) {
-            return target;
-        } else if (target == originNodeReference) {
-            return source;
-        } else {
-            throw new IllegalStateException("NOT PART OF CHAIN");
-        }
+        return targetId;
     }
 
     @Override
     public long originNodeReference() {
-        return originNodeReference;
+        return sourceId;
     }
 
     @Override
     public void init(long nodeReference, long reference, RelationshipSelection selection) {
-        relationshipCursors = graphStore.relationshipIds().relationshipCursors(nodeReference, selection);
-        originNodeReference = nodeReference;
+        reset();
+        this.sourceId = nodeReference;
+        this.selection = selection;
     }
 }

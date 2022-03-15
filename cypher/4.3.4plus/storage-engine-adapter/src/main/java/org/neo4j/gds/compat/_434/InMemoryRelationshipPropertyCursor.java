@@ -26,22 +26,20 @@ import org.neo4j.token.TokenHolders;
 
 public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelationshipPropertyCursor {
 
-    InMemoryRelationshipPropertyCursor(
-        CypherGraphStore graphStore,
-        TokenHolders tokenHolders
-    ) {
+    InMemoryRelationshipPropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders);
     }
 
     @Override
     public void initNodeProperties(long reference, long ownerReference) {
-
+        throw new UnsupportedOperationException("This is a relationship property cursor");
     }
 
     @Override
     public void initRelationshipProperties(long reference, long ownerReference) {
-        reset();
-        setId(reference);
-        setPropertySelection(InMemoryPropertySelection.SELECT_ALL);
+        var relationshipCursor = new InMemoryRelationshipScanCursor(graphStore, tokenHolders);
+        relationshipCursor.single(reference);
+        relationshipCursor.next();
+        relationshipCursor.properties(this, InMemoryPropertySelection.SELECT_ALL);
     }
 }

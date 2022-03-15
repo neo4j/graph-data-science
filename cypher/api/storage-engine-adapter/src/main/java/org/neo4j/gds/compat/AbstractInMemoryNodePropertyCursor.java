@@ -19,37 +19,40 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.ValueGroup;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor<NodeLabel, PropertySchema> {
+public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor {
 
     private final int[] nodePropertyKeyMapping;
     private final Value[] nodePropertyValues;
+    private final CypherGraphStore graphStore;
+    private final TokenHolders tokenHolders;
+    private final Map<Integer, ValueGroup> propertyKeyToValueGroupMapping;
 
     private int nodePropertyCount;
     private int currentNodeProperty;
 
     public AbstractInMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
-        super(NO_ID, graphStore, tokenHolders);
+        super(NO_ID);
 
+        this.graphStore = graphStore;
+        this.tokenHolders = tokenHolders;
         int propertyCount = graphStore.nodePropertyKeys().size();
         this.nodePropertyKeyMapping = new int[propertyCount];
         this.nodePropertyValues = new Value[propertyCount];
         this.nodePropertyCount = 0;
         this.currentNodeProperty = -1;
-    }
-
-    @Override
-    protected Map<NodeLabel, Map<String, PropertySchema>> propertySchema() {
-        return graphStore.schema().nodeSchema().properties();
+        this.propertyKeyToValueGroupMapping = new HashMap<>();
+        populateKeyToValueGroupMapping();
     }
 
     @Override
@@ -62,7 +65,6 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
         }
     }
 
-    @Override
     protected void setPropertySelection(InMemoryPropertySelection propertySelection) {
         var nodeId = getId();
         this.nodePropertyCount = 0;
@@ -116,4 +118,47 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
         this.currentNodeProperty = -1;
         Arrays.fill(this.nodePropertyKeyMapping, -1);
     }
+
+    @Override
+    public void setForceLoad() {
+
+    }
+
+    @Override
+    public void close() {
+
+    }
+
+    @Override
+    public ValueGroup propertyType() {
+        return propertyKeyToValueGroupMapping.get(propertyKey());
+    }
+
+
+    private void populateKeyToValueGroupMapping() {
+        graphStore.schema().nodeSchema().properties()
+            .forEach((identifier, propertyMap) ->
+                propertyMap.forEach((propertyKey, propertySchema) ->
+                    this.propertyKeyToValueGroupMapping.put(
+                        tokenHolders.propertyKeyTokens().getIdByName(propertyKey),
+                        valueGroupFromValueType(propertySchema.valueType())
+                    )
+                )
+            );
+    }
+
+    private static ValueGroup valueGroupFromValueType(ValueType valueType) {
+        switch (valueType) {
+            case DOUBLE:
+            case LONG:
+                return ValueGroup.NUMBER;
+            case LONG_ARRAY:
+            case DOUBLE_ARRAY:
+            case FLOAT_ARRAY:
+                return ValueGroup.NUMBER_ARRAY;
+            default:
+                return ValueGroup.UNKNOWN;
+        }
+    }
+
 }

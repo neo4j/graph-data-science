@@ -20,39 +20,60 @@
 package org.neo4j.gds.compat;
 
 import org.neo4j.gds.core.cypher.CypherGraphStore;
-import org.neo4j.gds.core.cypher.CypherRelationshipCursor;
-import org.neo4j.gds.core.cypher.SingleElementIterator;
 import org.neo4j.gds.storageengine.InMemoryRelationshipCursor;
 import org.neo4j.storageengine.api.AllRelationshipsScan;
 import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.StorageRelationshipScanCursor;
 import org.neo4j.token.TokenHolders;
 
-import java.util.stream.LongStream;
-import java.util.stream.StreamSupport;
-
 public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRelationshipCursor implements StorageRelationshipScanCursor {
 
+
     public AbstractInMemoryRelationshipScanCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
-        super(graphStore, tokenHolders, NO_ID);
+        super(graphStore, tokenHolders);
     }
 
     @Override
     public void scan() {
-        relationshipCursors = LongStream.range(0, graphStore.nodeCount())
-            .mapToObj(nodeId -> graphStore.relationshipIds().relationshipCursors(nodeId, RelationshipSelection.ALL_RELATIONSHIPS))
-            .map(cursor -> (Iterable<CypherRelationshipCursor>) () -> cursor)
-            .flatMap(relationshipCursors -> StreamSupport.stream(relationshipCursors.spliterator(), false))
-            .iterator();
-    }
-
-    @Override
-    public boolean scanBatch(AllRelationshipsScan scan, int sizeHint) {
-        return false;
+        reset();
+        this.sourceId = 0;
+        this.selection = RelationshipSelection.ALL_RELATIONSHIPS;
     }
 
     @Override
     public void single(long reference) {
-        relationshipCursors = new SingleElementIterator<>(graphStore.relationshipIds().relationshipForId(reference));
+        reset();
+        this.selection = RelationshipSelection.ALL_RELATIONSHIPS;
+
+        graphStore.relationshipIds().resolveRelationshipId(reference, (nodeId, offset, context) -> {
+            this.sourceId = nodeId;
+            setType(tokenHolders.relationshipTypeTokens().getIdByName(context.relationshipType().name));
+
+            for (long i = 0; i < offset; i++) {
+                next();
+            }
+
+            return null;
+        });
+    }
+
+    @Override
+    public boolean next() {
+        if (super.next()) {
+            return true;
+        } else {
+            this.sourceId++;
+            if (this.sourceId >= graphStore.nodeCount()) {
+                return false;
+            } else {
+                resetCursors();
+                return next();
+            }
+        }
+    }
+
+    @Override
+    public boolean scanBatch(AllRelationshipsScan scan, int sizeHint) {
+        throw new UnsupportedOperationException();
     }
 }

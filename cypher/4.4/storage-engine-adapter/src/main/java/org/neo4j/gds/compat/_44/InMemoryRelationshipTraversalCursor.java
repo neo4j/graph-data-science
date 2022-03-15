@@ -42,6 +42,6 @@ public class InMemoryRelationshipTraversalCursor extends AbstractInMemoryRelatio
     public void properties(
         StoragePropertyCursor propertyCursor, PropertySelection selection
     ) {
-        propertyCursor.initRelationshipProperties(propertiesReference(), selection);
+        properties(propertyCursor, new InMemoryPropertySelectionImpl(selection));
     }
 }

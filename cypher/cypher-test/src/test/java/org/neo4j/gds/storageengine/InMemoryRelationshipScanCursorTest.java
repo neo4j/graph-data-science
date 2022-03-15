@@ -20,15 +20,18 @@
 package org.neo4j.gds.storageengine;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipScanCursor;
+import org.neo4j.gds.compat.InMemoryPropertySelection;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
+import org.neo4j.values.storable.ValueGroup;
 
 import java.util.List;
 
@@ -42,11 +45,11 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
                                            "  (a:Label)" +
                                            ", (b:Label)" +
                                            ", (c:Label)" +
-                                           ", (a)-[:REL1]->(b)" +
-                                           ", (a)-[:REL1]->(c)" +
-                                           ", (b)-[:REL2]->(c)" +
-                                           ", (a)-[:REL3]->(a)" +
-                                           ", (c)-[:REL3]->(b)";
+                                           ", (a)-[:REL1 {relProp: 1.0D}]->(b)" +
+                                           ", (a)-[:REL1 {relProp: 2.0D}]->(c)" +
+                                           ", (b)-[:REL2 {relProp: 3.0D}]->(c)" +
+                                           ", (a)-[:REL3 {relProp: 4.0D}]->(a)" +
+                                           ", (c)-[:REL3 {relProp: 5.0D}]->(b)";
 
     @Inject
     IdFunction idFunction;
@@ -59,6 +62,7 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
             .api(db)
             .graphName("test")
             .addAllRelationshipTypes(List.of("REL1", "REL2", "REL3"))
+            .addRelationshipProperty(PropertyMapping.of("relProp"))
             .build()
             .graphStore();
     }
@@ -98,5 +102,20 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
         assertThat(relationshipScanCursor.getId()).isEqualTo(2);
         assertThat(relationshipScanCursor.sourceNodeReference()).isEqualTo(idFunction.of("b"));
         assertThat(relationshipScanCursor.targetNodeReference()).isEqualTo(idFunction.of("c"));
+    }
+
+    @Test
+    void shouldSupportPropertiesForSingleRelationship() {
+        var propertyCursor = StorageEngineProxy.inMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
+
+        relationshipScanCursor.single(2);
+
+        assertThat(relationshipScanCursor.next()).isTrue();
+        relationshipScanCursor.properties(propertyCursor, InMemoryPropertySelection.SELECT_ALL);
+
+        assertThat(propertyCursor.next()).isTrue();
+        assertThat(propertyCursor.propertyValue().asObject()).isEqualTo(3.0D);
+        assertThat(propertyCursor.propertyType()).isEqualTo(ValueGroup.NUMBER);
+        assertThat(propertyCursor.propertyKey()).isEqualTo(relationshipScanCursor.tokenHolders.propertyKeyTokens().getIdByName("relProp"));
     }
 }

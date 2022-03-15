@@ -20,16 +20,14 @@
 package org.neo4j.gds.compat._433;
 
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipScanCursor;
+import org.neo4j.gds.compat.InMemoryPropertySelection;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.token.TokenHolders;
 
 public class InMemoryRelationshipScanCursor extends AbstractInMemoryRelationshipScanCursor {
 
-    public InMemoryRelationshipScanCursor(
-        CypherGraphStore graphStore,
-        TokenHolders tokenHolders
-    ) {
+    InMemoryRelationshipScanCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders);
     }
 
@@ -40,6 +38,6 @@ public class InMemoryRelationshipScanCursor extends AbstractInMemoryRelationship
 
     @Override
     public void properties(StoragePropertyCursor propertyCursor) {
-        propertyCursor.initRelationshipProperties(propertiesReference());
+        properties(propertyCursor, InMemoryPropertySelection.SELECT_ALL);
     }
 }

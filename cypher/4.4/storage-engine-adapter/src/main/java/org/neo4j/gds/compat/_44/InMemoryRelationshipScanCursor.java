@@ -37,8 +37,8 @@ public class InMemoryRelationshipScanCursor extends AbstractInMemoryRelationship
     }
 
     @Override
-    public void single(long l, long l1, int i, long l2) {
-
+    public void single( long reference, long sourceNodeReference, int type, long targetNodeReference ) {
+        single(reference);
     }
 
     @Override
@@ -47,9 +47,7 @@ public class InMemoryRelationshipScanCursor extends AbstractInMemoryRelationship
     }
 
     @Override
-    public void properties(
-        StoragePropertyCursor storagePropertyCursor, PropertySelection propertySelection
-    ) {
-        storagePropertyCursor.initRelationshipProperties(propertiesReference(), propertySelection);
+    public void properties(StoragePropertyCursor storagePropertyCursor, PropertySelection propertySelection) {
+        properties(storagePropertyCursor, new InMemoryPropertySelectionImpl(propertySelection));
     }
 }

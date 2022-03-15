@@ -88,9 +88,8 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         this.txStateVisitorFn = txStateVisitorFn;
         this.commandCreationContextSupplier = commandCreationContextSupplier;
         this.storageReaderFn = storageReaderFn;
-        schemaAndTokensLifecycle();
+        initializeTokenHolders();
         graphStore.initialize(tokenHolders);
-
         this.countsStore = countsStoreFn.apply(graphStore, tokenHolders);
         this.metadataProvider = metadataProvider;
     }
@@ -168,39 +167,10 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     @Override
     public Lifecycle schemaAndTokensLifecycle() {
-        MutableInt labelCounter = new MutableInt(0);
-        MutableInt typeCounter = new MutableInt(0);
-        MutableInt propertyCounter = new MutableInt(0);
         return new LifecycleAdapter() {
             @Override
             public void init() {
-                graphStore
-                    .nodePropertyKeys()
-                    .values()
-                    .stream()
-                    .flatMap(Set::stream)
-                    .distinct()
-                    .forEach(propertyKey -> tokenHolders
-                        .propertyKeyTokens()
-                        .addToken(new NamedToken(propertyKey, propertyCounter.getAndIncrement())));
 
-                graphStore
-                    .relationshipPropertyKeys()
-                    .forEach(propertyKey -> tokenHolders
-                        .propertyKeyTokens()
-                        .addToken(new NamedToken(propertyKey, propertyCounter.getAndIncrement())));
-
-                graphStore
-                    .nodeLabels()
-                    .forEach(nodeLabel -> tokenHolders
-                        .labelTokens()
-                        .addToken(new NamedToken(nodeLabel.name(), labelCounter.getAndIncrement())));
-
-                graphStore
-                    .relationshipTypes()
-                    .forEach(relType -> tokenHolders
-                        .relationshipTypeTokens()
-                        .addToken(new NamedToken(relType.name(), typeCounter.getAndIncrement())));
             }
         };
     }
@@ -225,6 +195,37 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         CommandStream commands, LockService lockService, LockGroup lockGroup, TransactionApplicationMode mode
     ) {
 
+    }
+
+    private void initializeTokenHolders() {
+        MutableInt labelCounter = new MutableInt(0);
+        MutableInt typeCounter = new MutableInt(0);
+        MutableInt propertyCounter = new MutableInt(0);
+
+        var propertyKeys = graphStore
+            .nodePropertyKeys()
+            .values()
+            .stream()
+            .flatMap(Set::stream)
+            .collect(Collectors.toSet());
+        propertyKeys.addAll(graphStore.relationshipPropertyKeys());
+        propertyKeys.forEach(propertyKey ->
+            tokenHolders
+                .propertyKeyTokens()
+                .addToken(new NamedToken(propertyKey, propertyCounter.getAndIncrement()))
+        );
+
+        graphStore
+            .nodeLabels()
+            .forEach(nodeLabel -> tokenHolders
+                .labelTokens()
+                .addToken(new NamedToken(nodeLabel.name(), labelCounter.getAndIncrement())));
+
+        graphStore
+            .relationshipTypes()
+            .forEach(relType -> tokenHolders
+                .relationshipTypeTokens()
+                .addToken(new NamedToken(relType.name(), typeCounter.getAndIncrement())));
     }
 
     private static CypherGraphStore getGraphStoreFromCatalog(String graphName) {
