@@ -58,7 +58,12 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
         long nodeId, Iterable<StorageProperty> added, Iterable<StorageProperty> changed, IntIterable removed
     ) {
         visitAddedOrChangedNodeProperties(nodeId, added, changed);
-        visitDeletedNodeProperties(nodeId, removed);
+        if (!removed.isEmpty()) {
+            throw new UnsupportedOperationException(
+                "Removing single node properties is not supported. Use the `gds.graph.removeNodeProperties` procedure " +
+                "instead to drop the entire property form the graph."
+            );
+        }
     }
 
     public void removeNodeProperty(String propertyKey) {
@@ -96,14 +101,6 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
                 return true;
             });
         }
-    }
-
-    private void visitDeletedNodeProperties(long nodeId, IntIterable removed) {
-        removed.forEach(propertyKeyId -> {
-            if (this.nodePropertiesCache.containsKey(propertyKeyId)) {
-                this.nodePropertiesCache.get(propertyKeyId).removePropertyValue(nodeId);
-            }
-        });
     }
 
     private UpdatableNodeProperty getOrCreateUpdatableNodeProperty(int propertyKeyToken, Value value) {

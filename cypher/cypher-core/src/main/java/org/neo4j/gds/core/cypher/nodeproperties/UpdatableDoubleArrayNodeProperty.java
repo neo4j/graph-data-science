@@ -52,8 +52,4 @@ public class UpdatableDoubleArrayNodeProperty implements UpdatableNodeProperty, 
         doubleArrayList.set(nodeId, Neo4jValueConversion.getDoubleArray(value));
     }
 
-    @Override
-    public void removePropertyValue(long nodeId) {
-        doubleArrayList.set(nodeId, defaultValue);
-    }
 }

@@ -53,8 +53,4 @@ public class UpdatableDoubleNodeProperty implements UpdatableNodeProperty, Doubl
         doubleList.set(nodeId, Neo4jValueConversion.getDoubleValue(value));
     }
 
-    @Override
-    public void removePropertyValue(long nodeId) {
-        doubleList.set(nodeId, defaultValue);
-    }
 }

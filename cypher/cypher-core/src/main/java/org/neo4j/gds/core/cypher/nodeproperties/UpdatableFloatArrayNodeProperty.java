@@ -52,8 +52,4 @@ public class UpdatableFloatArrayNodeProperty implements UpdatableNodeProperty, F
         floatArrayList.set(nodeId, Neo4jValueConversion.getFloatArray(value));
     }
 
-    @Override
-    public void removePropertyValue(long nodeId) {
-        floatArrayList.set(nodeId, defaultValue);
-    }
 }

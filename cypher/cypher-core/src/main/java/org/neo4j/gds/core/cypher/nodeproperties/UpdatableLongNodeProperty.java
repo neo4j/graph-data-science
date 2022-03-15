@@ -53,8 +53,4 @@ public class UpdatableLongNodeProperty implements UpdatableNodeProperty, LongNod
         longList.set(nodeId, Neo4jValueConversion.getLongValue(value));
     }
 
-    @Override
-    public void removePropertyValue(long nodeId) {
-        longList.set(nodeId, defaultValue);
-    }
 }

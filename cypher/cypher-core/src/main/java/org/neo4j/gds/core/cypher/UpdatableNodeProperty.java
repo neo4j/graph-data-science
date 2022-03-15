@@ -25,6 +25,4 @@ import org.neo4j.values.storable.Value;
 public interface UpdatableNodeProperty extends NodeProperties {
 
     void updatePropertyValue(long nodeId, Value value);
-
-    void removePropertyValue(long nodeId);
 }
