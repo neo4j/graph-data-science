@@ -65,6 +65,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
+    private final DatabaseLayout databaseLayout;
     private final TokenHolders tokenHolders;
     private final InMemoryTransactionStateVisitor txStateVisitor;
     private final Supplier<CommandCreationContext> commandCreationContextSupplier;
@@ -82,6 +83,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         Supplier<CommandCreationContext> commandCreationContextSupplier,
         TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
     ) {
+        this.databaseLayout = databaseLayout;
         this.tokenHolders = tokenHolders;
         var graphName = InMemoryDatabaseCreationCatalog.getRegisteredDbCreationGraphName(databaseLayout.getDatabaseName());
         this.graphStore = getGraphStoreFromCatalog(graphName);
@@ -128,6 +130,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     @Override
     public void shutdown() {
+        InMemoryDatabaseCreationCatalog.removeDatabaseEntry(databaseLayout.getDatabaseName());
     }
 
     @Override
