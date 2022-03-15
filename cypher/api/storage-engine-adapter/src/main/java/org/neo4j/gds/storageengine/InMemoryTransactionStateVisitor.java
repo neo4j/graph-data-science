@@ -57,13 +57,13 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
     public void visitNodePropertyChanges(
         long nodeId, Iterable<StorageProperty> added, Iterable<StorageProperty> changed, IntIterable removed
     ) {
-        visitAddedOrChangedNodeProperties(nodeId, added, changed);
         if (!removed.isEmpty()) {
             throw new UnsupportedOperationException(
                 "Removing single node properties is not supported. Use the `gds.graph.removeNodeProperties` procedure " +
                 "instead to drop the entire property form the graph."
             );
         }
+        visitAddedOrChangedNodeProperties(nodeId, added, changed);
     }
 
     public void removeNodeProperty(String propertyKey) {
@@ -81,33 +81,18 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
             var propertyKey = tokenHolders.propertyKeyGetName(propertyKeyId);
             var propertyValue = storageProperty.value();
 
-            var updatableNodeProperty = getOrCreateUpdatableNodeProperty(propertyKeyId, propertyValue);
-
-            graphStore.nodes().forEachNodeLabel(nodeId, nodeLabel -> {
-                UpdatableNodeProperty nodeProperties;
-                if (graphStore.hasNodeProperty(nodeLabel, propertyKey)) {
-                    var maybeNodeProperties = graphStore.nodePropertyValues(nodeLabel, propertyKey);
-                    if (!(maybeNodeProperties instanceof UpdatableNodeProperty)) {
-                        throw new UnsupportedOperationException(formatWithLocale("Cannot update immutable property %s", propertyKey));
-                    }
-                    nodeProperties = (UpdatableNodeProperty) maybeNodeProperties;
-                } else {
-                    nodeProperties = updatableNodeProperty;
-                    graphStore.addNodeProperty(nodeLabel, propertyKey, nodeProperties);
-                }
-
-                nodeProperties.updatePropertyValue(nodeId, propertyValue);
-
-                return true;
-            });
+            UpdatableNodeProperty nodeProperties;
+            if (this.nodePropertiesCache.containsKey(propertyKeyId)) {
+                nodeProperties = this.nodePropertiesCache.get(propertyKeyId);
+            } else {
+                nodeProperties = createUpdatableNodeProperty(propertyKeyId, propertyValue);
+                graphStore.nodeLabels().forEach(nodeLabel -> graphStore.addNodeProperty(nodeLabel, propertyKey, nodeProperties));
+            }
+            nodeProperties.updatePropertyValue(nodeId, propertyValue);
         }
     }
 
-    private UpdatableNodeProperty getOrCreateUpdatableNodeProperty(int propertyKeyToken, Value value) {
-        if (this.nodePropertiesCache.containsKey(propertyKeyToken)) {
-            return this.nodePropertiesCache.get(propertyKeyToken);
-        }
-
+    private UpdatableNodeProperty createUpdatableNodeProperty(int propertyKeyToken, Value value) {
         var updatableNodeProperty = updatableNodePropertyFromValue(value);
         this.nodePropertiesCache.put(propertyKeyToken, updatableNodeProperty);
         return updatableNodeProperty;
