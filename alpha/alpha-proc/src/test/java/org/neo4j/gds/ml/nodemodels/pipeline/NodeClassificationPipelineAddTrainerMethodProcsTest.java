@@ -76,7 +76,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
     @Test
     void shouldSetRFParams() {
         assertCypherResult(
-            "CALL gds.alpha.pipeline.nodeClassification.addRandomForest('myPipeline', {maxDepth: 42, featureBaggingRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 1})",
+            "CALL gds.alpha.pipeline.nodeClassification.addRandomForest('myPipeline', {maxDepth: 42, maxFeaturesRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 2})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,

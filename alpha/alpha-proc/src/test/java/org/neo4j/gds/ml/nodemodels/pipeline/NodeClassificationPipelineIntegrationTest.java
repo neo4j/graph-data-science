@@ -239,7 +239,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
                  "  validationFolds: 5" +
                  "})");
         runQuery("CALL gds.alpha.pipeline.nodeClassification.addRandomForest('p', {" +
-                 "featureBaggingRatio: 1.0, numberOfDecisionTrees: 2, maxDepth: 5, minSplitSize: 1" +
+                 "maxFeaturesRatio: 1.0, numberOfDecisionTrees: 2, maxDepth: 5, minSplitSize: 2" +
                  "})");
 
         assertCypherResult("CALL gds.beta.pipeline.nodeClassification.train('g', {" +
