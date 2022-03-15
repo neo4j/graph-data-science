@@ -115,10 +115,10 @@ CREATE
        (nD:Node {tag: 'd'}),
        (nE:Node {tag: 'e'}),
 
-       (nA)-[:REL {cost: 8.0}]->(nB),
-       (nA)-[:REL {cost: 9.0}]->(nC),
-       (nB)-[:REL {cost: 1.0}]->(nE),
-       (nC)-[:REL {cost: 5.0}]->(nD)
+       (nA)-[:REL]->(nB),
+       (nA)-[:REL]->(nC),
+       (nB)-[:REL]->(nE),
+       (nC)-[:REL]->(nD)
 ----
 
 .The following statement will project the graph and store it in the graph catalog.
