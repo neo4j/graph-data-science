@@ -114,18 +114,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.sllpa.write",
         "gds.alpha.sllpa.write.estimate",
 
-        "gds.alpha.similarity.cosine.write",
-        "gds.alpha.similarity.cosine.stream",
-        "gds.alpha.similarity.cosine.stats",
-        "gds.alpha.similarity.euclidean.write",
-        "gds.alpha.similarity.euclidean.stream",
-        "gds.alpha.similarity.euclidean.stats",
-        "gds.alpha.similarity.overlap.write",
-        "gds.alpha.similarity.overlap.stream",
-        "gds.alpha.similarity.overlap.stats",
-        "gds.alpha.similarity.pearson.write",
-        "gds.alpha.similarity.pearson.stream",
-        "gds.alpha.similarity.pearson.stats",
         "gds.alpha.spanningTree.write",
         "gds.alpha.spanningTree.kmax.write",
         "gds.alpha.spanningTree.kmin.write",
@@ -441,7 +429,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 304;
+        int expectedCount = 291;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),
