@@ -30,11 +30,13 @@ import org.neo4j.gds.core.cypher.nodeproperties.UpdatableFloatArrayNodeProperty;
 import org.neo4j.gds.core.cypher.nodeproperties.UpdatableLongArrayNodeProperty;
 import org.neo4j.gds.core.cypher.nodeproperties.UpdatableLongNodeProperty;
 import org.neo4j.gds.core.loading.ValueConverter;
-import org.neo4j.internal.helpers.collection.Iterables;
+import org.neo4j.internal.helpers.collection.Iterators;
 import org.neo4j.storageengine.api.StorageProperty;
 import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.values.storable.Value;
+
+import java.util.Iterator;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -53,9 +55,16 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
         this.nodePropertiesCache = new IntObjectHashMap<>();
     }
 
-    @Override
+    // Neo4j >= 4.4
     public void visitNodePropertyChanges(
         long nodeId, Iterable<StorageProperty> added, Iterable<StorageProperty> changed, IntIterable removed
+    ) {
+        visitNodePropertyChanges(nodeId, added.iterator(), changed.iterator(), removed);
+    }
+
+    // Neo4j <= 4.3
+    public void visitNodePropertyChanges(
+        long nodeId, Iterator<StorageProperty> added, Iterator<StorageProperty> changed, IntIterable removed
     ) {
         if (!removed.isEmpty()) {
             throw new UnsupportedOperationException(
@@ -74,9 +83,10 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
         }
     }
 
-    private void visitAddedOrChangedNodeProperties(long nodeId, Iterable<StorageProperty> added, Iterable<StorageProperty> changed) {
-        var addedOrChangedProperties = Iterables.concat(added, changed);
-        for (StorageProperty storageProperty : addedOrChangedProperties) {
+    private void visitAddedOrChangedNodeProperties(long nodeId, Iterator<StorageProperty> added, Iterator<StorageProperty> changed) {
+        var addedOrChangedProperties = Iterators.concat(added, changed);
+
+        addedOrChangedProperties.forEachRemaining(storageProperty -> {
             var propertyKeyId = storageProperty.propertyKeyId();
             var propertyKey = tokenHolders.propertyKeyGetName(propertyKeyId);
             var propertyValue = storageProperty.value();
@@ -89,7 +99,7 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
                 graphStore.nodeLabels().forEach(nodeLabel -> graphStore.addNodeProperty(nodeLabel, propertyKey, nodeProperties));
             }
             nodeProperties.updatePropertyValue(nodeId, propertyValue);
-        }
+        });
     }
 
     private UpdatableNodeProperty createUpdatableNodeProperty(int propertyKeyToken, Value value) {
