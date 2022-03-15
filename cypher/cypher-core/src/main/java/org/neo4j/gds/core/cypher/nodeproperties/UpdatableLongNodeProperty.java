@@ -22,7 +22,7 @@ package org.neo4j.gds.core.cypher.nodeproperties;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.collections.HugeSparseLongList;
 import org.neo4j.gds.core.cypher.UpdatableNodeProperty;
-import org.neo4j.values.storable.LongValue;
+import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
 public class UpdatableLongNodeProperty implements UpdatableNodeProperty, LongNodeProperties {
@@ -50,7 +50,7 @@ public class UpdatableLongNodeProperty implements UpdatableNodeProperty, LongNod
 
     @Override
     public void updatePropertyValue(long nodeId, Value value) {
-        longList.set(nodeId, ((LongValue) value).longValue());
+        longList.set(nodeId, Neo4jValueConversion.getLongValue(value));
     }
 
     @Override

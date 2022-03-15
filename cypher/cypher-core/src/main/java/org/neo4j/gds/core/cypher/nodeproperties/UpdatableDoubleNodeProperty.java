@@ -22,7 +22,7 @@ package org.neo4j.gds.core.cypher.nodeproperties;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.collections.HugeSparseDoubleList;
 import org.neo4j.gds.core.cypher.UpdatableNodeProperty;
-import org.neo4j.values.storable.DoubleValue;
+import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
 public class UpdatableDoubleNodeProperty implements UpdatableNodeProperty, DoubleNodeProperties {
@@ -50,7 +50,7 @@ public class UpdatableDoubleNodeProperty implements UpdatableNodeProperty, Doubl
 
     @Override
     public void updatePropertyValue(long nodeId, Value value) {
-        doubleList.set(nodeId, ((DoubleValue) value).doubleValue());
+        doubleList.set(nodeId, Neo4jValueConversion.getDoubleValue(value));
     }
 
     @Override
