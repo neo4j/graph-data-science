@@ -564,3 +564,40 @@ The relationships that are written are always directed, even if the input graph 
 If for example `a -> b` is topK for `a` and symmetrically `b -> a` is topK for `b`, it appears as though an undirected relationship is written.
 However, they are just two directed relationships that have been independently written.
 ====
+
+[[algorithms-knn-examples-multiple-properties]]
+=== Calculation with multiple properties
+
+If we want calculate similarity based on multiple metrics, we can calculate the similarity for each property individually and take their mean.
+As an example, we can use the Normalized Euclidean similarity metric for the vector property and the Overlap metric for the items property.
+
+[role=query-example]
+--
+.The following shows an example of using multiple properties to calculate similarity and streams the results:
+[source, cypher, role=noplay]
+----
+CALL gds.knn.stream('myGraph', {
+    topK: 1,
+    nodeProperties: [{vector : "EUCLIDEAN"},'age',{items:"OVERLAP"}],
+    // The following parameters are set to produce a deterministic result
+    randomSeed: 1337,
+    concurrency: 1,
+    sampleRate: 1.0,
+    deltaThreshold: 0.0
+})
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
+ORDER BY similarity DESCENDING, Person1, Person2
+----
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Carol" | 0.999168744804655
+| "Carol" | "Alice" | 0.999168744804655
+| "Bob"   | "Carol" | 0.650800310800311
+| "Eve"   | "Bob"   | 0.457594716718804
+| "Dave"  | "Bob"   | 0.432012432012432
+|===
+
+Note that the two distinct maps in the query could be merged to a single one.
