@@ -21,14 +21,18 @@ package org.neo4j.gds.paths.traverse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
-
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -167,6 +171,42 @@ class DfsStreamProcTest extends BaseProcTest {
                 Stream.of("g", "f", "d", "c", "a", "b", "e").map(idFunction::of).collect(Collectors.toList())
             );
         });
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("pathQueryBuilders")
+    void testPathField(Function<GdsCypher.ParametersBuildStage, String> queryProvider, String displayName) {
+        var parametersBuildStage = GdsCypher.call(REVERSE_GRAPH_NAME)
+            .algo("dfs")
+            .streamMode()
+            .addParameter("sourceNode", idFunction.of("g"));
+        String query = queryProvider.apply(parametersBuildStage);
+
+        runQueryWithRowConsumer(query, row -> {
+            var path = row.getPath("path");
+
+            assertThat(path.length()).isEqualTo(6);
+
+            var nodeIds = new ArrayList<Long>();
+            path.nodes().forEach(node -> {
+                nodeIds.add(node.getId());
+            });
+
+            // We can't predict the traversal order deterministically => check the possible combinations
+            assertThat(nodeIds).isIn(
+                Stream.of("g", "e", "d", "b", "a", "c", "f").map(idFunction::of).collect(Collectors.toList()),
+                Stream.of("g", "e", "d", "c", "a", "b", "f").map(idFunction::of).collect(Collectors.toList()),
+                Stream.of("g", "f", "d", "b", "a", "c", "e").map(idFunction::of).collect(Collectors.toList()),
+                Stream.of("g", "f", "d", "c", "a", "b", "e").map(idFunction::of).collect(Collectors.toList())
+            );;
+        });
+    }
+
+    static Stream<Arguments> pathQueryBuilders() {
+        return Stream.of(
+            Arguments.of((Function<GdsCypher.ParametersBuildStage, String>) GdsCypher.ParametersBuildStage::yields, "No yield fields specified"),
+            Arguments.of((Function<GdsCypher.ParametersBuildStage, String>) stage -> stage.yields("path"), "Only `path` yield field")
+        );
     }
 
     @Test
