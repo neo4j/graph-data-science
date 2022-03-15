@@ -359,14 +359,14 @@ Consider the graph created by the following Cypher statement:
 
 [source, cypher, role=noplay setup-query]
 ----
-CREATE (alice:Person {name: 'Alice', age: 24})
-CREATE (bob:Person {name: 'Bob', age: 73})
-CREATE (carol:Person {name: 'Carol', age: 24})
-CREATE (dave:Person {name: 'Dave', age: 48})
-CREATE (eve:Person {name: 'Eve', age: 67});
+CREATE (alice:Person {name: 'Alice', age: 24, items:[1,3], vector: [0.1,0.3]})
+CREATE (bob:Person {name: 'Bob', age: 73, items: [1,2,3], vector: [0.2,0.6]})
+CREATE (carol:Person {name: 'Carol', age: 24, items: [3], vector: [0.1,0.35]})
+CREATE (dave:Person {name: 'Dave', age: 48, items: [2,4], vector: [0.6,0.2]})
+CREATE (eve:Person {name: 'Eve', age: 67, items: [1,5], vector: [0.8,0.7]});
 ----
 
-In the example, we want to use the K-Nearest Neighbors algorithm to compare people based on their age.
+In the example, we want to use the K-Nearest Neighbors algorithm to compare people based on either their age or a combination on all  provided properties.
 
 include::../shared/examples-named-native-note.adoc[]
 
@@ -378,7 +378,7 @@ CALL gds.graph.project(
     {
         Person: {
             label: 'Person',
-            properties: 'age'
+            properties: ['age','items','vector']
         }
     },
     '*'
