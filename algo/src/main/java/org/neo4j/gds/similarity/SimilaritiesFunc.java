@@ -86,42 +86,47 @@ public class SimilaritiesFunc {
         String listType = config.getOrDefault("vectorType", "numbers").toString();
 
         if (listType.equalsIgnoreCase("maps")) {
-            List<Map<String, Object>> vector1 = (List<Map<String, Object>>) rawVector1;
-            List<Map<String, Object>> vector2 = (List<Map<String, Object>>) rawVector2;
-
-            LongSet ids = new LongHashSet();
-
-            var v1Mappings = parseMapValues(vector1, ids);
-            var v2Mappings = parseMapValues(vector2, ids);
-
-            double[] weights1 = new double[ids.size()];
-            double[] weights2 = new double[ids.size()];
-
-            double skipValue = Double.NaN;
-            int index = 0;
-            for (long id : ids.toArray()) {
-                weights1[index] = v1Mappings.getOrDefault(id, skipValue);
-                weights2[index] = v2Mappings.getOrDefault(id, skipValue);
-                index++;
-            }
-
-            return Intersections.pearsonSkip(weights1, weights2, ids.size(), skipValue);
+            return pearsonForMapVectors((List<Map<String, Object>>) rawVector1, (List<Map<String, Object>>) rawVector2);
         } else {
-            List<Number> vector1 = (List<Number>) rawVector1;
-            List<Number> vector2 = (List<Number>) rawVector2;
-
-            validateInput(vector1, vector2);
-
-            int len = vector1.size();
-            double[] weights1 = new double[len];
-            double[] weights2 = new double[len];
-
-            for (int i = 0; i < len; i++) {
-                weights1[i] = getDoubleValue(vector1.get(i));
-                weights2[i] = getDoubleValue(vector2.get(i));
-            }
-            return Intersections.pearson(weights1, weights2, len);
+            return pearsonForNumberVectors((List<Number>) rawVector1, (List<Number>) rawVector2);
         }
+    }
+
+    private double pearsonForMapVectors(List<Map<String, Object>> rawVector1, List<Map<String, Object>> rawVector2) {
+        List<Map<String, Object>> vector1 = rawVector1;
+        List<Map<String, Object>> vector2 = rawVector2;
+
+        LongSet ids = new LongHashSet();
+
+        var v1Mappings = parseMapValues(vector1, ids);
+        var v2Mappings = parseMapValues(vector2, ids);
+
+        double[] weights1 = new double[ids.size()];
+        double[] weights2 = new double[ids.size()];
+
+        double skipValue = Double.NaN;
+        int index = 0;
+        for (long id : ids.toArray()) {
+            weights1[index] = v1Mappings.getOrDefault(id, skipValue);
+            weights2[index] = v2Mappings.getOrDefault(id, skipValue);
+            index++;
+        }
+
+        return Intersections.pearsonSkip(weights1, weights2, ids.size(), skipValue);
+    }
+
+    private double pearsonForNumberVectors(List<Number> vector1, List<Number> vector2) {
+        validateInput(vector1, vector2);
+
+        int len = vector1.size();
+        double[] weights1 = new double[len];
+        double[] weights2 = new double[len];
+
+        for (int i = 0; i < len; i++) {
+            weights1[i] = getDoubleValue(vector1.get(i));
+            weights2[i] = getDoubleValue(vector2.get(i));
+        }
+        return Intersections.pearson(weights1, weights2, len);
     }
 
     @NotNull
