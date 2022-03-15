@@ -33,7 +33,8 @@ import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
+import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.models.ClassifierFactory;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     NodeClassificationPredict.NodeClassificationResult
     > {
     private static final int MIN_BATCH_SIZE = 100;
-    private final LogisticRegressionData modelData;
+    private final Classifier.ClassifierData modelData;
 
     public NodeClassificationPredictPipelineExecutor(
         NodeClassificationPipeline pipeline,
@@ -55,7 +56,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         GraphStore graphStore,
         String graphName,
         ProgressTracker progressTracker,
-        LogisticRegressionData modelData
+        Classifier.ClassifierData modelData
     ) {
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
         this.modelData = modelData;
@@ -110,7 +111,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
             Optional.empty()
         );
         var innerAlgo = new NodeClassificationPredict(
-            new LogisticRegressionClassifier(modelData),
+            ClassifierFactory.create(modelData),
             graph,
             MIN_BATCH_SIZE,
             config.concurrency(),
