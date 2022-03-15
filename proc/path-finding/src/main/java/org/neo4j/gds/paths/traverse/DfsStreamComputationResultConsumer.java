@@ -27,17 +27,28 @@ import org.neo4j.gds.executor.ExecutionContext;
 import java.util.stream.Stream;
 
 class DfsStreamComputationResultConsumer implements ComputationResultConsumer<DFS, HugeLongArray, DfsStreamConfig, Stream<DfsStreamResult>> {
+
+    private final PathFactoryFacade pathFactoryFacade;
+
+    DfsStreamComputationResultConsumer(PathFactoryFacade pathFactoryFacade) {
+        this.pathFactoryFacade = pathFactoryFacade;
+    }
+
     @Override
     public Stream<DfsStreamResult> consume(
         ComputationResult<DFS, HugeLongArray, DfsStreamConfig> computationResult,
         ExecutionContext executionContext
     ) {
         return TraverseStreamComputationResultConsumer.consume(
-            computationResult.graph(),
+            computationResult.graph().isEmpty(),
+            computationResult.graph()::toOriginalNodeId,
             computationResult.result(),
             computationResult.config().sourceNode(),
-            executionContext,
-            DfsStreamResult::new
+            DfsStreamResult::new,
+            pathFactoryFacade,
+            executionContext.containsOutputField("path"),
+            executionContext.internalTransaction(),
+            DfsStreamProc.NEXT
         );
     }
 }

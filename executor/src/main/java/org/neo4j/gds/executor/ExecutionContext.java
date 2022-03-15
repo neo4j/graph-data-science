@@ -35,9 +35,12 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.NamedDatabaseId;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
+
+import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 // TODO Remove the @Nullable annotations once the EstimationCli uses ProcedureExecutors
 @ValueClass
@@ -58,6 +61,11 @@ public interface ExecutionContext {
     @Nullable
     KernelTransaction transaction();
 
+    @Value.Lazy
+    default InternalTransaction internalTransaction() {
+        return transaction().internalTransaction();
+    }
+
     @Nullable
     ProcedureCallContext callContext();
 
@@ -75,6 +83,12 @@ public interface ExecutionContext {
     @Value.Lazy
     default NamedDatabaseId databaseId() {
         return api().databaseId();
+    }
+
+    @Value.Lazy
+    default boolean containsOutputField(String fieldName) {
+        return callContext().outputFields()
+            .anyMatch(field -> toLowerCaseWithLocale(field).equals(fieldName));
     }
 
     @Value.Lazy

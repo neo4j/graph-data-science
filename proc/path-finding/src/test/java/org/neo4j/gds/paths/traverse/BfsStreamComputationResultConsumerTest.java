@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -28,19 +27,17 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.graphdb.Node;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
+import org.neo4j.graphdb.Path;
 
-import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,55 +45,63 @@ class BfsStreamComputationResultConsumerTest {
 
     @Mock ComputationResult<BFS, HugeLongArray, BfsStreamConfig> computationResultMock;
     @Mock ExecutionContext executionContextMock;
-    @Mock ProcedureCallContext procedureCallContextMock;
     @Mock BfsStreamConfig configMock;
     @Mock Graph graphMock;
+    @Mock PathFactoryFacade pathFactoryFacadeMock;
 
-    @BeforeEach
-    void setUp() {
+    @Test
+    void shouldNotComputePath() {
         when(graphMock.isEmpty()).thenReturn(false);
-        doReturn(1L, 2L).when(graphMock).toOriginalNodeId(anyLong());
+        when(graphMock.toOriginalNodeId(anyLong())).then(returnsFirstArg());
 
         when(computationResultMock.graph()).thenReturn(graphMock);
-
-        var result = HugeLongArray.newArray(2);
-        when(computationResultMock.result()).thenReturn(result);
+        when(computationResultMock.result()).thenReturn(HugeLongArray.of(1L, 2L));
 
         when(configMock.sourceNode()).thenReturn(0L);
         when(computationResultMock.config()).thenReturn(configMock);
 
-        when(executionContextMock.callContext()).thenReturn(procedureCallContextMock);
-    }
+        doReturn(false).when(executionContextMock).containsOutputField("path");
 
-    @Test
-    void shouldNotComputePath() {
-        when(procedureCallContextMock.outputFields()).thenReturn(Stream.of("sourceNode", "nodeIds"));
-
-        var consumer = new BfsStreamComputationResultConsumer();
+        var consumer = new BfsStreamComputationResultConsumer(new PathFactoryFacade());
 
         var actual = consumer.consume(computationResultMock, executionContextMock);
+
+        verifyNoInteractions(pathFactoryFacadeMock);
+
         assertThat(actual)
             .hasSize(1)
-            .containsExactly(
-                new BfsStreamResult(0, List.of(1L, 2L), null)
-            );
+            .satisfiesExactly(resultRow -> {
+                assertThat(resultRow.path).isNull();
+                assertThat(resultRow.sourceNode).isEqualTo(0L);
+                assertThat(resultRow.nodeIds).containsExactly(1L, 2L);
+            });
     }
 
     @Test
     void shouldComputePath() {
-        var kernelTransactionMock = mock(KernelTransaction.class);
-        var internalTransactionMock = mock(InternalTransaction.class);
-        doReturn(mock(Node.class)).when(internalTransactionMock).getNodeById(anyLong());
-        when(kernelTransactionMock.internalTransaction()).thenReturn(internalTransactionMock);
-        when(executionContextMock.transaction()).thenReturn(kernelTransactionMock);
-        when(procedureCallContextMock.outputFields()).thenReturn(Stream.of("sourceNode", "nodeIds", "path"));
+        when(graphMock.isEmpty()).thenReturn(false);
+        when(graphMock.toOriginalNodeId(anyLong())).then(returnsFirstArg());
 
-        var consumer = new BfsStreamComputationResultConsumer();
+        when(computationResultMock.graph()).thenReturn(graphMock);
+        when(computationResultMock.result()).thenReturn(HugeLongArray.of(1L, 2L));
+
+        when(configMock.sourceNode()).thenReturn(0L);
+        when(computationResultMock.config()).thenReturn(configMock);
+
+        doReturn(true).when(executionContextMock).containsOutputField("path");
+
+        doReturn(mock(Path.class)).when(pathFactoryFacadeMock).createPath(any(), any(), any());
+
+        var consumer = new BfsStreamComputationResultConsumer(pathFactoryFacadeMock);
 
         var actual = consumer.consume(computationResultMock, executionContextMock).collect(Collectors.toList());
         assertThat(actual)
             .hasSize(1)
-            .satisfiesExactly(resultRow -> assertThat(resultRow.path).isNotNull());
+            .satisfiesExactly(resultRow -> {
+                assertThat(resultRow.path).isNotNull();
+                assertThat(resultRow.sourceNode).isEqualTo(0L);
+                assertThat(resultRow.nodeIds).containsExactly(1L, 2L);
+            });
     }
 
 }

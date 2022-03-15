@@ -48,7 +48,7 @@ public class DfsStreamSpec implements AlgorithmSpec<DFS, HugeLongArray, DfsStrea
     }
     @Override
     public ComputationResultConsumer<DFS, HugeLongArray, DfsStreamConfig, Stream<DfsStreamResult>> computationResultConsumer() {
-        return new DfsStreamComputationResultConsumer();
+        return new DfsStreamComputationResultConsumer(new PathFactoryFacade());
     }
 
 }

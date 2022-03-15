@@ -49,7 +49,7 @@ public class BfsStreamSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStrea
 
     @Override
     public ComputationResultConsumer<BFS, HugeLongArray, BfsStreamConfig, Stream<BfsStreamResult>> computationResultConsumer() {
-        return new BfsStreamComputationResultConsumer();
+        return new BfsStreamComputationResultConsumer(new PathFactoryFacade());
     }
 
 }

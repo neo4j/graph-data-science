@@ -20,31 +20,33 @@
 package org.neo4j.gds.paths.traverse;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.graphdb.Path;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 final class TraverseStreamComputationResultConsumer {
 
     private TraverseStreamComputationResultConsumer() {}
 
     static <T> Stream<T> consume(
-        Graph graph,
+        boolean graphIsEmpty,
+        LongUnaryOperator toOriginalNodeId,
         @Nullable HugeLongArray nodes,
         long sourceNodeId,
-        ExecutionContext executionContext,
-        ConcreteResultTransformer<T> resultTransformer
+        ConcreteResultTransformer<T> resultTransformer,
+        PathFactoryFacade pathFactoryFacade,
+        boolean shouldReturnPath,
+        Transaction internalTransaction,
+        RelationshipType relationshipType
     ) {
-        if (graph.isEmpty() || null == nodes) {
+        if (graphIsEmpty || null == nodes) {
             return Stream.empty();
         }
 
@@ -52,19 +54,15 @@ final class TraverseStreamComputationResultConsumer {
         var nodeList = Arrays
             .stream(nodesArray)
             .boxed()
-            .map(graph::toOriginalNodeId)
+            .map(toOriginalNodeId::applyAsLong)
             .collect(Collectors.toList());
-
-        var shouldReturnPath = executionContext.callContext()
-            .outputFields()
-            .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
 
         Path path = null;
         if (shouldReturnPath) {
-            path = PathFactory.create(
-                executionContext.transaction().internalTransaction(),
+            path = pathFactoryFacade.createPath(
+                internalTransaction,
                 nodeList,
-                BfsStreamProc.NEXT
+                relationshipType
             );
         }
 
@@ -75,6 +73,7 @@ final class TraverseStreamComputationResultConsumer {
         ));
     }
 
+    @FunctionalInterface
     interface ConcreteResultTransformer<T> {
         T transform(long sourceNodeId, List<Long> nodeList, @Nullable Path path);
     }
