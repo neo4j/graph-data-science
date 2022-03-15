@@ -97,6 +97,7 @@ public final class NodeClassificationTrain {
     private final TerminationFlag terminationFlag;
 
     public static MemoryEstimation estimate(NodeClassificationPipeline pipeline, NodeClassificationPipelineTrainConfig config) {
+        // There's no memory estimation support for Random forest yet.
         var maxBatchSize = pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)
             .stream()
             .mapToInt(trainConfig -> ((GradientDescentConfig) trainConfig).batchSize())
@@ -172,6 +173,7 @@ public final class NodeClassificationTrain {
         int fudgedFeatureCount,
         LongUnaryOperator nodeSetSize
     ) {
+        // There's no memory estimation support for Random forest yet.
         MemoryEstimation training = LogisticRegressionTrainer.memoryEstimation(
             fudgedClassCount,
             fudgedFeatureCount,
@@ -340,7 +342,7 @@ public final class NodeClassificationTrain {
 
     private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
         progressTracker.beginSubTask();
-        for (TrainerConfig modelParams : pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)) {
+        pipeline.trainingParameterSpace().values().stream().flatMap(List::stream).forEach(modelParams -> {
             progressTracker.beginSubTask();
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
@@ -369,7 +371,7 @@ public final class NodeClassificationTrain {
                 validationStats.add(metric, validationStatsBuilder.build(metric));
                 trainStats.add(metric, trainStatsBuilder.build(metric));
             });
-        }
+        });
         progressTracker.endSubTask();
 
         var mainMetric = metrics.get(0);
