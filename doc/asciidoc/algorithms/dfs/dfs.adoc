@@ -1,11 +1,19 @@
 [[algorithms-dfs]]
 = Depth First Search
 :entity: relationship
+:result: path in traversal order
+:algorithm: Depth First Search
 
 [abstract]
 --
 This section describes the Depth First Search traversal algorithm in the Neo4j Graph Data Science library.
 --
+
+:directed:
+:undirected:
+:homogeneous:
+:heterogeneous:
+include::../shared/algorithm-traits.adoc[]
 
 
 [[algorithms-dfs-intro]]
@@ -41,6 +49,8 @@ YIELD
 include::../common-configuration/common-parameters.adoc[]
 
 include::../common-configuration/common-configuration.adoc[]
+
+NOTE: The algorithm is single-threaded and changing the `concurrency` parameter has no effect on the runtime.
 
 include::specific-configuration.adoc
 
@@ -104,16 +114,21 @@ include::specific-configuration.adoc
 [[algorithms-dfs-examples]]
 == Examples
 
-Consider the graph created by the following Cypher statement:
+:algorithm-name: {algorithm}
+:graph-description:
+:image-file: traverse-graph.svg
+include::../shared/examples-intro.adoc[]
+
+Consider the graph projected by the following Cypher statement:
 
 [source, cypher, role=noplay setup-query]
 ----
 CREATE
-       (nA:Node {tag: 'a'}),
-       (nB:Node {tag: 'b'}),
-       (nC:Node {tag: 'c'}),
-       (nD:Node {tag: 'd'}),
-       (nE:Node {tag: 'e'}),
+       (nA:Node {name: 'A'}),
+       (nB:Node {name: 'B'}),
+       (nC:Node {name: 'C'}),
+       (nD:Node {name: 'D'}),
+       (nE:Node {name: 'E'}),
 
        (nA)-[:REL]->(nB),
        (nA)-[:REL]->(nC),
@@ -124,87 +139,142 @@ CREATE
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project('myGraph', 'Node', 'REL', { relationshipProperties: 'cost' })
+CALL gds.graph.project('myGraph', 'Node', 'REL')
 ----
 
 In the following examples we will demonstrate using the Depth First Search algorithm on this graph.
-If we do not specify any of the options for early termination, the whole graph is visited:
+
+
+=== Memory Estimation
+
+:mode: stream
+include::../shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in stream mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node {name: 'A'})
+CALL gds.dfs.stream.estimate('myGraph', {
+  sourceNode: source
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 5         | 4                 | 344      | 344      | "344 Bytes"
+|===
+--
+
+
+=== Stream
+
+:!stream-details:
+include::../shared/examples-stream-intro.adoc[]]
+
+[role=query-example, no-result=true]
 --
 .Running the Depth First Search algorithm:
 [source, cypher, role=noplay]
 ----
-MATCH (a:Node{tag:'a'})
-WITH id(a) AS sourceNode
-CALL gds.dfs.stream('myGraph', {sourceNode: sourceNode})
+MATCH (source:Node{name:'A'})
+CALL gds.dfs.stream('myGraph', {
+  sourceNode: source
+})
 YIELD path
-UNWIND [ n in nodes(path) | n.tag ] AS tags
-RETURN tags
-ORDER BY tags
+RETURN path
 ----
-
-.Results
-[opts="header"]
-|===
-| tags
-| "a"
-| "b"
-| "c"
-| "d"
-| "e"
-|===
 --
 
-If specifying d and e as target nodes, not all nodes at distance 1 will be visited due to the depth first traversal order, in which node d is reached before b:
+If we do not specify any of the options for early termination, the algorithm will traverse the entire graph:
+In the image below we can see the traversal order of the nodes, marked by relationship type `NEXT`:
 
-[role=query-example]
+image::dfs-full-stream-path.svg[Visualization of Depth First Search stream without early termination conditions ,align="center"]
+
+
+[role=query-example, no-result=true]
 --
 .Running the Depth First Search algorithm with target nodes:
 [source, cypher, role=noplay]
 ----
-MATCH (a:Node{tag:'a'}), (d:Node{tag:'d'}), (e:Node{tag:'e'})
-WITH id(a) AS sourceNode, [id(d), id(e)] AS targetNodes
-CALL gds.dfs.stream('myGraph', {sourceNode: sourceNode, targetNodes: targetNodes})
+MATCH (a:Node{name:'A'}), (d:Node{name:'D'}), (e:Node{name:'E'})
+WITH id(a) AS source, [id(d), id(e)] AS targetNodes
+CALL gds.dfs.stream('myGraph', {
+  sourceNode: source,
+  targetNodes: targetNodes
+})
 YIELD path
-UNWIND [ n in nodes(path) | n.tag ] AS tags
-RETURN tags
-ORDER BY tags
+RETURN path
 ----
-
-.Results
-[opts="header"]
-|===
-| tags
-| "a"
-| "c"
-| "d"
-|===
 --
 
+If specifying nodes `D` and `E` as target nodes, not all nodes at distance 1 will be visited due to the depth first traversal order, in which node `D` is reached before `B`.
 
-[role=query-example]
+image::dfs-target-nodes-stream-path.svg[Visualization of Depth First Search stream with target nodes ,align="center"]
+
+
+[role=query-example, no-result=true]
 --
 .Running the Depth First Search algorithm with maxDepth:
 [source, cypher, role=noplay]
 ----
-MATCH (a:Node{tag:'a'})
-WITH id(a) AS sourceNode
-CALL gds.dfs.stream('myGraph', {sourceNode: sourceNode, maxDepth: 1})
+MATCH (source:Node{name:'A'})
+CALL gds.dfs.stream('myGraph', {
+  sourceNode: source,
+  maxDepth: 1
+})
 YIELD path
-UNWIND [ n in nodes(path) | n.tag ] AS tags
-RETURN tags
-ORDER BY tags
+RETURN path
+----
+--
+
+In the above case, nodes `D` and `E` were not visited since they are at distance 2 from node `A`.
+
+image::dfs-max-depth-stream-path.svg[Visualization of Depth First Search stream with max depth ,align="center"]
+
+
+=== Mutate
+
+The `mutate` execution mode updates the named graph with new relationships.
+The path returned from the Depth First Search algorithm is a line graph, where the nodes appear in the order they were visited by the algorithm.
+The relationship type has to be configured using the `mutateRelationshipType` option.
+
+The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
+
+For more details on the `mutate` mode in general, see <<running-algos-mutate>>.
+
+Depth First Search `mutate` supports the same early termination conditions as the `stream` mode.
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node{name:'A'})
+CALL gds.dfs.mutate('myGraph', {
+  sourceNode: source,
+  mutateRelationshipType: 'DFS'
+})
+YIELD relationshipsWritten
+RETURN relationshipsWritten
 ----
 
 .Results
 [opts="header"]
 |===
-| tags
-| "a"
-| "b"
-| "c"
+| relationshipsWritten
+| 4
 |===
 --
 
-In the above case, nodes d and e were not visited since they are at distance 2 from a.
+After executing the above query, the in-memory graph will be updated with new relationships of type `DFS`.
+
+[NOTE]
+====
+The relationships produced are always directed, even if the input graph is undirected.
+====

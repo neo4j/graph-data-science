@@ -21,6 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.paths.traverse.DfsMutateProc;
 import org.neo4j.gds.paths.traverse.DfsStreamProc;
 
 import java.util.List;
@@ -34,7 +35,7 @@ class DfsDocTest extends DocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(DfsStreamProc.class, GraphProjectProc.class);
+        return List.of(DfsStreamProc.class, DfsMutateProc.class, GraphProjectProc.class);
     }
 
     @Override
