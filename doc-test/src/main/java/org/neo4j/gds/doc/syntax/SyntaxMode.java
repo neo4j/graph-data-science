@@ -49,6 +49,8 @@ public enum SyntaxMode {
     PIPELINE_ADD_NODE_PROPERTY("pipeline-add-node-property-syntax"),
     PIPELINE_ADD_FEATURE("pipeline-add-feature-syntax"),
     PIPELINE_CONFIGURE_SPLIT("pipeline-configure-split-syntax"),
+    PIPELINE_ADD_LR_MODEL("pipeline-add-lr-syntax"),
+    PIPELINE_ADD_RF_MODEL("pipeline-add-rf-syntax"),
     PIPELINE_CONFIGURE_PARAMS("pipeline-configure-params-syntax"),
     PIPELINE_LIST("pipeline-list-syntax"),
     PIPELINE_EXISTS("pipeline-exists-syntax"),

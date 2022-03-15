@@ -1,0 +1,12 @@
+[[nodeclassification-pipelines-model-rf-table]]
+.Random Forest configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                    | Type      | Default                     | Optional | Description
+| maxFeaturesRatio        | Float     | `sqrt(number of features)`  | yes      | The ratio of features to consider when looking for the best split
+| numberOfSamplesRatio    | Float     | 1                           | yes      | The ratio of samples to consider per decision tree. We use sampling with replacement. To take every training example specify 0.
+| numberOfDecisionTrees   | Integer   | 100                         | yes      | The number of decision trees.
+| maxDepth                | Integer   | infinity                    | yes      | The maximum depth of a decision tree.
+| minSplitSize            | Integer   | 2                           | yes      | The minimum number of samples required to split an internal node.
+|===
+

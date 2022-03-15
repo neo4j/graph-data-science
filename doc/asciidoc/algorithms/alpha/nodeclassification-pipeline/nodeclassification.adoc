@@ -334,28 +334,30 @@ This collection is called the _parameter space_.
 Prior to training one or several model configurations can and should be added to the _parameter space_ with the `gds.beta.pipeline.nodeClassification.addLogisticRegression` and `gds.alpha.pipeline.nodeClassification.addRandomForest` modes.
 In <<algorithms-ml-nodeclassification-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
 
-The allowed model parameters are listed in the table <<nodeclassification-pipelines-model-configuration-table>>.
-
-If `configureParams` is not used, then a single model with defaults for all the model parameters is used.
 The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
 
 === Syntax
 
-[.pipeline-configure-params-syntax]
+.Syntax per Training method
+[.tabbed-example, caption = ]
+====
+[.include-with-logistic-regression]
+======
+[.pipeline-add-lr-syntax]
 --
 .Configure the train parameters syntax
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.nodeClassification.configureParams(
+CALL gds.beta.pipeline.nodeClassification.addLogisticRegression(
   pipelineName: String,
-  parameterSpace: List of Map
+  config: List of Map
 )
 YIELD
   name: String,
   nodePropertySteps: List of Map,
   featureProperties: List of String,
   splitConfig: Map,
-  parameterSpace: List of Map
+  parameterSpace: Map
 ----
 
 .Parameters
@@ -363,24 +365,50 @@ YIELD
 |===
 | Name            | Type        | Description
 | pipelineName    | String      | The name of the pipeline.
-| config  | Map   | The logistic regression config for a potential model. The allowed parameters for a model are defined in the next table.
+| config          | Map         | The logistic regression config for a potential model. The allowed parameters for a model are defined in the next table.
 |===
 
-[[nodeclassification-pipelines-model-configuration-table]]
-.Model configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name                | Type    | Default         | Optional | Description
-| penalty             | Float   | 0.0             | yes      | Penalty used for the logistic regression. By default, no penalty is applied.
-| batchSize           | Integer | 100             | yes      | Number of nodes per batch.
-| minEpochs           | Integer | 1               | yes      | Minimum number of training epochs.
-| maxEpochs           | Integer | 100             | yes      | Maximum number of training epochs.
-| patience            | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
-| tolerance           | Float   | 0.001           | yes      | The minimal improvement of the loss to be considered productive.
-|===
+include::logisticRegressionConfig.adoc[]
 
 include::pipelineInfoResult.adoc[]
 --
+======
+
+[.include-with-random-forest]
+======
+
+[.pipeline-add-rf-syntax]
+--
+.Configure the train parameters syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeClassification.addRandomForest(
+  pipelineName: String,
+  config: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  parameterSpace: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type        | Description
+| pipelineName    | String      | The name of the pipeline.
+| config          | Map         | The random forest config for a potential model. The allowed parameters for a model are defined in the next table.
+|===
+
+include::randomForestConfig.adoc[]
+
+include::pipelineInfoResult.adoc[]
+--
+=====
+====
+
 
 === Example
 
