@@ -31,13 +31,10 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.ml.core.batch.ListBatch;
 import org.neo4j.gds.ml.linkmodels.ExhaustiveLinkPredictionResult;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.models.Classifier;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.LongStream;
 
@@ -101,14 +98,12 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
     }
 
     final class LinkPredictionScoreByIdsConsumer implements Runnable {
-        private final static int RELATIONSHIP_BATCH_SIZE = 100;
         private final Graph graph;
         private final LinkPredictionSimilarityComputer linkPredictionSimilarityComputer;
         private final BoundedLongLongPriorityQueue predictionQueue;
         private final ProgressTracker progressTracker;
         private final Partition partition;
         private long linksConsidered;
-        private final List<Long> targetIdsBatchBuffer;
 
         LinkPredictionScoreByIdsConsumer(
             Graph graph,
@@ -123,7 +118,6 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             this.progressTracker = progressTracker;
             this.partition = partition;
             this.linksConsidered = 0;
-            this.targetIdsBatchBuffer = new ArrayList<>(RELATIONSHIP_BATCH_SIZE);
         }
 
         @Override
@@ -134,33 +128,18 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
                 var smallestTarget = sourceId + 1;
                 LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
                         if (largerNeighbors.contains(targetId)) return;
-                        targetIdsBatchBuffer.add(targetId);
-                        if (targetIdsBatchBuffer.size() == RELATIONSHIP_BATCH_SIZE) {
-                            flushBuffer(sourceId);
+                        var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
+                        linksConsidered++;
+                        if (probability < threshold) return;
+
+                        synchronized (predictionQueue) {
+                            predictionQueue.offer(sourceId, targetId, probability);
                         }
                     }
                 );
-                flushBuffer(sourceId);
             });
 
             progressTracker.logProgress(partition.nodeCount());
-        }
-
-        private void flushBuffer(long sourceId) {
-            if (targetIdsBatchBuffer.isEmpty()) return;
-            var similarities = linkPredictionSimilarityComputer.similarities(sourceId, new ListBatch(targetIdsBatchBuffer));
-            linksConsidered += targetIdsBatchBuffer.size();
-            var offset = 0;
-            for (long targetId : targetIdsBatchBuffer) {
-                var probability = similarities[offset];
-                offset += 1;
-                if (probability < threshold) continue;
-
-                synchronized (predictionQueue) {
-                    predictionQueue.offer(sourceId, targetId, probability);
-                }
-            }
-            targetIdsBatchBuffer.clear();
         }
 
         private LongHashSet largerNeighbors(long sourceId) {

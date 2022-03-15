@@ -25,7 +25,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.ml.core.batch.ListBatch;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionSimilarityComputer.LinkFilterFactory;
@@ -82,10 +81,6 @@ class LinkPredictionSimilarityComputerTest {
             0.5099986668799655, Offset.offset(1e-9));
         assertThat(lpSimComputer.similarity(graph.toMappedNodeId("a"), graph.toMappedNodeId("c"))).isEqualTo(
             0.7098853299317623, Offset.offset(1e-9));
-
-        var batch = new ListBatch(List.of(graph.toMappedNodeId("b"), graph.toMappedNodeId("c")));
-        assertThat(lpSimComputer.similarities(graph.toMappedNodeId("a"), batch))
-            .containsExactly(new double[]{0.5099986668799655, 0.7098853299317623}, Offset.offset(1e-9));
     }
 
     @Test
