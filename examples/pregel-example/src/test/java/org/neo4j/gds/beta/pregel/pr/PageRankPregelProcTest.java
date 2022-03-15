@@ -21,15 +21,16 @@ package org.neo4j.gds.beta.pregel.pr;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.closeTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.beta.pregel.pr.PageRankPregel.PAGE_RANK;
 
 class PageRankPregelProcTest extends BaseProcTest {
@@ -99,6 +100,23 @@ class PageRankPregelProcTest extends BaseProcTest {
             .yields("nodeId", "values");
 
         assertCypherResult(query + " RETURN nodeId, values.pagerank AS score", expected);
+    }
+
+    @Test
+    void streamEstimate() {
+        var query = GdsCypher.call()
+            .loadEverything()
+            .algo("example", "pregel", "pr")
+            .streamEstimation()
+            .addParameter("maxIterations", 10)
+            .yields("bytesMin", "bytesMax", "nodeCount", "relationshipCount");
+
+        runQueryWithRowConsumer(query, r -> {
+            assertEquals(11, r.getNumber("nodeCount").longValue());
+            assertEquals(17, r.getNumber("relationshipCount").longValue());
+            assertEquals(296_280, r.getNumber("bytesMin").longValue());
+            assertEquals(296_280, r.getNumber("bytesMax").longValue());
+        });
     }
 
     @Test
