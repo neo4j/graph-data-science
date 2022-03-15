@@ -23,11 +23,11 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -80,7 +80,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
-public final class NodeClassificationTrain extends Algorithm<NodeClassificationTrainResult> {
+public final class NodeClassificationTrain {
 
     private final Graph graph;
     private final NodeClassificationPipelineTrainConfig config;
@@ -93,6 +93,8 @@ public final class NodeClassificationTrain extends Algorithm<NodeClassificationT
     private final StatsMap trainStats;
     private final StatsMap validationStats;
     private final MetricComputer metricComputer;
+    private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
 
     public static MemoryEstimation estimate(NodeClassificationPipeline pipeline, NodeClassificationPipelineTrainConfig config) {
         var maxBatchSize = pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)
@@ -276,7 +278,8 @@ public final class NodeClassificationTrain extends Algorithm<NodeClassificationT
         StatsMap validationStats,
         ProgressTracker progressTracker
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
+        this.terminationFlag = TerminationFlag.RUNNING_TRUE;
         this.graph = graph;
         this.pipeline = pipeline;
         this.config = config;
@@ -298,10 +301,6 @@ public final class NodeClassificationTrain extends Algorithm<NodeClassificationT
         );
     }
 
-    @Override
-    public void release() {}
-
-    @Override
     public NodeClassificationTrainResult compute() {
         progressTracker.beginSubTask();
 
