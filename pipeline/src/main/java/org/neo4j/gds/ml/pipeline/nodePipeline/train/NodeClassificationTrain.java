@@ -455,6 +455,7 @@ public final class NodeClassificationTrain {
             terminationFlag,
             progressTracker,
             config.concurrency(),
+            config.randomSeed(),
             false
         );
 

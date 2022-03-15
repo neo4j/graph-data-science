@@ -25,10 +25,14 @@ import org.neo4j.gds.annotation.Configuration;
 public interface DecisionTreeTrainConfig {
 
     @Configuration.IntegerRange(min = 1)
-    int maxDepth();
+    default int maxDepth() {
+        return Integer.MAX_VALUE;
+    }
 
-    @Configuration.IntegerRange(min = 0)
-    int minSplitSize();
+    @Configuration.IntegerRange(min = 2)
+    default int minSplitSize() {
+        return 2;
+    }
 
     @Configuration.Ignore
     default String lossFunction() {

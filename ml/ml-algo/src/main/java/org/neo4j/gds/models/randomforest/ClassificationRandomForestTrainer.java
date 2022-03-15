@@ -56,19 +56,22 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
         int concurrency,
         LocalIdMap classIdMap,
         RandomForestTrainConfig config,
-        boolean computeOutOfBagError
+        boolean computeOutOfBagError,
+        Optional<Long> randomSeed
     ) {
         this.lossFunction = lossFunction;
         this.classIdMap = classIdMap;
         this.config = config;
         this.concurrency = concurrency;
         this.computeOutOfBagError = computeOutOfBagError;
-        this.random = config.randomSeed()
-            .map(SplittableRandom::new)
-            .orElseGet(SplittableRandom::new);
+        this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
     }
 
-    public ClassificationRandomForestPredictor train(Features allFeatureVectors, HugeLongArray allLabels, ReadOnlyHugeLongArray trainSet) {
+    public ClassificationRandomForestPredictor train(
+        Features allFeatureVectors,
+        HugeLongArray allLabels,
+        ReadOnlyHugeLongArray trainSet
+    ) {
         Optional<HugeAtomicLongArray> maybePredictions = computeOutOfBagError
             ? Optional.of(HugeAtomicLongArray.newArray(classIdMap.size() * trainSet.size()))
             : Optional.empty();
@@ -155,7 +158,7 @@ public class ClassificationRandomForestTrainer<LOSS extends DecisionTreeLoss> im
             var featureBagger = new FeatureBagger(
                 random,
                 allFeatureVectors.featureDimension(),
-                randomForestTrainConfig.featureBaggingRatio()
+                randomForestTrainConfig.maxFeaturesRatio(allFeatureVectors.featureDimension())
             );
 
             var decisionTree = new ClassificationDecisionTreeTrain<>(

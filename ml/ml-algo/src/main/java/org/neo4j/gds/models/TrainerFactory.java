@@ -29,6 +29,8 @@ import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.models.randomforest.ClassificationRandomForestTrainer;
 import org.neo4j.gds.models.randomforest.RandomForestTrainConfig;
 
+import java.util.Optional;
+
 public class TrainerFactory {
 
     private TrainerFactory() {}
@@ -40,6 +42,7 @@ public class TrainerFactory {
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
         int concurrency,
+        Optional<Long> randomSeed,
         boolean reduceClassCount
     ) {
         switch (TrainingMethod.valueOf(config.methodName())) {
@@ -59,7 +62,8 @@ public class TrainerFactory {
                     concurrency,
                     classIdMap,
                     (RandomForestTrainConfig) config,
-                    false
+                    false,
+                    randomSeed
                 );
             }
             default:

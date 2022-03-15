@@ -84,7 +84,7 @@ class ClassificationDecisionTreeTest {
                 Arguments.of(new double[]{3.0, 0.0}, 1337, 100),
                 Arguments.of(new double[]{0.0, 4.0}, 42, 100)
             ),
-            () -> Stream.of(Arguments.of(1), Arguments.of(3))
+            () -> Stream.of(Arguments.of(2), Arguments.of(4))
         );
     }
 
@@ -94,7 +94,7 @@ class ClassificationDecisionTreeTest {
         double[] featureVector,
         long expectedPrediction,
         int maxDepth,
-        int minSize
+        int minSplitSize
     ) {
         var decisionTree = new ClassificationDecisionTreeTrain<>(
             giniIndexLoss,
@@ -103,7 +103,7 @@ class ClassificationDecisionTreeTest {
             CLASS_MAPPING,
             DecisionTreeTrainConfigImpl.builder()
                 .maxDepth(maxDepth)
-                .minSplitSize(minSize)
+                .minSplitSize(minSplitSize)
                 .build(),
             new FeatureBagger(new SplittableRandom(), featureVector.length, 1)
         );
@@ -122,7 +122,7 @@ class ClassificationDecisionTreeTest {
     void indexSamplingShouldWork() {
         var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
             .maxDepth(1)
-            .minSplitSize(1)
+            .minSplitSize(2)
             .build();
 
         HugeLongArray mutableFeatureVectors = HugeLongArray.newArray(features.size());
@@ -162,7 +162,7 @@ class ClassificationDecisionTreeTest {
 
         var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
             .maxDepth(1)
-            .minSplitSize(1)
+            .minSplitSize(2)
             .build();
 
         var mutableSampledVectors = HugeLongArray.newArray(1);

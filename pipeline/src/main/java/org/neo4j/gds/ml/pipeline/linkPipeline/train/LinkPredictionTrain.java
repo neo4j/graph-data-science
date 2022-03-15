@@ -176,6 +176,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             terminationFlag,
             customProgressTracker,
             config.concurrency(),
+            config.randomSeed(),
             true
         ).train(featureAndLabels.features(), featureAndLabels.labels(), trainSet);
     }

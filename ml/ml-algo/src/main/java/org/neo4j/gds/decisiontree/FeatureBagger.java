@@ -30,11 +30,11 @@ public final class FeatureBagger {
     private final int totalNumberOfFeatures;
     private final int numberOfSamples;
 
-    public FeatureBagger(SplittableRandom random, int totalNumberOfFeatures, double featureBaggingRatio) {
-        assert Double.compare(featureBaggingRatio, 0) != 0 : "Invalid featureBaggingRatio";
+    public FeatureBagger(SplittableRandom random, int totalNumberOfFeatures, double maxFeaturesRatio) {
+        assert Double.compare(maxFeaturesRatio, 0) != 0 : "Invalid maxFeaturesRatio";
 
         this.totalNumberOfFeatures = totalNumberOfFeatures;
-        this.numberOfSamples = (int) Math.ceil(featureBaggingRatio * totalNumberOfFeatures);
+        this.numberOfSamples = (int) Math.ceil(maxFeaturesRatio * totalNumberOfFeatures);
         this.sampler = new IntUniformSamplerFromRange(random);
     }
 

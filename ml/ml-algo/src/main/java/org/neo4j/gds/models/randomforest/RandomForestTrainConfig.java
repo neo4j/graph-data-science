@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.models.randomforest;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.decisiontree.DecisionTreeTrainConfig;
 import org.neo4j.gds.models.TrainerConfig;
@@ -29,14 +27,19 @@ import org.neo4j.gds.models.TrainingMethod;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 @Configuration
-public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, RandomSeedConfig, TrainerConfig {
+public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, TrainerConfig {
 
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
-    double featureBaggingRatio();
+    Optional<Double> maxFeaturesRatio();
 
-    @Value.Default
+    @Configuration.Ignore
+    default double maxFeaturesRatio(int featureDimension) {
+        return maxFeaturesRatio().orElse(1.0D / Math.sqrt(featureDimension));
+    }
+
     @Configuration.DoubleRange(min = 0, max = 1)
     // A value of 0 means "sampling off": Do not sample, rather use all training examples given.
     default double numberOfSamplesRatio() {
@@ -44,7 +47,9 @@ public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, Random
     }
 
     @Configuration.IntegerRange(min = 1)
-    int numberOfDecisionTrees();
+    default int numberOfDecisionTrees() {
+        return 100;
+    }
 
     @Override
     default String methodName() {

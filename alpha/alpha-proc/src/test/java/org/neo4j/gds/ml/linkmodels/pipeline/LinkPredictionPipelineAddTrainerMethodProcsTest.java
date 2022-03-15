@@ -113,7 +113,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
     @Test
     void addRandomForest() {
         assertCypherResult(
-            "CALL gds.alpha.pipeline.linkPrediction.addRandomForest('myPipeline', {maxDepth: 42, featureBaggingRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 1})",
+            "CALL gds.alpha.pipeline.linkPrediction.addRandomForest('myPipeline', {maxDepth: 42, maxFeaturesRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 2})",
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
@@ -124,9 +124,9 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                     List.of(RandomForestTrainConfigImpl
                         .builder()
                         .maxDepth(42)
-                        .featureBaggingRatio(0.5)
+                        .maxFeaturesRatio(0.5)
                         .numberOfDecisionTrees(10)
-                        .minSplitSize(1)
+                        .minSplitSize(2)
                         .build()
                         .toMap()),
                     TrainingMethod.LogisticRegression.name(), List.of()

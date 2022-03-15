@@ -53,13 +53,13 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         root = splitAndPush(stack, trainSetIndices, trainSetIndices.size(), 1);
 
         int maxDepth = config.maxDepth();
-        int minSize = config.minSplitSize();
+        int minSplitSize = config.minSplitSize();
 
         while (!stack.isEmpty()) {
             var record = stack.pop();
             var split = record.split();
 
-            if (record.depth() >= maxDepth || split.sizes().left() <= minSize) {
+            if (record.depth() >= maxDepth || split.sizes().left() < minSplitSize) {
                 record.node().setLeftChild(new TreeNode<>(toTerminal(split.groups().left(), split.sizes().left())));
             } else {
                 record.node().setLeftChild(splitAndPush(
@@ -70,7 +70,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
                 ));
             }
 
-            if (record.depth() >= maxDepth || split.sizes().right() <= minSize) {
+            if (record.depth() >= maxDepth || split.sizes().right() < minSplitSize) {
                 record.node().setRightChild(new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right())));
             } else {
                 record.node().setRightChild(splitAndPush(

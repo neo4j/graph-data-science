@@ -106,12 +106,12 @@ class ClassificationRandomForestTest {
             RandomForestTrainConfigImpl
                 .builder()
                 .maxDepth(1)
-                .minSplitSize(1)
-                .randomSeed(42L)
-                .featureBaggingRatio(1.0D)
+                .minSplitSize(2)
+                .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(1)
                 .build(),
-            false
+            false,
+            Optional.of(42L)
         );
 
         var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -136,13 +136,13 @@ class ClassificationRandomForestTest {
             RandomForestTrainConfigImpl
                 .builder()
                 .maxDepth(2)
-                .minSplitSize(1)
-                .randomSeed(Optional.of(1337L))
+                .minSplitSize(2)
                 .numberOfSamplesRatio(0.5D)
-                .featureBaggingRatio(1.0D)
+                .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(20)
                 .build(),
-            false
+            false,
+            Optional.of(1337L)
         );
 
         var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -167,12 +167,12 @@ class ClassificationRandomForestTest {
             RandomForestTrainConfigImpl
                 .builder()
                 .maxDepth(2)
-                .minSplitSize(1)
-                .randomSeed(Optional.of(1337L))
-                .featureBaggingRatio(1.0D)
+                .minSplitSize(2)
+                .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(20)
                 .build(),
-            true
+            true,
+            Optional.of(1337L)
         );
 
         randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -190,13 +190,13 @@ class ClassificationRandomForestTest {
             RandomForestTrainConfigImpl
                 .builder()
                 .maxDepth(2)
-                .minSplitSize(1)
-                .randomSeed(Optional.of(1337L))
+                .minSplitSize(2)
                 .numberOfSamplesRatio(0.5D)
-                .featureBaggingRatio(1.0D)
+                .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(5)
                 .build(),
-            false
+            false,
+            Optional.of(1337L)
         );
 
         HugeLongArray mutableTrainSet = HugeLongArray.newArray(NUM_SAMPLES / 2);
