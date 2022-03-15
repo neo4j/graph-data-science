@@ -24,13 +24,13 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipScanCursor;
+import org.neo4j.gds.compat.InMemoryPropertySelection;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.values.storable.ValueGroup;
 
 import java.util.List;
@@ -111,7 +111,7 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
         relationshipScanCursor.single(2);
 
         assertThat(relationshipScanCursor.next()).isTrue();
-        relationshipScanCursor.properties(propertyCursor, PropertySelection.ALL_PROPERTIES);
+        relationshipScanCursor.properties(propertyCursor, InMemoryPropertySelection.SELECT_ALL);
 
         assertThat(propertyCursor.next()).isTrue();
         assertThat(propertyCursor.propertyValue().asObject()).isEqualTo(3.0D);
