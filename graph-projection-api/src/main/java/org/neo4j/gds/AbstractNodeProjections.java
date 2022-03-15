@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.DataClass;
 import org.neo4j.gds.utils.StringFormatting;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -170,5 +171,27 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
                 ALL_NODES.name()
             ));
         }
+    }
+
+    @Value.Check
+    public void validatePropertyKeyMappings() {
+        var mapping = new HashMap<String, String>();
+
+        projections().values().stream()
+            .flatMap(nodeProjection -> nodeProjection.properties().stream())
+            .forEach(propertyMapping -> {
+                var propertyKey = propertyMapping.propertyKey();
+                var neoKey = propertyMapping.neoPropertyKey();
+
+                if (mapping.containsKey(propertyKey) && !mapping.get(propertyKey).equals(neoKey)) {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Specifying multiple neoPropertyKeys for the same property is not allowed, found propertyKey: %s, neoPropertyKeys: %s, %s.",
+                        propertyKey,
+                        neoKey,
+                        mapping.get(propertyKey)
+                    ));
+                }
+                mapping.put(propertyKey, neoKey);
+            });
     }
 }
