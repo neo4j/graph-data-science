@@ -101,7 +101,6 @@ class NodeClassificationTrainTest {
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
 
-        // to keep same expectation as before bugfix in this commit
         pipeline.addTrainerConfig(
             TrainingMethod.LogisticRegression,
             LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
