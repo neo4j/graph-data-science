@@ -111,7 +111,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         );
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, List.of(featureStep));
         var linkPrediction = new ExhaustiveLinkPrediction(
-            new LogisticRegressionClassifier(modelData),
+            LogisticRegressionClassifier.from(modelData),
             linkFeatureExtractor,
             graph,
             concurrency,
@@ -172,7 +172,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, List.of(featureStep));
 
         var linkPrediction = new ExhaustiveLinkPrediction(
-            new LogisticRegressionClassifier(modelData),
+            LogisticRegressionClassifier.from(modelData),
             linkFeatureExtractor,
             graph,
             4,

@@ -106,7 +106,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         );
 
         var linkPrediction = new ApproximateLinkPrediction(
-            new LogisticRegressionClassifier(modelData),
+            LogisticRegressionClassifier.from(modelData),
             LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
             graph,
             ImmutableKnnBaseConfig.builder()
@@ -178,7 +178,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
         for (int i = 0; i < 2; i++) {
             var linkPrediction = new ApproximateLinkPrediction(
-                new LogisticRegressionClassifier(modelData),
+                LogisticRegressionClassifier.from(modelData),
                 LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
                 graph,
                 ImmutableKnnBaseConfig.builder()
@@ -222,7 +222,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         );
 
         var linkPrediction = new ApproximateLinkPrediction(
-            new LogisticRegressionClassifier(modelData),
+            LogisticRegressionClassifier.from(modelData),
             LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
             graph,
             ImmutableKnnBaseConfig.builder()

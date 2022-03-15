@@ -110,7 +110,7 @@ class NodeClassificationPredictTest {
             .build();
 
         var result = new NodeClassificationPredict(
-            new LogisticRegressionClassifier(modelData),
+            LogisticRegressionClassifier.from(modelData),
             graph,
             1,
             1,
@@ -166,7 +166,7 @@ class NodeClassificationPredictTest {
             .build();
 
         var result = new NodeClassificationPredict(
-            new LogisticRegressionClassifier(modelData),
+            LogisticRegressionClassifier.from(modelData),
             graph,
             1,
             1,

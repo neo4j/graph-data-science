@@ -142,7 +142,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
-                new LogisticRegressionClassifier(modelData),
+                LogisticRegressionClassifier.from(modelData),
                 config,
                 caller.executionContext(),
                 graphStore,
@@ -235,7 +235,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
-                new LogisticRegressionClassifier(modelData),
+                LogisticRegressionClassifier.from(modelData),
                 config,
                 caller.executionContext(),
                 graphStore,
@@ -306,7 +306,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
-                new LogisticRegressionClassifier(modelData),
+                LogisticRegressionClassifier.from(modelData),
                 config,
                 caller.executionContext(),
                 graphStore,

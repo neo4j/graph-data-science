@@ -24,7 +24,7 @@ import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.models.randomforest.ClassificationRandomForestPredictor;
 import org.neo4j.gds.models.randomforest.RandomForestData;
 
-public class ClassifierFactory {
+public final class ClassifierFactory {
 
     private ClassifierFactory() {}
 
@@ -33,7 +33,7 @@ public class ClassifierFactory {
     ) {
         switch (classifierData.trainerMethod()) {
             case LogisticRegression:
-                return new LogisticRegressionClassifier((LogisticRegressionData) classifierData);
+                return LogisticRegressionClassifier.from((LogisticRegressionData) classifierData);
             case RandomForest:
                 return new ClassificationRandomForestPredictor((RandomForestData) classifierData);
             default:

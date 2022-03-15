@@ -76,7 +76,7 @@ class LogisticRegressionClassifierTest {
             Weights.ofVector(0)
         );
 
-        var predictor = new LogisticRegressionClassifier(modelData);
+        var predictor = LogisticRegressionClassifier.from(modelData);
 
         var result = predictor.predictProbabilities(
             0,
@@ -101,7 +101,7 @@ class LogisticRegressionClassifierTest {
             Weights.ofVector(-2.1, 0.2)
         );
 
-        var classifier = new LogisticRegressionClassifier(modelData);
+        var classifier = LogisticRegressionClassifier.from(modelData);
         var random = new Random();
         var featureData = HugeObjectArray.newArray(double[].class, 10);
         for (int i = 0; i < 10; i++) {

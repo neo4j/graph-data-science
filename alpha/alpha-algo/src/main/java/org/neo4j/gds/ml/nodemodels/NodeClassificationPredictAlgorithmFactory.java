@@ -58,7 +58,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
         );
         var featureProperties = model.trainConfig().featureProperties();
         return new NodeClassificationPredict(
-            new LogisticRegressionClassifier(model.data()),
+            LogisticRegressionClassifier.from(model.data()),
             graph,
             configuration.batchSize(),
             configuration.concurrency(),

@@ -76,7 +76,7 @@ class LinkPredictionSimilarityComputerTest {
         );
         var lpSimComputer = new LinkPredictionSimilarityComputer(
             linkFeatureExtractor,
-            new LogisticRegressionClassifier(modelData)
+            LogisticRegressionClassifier.from(modelData)
         );
         assertThat(lpSimComputer.similarity(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"))).isEqualTo(
             0.5099986668799655, Offset.offset(1e-9));

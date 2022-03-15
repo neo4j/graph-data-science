@@ -38,14 +38,18 @@ import org.neo4j.gds.models.Features;
 import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
 import static org.neo4j.gds.ml.core.Dimensions.matrix;
 
-public class LogisticRegressionClassifier implements Classifier {
+public final class LogisticRegressionClassifier implements Classifier {
 
     private final LogisticRegressionData data;
 
-    public LogisticRegressionClassifier(
+    private LogisticRegressionClassifier(
         LogisticRegressionData data
     ) {
         this.data = data;
+    }
+
+    public static LogisticRegressionClassifier from(LogisticRegressionData data) {
+        return new LogisticRegressionClassifier(data);
     }
 
     public static long sizeOfPredictionsVariableInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {

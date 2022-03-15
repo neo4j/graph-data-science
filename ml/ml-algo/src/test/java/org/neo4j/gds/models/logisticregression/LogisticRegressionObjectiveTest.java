@@ -78,18 +78,18 @@ class LogisticRegressionObjectiveTest {
             idMap.toMapped(labels.get(i));
         }
 
-        var standardClassifier = new LogisticRegressionClassifier(
+        var standardClassifier = LogisticRegressionClassifier.from(
             LogisticRegressionData.standard(2, idMap)
         );
-        var reducedClassifier = new LogisticRegressionClassifier(
+        var reducedClassifier = LogisticRegressionClassifier.from(
             LogisticRegressionData.withReducedClassCount(2, idMap)
         );
-        var trainedStandardClassifier = new LogisticRegressionClassifier(
+        var trainedStandardClassifier = LogisticRegressionClassifier.from(
             LogisticRegressionData.standard(2, idMap)
         );
         Arrays.setAll(trainedStandardClassifier.data().weights().data().data(), i -> i);
         Arrays.setAll(trainedStandardClassifier.data().bias().data().data(), i -> i == 0 ? 0.4 : 0.8);
-        var trainedReducedClassifier = new LogisticRegressionClassifier(
+        var trainedReducedClassifier = LogisticRegressionClassifier.from(
             LogisticRegressionData.withReducedClassCount(2, idMap)
         );
         Arrays.setAll(trainedReducedClassifier.data().weights().data().data(), i -> i);
