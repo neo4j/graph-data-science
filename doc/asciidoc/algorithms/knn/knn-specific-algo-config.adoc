@@ -3,7 +3,13 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                                                             | Type            | Default   | Optional | Description
-| nodeProperties                                                   | List of String  | n/a       | no       | The list of node properties to use for similarity computation. At least one node property must be specified.
+| nodeProperties                                                   | String or Map or List of String / Maps  | n/a       | no       | The collection of node properties to use for similarity computation along with their selected similarity metrics.
+At least one node property must be specified.
+Maps contain properties along with a specified similarity metric as key-value pairs.
+If a property is given as string outside a map, the default similarity metric for its type is used.
+If a mixture of default and non-default metrics is used, the maps and strings can be arbitrarily placed in a single list for convenience.
+Depending on the property type, the following metrics are available for use:
+JACCARD, OVERLAP, COSINE, EUCLIDEAN, PEARSON, LONG_PROPERTY_METRIC, DOUBLE_PROPERTY_METRIC.
 | topK                                                             | Integer         | 10        | yes      | The number of neighbors to find for each node.
 The K-nearest neighbors are returned.
 This value cannot be lower than 1.
