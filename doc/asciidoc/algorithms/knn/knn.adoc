@@ -96,17 +96,38 @@ The Jaccard similarity is used as the default option for comparing list of integ
 
 List of floating-point numbers::
 
-When a property is a list of floating-point numbers, the similarity is computed using the cosine similarity metric.
-See the <<algorithms-similarity-cosine-context, Cosine Similarity>> algorithm for more details.
-We normalise the cosine similarity score into the range `[0, 1]` by doing `consine metric = (cosine similarity + 1)/ 2`.
+When a property is a list of floating-point numbers, there are three alternatives for computing similarity between two nodes.
+
+The default metric used is that of Cosine Similarity, which is defined as follows:
+
+image::cosine-similarity.png[role="middle"]
+
+Notice that the above formula gives number within the range of `[-1, 1]` .
+We normalise the obtained score into the range `[0, 1]` by doing `cosine metric = (cosine similarity + 1)/ 2`.
+
+The other two metrics include the Pearson correlation score and Normalized Euclidean similarity.
+
+The Pearson correlation score is defined as follows:
+
+image::pearson-similarity.png[role="middle"]
+
+As above, the formula gives numbers in the range `[-1, 1]`, which are normalized into the range `[0, 1]` similarly.
+
+The Normalized Euclidean Similarity works by first calculating the Euclidean distance as follows:
+
+image::euclidean.png[role="middle"]
+
+The result from this formula is a nonnegative value that is not necessarily bounded into the  `[0, 1]` range.
+Τo bound the number into this range and obtain a similarity score, we return `similarity= 1/(1+distance)`
+, i.e., we perform the same normalization as in the case of scalar values.
+
+
 
 Multiple properties::
 
-Finally, when multiple properties are specified, the similarity of the two neighbors is the mean of the similarities of the individual properties,
-i.e. the simple mean of the numbers, each of which is in the range `[0, 1]`, giving a total score also in the `[0, 1]` range.
+Finally, when multiple properties are specified, the similarity of the two neighbors is the mean of the similarities of the individual properties, i.e. the simple mean of the numbers, each of which is in the range `[0, 1]`, giving a total score also in the `[0, 1]` range.
 
 NB: The validity of this mean is highly context dependent, so take care when applying it to your data domain.
-
 
 [[algorithms-knn-introduction-sampling]]
 === Initial neighbor sampling
