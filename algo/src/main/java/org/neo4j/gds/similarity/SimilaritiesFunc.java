@@ -61,9 +61,7 @@ public class SimilaritiesFunc {
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2
     ) {
-        if (vector1.size() != vector2.size() || vector1.size() == 0) {
-            throw new RuntimeException("Vectors must be non-empty and of the same size");
-        }
+        validateInput(vector1, vector2);
 
         int len = Math.min(vector1.size(), vector2.size());
         double[] weights1 = new double[len];
@@ -122,9 +120,7 @@ public class SimilaritiesFunc {
             List<Number> vector1 = (List<Number>) rawVector1;
             List<Number> vector2 = (List<Number>) rawVector2;
 
-            if (vector1.size() != vector2.size() || vector1.size() == 0) {
-                throw new RuntimeException("Vectors must be non-empty and of the same size");
-            }
+            validateInput(vector1, vector2);
 
             int len = vector1.size();
             double[] weights1 = new double[len];
@@ -144,9 +140,7 @@ public class SimilaritiesFunc {
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2
     ) {
-        if (vector1.size() != vector2.size() || vector1.size() == 0) {
-            throw new RuntimeException("Vectors must be non-empty and of the same size");
-        }
+        validateInput(vector1, vector2);
 
         int len = Math.min(vector1.size(), vector2.size());
         double[] weights1 = new double[len];
@@ -185,6 +179,15 @@ public class SimilaritiesFunc {
 
         long denominator = Math.min(vector1.size(), vector2.size());
         return denominator == 0 ? 0 : (double) intersection / denominator;
+    }
+
+    private void validateInput(
+        @Name("vector1") List<Number> vector1,
+        @Name("vector2") List<Number> vector2
+    ) {
+        if (vector1.size() != vector2.size() || vector1.isEmpty()) {
+            throw new RuntimeException("Vectors must be non-empty and of the same size");
+        }
     }
 
     /**
