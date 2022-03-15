@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.closeTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.beta.pregel.pr.PageRankPregel.PAGE_RANK;
 
 class PageRankPregelProcTest extends BaseProcTest {
@@ -99,6 +100,23 @@ class PageRankPregelProcTest extends BaseProcTest {
             .yields("nodeId", "values");
 
         assertCypherResult(query + " RETURN nodeId, values.pagerank AS score", expected);
+    }
+
+    @Test
+    void streamEstimate() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("example", "pregel", "pr")
+            .streamEstimation()
+            .addParameter("maxIterations", 10)
+            .yields("bytesMin", "bytesMax", "nodeCount", "relationshipCount");
+
+        runQueryWithRowConsumer(query, r -> {
+            assertEquals(11, r.getNumber("nodeCount").longValue());
+            assertEquals(17, r.getNumber("relationshipCount").longValue());
+            assertEquals(768, r.getNumber("bytesMin").longValue());
+            assertEquals(768, r.getNumber("bytesMax").longValue());
+        });
     }
 
     @Test

@@ -109,7 +109,11 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
             @Override
             public MemoryEstimation memoryEstimation(PregelProcedureConfig configuration) {
                 var computation = new Computation();
-                return Pregel.memoryEstimation(computation.schema(configuration), computation.reducer().isPresent(), configuration.isAsynchronous());
+                return Pregel.memoryEstimation(
+                    computation.schema(configuration),
+                    computation.reducer().isEmpty(),
+                    configuration.isAsynchronous()
+                );
             }
         };
     }
