@@ -85,11 +85,11 @@ When a property is a list of integers, similarity can be measured with either th
 
 Jaccard similarity is defined as follows:
 
-image::jaccard.png[size of intersection divided by size of union,align="center"]
+image::knn-formulas/jacard.svg[size of intersection divided by size of union,align="center"]
 
 The Overlap coefficient is defined as follows:
 
-image::overlap.png[size of intersection divided by size of minimum set,align="center"]
+image::knn-formulas/overlap.svg[size of intersection divided by size of minimum set,align="center"]
 
 Both of these metrics give a score in the range `[0, 1]` and no normalization needs to be performed.
 The Jaccard similarity is used as the default option for comparing list of integers when the metric is not specified.
@@ -100,7 +100,7 @@ When a property is a list of floating-point numbers, there are three alternative
 
 The default metric used is that of Cosine Similarity, which is defined as follows:
 
-image::cosine-similarity.png[role="middle"]
+image::knn-formulas/cosine.svg[role="middle"]
 
 Notice that the above formula gives number within the range of `[-1, 1]` .
 We normalise the obtained score into the range `[0, 1]` by doing `cosine metric = (cosine similarity + 1)/ 2`.
@@ -109,13 +109,13 @@ The other two metrics include the Pearson correlation score and Normalized Eucli
 
 The Pearson correlation score is defined as follows:
 
-image::pearson-similarity.png[role="middle"]
+image::knn-formulas/pearson.svg[role="middle"]
 
 As above, the formula gives numbers in the range `[-1, 1]`, which are normalized into the range `[0, 1]` similarly.
 
 The Normalized Euclidean Similarity works by first calculating the Euclidean distance as follows:
 
-image::euclidean.png[role="middle"]
+image::knn-formulas/ed.svg[role="middle"]
 
 The result from this formula is a nonnegative value that is not necessarily bounded into the  `[0, 1]` range.
 Τo bound the number into this range and obtain a similarity score, we return `similarity= 1/(1+distance)`
