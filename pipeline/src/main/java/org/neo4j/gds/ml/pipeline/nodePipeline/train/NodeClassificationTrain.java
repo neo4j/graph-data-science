@@ -231,7 +231,14 @@ public final class NodeClassificationTrain {
         nodeIds.setAll(i -> i);
         var trainStats = StatsMap.create(metrics);
         var validationStats = StatsMap.create(metrics);
-        var features = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
+
+        Features features;
+        if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest).isEmpty()) {
+            features = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
+        } else {
+            // Random forest uses feature vectors many times each.
+            features = FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
+        }
 
         return new NodeClassificationTrain(
             graph,

@@ -68,6 +68,23 @@ public final class FeaturesFactory {
         return features;
     }
 
+    public static Features extractEagerFeatures(Graph graph, List<String> featureProperties) {
+        var featureExtractors = new ArrayList<FeatureExtractor>();
+        featureExtractors.addAll(FeatureExtraction.propertyExtractors(graph, featureProperties));
+        var numberOfFeatures = FeatureExtraction.featureCount(featureExtractors);
+
+        var featuresArray = HugeObjectArray.newArray(double[].class, graph.nodeCount());
+        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+            var features = new double[numberOfFeatures];
+
+            FeatureExtraction.extract(nodeId, 0, featureExtractors, new DoubleArrayFeatureConsumer(features));
+
+            featuresArray.set(nodeId, features);
+        }
+
+        return wrap(featuresArray);
+    }
+
     public static Features wrap(HugeObjectArray<double[]> features) {
         return new Features() {
             @Override
@@ -109,5 +126,21 @@ public final class FeaturesFactory {
                 return features.get(Math.toIntExact(id));
             }
         };
+    }
+
+    private static class DoubleArrayFeatureConsumer implements FeatureConsumer {
+        private final double[] features;
+
+        public DoubleArrayFeatureConsumer(double[] features) {this.features = features;}
+
+        @Override
+        public void acceptScalar(long nodeOffset, int offset, double value) {
+            features[offset] = value;
+        }
+
+        @Override
+        public void acceptArray(long nodeOffset, int offset, double[] values) {
+            System.arraycopy(values, 0, features, offset, values.length);
+        }
     }
 }
