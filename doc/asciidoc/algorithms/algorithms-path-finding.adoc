@@ -39,6 +39,6 @@ include::alpha/alpha-minimum-weight-spanning-tree.adoc[leveloffset=+1]
 
 include::alpha/alpha-all-pairs-shortest-path.adoc[leveloffset=+1]
 
-include::algorithms-bfs.adoc[leveloffset=+1]
+include::bfs/bfs.adoc[leveloffset=+1]
 
-include::algorithms-dfs.adoc[leveloffset=+1]
+include::dfs/dfs.adoc[leveloffset=+1]

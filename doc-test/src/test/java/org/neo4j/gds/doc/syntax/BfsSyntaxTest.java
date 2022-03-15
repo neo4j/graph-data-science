@@ -17,18 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
-
-import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.paths.traverse.BfsStreamProc;
+package org.neo4j.gds.doc.syntax;
 
 import java.util.List;
 
-public class BfsDocTest extends DocTestBase {
+import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+
+public class BfsSyntaxTest extends SyntaxTestBase {
 
     @Override
-    protected List<Class<?>> procedures() {
-        return List.of(BfsStreamProc.class, GraphProjectProc.class);
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STREAM),
+            SyntaxModeMeta.of(MUTATE)
+        );
     }
 
     @Override
