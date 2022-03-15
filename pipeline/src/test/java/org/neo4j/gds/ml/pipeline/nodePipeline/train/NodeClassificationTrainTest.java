@@ -116,11 +116,10 @@ class NodeClassificationTrainTest {
 
         // Should NOT be the winning model, so give it bad hyperparams.
         pipeline.addTrainerConfig(TrainingMethod.RandomForest, RandomForestTrainConfigImpl.builder()
-            .minSplitSize(1)
+            .minSplitSize(2)
             .maxDepth(1)
             .numberOfDecisionTrees(1)
-            .featureBaggingRatio(0.1)
-            .randomSeed(42L) // FIXME: Remove me!
+            .maxFeaturesRatio(0.1)
             .build()
         );
 

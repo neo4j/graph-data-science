@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -148,6 +149,10 @@ public final class NodeClassificationTrain {
         } else {
             // There's no memory estimation support for Random forest yet.
             builder.add(MemoryEstimations.of("max of model selection and best model evaluation (unknown)", MemoryRange.of(0)));
+            builder.perGraphDimension("cached feature vectors", (dim, threads) -> MemoryRange.of(
+                HugeObjectArray.memoryEstimation(dim.nodeCount(), sizeOfDoubleArray(10)),
+                HugeObjectArray.memoryEstimation(dim.nodeCount(), sizeOfDoubleArray(fudgedFeatureCount))
+            ));
         }
 
         return builder.build();

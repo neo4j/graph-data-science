@@ -23,6 +23,9 @@ import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestProcedureRunner;
@@ -34,6 +37,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -47,12 +51,15 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.ImmutableNodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.TrainingMethod;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.randomforest.RandomForestTrainConfigImpl;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -262,8 +269,17 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         });
     }
 
-    @Test
-    void shouldEstimateMemory() {
+
+    public static Stream<Arguments> trainerMethodConfigs() {
+        return Stream.of(
+            Arguments.of(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig(), MemoryRange.of(31742464L, 31774424L)),
+            Arguments.of(TrainingMethod.RandomForest, RandomForestTrainConfigImpl.builder().build(), MemoryRange.of(97992L, 165232L))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("trainerMethodConfigs")
+    void shouldEstimateMemory(TrainingMethod trainingMethod, TrainerConfig trainerConfig, MemoryRange memoryRange) {
         var pipeline = insertPipelineIntoCatalog();
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
             "pageRank",
@@ -274,7 +290,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             Map.of("mutateProperty", "myNewProp", "threshold", 0.42F, "relationshipWeightProperty", "weight")
         ));
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
+        pipeline.addTrainerConfig(trainingMethod, trainerConfig);
 
         var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
             .pipeline(PIPELINE_NAME)
@@ -296,8 +312,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),
-            31742464L,
-            31774424L
+            memoryRange.min,
+            memoryRange.max
         );
     }
 

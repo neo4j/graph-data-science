@@ -174,7 +174,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
 
-            var root = new TreeNode<>(0L);
+            var root = new TreeNode<>(0);
             var modelData = ImmutableRandomForestData
                 .builder()
                 .addDecisionTree(new DecisionTreePredict<>(root))
