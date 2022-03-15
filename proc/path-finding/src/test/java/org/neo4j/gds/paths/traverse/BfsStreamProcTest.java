@@ -73,12 +73,13 @@ class BfsStreamProcTest extends BaseProcTest {
 
     private static final String REVERSE_GRAPH_NAME = DEFAULT_GRAPH_NAME + "_reverse";
 
-
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(BfsStreamProc.class, GraphProjectProc.class);
-        runQuery(DB_CYPHER);
+    }
 
+    @Test
+    void testFindAnyOf() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withNodeLabel("Node")
@@ -86,16 +87,6 @@ class BfsStreamProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
 
-        var createReverseGraphQuery = GdsCypher.call(REVERSE_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Orientation.REVERSE)
-            .yields();
-        runQuery(createReverseGraphQuery);
-    }
-
-    @Test
-    void testFindAnyOf() {
         long id = idFunction.of("a");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("bfs")
@@ -115,6 +106,13 @@ class BfsStreamProcTest extends BaseProcTest {
 
     @Test
     void testMaxDepthOut() {
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphProject()
+            .withNodeLabel("Node")
+            .withRelationshipType("TYPE")
+            .yields();
+        runQuery(createQuery);
+
         long source = idFunction.of("a");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("bfs")
@@ -134,6 +132,13 @@ class BfsStreamProcTest extends BaseProcTest {
 
     @Test
     void testMaxDepthIn() {
+        var createReverseGraphQuery = GdsCypher.call(REVERSE_GRAPH_NAME)
+            .graphProject()
+            .withNodeLabel("Node")
+            .withRelationshipType("TYPE", Orientation.REVERSE)
+            .yields();
+        runQuery(createReverseGraphQuery);
+
         long source = idFunction.of("g");
         String query = GdsCypher.call(REVERSE_GRAPH_NAME)
             .algo("bfs")
@@ -152,6 +157,13 @@ class BfsStreamProcTest extends BaseProcTest {
 
     @Test
     void testWithoutEarlyTermination() {
+        var createReverseGraphQuery = GdsCypher.call(REVERSE_GRAPH_NAME)
+            .graphProject()
+            .withNodeLabel("Node")
+            .withRelationshipType("TYPE", Orientation.REVERSE)
+            .yields();
+        runQuery(createReverseGraphQuery);
+
         long source = idFunction.of("g");
         String query = GdsCypher.call(REVERSE_GRAPH_NAME)
             .algo("bfs")
@@ -176,6 +188,13 @@ class BfsStreamProcTest extends BaseProcTest {
     @ParameterizedTest(name = "{1}")
     @MethodSource("pathQueryBuilders")
     void testPathField(Function<GdsCypher.ParametersBuildStage, String> queryProvider, String displayName) {
+        var createReverseGraphQuery = GdsCypher.call(REVERSE_GRAPH_NAME)
+            .graphProject()
+            .withNodeLabel("Node")
+            .withRelationshipType("TYPE", Orientation.REVERSE)
+            .yields();
+        runQuery(createReverseGraphQuery);
+
         var parametersBuildStage = GdsCypher.call(REVERSE_GRAPH_NAME)
             .algo("bfs")
             .streamMode()
@@ -206,6 +225,7 @@ class BfsStreamProcTest extends BaseProcTest {
 
     @Test
     void failOnInvalidSourceNode() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("bfs")
             .streamMode()
@@ -217,6 +237,7 @@ class BfsStreamProcTest extends BaseProcTest {
 
     @Test
     void failOnInvalidEndNode() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("bfs")
             .streamMode()
