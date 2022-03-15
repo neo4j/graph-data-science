@@ -44,6 +44,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.NodeLabelToken;
+import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -67,7 +69,6 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.StreamSupport;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -125,8 +126,8 @@ public final class CypherAggregation extends BaseProc {
 
             Map<String, Value> sourceNodePropertyValues = null;
             Map<String, Value> targetNodePropertyValues = null;
-            NodeLabel[] sourceNodeLabels = null;
-            NodeLabel[] targetNodeLabels = null;
+            var sourceNodeLabels = NodeLabelTokens.empty();
+            var targetNodeLabels = NodeLabelTokens.empty();
 
             if (nodesConfig != null) {
                 sourceNodePropertyValues = propertiesConfig("sourceNodeProperties", nodesConfig);
@@ -235,34 +236,35 @@ public final class CypherAggregation extends BaseProc {
             ));
         }
 
-        private @Nullable NodeLabel[] labelsConfig(
+        private @NotNull NodeLabelToken labelsConfig(
             Node node,
             String nodeLabelKey,
             @NotNull Map<String, Object> nodesConfig
         ) {
             var nodeLabelsEntry = nodesConfig.remove(nodeLabelKey);
-            if (nodeLabelsEntry instanceof List) {
-                return ((List<?>) nodeLabelsEntry)
-                    .stream()
-                    .map(label -> NodeLabel.of(String.valueOf(label)))
-                    .toArray(NodeLabel[]::new);
+            var nodeLabels = tryLabelsConfig(node, nodeLabelsEntry);
+
+            if (nodeLabels == null) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The value of `%s` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `%s`.",
+                    nodeLabelKey,
+                    nodeLabelsEntry.getClass().getSimpleName()
+                ));
             }
-            if (nodeLabelsEntry instanceof String) {
-                return new NodeLabel[]{NodeLabel.of((String) nodeLabelsEntry)};
+
+            return nodeLabels;
+        }
+
+        private @Nullable NodeLabelToken tryLabelsConfig(Node node, @Nullable Object nodeLabels) {
+            if (Boolean.TRUE.equals(nodeLabels)) {
+                return NodeLabelTokens.ofNullable(node.getLabels());
             }
-            if (Boolean.TRUE.equals(nodeLabelsEntry)) {
-                return StreamSupport.stream(node.getLabels().spliterator(), false)
-                    .map(label -> new NodeLabel(label.name()))
-                    .toArray(NodeLabel[]::new);
+
+            if (Boolean.FALSE.equals(nodeLabels)) {
+                nodeLabels = null;
             }
-            if (nodeLabelsEntry == null || Boolean.FALSE.equals(nodeLabelsEntry)) {
-                return null;
-            }
-            throw new IllegalArgumentException(formatWithLocale(
-                "The value of `%s` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `%s`.",
-                nodeLabelKey,
-                nodeLabelsEntry.getClass().getSimpleName()
-            ));
+
+            return NodeLabelTokens.ofNullable(nodeLabels);
         }
 
         private @Nullable RelationshipType typeConfig(
@@ -321,7 +323,7 @@ public final class CypherAggregation extends BaseProc {
 
         private long loadNode(
             Node node,
-            @Nullable NodeLabel[] nodeLabels,
+            NodeLabelToken nodeLabels,
             @Nullable Map<String, Value> nodeProperties
         ) {
             return (nodeProperties == null)
@@ -520,28 +522,29 @@ final class LazyIdMapBuilder implements PartialIdMap {
             .build();
     }
 
-    long addNode(long nodeId, @Nullable NodeLabel[] labels) {
-        return addNodeWithProperties(nodeId, Map.of(), labels);
+    long addNode(long nodeId, NodeLabelToken nodeLabels) {
+        isEmpty.lazySet(false);
+        this.nodesBuilder.addNode(nodeId, nodeLabels);
+        return nodeId;
     }
 
     long addNodeWithProperties(
         long nodeId,
         Map<String, Value> properties,
-        @Nullable NodeLabel[] nodeLabels
+        NodeLabelToken nodeLabels
     ) {
-        isEmpty.lazySet(false);
-
         if (properties.isEmpty()) {
-            this.nodesBuilder.addNode(nodeId, nodeLabels);
-        } else {
-            this.nodesBuilder.addNode(nodeId, properties, nodeLabels);
+            return addNode(nodeId, nodeLabels);
         }
+
+        isEmpty.lazySet(false);
+        this.nodesBuilder.addNode(nodeId, properties, nodeLabels);
         return nodeId;
     }
 
     @Override
     public long toMappedNodeId(long nodeId) {
-        return this.addNode(nodeId, null);
+        return this.addNode(nodeId, NodeLabelTokens.empty());
     }
 
     @Override
