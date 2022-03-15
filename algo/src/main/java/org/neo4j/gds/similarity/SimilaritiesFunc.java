@@ -38,22 +38,29 @@ import java.util.function.Predicate;
 
 public class SimilaritiesFunc {
 
-    public static final Predicate<Number> IS_NULL = Predicate.isEqual(null);
-    public static final Comparator<Number> NUMBER_COMPARATOR = new NumberComparator();
-
+    private static final Predicate<Number> IS_NULL = Predicate.isEqual(null);
+    private static final Comparator<Number> NUMBER_COMPARATOR = new NumberComparator();
     private static final String CATEGORY_KEY = "category";
     private static final String WEIGHT_KEY = "weight";
 
     @UserFunction("gds.alpha.similarity.jaccard")
     @Description("RETURN gds.alpha.similarity.jaccard(vector1, vector2) - Given two collection vectors, calculate Jaccard similarity")
-    public double jaccardSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
-        if (vector1 == null || vector2 == null) return 0;
+    public double jaccardSimilarity(
+        @Name("vector1") List<Number> vector1,
+        @Name("vector2") List<Number> vector2
+    ) {
+        if (vector1 == null || vector2 == null) {
+            return 0;
+        }
         return jaccard(vector1, vector2);
     }
 
     @UserFunction("gds.alpha.similarity.cosine")
     @Description("RETURN gds.alpha.similarity.cosine(vector1, vector2) - Given two collection vectors, calculate cosine similarity")
-    public double cosineSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
+    public double cosineSimilarity(
+        @Name("vector1") List<Number> vector1,
+        @Name("vector2") List<Number> vector2
+    ) {
         if (vector1.size() != vector2.size() || vector1.size() == 0) {
             throw new RuntimeException("Vectors must be non-empty and of the same size");
         }
@@ -72,7 +79,11 @@ public class SimilaritiesFunc {
 
     @UserFunction("gds.alpha.similarity.pearson")
     @Description("RETURN gds.alpha.similarity.pearson(vector1, vector2) - Given two collection vectors, calculate pearson similarity")
-    public double pearsonSimilarity(@Name("vector1") Object rawVector1, @Name("vector2") Object rawVector2, @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+    public double pearsonSimilarity(
+        @Name("vector1") Object rawVector1,
+        @Name("vector2") Object rawVector2,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
         String listType = config.getOrDefault("vectorType", "numbers").toString();
 
         if (listType.equalsIgnoreCase("maps")) {
@@ -129,7 +140,10 @@ public class SimilaritiesFunc {
 
     @UserFunction("gds.alpha.similarity.euclideanDistance")
     @Description("RETURN gds.alpha.similarity.euclideanDistance(vector1, vector2) - Given two collection vectors, calculate the euclidean distance (square root of the sum of the squared differences)")
-    public double euclideanDistance(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
+    public double euclideanDistance(
+        @Name("vector1") List<Number> vector1,
+        @Name("vector2") List<Number> vector2
+    ) {
         if (vector1.size() != vector2.size() || vector1.size() == 0) {
             throw new RuntimeException("Vectors must be non-empty and of the same size");
         }
@@ -148,14 +162,22 @@ public class SimilaritiesFunc {
 
     @UserFunction("gds.alpha.similarity.euclidean")
     @Description("RETURN gds.alpha.similarity.euclidean(vector1, vector2) - Given two collection vectors, calculate similarity based on euclidean distance")
-    public double euclideanSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
+    public double euclideanSimilarity(
+        @Name("vector1") List<Number> vector1,
+        @Name("vector2") List<Number> vector2
+    ) {
         return 1.0D / (1 + euclideanDistance(vector1, vector2));
     }
 
     @UserFunction("gds.alpha.similarity.overlap")
     @Description("RETURN gds.alpha.similarity.overlap(vector1, vector2) - Given two collection vectors, calculate overlap similarity")
-    public double overlapSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
-        if (vector1 == null || vector2 == null) return 0;
+    public double overlapSimilarity(
+        @Name("vector1") List<Number> vector1,
+        @Name("vector2") List<Number> vector2
+    ) {
+        if (vector1 == null || vector2 == null) {
+            return 0;
+        }
 
         HashSet<Number> intersectionSet = new HashSet<>(vector1);
         intersectionSet.retainAll(vector2);
