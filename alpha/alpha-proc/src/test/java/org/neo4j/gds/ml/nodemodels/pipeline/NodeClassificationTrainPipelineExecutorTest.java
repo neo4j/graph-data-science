@@ -191,6 +191,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var pipeline = new NodeClassificationPipeline();
+            pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
 
             NodeClassificationTrainConfig actualConfig = NodeClassificationTrainPipelineExecutor.innerConfig(pipeline, config);
 
@@ -220,6 +221,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("array"));
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
 
         var metricSpecification = MetricSpecification.parse("F1(class=1)");
 
@@ -316,6 +318,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             Map.of("mutateProperty", "myNewProp", "threshold", 0.42F, "relationshipWeightProperty", "weight")
         ));
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
 
         var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
             .pipeline(PIPELINE_NAME)
@@ -340,8 +343,31 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             31742464L,
             31774424L
         );
-
     }
+
+    @Test
+    void failEstimateOnEmptyParameterSpace() {
+        var pipeline = insertPipelineIntoCatalog();
+        pipeline.featureProperties().addAll(List.of("array", "scalar"));
+
+        var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
+            .pipeline(PIPELINE_NAME)
+            .username("myUser")
+            .graphName(GRAPH_NAME)
+            .modelName("myModel")
+            .concurrency(1)
+            .randomSeed(42L)
+            .targetProperty("t")
+            .addRelationshipType("SOME_REL")
+            .addNodeLabel("SOME_LABEL")
+            .minBatchSize(1)
+            .metrics(List.of(MetricSpecification.parse("F1_WEIGHTED")))
+            .build();
+
+        assertThatThrownBy(() -> NodeClassificationTrainPipelineExecutor.estimate(pipeline, config, new OpenModelCatalog()))
+            .hasMessage("Need at least one model candidate for training.");
+    }
+
     private NodeClassificationPipeline insertPipelineIntoCatalog() {
         var info = new NodeClassificationPipeline();
         PipelineCatalog.set(getUsername(), PIPELINE_NAME, info);

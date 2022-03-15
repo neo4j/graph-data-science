@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.models.TrainingMethod;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.models.randomforest.RandomForestTrainConfigImpl;
 
 import java.util.List;
@@ -33,11 +32,11 @@ import java.util.Map;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcsTest.DEFAULT_SPLIT_CONFIG;
 
-class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
+class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(LinkPredictionPipelineConfigureParamsProc.class, LinkPredictionPipelineCreateProc.class);
+        registerProcedures(LinkPredictionPipelineAddTrainerMethodProcs.class, LinkPredictionPipelineCreateProc.class);
 
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('myPipeline')");
     }
@@ -50,13 +49,15 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void shouldSetParams() {
         assertCypherResult(
-            "CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 42}])",
+            "CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {minEpochs: 42})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
-                "parameterSpace", Map.of(TrainingMethod.LogisticRegression.name(), List.of(Map.of(
+                "parameterSpace", Map.of(
+                    TrainingMethod.RandomForest.name(), List.of(),
+                    TrainingMethod.LogisticRegression.name(), List.of(Map.of(
                         "maxEpochs", 100,
                         "minEpochs", 42,
                         "penalty", 0.0,
@@ -71,26 +72,40 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldOnlyKeepLastOverride() {
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 42}])");
+    void shouldAddMultipleModels() {
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {minEpochs: 42})");
 
         assertCypherResult(
-            "CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 4}])",
+            "CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {minEpochs: 4})",
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
-                "parameterSpace", Map.of(TrainingMethod.LogisticRegression.name(), List.of(Map.of(
-                    "maxEpochs", 100,
-                    "minEpochs", 4,
-                    "penalty", 0.0,
-                    "patience", 1,
-                    "methodName", TrainingMethod.LogisticRegression.name(),
-                    "batchSize", 100,
-                    "tolerance", 0.001,
-                    "useBiasFeature", true
-                )))
+                "parameterSpace", Map.of(
+                    TrainingMethod.RandomForest.name(), List.of(),
+                    TrainingMethod.LogisticRegression.name(), List.of(
+                        Map.of(
+                            "maxEpochs", 100,
+                            "minEpochs", 42,
+                            "penalty", 0.0,
+                            "patience", 1,
+                            "methodName", TrainingMethod.LogisticRegression.name(),
+                            "batchSize", 100,
+                            "tolerance", 0.001,
+                            "useBiasFeature", true
+                        ),
+                        Map.of(
+                            "maxEpochs", 100,
+                            "minEpochs", 4,
+                            "penalty", 0.0,
+                            "patience", 1,
+                            "methodName", TrainingMethod.LogisticRegression.name(),
+                            "batchSize", 100,
+                            "tolerance", 0.001,
+                            "useBiasFeature", true
+                        )
+                    ))
             ))
         );
     }
@@ -98,7 +113,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void addRandomForest() {
         assertCypherResult(
-            "CALL gds.beta.pipeline.linkPrediction.addRandomForest('myPipeline', {maxDepth: 42, featureBaggingRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 1})",
+            "CALL gds.alpha.pipeline.linkPrediction.addRandomForest('myPipeline', {maxDepth: 42, featureBaggingRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 1})",
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
@@ -114,8 +129,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
                         .minSplitSize(1)
                         .build()
                         .toMap()),
-                    TrainingMethod.LogisticRegression.name(),
-                    List.of(LogisticRegressionTrainConfig.defaultConfig().toMap())
+                    TrainingMethod.LogisticRegression.name(), List.of()
                 )
             ))
         );
@@ -124,7 +138,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void failOnInvalidParameterValues() {
         assertError(
-            "CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 0.5, batchSize: 0.51}])",
+            "CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {minEpochs: 0.5, batchSize: 0.51})",
             "Multiple errors in configuration arguments:\n" +
             "\t\t\t\tThe value of `batchSize` must be of type `Integer` but was `Double`.\n" +
             "\t\t\t\tThe value of `minEpochs` must be of type `Integer` but was `Double`."
@@ -134,7 +148,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void failOnInvalidKeys() {
         assertError(
-            "CALL gds.beta.pipeline.linkPrediction.configureParams('myPipeline', [{invalidKey: 42, penaltE: -0.51}])",
+            "CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {invalidKey: 42, penaltE: -0.51})",
             "Unexpected configuration keys: invalidKey, penaltE (Did you mean one of [penalty, patience]?)"
         );
     }

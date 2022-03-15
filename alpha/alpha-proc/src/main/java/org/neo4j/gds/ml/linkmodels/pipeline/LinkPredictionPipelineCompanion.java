@@ -29,7 +29,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.TrainingMethod;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -38,11 +37,9 @@ public final class LinkPredictionPipelineCompanion {
 
     public static final String PREDICT_DESCRIPTION = "Predicts relationships for all node pairs based on a previously trained link prediction model.";
     public static final String ESTIMATE_PREDICT_DESCRIPTION = "Estimates memory for predicting links based on a previously trained pipeline model";
-    static final Map<String, List<Map<String, Object>>> DEFAULT_PARAM_CONFIG = Map.of(
-        TrainingMethod.LogisticRegression.name(),
-        List.of(
-            LogisticRegressionTrainConfig.defaultConfig().toMap()
-        )
+    static final Map<String, List<Map<String, Object>>> DEFAULT_PARAM_SPACE = Map.of(
+        TrainingMethod.LogisticRegression.name(), List.of(),
+        TrainingMethod.RandomForest.name(), List.of()
     );
 
     private LinkPredictionPipelineCompanion() {}

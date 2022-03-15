@@ -74,8 +74,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.beta.pipeline.linkPrediction.addFeature",
         "gds.beta.pipeline.linkPrediction.addNodeProperty",
-        "gds.beta.pipeline.linkPrediction.configureParams",
-        "gds.beta.pipeline.linkPrediction.addRandomForest",
+        "gds.beta.pipeline.linkPrediction.addLogisticRegression",
+        "gds.alpha.pipeline.linkPrediction.addRandomForest",
         "gds.beta.pipeline.linkPrediction.configureSplit",
         "gds.beta.pipeline.linkPrediction.create",
         "gds.beta.pipeline.linkPrediction.predict.mutate",
@@ -87,7 +87,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.beta.pipeline.nodeClassification.selectFeatures",
         "gds.beta.pipeline.nodeClassification.addNodeProperty",
-        "gds.beta.pipeline.nodeClassification.configureParams",
+        "gds.beta.pipeline.nodeClassification.addLogisticRegression",
         "gds.beta.pipeline.nodeClassification.configureSplit",
         "gds.beta.pipeline.nodeClassification.create",
         "gds.beta.pipeline.nodeClassification.predict.mutate",

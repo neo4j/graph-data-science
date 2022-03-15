@@ -49,9 +49,7 @@ class LinkPredictionPipelineTest {
             .returns(List.of(), LinkPredictionPipeline::nodePropertySteps)
             .returns(LinkPredictionSplitConfig.DEFAULT_CONFIG, LinkPredictionPipeline::splitConfig);
 
-        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression))
-            .usingRecursiveComparison()
-            .isEqualTo(List.of(LogisticRegressionTrainConfig.defaultConfig()));
+        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)).isEmpty();
     }
 
     @Test
@@ -176,8 +174,8 @@ class LinkPredictionPipelineTest {
                 )
                 .returns(
                     Map.of(
-                        TrainingMethod.LogisticRegression.name(),
-                        List.of(LogisticRegressionTrainConfig.defaultConfig().toMap())
+                        TrainingMethod.LogisticRegression.name(), List.of(),
+                        TrainingMethod.RandomForest.name(), List.of()
                     ),
                     pipelineMap -> pipelineMap.get("trainingParameterSpace")
                 );

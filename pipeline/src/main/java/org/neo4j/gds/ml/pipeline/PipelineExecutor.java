@@ -86,6 +86,12 @@ public abstract class PipelineExecutor<
         return MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations);
     }
 
+    public static void validateTrainingParameterSpace(Pipeline pipeline) {
+        if (pipeline.numberOfModelCandidates() == 0) {
+            throw new IllegalArgumentException("Need at least one model candidate for training.");
+        }
+    }
+
     public abstract Map<DatasetSplits, GraphFilter> splitDataset();
 
     protected abstract RESULT execute(Map<DatasetSplits, GraphFilter> dataSplits);

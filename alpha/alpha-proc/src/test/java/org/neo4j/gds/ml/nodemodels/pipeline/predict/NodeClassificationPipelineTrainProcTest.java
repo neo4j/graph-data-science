@@ -41,7 +41,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineAddStepProcs;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineConfigureParamsProc;
+import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineAddTrainerMethodProcs;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCreateProc;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -102,7 +102,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             ModelDropProc.class,
             NodeClassificationPipelineCreateProc.class,
             NodeClassificationPipelineAddStepProcs.class,
-            NodeClassificationPipelineConfigureParamsProc.class,
+            NodeClassificationPipelineAddTrainerMethodProcs.class,
             NodeClassificationPipelineConfigureSplitProc.class,
             NodeClassificationPipelineTrainProc.class
         );
@@ -140,7 +140,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             pipe
         );
         runQuery(
-            "CALL gds.beta.pipeline.nodeClassification.configureParams($pipeline, [{penalty: 1000, maxEpochs: 1}])",
+            "CALL gds.beta.pipeline.nodeClassification.addLogisticRegression($pipeline, {penalty: 1000, maxEpochs: 1})",
             pipe
         );
         runQuery(
@@ -244,10 +244,8 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         params.put("graphDefinition", graphNameOrConfiguration);
         params.put("modelName", MODEL_NAME);
 
-        runQuery(
-            "CALL gds.beta.pipeline.nodeClassification.create($pipeline)",
-            pipe
-        );
+        runQuery("CALL gds.beta.pipeline.nodeClassification.create($pipeline)", pipe);
+        runQuery("CALL gds.beta.pipeline.nodeClassification.addLogisticRegression($pipeline)", pipe);
 
         assertCypherResult(
             "CALL gds.beta.pipeline.nodeClassification.train.estimate(" +

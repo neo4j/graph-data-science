@@ -45,9 +45,8 @@ class NodeClassificationPipelineTest {
             .returns(List.of(), NodeClassificationPipeline::nodePropertySteps)
             .returns(NodeClassificationSplitConfig.DEFAULT_CONFIG, NodeClassificationPipeline::splitConfig);
 
-        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression))
-            .usingRecursiveComparison()
-            .isEqualTo(List.of(LogisticRegressionTrainConfig.defaultConfig()));
+        assertThat(pipeline.trainingParameterSpace())
+            .isEqualTo(Map.of(TrainingMethod.LogisticRegression, List.of(), TrainingMethod.RandomForest, List.of()));
     }
 
     @Test
@@ -156,8 +155,8 @@ class NodeClassificationPipelineTest {
                     pipelineMap -> pipelineMap.get("splitConfig")
                 )
                 .returns(
-                    List.of(LogisticRegressionTrainConfig.defaultConfig().toMap()),
-                    pipelineMap -> ((Map<String, Object>) pipelineMap.get("trainingParameterSpace")).get(TrainingMethod.LogisticRegression.name())
+                    Map.of(TrainingMethod.LogisticRegression.name(), List.of(), TrainingMethod.RandomForest.name(), List.of()),
+                    pipelineMap -> pipelineMap.get("trainingParameterSpace")
                 );
         }
 

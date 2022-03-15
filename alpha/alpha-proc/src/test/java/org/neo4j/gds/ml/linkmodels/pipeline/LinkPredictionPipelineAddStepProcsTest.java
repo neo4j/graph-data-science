@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_CONFIG;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_SPACE;
 
 class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
 
@@ -68,7 +68,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
                         "config", Map.of("mutateProperty", "pr")
                     )),
                 "featureSteps", List.of(),
-                "parameterSpace", DEFAULT_PARAM_CONFIG
+                "parameterSpace", DEFAULT_PARAM_SPACE
             ))
         );
     }
@@ -84,7 +84,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
                         "name", "HADAMARD",
                         "config", Map.of("nodeProperties", List.of("pr"))
                     )),
-                "parameterSpace", DEFAULT_PARAM_CONFIG
+                "parameterSpace", DEFAULT_PARAM_SPACE
             ))
         );
     }
@@ -158,7 +158,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
                         "config", Map.of("nodeProperties", List.of("pr"))
                     )
                 ),
-                "parameterSpace", DEFAULT_PARAM_CONFIG
+                "parameterSpace", DEFAULT_PARAM_SPACE
             ))
         );
     }
@@ -179,7 +179,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
                         "config", Map.of("mutateProperty", "pr2")
                     )),
                 "featureSteps", List.of(),
-                "parameterSpace", DEFAULT_PARAM_CONFIG
+                "parameterSpace", DEFAULT_PARAM_SPACE
             ))
         );
     }

@@ -102,7 +102,7 @@ CALL gds.beta.pipeline.nodeClassification.create('pipe')
 | name     | nodePropertySteps | featureProperties | splitConfig | parameterSpace
 | "pipe"   | []                | []
            | {testFraction=0.3, validationFolds=3}
-           | {LogisticRegression=[{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
+           | {RandomForest=[], LogisticRegression=[]}
 |===
 --
 
@@ -329,9 +329,9 @@ We now reconfigured the splitting of the pipeline, which will be applied during 
 [[algorithms-ml-nodeclassification-configure-model-parameters]]
 == Configuring the model parameters
 
-The `gds.beta.pipeline.nodeClassification.configureParams` mode is used to set up the train mode with a list of configurations of logistic regression models.
-The set of model configurations is called the _parameter space_ which parametrizes a set of model candidates.
-The parameter space can be configured by passing this procedure a list of maps, where each map configures the training of one logistic regression model.
+A pipeline contains a collection of configurations for model candidates which is initially empty.
+This collection is called the _parameter space_.
+Prior to training one or several model configurations can and should be added to the _parameter space_ with the `gds.beta.pipeline.nodeClassification.addLogisticRegression` and `gds.alpha.pipeline.nodeClassification.addRandomForest` modes.
 In <<algorithms-ml-nodeclassification-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
 
 The allowed model parameters are listed in the table <<nodeclassification-pipelines-model-configuration-table>>.
@@ -363,7 +363,7 @@ YIELD
 |===
 | Name            | Type        | Description
 | pipelineName    | String      | The name of the pipeline.
-| parameterSpace  | List of Map | The parameter space used to select the best model from. Each Map corresponds to potential model. The allowed parameters for a model are defined in the next table.
+| config  | Map   | The logistic regression config for a potential model. The allowed parameters for a model are defined in the next table.
 |===
 
 [[nodeclassification-pipelines-model-configuration-table]]
@@ -384,21 +384,29 @@ include::pipelineInfoResult.adoc[]
 
 === Example
 
+// FIXME fix this example
+[source, cypher, role=noplay query-example, no-result=true, group=nc]
+.The following will configure the parameter space of the pipeline:
+--
+CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe', {penalty: 0.0625})
+YIELD parameterSpace
+--
+
+
 [role=query-example,group=nc]
 --
 .The following will configure the parameter space of the pipeline:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.nodeClassification.configureParams('pipe',
-  [{penalty: 0.0625}, {tolerance: 0.01}, {maxEpochs: 500}]
-) YIELD parameterSpace
+CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe', {maxEpochs: 500})
+YIELD parameterSpace
 ----
 
 .Results
 [opts="header",cols="1"]
 |===
 | parameterSpace
-| {LogisticRegression=[{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}, {useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.01}, {useBiasFeature=true, maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
+| {RandomForest=[], LogisticRegression=[{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}, {useBiasFeature=true, maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
 |===
 
 The `parameterSpace` in the pipeline now contains the three different model parameters, expanded with the default values.

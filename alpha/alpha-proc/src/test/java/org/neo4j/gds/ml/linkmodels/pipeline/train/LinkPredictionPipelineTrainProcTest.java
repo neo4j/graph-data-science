@@ -38,12 +38,12 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcs;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProc;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddTrainerMethodProcs;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.model.catalog.ModelDropProc;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 
 import java.util.List;
 import java.util.Map;
@@ -109,7 +109,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             LinkPredictionPipelineTrainProc.class,
             LinkPredictionPipelineCreateProc.class,
             LinkPredictionPipelineAddStepProcs.class,
-            LinkPredictionPipelineConfigureParamsProc.class,
+            LinkPredictionPipelineAddTrainerMethodProcs.class,
             LinkPredictionPipelineConfigureSplitProc.class,
             GraphProjectProc.class,
             ModelDropProc.class
@@ -147,7 +147,8 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe1')");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe1', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe1', 'L2', {nodeProperties: ['pr']})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('pipe1', [{penalty: 1}, {penalty: 2}] )");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe1', {penalty: 1})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe1', {penalty: 2})");
 
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.train(" +
@@ -184,6 +185,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     void failsWhenMissingFeatures() {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe2')");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe2', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe2')");
 
         assertError("CALL gds.beta.pipeline.linkPrediction.train(" +
                     "   $graphName, " +
@@ -196,6 +198,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     @Test
     void failsWhenMissingNodeProperty() {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')");
         runQuery(
             "CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'l2', {nodeProperties: ['missingNodeProperty']})");
         assertError(
@@ -209,7 +212,8 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe4')");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe4', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe4', 'L2', {nodeProperties: ['array', 'pr']})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('pipe4', [{penalty: 1}, {penalty: 2}] )");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe4', {penalty: 1})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe4', {penalty: 2})");
 
         Object expectedMetrics = Map.of("AUCPR", Map.of(
             "outerTrain", 1.0,
@@ -254,7 +258,8 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe5', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe5', 'L2', {nodeProperties: ['pr']})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe5', {trainFraction: 0.45, testFraction: 0.45})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('pipe5', [{penalty: 1}, {penalty: 2}] )");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe5', {penalty: 1})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe5', {penalty: 2})");
 
         String trainQuery =
             "CALL gds.beta.pipeline.linkPrediction.train(" +
@@ -285,7 +290,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe6', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe6', 'L2', {nodeProperties: ['pr']})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe6', {trainFraction: 0.45, testFraction: 0.45})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('pipe6', [{penalty: 0, maxEpochs: 10, minEpochs: 10}] )");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe6', {penalty: 0, maxEpochs: 10, minEpochs: 10})");
 
         String trainQuery =
             "CALL gds.beta.pipeline.linkPrediction.train(" +
@@ -310,7 +315,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe7', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe7', 'L2', {nodeProperties: ['pr']})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe7', {trainFraction: 0.45, testFraction: 0.45})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureParams('pipe7', [{penalty: 0, maxEpochs: 10, minEpochs: 10}] )");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe7', {penalty: 0, maxEpochs: 10, minEpochs: 10})");
 
         String trainQuery =
             "CALL gds.beta.pipeline.linkPrediction.train(" +
@@ -332,6 +337,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     void estimate() {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')");
 
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.train.estimate(" +

@@ -420,7 +420,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         );
 
         return Stream.of(
-            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(71_048, 2_082_008)),
+            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(71_144, 2_082_104)),
             Arguments.of("only FastRP", List.of(fastRP), MemoryRange.of(6_204_288)),
             Arguments.of("Both", List.of(degreeCentr, fastRP), MemoryRange.of(6_204_288))
         );
@@ -437,6 +437,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .build();
 
         LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
 
         for (NodePropertyStep propertyStep : nodePropertySteps) {
             pipeline.addNodePropertyStep(propertyStep);
@@ -452,5 +453,20 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         assertThat(actualRange)
             .withFailMessage("Got %d, %d", actualRange.min, actualRange.max)
             .isEqualTo(expectedRange);
+    }
+
+    @Test
+    void failEstimateOnEmptyParameterSpace() {
+        var config = LinkPredictionTrainConfig
+            .builder()
+            .modelName("DUMMY")
+            .graphName("DUMMY")
+            .pipeline("DUMMY")
+            .build();
+
+        LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
+
+        assertThatThrownBy(() -> LinkPredictionTrainPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config))
+            .hasMessage("Need at least one model candidate for training.");
     }
 }
