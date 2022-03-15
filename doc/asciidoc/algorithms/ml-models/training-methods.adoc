@@ -1,0 +1,59 @@
+[[algorithms-ml-training-methods]]
+== Training methods
+
+
+<<algorithms-ml-nodeclassification-pipelines, Node Classification Pipelines>> and <<algorithms-ml-linkprediction-pipelines, Link Prediction Pipelines>> are trained using supervised machine learning methods.
+Currently, GDS supports two such methods, namely <<algorithms-ml-training-methods-logistic-regression>> and <<algorithms-ml-training-methods-random-forest>>.
+Each of these methods have several hyperparameters that one can set to influence the training.
+The objective of this page is to give a brief overview of logistic regression and random forest, as well as advice on how to tune their hyperparameters.
+
+
+[[algorithms-ml-training-methods-logistic-regression]]
+=== Logistic regression
+
+Logistic regression is a fundamental supervised machine learning classification method.
+The model is trained by minimizing a weighted loss function, typically using something like gradient descent (the Adam optimizer in GDS).
+
+The weights are in the form of a `[c,d]` sized matrix `W` and a bias vector `b` of length `c`, where `d` is the feature dimension and `c` is equal the number of classes in the multiclass case, and 1 in the binary case.
+The loss function is then defined by as:
+
+`CE(softmax(W&#8901;x + b))`
+
+where `CE` is the https://en.wikipedia.org/wiki/Cross_entropy#Cross-entropy_loss_function_and_logistic_regression[cross entropy loss], `softmax` is the https://en.wikipedia.org/wiki/Softmax_function[softmax function], and `x` is a `d` length feature vector training example.
+
+https://en.wikipedia.org/wiki/Logistic_regression[Click here] for more details on logistic regression.
+
+// TODO: ADD LINK TO addLogisticRegression procs here!
+
+==== Tuning the hyperparameters
+
+The parameters `maxEpochs`, `tolerance` and `patience` control for how long the training will run until termination.
+These parameters give ways to limit a computational budget. In general, higher `maxEpochs` and `patience` and lower `tolerance` lead to longer training but higher quality models.
+It is however well-known that restricting the computational budget can serve the purpose of regularization and mitigate overfitting.
+
+When faced with a heavy training task, a strategy to perform hyperparameter optimization faster, is to initially use lower values for the budget related parameters while exploring better ranges for other general or algorithm specific parameters.
+
+More precisely, `maxEpochs` is the maximum number of epochs trained until termination.
+Whether the training exhausted the maximum number of epochs or converged prior is reported in the neo4j debug log.
+
+As for `patience` and `tolerance`, the former is the maximum number of consecutive epochs that do not improve the training loss at least by a `tolerance` fraction of the current loss.
+After `patience` such unproductive epochs, the training is terminated.
+In our experience, reasonable values for `patience` are in the range `1` to `3`.
+
+It is also possible, via `minEpochs`, to control a minimum number of epochs before the above termination criteria enter into play.
+
+The training algorithm applied to the above algorithms is gradient descent.
+The gradient updates are computed batch-wise on batches of `batchSize` examples, and batches are computed concurrently on `concurrency` threads.
+Thus, `batchSize` can affect the convergence rate, but since the algorithms above optimize convex functions, the resulting model is in theory (approximately) unique.
+
+
+[[algorithms-ml-training-methods-random-forest]]
+=== Random forest
+
+
+// overview
+
+// TODO: ADD LINK TO addRandomForest procs here!
+
+
+==== Tuning the hyperparameters
