@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -90,19 +91,8 @@ public class SimilaritiesFunc {
 
             LongSet ids = new LongHashSet();
 
-            LongDoubleMap v1Mappings = new LongDoubleHashMap();
-            for (Map<String, Object> entry : vector1) {
-                Long id = (Long) entry.get(CATEGORY_KEY);
-                ids.add(id);
-                v1Mappings.put(id, (Double) entry.get(WEIGHT_KEY));
-            }
-
-            LongDoubleMap v2Mappings = new LongDoubleHashMap();
-            for (Map<String, Object> entry : vector2) {
-                Long id = (Long) entry.get(CATEGORY_KEY);
-                ids.add(id);
-                v2Mappings.put(id, (Double) entry.get(WEIGHT_KEY));
-            }
+            var v1Mappings = parseMapValues(vector1, ids);
+            var v2Mappings = parseMapValues(vector2, ids);
 
             double[] weights1 = new double[ids.size()];
             double[] weights2 = new double[ids.size()];
@@ -132,6 +122,17 @@ public class SimilaritiesFunc {
             }
             return Intersections.pearson(weights1, weights2, len);
         }
+    }
+
+    @NotNull
+    private LongDoubleMap parseMapValues(List<Map<String, Object>> vector1, LongSet ids) {
+        var v1Mappings = new LongDoubleHashMap();
+        for (Map<String, Object> entry : vector1) {
+            var id = (Long) entry.get(CATEGORY_KEY);
+            ids.add(id);
+            v1Mappings.put(id, (Double) entry.get(WEIGHT_KEY));
+        }
+        return v1Mappings;
     }
 
     @UserFunction("gds.alpha.similarity.euclideanDistance")
