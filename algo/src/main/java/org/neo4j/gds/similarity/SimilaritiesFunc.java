@@ -33,16 +33,16 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
-
-import static org.neo4j.gds.impl.similarity.SimilarityVectorAggregator.CATEGORY_KEY;
-import static org.neo4j.gds.impl.similarity.SimilarityVectorAggregator.WEIGHT_KEY;
-import static org.neo4j.gds.impl.utils.NumberUtils.getDoubleValue;
 
 public class SimilaritiesFunc {
 
     public static final Predicate<Number> IS_NULL = Predicate.isEqual(null);
     public static final Comparator<Number> NUMBER_COMPARATOR = new NumberComparator();
+
+    private static final String CATEGORY_KEY = "category";
+    private static final String WEIGHT_KEY = "weight";
 
     @UserFunction("gds.alpha.similarity.jaccard")
     @Description("RETURN gds.alpha.similarity.jaccard(vector1, vector2) - Given two collection vectors, calculate Jaccard similarity")
@@ -219,6 +219,10 @@ public class SimilaritiesFunc {
         union += (vector1.size() - index1) + (vector2.size() - index2);
 
         return union == 0 ? 1 : intersection / union;
+    }
+
+    private static double getDoubleValue(Number value) {
+        return Optional.ofNullable(value).map(Number::doubleValue).orElse(Double.NaN);
     }
 
     static class NumberComparator implements Comparator<Number> {
