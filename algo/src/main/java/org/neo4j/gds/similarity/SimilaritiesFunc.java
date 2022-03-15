@@ -92,6 +92,53 @@ public class SimilaritiesFunc {
         }
     }
 
+    @UserFunction("gds.alpha.similarity.euclideanDistance")
+    @Description("RETURN gds.alpha.similarity.euclideanDistance(vector1, vector2) - Given two collection vectors, calculate the euclidean distance (square root of the sum of the squared differences)")
+    public double euclideanDistance(
+        @Name("vector1") List<Number> vector1,
+        @Name("vector2") List<Number> vector2
+    ) {
+        validateInput(vector1, vector2);
+
+        int len = Math.min(vector1.size(), vector2.size());
+        double[] weights1 = new double[len];
+        double[] weights2 = new double[len];
+
+        for (int i = 0; i < len; i++) {
+            weights1[i] = getDoubleValue(vector1.get(i));
+            weights2[i] = getDoubleValue(vector2.get(i));
+        }
+
+        return Math.sqrt(Intersections.sumSquareDelta(weights1, weights2, len));
+    }
+
+    @UserFunction("gds.alpha.similarity.euclidean")
+    @Description("RETURN gds.alpha.similarity.euclidean(vector1, vector2) - Given two collection vectors, calculate similarity based on euclidean distance")
+    public double euclideanSimilarity(
+        @Name("vector1") List<Number> vector1,
+        @Name("vector2") List<Number> vector2
+    ) {
+        return 1.0D / (1 + euclideanDistance(vector1, vector2));
+    }
+
+    @UserFunction("gds.alpha.similarity.overlap")
+    @Description("RETURN gds.alpha.similarity.overlap(vector1, vector2) - Given two collection vectors, calculate overlap similarity")
+    public double overlapSimilarity(
+        @Name("vector1") List<Number> vector1,
+        @Name("vector2") List<Number> vector2
+    ) {
+        if (vector1 == null || vector2 == null) {
+            return 0;
+        }
+
+        var intersectionSet = new HashSet<>(vector1);
+        intersectionSet.retainAll(vector2);
+        int intersection = intersectionSet.size();
+
+        long denominator = Math.min(vector1.size(), vector2.size());
+        return denominator == 0 ? 0 : (double) intersection / denominator;
+    }
+
     private double pearsonForMapVectors(List<Map<String, Object>> rawVector1, List<Map<String, Object>> rawVector2) {
         List<Map<String, Object>> vector1 = rawVector1;
         List<Map<String, Object>> vector2 = rawVector2;
@@ -138,53 +185,6 @@ public class SimilaritiesFunc {
             v1Mappings.put(id, (Double) entry.get(WEIGHT_KEY));
         }
         return v1Mappings;
-    }
-
-    @UserFunction("gds.alpha.similarity.euclideanDistance")
-    @Description("RETURN gds.alpha.similarity.euclideanDistance(vector1, vector2) - Given two collection vectors, calculate the euclidean distance (square root of the sum of the squared differences)")
-    public double euclideanDistance(
-        @Name("vector1") List<Number> vector1,
-        @Name("vector2") List<Number> vector2
-    ) {
-        validateInput(vector1, vector2);
-
-        int len = Math.min(vector1.size(), vector2.size());
-        double[] weights1 = new double[len];
-        double[] weights2 = new double[len];
-
-        for (int i = 0; i < len; i++) {
-            weights1[i] = getDoubleValue(vector1.get(i));
-            weights2[i] = getDoubleValue(vector2.get(i));
-        }
-
-        return Math.sqrt(Intersections.sumSquareDelta(weights1, weights2, len));
-    }
-
-    @UserFunction("gds.alpha.similarity.euclidean")
-    @Description("RETURN gds.alpha.similarity.euclidean(vector1, vector2) - Given two collection vectors, calculate similarity based on euclidean distance")
-    public double euclideanSimilarity(
-        @Name("vector1") List<Number> vector1,
-        @Name("vector2") List<Number> vector2
-    ) {
-        return 1.0D / (1 + euclideanDistance(vector1, vector2));
-    }
-
-    @UserFunction("gds.alpha.similarity.overlap")
-    @Description("RETURN gds.alpha.similarity.overlap(vector1, vector2) - Given two collection vectors, calculate overlap similarity")
-    public double overlapSimilarity(
-        @Name("vector1") List<Number> vector1,
-        @Name("vector2") List<Number> vector2
-    ) {
-        if (vector1 == null || vector2 == null) {
-            return 0;
-        }
-
-        HashSet<Number> intersectionSet = new HashSet<>(vector1);
-        intersectionSet.retainAll(vector2);
-        int intersection = intersectionSet.size();
-
-        long denominator = Math.min(vector1.size(), vector2.size());
-        return denominator == 0 ? 0 : (double) intersection / denominator;
     }
 
     private void validateInput(
