@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.IntObjectMap;
 import org.eclipse.collections.api.IntIterable;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.cypher.UpdatableNodeProperty;
+import org.neo4j.gds.core.cypher.nodeproperties.UpdatableDoubleArrayNodeProperty;
 import org.neo4j.gds.core.cypher.nodeproperties.UpdatableDoubleNodeProperty;
 import org.neo4j.gds.core.cypher.nodeproperties.UpdatableLongArrayNodeProperty;
 import org.neo4j.gds.core.cypher.nodeproperties.UpdatableLongNodeProperty;
@@ -126,6 +127,8 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
                 return new UpdatableDoubleNodeProperty(nodeCount, defaultValue.doubleValue());
             case LONG_ARRAY:
                 return new UpdatableLongArrayNodeProperty(nodeCount, defaultValue.longArrayValue());
+            case DOUBLE_ARRAY:
+                return new UpdatableDoubleArrayNodeProperty(nodeCount, defaultValue.doubleArrayValue());
         }
         throw new IllegalArgumentException(formatWithLocale("Unsupported property type %s", value.getTypeName()));
     }
