@@ -92,7 +92,7 @@ The Overlap coefficient is defined as follows:
 image::knn-formulas/overlap.svg[size of intersection divided by size of minimum set,align="center"]
 
 Both of these metrics give a score in the range `[0, 1]` and no normalization needs to be performed.
-The Jaccard similarity is used as the default option for comparing list of integers when the metric is not specified.
+Jaccard similarity is used as the default option for comparing list of integers when the metric is not specified.
 
 List of floating-point numbers::
 
@@ -366,12 +366,12 @@ CREATE (dave:Person {name: 'Dave', age: 48, items: [2,4], vector: [0.6,0.2]})
 CREATE (eve:Person {name: 'Eve', age: 67, items: [1,5], vector: [0.8,0.7]});
 ----
 
-In the example, we want to use the K-Nearest Neighbors algorithm to compare people based on either their age or a combination on all  provided properties.
+In the example, we want to use the K-Nearest Neighbors algorithm to compare people based on either their age or a combination on all provided properties.
 
 include::../shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
-[source, cypher, role=noplay graph-project-query]
+[source,cypher,role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
     'myGraph',
@@ -568,8 +568,8 @@ However, they are just two directed relationships that have been independently w
 [[algorithms-knn-examples-multiple-properties]]
 === Calculation with multiple properties
 
-If we want calculate similarity based on multiple metrics, we can calculate the similarity for each property individually and take their mean.
-As an example, we can use the Normalized Euclidean similarity metric for the vector property and the Overlap metric for the items property.
+If we want to calculate similarity based on multiple metrics, we can calculate the similarity for each property individually and take their mean.
+As an example, we can use the Normalized Euclidean similarity metric for the vector property and the Overlap metric for the items property in addition to the age property.
 
 [role=query-example]
 --
