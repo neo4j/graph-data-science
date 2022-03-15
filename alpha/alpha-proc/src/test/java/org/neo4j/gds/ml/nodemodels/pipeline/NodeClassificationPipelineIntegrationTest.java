@@ -219,4 +219,56 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
         );
     }
 
+    @Test
+    void trainAndPredictRF() {
+        runQuery(
+            "CALL gds.graph.project('g', ['N', 'Hidden'], {T: {properties: 'w'}}, {nodeProperties: ['a', 'b', 'class']})");
+
+        runQuery("CALL gds.beta.pipeline.nodeClassification.create('p')");
+
+        runQuery("CALL gds.beta.pipeline.nodeClassification.addNodeProperty('p', 'wcc', {" +
+                 "  mutateProperty: 'community', " +
+                 "  relationshipWeightProperty: 'w'" +
+                 "})");
+        // let's try both list and single string syntaxes
+        runQuery("CALL gds.beta.pipeline.nodeClassification.selectFeatures('p', 'a')");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.selectFeatures('p', ['b', 'community'])");
+
+        runQuery("CALL gds.beta.pipeline.nodeClassification.configureSplit('p', {" +
+                 "  testFraction: 0.2, " +
+                 "  validationFolds: 5" +
+                 "})");
+        runQuery("CALL gds.alpha.pipeline.nodeClassification.addRandomForest('p', {" +
+                 "featureBaggingRatio: 1.0, numberOfDecisionTrees: 2, maxDepth: 5, minSplitSize: 1" +
+                 "})");
+
+        assertCypherResult("CALL gds.beta.pipeline.nodeClassification.train('g', {" +
+                 " nodeLabels: ['N']," +
+                 " pipeline: 'p'," +
+                 " modelName: 'model'," +
+                 " targetProperty: 'class'," +
+                 " metrics: ['F1_WEIGHTED']," +
+                 " randomSeed: 2" +
+                 "})" +
+                " YIELD modelInfo" +
+                " RETURN modelInfo.modelType AS modelType",
+            Map.of("graphName", 'g', "modelName", "model"),
+            List.of(Map.of("modelType", "NodeClassification"))
+        );
+
+        assertCypherResult(
+            "CALL gds.beta.pipeline.nodeClassification.predict.stream('g', {" +
+            "  nodeLabels: ['Hidden']," +
+            "  modelName: 'model'," +
+            "  includePredictedProbabilities: true" +
+            "}) YIELD nodeId, predictedClass, predictedProbabilities " +
+            "RETURN gds.util.asNode(nodeId).name AS name, predictedClass, predictedProbabilities AS probabilities " +
+            "  ORDER BY name ASC",
+            List.of(
+                Map.of("name", "0_hidden", "predictedClass", 0L, "probabilities", listOfSize(3)),
+                Map.of("name", "1_hidden", "predictedClass", 1L, "probabilities", listOfSize(3)),
+                Map.of("name", "2_hidden", "predictedClass", 2L, "probabilities", listOfSize(3))
+            )
+        );
+    }
 }

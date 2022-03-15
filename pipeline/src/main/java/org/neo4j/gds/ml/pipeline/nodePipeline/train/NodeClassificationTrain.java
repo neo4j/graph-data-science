@@ -69,6 +69,7 @@ import org.openjdk.jol.util.Multiset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
@@ -97,37 +98,42 @@ public final class NodeClassificationTrain {
     private final TerminationFlag terminationFlag;
 
     public static MemoryEstimation estimate(NodeClassificationPipeline pipeline, NodeClassificationPipelineTrainConfig config) {
-        // There's no memory estimation support for Random forest yet.
-        var maxBatchSize = pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)
-            .stream()
-            .mapToInt(trainConfig -> ((GradientDescentConfig) trainConfig).batchSize())
-            .max()
-            .orElseThrow();
-
         var fudgedClassCount = 1000;
         var fudgedFeatureCount = 500;
         var holdoutFraction = pipeline.splitConfig().testFraction();
         var validationFolds = pipeline.splitConfig().validationFolds();
 
-        var modelSelection = modelTrainAndEvaluateMemoryUsage(
-            maxBatchSize,
-            fudgedClassCount,
-            fudgedFeatureCount,
-            (nodeCount) -> (long) (nodeCount * holdoutFraction * (validationFolds - 1) / validationFolds)
-        );
-        var bestModelEvaluation = delegateEstimation(
-            modelTrainAndEvaluateMemoryUsage(
+        // Can only derive this for LR atm.
+        Optional<MemoryEstimation> maybeModelTrainingEstimation = Optional.empty();
+
+        if (!pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression).isEmpty()) {
+            var maxBatchSize = pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)
+                .stream()
+                .mapToInt(trainConfig -> ((GradientDescentConfig) trainConfig).batchSize())
+                .max()
+                .orElseThrow();
+
+            var modelSelection = modelTrainAndEvaluateMemoryUsage(
                 maxBatchSize,
                 fudgedClassCount,
                 fudgedFeatureCount,
-                (nodeCount) -> (long) (nodeCount * holdoutFraction)
-            ),
-            "best model evaluation"
-        );
-        var maxOfModelSelectionAndBestModelEvaluation = maxEstimation(List.of(modelSelection, bestModelEvaluation));
+                (nodeCount) -> (long) (nodeCount * holdoutFraction * (validationFolds - 1) / validationFolds)
+            );
+            var bestModelEvaluation = delegateEstimation(
+                modelTrainAndEvaluateMemoryUsage(
+                    maxBatchSize,
+                    fudgedClassCount,
+                    fudgedFeatureCount,
+                    (nodeCount) -> (long) (nodeCount * holdoutFraction)
+                ),
+                "best model evaluation"
+            );
+
+            maybeModelTrainingEstimation = Optional.of(maxEstimation(List.of(modelSelection, bestModelEvaluation)));
+        }
         // Final step is to retrain the best model with the entire node set.
         // Training memory is independent of node set size so we can skip that last estimation.
-        return MemoryEstimations.builder()
+        var builder = MemoryEstimations.builder()
             .perNode("global targets", HugeLongArray::memoryEstimation)
             .rangePerNode("global class counts", __ -> MemoryRange.of(2 * Long.BYTES, fudgedClassCount * Long.BYTES))
             .add("metrics", MetricSpecification.memoryEstimation(fudgedClassCount))
@@ -135,9 +141,16 @@ public final class NodeClassificationTrain {
             .add("outer split", FractionSplitter.estimate(1 - holdoutFraction))
             .add("inner split", StratifiedKFoldSplitter.memoryEstimationForNodeSet(validationFolds, 1 - holdoutFraction))
             .add("stats map train", StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates()))
-            .add("stats map validation", StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates()))
-            .add("max of model selection and best model evaluation", maxOfModelSelectionAndBestModelEvaluation)
-            .build();
+            .add("stats map validation", StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates()));
+
+        if (maybeModelTrainingEstimation.isPresent()) {
+            builder.add("max of model selection and best model evaluation", maybeModelTrainingEstimation.get());
+        } else {
+            // There's no memory estimation support for Random forest yet.
+            builder.add(MemoryEstimations.of("max of model selection and best model evaluation (unknown)", MemoryRange.of(0)));
+        }
+
+        return builder.build();
     }
 
     public static String taskName() {

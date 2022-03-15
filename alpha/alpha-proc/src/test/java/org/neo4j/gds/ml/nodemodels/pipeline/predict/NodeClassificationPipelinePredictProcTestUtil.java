@@ -34,6 +34,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
@@ -65,7 +66,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         addPipelineModelWithFeatures(modelCatalog, graphName, username, dimensionOfNodeFeatures, List.of("a","b"));
     }
 
-    static Model<LogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
+    static Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
         String graphName,
         String username,
         int dimensionOfNodeFeatures,

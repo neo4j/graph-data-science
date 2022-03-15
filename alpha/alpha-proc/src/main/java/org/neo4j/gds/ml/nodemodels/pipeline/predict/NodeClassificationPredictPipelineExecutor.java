@@ -35,7 +35,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineMo
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.ClassifierFactory;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 
 import java.util.List;
 import java.util.Map;
@@ -63,13 +62,13 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     }
 
     public static MemoryEstimation estimate(
-        Model<LogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
+        Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
         NodeClassificationPredictPipelineBaseConfig configuration,
         ModelCatalog modelCatalog
     ) {
         var pipeline = model.customInfo().trainingPipeline();
         var classCount = model.customInfo().classes().size();
-        var featureCount = model.data().weights().data().cols();
+        var featureCount = model.data().featureDimension();
 
         MemoryEstimation nodePropertyStepEstimation = PipelineExecutor.estimateNodePropertySteps(
             modelCatalog,
