@@ -147,8 +147,12 @@ public final class NodeClassificationTrain {
         if (maybeModelTrainingEstimation.isPresent()) {
             builder.add("max of model selection and best model evaluation", maybeModelTrainingEstimation.get());
         } else {
-            // There's no memory estimation support for Random forest yet.
+            // There's no memory estimation support for random forest yet.
             builder.add(MemoryEstimations.of("max of model selection and best model evaluation (unknown)", MemoryRange.of(0)));
+        }
+
+        if (!pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest).isEmpty()) {
+            // Having a random forest model candidate forces using eager feature extraction.
             builder.perGraphDimension("cached feature vectors", (dim, threads) -> MemoryRange.of(
                 HugeObjectArray.memoryEstimation(dim.nodeCount(), sizeOfDoubleArray(10)),
                 HugeObjectArray.memoryEstimation(dim.nodeCount(), sizeOfDoubleArray(fudgedFeatureCount))

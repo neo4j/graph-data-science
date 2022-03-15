@@ -272,14 +272,27 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
     public static Stream<Arguments> trainerMethodConfigs() {
         return Stream.of(
-            Arguments.of(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig(), MemoryRange.of(31742464L, 31774424L)),
-            Arguments.of(TrainingMethod.RandomForest, RandomForestTrainConfigImpl.builder().build(), MemoryRange.of(97992L, 165232L))
+            Arguments.of(
+                List.of(TrainingMethod.LogisticRegression),
+                List.of(LogisticRegressionTrainConfig.defaultConfig()),
+                MemoryRange.of(31_742_464L, 31_774_424L)
+            ),
+            Arguments.of(
+                List.of(TrainingMethod.RandomForest),
+                List.of(RandomForestTrainConfigImpl.builder().build()),
+                MemoryRange.of(97_992L, 165_232L)
+            ),
+            Arguments.of(
+                List.of(TrainingMethod.LogisticRegression, TrainingMethod.RandomForest),
+                List.of(LogisticRegressionTrainConfig.defaultConfig(), RandomForestTrainConfigImpl.builder().build()),
+                MemoryRange.of(31_839_432L, 31_906_672L)
+            )
         );
     }
 
     @ParameterizedTest
     @MethodSource("trainerMethodConfigs")
-    void shouldEstimateMemory(TrainingMethod trainingMethod, TrainerConfig trainerConfig, MemoryRange memoryRange) {
+    void shouldEstimateMemory(List<TrainingMethod> trainingMethods, List<TrainerConfig> trainerConfigs, MemoryRange memoryRange) {
         var pipeline = insertPipelineIntoCatalog();
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
             "pageRank",
@@ -290,7 +303,10 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             Map.of("mutateProperty", "myNewProp", "threshold", 0.42F, "relationshipWeightProperty", "weight")
         ));
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
-        pipeline.addTrainerConfig(trainingMethod, trainerConfig);
+
+        for (int i = 0; i < trainerConfigs.size(); i++) {
+            pipeline.addTrainerConfig(trainingMethods.get(i), trainerConfigs.get(i));
+        }
 
         var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
             .pipeline(PIPELINE_NAME)
