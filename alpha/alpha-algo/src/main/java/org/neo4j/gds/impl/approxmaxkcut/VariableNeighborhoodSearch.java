@@ -20,7 +20,7 @@
 package org.neo4j.gds.impl.approxmaxkcut;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.AtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
@@ -38,7 +38,7 @@ class VariableNeighborhoodSearch {
     private final ApproxMaxKCutConfig config;
     private final LocalSearch localSearch;
     private final HugeByteArray[] candidateSolutions;
-    private final AtomicDoubleArray[] costs;
+    private final HugeAtomicDoubleArray[] costs;
     private final ProgressTracker progressTracker;
     private HugeByteArray neighborSolution;
     private AtomicLongArray neighborCardinalities;
@@ -50,7 +50,7 @@ class VariableNeighborhoodSearch {
         ApproxMaxKCutConfig config,
         LocalSearch localSearch,
         HugeByteArray[] candidateSolutions,
-        AtomicDoubleArray[] costs,
+        HugeAtomicDoubleArray[] costs,
         ProgressTracker progressTracker
     ) {
         this.graph = graph;
@@ -70,7 +70,7 @@ class VariableNeighborhoodSearch {
         var bestCandidateSolution = candidateSolutions[candidateIdx];
         var bestCardinalities = currentCardinalities;
         var bestCost = costs[candidateIdx];
-        var neighborCost = new AtomicDoubleArray(1);
+        var neighborCost = HugeAtomicDoubleArray.newArray(1);
         var currentOrder = 0;
 
         progressTracker.beginSubTask();
