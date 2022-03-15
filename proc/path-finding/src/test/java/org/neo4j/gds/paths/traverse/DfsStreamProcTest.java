@@ -39,9 +39,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Graph:
  *
  *     (b)   (e)
- *   2/ 1\ 2/ 1\
+ *    /  \  /  \
  * >(a)  (d)  ((g))
- *   1\ 2/ 1\ 2/
+ *    \  /  \  /
  *    (c)   (f)
  */
 class DfsStreamProcTest extends BaseProcTest {
@@ -66,20 +66,31 @@ class DfsStreamProcTest extends BaseProcTest {
         ", (e)-[:TYPE {cost:2.0}]->(g)" +
         ", (f)-[:TYPE {cost:1.0}]->(g)";
 
+    private static final String REVERSE_GRAPH_NAME = DEFAULT_GRAPH_NAME + "_reverse";
+
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(DfsStreamProc.class, GraphProjectProc.class);
         runQuery(DB_CYPHER);
-    }
 
-    @Test
-    void testFindAnyOf() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE")
             .yields();
         runQuery(createQuery);
+
+        var createReverseGraphQuery = GdsCypher.call(REVERSE_GRAPH_NAME)
+            .graphProject()
+            .withNodeLabel("Node")
+            .withRelationshipType("TYPE", Orientation.REVERSE)
+            .yields();
+        runQuery(createReverseGraphQuery);
+
+    }
+
+    @Test
+    void testFindAnyOf() {
         long id = idFunction.of("a");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("dfs")
@@ -102,12 +113,6 @@ class DfsStreamProcTest extends BaseProcTest {
 
     @Test
     void testMaxDepthOut() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE")
-            .yields();
-        runQuery(createQuery);
         long id = idFunction.of("a");
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("dfs")
@@ -126,15 +131,8 @@ class DfsStreamProcTest extends BaseProcTest {
 
     @Test
     void testMaxDepthIn() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Orientation.REVERSE)
-            .yields();
-        runQuery(createQuery);
-
         long id = idFunction.of("g");
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(REVERSE_GRAPH_NAME)
             .algo("dfs")
             .streamMode()
             .addParameter("sourceNode", id)
@@ -150,16 +148,9 @@ class DfsStreamProcTest extends BaseProcTest {
     }
 
     @Test
-    void testPath() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Orientation.REVERSE)
-            .yields();
-        runQuery(createQuery);
-
+    void testWithoutEarlyTermination() {
         long id = idFunction.of("g");
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(REVERSE_GRAPH_NAME)
             .algo("dfs")
             .streamMode()
             .addParameter("sourceNode", id)
@@ -180,7 +171,6 @@ class DfsStreamProcTest extends BaseProcTest {
 
     @Test
     void failOnInvalidSourceNode() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("dfs")
             .streamMode()
@@ -192,7 +182,6 @@ class DfsStreamProcTest extends BaseProcTest {
 
     @Test
     void failOnInvalidEndNode() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("dfs")
             .streamMode()
