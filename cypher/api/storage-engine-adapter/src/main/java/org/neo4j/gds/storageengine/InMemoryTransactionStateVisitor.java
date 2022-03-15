@@ -25,14 +25,13 @@ import org.eclipse.collections.api.IntIterable;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.cypher.UpdatableNodeProperty;
 import org.neo4j.gds.core.cypher.nodeproperties.UpdatableDoubleNodeProperty;
+import org.neo4j.gds.core.cypher.nodeproperties.UpdatableLongArrayNodeProperty;
 import org.neo4j.gds.core.cypher.nodeproperties.UpdatableLongNodeProperty;
 import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.internal.helpers.collection.Iterables;
 import org.neo4j.storageengine.api.StorageProperty;
 import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
-import org.neo4j.values.storable.DoubleValue;
-import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -116,16 +115,18 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
     }
 
     private UpdatableNodeProperty updatableNodePropertyFromValue(Value value) {
-        var defaultValue = ValueConverter.valueType(value).fallbackValue();
+        var valueType = ValueConverter.valueType(value);
+        var defaultValue = valueType.fallbackValue();
         var nodeCount = graphStore.nodeCount();
 
-        if (value instanceof LongValue) {
-            return new UpdatableLongNodeProperty(nodeCount, defaultValue.longValue());
+        switch (valueType) {
+            case LONG:
+                return new UpdatableLongNodeProperty(nodeCount, defaultValue.longValue());
+            case DOUBLE:
+                return new UpdatableDoubleNodeProperty(nodeCount, defaultValue.doubleValue());
+            case LONG_ARRAY:
+                return new UpdatableLongArrayNodeProperty(nodeCount, defaultValue.longArrayValue());
         }
-        if (value instanceof DoubleValue) {
-            return new UpdatableDoubleNodeProperty(nodeCount, defaultValue.doubleValue());
-        }
-
         throw new IllegalArgumentException(formatWithLocale("Unsupported property type %s", value.getTypeName()));
     }
 }
