@@ -82,8 +82,6 @@ import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
 public final class NodeClassificationTrain extends Algorithm<NodeClassificationTrainResult> {
 
-    public static final String MODEL_TYPE = "nodeLogisticRegression";
-
     private final Graph graph;
     private final NodeClassificationPipelineTrainConfig config;
     private final NodeClassificationPipeline pipeline;
@@ -422,7 +420,7 @@ public final class NodeClassificationTrain extends Algorithm<NodeClassificationT
         return Model.of(
             config.username(),
             config.modelName(),
-            MODEL_TYPE,
+            NodeClassificationPipeline.MODEL_TYPE,
             graph.schema(),
             classifier.data(),
             config,
