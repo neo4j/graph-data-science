@@ -19,11 +19,6 @@
  */
 package org.neo4j.gds.similarity;
 
-import com.carrotsearch.hppc.LongDoubleHashMap;
-import com.carrotsearch.hppc.LongDoubleMap;
-import com.carrotsearch.hppc.LongHashSet;
-import com.carrotsearch.hppc.LongSet;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -33,7 +28,6 @@ import org.neo4j.values.storable.Values;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -138,40 +132,6 @@ public class SimilaritiesFunc {
 
         long denominator = Math.min(vector1.size(), vector2.size());
         return denominator == 0 ? 0 : (double) intersection / denominator;
-    }
-
-    private double pearsonForMapVectors(List<Map<String, Object>> rawVector1, List<Map<String, Object>> rawVector2) {
-        List<Map<String, Object>> vector1 = rawVector1;
-        List<Map<String, Object>> vector2 = rawVector2;
-
-        LongSet ids = new LongHashSet();
-
-        var v1Mappings = parseMapValues(vector1, ids);
-        var v2Mappings = parseMapValues(vector2, ids);
-
-        double[] weights1 = new double[ids.size()];
-        double[] weights2 = new double[ids.size()];
-
-        double skipValue = Double.NaN;
-        int index = 0;
-        for (long id : ids.toArray()) {
-            weights1[index] = v1Mappings.getOrDefault(id, skipValue);
-            weights2[index] = v2Mappings.getOrDefault(id, skipValue);
-            index++;
-        }
-
-        return Intersections.pearsonSkip(weights1, weights2, ids.size(), skipValue);
-    }
-
-    @NotNull
-    private LongDoubleMap parseMapValues(List<Map<String, Object>> vector1, LongSet ids) {
-        var v1Mappings = new LongDoubleHashMap();
-        for (Map<String, Object> entry : vector1) {
-            var id = (Long) entry.get(CATEGORY_KEY);
-            ids.add(id);
-            v1Mappings.put(id, (Double) entry.get(WEIGHT_KEY));
-        }
-        return v1Mappings;
     }
 
     private int validateLength(List<Number> vector1, List<Number> vector2) {
