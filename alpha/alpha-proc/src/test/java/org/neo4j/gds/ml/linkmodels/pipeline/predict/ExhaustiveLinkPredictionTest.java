@@ -50,6 +50,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.linkmodels.pipeline.predict.ApproximateLinkPredictionTest.compareWithPrecision;
 
 class ExhaustiveLinkPredictionTest extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
@@ -142,7 +143,9 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         );
 
         var endIndex = Math.min(topN, expectedLinks.size());
-        assertThat(predictedLinks).containsExactly(expectedLinks
+        assertThat(predictedLinks)
+            .usingElementComparator(compareWithPrecision(1e-10))
+            .containsExactly(expectedLinks
             .subList(0, endIndex)
             .toArray(PredictedLink[]::new));
     }

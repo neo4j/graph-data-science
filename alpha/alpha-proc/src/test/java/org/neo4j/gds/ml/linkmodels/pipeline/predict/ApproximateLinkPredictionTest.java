@@ -264,7 +264,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         assertThat(actualEstimate.memoryUsage().toString()).isEqualTo("[23 KiB ... 42 KiB]");
     }
 
-    private Comparator<PredictedLink> compareWithPrecision(double precision) {
+    static Comparator<PredictedLink> compareWithPrecision(double precision) {
         return (o1, o2) -> {
             boolean sourceEq = o1.sourceId() == o2.sourceId();
             boolean targetEq = o1.targetId() == o2.targetId();
