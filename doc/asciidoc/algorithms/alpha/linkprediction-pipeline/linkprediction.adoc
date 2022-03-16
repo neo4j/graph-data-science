@@ -426,6 +426,7 @@ YIELD
 | config          | Map         | The logistic regression config for a model candidate. The allowed parameters for a model are defined in the next table.
 |===
 
+[[algorithms-ml-linkprediction-logistic-regression-syntax]]
 include::../../ml-models/logisticRegressionConfig.adoc[]
 
 include::pipelineInfoResult.adoc[]
@@ -460,6 +461,7 @@ YIELD
 | config          | Map         | The random forest config for a model candidate. The allowed parameters for a model are defined in the next table.
 |===
 
+[[algorithms-ml-linkprediction-random-forest-syntax]]
 include::../../ml-models/randomForestConfig.adoc[]
 
 include::pipelineInfoResult.adoc[]
