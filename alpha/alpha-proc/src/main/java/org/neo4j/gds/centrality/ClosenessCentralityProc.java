@@ -21,14 +21,14 @@ package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.beta.closeness.ClosenessCentrality;
+import org.neo4j.gds.beta.closeness.ClosenessCentralityConfig;
+import org.neo4j.gds.beta.closeness.ClosenessCentralityFactory;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.impl.closeness.ClosenessCentralityConfig;
-import org.neo4j.gds.impl.closeness.ClosenessCentralityFactory;
-import org.neo4j.gds.impl.closeness.ClosenessCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 import java.util.List;

@@ -22,13 +22,13 @@ package org.neo4j.gds.impl;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.beta.closeness.ClosenessCentrality;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.impl.closeness.ClosenessCentrality;
 
 import java.util.Map;
 import java.util.stream.Collectors;

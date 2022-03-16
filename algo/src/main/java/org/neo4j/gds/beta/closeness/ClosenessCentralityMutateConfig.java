@@ -17,25 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.closeness;
+package org.neo4j.gds.beta.closeness;
 
-import org.immutables.value.Value;
+
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
-public interface ClosenessCentralityConfig extends AlgoBaseConfig {
+public interface ClosenessCentralityMutateConfig extends ClosenessCentralityConfig, MutatePropertyConfig {
 
-    @Value.Default
-    default boolean improved() {
-        return false;
-    }
-
-    static ClosenessCentralityConfig of(CypherMapWrapper config) {
-        return new ClosenessCentralityConfigImpl(config);
+    static ClosenessCentralityMutateConfig of(CypherMapWrapper config) {
+        return new ClosenessCentralityMutateConfigImpl(config);
     }
 }
