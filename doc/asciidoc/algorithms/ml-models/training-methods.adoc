@@ -32,8 +32,6 @@ In GDS, this we provide the option of adding `l2` regularization.
 
 https://en.wikipedia.org/wiki/Logistic_regression[Click here] for more details on logistic regression.
 
-For all available hyperparameters of logistic regression in GDS, see for example <<algorithms-ml-linkprediction-logistic-regression-syntax, this section>>.
-
 
 ==== Tuning the hyperparameters
 
@@ -72,8 +70,6 @@ The approach of combining several predictors (in this case decision trees) is al
 The loss used by the decision trees in GDS is the https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity[Gini impurity].
 
 https://en.wikipedia.org/wiki/Random_forest[Click here] for more details on random forest.
-
-For all available hyperparameters of random forest in GDS, see for example <<algorithms-ml-linkprediction-random-forest-syntax, this section>>.
 
 
 ==== Tuning the hyperparameters

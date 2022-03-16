@@ -1,5 +1,4 @@
-[[model-lr-config-table]]
-.Model configuration
+.Logistic regression configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                | Type    | Default         | Optional | Description
@@ -10,4 +9,3 @@
 | patience            | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
 | tolerance           | Float   | 0.001           | yes      | The minimal improvement of the loss to be considered productive.
 |===
-
