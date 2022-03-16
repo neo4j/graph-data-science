@@ -15,11 +15,14 @@ Logistic regression is a fundamental supervised machine learning classification 
 The model is trained by minimizing a weighted loss function, typically using something like gradient descent (the Adam optimizer in GDS).
 
 The weights are in the form of a `[c,d]` sized matrix `W` and a bias vector `b` of length `c`, where `d` is the feature dimension and `c` is equal the number of classes in the multiclass case, and 1 in the binary case.
-The loss function is then defined by as:
+The loss function is then defined as:
 
 `CE(softmax(W&#8901;x + b))`
 
 where `CE` is the https://en.wikipedia.org/wiki/Cross_entropy#Cross-entropy_loss_function_and_logistic_regression[cross entropy loss], `softmax` is the https://en.wikipedia.org/wiki/Softmax_function[softmax function], and `x` is a `d` length feature vector training example.
+
+To avoid overfitting one may also add a https://en.wikipedia.org/wiki/Regularization_(mathematics)regularization term to the loss.
+In GDS, this we provide the option of adding `l2` regularization.
 
 https://en.wikipedia.org/wiki/Logistic_regression[Click here] for more details on logistic regression.
 
