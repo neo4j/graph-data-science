@@ -5,7 +5,6 @@
 | Name                                                             | Type            | Default   | Optional | Description
 | nodeProperties                                                   | String or Map or List of Strings / Maps  | n/a       | no
 | The node properties to use for similarity computation along with their selected similarity metrics.
-At least one node property must be specified.
 Accepts a single property key,
 a Map of property keys to metrics,
 or a List of property keys and/or Maps, as above.
