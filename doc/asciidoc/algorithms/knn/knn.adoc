@@ -72,7 +72,7 @@ The similarity measure used in the KNN algorithm depends on the type of the conf
 KNN supports both scalar numeric values and lists of numbers.
 
 
-=== Scalar numeric property
+==== Scalar numeric property
 
 When a property is a scalar number, the similarity is computed as follows:
 
@@ -81,7 +81,7 @@ image::equations/knn-scalar-similarity.svg[title="one divided by one plus the ab
 This gives us a number in the range `(0, 1]`.
 
 
-=== List of integers
+==== List of integers
 
 When a property is a list of integers, similarity can be measured with either the Jaccard similarity or the Overlap coefficient.
 
@@ -97,7 +97,7 @@ Both of these metrics give a score in the range `[0, 1]` and no normalization ne
 Jaccard similarity is used as the default option for comparing lists of integers when the metric is not specified.
 
 
-=== List of floating-point numbers
+==== List of floating-point numbers
 
 When a property is a list of floating-point numbers, there are three alternatives for computing similarity between two nodes.
 
@@ -124,7 +124,7 @@ The result from this formula is a non-negative value, but is not necessarily bou
 Τo bound the number into this range and obtain a similarity score, we return `score = 1 / (1 + distance)`, i.e., we perform the same normalization as in the case of scalar values.
 
 
-=== Multiple properties
+==== Multiple properties
 
 Finally, when multiple properties are specified, the similarity of the two neighbors is the mean of the similarities of the individual properties, i.e. the simple mean of the numbers, each of which is in the range `[0, 1]`, giving a total score also in the `[0, 1]` range.
 
