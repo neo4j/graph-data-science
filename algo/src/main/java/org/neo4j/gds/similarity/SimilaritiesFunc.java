@@ -78,17 +78,20 @@ public class SimilaritiesFunc {
     @UserFunction("gds.alpha.similarity.pearson")
     @Description("RETURN gds.alpha.similarity.pearson(vector1, vector2) - Given two collection vectors, calculate pearson similarity")
     public double pearsonSimilarity(
-        @Name("vector1") Object rawVector1,
-        @Name("vector2") Object rawVector2,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+        @Name("vector1") List<Number> vector1,
+        @Name("vector2") List<Number> vector2
     ) {
-        String listType = config.getOrDefault("vectorType", "numbers").toString();
 
-        if (listType.equalsIgnoreCase("maps")) {
-            return pearsonForMapVectors((List<Map<String, Object>>) rawVector1, (List<Map<String, Object>>) rawVector2);
-        } else {
-            return pearsonForNumberVectors((List<Number>) rawVector1, (List<Number>) rawVector2);
+        int len = validateLength(vector1, vector2);
+
+        double[] weights1 = new double[len];
+        double[] weights2 = new double[len];
+
+        for (int i = 0; i < len; i++) {
+            weights1[i] = getDoubleValue(vector1.get(i));
+            weights2[i] = getDoubleValue(vector2.get(i));
         }
+        return Intersections.pearson(weights1, weights2, len);
     }
 
     @UserFunction("gds.alpha.similarity.euclideanDistance")
@@ -158,20 +161,6 @@ public class SimilaritiesFunc {
         }
 
         return Intersections.pearsonSkip(weights1, weights2, ids.size(), skipValue);
-    }
-
-    private double pearsonForNumberVectors(List<Number> vector1, List<Number> vector2) {
-
-        int len = validateLength(vector1, vector2);
-
-        double[] weights1 = new double[len];
-        double[] weights2 = new double[len];
-
-        for (int i = 0; i < len; i++) {
-            weights1[i] = getDoubleValue(vector1.get(i));
-            weights2[i] = getDoubleValue(vector2.get(i));
-        }
-        return Intersections.pearson(weights1, weights2, len);
     }
 
     @NotNull
