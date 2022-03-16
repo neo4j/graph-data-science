@@ -93,10 +93,16 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
     }
 
     @SuppressWarnings("unused")
-    public static final class WriteResult extends CentralityScore.Stats {
+    public static final class WriteResult {
 
         public final long nodePropertiesWritten;
         public final long postProcessingMillis;
+        public final long nodes;
+        public final long preProcessingMillis;
+        public final long computeMillis;
+        public final long writeMillis;
+        public final String writeProperty;
+        public final Map<String, Object> centralityDistribution;
 
         WriteResult(
             long nodes,
@@ -110,7 +116,12 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
             Map<String, Object> config
         ) {
 
-            super(nodes, preProcessingMillis, computeMillis, writeMillis, writeProperty, centralityDistribution);
+            this.nodes = nodes;
+            this.preProcessingMillis = preProcessingMillis;
+            this.computeMillis = computeMillis;
+            this.writeMillis = writeMillis;
+            this.writeProperty = writeProperty;
+            this.centralityDistribution = centralityDistribution;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.postProcessingMillis = postProcessingMillis;
         }

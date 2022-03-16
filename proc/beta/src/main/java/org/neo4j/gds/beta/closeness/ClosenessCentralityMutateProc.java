@@ -95,10 +95,16 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
     }
 
     @SuppressWarnings("unused")
-    public static final class MutateResult extends CentralityScore.Mutate {
+    public static final class MutateResult {
 
         public final long nodePropertiesWritten;
         public final long postProcessingMillis;
+        public final long nodes;
+        public final long preProcessingMillis;
+        public final long computeMillis;
+        public final long mutateMillis;
+        public final String mutateProperty;
+        public final Map<String, Object> centralityDistribution;
 
         MutateResult(
             long nodes,
@@ -112,7 +118,12 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
             Map<String, Object> config
         ) {
 
-            super(nodes, preProcessingMillis, computeMillis, mutateMillis, mutateProperty, centralityDistribution);
+            this.nodes = nodes;
+            this.preProcessingMillis = preProcessingMillis;
+            this.computeMillis = computeMillis;
+            this.mutateMillis = mutateMillis;
+            this.mutateProperty = mutateProperty;
+            this.centralityDistribution = centralityDistribution;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.postProcessingMillis = postProcessingMillis;
         }
