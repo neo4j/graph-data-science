@@ -1,5 +1,5 @@
 [[algorithms-ml-training-methods]]
-== Training methods
+= Training methods
 
 [abstract]
 --
