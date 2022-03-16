@@ -140,6 +140,52 @@ Finally, when multiple properties are specified, the similarity of the two neigh
 The validity of this mean is highly context dependent, so take care when applying it to your data domain.
 ====
 
+[[algorithms-knn-node-properties-configuration]]
+==== Node properties and metrics configuration
+
+The node properties and metrics to use are specified with the `nodeProperties` configuration parameter.
+At least one node property must be specified.
+
+This parameter accepts one of:
+
+.nodeProperties syntax
+[cols="1,2a"]
+|===
+| a single property name
+| `nodeProperties: 'embedding'`
+| a Map of property keys to metrics
+|
+----
+nodeProperties: {
+    embedding: 'COSINE',
+    age: 'DEFAULT',
+    lotteryNumbers: 'OVERLAP'
+}
+----
+| list of Strings and/or Maps
+|
+----
+nodeProperties: [
+    {embedding: 'COSINE'},
+    'age',
+    {lotteryNumbers: 'OVERLAP'}
+]
+----
+|===
+
+The available metrics by type are:
+
+.Available metrics by type
+[options=header,cols="1,1"]
+|===
+| type            | metric
+| List of Integer | `JACCARD`, `OVERLAP`
+| List of Float   | `COSINE`, `EUCLIDEAN`, `PEARSON`
+|===
+
+For any property type, `DEFAULT` can also be specified to use the default metric.
+For scalar numbers, there is only the default metric.
+
 
 [[algorithms-knn-introduction-sampling]]
 === Initial neighbor sampling
