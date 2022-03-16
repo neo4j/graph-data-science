@@ -91,7 +91,7 @@ public final class CypherAggregation extends BaseProc {
         private final String username;
 
         // #result() is called twice, we cache the result of the first call to return it again in the second invocation
-        private @Nullable Map<String, Object> result;
+        private @Nullable AggregationResult result;
 
         private @Nullable String graphName;
         private @Nullable LazyIdMapBuilder idMapBuilder;
@@ -350,11 +350,14 @@ public final class CypherAggregation extends BaseProc {
             return propertyValues;
         }
 
-        // TODO: generate some code for the ReturnType annotation to convert from an instance of its type
-        //  to a Map<String, Object> (similar to toMap in configuration)
         @UserAggregationResult
         @ReturnType(AggregationResult.class)
         public @Nullable Map<String, Object> result() {
+            AggregationResult result = buildGraph();
+            return result == null ? null : result.toMap();
+        }
+
+        public @Nullable AggregationResult buildGraph() {
 
             var graphName = this.graphName;
 
@@ -389,12 +392,12 @@ public final class CypherAggregation extends BaseProc {
 
             var projectMillis = this.progressTimer.stop().getDuration();
 
-            this.result = Map.of(
-                "graphName", graphName,
-                "nodeCount", graphStore.nodeCount(),
-                "relationshipCount", graphStore.relationshipCount(),
-                "projectMillis", projectMillis
-            );
+            this.result = AggregationResultImpl.builder()
+                .graphName(graphName)
+                .nodeCount(graphStore.nodeCount())
+                .relationshipCount(graphStore.relationshipCount())
+                .projectMillis(projectMillis)
+                .build();
 
             return this.result;
         }
@@ -499,11 +502,22 @@ public final class CypherAggregation extends BaseProc {
         }
     }
 
-    public static final class AggregationResult {
-        public String graphName;
-        public long nodeCount;
-        public long relationshipCount;
-        public long projectMillis;
+    @Configuration
+    public interface AggregationResult {
+        @ReturnType.Include
+        String graphName();
+
+        @ReturnType.Include
+        long nodeCount();
+
+        @ReturnType.Include
+        long relationshipCount();
+
+        @ReturnType.Include
+        long projectMillis();
+
+        @Configuration.ToMap
+        Map<String, Object> toMap();
     }
 }
 

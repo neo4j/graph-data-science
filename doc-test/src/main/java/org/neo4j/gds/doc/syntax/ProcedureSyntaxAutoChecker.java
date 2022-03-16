@@ -25,14 +25,19 @@ import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.ast.Table;
 import org.asciidoctor.extension.Postprocessor;
 import org.assertj.core.api.SoftAssertions;
+import org.neo4j.gds.annotation.ReturnType;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -176,15 +181,41 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
             .collect(Collectors.toList());
     }
 
-    private Collection<String> extractExpectedResultFields(Class<?> resultClass) {
-        return Arrays
-            .stream(resultClass.getFields())
-            // Deprecated fields shouldn't be in the documentation
-            // Ignore static final fields
-            .filter(field -> field.getAnnotation(Deprecated.class) == null
-                             && !(Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())))
-            .map(Field::getName)
+    private static Collection<String> extractExpectedResultFields(Class<?> resultClass) {
+        return findResultFields(resultClass)
+            .map(Member::getName)
             .collect(Collectors.toList());
     }
 
+    private static Stream<? extends Member> findResultFields(Class<?> resultClass) {
+        return resultClass.isInterface()
+            ? resultFieldsFromInterfaceMethods(resultClass)
+            : resultFieldsFromClassFields(resultClass);
+    }
+
+    private static Stream<Method> resultFieldsFromInterfaceMethods(Class<?> resultClass) {
+        return Arrays
+            .stream(resultClass.getDeclaredMethods())
+            .filter(ProcedureSyntaxAutoChecker::includeMethodInResult);
+    }
+
+    private static Stream<Field> resultFieldsFromClassFields(Class<?> resultClass) {
+        return Arrays
+            .stream(resultClass.getFields())
+            .filter(ProcedureSyntaxAutoChecker::includeFieldInResult);
+    }
+
+    private static boolean includeMethodInResult(AnnotatedElement method) {
+        return method.isAnnotationPresent(ReturnType.Include.class);
+    }
+
+    private static boolean includeFieldInResult(Field field) {
+        // Deprecated fields shouldn't be in the documentation
+        if (field.isAnnotationPresent(Deprecated.class)) {
+            return false;
+        }
+
+        // Ignore static fields
+        return !Modifier.isStatic(field.getModifiers());
+    }
 }

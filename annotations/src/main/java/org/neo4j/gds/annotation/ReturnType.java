@@ -31,4 +31,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ReturnType {
     Class<?> value();
+
+    /**
+     * Annotated methods are included in the result definition.
+     */
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface Include {
+    }
 }
