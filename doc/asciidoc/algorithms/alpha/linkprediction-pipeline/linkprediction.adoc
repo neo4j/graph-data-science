@@ -384,11 +384,13 @@ We now reconfigured the splitting of the pipeline, which will be applied during 
 --
 
 [[algorithms-ml-linkprediction-configure-model-parameters]]
-== Configuring the model parameter space
+== Adding model candidates
 
 A pipeline contains a collection of configurations for model candidates which is initially empty.
 This collection is called the _parameter space_.
-Prior to training one or several model configurations can and should be added to the _parameter space_ with the `gds.beta.pipeline.linkPrediction.addLogisticRegression` and `gds.alpha.pipeline.linkPrediction.addRandomForest` modes.
+Prior to training one or several model configurations can and should be added to the _parameter space_ with the `gds.beta.pipeline.linkPrediction.addLogisticRegression` and `gds.alpha.pipeline.linkPrediction.addRandomForest` procedures.
+For information about the available training methods in GDS, logistic regression and random forest, see <<algorithms-ml-training-methods>>.
+
 In <<algorithms-ml-nodeclassification-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
 
 The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
@@ -508,6 +510,12 @@ RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.Logistic
 
 The `parameterSpace` in the pipeline now contains the three different model candidates, expanded with the default values.
 Each specified model candidate will be tried out during the model selection in <<algorithms-ml-linkprediction-pipelines-train, training>>.
+
+[NOTE]
+====
+These are somewhat naive examples of how to add and configure model candidates.
+Please see <<algorithms-ml-training-methods>> for more information on how to tune the configuration parameters of each method.
+====
 
 include::training.adoc[]
 
