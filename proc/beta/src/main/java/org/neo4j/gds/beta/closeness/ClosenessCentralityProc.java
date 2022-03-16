@@ -21,7 +21,6 @@ package org.neo4j.gds.beta.closeness;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
@@ -51,8 +50,8 @@ public final class ClosenessCentralityProc {
         ComputationResult<ClosenessCentrality, ClosenessCentralityResult, CONFIG> computeResult
     ) {
         if (computeResult.result() != null) {
-            HugeDoubleArray centrality = computeResult.result().centralities();
-            procResultBuilder.withCentralityFunction(centrality::get);
+            var centralities = computeResult.result().centralities();
+            procResultBuilder.withCentralityFunction(centralities::get);
         }
         return procResultBuilder;
     }

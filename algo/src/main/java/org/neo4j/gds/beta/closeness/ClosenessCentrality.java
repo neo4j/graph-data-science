@@ -21,12 +21,15 @@ package org.neo4j.gds.beta.closeness;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.PagedAtomicIntegerArray;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.BfsConsumer;
 import org.neo4j.gds.msbfs.MultiSourceBFS;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -99,17 +102,28 @@ public class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
         progressTracker.endSubTask();
     }
 
-    private HugeDoubleArray computeCloseness() {
+    private HugeAtomicDoubleArray computeCloseness() {
         progressTracker.beginSubTask();
-        var cc = HugeDoubleArray.newArray(nodeCount);
-        for (int i = 0; i < nodeCount; i++) {
-            cc.set(i, centrality(
-                farness.get(i),
-                component.get(i),
-                nodeCount,
-                wassermanFaust
-            ));
-        }
+
+        var cc = HugeAtomicDoubleArray.newArray(nodeCount);
+
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            graph.nodeCount(),
+            partition -> (Runnable) () -> {
+                partition.consume(nodeId -> cc.set(nodeId, centrality(
+                    farness.get(nodeId),
+                    component.get(nodeId),
+                    nodeCount,
+                    wassermanFaust
+                )));
+                progressTracker.logProgress(partition.nodeCount());
+            },
+            Optional.empty()
+        );
+
+        ParallelUtil.run(tasks, executorService);
+
         progressTracker.endSubTask();
         return cc;
     }
