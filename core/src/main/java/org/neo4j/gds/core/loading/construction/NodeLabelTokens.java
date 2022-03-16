@@ -49,7 +49,7 @@ public final class NodeLabelTokens {
         }
 
         if (nodeLabels instanceof NodeLabel[]) {
-            return ofNodeLabel((NodeLabel[]) nodeLabels);
+            return ofNodeLabels((NodeLabel[]) nodeLabels);
         }
 
         if (nodeLabels instanceof String[]) {
@@ -72,7 +72,7 @@ public final class NodeLabelTokens {
         return Null.INSTANCE;
     }
 
-    static @NotNull NodeLabelToken ofNodeLabel(NodeLabel... nodeLabels) {
+    public static @NotNull NodeLabelToken ofNodeLabels(NodeLabel... nodeLabels) {
         return new Array<>(nodeLabels, Function.identity());
     }
 

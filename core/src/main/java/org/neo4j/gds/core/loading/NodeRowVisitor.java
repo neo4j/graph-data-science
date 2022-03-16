@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.core.loading.construction.NodeLabelToken;
+import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.Result;
@@ -38,7 +39,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     private static final String ID_COLUMN = "id";
-    private static final NodeLabel[] ALL_NODES_LABEL_ARRAY = new NodeLabel[]{ ALL_NODES };
+    private static final NodeLabelToken ALL_NODES_LABEL = NodeLabelTokens.of(ALL_NODES);
 
     static final String LABELS_COLUMN = "labels";
     static final Set<String> RESERVED_COLUMNS = Set.of(ID_COLUMN, LABELS_COLUMN);
@@ -96,7 +97,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         return Optional.ofNullable(this.error);
     }
 
-    private NodeLabel[] getLabels(Result.ResultRow row, long neoId) {
+    private NodeLabelToken getLabels(Result.ResultRow row, long neoId) {
         if (hasLabelInformation) {
             Object labelsObject = row.get(LABELS_COLUMN);
             if (!(labelsObject instanceof List)) {
@@ -107,8 +108,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 ));
             }
 
-            List<String> labels = (List<String>) labelsObject;
-
+            var labels = NodeLabelTokens.of(labelsObject);
             if (labels.isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Node(%d) does not specify a label, but label column '%s' was specified.",
@@ -117,9 +117,9 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 ));
             }
 
-            return nodeLabelArray(labels);
+            return labels;
         } else {
-            return ALL_NODES_LABEL_ARRAY;
+            return ALL_NODES_LABEL;
         }
     }
 
@@ -143,14 +143,4 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     long maxId() {
         return maxNeoId;
     }
-
-    private static NodeLabel[] nodeLabelArray(List<String> labels) {
-        NodeLabel[] nodeLabels = new NodeLabel[labels.size()];
-        for (int i = 0; i < labels.size(); i++) {
-            String label = labels.get(i);
-            nodeLabels[i] = NodeLabel.of(label);
-        }
-        return nodeLabels;
-    }
-
 }

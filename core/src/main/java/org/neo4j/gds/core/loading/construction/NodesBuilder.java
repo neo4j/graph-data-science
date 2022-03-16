@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.ObjectIntMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
@@ -156,20 +157,30 @@ public final class NodesBuilder {
         }
     }
 
-    public void addNode(long originalId, NodeLabel... nodeLabels) {
-        this.threadLocalBuilder.get().addNode(originalId, NodeLabelTokens.ofNodeLabel(nodeLabels));
+    public void addNode(long originalId) {
+        this.addNode(originalId, NodeLabelTokens.empty());
     }
 
     public void addNode(long originalId, NodeLabelToken nodeLabels) {
         this.threadLocalBuilder.get().addNode(originalId, nodeLabels);
     }
 
-    public void addNode(long originalId, Map<String, Value> properties, NodeLabel... nodeLabels) {
-        this.threadLocalBuilder.get().addNode(originalId, properties, NodeLabelTokens.ofNodeLabel(nodeLabels));
+    @TestOnly
+    public void addNode(long originalId, NodeLabel... nodeLabels) {
+        this.addNode(originalId, NodeLabelTokens.ofNodeLabels(nodeLabels));
+    }
+
+    public void addNode(long originalId, Map<String, Value> properties) {
+        this.addNode(originalId, properties, NodeLabelTokens.empty());
     }
 
     public void addNode(long originalId, Map<String, Value> properties, NodeLabelToken nodeLabels) {
         this.threadLocalBuilder.get().addNode(originalId, properties, nodeLabels);
+    }
+
+    @TestOnly
+    public void addNode(long originalId, Map<String, Value> properties, NodeLabel... nodeLabels) {
+        this.addNode(originalId, properties, NodeLabelTokens.ofNodeLabels(nodeLabels));
     }
 
     public void flush() {

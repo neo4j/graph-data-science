@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.beta.generator;
 
-import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 
 @FunctionalInterface
 public interface NodeLabelProducer {
-    NodeLabel[] labels(long nodeId);
+    NodeLabelToken labels(long nodeId);
 }
