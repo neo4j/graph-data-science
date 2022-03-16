@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.beta.closeness.ClosenessCentralityStreamProc;
+import org.neo4j.gds.beta.closeness.ClosenessCentralityWriteProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -68,7 +70,7 @@ public class ClosenessCentralityDocTest extends BaseProcTest {
     @Test
     void shouldStream() {
         String query =
-            "CALL gds.alpha.closeness.stream('graph', {})" +
+            "CALL gds.beta.closeness.stream('graph', {})" +
             " YIELD nodeId, centrality" +
             " RETURN gds.util.asNode(nodeId).name AS user, centrality" +
             " ORDER BY centrality DESC";
@@ -90,7 +92,7 @@ public class ClosenessCentralityDocTest extends BaseProcTest {
     @Test
     void shouldWrite() {
         String query =
-            "CALL gds.alpha.closeness.write('graph', {" +
+            "CALL gds.beta.closeness.write('graph', {" +
             "  writeProperty: 'centrality'" +
             "}) YIELD nodes, writeProperty";
 

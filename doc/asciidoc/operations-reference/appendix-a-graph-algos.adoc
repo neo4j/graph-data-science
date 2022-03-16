@@ -186,6 +186,10 @@ include::../algorithms/algorithm-tiers.adoc[]
 [opts=header,cols="1, 1"]
 |===
 |Algorithm name | Operation
+.3+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
+| `gds.beta.closeness.mutate`
+| `gds.beta.closeness.stream`
+| `gds.beta.closeness.write`
 .8+<.^|<<algorithms-embeddings-graph-sage, GraphSAGE>>
 | `gds.beta.graphSage.stream`
 | `gds.beta.graphSage.stream.estimate`
@@ -238,10 +242,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.maxkcut.mutate.estimate`
 | `gds.alpha.maxkcut.stream`
 | `gds.alpha.maxkcut.stream.estimate`
-.5+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
-| `gds.alpha.closeness.mutate`
-| `gds.alpha.closeness.stream`
-| `gds.alpha.closeness.write`
+.2+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
 | `gds.alpha.closeness.harmonic.stream`
 | `gds.alpha.closeness.harmonic.write`
 .1+<.^|<<algorithms-collapse-path, Collapse Path>>

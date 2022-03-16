@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality;
+package org.neo4j.gds.beta.closeness;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
@@ -26,9 +26,6 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.impl.closeness.ClosenessCentralityConfig;
-import org.neo4j.gds.impl.closeness.ClosenessCentralityFactory;
-import org.neo4j.gds.impl.closeness.ClosenessCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 import java.util.List;

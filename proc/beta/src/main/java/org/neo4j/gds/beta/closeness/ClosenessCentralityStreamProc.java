@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality;
+package org.neo4j.gds.beta.closeness;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
@@ -26,8 +26,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.impl.closeness.ClosenessCentralityStreamConfig;
-import org.neo4j.gds.impl.closeness.ClosenessCentrality;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,11 +33,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.centrality.ClosenessCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.beta.closeness.ClosenessCentralityProc.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.closeness.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.beta.closeness.stream", description = DESCRIPTION, executionMode = STREAM)
 public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentrality.Result, ClosenessCentralityStreamConfig> {
 
     @Override
@@ -47,7 +45,7 @@ public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentralit
         return "ClosenessCentrality";
     }
 
-    @Procedure(value = "gds.alpha.closeness.stream", mode = READ)
+    @Procedure(value = "gds.beta.closeness.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ClosenessCentrality.Result> stream(
         @Name(value = "graphName") String graphName,

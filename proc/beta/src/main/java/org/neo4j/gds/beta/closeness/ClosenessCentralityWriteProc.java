@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality;
+package org.neo4j.gds.beta.closeness;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.GraphAlgorithmFactory;
@@ -28,8 +28,6 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.impl.closeness.ClosenessCentralityWriteConfig;
-import org.neo4j.gds.impl.closeness.ClosenessCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -40,11 +38,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.centrality.ClosenessCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.beta.closeness.ClosenessCentralityProc.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.alpha.closeness.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.beta.closeness.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityWriteProc.WriteResult, ClosenessCentralityWriteConfig> {
 
     @Override
@@ -52,7 +50,7 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
         return "ClosenessCentrality";
     }
 
-    @Procedure(value = "gds.alpha.closeness.write", mode = WRITE)
+    @Procedure(value = "gds.beta.closeness.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
@@ -95,10 +93,16 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
     }
 
     @SuppressWarnings("unused")
-    public static final class WriteResult extends CentralityScore.Stats {
+    public static final class WriteResult {
 
         public final long nodePropertiesWritten;
         public final long postProcessingMillis;
+        public final long nodes;
+        public final long preProcessingMillis;
+        public final long computeMillis;
+        public final long writeMillis;
+        public final String writeProperty;
+        public final Map<String, Object> centralityDistribution;
 
         WriteResult(
             long nodes,
@@ -112,7 +116,12 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
             Map<String, Object> config
         ) {
 
-            super(nodes, preProcessingMillis, computeMillis, writeMillis, writeProperty, centralityDistribution);
+            this.nodes = nodes;
+            this.preProcessingMillis = preProcessingMillis;
+            this.computeMillis = computeMillis;
+            this.writeMillis = writeMillis;
+            this.writeProperty = writeProperty;
+            this.centralityDistribution = centralityDistribution;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.postProcessingMillis = postProcessingMillis;
         }

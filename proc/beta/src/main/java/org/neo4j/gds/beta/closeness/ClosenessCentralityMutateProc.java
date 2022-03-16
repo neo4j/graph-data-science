@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality;
+package org.neo4j.gds.beta.closeness;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.GraphAlgorithmFactory;
@@ -26,9 +26,8 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.impl.closeness.ClosenessCentralityMutateConfig;
-import org.neo4j.gds.impl.closeness.ClosenessCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -39,8 +38,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.beta.closeness.ClosenessCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.beta.closeness.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityMutateProc.MutateResult, ClosenessCentralityMutateConfig> {
 
     @Override
@@ -48,7 +50,7 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
         return "ClosenessCentrality";
     }
 
-    @Procedure(value = "gds.alpha.closeness.mutate", mode = READ)
+    @Procedure(value = "gds.beta.closeness.mutate", mode = READ)
     @Description(ClosenessCentralityProc.DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -93,10 +95,16 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
     }
 
     @SuppressWarnings("unused")
-    public static final class MutateResult extends CentralityScore.Mutate {
+    public static final class MutateResult {
 
         public final long nodePropertiesWritten;
         public final long postProcessingMillis;
+        public final long nodes;
+        public final long preProcessingMillis;
+        public final long computeMillis;
+        public final long mutateMillis;
+        public final String mutateProperty;
+        public final Map<String, Object> centralityDistribution;
 
         MutateResult(
             long nodes,
@@ -110,7 +118,12 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
             Map<String, Object> config
         ) {
 
-            super(nodes, preProcessingMillis, computeMillis, mutateMillis, mutateProperty, centralityDistribution);
+            this.nodes = nodes;
+            this.preProcessingMillis = preProcessingMillis;
+            this.computeMillis = computeMillis;
+            this.mutateMillis = mutateMillis;
+            this.mutateProperty = mutateProperty;
+            this.centralityDistribution = centralityDistribution;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.postProcessingMillis = postProcessingMillis;
         }
