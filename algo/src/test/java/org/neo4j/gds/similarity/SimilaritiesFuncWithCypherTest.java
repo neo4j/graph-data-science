@@ -38,24 +38,24 @@ class SimilaritiesFuncWithCypherTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
 
-        "  CREATE  "+
-        "  (java:Skill {name: 'Java'}), " +
-        "  (neo4j:Skill {name: 'Neo4j'}), " +
-        "  (nodejs:Skill {name: 'NodeJS'}), " +
-        "  (scala:Skill {name: 'Scala'}), " +
-        "  (jim:Employee {name: 'Jim'}), " +
-        "  (bob:Employee {name: 'Bob'}), " +
-        "  (role:Role {name: 'Role 1-Analytics Manager'}), " +
-        " " +
-        "  (role)-[:REQUIRES_SKILL {proficiency:8.54}]->(java), " +
-        "  (role)-[:REQUIRES_SKILL {proficiency:4.3}]->(scala), " +
-        "  (role)-[:REQUIRES_SKILL {proficiency:9.75}]->(neo4j), " +
-        " " +
-        "  (bob)-[:HAS_SKILL {proficiency:10}]->(java), " +
-        "  (bob)-[:HAS_SKILL {proficiency:7.5}]->(neo4j), " +
-        "  (bob)-[:HAS_SKILL]->(scala), " +
-        "  (jim)-[:HAS_SKILL {proficiency:8.25}]->(java), " +
-        "  (jim)-[:HAS_SKILL {proficiency:7.1}]->(scala)";
+        " CREATE"+
+        " (java:Skill {name: 'Java'})," +
+        " (neo4j:Skill {name: 'Neo4j'})," +
+        " (nodejs:Skill {name: 'NodeJS'})," +
+        " (scala:Skill {name: 'Scala'})," +
+        " (jim:Employee {name: 'Jim'})," +
+        " (bob:Employee {name: 'Bob'})," +
+        " (role:Role {name: 'Role 1-Analytics Manager'})," +
+
+        " (role)-[:REQUIRES_SKILL {proficiency :8.54}]->(java)," +
+        " (role)-[:REQUIRES_SKILL {proficiency :4.3}]->(scala)," +
+        " (role)-[:REQUIRES_SKILL {proficiency :9.75}]->(neo4j)," +
+
+        " (bob)-[:HAS_SKILL {proficiency: 10}]->(java)," +
+        " (bob)-[:HAS_SKILL {proficiency: 7.5}]->(neo4j)," +
+        " (bob)-[:HAS_SKILL]->(scala)," +
+        " (jim)-[:HAS_SKILL {proficiency: 8.25}]->(java)," +
+        " (jim)-[:HAS_SKILL {proficiency: 7.1}]->(scala)";
 
 
 
@@ -282,5 +282,3 @@ class SimilaritiesFuncWithCypherTest extends BaseProcTest {
     }
 
 }
-
-
