@@ -40,15 +40,19 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.decisiontree.TreeNode;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.randomforest.ImmutableRandomForestData;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.ArrayList;
@@ -132,6 +136,51 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             };
             var bias = new double[]{0.0, 0.0};
             var modelData = NodeClassificationPipelinePredictProcTestUtil.createModeldata(weights, bias);
+
+            var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
+                pipeline,
+                config,
+                caller.executionContext(),
+                graphStore,
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER,
+                modelData
+            );
+
+            var predictionResult = pipelineExecutor.compute();
+
+            assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.nodeCount());
+            assertThat(predictionResult.predictedProbabilities()).isPresent();
+            assertThat(predictionResult.predictedProbabilities().orElseThrow().size()).isEqualTo(graphStore.nodeCount());
+
+            assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
+            assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
+        });
+    }
+
+    @Test
+    void shouldPredictWithRandomForest() {
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var config = new NodeClassificationPredictPipelineBaseConfigImpl(
+                "",
+                CypherMapWrapper.empty()
+                    .withEntry("modelName", "model")
+                    .withEntry("includePredictedProbabilities",true)
+                    .withEntry("graphName", GRAPH_NAME)
+            );
+
+            var pipeline = new NodeClassificationPipeline();
+            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
+            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
+            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
+
+            var root = new TreeNode<>(0);
+            var modelData = ImmutableRandomForestData
+                .builder()
+                .addDecisionTree(new DecisionTreePredict<>(root))
+                .featureDimension(3)
+                .classIdMap(LinkPredictionTrain.makeClassIdMap())
+                .build();
 
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
                 pipeline,

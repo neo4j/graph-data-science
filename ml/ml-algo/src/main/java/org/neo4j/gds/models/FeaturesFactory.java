@@ -23,19 +23,16 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
-import org.neo4j.gds.ml.core.features.FeatureExtractor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public final class FeaturesFactory {
     private FeaturesFactory() {}
 
     public static Features extractLazyFeatures(Graph graph, List<String> featureProperties) {
-
-        var featureExtractors = new ArrayList<FeatureExtractor>();
-        featureExtractors.addAll(FeatureExtraction.propertyExtractors(graph, featureProperties));
+        var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
         var numberOfFeatures = FeatureExtraction.featureCount(featureExtractors);
+
         Features features = new Features() {
             @Override
             public long size() {
@@ -66,6 +63,15 @@ public final class FeaturesFactory {
         };
 
         return features;
+    }
+
+    public static Features extractEagerFeatures(Graph graph, List<String> featureProperties) {
+        var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
+        var featuresArray = HugeObjectArray.newArray(double[].class, graph.nodeCount());
+
+        FeatureExtraction.extract(graph, featureExtractors, featuresArray);
+
+        return wrap(featuresArray);
     }
 
     public static Features wrap(HugeObjectArray<double[]> features) {
@@ -110,4 +116,5 @@ public final class FeaturesFactory {
             }
         };
     }
+
 }

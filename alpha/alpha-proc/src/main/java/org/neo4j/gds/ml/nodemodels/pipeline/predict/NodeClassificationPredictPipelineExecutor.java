@@ -33,8 +33,8 @@ import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.models.ClassifierFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +46,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     NodeClassificationPredict.NodeClassificationResult
     > {
     private static final int MIN_BATCH_SIZE = 100;
-    private final LogisticRegressionData modelData;
+    private final Classifier.ClassifierData modelData;
 
     public NodeClassificationPredictPipelineExecutor(
         NodeClassificationPipeline pipeline,
@@ -55,20 +55,20 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         GraphStore graphStore,
         String graphName,
         ProgressTracker progressTracker,
-        LogisticRegressionData modelData
+        Classifier.ClassifierData modelData
     ) {
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
         this.modelData = modelData;
     }
 
     public static MemoryEstimation estimate(
-        Model<LogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
+        Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
         NodeClassificationPredictPipelineBaseConfig configuration,
         ModelCatalog modelCatalog
     ) {
         var pipeline = model.customInfo().trainingPipeline();
         var classCount = model.customInfo().classes().size();
-        var featureCount = model.data().weights().data().cols();
+        var featureCount = model.data().featureDimension();
 
         MemoryEstimation nodePropertyStepEstimation = PipelineExecutor.estimateNodePropertySteps(
             modelCatalog,
@@ -110,7 +110,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
             Optional.empty()
         );
         var innerAlgo = new NodeClassificationPredict(
-            new LogisticRegressionClassifier(modelData),
+            ClassifierFactory.create(modelData),
             graph,
             MIN_BATCH_SIZE,
             config.concurrency(),

@@ -72,13 +72,11 @@ public class GiniIndex implements DecisionTreeLoss {
             groupClassCounts[expectedLabel]++;
         }
 
-        double score = 0.0;
+        long score = 0;
         for (var count : groupClassCounts) {
-            score += Math.pow(count, 2);
+            score += count * count;
         }
 
-        score /= groupSize;
-
-        return groupSize - score;
+        return groupSize - (double) score / groupSize;
     }
 }

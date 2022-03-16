@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.models.TrainingMethod;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.randomforest.RandomForestTrainConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -37,17 +38,34 @@ import static org.neo4j.procedure.Mode.READ;
 public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.addLogisticRegression", mode = READ)
-    @Description("Configures the parameters of the node classification train pipeline.")
-    public Stream<PipelineInfoResult> configureParams(
+    @Description("Add a logistic regression configuration to the parameter space of the node classification train pipeline.")
+    public Stream<PipelineInfoResult> addLogisticRegression(
         @Name("pipelineName") String pipelineName,
-        @Name(value = "parameterSpace", defaultValue = "{}") Map<String, Object> config
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationPipeline.class);
 
         var lrConfig = LogisticRegressionTrainConfig.of(config);
+
         validateConfig(CypherMapWrapper.create(config), lrConfig.configKeys());
 
         pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, lrConfig);
+
+        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+    }
+
+    @Procedure(name = "gds.alpha.pipeline.nodeClassification.addRandomForest", mode = READ)
+    @Description("Add a random forest configuration to the parameter space of the node classification train pipeline.")
+    public Stream<PipelineInfoResult> addRandomForest(
+        @Name("pipelineName") String pipelineName,
+        @Name(value = "config") Map<String, Object> randomForestConfig
+    ) {
+        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationPipeline.class);
+
+        var trainConfig = RandomForestTrainConfig.of(randomForestConfig);
+        validateConfig(CypherMapWrapper.create(randomForestConfig), trainConfig.configKeys());
+
+        pipeline.addTrainerConfig(TrainingMethod.RandomForest, trainConfig);
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }

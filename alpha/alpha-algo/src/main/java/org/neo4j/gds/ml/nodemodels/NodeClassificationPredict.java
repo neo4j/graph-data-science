@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
+import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.FeaturesFactory;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 
@@ -41,7 +42,7 @@ import static org.neo4j.gds.ml.core.batch.BatchTransformer.IDENTITY;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict.NodeClassificationResult> {
 
-    private final LogisticRegressionClassifier classifier;
+    private final Classifier classifier;
     private final Graph graph;
     private final int batchSize;
     private final int concurrency;
@@ -49,7 +50,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
     private final List<String> featureProperties;
 
     public NodeClassificationPredict(
-        LogisticRegressionClassifier classifier,
+        Classifier classifier,
         Graph graph,
         int batchSize,
         int concurrency,

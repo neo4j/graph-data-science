@@ -45,6 +45,7 @@ import org.neo4j.gds.models.TrainingMethod;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.models.randomforest.RandomForestTrainConfigImpl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -111,8 +112,16 @@ class NodeClassificationTrainTest {
             .maxEpochs(10000)
             .tolerance(1e-5)
             .build();
-
         pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, expectedWinner);
+
+        // Should NOT be the winning model, so give it bad hyperparams.
+        pipeline.addTrainerConfig(TrainingMethod.RandomForest, RandomForestTrainConfigImpl.builder()
+            .minSplitSize(2)
+            .maxDepth(1)
+            .numberOfDecisionTrees(1)
+            .maxFeaturesRatio(0.1)
+            .build()
+        );
 
         var config = createConfig("model", metricSpecification, 1L);
 
@@ -129,11 +138,13 @@ class NodeClassificationTrainTest {
         var customInfo = model.customInfo();
         List<ModelStats> validationScores = result.modelSelectionStatistics().validationStats().get(metric);
 
-        assertThat(validationScores).hasSize(2);
+        assertThat(validationScores).hasSize(3);
 
         double model1Score = validationScores.get(0).avg();
         double model2Score = validationScores.get(1).avg();
+        double model3Score = validationScores.get(2).avg();
         assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));
+        assertThat(model1Score).isNotCloseTo(model3Score, Percentage.withPercentage(0.2));
 
         var actualWinnerParams = customInfo.bestParameters();
         assertThat(actualWinnerParams).isEqualTo(expectedWinner);
