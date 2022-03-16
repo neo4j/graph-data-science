@@ -97,34 +97,6 @@ class EmptyGraphProcTest extends BaseProcTest {
     }
 
     @Test
-    void testClosenessCentralityStream() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.beta.closeness")
-            .streamMode()
-            .yields();
-        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
-    }
-
-    @Test
-    void testClosenessCentralityWrite() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.beta.closeness")
-            .writeMode()
-            .addParameter("writeProperty", "irrelevant")
-            .yields();
-        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
-    }
-
-    @Test
-    void testHarmonicCentralityStream() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.closeness.harmonic")
-            .streamMode()
-            .yields();
-        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
-    }
-
-    @Test
     void testHarmonicCentralityWrite() {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")
