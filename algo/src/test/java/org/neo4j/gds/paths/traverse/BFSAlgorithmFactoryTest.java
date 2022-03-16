@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BFSAlgorithmFactoryTest {
 
     @ParameterizedTest
-    @CsvSource({"10_000,100_000,402_988,402_988,482972", "100_000,1_000_000,4_026_890,4_026_890,4_826_874"})
+    @CsvSource({"10_000,100_000,402_988,402_988,482_972", "100_000,1_000_000,4_026_890,4_026_890,4_826_874"})
     void testMemoryEstimation(
         long nodeCount,
         long relationshipCount,

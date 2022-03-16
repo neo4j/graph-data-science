@@ -195,7 +195,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
             delta
         );
         int bfsTaskListSize = bfsTaskList.size();
-        long currentDepth=0;
+        long currentDepth = 0;
         while (running()) {
             if (currentDepth == maximumDepth) {
                 break;
