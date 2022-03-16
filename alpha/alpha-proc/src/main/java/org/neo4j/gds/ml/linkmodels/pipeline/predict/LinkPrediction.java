@@ -28,6 +28,7 @@ import org.neo4j.gds.models.Classifier;
 
 public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
 
+    static final int MIN_NODE_BATCH_SIZE = 10;
     private final Classifier classifier;
     private final LinkFeatureExtractor linkFeatureExtractor;
     private final Graph graph;
