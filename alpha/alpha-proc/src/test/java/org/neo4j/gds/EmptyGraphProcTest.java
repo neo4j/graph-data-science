@@ -99,7 +99,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testClosenessCentralityStream() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.closeness")
+            .algo("gds.beta.closeness")
             .streamMode()
             .yields();
         runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
@@ -108,7 +108,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testClosenessCentralityWrite() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.closeness")
+            .algo("gds.beta.closeness")
             .writeMode()
             .addParameter("writeProperty", "irrelevant")
             .yields();

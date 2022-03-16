@@ -42,7 +42,7 @@ import static org.neo4j.gds.beta.closeness.ClosenessCentralityProc.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.alpha.closeness.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.beta.closeness.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityWriteProc.WriteResult, ClosenessCentralityWriteConfig> {
 
     @Override
@@ -50,7 +50,7 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
         return "ClosenessCentrality";
     }
 
-    @Procedure(value = "gds.alpha.closeness.write", mode = WRITE)
+    @Procedure(value = "gds.beta.closeness.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,

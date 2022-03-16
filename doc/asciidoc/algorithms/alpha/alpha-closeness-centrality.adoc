@@ -84,7 +84,7 @@ In practice, a variation on the original formula is used so that we don't run in
 .The following will run the algorithm and mutate the in-memory graph.
 [source,cypher,role=noplay]
 ----
-CALL gds.alpha.closeness.mutate(
+CALL gds.beta.closeness.mutate(
   graphName: string,
   configuration: map
 )
@@ -122,7 +122,7 @@ Also provides the default value for 'readConcurrency' and 'mutateConcurrency'.
 .The following will run the algorithm and write back results:
 [source,cypher,role=noplay]
 ----
-CALL gds.alpha.closeness.write(
+CALL gds.beta.closeness.write(
   graphName: string,
   configuration: map
 )
@@ -160,7 +160,7 @@ Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 .The following will run the algorithm and stream results:
 [source,cypher,role=noplay]
 ----
-CALL gds.alpha.closeness.stream(
+CALL gds.beta.closeness.stream(
   graphName: string,
   configuration: map
 )
@@ -217,7 +217,7 @@ CALL gds.graph.project('graph', 'Node', 'LINK')
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.closeness.stream('graph', {})
+CALL gds.beta.closeness.stream('graph', {})
 YIELD nodeId, centrality
 RETURN gds.util.asNode(nodeId).name AS user, centrality
 ORDER BY centrality DESC
@@ -245,7 +245,7 @@ Any node that has a direct connection to all other nodes would score 1.
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.closeness.write('graph', {
+CALL gds.beta.closeness.write('graph', {
   writeProperty: 'centrality'
 }) YIELD nodes, writeProperty
 ----

@@ -26,6 +26,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -37,8 +38,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.beta.closeness.ClosenessCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
+@GdsCallable(name = "gds.beta.closeness.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityMutateProc.MutateResult, ClosenessCentralityMutateConfig> {
 
     @Override
@@ -46,7 +50,7 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
         return "ClosenessCentrality";
     }
 
-    @Procedure(value = "gds.alpha.closeness.mutate", mode = READ)
+    @Procedure(value = "gds.beta.closeness.mutate", mode = READ)
     @Description(ClosenessCentralityProc.DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,

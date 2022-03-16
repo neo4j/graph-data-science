@@ -37,7 +37,7 @@ import static org.neo4j.gds.beta.closeness.ClosenessCentralityProc.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.closeness.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.beta.closeness.stream", description = DESCRIPTION, executionMode = STREAM)
 public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentrality.Result, ClosenessCentralityStreamConfig> {
 
     @Override
@@ -45,7 +45,7 @@ public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentralit
         return "ClosenessCentrality";
     }
 
-    @Procedure(value = "gds.alpha.closeness.stream", mode = READ)
+    @Procedure(value = "gds.beta.closeness.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ClosenessCentrality.Result> stream(
         @Name(value = "graphName") String graphName,
