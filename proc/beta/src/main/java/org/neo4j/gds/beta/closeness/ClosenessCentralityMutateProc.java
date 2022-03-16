@@ -17,18 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality;
+package org.neo4j.gds.beta.closeness;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.WriteProc;
+import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.beta.closeness.ClosenessCentrality;
-import org.neo4j.gds.beta.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -40,105 +37,104 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.centrality.ClosenessCentralityProc.DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.closeness.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityWriteProc.WriteResult, ClosenessCentralityWriteConfig> {
+public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityMutateProc.MutateResult, ClosenessCentralityMutateConfig> {
 
     @Override
     public String name() {
         return "ClosenessCentrality";
     }
 
-    @Procedure(value = "gds.alpha.closeness.write", mode = WRITE)
-    @Description(DESCRIPTION)
-    public Stream<WriteResult> write(
+    @Procedure(value = "gds.alpha.closeness.mutate", mode = READ)
+    @Description(ClosenessCentralityProc.DESCRIPTION)
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration));
+        return mutate(compute(graphName, configuration));
+    }
+
+
+    @Override
+    protected ClosenessCentralityMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return ClosenessCentralityMutateConfig.of(config);
     }
 
     @Override
-    protected ClosenessCentralityWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return ClosenessCentralityWriteConfig.of(config);
-    }
-
-    @Override
-    public ValidationConfiguration<ClosenessCentralityWriteConfig> validationConfig() {
+    public ValidationConfiguration<ClosenessCentralityMutateConfig> validationConfig() {
         return ClosenessCentralityProc.getValidationConfig();
     }
 
     @Override
-    public GraphAlgorithmFactory<ClosenessCentrality, ClosenessCentralityWriteConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<ClosenessCentrality, ClosenessCentralityMutateConfig> algorithmFactory() {
         return ClosenessCentralityProc.algorithmFactory();
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityWriteConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityMutateConfig> computationResult) {
         return ClosenessCentralityProc.nodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityWriteConfig> computeResult,
+    protected AbstractResultBuilder<MutateResult> resultBuilder(
+        ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return ClosenessCentralityProc.resultBuilder(
-            new WriteResult.Builder(callContext, computeResult.config().concurrency()).withWriteProperty(computeResult
-                .config()
-                .writeProperty()),
-            computeResult
-        ).withNodeCount(computeResult.graph().nodeCount());
+        var procResultBuilder = new MutateResult.Builder(
+            executionContext.callContext(),
+            computeResult.config().concurrency()
+        ).withMutateProperty(computeResult.config().mutateProperty());
+        return ClosenessCentralityProc
+            .resultBuilder(procResultBuilder, computeResult)
+            .withNodeCount(computeResult.graph().nodeCount());
     }
 
     @SuppressWarnings("unused")
-    public static final class WriteResult extends CentralityScore.Stats {
+    public static final class MutateResult extends CentralityScore.Mutate {
 
         public final long nodePropertiesWritten;
         public final long postProcessingMillis;
 
-        WriteResult(
+        MutateResult(
             long nodes,
             long nodePropertiesWritten,
             long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
-            long writeMillis,
-            String writeProperty,
+            long mutateMillis,
+            String mutateProperty,
             @Nullable Map<String, Object> centralityDistribution,
             Map<String, Object> config
         ) {
 
-            super(nodes, preProcessingMillis, computeMillis, writeMillis, writeProperty, centralityDistribution);
+            super(nodes, preProcessingMillis, computeMillis, mutateMillis, mutateProperty, centralityDistribution);
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.postProcessingMillis = postProcessingMillis;
         }
 
-        static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
-            public String writeProperty;
+        static final class Builder extends AbstractCentralityResultBuilder<ClosenessCentralityMutateProc.MutateResult> {
+            public String mutateProperty;
 
             protected Builder(ProcedureCallContext callContext, int concurrency) {
                 super(callContext, concurrency);
             }
 
-            public Builder withWriteProperty(String writeProperty) {
-                this.writeProperty = writeProperty;
+            public ClosenessCentralityMutateProc.MutateResult.Builder withMutateProperty(String mutateProperty) {
+                this.mutateProperty = mutateProperty;
                 return this;
             }
 
             @Override
-            public WriteResult buildResult() {
-                return new WriteResult(
+            public ClosenessCentralityMutateProc.MutateResult buildResult() {
+                return new ClosenessCentralityMutateProc.MutateResult(
                     nodeCount,
                     nodePropertiesWritten,
                     preProcessingMillis,
                     computeMillis,
                     postProcessingMillis,
-                    writeMillis,
-                    writeProperty,
+                    mutateMillis,
+                    mutateProperty,
                     centralityHistogram,
                     config.toMap()
                 );

@@ -23,8 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.centrality.ClosenessCentralityStreamProc;
-import org.neo4j.gds.centrality.ClosenessCentralityWriteProc;
 import org.neo4j.gds.centrality.HarmonicCentralityStreamProc;
 import org.neo4j.gds.centrality.HarmonicCentralityWriteProc;
 import org.neo4j.gds.influenceMaximization.CELFProc;
@@ -50,8 +48,6 @@ class EmptyGraphProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             AllShortestPathsProc.class,
-            ClosenessCentralityStreamProc.class,
-            ClosenessCentralityWriteProc.class,
             HarmonicCentralityStreamProc.class,
             HarmonicCentralityWriteProc.class,
             KSpanningTreeMaxProc.class,
