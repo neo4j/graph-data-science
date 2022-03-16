@@ -65,65 +65,66 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 ====
 
 
-[[algorithms-knn-introduction-similarity]]
-=== Similarity measures
+[[algorithms-knn-introduction-metrics]]
+=== Similarity metrics
 
 The similarity measure used in the KNN algorithm depends on the type of the configured node properties.
 KNN supports both scalar numeric values and lists of numbers.
 
-Scalar numeric property::
 
-When a property is a scalar number, the similarity is computed as one divided by one plus the absolute difference between the values:
+=== Scalar numeric property
 
-image::equations/knn-scalar-similarity.svg[one divided by one plus the absolute difference of ps and pt,align="center"]
+When a property is a scalar number, the similarity is computed as follows:
+
+image::equations/knn-scalar-similarity.svg[title="one divided by one plus the absolute difference", float="center"]
 
 This gives us a number in the range `(0, 1]`.
 
-List of integers::
+
+=== List of integers
 
 When a property is a list of integers, similarity can be measured with either the Jaccard similarity or the Overlap coefficient.
 
 Jaccard similarity is defined as follows:
 
-image::knn-formulas/jacard.svg[size of intersection divided by size of union,align="center"]
+image::knn-formulas/jacard.svg[title="size of intersection divided by size of union", float="center"]
 
 The Overlap coefficient is defined as follows:
 
-image::knn-formulas/overlap.svg[size of intersection divided by size of minimum set,align="center"]
+image::knn-formulas/overlap.svg[title="size of intersection divided by size of minimum set", float="center"]
 
 Both of these metrics give a score in the range `[0, 1]` and no normalization needs to be performed.
-Jaccard similarity is used as the default option for comparing list of integers when the metric is not specified.
+Jaccard similarity is used as the default option for comparing lists of integers when the metric is not specified.
 
-List of floating-point numbers::
+
+=== List of floating-point numbers
 
 When a property is a list of floating-point numbers, there are three alternatives for computing similarity between two nodes.
 
-The default metric used is that of Cosine Similarity, which is defined as follows:
+The default metric used is that of Cosine similarity, which is defined as follows:
 
-image::knn-formulas/cosine.svg[role="middle"]
+image::knn-formulas/cosine.svg[title="dot product of the vectors divided by the product of their lengths", float="center"]
 
-Notice that the above formula gives number within the range of `[-1, 1]` .
-We normalise the obtained score into the range `[0, 1]` by doing `cosine metric = (cosine similarity + 1)/ 2`.
+Notice that the above formula gives a score in the range of `[-1, 1]` .
+The score is normalized into the range `[0, 1]` by doing `score = (score + 1) / 2`.
 
 The other two metrics include the Pearson correlation score and Normalized Euclidean similarity.
 
 The Pearson correlation score is defined as follows:
 
-image::knn-formulas/pearson.svg[role="middle"]
+image::knn-formulas/pearson.svg[title="covariance divided by the product of the standard deviations", float="center"]
 
-As above, the formula gives numbers in the range `[-1, 1]`, which are normalized into the range `[0, 1]` similarly.
+As above, the formula gives a score in the range `[-1, 1]`, which is normalized into the range `[0, 1]` similarly.
 
 The Normalized Euclidean Similarity works by first calculating the Euclidean distance as follows:
 
-image::knn-formulas/ed.svg[role="middle"]
+image::knn-formulas/ed.svg[title="the root of the sum of the square difference between each pair of elements", float="center"]
 
-The result from this formula is a nonnegative value that is not necessarily bounded into the  `[0, 1]` range.
-Τo bound the number into this range and obtain a similarity score, we return `similarity= 1/(1+distance)`
-, i.e., we perform the same normalization as in the case of scalar values.
-
+The result from this formula is a non-negative value, but is not necessarily bounded into the  `[0, 1]` range.
+Τo bound the number into this range and obtain a similarity score, we return `score = 1 / (1 + distance)`, i.e., we perform the same normalization as in the case of scalar values.
 
 
-Multiple properties::
+=== Multiple properties
 
 Finally, when multiple properties are specified, the similarity of the two neighbors is the mean of the similarities of the individual properties, i.e. the simple mean of the numbers, each of which is in the range `[0, 1]`, giving a total score also in the `[0, 1]` range.
 
