@@ -32,13 +32,11 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.TrainingMethod;
 
-import java.util.Optional;
-
 @ValueClass
 public interface LogisticRegressionData extends Classifier.ClassifierData {
 
     Weights<Matrix> weights();
-    Optional<Weights<Vector>> bias();
+    Weights<Vector> bias();
 
     @Value.Derived
     default TrainingMethod trainerMethod() {
@@ -50,21 +48,19 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
         return weights().dimension(Dimensions.COLUMNS_INDEX);
     }
 
-    static LogisticRegressionData standard(int featureCount, boolean useBias, LocalIdMap classIdMap) {
-        return create(classIdMap.size(), featureCount, useBias, classIdMap);
+    static LogisticRegressionData standard(int featureCount, LocalIdMap classIdMap) {
+        return create(classIdMap.size(), featureCount, classIdMap);
     }
 
     // this is an optimization where "virtually" add a weight of 0.0 for the last class
-    static LogisticRegressionData withReducedClassCount(int featureCount, boolean useBias, LocalIdMap classIdMap) {
-        return create(classIdMap.size() - 1, featureCount, useBias, classIdMap);
+    static LogisticRegressionData withReducedClassCount(int featureCount, LocalIdMap classIdMap) {
+        return create(classIdMap.size() - 1, featureCount, classIdMap);
     }
 
-    private static LogisticRegressionData create(int classCount, int featureCount, boolean useBias, LocalIdMap classIdMap) {
+    private static LogisticRegressionData create(int classCount, int featureCount, LocalIdMap classIdMap) {
         var weights = Weights.ofMatrix(classCount, featureCount);
 
-        var bias = useBias
-            ? Optional.of(new Weights<>(new Vector(classCount)))
-            : Optional.<Weights<Vector>>empty();
+        var bias = new Weights<>(new Vector(classCount));
 
         return ImmutableLogisticRegressionData
             .builder()
@@ -74,7 +70,7 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
             .build();
     }
 
-    static LogisticRegressionData create(Weights<Matrix> weights, Optional<Weights<Vector>> bias, LocalIdMap classIdMap) {
+    static LogisticRegressionData create(Weights<Matrix> weights, Weights<Vector> bias, LocalIdMap classIdMap) {
         return ImmutableLogisticRegressionData.builder().bias(bias).weights(weights).classIdMap(classIdMap).build();
     }
 
@@ -88,20 +84,11 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
             .build();
     }
 
-    static MemoryEstimation memoryEstimation(int numberOfClasses, int numberOfFeatures, boolean useBias) {
-        var builder = MemoryEstimations.builder(LogisticRegressionData.class)
-            .add("classIdMap", LocalIdMap.memoryEstimation(numberOfClasses))
-            .fixed("weights", Weights.sizeInBytes(numberOfClasses, numberOfFeatures));
-        if (useBias) {
-            builder.fixed("bias", Weights.sizeInBytes(numberOfClasses, 1));
-        }
-        return builder.build();
-    }
-
     static MemoryEstimation memoryEstimation(int numberOfClasses, int numberOfFeatures) {
         return MemoryEstimations.builder(LogisticRegressionData.class)
             .add("classIdMap", LocalIdMap.memoryEstimation(numberOfClasses))
             .fixed("weights", Weights.sizeInBytes(numberOfClasses, numberOfFeatures))
+            .fixed("bias", Weights.sizeInBytes(numberOfClasses, 1))
             .build();
     }
 

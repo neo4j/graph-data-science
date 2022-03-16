@@ -434,7 +434,6 @@ YIELD
 | maxEpochs           | Integer | 100             | yes      | Maximum number of training epochs.
 | patience            | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
 | tolerance           | Float   | 0.001           | yes      | The minimal improvement of the loss to be considered productive.
-| useBiasFeature      | Boolean | true            | yes      | Whether the logistic regression model uses a bias feature.
 |===
 
 include::pipelineInfoResult.adoc[]
@@ -457,7 +456,7 @@ YIELD parameterSpace
 [opts="header",cols="1"]
 |===
 | parameterSpace
-| {RandomForest=[], LogisticRegression=[{useBiasFeature=true, maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
+| {RandomForest=[], LogisticRegression=[{maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
 |===
 
 The `parameterSpace` in the pipeline now contains the three different model parameters, expanded with the default values.

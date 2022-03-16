@@ -63,7 +63,6 @@ import org.neo4j.gds.test.TestProc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -138,7 +137,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                         1,
                         3
                     )),
-                Optional.empty()
+                Weights.ofVector(0.0)
             );
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
@@ -231,7 +230,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                         1,
                         4
                     )),
-                Optional.empty()
+                Weights.ofVector(0.0)
             );
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
@@ -279,7 +278,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                         1,
                         4
                     )),
-                Optional.empty()
+                Weights.ofVector(0.0)
             );
 
             modelCatalog.set(Model.of(

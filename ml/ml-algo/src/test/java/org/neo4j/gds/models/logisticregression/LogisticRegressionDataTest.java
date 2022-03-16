@@ -22,7 +22,6 @@ package org.neo4j.gds.models.logisticregression;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -49,7 +48,8 @@ class LogisticRegressionDataTest {
 
         var overheadForOneClassIdMap = 24 + 16 + 32;
         var overheadForOneWeigths = 16;
-        var overheadForOneNLRData = 16 + overheadForOneClassIdMap + overheadForOneWeigths;
+        var overheadForOneBias = 16;
+        var overheadForOneNLRData = 16 + overheadForOneClassIdMap + overheadForOneWeigths + overheadForOneBias;
 
         // scaling number of classes scales memory usage linearly, modulo overhead
         assertThat(_08_05.max).isEqualTo(2 * _04_05.max - overheadForOneNLRData);
@@ -67,8 +67,8 @@ class LogisticRegressionDataTest {
         // * 4: the number of classes
         // * 8: size per stored value in the weights matrix
         // => the size of the change based on varying the number of features
-        assertThat(_04_05.max).isEqualTo(344);
-        assertThat(_04_10.max).isEqualTo(344 + 5 * 4 * 8); // five is the number of added features
+        assertThat(_04_05.max).isEqualTo(392);
+        assertThat(_04_10.max).isEqualTo(392 + 5 * 4 * 8); // five is the number of added features
         assertThat(_04_10.max).isEqualTo(_04_05.max + 5 * 4 * 8);
         assertThat(_08_10.max).isEqualTo(_08_05.max + 5 * 8 * 8);
         assertThat(_04_20.max).isEqualTo(_04_05.max + 15 * 4 * 8);
@@ -92,37 +92,33 @@ class LogisticRegressionDataTest {
         assertThat(memoryEstimation.memoryUsage()).isEqualTo(MemoryRange.of(minEstimation, maxEstimation));
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void shouldCreateReducedData(boolean useBias) {
+    @Test
+    void shouldCreateReducedData() {
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(42);
         classIdMap.toMapped(43);
         classIdMap.toMapped(1900);
-        var data = LogisticRegressionData.withReducedClassCount(3, useBias, classIdMap);
+        var data = LogisticRegressionData.withReducedClassCount(3, classIdMap);
         var matrix = data.weights().data();
 
         assertThat(matrix.rows()).isEqualTo(2);
         assertThat(matrix.cols()).isEqualTo(3);
         assertThat(matrix.data()).containsExactly(new double[6]);
-        assertThat(data.bias().isPresent()).isEqualTo(useBias);
         assertThat(data.classIdMap()).isEqualTo(classIdMap);
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void shouldCreateStandardData(boolean useBias) {
+    @Test
+    void shouldCreateStandardData() {
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(42);
         classIdMap.toMapped(43);
         classIdMap.toMapped(1900);
-        var data = LogisticRegressionData.standard(3, useBias, classIdMap);
+        var data = LogisticRegressionData.standard(3, classIdMap);
         var matrix = data.weights().data();
 
         assertThat(matrix.rows()).isEqualTo(3);
         assertThat(matrix.cols()).isEqualTo(3);
         assertThat(matrix.data()).containsExactly(new double[9]);
-        assertThat(data.bias().isPresent()).isEqualTo(useBias);
         assertThat(data.classIdMap()).isEqualTo(classIdMap);
     }
 

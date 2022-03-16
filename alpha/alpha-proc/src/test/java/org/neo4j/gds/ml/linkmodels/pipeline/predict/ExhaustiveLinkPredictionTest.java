@@ -101,7 +101,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
                     1,
                     WEIGHTS.length
                 )),
-            Optional.empty()
+            Weights.ofVector(0.0)
         );
 
         var graph = graphStore.getGraph(
@@ -160,7 +160,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
                     1,
                     WEIGHTS.length
                 )),
-            Optional.empty()
+            Weights.ofVector(0.0)
         );
 
         var graph = graphStore.getGraph(

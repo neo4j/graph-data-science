@@ -49,7 +49,6 @@ import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -103,7 +102,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                     1,
                     WEIGHTS.length
                 )),
-            Optional.empty()
+            Weights.ofVector(0.0)
         );
 
         var linkPrediction = new ApproximateLinkPrediction(
@@ -166,7 +165,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 1,
                 weights.length
             )),
-            Optional.empty()
+            Weights.ofVector(0.0)
         );
 
         var expectedLinks = List.of(
@@ -219,7 +218,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                     1,
                     WEIGHTS.length
                 )),
-            Optional.empty()
+            Weights.ofVector(0.0)
         );
 
         var linkPrediction = new ApproximateLinkPrediction(
