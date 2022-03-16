@@ -26,6 +26,8 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
     private final NodeProperties nodeProperties;
     private final LongArraySimilarityMetric metric;
@@ -42,7 +44,17 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
     public double similarity(long firstNodeId, long secondNodeId) {
         var left = nodeProperties.longArrayValue(firstNodeId);
         var right = nodeProperties.longArrayValue(secondNodeId);
+        if (left == null) {
+            throwForNode(firstNodeId);
+        }
+        if (right == null) {
+            throwForNode(secondNodeId);
+        }
         return metric.compute(left, right);
+    }
+
+    private void throwForNode(long nodeId) {
+        throw new IllegalArgumentException(formatWithLocale("Missing node property for node with id `%s`.", nodeId));
     }
 
     static final class SortedLongArrayProperties implements LongArrayNodeProperties {

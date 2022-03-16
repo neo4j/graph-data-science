@@ -22,6 +22,8 @@ package org.neo4j.gds.similarity.knn.metrics;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer {
     private final NodeProperties nodeProperties;
     private final DoubleArraySimilarityMetric metric;
@@ -38,6 +40,16 @@ final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer 
     public double similarity(long firstNodeId, long secondNodeId) {
         var left = nodeProperties.doubleArrayValue(firstNodeId);
         var right = nodeProperties.doubleArrayValue(secondNodeId);
+        if (left == null) {
+            throwForNode(firstNodeId);
+        }
+        if (right == null) {
+            throwForNode(secondNodeId);
+        }
         return metric.compute(left, right);
+    }
+
+    private void throwForNode(long nodeId) {
+        throw new IllegalArgumentException(formatWithLocale("Missing node property for node with id `%s`.", nodeId));
     }
 }

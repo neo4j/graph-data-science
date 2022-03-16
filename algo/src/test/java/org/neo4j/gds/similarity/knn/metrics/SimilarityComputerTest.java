@@ -29,6 +29,7 @@ import net.jqwik.api.Provide;
 import net.jqwik.api.constraints.Positive;
 import org.eclipse.collections.api.tuple.primitive.LongLongPair;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.NodeProperties;
@@ -43,6 +44,7 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
 class SimilarityComputerTest {
@@ -220,6 +222,42 @@ class SimilarityComputerTest {
     void safeSimilaritySwallowsNonFiniteValues(SimilarityComputer sim) {
         assertThat(sim.similarity(42, 1337)).isNaN();
         assertThat(sim.safeSimilarity(42, 1337)).isZero();
+    }
+
+    @Test
+    void doubleArraySimilarityComputerHandlesNullProperties() {
+        NodeProperties props = new DoubleArrayTestProperties(nodeId -> null);
+        var sim = SimilarityComputer.ofDoubleArrayProperty(
+            props,
+            SimilarityMetric.defaultMetricForType(ValueType.DOUBLE_ARRAY)
+        );
+        assertThatThrownBy(() -> sim.similarity(0, 1))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Missing node property for node with id");
+    }
+
+    @Test
+    void floatArraySimilarityComputerHandlesNullProperties() {
+        NodeProperties props = new FloatArrayTestProperties(nodeId -> null);
+        var sim = SimilarityComputer.ofFloatArrayProperty(
+            props,
+            SimilarityMetric.defaultMetricForType(ValueType.FLOAT_ARRAY)
+        );
+        assertThatThrownBy(() -> sim.similarity(0, 1))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Missing node property for node with id");
+    }
+
+    @Test
+    void longArraySimilarityComputerHandlesNullProperties() {
+        NodeProperties props = new LongArrayTestProperties(nodeId -> null);
+        var sim = SimilarityComputer.ofLongArrayProperty(
+            props,
+            SimilarityMetric.defaultMetricForType(ValueType.LONG_ARRAY)
+        );
+        assertThatThrownBy(() -> sim.similarity(0, 1))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Missing node property for node with id");
     }
 
     static Stream<SimilarityComputer> nonFiniteSimilarities() {
