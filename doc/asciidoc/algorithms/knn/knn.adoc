@@ -65,69 +65,125 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 ====
 
 
-[[algorithms-knn-introduction-similarity]]
-=== Similarity measures
+[[algorithms-knn-introduction-metrics]]
+=== Similarity metrics
 
 The similarity measure used in the KNN algorithm depends on the type of the configured node properties.
 KNN supports both scalar numeric values and lists of numbers.
 
-Scalar numeric property::
 
-When a property is a scalar number, the similarity is computed as one divided by one plus the absolute difference between the values:
+==== Scalar numbers
 
-image::equations/knn-scalar-similarity.svg[one divided by one plus the absolute difference of ps and pt,align="center"]
+When a property is a scalar number, the similarity is computed as follows:
+
+image::equations/knn-scalar-similarity.svg[title="one divided by one plus the absolute difference", float="center"]
 
 This gives us a number in the range `(0, 1]`.
 
-List of integers::
+
+==== List of integers
 
 When a property is a list of integers, similarity can be measured with either the Jaccard similarity or the Overlap coefficient.
 
-Jaccard similarity is defined as follows:
+Jaccard similarity::
++
+image::knn-formulas/jacard.svg[title="size of intersection divided by size of union", float="center"]
 
-image::knn-formulas/jacard.svg[size of intersection divided by size of union,align="center"]
 
-The Overlap coefficient is defined as follows:
-
-image::knn-formulas/overlap.svg[size of intersection divided by size of minimum set,align="center"]
+Overlap coefficient::
++
+image::knn-formulas/overlap.svg[title="size of intersection divided by size of minimum set", float="center"]
 
 Both of these metrics give a score in the range `[0, 1]` and no normalization needs to be performed.
-Jaccard similarity is used as the default option for comparing list of integers when the metric is not specified.
+Jaccard similarity is used as the default option for comparing lists of integers when the metric is not specified.
 
-List of floating-point numbers::
+
+==== List of floating-point numbers
 
 When a property is a list of floating-point numbers, there are three alternatives for computing similarity between two nodes.
 
-The default metric used is that of Cosine Similarity, which is defined as follows:
+The default metric used is that of Cosine similarity.
 
-image::knn-formulas/cosine.svg[role="middle"]
+Cosine similarity::
++
+image::knn-formulas/cosine.svg[title="dot product of the vectors divided by the product of their lengths", float="center"]
 
-Notice that the above formula gives number within the range of `[-1, 1]` .
-We normalise the obtained score into the range `[0, 1]` by doing `cosine metric = (cosine similarity + 1)/ 2`.
+Notice that the above formula gives a score in the range of `[-1, 1]` .
+The score is normalized into the range `[0, 1]` by doing `score = (score + 1) / 2`.
 
 The other two metrics include the Pearson correlation score and Normalized Euclidean similarity.
 
-The Pearson correlation score is defined as follows:
 
-image::knn-formulas/pearson.svg[role="middle"]
+Pearson correlation score::
++
+image::knn-formulas/pearson.svg[title="covariance divided by the product of the standard deviations", float="center"]
 
-As above, the formula gives numbers in the range `[-1, 1]`, which are normalized into the range `[0, 1]` similarly.
-
-The Normalized Euclidean Similarity works by first calculating the Euclidean distance as follows:
-
-image::knn-formulas/ed.svg[role="middle"]
-
-The result from this formula is a nonnegative value that is not necessarily bounded into the  `[0, 1]` range.
-Τo bound the number into this range and obtain a similarity score, we return `similarity= 1/(1+distance)`
-, i.e., we perform the same normalization as in the case of scalar values.
+As above, the formula gives a score in the range `[-1, 1]`, which is normalized into the range `[0, 1]` similarly.
 
 
+Euclidean similarity::
++
+image::knn-formulas/ed.svg[title="the root of the sum of the square difference between each pair of elements", float="center"]
 
-Multiple properties::
+The result from this formula is a non-negative value, but is not necessarily bounded into the  `[0, 1]` range.
+Τo bound the number into this range and obtain a similarity score, we return `score = 1 / (1 + distance)`, i.e., we perform the same normalization as in the case of scalar values.
+
+
+==== Multiple properties
 
 Finally, when multiple properties are specified, the similarity of the two neighbors is the mean of the similarities of the individual properties, i.e. the simple mean of the numbers, each of which is in the range `[0, 1]`, giving a total score also in the `[0, 1]` range.
 
-NB: The validity of this mean is highly context dependent, so take care when applying it to your data domain.
+[NOTE]
+====
+The validity of this mean is highly context dependent, so take care when applying it to your data domain.
+====
+
+[[algorithms-knn-node-properties-configuration]]
+==== Node properties and metrics configuration
+
+The node properties and metrics to use are specified with the `nodeProperties` configuration parameter.
+At least one node property must be specified.
+
+This parameter accepts one of:
+
+.nodeProperties syntax
+[cols="1,2a"]
+|===
+| a single property name
+| `nodeProperties: 'embedding'`
+| a Map of property keys to metrics
+|
+----
+nodeProperties: {
+    embedding: 'COSINE',
+    age: 'DEFAULT',
+    lotteryNumbers: 'OVERLAP'
+}
+----
+| list of Strings and/or Maps
+|
+----
+nodeProperties: [
+    {embedding: 'COSINE'},
+    'age',
+    {lotteryNumbers: 'OVERLAP'}
+]
+----
+|===
+
+The available metrics by type are:
+
+.Available metrics by type
+[options=header,cols="1,1"]
+|===
+| type            | metric
+| List of Integer | `JACCARD`, `OVERLAP`
+| List of Float   | `COSINE`, `EUCLIDEAN`, `PEARSON`
+|===
+
+For any property type, `DEFAULT` can also be specified to use the default metric.
+For scalar numbers, there is only the default metric.
+
 
 [[algorithms-knn-introduction-sampling]]
 === Initial neighbor sampling
@@ -357,11 +413,11 @@ Consider the graph created by the following Cypher statement:
 
 [source, cypher, role=noplay setup-query]
 ----
-CREATE (alice:Person {name: 'Alice', age: 24, items:[1,3], ratings: [1.0,3.0]})
-CREATE (bob:Person {name: 'Bob', age: 73, items: [1,2,3], ratings: [2.1,1.6]})
-CREATE (carol:Person {name: 'Carol', age: 24, items: [3], ratings: [1.5,3.1]})
-CREATE (dave:Person {name: 'Dave', age: 48, items: [2,4], ratings: [0.6,0.2]})
-CREATE (eve:Person {name: 'Eve', age: 67, items: [1,5], ratings: [1.8,2.7]});
+CREATE (alice:Person {name: 'Alice', age: 24, lotteryNumbers: [1, 3], embedding: [1.0, 3.0]})
+CREATE (bob:Person {name: 'Bob', age: 73, lotteryNumbers: [1, 2, 3], embedding: [2.1, 1.6]})
+CREATE (carol:Person {name: 'Carol', age: 24, lotteryNumbers: [3], embedding: [1.5, 3.1]})
+CREATE (dave:Person {name: 'Dave', age: 48, lotteryNumbers: [2, 4], embedding: [0.6, 0.2]})
+CREATE (eve:Person {name: 'Eve', age: 67, lotteryNumbers: [1, 5], embedding: [1.8, 2.7]});
 ----
 
 In the example, we want to use the K-Nearest Neighbors algorithm to compare people based on either their age or a combination on all provided properties.
@@ -376,7 +432,7 @@ CALL gds.graph.project(
     {
         Person: {
             label: 'Person',
-            properties: ['age','items','ratings']
+            properties: ['age','lotteryNumbers','embedding']
         }
     },
     '*'
@@ -567,7 +623,7 @@ However, they are just two directed relationships that have been independently w
 === Calculation with multiple properties
 
 If we want to calculate similarity based on multiple metrics, we can calculate the similarity for each property individually and take their mean.
-As an example, we can use the Normalized Euclidean similarity metric for the ratings property and the Overlap metric for the items property in addition to the age property.
+As an example, we can use the Normalized Euclidean similarity metric for the embedding property and the Overlap metric for the lottery numbers property in addition to the age property.
 
 [role=query-example]
 --
@@ -576,7 +632,11 @@ As an example, we can use the Normalized Euclidean similarity metric for the rat
 ----
 CALL gds.knn.stream('myGraph', {
     topK: 1,
-    nodeProperties: [{ratings : "EUCLIDEAN"},'age',{items:"OVERLAP"}],
+    nodeProperties: [
+        {embedding: "EUCLIDEAN"},
+        'age',
+        {lotteryNumbers: "OVERLAP"}
+    ],
     // The following parameters are set to produce a deterministic result
     randomSeed: 1337,
     concurrency: 1,
