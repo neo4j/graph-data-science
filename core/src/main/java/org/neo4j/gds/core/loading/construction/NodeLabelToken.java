@@ -17,11 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.generator;
+package org.neo4j.gds.core.loading.construction;
 
-import org.neo4j.gds.core.loading.construction.NodeLabelToken;
+import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.NodeLabel;
 
-@FunctionalInterface
-public interface NodeLabelProducer {
-    NodeLabelToken labels(long nodeId);
+public interface NodeLabelToken {
+
+    boolean isEmpty();
+
+    int size();
+
+    @NotNull NodeLabel get(int index);
 }
+
+

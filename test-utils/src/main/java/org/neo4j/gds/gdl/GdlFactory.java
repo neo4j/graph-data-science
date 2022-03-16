@@ -42,6 +42,7 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.IdMapAndProperties;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -194,13 +195,19 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .concurrency(1)
             .build();
 
-        gdlHandler.getVertices().forEach(vertex -> nodesBuilder.addNode(
-            vertex.getId(),
-            vertex.getLabels().stream()
-                .map(NodeLabel::of)
-                .filter(nodeLabel -> !nodeLabel.equals(NodeLabel.ALL_NODES))
-                .toArray(NodeLabel[]::new)
-        ));
+        gdlHandler.getVertices().forEach(vertex -> {
+            var labels = vertex.getLabels();
+            if (labels.contains(NodeLabel.ALL_NODES.name())) {
+                labels = labels
+                    .stream()
+                    .filter(label -> !NodeLabel.ALL_NODES.name().equals(label))
+                    .collect(Collectors.toList());
+            }
+            nodesBuilder.addNode(
+                vertex.getId(),
+                NodeLabelTokens.of(labels)
+            );
+        });
 
         var idMap = nodesBuilder.build().idMap();
 

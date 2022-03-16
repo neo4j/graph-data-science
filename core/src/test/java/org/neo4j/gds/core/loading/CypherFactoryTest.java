@@ -47,7 +47,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -383,11 +382,11 @@ class CypherFactoryTest extends BaseTest {
         assertEquals(3, abGraph.nodeCount());
 
         var expectation = List.of(
-            Pair.of(Set.of(NodeLabel.of("A")), Set.of(NodeLabel.of("B"))),
-            Pair.of(Set.of(NodeLabel.of("A")), Set.of(NodeLabel.of("A"), NodeLabel.of("B")))
+            Pair.of(List.of(NodeLabel.of("A")), List.of(NodeLabel.of("B"))),
+            Pair.of(List.of(NodeLabel.of("A")), List.of(NodeLabel.of("A"), NodeLabel.of("B")))
         );
 
-        var actual = new ArrayList<Pair<Set<NodeLabel>, Set<NodeLabel>>>();
+        var actual = new ArrayList<Pair<List<NodeLabel>, List<NodeLabel>>>();
         abGraph.forEachNode(nodeId -> {
             abGraph.forEachRelationship(nodeId, (source, target) -> {
                 actual.add(Pair.of(abGraph.nodeLabels(source), abGraph.nodeLabels(target)));

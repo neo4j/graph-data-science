@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.LongPredicate;
@@ -95,7 +96,7 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public Set<NodeLabel> nodeLabels(long nodeId) {
+    public List<NodeLabel> nodeLabels(long nodeId) {
         return idMap.nodeLabels(nodeId);
     }
 

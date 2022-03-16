@@ -37,7 +37,6 @@ import org.neo4j.gds.extension.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -96,7 +95,7 @@ class GraphStoreNodeVisitorTest {
         GraphStoreNodeVisitor nodeVisitor = new GraphStoreNodeVisitor(nodeSchema, nodesBuilder);
         graph.forEachNode(nodeId -> {
             nodeVisitor.id(nodeId);
-            Set<NodeLabel> nodeLabels = graph.nodeLabels(nodeId);
+            var nodeLabels = graph.nodeLabels(nodeId);
             nodeVisitor.labels(nodeLabels.stream().map(NodeLabel::name).toArray(String[]::new));
             var propertyKeys = graphStore.nodePropertyKeys(nodeLabels);
             for (String propertyKey : propertyKeys) {

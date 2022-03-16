@@ -33,6 +33,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
@@ -89,7 +90,7 @@ class GraphSageTest {
         graph = RandomGraphGenerator.builder()
             .nodeCount(NODE_COUNT)
             .averageDegree(3)
-            .nodeLabelProducer(nodeId -> new NodeLabel[] {NodeLabel.of("P")})
+            .nodeLabelProducer(nodeId -> NodeLabelTokens.of("P"))
             .addNodePropertyProducer(NodeLabel.of("P"), PropertyProducer.randomDouble("f1", 0, 1))
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .relationshipPropertyProducer(PropertyProducer.fixedDouble("weight", 1.0))

@@ -23,8 +23,10 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -49,8 +51,8 @@ public class CypherIdMap extends IdMapAdapter implements NodeLabelUpdater {
     }
 
     @Override
-    public Set<NodeLabel> nodeLabels(long nodeId) {
-        var nodeLabels = new HashSet<>(super.nodeLabels(nodeId));
+    public List<NodeLabel> nodeLabels(long nodeId) {
+        var nodeLabels = new ArrayList<>(super.nodeLabels(nodeId));
         additionalNodeLabels.forEach((nodeLabel, bitSet) -> {
             if (bitSet.get(nodeId)) {
                 nodeLabels.add(nodeLabel);

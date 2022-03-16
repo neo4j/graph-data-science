@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -141,7 +142,7 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public Set<NodeLabel> nodeLabels(long nodeId) {
+    public List<NodeLabel> nodeLabels(long nodeId) {
         return graph.nodeLabels(nodeId);
     }
 

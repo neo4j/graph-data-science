@@ -23,14 +23,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
@@ -191,8 +192,8 @@ class RandomGraphGeneratorTest {
 
     @Test
     void shouldGenerateNodeLabels() {
-        NodeLabel[] aLabel = new NodeLabel[]{NodeLabel.of("A")};
-        NodeLabel[] bLabel = new NodeLabel[]{NodeLabel.of("B")};
+        var aLabel = NodeLabelTokens.of("A");
+        var bLabel = NodeLabelTokens.of("B");
 
         HugeGraph graph = RandomGraphGenerator.builder()
             .nodeCount(10)
@@ -261,8 +262,8 @@ class RandomGraphGeneratorTest {
 
     @Test
     void shouldGenerateNodeLabelsAndProperties() {
-        NodeLabel[] aLabel = new NodeLabel[]{NodeLabel.of("A"), NodeLabel.ALL_NODES};
-        NodeLabel[] bLabel = new NodeLabel[]{NodeLabel.of("B"), NodeLabel.ALL_NODES};
+        var aLabel = NodeLabelTokens.ofNodeLabels(NodeLabel.of("A"), NodeLabel.ALL_NODES);
+        var bLabel = NodeLabelTokens.ofNodeLabels(NodeLabel.of("B"), NodeLabel.ALL_NODES);
 
         HugeGraph graph = RandomGraphGenerator.builder()
             .nodeCount(10)

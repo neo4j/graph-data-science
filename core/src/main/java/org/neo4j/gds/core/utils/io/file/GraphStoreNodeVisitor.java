@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
+import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -39,12 +39,11 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
 
     @Override
     protected void exportElement() {
-        NodeLabel[] nodeLabels = labels().stream().map(NodeLabel::of).toArray(NodeLabel[]::new);
         Map<String, Value> props = new HashMap<>();
         forEachProperty((key, value) -> {
             props.put(key, Values.of(value));
         });
-
+        var nodeLabels = NodeLabelTokens.of(labels());
         nodesBuilder.addNode(id(), props, nodeLabels);
     }
 

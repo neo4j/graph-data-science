@@ -303,7 +303,7 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public Set<NodeLabel> nodeLabels(long nodeId) {
+    public List<NodeLabel> nodeLabels(long nodeId) {
         return first.nodeLabels(nodeId);
     }
 

@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.ObjectIntMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
@@ -156,12 +157,30 @@ public final class NodesBuilder {
         }
     }
 
-    public void addNode(long originalId, NodeLabel... nodeLabels) {
+    public void addNode(long originalId) {
+        this.addNode(originalId, NodeLabelTokens.empty());
+    }
+
+    public void addNode(long originalId, NodeLabelToken nodeLabels) {
         this.threadLocalBuilder.get().addNode(originalId, nodeLabels);
     }
 
-    public void addNode(long originalId, Map<String, Value> properties, NodeLabel... nodeLabels) {
+    @TestOnly
+    public void addNode(long originalId, NodeLabel... nodeLabels) {
+        this.addNode(originalId, NodeLabelTokens.ofNodeLabels(nodeLabels));
+    }
+
+    public void addNode(long originalId, Map<String, Value> properties) {
+        this.addNode(originalId, properties, NodeLabelTokens.empty());
+    }
+
+    public void addNode(long originalId, Map<String, Value> properties, NodeLabelToken nodeLabels) {
         this.threadLocalBuilder.get().addNode(originalId, properties, nodeLabels);
+    }
+
+    @TestOnly
+    public void addNode(long originalId, Map<String, Value> properties, NodeLabel... nodeLabels) {
+        this.addNode(originalId, properties, NodeLabelTokens.ofNodeLabels(nodeLabels));
     }
 
     public void flush() {
@@ -326,7 +345,7 @@ public final class NodesBuilder {
             this.batchNodeProperties = new ArrayList<>(buffer.capacity());
         }
 
-        public void addNode(long originalId, NodeLabel... nodeLabels) {
+        public void addNode(long originalId, NodeLabelToken nodeLabels) {
             if (!seenNodeIdPredicate.test(originalId)) {
                 long[] labels = labelTokens(nodeLabels);
 
@@ -338,12 +357,7 @@ public final class NodesBuilder {
             }
         }
 
-        public void flush() {
-            flushBuffer();
-            reset();
-        }
-
-        public void addNode(long originalId, Map<String, Value> properties, NodeLabel... nodeLabels) {
+        public void addNode(long originalId, Map<String, Value> properties, NodeLabelToken nodeLabels) {
             if (!seenNodeIdPredicate.test(originalId)) {
                 long[] labels = labelTokens(nodeLabels);
 
@@ -358,19 +372,23 @@ public final class NodesBuilder {
             }
         }
 
-        private long[] labelTokens(NodeLabel... nodeLabels) {
-            if (nodeLabels == null || nodeLabels.length == 0) {
+        private long[] labelTokens(NodeLabelToken nodeLabels) {
+            if (nodeLabels.isEmpty()) {
                 anyLabelArray[0] = labelTokenIdFn.apply(NodeLabel.ALL_NODES);
                 return anyLabelArray;
             }
 
-            long[] labelIds = new long[nodeLabels.length];
-
-            for (int i = 0; i < nodeLabels.length; i++) {
-                labelIds[i] = labelTokenIdFn.apply(nodeLabels[i]);
+            long[] labelIds = new long[nodeLabels.size()];
+            for (int i = 0; i < labelIds.length; i++) {
+                labelIds[i] = labelTokenIdFn.apply(nodeLabels.get(i));
             }
 
             return labelIds;
+        }
+
+        public void flush() {
+            flushBuffer();
+            reset();
         }
 
         private void flushBuffer() {
