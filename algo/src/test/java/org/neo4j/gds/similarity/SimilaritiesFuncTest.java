@@ -55,21 +55,15 @@ class SimilaritiesFuncTest extends BaseProcTest {
             });
     }
 
-
-
-    @Test
-    void testJaccardWithDuplicatesViaCypher() {
-        runQueryWithResultConsumer(
-            "RETURN gds.alpha.similarity.jaccard([1, 1, 2], [1, 3, 3]) AS jaccardSim", result -> {
-                assertEquals(1/5D, result.next().get("jaccardSim"));
-            });
-    }
-
     @ParameterizedTest
     @MethodSource("listsWithDuplicates")
-    void jaccardSimilarityShouldUseListsNotSets(List<Number> left, List<Number> right, double expected) {
+    void jaccardSimilarityShouldWorkWithDuplicates(List<Number> left, List<Number> right, double expected) {
         double actual = new SimilaritiesFunc().jaccardSimilarity(left, right);
         assertEquals(expected, actual);
+        runQueryWithResultConsumer(
+            "RETURN gds.alpha.similarity.jaccard("+Arrays.toString(left.toArray()) +","+Arrays.toString(right.toArray())+") AS jaccardSim", result -> {
+                assertEquals(expected, result.next().get("jaccardSim"));
+            });
     }
 
     static Stream<Arguments> listsWithDuplicates() {
@@ -78,6 +72,11 @@ class SimilaritiesFuncTest extends BaseProcTest {
                 new ArrayList<Number>(Arrays.asList(1, 1)),
                 new ArrayList<Number>(Arrays.asList(1, 2)),
                 1/3D
+            ),
+            Arguments.of(
+                new ArrayList<Number>(Arrays.asList(1, 1, 2)),
+                new ArrayList<Number>(Arrays.asList(1, 3, 3)),
+                1/5D
             ),
             Arguments.of(
                 new ArrayList<Number>(Arrays.asList(1, 2)),
@@ -140,6 +139,9 @@ class SimilaritiesFuncTest extends BaseProcTest {
         runQuery("RETURN gds.alpha.similarity.overlap([1, null, 2], [null, 1, 3])");
 
         runQuery("RETURN gds.alpha.similarity.jaccard([1, null, 2], [null, 1, 3])");
+
+        runQuery("RETURN gds.alpha.similarity.pearson(['lala', 2, 3], [null, 1, 3])");
+
     }
 
 }
