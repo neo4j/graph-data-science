@@ -1,4 +1,4 @@
-[[nodeclassification-pipelines-model-lr-table]]
+[[model-lr-config-table]]
 .Model configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===

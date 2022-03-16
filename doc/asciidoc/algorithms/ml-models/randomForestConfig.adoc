@@ -1,4 +1,4 @@
-[[nodeclassification-pipelines-model-rf-table]]
+[[model-rf-config-table]]
 .Random Forest configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===

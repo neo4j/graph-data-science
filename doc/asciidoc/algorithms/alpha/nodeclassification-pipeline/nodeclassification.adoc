@@ -46,7 +46,7 @@ The rest of this page is divided as follows:
 * <<algorithms-ml-nodeclassification-adding-node-properties, Adding node properties>>
 * <<algorithms-ml-nodeclassification-adding-features, Adding features>>
 * <<algorithms-ml-nodeclassification-configure-splits, Configuring the node splits>>
-* <<algorithms-ml-nodeclassification-configure-model-parameters, Configuring the model parameters>>
+* <<algorithms-ml-nodeclassification-configure-model-parameters, Configuring the model parameter space>>
 * <<algorithms-ml-nodeclassification-pipelines-train, Training the pipeline>>
 * <<algorithms-node-classification-pipelines-predict, Applying a classification model to make predictions>>
 
@@ -327,7 +327,7 @@ We now reconfigured the splitting of the pipeline, which will be applied during 
 --
 
 [[algorithms-ml-nodeclassification-configure-model-parameters]]
-== Configuring the model parameters
+== Configuring the model parameter space
 
 A pipeline contains a collection of configurations for model candidates which is initially empty.
 This collection is called the _parameter space_.
@@ -338,7 +338,6 @@ The parameter space of a pipeline can be inspected using `gds.beta.model.list` a
 
 === Syntax
 
-.Syntax per Training method
 [.tabbed-example, caption = ]
 ====
 [.include-with-logistic-regression]
@@ -368,7 +367,7 @@ YIELD
 | config          | Map         | The logistic regression config for a potential model. The allowed parameters for a model are defined in the next table.
 |===
 
-include::logisticRegressionConfig.adoc[]
+include::../../ml-models/logisticRegressionConfig.adoc[]
 
 include::pipelineInfoResult.adoc[]
 --
@@ -402,7 +401,7 @@ YIELD
 | config          | Map         | The random forest config for a potential model. The allowed parameters for a model are defined in the next table.
 |===
 
-include::randomForestConfig.adoc[]
+include::../../ml-models/randomForestConfig.adoc[]
 
 include::pipelineInfoResult.adoc[]
 --
@@ -412,34 +411,43 @@ include::pipelineInfoResult.adoc[]
 
 === Example
 
-// FIXME fix this example
+We can add multiple model candidates to our pipeline.
+
 [source, cypher, role=noplay query-example, no-result=true, group=nc]
-.The following will configure the parameter space of the pipeline:
+.The following will add a logistic regression model:
 --
 CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe', {penalty: 0.0625})
 YIELD parameterSpace
 --
 
+[source, cypher, role=noplay query-example, no-result=true, group=nc]
+.The following will add a random forest model:
+--
+CALL gds.alpha.pipeline.nodeClassification.addRandomForest('pipe', {numberOfDecisionTrees: 5})
+YIELD parameterSpace
+--
 
 [role=query-example,group=nc]
 --
-.The following will configure the parameter space of the pipeline:
+.The following will add another logistic regression model:
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe', {maxEpochs: 500})
 YIELD parameterSpace
+RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace
 ----
 
 .Results
-[opts="header",cols="1"]
+[opts="header",cols="1, 1"]
 |===
-| parameterSpace
-| {RandomForest=[], LogisticRegression=[{maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}, {maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
+| randomForestSpace | logisticRegressionSpace
+| [{maxDepth=2147483647, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}, {maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]
 |===
-
-The `parameterSpace` in the pipeline now contains the three different model parameters, expanded with the default values.
-Each specified model configuration will be tried out during the model selection in <<algorithms-ml-nodeclassification-pipelines-train, training>>.
 --
+
+The `parameterSpace` in the pipeline now contains the three different model candidates, expanded with the default values.
+Each specified model candidate will be tried out during the model selection in <<algorithms-ml-nodeclassification-pipelines-train, training>>.
+
 
 include::training.adoc[]
 
