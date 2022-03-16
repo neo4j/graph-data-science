@@ -38,6 +38,14 @@ public interface SimilarityComputer {
         return Double.isFinite(similarity) ? similarity : 0.0;
     }
 
+    default void throwForNode(long nodeId, String propertyName) {
+        throw new IllegalArgumentException(formatWithLocale(
+            "Missing node property `%s` for node with id `%s`.",
+            propertyName,
+            nodeId
+        ));
+    }
+
     double similarity(long firstNodeId, long secondNodeId);
 
     static SimilarityComputer ofProperties(Graph graph, List<KnnNodePropertySpec> knnNodeProperties) {
