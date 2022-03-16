@@ -31,8 +31,6 @@ The manual covers the following areas:
 * <<installation>> -- Instructions for how to install and use the Neo4j Graph Data Science library.
 * <<common-usage>> -- General usage patterns and recommendations for getting the most out of the Neo4j Graph Data Science library.
 * <<management-ops>> -- A detailed guide to the graph catalog and utility procedures included in the Neo4j Graph Data Science library.
-* <<model-catalog-ops>> -- A detailed guide to the model catalog and utility procedures included in the Neo4j Graph Data Science library.
-* <<pipeline-catalog-ops>> -- A detailed guide to the pipeline catalog and utility procedures included in the Neo4j Graph Data Science library.
 * <<algorithms>> -- A detailed guide to each of the algorithms in their respective categories, including use-cases and examples.
 * <<machine-learning>> -- A detailed guide to the machine learning procedures included in the Neo4j Graph Data Science library.
 * <<production-deployment>> -- This chapter explains advanced details with regards to common Neo4j components.
@@ -50,8 +48,6 @@ include::installation/installation.adoc[]
 include::common-usage/common-usage.adoc[]
 
 include::management-ops/management-ops.adoc[]
-
-include::model-catalog/model-catalog.adoc[]
 
 include::algorithms/algorithms-intro.adoc[]
 

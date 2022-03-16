@@ -19,3 +19,8 @@ The Neo4j GDS library includes the following algorithms to train and apply machi
 * Beta
 ** <<nodeclassification-pipelines, Node Classification Pipelines>>
 ** <<linkprediction-pipelines, Link Prediction Pipelines>>
+
+For managing the creating pipelines and models:
+
+* <<model-catalog-ops>> -- A detailed guide to the model catalog and utility procedures included in the Neo4j Graph Data Science library.
+* <<pipeline-catalog-ops>> -- A detailed guide to the pipeline catalog and utility procedures included in the Neo4j Graph Data Science library.

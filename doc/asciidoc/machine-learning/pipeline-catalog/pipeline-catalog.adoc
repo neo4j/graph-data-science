@@ -13,12 +13,3 @@ The pipeline catalog is a concept within the GDS library that allows managing mu
 
 
 This chapter explains the available pipeline catalog operations.
-
-//[[model-catalog-procs]]
-//[opts=header,cols="1m,1"]
-//|===
-//| Name                                                | Description
-//| <<catalog-model-list, gds.beta.model.list>>         | Prints information about models that are currently available in the catalog.
-//| <<catalog-model-exists, gds.beta.model.exists>>     | Checks if a named model is available in the catalog.
-//| <<catalog-model-drop, gds.beta.model.drop>>         | Drops a named model from the catalog.
-//|===
