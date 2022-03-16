@@ -122,6 +122,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
         var knnBuilder = ImmutableKnnBaseConfig.builder()
             .sampleRate(sampleRate())
             .nodeProperties(List.of(new KnnNodePropertySpec("NotUsedInLP")))
+            .minBatchSize(ApproximateLinkPrediction.MIN_NODE_BATCH_SIZE)
             .concurrency(concurrency());
 
         topK().ifPresent(knnBuilder::topK);

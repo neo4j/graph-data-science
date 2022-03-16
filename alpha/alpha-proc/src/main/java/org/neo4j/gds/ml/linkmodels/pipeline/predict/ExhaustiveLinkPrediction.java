@@ -42,6 +42,7 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 
 public class ExhaustiveLinkPrediction extends LinkPrediction {
+    private static final int MIN_NODE_BATCH_SIZE = 10;
     private final int topN;
     private final double threshold;
 
@@ -91,7 +92,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
                 partition,
                 progressTracker
             ),
-            Optional.empty()
+            Optional.of(MIN_NODE_BATCH_SIZE)
         );
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
@@ -101,7 +102,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
     }
 
     final class LinkPredictionScoreByIdsConsumer implements Runnable {
-        private final static int BATCH_SIZE = 100;
+        private final static int RELATIONSHIP_BATCH_SIZE = 100;
         private final Graph graph;
         private final LinkPredictionSimilarityComputer linkPredictionSimilarityComputer;
         private final BoundedLongLongPriorityQueue predictionQueue;
@@ -123,7 +124,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             this.progressTracker = progressTracker;
             this.partition = partition;
             this.linksConsidered = 0;
-            this.targetIdsBatchBuffer = new ArrayList<>(BATCH_SIZE);
+            this.targetIdsBatchBuffer = new ArrayList<>(RELATIONSHIP_BATCH_SIZE);
         }
 
         @Override
@@ -135,7 +136,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
                 LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
                         if (largerNeighbors.contains(targetId)) return;
                         targetIdsBatchBuffer.add(targetId);
-                        if (targetIdsBatchBuffer.size() == BATCH_SIZE) {
+                        if (targetIdsBatchBuffer.size() == RELATIONSHIP_BATCH_SIZE) {
                             flushBuffer(sourceId);
                         }
                     }
