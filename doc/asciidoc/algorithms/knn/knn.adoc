@@ -340,8 +340,6 @@ include::knn-specific-algo-config.adoc[]
 The KNN algorithm does not read any relationships, but the values for `relationshipProjection` or `relationshipQuery` are still being used and respected for the graph loading.
 ====
 
-include::knn-specific-algo-config.adoc[]
-
 The results are the same as running write mode on a named graph, see <<algorithms-knn-syntax, write mode syntax above>>.
 
 [NOTE]
