@@ -49,6 +49,7 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.procedure.Description;
@@ -67,9 +68,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CypherAggregation extends BaseProc {
@@ -85,6 +86,8 @@ public final class CypherAggregation extends BaseProc {
         );
     }
 
+    // public is required for the Cypher runtime
+    @SuppressWarnings({"WeakerAccess", "CodeBlock2Expr"})
     public static class GraphAggregator {
 
         private final ProgressTimer progressTimer;
@@ -268,7 +271,7 @@ public final class CypherAggregation extends BaseProc {
         }
 
         private @Nullable RelationshipType typeConfig(
-            String relationshipTypeKey,
+            @SuppressWarnings("SameParameterValue") String relationshipTypeKey,
             @NotNull Map<String, Object> relationshipConfig
         ) {
             var relationshipTypeEntry = relationshipConfig.remove(relationshipTypeKey);
@@ -292,8 +295,7 @@ public final class CypherAggregation extends BaseProc {
                 .nodes(this.idMapBuilder)
                 .orientation(Orientation.NATURAL)
                 .aggregation(Aggregation.NONE)
-                // TODO: concurrency from config
-                .concurrency(4);
+                .concurrency(DEFAULT_CONCURRENCY);
 
             if (this.relationshipPropertySchemas != null) {
                 for (var ignored : this.relationshipPropertySchemas) {
@@ -322,10 +324,11 @@ public final class CypherAggregation extends BaseProc {
         }
 
         private long loadNode(
-            Node node,
+            Entity node,
             NodeLabelToken nodeLabels,
             @Nullable Map<String, Value> nodeProperties
         ) {
+            assert this.idMapBuilder != null;
             return (nodeProperties == null)
                 ? this.idMapBuilder.addNode(node.getId(), nodeLabels)
                 : this.idMapBuilder.addNodeWithProperties(node.getId(), nodeProperties, nodeLabels);
@@ -461,7 +464,7 @@ public final class CypherAggregation extends BaseProc {
             return nodeSchemaBuilder.build();
         }
 
-        private static NodeSchema nodeSchemaWithoutProperties(Set<NodeLabel> nodeLabels) {
+        private static NodeSchema nodeSchemaWithoutProperties(Iterable<NodeLabel> nodeLabels) {
             var nodeSchemaBuilder = NodeSchema.builder();
             nodeLabels.forEach(nodeSchemaBuilder::addLabel);
             return nodeSchemaBuilder.build();
@@ -558,7 +561,7 @@ final class LazyIdMapBuilder implements PartialIdMap {
 
     @Override
     public long toMappedNodeId(long nodeId) {
-        return this.addNode(nodeId, NodeLabelTokens.empty());
+        return nodeId;
     }
 
     @Override
