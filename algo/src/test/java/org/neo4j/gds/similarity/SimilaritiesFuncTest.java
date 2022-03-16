@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SimilaritiesFuncTest extends BaseProcTest {
@@ -120,28 +122,32 @@ class SimilaritiesFuncTest extends BaseProcTest {
     void testCosineWithNulls() {
         var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
         var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
-        assertEquals(0, new SimilaritiesFunc().cosineSimilarity(left, right));
+        assertThat(new SimilaritiesFunc().cosineSimilarity(left, right))
+            .isCloseTo(0.8485, Offset.offset(0.001));
     }
 
     @Test
     void testEuclideanSimilarityWithNulls() {
         var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
         var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
-        assertEquals(0, new SimilaritiesFunc().euclideanSimilarity(left, right));
+        assertThat(new SimilaritiesFunc().euclideanSimilarity(left, right))
+            .isCloseTo(0.3660, Offset.offset(0.001));
     }
 
     @Test
     void testEuclideanDistanceWithNulls() {
         var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
         var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
-        assertEquals(0, new SimilaritiesFunc().euclideanDistance(left, right));
+        assertThat(new SimilaritiesFunc().euclideanDistance(left, right))
+            .isCloseTo(1.732, Offset.offset(0.001));
     }
 
     @Test
     void testPearsonWithNulls() {
         var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
         var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
-        assertEquals(0, new SimilaritiesFunc().pearsonSimilarity(left, right));
+        assertThat(new SimilaritiesFunc().pearsonSimilarity(left, right))
+            .isCloseTo(0.6546, Offset.offset(0.001));
     }
 
     @Test

@@ -56,8 +56,8 @@ public class SimilaritiesFunc {
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2
     ) {
-
         int len = validateLength(vector1, vector2);
+
         double[] weights1 = new double[len];
         double[] weights2 = new double[len];
 
@@ -75,7 +75,6 @@ public class SimilaritiesFunc {
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2
     ) {
-
         int len = validateLength(vector1, vector2);
 
         double[] weights1 = new double[len];
@@ -201,7 +200,7 @@ public class SimilaritiesFunc {
     }
 
     private static double getDoubleValue(Number value) {
-        return Optional.ofNullable(value).map(Number::doubleValue).orElse(Double.NaN);
+        return Optional.ofNullable(value).map(Number::doubleValue).orElse(0D);
     }
 
     static class NumberComparator implements Comparator<Number> {
