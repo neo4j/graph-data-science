@@ -20,11 +20,98 @@
 package org.neo4j.gds.beta.closeness;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.beta.closeness.ClosenessCentrality.centrality;
 
+/**
+ * Graph:
+ *
+ * (A)<-->(B)<-->(C)<-->(D)<-->(E)
+ *
+ * Calculation:
+ *
+ * N = 5        // number of nodes
+ * k = N-1 = 4  // used for normalization
+ *
+ * A     B     C     D     E
+ * --|-----------------------------
+ * A | 0     1     2     3     4       // farness between each pair of nodes
+ * B | 1     0     1     2     3
+ * C | 2     1     0     1     2
+ * D | 3     2     1     0     1
+ * E | 4     3     2     1     0
+ * --|-----------------------------
+ * S | 10    7     6     7     10      // sum each column
+ * ==|=============================
+ * k/S| 0.4  0.57  0.67  0.57   0.4     // normalized centrality
+ */
+@GdlExtension
 class ClosenessCentralityTest {
+
+    @GdlGraph
+    private static final String DB_CYPHER =
+        "CREATE " +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+
+        ", (a)-[:TYPE]->(b)" +
+        ", (b)-[:TYPE]->(a)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (c)-[:TYPE]->(b)" +
+        ", (c)-[:TYPE]->(d)" +
+        ", (d)-[:TYPE]->(c)" +
+        ", (d)-[:TYPE]->(e)" +
+        ", (e)-[:TYPE]->(d)";
+
+    private static final double[] EXPECTED = new double[]{0.4, 0.57, 0.66, 0.57, 0.4};
+
+    @Inject
+    private Graph graph;
+
+    @Test
+    void testGetCentrality() {
+        ClosenessCentrality algo = new ClosenessCentrality(
+            graph,
+            ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            false,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+        algo.compute();
+        final double[] centrality = algo.getCentrality().toArray();
+
+        assertArrayEquals(EXPECTED, centrality, 0.1);
+    }
+
+    @Test
+    void testStream() {
+        final double[] centrality = new double[(int) graph.nodeCount()];
+
+        ClosenessCentrality algo = new ClosenessCentrality(
+            graph,
+            ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            false,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> centrality[Math.toIntExact(graph.toMappedNodeId(r.nodeId))] = r.centrality);
+
+        assertArrayEquals(EXPECTED, centrality, 0.1);
+    }
 
     @Test
     void testCentralityFormula() {
@@ -42,7 +129,7 @@ class ClosenessCentralityTest {
         assertEquals(0.5, centrality(10, 5, 10, false), 0.01);
         assertEquals(0, centrality(0, 0, 10, false), 0.01);
 
-        assertEquals(5/9D, centrality(5, 5, 10, true), 0.01);
+        assertEquals(5 / 9D, centrality(5, 5, 10, true), 0.01);
         assertEquals(1.25, centrality(5, 5, 5, true), 0.01);
     }
 }

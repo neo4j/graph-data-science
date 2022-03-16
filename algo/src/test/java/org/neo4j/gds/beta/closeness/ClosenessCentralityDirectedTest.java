@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl;
+package org.neo4j.gds.beta.closeness;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.beta.closeness.ClosenessCentrality;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -34,53 +33,60 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 /**
  * Graph:
  *
- *  (A)<-->(B)<-->(C)<-->(D)<-->(E)
+ * (A) <->  (B)  <- (C)
+ * (D) <->  (E) <- (F)
  *
  * Calculation:
  *
- * N = 5        // number of nodes
- * k = N-1 = 4  // used for normalization
+ * standard:
  *
- *      A     B     C     D     E
- *  --|-----------------------------
- *  A | 0     1     2     3     4       // farness between each pair of nodes
- *  B | 1     0     1     2     3
- *  C | 2     1     0     1     2
- *  D | 3     2     1     0     1
- *  E | 4     3     2     1     0
- *  --|-----------------------------
- *  S | 10    7     6     7     10      // sum each column
- *  ==|=============================
- * k/S| 0.4  0.57  0.67  0.57   0.4     // normalized centrality
+ * d(A,B)=1
+ * d(C,B)=1  farness(B)=2  component(B)=2  CC(B)=1
+ * d(B,A)=1
+ * d(C,A)=2  farness(A)= 3 component(A)=2 CC(A)=2/3
+ *
+ * d(A,C)=inf
+ * d(B,C)=inf farness(C)=inf, comp(C)=0  CC(C)=0
+ *
+ * D,E,F follow suit
+ *
+ * with WF:
+ *
+ * CCWF(B) = (4/5) * (1/2) =  2/5
+ * CCWF(A) =  (4/5) * (1/3) = 4/15
+ * CCWF(C) = 0
+ *
+ * D,E,F follow suit
  */
 @GdlExtension
-class ClosenessCentralityTest {
+class ClosenessCentralityDirectedTest {
 
     @GdlGraph
     private static final String DB_CYPHER =
-            "CREATE " +
-            "  (a:Node)" +
-            ", (b:Node)" +
-            ", (c:Node)" +
-            ", (d:Node)" +
-            ", (e:Node)" +
+        "CREATE " +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+        
+        ", (a)-[:TYPE]->(b)" +
+        ", (b)-[:TYPE]->(a)" +
+        ", (c)-[:TYPE]->(b)" +
+        ", (d)-[:TYPE]->(e)" +
+        ", (e)-[:TYPE]->(d)" +
+        ", (f)-[:TYPE]->(e)";
 
-            ", (a)-[:TYPE]->(b)" +
-            ", (b)-[:TYPE]->(a)" +
-            ", (b)-[:TYPE]->(c)" +
-            ", (c)-[:TYPE]->(b)" +
-            ", (c)-[:TYPE]->(d)" +
-            ", (d)-[:TYPE]->(c)" +
-            ", (d)-[:TYPE]->(e)" +
-            ", (e)-[:TYPE]->(d)";
+    private static final double[] EXPECTED = new double[]{2 / 3.0, 1, 0, 2 / 3.0, 1, 0};
+    private static final double[] EXPECTED_WF = new double[]{4 / 15.0, 2 / 5.0, 0, 4 / 15.0, 2 / 5.0, 0};
 
-    private static final double[] EXPECTED = new double[]{0.4, 0.57, 0.66, 0.57, 0.4};
 
     @Inject
     private Graph graph;
 
     @Test
-    void testGetCentrality() {
+    void testCentrality() {
         ClosenessCentrality algo = new ClosenessCentrality(
             graph,
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
@@ -95,7 +101,22 @@ class ClosenessCentralityTest {
     }
 
     @Test
-    void testStream() {
+    void testCentralityWithWassermanFaust() {
+        ClosenessCentrality algo = new ClosenessCentrality(
+            graph,
+            ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            true,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+        algo.compute();
+        final double[] centrality = algo.getCentrality().toArray();
+
+        assertArrayEquals(EXPECTED_WF, centrality, 0.1);
+    }
+
+    @Test
+    void testStreamIfOnADirectedGraph() {
         final double[] centrality = new double[(int) graph.nodeCount()];
 
         ClosenessCentrality algo = new ClosenessCentrality(
