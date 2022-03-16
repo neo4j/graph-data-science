@@ -561,7 +561,7 @@ final class LazyIdMapBuilder implements PartialIdMap {
 
     @Override
     public long toMappedNodeId(long nodeId) {
-        return this.addNode(nodeId, NodeLabelTokens.empty());
+        return nodeId;
     }
 
     @Override
