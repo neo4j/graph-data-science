@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -48,7 +47,7 @@ final class NodePropertySampler {
 
     private final long nodesToSample;
     private final GraphStore graphStore;
-    private final Map<Set<NodeLabel>, NodeLabelSample> schemaSamples;
+    private final Map<List<NodeLabel>, NodeLabelSample> schemaSamples;
 
     private NodePropertySampler(GraphStore graphStore, double samplingFactor) {
         this.graphStore = graphStore;

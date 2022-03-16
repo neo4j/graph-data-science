@@ -42,6 +42,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -239,7 +240,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
-    public Set<NodeLabel> nodeLabels(long nodeId) {
+    public List<NodeLabel> nodeLabels(long nodeId) {
         return filteredIdMap.nodeLabels(nodeId);
     }
 

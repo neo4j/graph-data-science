@@ -26,6 +26,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -42,7 +43,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class LabelInformation {
 
-    private static final Set<NodeLabel> ALL_NODES_LABELS = Set.of(NodeLabel.ALL_NODES);
+    private static final List<NodeLabel> ALL_NODES_LABELS = List.of(NodeLabel.ALL_NODES);
+    private static final Set<NodeLabel> ALL_NODES_LABEL_SET = Set.of(NodeLabel.ALL_NODES);
 
     public static LabelInformation from(Map<NodeLabel, BitSet> labelInformation) {
         return new LabelInformation(labelInformation);
@@ -92,22 +94,22 @@ public final class LabelInformation {
 
     public Set<NodeLabel> availableNodeLabels() {
         return labelInformation.isEmpty()
-            ? ALL_NODES_LABELS
+            ? ALL_NODES_LABEL_SET
             : labelSet();
     }
 
-    public Set<NodeLabel> nodeLabelsForNodeId(long nodeId) {
+    public List<NodeLabel> nodeLabelsForNodeId(long nodeId) {
         if (isEmpty()) {
             return ALL_NODES_LABELS;
         } else {
-            Set<NodeLabel> set = new HashSet<>();
+            List<NodeLabel> labels = new ArrayList<>();
             forEach((nodeLabel, bitSet) -> {
                 if (bitSet.get(nodeId)) {
-                    set.add(nodeLabel);
+                    labels.add(nodeLabel);
                 }
                 return true;
             });
-            return set;
+            return labels;
         }
     }
 

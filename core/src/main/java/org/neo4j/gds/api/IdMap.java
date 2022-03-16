@@ -22,6 +22,7 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.NodeLabel;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -77,7 +78,7 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
 
     long highestNeoId();
 
-    Set<NodeLabel> nodeLabels(long nodeId);
+    List<NodeLabel> nodeLabels(long nodeId);
 
     void forEachNodeLabel(long nodeId, IdMap.NodeLabelConsumer consumer);
 

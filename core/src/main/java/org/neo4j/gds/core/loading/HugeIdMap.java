@@ -34,6 +34,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.LongPredicate;
@@ -160,7 +161,7 @@ public class HugeIdMap implements IdMap {
     }
 
     @Override
-    public Set<NodeLabel> nodeLabels(long nodeId) {
+    public List<NodeLabel> nodeLabels(long nodeId) {
         return labelInformation.nodeLabelsForNodeId(nodeId);
     }
 
@@ -230,7 +231,7 @@ public class HugeIdMap implements IdMap {
         }
 
         @Override
-        public Set<NodeLabel> nodeLabels(long nodeId) {
+        public List<NodeLabel> nodeLabels(long nodeId) {
             return super.nodeLabels(toOriginalNodeId(nodeId));
         }
 

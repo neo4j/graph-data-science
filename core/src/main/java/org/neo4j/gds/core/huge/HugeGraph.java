@@ -41,6 +41,7 @@ import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -503,7 +504,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public Set<NodeLabel> nodeLabels(long nodeId) {
+    public List<NodeLabel> nodeLabels(long nodeId) {
         return idMap.nodeLabels(nodeId);
     }
 
