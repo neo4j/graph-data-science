@@ -39,10 +39,8 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
-import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -78,18 +76,9 @@ public final class CypherAggregation extends BaseProc {
     @UserAggregationFunction(name = "gds.alpha.graph.project")
     @Description("Creates a named graph in the catalog for use by algorithms.")
     public GraphAggregator projectFromCypherAggregation() {
-
         var progressTimer = ProgressTimer.start();
-        var catalogRequest = ImmutableCatalogRequest.of(
-            databaseId().name(),
-            username(),
-            Optional.empty(),
-            isGdsAdmin()
-        );
-
         return new GraphAggregator(
             progressTimer,
-            catalogRequest,
             this.api.databaseId(),
             username()
         );
@@ -98,9 +87,11 @@ public final class CypherAggregation extends BaseProc {
     public static class GraphAggregator {
 
         private final ProgressTimer progressTimer;
-        private final CatalogRequest catalogRequest;
         private final NamedDatabaseId databaseId;
         private final String username;
+
+        // #result() is called twice, we cache the result of the first call to return it again in the second invocation
+        private @Nullable Map<String, Object> result;
 
         private @Nullable String graphName;
         private @Nullable LazyIdMapBuilder idMapBuilder;
@@ -109,12 +100,10 @@ public final class CypherAggregation extends BaseProc {
 
         GraphAggregator(
             ProgressTimer progressTimer,
-            CatalogRequest catalogRequest,
             NamedDatabaseId databaseId,
             String username
         ) {
             this.progressTimer = progressTimer;
-            this.catalogRequest = catalogRequest;
             this.databaseId = databaseId;
             this.username = username;
             this.relImporters = new HashMap<>();
@@ -232,10 +221,11 @@ public final class CypherAggregation extends BaseProc {
         @Nullable
         private Map<String, Value> propertiesConfig(
             String propertyKey,
-            @NotNull Map<String, Object> proeprtiesConfig
+            @NotNull Map<String, Object> propertiesConfig
         ) {
-            var nodeProperties = proeprtiesConfig.remove(propertyKey);
+            var nodeProperties = propertiesConfig.remove(propertyKey);
             if (nodeProperties == null || nodeProperties instanceof Map) {
+                //noinspection unchecked
                 return objectsToValues((Map<String, Object>) nodeProperties);
             }
             throw new IllegalArgumentException(formatWithLocale(
@@ -364,28 +354,22 @@ public final class CypherAggregation extends BaseProc {
         //  to a Map<String, Object> (similar to toMap in configuration)
         @UserAggregationResult
         @ReturnType(AggregationResult.class)
-        public Map<String, Object> result() {
+        public @Nullable Map<String, Object> result() {
 
             var graphName = this.graphName;
 
             if (graphName == null) {
-                return Map.of(
-                    "graphName", "<no data was projected>",
-                    "nodeCount", 0,
-                    "relationshipCount", 0,
-                    "projectMillis", this.progressTimer.stop().getDuration()
-                );
+                // Nothing aggregated
+                return null;
             }
 
-            if (GraphStoreCatalog.exists(this.username, this.databaseId, graphName)) {
-                var graphStore = GraphStoreCatalog.get(this.catalogRequest, graphName).graphStore();
-                return Map.of(
-                    "graphName", graphName,
-                    "nodeCount", graphStore.nodeCount(),
-                    "relationshipCount", graphStore.relationshipCount(),
-                    "projectMillis", this.progressTimer.stop().getDuration()
-                );
+            if (this.result != null) {
+                return this.result;
             }
+
+            // in case something else has written something with the same graph name
+            // validate again before doing the heavier graph building
+            validateGraphName(graphName);
 
             var graphStoreBuilder = new GraphStoreBuilder()
                 .concurrency(4)
@@ -405,12 +389,14 @@ public final class CypherAggregation extends BaseProc {
 
             var projectMillis = this.progressTimer.stop().getDuration();
 
-            return Map.of(
+            this.result = Map.of(
                 "graphName", graphName,
                 "nodeCount", graphStore.nodeCount(),
                 "relationshipCount", graphStore.relationshipCount(),
                 "projectMillis", projectMillis
             );
+
+            return this.result;
         }
 
         private PartialIdMap buildNodesWithProperties(GraphStoreBuilder graphStoreBuilder) {
@@ -449,6 +435,9 @@ public final class CypherAggregation extends BaseProc {
                 graphStoreBuilder.putRelationships(relType, allRelationships.get(0).topology());
                 graphStoreBuilder.putRelationshipPropertyStores(relType, propertyStore);
             });
+            // release all references to the builders
+            // we are only be called once and don't support double invocations of `result` building
+            this.relImporters.clear();
         }
 
         private static NodeSchema nodeSchemaWithProperties(Map<NodeLabel, Map<String, NodeProperties>> nodeSchemaMap) {
