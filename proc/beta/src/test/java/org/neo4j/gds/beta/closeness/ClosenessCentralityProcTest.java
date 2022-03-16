@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.beta.closeness;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.AdditionalMatchers;
-import org.mockito.Mock;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
@@ -47,24 +46,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 
 class ClosenessCentralityProcTest extends BaseProcTest {
 
     public static final String TYPE = "TYPE";
 
-    private static long centerNodeId;
-
-    interface TestConsumer {
-        void accept(long nodeId, double centrality);
-    }
-
-    @Mock
-    private TestConsumer consumer;
+    private List<Map<String, Object>> expectedCentralityResult;
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -83,7 +70,7 @@ class ClosenessCentralityProcTest extends BaseProcTest {
                 .setLabel("Node")
                 .createNode();
 
-        centerNodeId = center.getId();
+        long centerNodeId = center.getId();
 
         builder.newRingBuilder()
             .createRing(5)
@@ -92,6 +79,20 @@ class ClosenessCentralityProcTest extends BaseProcTest {
             .createRing(5)
             .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
             .close();
+
+        expectedCentralityResult = List.of(
+            Map.of("nodeId", centerNodeId, "centrality", Matchers.closeTo(1.0, 0.01)),
+            Map.of("nodeId", 1L, "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", 2L, "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", 3L, "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", 4L, "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", 5L, "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", 6L, "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", 7L, "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", 8L, "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", 9L, "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", 10L, "centrality", Matchers.closeTo(0.588, 0.01))
+        );
 
         registerProcedures(
             ClosenessCentralityWriteProc.class,
@@ -107,14 +108,8 @@ class ClosenessCentralityProcTest extends BaseProcTest {
         String query = gdsCypher()
             .streamMode()
             .yields("nodeId", "centrality");
-        runQueryWithRowConsumer(query, row -> {
-            consumer.accept(
-                row.getNumber("nodeId").longValue(),
-                row.getNumber("centrality").doubleValue()
-            );
-        });
 
-        verifyMock();
+        assertCypherResult(query, expectedCentralityResult);
     }
 
     @Test
@@ -134,17 +129,10 @@ class ClosenessCentralityProcTest extends BaseProcTest {
             assertEquals(1.0, (Double) centralityDistribution.get("max"), 1e-2);
         });
 
-        runQueryWithRowConsumer(
-            "MATCH (n) WHERE exists(n.centrality) RETURN id(n) AS id, n.centrality AS centrality",
-            row -> {
-                consumer.accept(
-                    row.getNumber("id").longValue(),
-                    row.getNumber("centrality").doubleValue()
-                );
-            }
+        assertCypherResult(
+            "MATCH (n) WHERE exists(n.centrality) RETURN id(n) AS nodeId, n.centrality AS centrality",
+            expectedCentralityResult
         );
-
-        verifyMock();
     }
 
     @Test
@@ -167,18 +155,10 @@ class ClosenessCentralityProcTest extends BaseProcTest {
         assertCypherResult(
             "MATCH (n) WHERE exists(n.centrality) RETURN count(n) AS count ", List.of(Map.of("count", 0L)));
 
-        String mutateTestQuery = "CALL gds.graph.streamNodeProperties('graph',['centrality']) YIELD nodeId, propertyValue";
-        runQueryWithRowConsumer(
-            mutateTestQuery,
-            row -> {
-                consumer.accept(
-                    row.getNumber("nodeId").longValue(),
-                    row.getNumber("propertyValue").doubleValue()
-                );
-            }
+        assertCypherResult(
+            "CALL gds.graph.streamNodeProperties('graph',['centrality']) YIELD nodeId, propertyValue AS centrality",
+            expectedCentralityResult
         );
-
-        verifyMock();
     }
 
 
@@ -208,10 +188,5 @@ class ClosenessCentralityProcTest extends BaseProcTest {
     private GdsCypher.ModeBuildStage gdsCypher() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
         return GdsCypher.call(DEFAULT_GRAPH_NAME).algo("gds.alpha.closeness");
-    }
-
-    private void verifyMock() {
-        verify(consumer, times(1)).accept(eq(centerNodeId), AdditionalMatchers.eq(1.0, 0.01));
-        verify(consumer, times(10)).accept(anyLong(), AdditionalMatchers.eq(0.588, 0.01));
     }
 }
