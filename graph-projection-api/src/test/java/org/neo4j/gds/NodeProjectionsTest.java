@@ -147,6 +147,38 @@ class NodeProjectionsTest {
             .hasMessage("Duplicate property key `prop`");
     }
 
+    @Test
+    void shouldFailOnAmbiguousNodePropertyDefinition() {
+        var builder = NodeProjections.builder().projections(Map.of(
+            NodeLabel.of("A"),
+            NodeProjection
+                .builder()
+                .label("A")
+                .properties(PropertyMappings
+                    .builder()
+                    .addMapping(PropertyMapping.of("foo", "bar", DefaultValue.DEFAULT))
+                    .build()
+                )
+                .build(),
+
+            NodeLabel.of("B"),
+            NodeProjection
+                .builder()
+                .label("B")
+                .properties(PropertyMappings
+                    .builder()
+                    .addMapping(PropertyMapping.of("foo", "baz", DefaultValue.DEFAULT))
+                    .build()
+                )
+                .build()
+
+        ));
+
+        assertThatThrownBy(builder::build)
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Specifying multiple neoPropertyKeys for the same property is not allowed, found propertyKey: foo, neoPropertyKeys");
+    }
+
     static Stream<Arguments> syntacticSugarsSimple() {
         return Stream.of(
             Arguments.of(
