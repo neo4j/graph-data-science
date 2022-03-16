@@ -122,6 +122,9 @@ public class SimilaritiesFunc {
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2
     ) {
+        vector1.removeIf(IS_NULL);
+        vector2.removeIf(IS_NULL);
+
         if (vector1 == null || vector2 == null) {
             return 0;
         }
