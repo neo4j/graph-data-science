@@ -72,7 +72,7 @@ The similarity measure used in the KNN algorithm depends on the type of the conf
 KNN supports both scalar numeric values and lists of numbers.
 
 
-==== Scalar numeric property
+==== Scalar numbers
 
 When a property is a scalar number, the similarity is computed as follows:
 
@@ -85,12 +85,13 @@ This gives us a number in the range `(0, 1]`.
 
 When a property is a list of integers, similarity can be measured with either the Jaccard similarity or the Overlap coefficient.
 
-Jaccard similarity is defined as follows:
-
+Jaccard similarity::
++
 image::knn-formulas/jacard.svg[title="size of intersection divided by size of union", float="center"]
 
-The Overlap coefficient is defined as follows:
 
+Overlap coefficient::
++
 image::knn-formulas/overlap.svg[title="size of intersection divided by size of minimum set", float="center"]
 
 Both of these metrics give a score in the range `[0, 1]` and no normalization needs to be performed.
@@ -101,8 +102,10 @@ Jaccard similarity is used as the default option for comparing lists of integers
 
 When a property is a list of floating-point numbers, there are three alternatives for computing similarity between two nodes.
 
-The default metric used is that of Cosine similarity, which is defined as follows:
+The default metric used is that of Cosine similarity.
 
+Cosine similarity::
++
 image::knn-formulas/cosine.svg[title="dot product of the vectors divided by the product of their lengths", float="center"]
 
 Notice that the above formula gives a score in the range of `[-1, 1]` .
@@ -110,14 +113,18 @@ The score is normalized into the range `[0, 1]` by doing `score = (score + 1) / 
 
 The other two metrics include the Pearson correlation score and Normalized Euclidean similarity.
 
-The Pearson correlation score is defined as follows:
+// The Pearson correlation score is defined as follows:
 
+Pearson correlation score::
++
 image::knn-formulas/pearson.svg[title="covariance divided by the product of the standard deviations", float="center"]
 
 As above, the formula gives a score in the range `[-1, 1]`, which is normalized into the range `[0, 1]` similarly.
 
-The Normalized Euclidean Similarity works by first calculating the Euclidean distance as follows:
+// The Normalized Euclidean Similarity works by first calculating the Euclidean distance as follows:
 
+Euclidean similarity::
++
 image::knn-formulas/ed.svg[title="the root of the sum of the square difference between each pair of elements", float="center"]
 
 The result from this formula is a non-negative value, but is not necessarily bounded into the  `[0, 1]` range.
