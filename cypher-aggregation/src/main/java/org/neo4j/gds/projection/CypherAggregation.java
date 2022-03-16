@@ -86,6 +86,8 @@ public final class CypherAggregation extends BaseProc {
         );
     }
 
+    // public is required for the Cypher runtime
+    @SuppressWarnings({"WeakerAccess", "CodeBlock2Expr"})
     public static class GraphAggregator {
 
         private final ProgressTimer progressTimer;
@@ -269,7 +271,7 @@ public final class CypherAggregation extends BaseProc {
         }
 
         private @Nullable RelationshipType typeConfig(
-            String relationshipTypeKey,
+            @SuppressWarnings("SameParameterValue") String relationshipTypeKey,
             @NotNull Map<String, Object> relationshipConfig
         ) {
             var relationshipTypeEntry = relationshipConfig.remove(relationshipTypeKey);
@@ -326,6 +328,7 @@ public final class CypherAggregation extends BaseProc {
             NodeLabelToken nodeLabels,
             @Nullable Map<String, Value> nodeProperties
         ) {
+            assert this.idMapBuilder != null;
             return (nodeProperties == null)
                 ? this.idMapBuilder.addNode(node.getId(), nodeLabels)
                 : this.idMapBuilder.addNodeWithProperties(node.getId(), nodeProperties, nodeLabels);
