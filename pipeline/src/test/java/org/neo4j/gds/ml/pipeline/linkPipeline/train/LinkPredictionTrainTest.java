@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
@@ -391,7 +392,7 @@ class LinkPredictionTrainTest {
                 .modelName("DUMMY")
                 .graphName("DUMMY")
                 .pipeline("DUMMY")
-                .concurrency(1)
+                .concurrency(4)
                 .build(),
             progressTracker
         ).compute();
@@ -442,20 +443,21 @@ class LinkPredictionTrainTest {
                 .modelName("DUMMY")
                 .graphName("DUMMY")
                 .pipeline("DUMMY")
-                .concurrency(1)
+                .concurrency(4)
                 .build(),
             progressTracker
         ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
+            .extracting(keepingFixedNumberOfDecimals())
             .contains(
                 "LinkPredictionTrain :: train best model :: Start",
-                "LinkPredictionTrain :: train best model :: Epoch 1 with loss 0.688097",
-                "LinkPredictionTrain :: train best model :: Epoch 2 with loss 0.683214",
-                "LinkPredictionTrain :: train best model :: Epoch 3 with loss 0.678498",
-                "LinkPredictionTrain :: train best model :: Epoch 4 with loss 0.673953",
-                "LinkPredictionTrain :: train best model :: Epoch 5 with loss 0.669577",
+                "LinkPredictionTrain :: train best model :: Epoch 1 with loss 0.688097317504",
+                "LinkPredictionTrain :: train best model :: Epoch 2 with loss 0.683213654690",
+                "LinkPredictionTrain :: train best model :: Epoch 3 with loss 0.678498422872",
+                "LinkPredictionTrain :: train best model :: Epoch 4 with loss 0.673952840083",
+                "LinkPredictionTrain :: train best model :: Epoch 5 with loss 0.669576960529",
                 "LinkPredictionTrain :: train best model :: Finished"
             );
     }

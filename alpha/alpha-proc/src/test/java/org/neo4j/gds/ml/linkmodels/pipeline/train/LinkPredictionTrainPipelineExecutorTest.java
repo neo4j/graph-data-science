@@ -69,6 +69,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
@@ -366,6 +367,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
+                .extracting(keepingFixedNumberOfDecimals())
                 .contains(
                     "Link Prediction Train Pipeline :: Start",
                     "Link Prediction Train Pipeline :: split relationships :: Start",
@@ -385,8 +387,8 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                     "Link Prediction Train Pipeline :: LinkPredictionTrain :: select model 100%",
                     "Link Prediction Train Pipeline :: LinkPredictionTrain :: select model :: Finished",
                     "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Start",
-                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Epoch 1 with loss 0.689119",
-                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Epoch 100 with loss 0.465553",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Epoch 1 with loss 0.689118610778",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Epoch 100 with loss 0.465553153928",
                     "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Finished",
                     "Link Prediction Train Pipeline :: LinkPredictionTrain :: compute train metrics :: Start",
                     "Link Prediction Train Pipeline :: LinkPredictionTrain :: compute train metrics 100%",

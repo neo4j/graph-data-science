@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.train;
 
-import org.assertj.core.api.iterable.ThrowingExtractor;
 import org.assertj.core.data.Percentage;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -54,6 +52,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 
@@ -143,8 +142,9 @@ class NodeClassificationTrainTest {
         double model1Score = validationScores.get(0).avg();
         double model2Score = validationScores.get(1).avg();
         double model3Score = validationScores.get(2).avg();
-        assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));
-        assertThat(model1Score).isNotCloseTo(model3Score, Percentage.withPercentage(0.2));
+        assertThat(model1Score)
+            .isNotCloseTo(model2Score, Percentage.withPercentage(0.2))
+            .isNotCloseTo(model3Score, Percentage.withPercentage(0.2));
 
         var actualWinnerParams = customInfo.bestParameters();
         assertThat(actualWinnerParams).isEqualTo(expectedWinner);
@@ -358,11 +358,6 @@ class NodeClassificationTrainTest {
                 "NCTrain :: RetrainSelectedModel :: Finished",
                 "NCTrain :: Finished"
             );
-    }
-
-    @NotNull
-    private static ThrowingExtractor<String, String, RuntimeException> keepingFixedNumberOfDecimals() {
-        return msg -> msg.replaceAll("([\\d]+\\.[\\d]{1,12})[\\d]*", "$1");
     }
 
     @ParameterizedTest
