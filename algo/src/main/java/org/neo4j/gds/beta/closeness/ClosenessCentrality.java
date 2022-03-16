@@ -28,8 +28,6 @@ import org.neo4j.gds.msbfs.BfsConsumer;
 import org.neo4j.gds.msbfs.MultiSourceBFS;
 
 import java.util.concurrent.ExecutorService;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 /**
  * Normalized Closeness Centrality
@@ -87,17 +85,6 @@ public class ClosenessCentrality extends Algorithm<ClosenessCentrality> {
         return cc;
     }
 
-    public Stream<ClosenessCentrality.Result> resultStream() {
-        return LongStream.range(0L, nodeCount)
-            .mapToObj(nodeId -> new ClosenessCentrality.Result(
-                graph.toOriginalNodeId(nodeId),
-                centrality(farness.get(nodeId), component.get(nodeId), nodeCount, wassermanFaust)
-            ));
-    }
-
-    @Override
-    public void release() {}
-
     @Override
     public ClosenessCentrality compute() {
         progressTracker.beginSubTask();
@@ -116,26 +103,7 @@ public class ClosenessCentrality extends Algorithm<ClosenessCentrality> {
         return this;
     }
 
-    /**
-     * Result class used for streaming
-     */
-    public static final class Result {
+    @Override
+    public void release() {}
 
-        public final long nodeId;
-
-        public final double centrality;
-
-        public Result(long nodeId, double centrality) {
-            this.nodeId = nodeId;
-            this.centrality = centrality;
-        }
-
-        @Override
-        public String toString() {
-            return "Result{" +
-                    "nodeId=" + nodeId +
-                    ", centrality=" + centrality +
-                    '}';
-        }
-    }
 }

@@ -26,9 +26,10 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Graph:
@@ -70,7 +71,7 @@ class ClosenessCentralityDirectedTest {
         ", (d:Node)" +
         ", (e:Node)" +
         ", (f:Node)" +
-        
+
         ", (a)-[:TYPE]->(b)" +
         ", (b)-[:TYPE]->(a)" +
         ", (c)-[:TYPE]->(b)" +
@@ -78,58 +79,47 @@ class ClosenessCentralityDirectedTest {
         ", (e)-[:TYPE]->(d)" +
         ", (f)-[:TYPE]->(e)";
 
-    private static final double[] EXPECTED = new double[]{2 / 3.0, 1, 0, 2 / 3.0, 1, 0};
-    private static final double[] EXPECTED_WF = new double[]{4 / 15.0, 2 / 5.0, 0, 4 / 15.0, 2 / 5.0, 0};
-
-
     @Inject
     private Graph graph;
 
+    @Inject
+    private IdFunction idFunction;
+
     @Test
     void testCentrality() {
-        ClosenessCentrality algo = new ClosenessCentrality(
+        var algo = new ClosenessCentrality(
             graph,
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
             false,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
-        algo.compute();
-        final double[] centrality = algo.getCentrality().toArray();
 
-        assertArrayEquals(EXPECTED, centrality, 0.1);
+        var result = algo.compute().getCentrality();
+        assertThat(result.get(idFunction.of("a"))).isEqualTo(2 / 3.0);
+        assertThat(result.get(idFunction.of("b"))).isEqualTo(1);
+        assertThat(result.get(idFunction.of("c"))).isEqualTo(0);
+        assertThat(result.get(idFunction.of("d"))).isEqualTo(2 / 3.0);
+        assertThat(result.get(idFunction.of("e"))).isEqualTo(1);
+        assertThat(result.get(idFunction.of("f"))).isEqualTo(0);
     }
 
     @Test
     void testCentralityWithWassermanFaust() {
-        ClosenessCentrality algo = new ClosenessCentrality(
+        var algo = new ClosenessCentrality(
             graph,
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
             true,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
-        algo.compute();
-        final double[] centrality = algo.getCentrality().toArray();
 
-        assertArrayEquals(EXPECTED_WF, centrality, 0.1);
-    }
-
-    @Test
-    void testStreamIfOnADirectedGraph() {
-        final double[] centrality = new double[(int) graph.nodeCount()];
-
-        ClosenessCentrality algo = new ClosenessCentrality(
-            graph,
-            ConcurrencyConfig.DEFAULT_CONCURRENCY,
-            false,
-            Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
-        );
-        algo.compute();
-        algo.resultStream()
-            .forEach(r -> centrality[Math.toIntExact(graph.toMappedNodeId(r.nodeId))] = r.centrality);
-
-        assertArrayEquals(EXPECTED, centrality, 0.1);
+        var result = algo.compute().getCentrality();
+        assertThat(result.get(idFunction.of("a"))).isEqualTo(4 / 15.0);
+        assertThat(result.get(idFunction.of("b"))).isEqualTo(2 / 5.0);
+        assertThat(result.get(idFunction.of("c"))).isEqualTo(0);
+        assertThat(result.get(idFunction.of("d"))).isEqualTo(4 / 15.0);
+        assertThat(result.get(idFunction.of("e"))).isEqualTo(2 / 5.0);
+        assertThat(result.get(idFunction.of("f"))).isEqualTo(0);
     }
 }

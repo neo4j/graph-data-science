@@ -94,7 +94,6 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
             .withNodeCount(computeResult.graph().nodeCount());
     }
 
-    @SuppressWarnings("unused")
     public static final class MutateResult {
 
         public final long nodePropertiesWritten;
@@ -131,7 +130,7 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
         static final class Builder extends AbstractCentralityResultBuilder<ClosenessCentralityMutateProc.MutateResult> {
             public String mutateProperty;
 
-            protected Builder(ProcedureCallContext callContext, int concurrency) {
+            private Builder(ProcedureCallContext callContext, int concurrency) {
                 super(callContext, concurrency);
             }
 

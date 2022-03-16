@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.closeness;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ConcurrencyConfig;
@@ -26,9 +27,10 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.beta.closeness.ClosenessCentrality.centrality;
 
@@ -75,42 +77,29 @@ class ClosenessCentralityTest {
         ", (d)-[:TYPE]->(e)" +
         ", (e)-[:TYPE]->(d)";
 
-    private static final double[] EXPECTED = new double[]{0.4, 0.57, 0.66, 0.57, 0.4};
-
     @Inject
     private Graph graph;
 
+    @Inject
+    private IdFunction idFunction;
+
     @Test
     void testGetCentrality() {
-        ClosenessCentrality algo = new ClosenessCentrality(
+        var algo = new ClosenessCentrality(
             graph,
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
             false,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
-        algo.compute();
-        final double[] centrality = algo.getCentrality().toArray();
 
-        assertArrayEquals(EXPECTED, centrality, 0.1);
-    }
+        var result = algo.compute().getCentrality();
 
-    @Test
-    void testStream() {
-        final double[] centrality = new double[(int) graph.nodeCount()];
-
-        ClosenessCentrality algo = new ClosenessCentrality(
-            graph,
-            ConcurrencyConfig.DEFAULT_CONCURRENCY,
-            false,
-            Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
-        );
-        algo.compute();
-        algo.resultStream()
-            .forEach(r -> centrality[Math.toIntExact(graph.toMappedNodeId(r.nodeId))] = r.centrality);
-
-        assertArrayEquals(EXPECTED, centrality, 0.1);
+        assertThat(result.get(idFunction.of("a"))).isCloseTo(0.4, Offset.offset(0.01));
+        assertThat(result.get(idFunction.of("b"))).isCloseTo(0.57, Offset.offset(0.01));
+        assertThat(result.get(idFunction.of("c"))).isCloseTo(0.66, Offset.offset(0.01));
+        assertThat(result.get(idFunction.of("d"))).isCloseTo(0.57, Offset.offset(0.01));
+        assertThat(result.get(idFunction.of("e"))).isCloseTo(0.4, Offset.offset(0.01));
     }
 
     @Test

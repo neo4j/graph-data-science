@@ -92,7 +92,6 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
         ).withNodeCount(computeResult.graph().nodeCount());
     }
 
-    @SuppressWarnings("unused")
     public static final class WriteResult {
 
         public final long nodePropertiesWritten;
@@ -129,7 +128,7 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
         static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
             public String writeProperty;
 
-            protected Builder(ProcedureCallContext callContext, int concurrency) {
+            private Builder(ProcedureCallContext callContext, int concurrency) {
                 super(callContext, concurrency);
             }
 
