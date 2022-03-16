@@ -59,7 +59,6 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "parameterSpace", Map.of(
                     TrainingMethod.RandomForest.name(), List.of(),
                     TrainingMethod.LogisticRegression.name(), List.of(Map.of(
-                            "useBiasFeature", true,
                             "maxEpochs", 100,
                             "minEpochs", 42,
                             "methodName", TrainingMethod.LogisticRegression.name(),
@@ -119,8 +118,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "patience", 1,
                             "methodName", TrainingMethod.LogisticRegression.name(),
                             "batchSize", 100,
-                            "tolerance", 0.001,
-                            "useBiasFeature", true
+                            "tolerance", 0.001
                         ),
                         Map.of(
                             "maxEpochs", 100,
@@ -129,8 +127,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "patience", 1,
                             "methodName", TrainingMethod.LogisticRegression.name(),
                             "batchSize", 100,
-                            "tolerance", 0.001,
-                            "useBiasFeature", true
+                            "tolerance", 0.001
                         )
                     ))
             ))

@@ -79,21 +79,21 @@ class LogisticRegressionObjectiveTest {
         }
 
         var standardClassifier = new LogisticRegressionClassifier(
-            LogisticRegressionData.standard(2, true, idMap)
+            LogisticRegressionData.standard(2, idMap)
         );
         var reducedClassifier = new LogisticRegressionClassifier(
-            LogisticRegressionData.withReducedClassCount(2, true, idMap)
+            LogisticRegressionData.withReducedClassCount(2, idMap)
         );
         var trainedStandardClassifier = new LogisticRegressionClassifier(
-            LogisticRegressionData.standard(2, true, idMap)
+            LogisticRegressionData.standard(2, idMap)
         );
         Arrays.setAll(trainedStandardClassifier.data().weights().data().data(), i -> i);
-        Arrays.setAll(trainedStandardClassifier.data().bias().orElseThrow().data().data(), i -> i == 0 ? 0.4 : 0.8);
+        Arrays.setAll(trainedStandardClassifier.data().bias().data().data(), i -> i == 0 ? 0.4 : 0.8);
         var trainedReducedClassifier = new LogisticRegressionClassifier(
-            LogisticRegressionData.withReducedClassCount(2, true, idMap)
+            LogisticRegressionData.withReducedClassCount(2, idMap)
         );
         Arrays.setAll(trainedReducedClassifier.data().weights().data().data(), i -> i);
-        Arrays.setAll(trainedReducedClassifier.data().bias().orElseThrow().data().data(), i -> i == 0 ? 0.4 : 0.8);
+        Arrays.setAll(trainedReducedClassifier.data().bias().data().data(), i -> i == 0 ? 0.4 : 0.8);
         var features = FeaturesFactory.wrap(featuresHOA);
         this.standardObjective = new LogisticRegressionObjective(
             standardClassifier,
@@ -226,13 +226,12 @@ class LogisticRegressionObjectiveTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        " 10,   1, false,  808",
-        " 10,   1, true, 1_000",
-        "100,   1, true, 6_760",
-        " 10, 100, true, 9_712",
+        " 10,   1, 1_000",
+        "100,   1, 6_760",
+        " 10, 100, 9_712",
     })
-    void shouldEstimateMemoryUsage(int batchSize, int featureDim, boolean useBias, long expected) {
-        var memoryUsageInBytes = LogisticRegressionObjective.sizeOfBatchInBytes(batchSize, featureDim, useBias);
+    void shouldEstimateMemoryUsage(int batchSize, int featureDim, long expected) {
+        var memoryUsageInBytes = LogisticRegressionObjective.sizeOfBatchInBytes(batchSize, featureDim);
         assertThat(memoryUsageInBytes).isEqualTo(expected);
     }
 

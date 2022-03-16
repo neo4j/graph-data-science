@@ -406,7 +406,7 @@ YIELD parameterSpace
 [opts="header",cols="1"]
 |===
 | parameterSpace
-| {RandomForest=[], LogisticRegression=[{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}, {useBiasFeature=true, maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
+| {RandomForest=[], LogisticRegression=[{maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}, {maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
 |===
 
 The `parameterSpace` in the pipeline now contains the three different model parameters, expanded with the default values.

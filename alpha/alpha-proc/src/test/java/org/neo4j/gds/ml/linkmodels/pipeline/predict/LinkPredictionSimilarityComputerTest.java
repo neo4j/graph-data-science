@@ -39,7 +39,6 @@ import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -73,7 +72,7 @@ class LinkPredictionSimilarityComputerTest {
                 1,
                 2
             )),
-            Optional.empty()
+            Weights.ofVector(0.0)
         );
         var lpSimComputer = new LinkPredictionSimilarityComputer(
             linkFeatureExtractor,

@@ -91,9 +91,7 @@ public class LogisticRegressionClassifier implements Classifier {
             batchFeatures,
             weights
         );
-        var softmaxInput = data.bias().isPresent()
-            ? new MatrixVectorSum(weightedFeatures, data.bias().get())
-            : weightedFeatures;
+        var softmaxInput = new MatrixVectorSum(weightedFeatures, data.bias());
         return weights.data().rows() == numberOfClasses()
             ? new Softmax(softmaxInput)
             : new ReducedSoftmax(softmaxInput);

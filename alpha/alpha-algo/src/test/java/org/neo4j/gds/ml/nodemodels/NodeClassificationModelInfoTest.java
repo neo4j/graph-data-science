@@ -93,7 +93,6 @@ class NodeClassificationModelInfoTest {
     @NotNull
     private Map<String, Object> expectedParameters() {
         return Map.of(
-            "useBiasFeature", true,
             "batchSize", 100,
             "maxEpochs", 100,
             "minEpochs", 1,

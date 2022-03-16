@@ -55,8 +55,7 @@ public final class LogisticRegressionTrainer implements Trainer {
                 "computation graph",
                 linkFeatureDimension.apply(featureDim -> LogisticRegressionObjective.sizeOfBatchInBytes(
                     llrConfig.batchSize(),
-                    Math.toIntExact(featureDim),
-                    llrConfig.useBiasFeature()
+                    Math.toIntExact(featureDim)
                 ))
             )
             .build();
@@ -69,7 +68,7 @@ public final class LogisticRegressionTrainer implements Trainer {
     ) {
         var CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA = 1;
         return MemoryEstimations.builder(LogisticRegressionTrainer.class)
-            .add("model data", LogisticRegressionData.memoryEstimation(numberOfClasses, numberOfFeatures, true))
+            .add("model data", LogisticRegressionData.memoryEstimation(numberOfClasses, numberOfFeatures))
             .add("training", Training.memoryEstimation(numberOfFeatures, numberOfClasses, CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA))
             .perThread("computation graph", sizeInBytesOfComputationGraph(batchSize, numberOfFeatures, numberOfClasses))
             .build();
@@ -99,8 +98,8 @@ public final class LogisticRegressionTrainer implements Trainer {
     @Override
     public LogisticRegressionClassifier train(Features features, HugeLongArray labels, ReadOnlyHugeLongArray trainSet) {
         var data = reduceClassCount
-            ? withReducedClassCount(features.featureDimension(), trainConfig.useBiasFeature(), classIdMap)
-            : standard(features.featureDimension(), trainConfig.useBiasFeature(), classIdMap);
+            ? withReducedClassCount(features.featureDimension(), classIdMap)
+            : standard(features.featureDimension(), classIdMap);
         var classifier = new LogisticRegressionClassifier(data);
         var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);
         var training = new Training(trainConfig, progressTracker, trainSet.size(), terminationFlag);

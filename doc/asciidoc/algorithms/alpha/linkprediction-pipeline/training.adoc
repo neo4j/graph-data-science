@@ -234,7 +234,7 @@ RETURN
 [opts="header", cols="6, 2, 2, 2"]
 |===
 | winningModel                                                                                               | avgTrainScore      | outerTrainScore     | testScore
-| {useBiasFeature=true, maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001} | 0.3721560846560847 |  0.3801587301587301 | 0.7638888888888888
+| {maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001} | 0.3721560846560847 |  0.3801587301587301 | 0.7638888888888888
 |===
 
 We can see the model configuration with `tolerance = 0.001` (and defaults filled for remaining parameters) was selected, and has a score of `0.76` on the test set.

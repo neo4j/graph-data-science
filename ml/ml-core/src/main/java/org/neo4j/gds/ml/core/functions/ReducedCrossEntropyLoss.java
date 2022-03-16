@@ -28,7 +28,6 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.neo4j.gds.ml.core.Dimensions.scalar;
 
@@ -41,19 +40,19 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
 
     private final Variable<Matrix> predictions;
     private final Variable<Matrix> weights;
-    private final Optional<Weights<Vector>> bias;
+    private final Weights<Vector> bias;
     private final Variable<Matrix> features;
     private final Variable<Vector> labels;
 
     public ReducedCrossEntropyLoss(
         Variable<Matrix> predictions,
         Variable<Matrix> weights,
-        Optional<Weights<Vector>> bias,
+        Weights<Vector> bias,
         Variable<Matrix> features,
         Variable<Vector> labels
     ) {
         super(
-            bias.map(b -> List.of(weights, features, labels, b)).orElse(List.of(weights, features, labels)),
+            List.of(weights, features, labels, bias),
             scalar()
         );
 
@@ -108,7 +107,7 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
                 }
             }
             return gradient;
-        } else if (bias.map(b -> parent == b).orElse(Boolean.FALSE)) {
+        } else if (parent == bias) {
             var biasVector = ctx.data(parent);
             var gradient = biasVector.createWithSameDimensions();
             int reducedClassCount = biasVector.totalSize();

@@ -42,7 +42,6 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
-import java.util.Optional;
 
 import static java.lang.Math.max;
 
@@ -53,7 +52,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
     private final HugeLongArray labels;
 
     //TODO: add support for number of classes and Fudge only in NC
-    public static long sizeOfBatchInBytes(int batchSize, int featureDim, boolean useBias) {
+    public static long sizeOfBatchInBytes(int batchSize, int featureDim) {
         // we consider each variable in the computation graph
         var batchedTargets = Matrix.sizeInBytes(batchSize, 1);
         var features = Matrix.sizeInBytes(batchSize, featureDim);
@@ -69,7 +68,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
         var constantScale = Scalar.sizeInBytes();
         var elementSum = Scalar.sizeInBytes();
 
-        var maybeBias = useBias ? weightedFeatures : 0;
+        var bias = weightedFeatures;
         var penalty = l2norm + constantScale;
 
         // 2 * x == computing data and gradient for this computation variable
@@ -78,7 +77,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
                batchedTargets +
                features +
                2 * weightedFeatures +
-               2 * maybeBias +
+               2 * bias +
                2 * sigmoid +
                2 * unpenalizedLoss +
                2 * penalty +
@@ -147,12 +146,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
-        Optional<Weights<Vector>> bias = classifier.data().bias();
-        if (bias.isPresent()) {
-            return List.of(classifier.data().weights(), bias.get());
-        } else {
-            return List.of(classifier.data().weights());
-        }
+        return List.of(classifier.data().weights(), classifier.data().bias());
     }
 
     @Override

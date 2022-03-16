@@ -45,7 +45,6 @@ import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain.MODEL_TYPE;
 
@@ -99,7 +98,7 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
                 1,
                 weights.length
             )),
-            Optional.empty()
+            Weights.ofVector(0.0)
         );
 
         modelCatalog.set(Model.of(

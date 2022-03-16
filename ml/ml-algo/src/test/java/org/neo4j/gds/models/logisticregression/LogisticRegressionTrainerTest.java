@@ -71,9 +71,9 @@ class LogisticRegressionTrainerTest {
         );
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
-        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(0) != 0D);
-        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(1) != 0D);
-        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(2) != 0D);
+        assertThat(classifier.data().bias()).matches(w -> w.data().dataAt(0) != 0D);
+        assertThat(classifier.data().bias()).matches(w -> w.data().dataAt(1) != 0D);
+        assertThat(classifier.data().bias()).matches(w -> w.data().dataAt(2) != 0D);
         assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 3);
         assertThat(classifier.data().weights().data().data()).containsExactly(
             new double[]{
@@ -107,9 +107,9 @@ class LogisticRegressionTrainerTest {
         var classifier = trainer.train(new TestFeatures(features), FOUR_CLASSES, ReadOnlyHugeLongArray.of(labels));
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
-        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(0) != 0D);
-        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(1) != 0D);
-        assertThat(classifier.data().bias()).isNotEmpty().get().matches(w -> w.data().dataAt(2) != 0D);
+        assertThat(classifier.data().bias()).matches(w -> w.data().dataAt(0) != 0D);
+        assertThat(classifier.data().bias()).matches(w -> w.data().dataAt(1) != 0D);
+        assertThat(classifier.data().bias()).matches(w -> w.data().dataAt(2) != 0D);
         assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 3);
         assertThat(classifier.data().weights().data().data()).containsExactly(
             new double[]{
@@ -122,47 +122,10 @@ class LogisticRegressionTrainerTest {
     }
 
     @Test
-    void withoutBias() {
-        var trainer = new LogisticRegressionTrainer(
-            1,
-            LogisticRegressionTrainConfig.of(Map.of("useBiasFeature", false)),
-            fourClassIdMap(),
-            true,
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
-        );
-
-        double[][] features = new double[5][5];
-        for (int i = 0; i < features.length; i++) {
-            for (int j = 0; j < features[i].length; j++) {
-                features[i][j] = ((double) i) / (j + 1);
-            }
-        }
-        var classifier = trainer.train(
-            new TestFeatures(features),
-            FOUR_CLASSES,
-            ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 1, 2, 3, 4))
-        );
-
-        assertThat(classifier.numberOfClasses()).isEqualTo(4);
-        assertThat(classifier.data().bias()).isEmpty();
-        assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 5);
-        assertThat(classifier.data().weights().data().data())
-            .containsExactly(
-                new double[]{
-                    0.001999766, 0.001999766, 0.001999766, 0.001999766, 0.001999766,
-                    0.001999766, 0.001999766, 0.001999766, 0.001999766, 0.001999766,
-                    0.001999924, 0.001999924, 0.001999924, 0.001999924, 0.001999924
-                },
-                Offset.offset(1e-9)
-            );
-    }
-
-    @Test
     void usingStandardWeights() {
         var trainer = new LogisticRegressionTrainer(
             1,
-            LogisticRegressionTrainConfig.of(Map.of("useBiasFeature", false)),
+            LogisticRegressionTrainConfig.defaultConfig(),
             fourClassIdMap(),
             false,
             TerminationFlag.RUNNING_TRUE,
@@ -183,16 +146,21 @@ class LogisticRegressionTrainerTest {
         );
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
-        assertThat(classifier.data().bias()).isEmpty();
         assertThat(classifier.data().weights().data().dimensions()).containsExactly(4, 5);
         assertThat(classifier.data().weights().data().data())
             .containsExactly(
                 new double[]{
-                    0.07112165177005575, 0.07282159911961641, 0.07299361494706944, -0.08118839640670544, 0.0738451516049731,
-                    0.07250321634094545, 0.06926188286299505, 0.07036007869555168, 0.07155818423783798, 0.071881927159593,
-                    -0.070415705597294, 0.09351752899399764, -0.06700072894326915, 0.07646075088422129, -0.07382078874569262,
-                    -0.07247742154547929, -0.07244736978411997, -0.07254489591102062, -0.07245099306947704, -0.07250321395784994
-
+                    0.08627900105266102, 0.09273267314678312, 0.09349891894008305, -0.11487502366240651, 0.09650781245420756,
+                    0.09289478267235998, 0.08184372875603671, 0.08582250030378356, 0.08989331517422305, 0.09095783501089064,
+                    -0.08027455601660115, 0.13006700122492873, -0.060498675944529436, 0.10485891962810245, -0.09612502145924187,
+                    -0.0930896892159113, -0.0930382197013168, -0.09321662310635541, -0.09305099223387062, -0.09312873059916749
+                },
+                Offset.offset(1e-9)
+            );
+        assertThat(classifier.data().bias().data().data())
+            .containsExactly(
+                new double[]{
+                    0.0928284537874426, 0.08881935818609046, -0.07553836988915141, -0.09312217411510736
                 },
                 Offset.offset(1e-9)
             );
@@ -222,7 +190,6 @@ class LogisticRegressionTrainerTest {
         );
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
-        assertThat(classifier.data().bias()).isNotEmpty();
         assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 3);
         assertThat(classifier.data().weights().data().data()).containsExactly(
             new double[]{
@@ -259,7 +226,6 @@ class LogisticRegressionTrainerTest {
         );
 
         assertThat(classifier.numberOfClasses()).isEqualTo(4);
-        assertThat(classifier.data().bias()).isNotEmpty();
         assertThat(classifier.data().weights().data().dimensions()).containsExactly(3, 3);
         assertThat(classifier.data().weights().data().data()).containsExactly(
             new double[]{
