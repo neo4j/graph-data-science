@@ -1,6 +1,10 @@
 [[algorithms-ml-training-methods]]
 == Training methods
 
+[abstract]
+--
+This section describes supervised machine learning methods for training pipelines in the Neo4j Graph Data Science library.
+--
 
 <<algorithms-ml-nodeclassification-pipelines, Node Classification Pipelines>> and <<algorithms-ml-linkprediction-pipelines, Link Prediction Pipelines>> are trained using supervised machine learning methods.
 Currently, GDS supports two such methods, namely <<algorithms-ml-training-methods-logistic-regression>> and <<algorithms-ml-training-methods-random-forest>>.
