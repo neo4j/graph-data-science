@@ -21,34 +21,22 @@ package org.neo4j.gds.beta.closeness;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NonReleasingTaskRegistry;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
-import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Neo4jGraphExtension
-class ClosenessCentralityProcTest extends BaseProcTest {
+abstract class ClosenessCentralityProcTest<CONFIG extends ClosenessCentralityConfig> extends BaseProcTest implements AlgoBaseProcTest<ClosenessCentrality, CONFIG, ClosenessCentralityResult> {
 
     @Neo4jGraph
     public static final String DB_CYPHER =
@@ -101,10 +89,32 @@ class ClosenessCentralityProcTest extends BaseProcTest {
     @Inject
     private IdFunction idFunction;
 
-    private List<Map<String, Object>> expectedCentralityResult;
+    protected List<Map<String, Object>> expectedCentralityResult;
+
+    @Override
+    public GraphDatabaseAPI graphDb() {
+        return db;
+    }
+
+    @Override
+    public void assertResultEquals(ClosenessCentralityResult result1, ClosenessCentralityResult result2) {
+        var left = result1.centralities();
+        var right = result2.centralities();
+
+        assertThat(left.size()).as("Result size").isEqualTo(right.size());
+
+        for (long i = 0; i < left.size(); i++) {
+            assertThat(left.get(i)).as("Value at index " + i).isEqualTo(right.get(i));
+        }
+    }
 
     @BeforeEach
     void setupGraph() throws Exception {
+        registerProcedures(
+            getProcedureClazz(),
+            GraphProjectProc.class
+        );
+
         expectedCentralityResult = List.of(
             Map.of("nodeId", idFunction.of("n0"), "centrality", Matchers.closeTo(1.0, 0.01)),
             Map.of("nodeId", idFunction.of("n1"), "centrality", Matchers.closeTo(0.588, 0.01)),
@@ -118,101 +128,5 @@ class ClosenessCentralityProcTest extends BaseProcTest {
             Map.of("nodeId", idFunction.of("n9"), "centrality", Matchers.closeTo(0.588, 0.01)),
             Map.of("nodeId", idFunction.of("n10"), "centrality", Matchers.closeTo(0.588, 0.01))
         );
-
-        registerProcedures(
-            ClosenessCentralityWriteProc.class,
-            ClosenessCentralityStreamProc.class,
-            ClosenessCentralityMutateProc.class,
-            GraphStreamNodePropertiesProc.class,
-            GraphProjectProc.class
-        );
-    }
-
-    @Test
-    void testClosenessStream() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
-        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.closeness")
-            .streamMode()
-            .yields("nodeId", "centrality");
-
-        assertCypherResult(query, expectedCentralityResult);
-    }
-
-    @Test
-    void testClosenessWrite() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
-        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.closeness")
-            .writeMode()
-            .addParameter("writeProperty", "centrality")
-            .yields();
-
-        runQueryWithRowConsumer(query, row -> {
-            assertNotEquals(-1L, row.getNumber("writeMillis"));
-            assertNotEquals(-1L, row.getNumber("preProcessingMillis"));
-            assertNotEquals(-1L, row.getNumber("computeMillis"));
-            assertNotEquals(-1L, row.getNumber("nodes"));
-            Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
-            assertNotNull(centralityDistribution);
-            assertEquals(1.0, (Double) centralityDistribution.get("max"), 1e-2);
-        });
-
-        assertCypherResult(
-            "MATCH (n) WHERE exists(n.centrality) RETURN id(n) AS nodeId, n.centrality AS centrality",
-            expectedCentralityResult
-        );
-    }
-
-    @Test
-    void testClosenessMutate() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
-        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.closeness")
-            .mutateMode()
-            .addParameter("mutateProperty", "centrality")
-            .yields();
-
-        runQueryWithRowConsumer(query, row -> {
-            assertNotEquals(-1L, row.getNumber("mutateMillis"));
-            assertNotEquals(-1L, row.getNumber("preProcessingMillis"));
-            assertNotEquals(-1L, row.getNumber("computeMillis"));
-            assertNotEquals(-1L, row.getNumber("nodes"));
-            Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
-            assertNotNull(centralityDistribution);
-            assertEquals(1.0, (Double) centralityDistribution.get("max"), 1e-2);
-        });
-
-        assertCypherResult(
-            "MATCH (n) WHERE exists(n.centrality) RETURN count(n) AS count ", List.of(Map.of("count", 0L)));
-
-        assertCypherResult(
-            "CALL gds.graph.streamNodeProperties('graph',['centrality']) YIELD nodeId, propertyValue AS centrality",
-            expectedCentralityResult
-        );
-    }
-
-
-    @Test
-    void testProgressTracking() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        TestProcedureRunner.applyOnProcedure(db, ClosenessCentralityWriteProc.class, proc -> {
-            var taskStore = new GlobalTaskStore();
-
-            proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
-            proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
-                TransactionContext.of(proc.api, proc.procedureTransaction)
-            );
-
-            proc.write(
-                DEFAULT_GRAPH_NAME,
-                Map.of("writeProperty", "myProp")
-            );
-
-            assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
-                "ClosenessCentrality",
-                "ClosenessCentrality :: WriteNodeProperties"
-            );
-        });
     }
 }
