@@ -90,7 +90,7 @@ class SimilarityComputerTest {
             }, (f1, f2) -> f1)
             .toArray()
         );
-        var sim = SimilarityComputer.ofFloatArrayProperty(props, similarityMetric);
+        var sim = SimilarityComputer.ofFloatArrayProperty("", props, similarityMetric);
 
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
     }
@@ -108,7 +108,7 @@ class SimilarityComputerTest {
             }, (f1, f2) -> f1)
             .toArray()
         );
-        var sim = SimilarityComputer.ofFloatArrayProperty(props, similarityMetric);
+        var sim = SimilarityComputer.ofFloatArrayProperty("", props, similarityMetric);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
 
@@ -126,7 +126,7 @@ class SimilarityComputerTest {
             }, (f1, f2) -> f1)
             .toArray());
 
-        var sim = SimilarityComputer.ofFloatArrayProperty(props, similarityMetric);
+        var sim = SimilarityComputer.ofFloatArrayProperty("", props, similarityMetric);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
 
@@ -136,7 +136,7 @@ class SimilarityComputerTest {
         @ForAll @From("doubleArrayMetrics") SimilarityMetric similarityMetric
     ) {
         NodeProperties props = new DoubleArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0).toArray());
-        var sim = SimilarityComputer.ofDoubleArrayProperty(props, similarityMetric);
+        var sim = SimilarityComputer.ofDoubleArrayProperty("", props, similarityMetric);
 
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
     }
@@ -147,7 +147,7 @@ class SimilarityComputerTest {
         @ForAll @From("doubleArrayMetrics") SimilarityMetric similarityMetric
     ) {
         NodeProperties props = new DoubleArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0).toArray());
-        var sim = SimilarityComputer.ofDoubleArrayProperty(props, similarityMetric);
+        var sim = SimilarityComputer.ofDoubleArrayProperty("", props, similarityMetric);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
 
@@ -158,7 +158,7 @@ class SimilarityComputerTest {
     ) {
         NodeProperties props = new DoubleArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, -10.0, 10.0).toArray());
 
-        var sim = SimilarityComputer.ofDoubleArrayProperty(props, similarityMetric);
+        var sim = SimilarityComputer.ofDoubleArrayProperty("", props, similarityMetric);
 
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
@@ -169,7 +169,7 @@ class SimilarityComputerTest {
         @ForAll @From("longArrayMetrics") SimilarityMetric similarityMetric
     ) {
         NodeProperties props = new LongArrayTestProperties(nodeId -> new Random(nodeId).longs(42, 0, 1337).toArray());
-        var sim = SimilarityComputer.ofLongArrayProperty(props, similarityMetric);
+        var sim = SimilarityComputer.ofLongArrayProperty("", props, similarityMetric);
 
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
     }
@@ -180,7 +180,7 @@ class SimilarityComputerTest {
         @ForAll @From("longArrayMetrics") SimilarityMetric similarityMetric
     ) {
         NodeProperties props = new LongArrayTestProperties(nodeId -> new Random(nodeId).longs(42, 0, 1337).toArray());
-        var sim = SimilarityComputer.ofLongArrayProperty(props, similarityMetric);
+        var sim = SimilarityComputer.ofLongArrayProperty("", props, similarityMetric);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
 
@@ -190,7 +190,7 @@ class SimilarityComputerTest {
         @ForAll @From("longArrayMetrics") SimilarityMetric similarityMetric
     ) {
         NodeProperties props = new LongArrayTestProperties(nodeId -> new Random(nodeId).longs(42, -10, 10).toArray());
-        var sim = SimilarityComputer.ofLongArrayProperty(props, similarityMetric);
+        var sim = SimilarityComputer.ofLongArrayProperty("", props, similarityMetric);
 
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isBetween(0.0, 1.0);
     }
@@ -210,6 +210,7 @@ class SimilarityComputerTest {
             return new double[0];
         });
         var sim = SimilarityComputer.ofDoubleArrayProperty(
+            "",
             props,
             SimilarityMetric.defaultMetricForType(ValueType.DOUBLE_ARRAY)
         );
@@ -228,36 +229,39 @@ class SimilarityComputerTest {
     void doubleArraySimilarityComputerHandlesNullProperties() {
         NodeProperties props = new DoubleArrayTestProperties(nodeId -> null);
         var sim = SimilarityComputer.ofDoubleArrayProperty(
+            "doubleArrayProperty",
             props,
             SimilarityMetric.defaultMetricForType(ValueType.DOUBLE_ARRAY)
         );
         assertThatThrownBy(() -> sim.similarity(0, 1))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Missing node property for node with id");
+            .hasMessageContaining("Missing node property `doubleArrayProperty` for node with id");
     }
 
     @Test
     void floatArraySimilarityComputerHandlesNullProperties() {
         NodeProperties props = new FloatArrayTestProperties(nodeId -> null);
         var sim = SimilarityComputer.ofFloatArrayProperty(
+            "floatArrayProperty",
             props,
             SimilarityMetric.defaultMetricForType(ValueType.FLOAT_ARRAY)
         );
         assertThatThrownBy(() -> sim.similarity(0, 1))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Missing node property for node with id");
+            .hasMessageContaining("Missing node property `floatArrayProperty` for node with id");
     }
 
     @Test
     void longArraySimilarityComputerHandlesNullProperties() {
         NodeProperties props = new LongArrayTestProperties(nodeId -> null);
         var sim = SimilarityComputer.ofLongArrayProperty(
+            "longArrayProperty",
             props,
             SimilarityMetric.defaultMetricForType(ValueType.LONG_ARRAY)
         );
         assertThatThrownBy(() -> sim.similarity(0, 1))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Missing node property for node with id");
+            .hasMessageContaining("Missing node property `longArrayProperty` for node with id");
     }
 
     static Stream<SimilarityComputer> nonFiniteSimilarities() {
@@ -266,10 +270,12 @@ class SimilarityComputerTest {
             SimilarityComputer.ofDoubleProperty(new DoubleTestProperties(nodeId -> Double.POSITIVE_INFINITY)),
             SimilarityComputer.ofDoubleProperty(new DoubleTestProperties(nodeId -> Double.NEGATIVE_INFINITY)),
             SimilarityComputer.ofFloatArrayProperty(
+                "",
                 new FloatArrayTestProperties(nodeId -> new float[]{}),
                 SimilarityMetric.defaultMetricForType(ValueType.FLOAT_ARRAY)
             ),
             SimilarityComputer.ofDoubleArrayProperty(
+                "",
                 new DoubleArrayTestProperties(nodeId -> new double[]{}),
                 SimilarityMetric.defaultMetricForType(ValueType.DOUBLE_ARRAY)
             )

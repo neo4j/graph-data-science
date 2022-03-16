@@ -25,10 +25,12 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
+    private final String propertyName;
     private final NodeProperties nodeProperties;
     private final FloatArraySimilarityMetric metric;
 
-    FloatArrayPropertySimilarityComputer(NodeProperties nodeProperties, FloatArraySimilarityMetric metric) {
+    FloatArrayPropertySimilarityComputer(String propertyName, NodeProperties nodeProperties, FloatArraySimilarityMetric metric) {
+        this.propertyName = propertyName;
         this.metric = metric;
         if (nodeProperties.valueType() != ValueType.FLOAT_ARRAY) {
             throw new IllegalArgumentException("The property is not of type FLOAT_ARRAY");
@@ -50,6 +52,10 @@ final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
     }
 
     private void throwForNode(long nodeId) {
-        throw new IllegalArgumentException(formatWithLocale("Missing node property for node with id `%s`.", nodeId));
+        throw new IllegalArgumentException(formatWithLocale(
+            "Missing node property `%s` for node with id `%s`.",
+            propertyName,
+            nodeId
+        ));
     }
 }

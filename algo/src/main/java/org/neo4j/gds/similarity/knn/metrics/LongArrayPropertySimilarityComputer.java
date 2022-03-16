@@ -29,10 +29,12 @@ import java.util.Arrays;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
+    private final String propertyName;
     private final NodeProperties nodeProperties;
     private final LongArraySimilarityMetric metric;
 
-    LongArrayPropertySimilarityComputer(NodeProperties nodeProperties, LongArraySimilarityMetric metric) {
+    LongArrayPropertySimilarityComputer(String propertyName, NodeProperties nodeProperties, LongArraySimilarityMetric metric) {
+        this.propertyName = propertyName;
         if (nodeProperties.valueType() != ValueType.LONG_ARRAY) {
             throw new IllegalArgumentException("The property is not of type LONG_ARRAY");
         }
@@ -54,7 +56,11 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
     }
 
     private void throwForNode(long nodeId) {
-        throw new IllegalArgumentException(formatWithLocale("Missing node property for node with id `%s`.", nodeId));
+        throw new IllegalArgumentException(formatWithLocale(
+            "Missing node property `%s` for node with id `%s`.",
+            propertyName,
+            nodeId
+        ));
     }
 
     static final class SortedLongArrayProperties implements LongArrayNodeProperties {

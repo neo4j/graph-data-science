@@ -62,8 +62,7 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
         };
 
         var similarityComputer = SimilarityComputer.ofProperty(
-            nodeProperties,
-            "myProperty",
+            "myProperty", nodeProperties,
             SimilarityMetric.LONG_PROPERTY_METRIC
         );
 
