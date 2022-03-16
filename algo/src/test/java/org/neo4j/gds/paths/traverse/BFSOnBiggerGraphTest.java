@@ -110,7 +110,8 @@ class BFSOnBiggerGraphTest {
             (s, t, w) -> 1.,
             concurrency,
             ProgressTracker.NULL_TRACKER,
-            delta
+            delta,
+            BFS.ALL_DEPTHS_ALLOWED
         ).compute().toArray();
 
         assertThat(nodes)

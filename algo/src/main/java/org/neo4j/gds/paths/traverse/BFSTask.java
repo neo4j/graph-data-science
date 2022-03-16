@@ -29,7 +29,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.LongAdder;
 
 /**
  * A task that will compute BFS for portion of the graph.
@@ -63,7 +62,6 @@ class BFSTask implements Runnable {
     // Maximum size of a single chunk.
     private final int delta;
 
-    private final LongAdder ignoredNodesCount;
     private final TerminationFlag terminationFlag;
 
     // Used in the synchronization phase, keeps track of the current chunk index.
@@ -87,7 +85,6 @@ class BFSTask implements Runnable {
         Aggregator aggregatorFunction,
         int delta,
         long sourceNodeId,
-        LongAdder ignoredNodesCount,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
@@ -103,7 +100,6 @@ class BFSTask implements Runnable {
         this.aggregatorFunction = aggregatorFunction;
         this.delta = delta;
         this.sourceNodeId = sourceNodeId;
-        this.ignoredNodesCount = ignoredNodesCount;
         this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
 
@@ -187,16 +183,10 @@ class BFSTask implements Runnable {
 
     private void relaxNode(long nodeIndex, long nodeId, long sourceNodeId, double weight) {
         var exitPredicateResult = exitPredicate.test(sourceNodeId, nodeId, weight);
-        if (exitPredicateResult == ExitPredicate.Result.CONTINUE) {
-            traversedNodes.set(nodeIndex, BFS.IGNORE_NODE);
-            ignoredNodesCount.increment();
+        if (exitPredicateResult == ExitPredicate.Result.BREAK) {
+            // Update the global `targetFoundIndex` so other tasks will know a target is reached and terminate as well.
+            targetFoundIndex.getAndAccumulate(nodeIndex, Math::min);
             return;
-        } else {
-            if (exitPredicateResult == ExitPredicate.Result.BREAK) {
-                // Update the global `targetFoundIndex` so other tasks will know a target is reached and terminate as well.
-                targetFoundIndex.getAndAccumulate(nodeIndex, Math::min);
-                return;
-            }
         }
 
         this.graph.forEachRelationship(

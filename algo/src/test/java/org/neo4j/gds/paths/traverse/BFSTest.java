@@ -105,7 +105,8 @@ class BFSTest {
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             (s, t, w) -> 1.,
             concurrency,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            BFS.ALL_DEPTHS_ALLOWED
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
@@ -129,7 +130,8 @@ class BFSTest {
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
             concurrency,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            BFS.ALL_DEPTHS_ALLOWED
         ).compute().toArray();
         assertEquals(7, nodes.length);
     }
@@ -144,14 +146,15 @@ class BFSTest {
     @ValueSource(ints = {1, 4})
     void testBfsMaxDepthOut(int concurrency) {
         long source = naturalGraph.toMappedNodeId("a");
-        double maxHops = 4.;
+        long maxHops = 4;
         long[] nodes = BFS.create(
             naturalGraph,
             source,
             (s, t, w) -> w >= maxHops ? Result.CONTINUE : Result.FOLLOW,
             (s, t, w) -> w + 1.,
             concurrency,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            maxHops - 1
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
@@ -166,7 +169,8 @@ class BFSTest {
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
             concurrency,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            BFS.ALL_DEPTHS_ALLOWED
         ).compute();
     }
 
@@ -182,7 +186,8 @@ class BFSTest {
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
             concurrency,
-            progressTracker
+            progressTracker,
+            BFS.ALL_DEPTHS_ALLOWED
         ).compute();
         var messagesInOrder = testLog.getMessages(INFO);
 

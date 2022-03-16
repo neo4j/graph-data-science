@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Parallel implementation of the BFS algorithm.
@@ -62,17 +61,17 @@ public final class BFS extends Algorithm<HugeLongArray> {
 
     private static final int DEFAULT_DELTA = 64;
     static final int IGNORE_NODE = -1;
+    public static final int ALL_DEPTHS_ALLOWED = -1;
 
     private final long sourceNodeId;
     private final ExitPredicate exitPredicate;
     private final Aggregator aggregatorFunction;
     private final Graph graph;
     private final int delta;
-
+    private final long maximumDepth;
     // An array to keep the node ids that were already traversed in the correct order.
     // It is initialized with the total number of nodes, but may contain less than that.
     private HugeLongArray traversedNodes;
-    private final LongAdder ignoredNodesCount = new LongAdder();
 
     // An array to keep the weight/depth of the node at the same position in `traversedNodes`.
     // It is initialized with the total number of nodes, but may contain less than that.
@@ -93,7 +92,8 @@ public final class BFS extends Algorithm<HugeLongArray> {
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
         int concurrency,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        long maximumDepth
     ) {
         return create(
             graph,
@@ -102,7 +102,8 @@ public final class BFS extends Algorithm<HugeLongArray> {
             aggregatorFunction,
             concurrency,
             progressTracker,
-            DEFAULT_DELTA
+            DEFAULT_DELTA,
+            maximumDepth
         );
     }
 
@@ -113,7 +114,8 @@ public final class BFS extends Algorithm<HugeLongArray> {
         Aggregator aggregatorFunction,
         int concurrency,
         ProgressTracker progressTracker,
-        int delta
+        int delta,
+        long maximumDepth
     ) {
 
         var nodeCount = Math.toIntExact(graph.nodeCount());
@@ -132,7 +134,8 @@ public final class BFS extends Algorithm<HugeLongArray> {
             aggregatorFunction,
             concurrency,
             progressTracker,
-            delta
+            delta,
+            maximumDepth
         );
     }
 
@@ -146,7 +149,8 @@ public final class BFS extends Algorithm<HugeLongArray> {
         Aggregator aggregatorFunction,
         int concurrency,
         ProgressTracker progressTracker,
-        int delta
+        int delta,
+        long maximumDepth
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -155,7 +159,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         this.aggregatorFunction = aggregatorFunction;
         this.concurrency = concurrency;
         this.delta = delta;
-
+        this.maximumDepth = maximumDepth;
         this.traversedNodes = traversedNodes;
         this.weights = weights;
         this.visited = visited;
@@ -191,8 +195,11 @@ public final class BFS extends Algorithm<HugeLongArray> {
             delta
         );
         int bfsTaskListSize = bfsTaskList.size();
-
+        long currentDepth = 0;
         while (running()) {
+            if (currentDepth == maximumDepth) {
+                break;
+            }
             ParallelUtil.run(bfsTaskList, Pools.DEFAULT);
 
             if (targetFoundIndex.get() != Long.MAX_VALUE) {
@@ -229,6 +236,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
             }
 
             traversedNodesIndex.set(previousTraversedNodesLength);
+            currentDepth++;
         }
 
         // Find the portion of `traversedNodes` that contains the actual result, doesn't account for target node, hence the `if` statement.
@@ -237,15 +245,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
             nodesLengthToRetain = targetFoundIndex.intValue() + 1;
         }
 
-        var result = HugeLongArray.newArray(nodesLengthToRetain - ignoredNodesCount.longValue());
-        long resultIndex = 0;
-        for (long i = 0; i < nodesLengthToRetain; i++) {
-            long traversedNodeId = traversedNodes.get(i);
-            if (traversedNodeId != IGNORE_NODE) {
-                result.set(resultIndex, traversedNodeId);
-                resultIndex++;
-            }
-        }
+        var result = traversedNodes.copyOf(nodesLengthToRetain);
 
         progressTracker.endSubTask();
         return result;
@@ -273,7 +273,6 @@ public final class BFS extends Algorithm<HugeLongArray> {
                 aggregatorFunction,
                 delta,
                 sourceNodeId,
-                ignoredNodesCount,
                 terminationFlag,
                 progressTracker
             ));
