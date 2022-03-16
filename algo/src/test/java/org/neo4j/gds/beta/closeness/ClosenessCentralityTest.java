@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -93,10 +92,9 @@ class ClosenessCentralityTest {
 
     @Test
     void testGetCentrality() {
-        var algo = new ClosenessCentrality(
+        var algo = ClosenessCentrality.of(
             graph,
-            ConcurrencyConfig.DEFAULT_CONCURRENCY,
-            false,
+            ImmutableClosenessCentralityStreamConfig.builder().build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -137,10 +135,9 @@ class ClosenessCentralityTest {
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
-        var algo = new ClosenessCentrality(
+        var algo = ClosenessCentrality.of(
             graph,
-            config.concurrency(),
-            false,
+            config,
             Pools.DEFAULT,
             progressTracker
         );

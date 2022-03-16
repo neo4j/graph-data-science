@@ -34,10 +34,9 @@ public class ClosenessCentralityFactory<CONFIG extends ClosenessCentralityConfig
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new ClosenessCentrality(
+        return ClosenessCentrality.of(
             graph,
-            configuration.concurrency(),
-            configuration.improved(),
+            configuration,
             Pools.DEFAULT,
             progressTracker
         );

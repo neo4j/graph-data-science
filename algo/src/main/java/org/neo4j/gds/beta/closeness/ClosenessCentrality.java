@@ -38,7 +38,7 @@ import java.util.concurrent.ExecutorService;
  * Utilizes the MSBFS for counting the farness between nodes.
  * See MSBFS documentation.
  */
-public class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
+public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
 
     static double centrality(long farness, long componentSize, long nodeCount, boolean wassermanFaust) {
         if (farness == 0L) {
@@ -58,7 +58,22 @@ public class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
     private final PagedAtomicIntegerArray farness;
     private final PagedAtomicIntegerArray component;
 
-    public ClosenessCentrality(
+    public static ClosenessCentrality of(
+        Graph graph,
+        ClosenessCentralityConfig config,
+        ExecutorService executorService,
+        ProgressTracker progressTracker
+    ) {
+        return new ClosenessCentrality(
+            graph,
+            config.concurrency(),
+            config.improved(),
+            executorService,
+            progressTracker
+        );
+    }
+
+    private ClosenessCentrality(
         Graph graph,
         int concurrency,
         boolean wassermanFaust,
@@ -105,13 +120,13 @@ public class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
     private HugeAtomicDoubleArray computeCloseness() {
         progressTracker.beginSubTask();
 
-        var cc = HugeAtomicDoubleArray.newArray(nodeCount);
+        var closeness = HugeAtomicDoubleArray.newArray(nodeCount);
 
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             graph.nodeCount(),
             partition -> (Runnable) () -> {
-                partition.consume(nodeId -> cc.set(nodeId, centrality(
+                partition.consume(nodeId -> closeness.set(nodeId, centrality(
                     farness.get(nodeId),
                     component.get(nodeId),
                     nodeCount,
@@ -125,6 +140,7 @@ public class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
         ParallelUtil.run(tasks, executorService);
 
         progressTracker.endSubTask();
-        return cc;
+        
+        return closeness;
     }
 }

@@ -65,14 +65,13 @@ class ClosenessCentralityDiscoTest {
 
     @Test
     void testHuge() {
-        final ClosenessCentrality algo = new ClosenessCentrality(
+        var algo = ClosenessCentrality.of(
             graph,
-            2,
-            true,
+            ImmutableClosenessCentralityStreamConfig.builder().concurrency(2).improved(true).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
-
+        
         var result = algo.compute().centralities();
         assertThat(result.get(idFunction.of("a"))).isCloseTo(0.5, Offset.offset(0.01));
         assertThat(result.get(idFunction.of("b"))).isCloseTo(0.5, Offset.offset(0.01));

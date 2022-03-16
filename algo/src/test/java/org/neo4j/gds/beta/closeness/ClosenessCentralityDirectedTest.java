@@ -21,7 +21,6 @@ package org.neo4j.gds.beta.closeness;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -87,10 +86,9 @@ class ClosenessCentralityDirectedTest {
 
     @Test
     void testCentrality() {
-        var algo = new ClosenessCentrality(
+        var algo = ClosenessCentrality.of(
             graph,
-            ConcurrencyConfig.DEFAULT_CONCURRENCY,
-            false,
+            ImmutableClosenessCentralityStreamConfig.builder().build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -106,10 +104,9 @@ class ClosenessCentralityDirectedTest {
 
     @Test
     void testCentralityWithWassermanFaust() {
-        var algo = new ClosenessCentrality(
+        var algo = ClosenessCentrality.of(
             graph,
-            ConcurrencyConfig.DEFAULT_CONCURRENCY,
-            true,
+            ImmutableClosenessCentralityStreamConfig.builder().improved(true).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
