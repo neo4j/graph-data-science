@@ -23,19 +23,16 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
-import org.neo4j.gds.ml.core.features.FeatureExtractor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public final class FeaturesFactory {
     private FeaturesFactory() {}
 
     public static Features extractLazyFeatures(Graph graph, List<String> featureProperties) {
-
-        var featureExtractors = new ArrayList<FeatureExtractor>();
-        featureExtractors.addAll(FeatureExtraction.propertyExtractors(graph, featureProperties));
+        var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
         var numberOfFeatures = FeatureExtraction.featureCount(featureExtractors);
+
         Features features = new Features() {
             @Override
             public long size() {
@@ -69,18 +66,10 @@ public final class FeaturesFactory {
     }
 
     public static Features extractEagerFeatures(Graph graph, List<String> featureProperties) {
-        var featureExtractors = new ArrayList<FeatureExtractor>();
-        featureExtractors.addAll(FeatureExtraction.propertyExtractors(graph, featureProperties));
-        var numberOfFeatures = FeatureExtraction.featureCount(featureExtractors);
-
+        var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
         var featuresArray = HugeObjectArray.newArray(double[].class, graph.nodeCount());
-        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-            var features = new double[numberOfFeatures];
 
-            FeatureExtraction.extract(nodeId, 0, featureExtractors, new DoubleArrayFeatureConsumer(features));
-
-            featuresArray.set(nodeId, features);
-        }
+        FeatureExtraction.extract(graph, featureExtractors, featuresArray);
 
         return wrap(featuresArray);
     }
@@ -128,19 +117,4 @@ public final class FeaturesFactory {
         };
     }
 
-    private static class DoubleArrayFeatureConsumer implements FeatureConsumer {
-        private final double[] features;
-
-        public DoubleArrayFeatureConsumer(double[] features) {this.features = features;}
-
-        @Override
-        public void acceptScalar(long nodeOffset, int offset, double value) {
-            features[offset] = value;
-        }
-
-        @Override
-        public void acceptArray(long nodeOffset, int offset, double[] values) {
-            System.arraycopy(values, 0, features, offset, values.length);
-        }
-    }
 }
