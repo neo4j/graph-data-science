@@ -94,7 +94,7 @@ include::../common-configuration/common-parameters.adoc[]
 | mutateRelationshipType                                        | String            | n/a     | no       | The relationship type used for the new relationships written to the projected graph.
 |===
 
-include::specific-configuration.adoc
+include::specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
