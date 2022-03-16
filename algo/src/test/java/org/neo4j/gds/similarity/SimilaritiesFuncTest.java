@@ -34,32 +34,37 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+/**
+ *
+ * cosine similarity taken from here: https://neo4j.com/graphgist/a7c915c8-a3d6-43b9-8127-1836fecc6e2f
+ * euclid distance taken from here: https://neo4j.com/blog/real-time-recommendation-engine-data-science/
+ * euclid similarity taken from here: http://stats.stackexchange.com/a/158285
+ * pearson similarity taken from here: http://guides.neo4j.com/sandbox/recommendations
+ */
 class SimilaritiesFuncTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
-            "CREATE (java:Skill{name:'Java'})\n" +
-            "CREATE (neo4j:Skill{name:'Neo4j'})\n" +
-            "CREATE (nodejs:Skill{name:'NodeJS'})\n" +
-            "CREATE (scala:Skill{name:'Scala'})\n" +
-            "CREATE (jim:Employee{name:'Jim'})\n" +
-            "CREATE (bob:Employee{name:'Bob'})\n" +
-            "CREATE (role:Role {name:'Role 1-Analytics Manager'})\n" +
-            "\n" +
-            "CREATE (role)-[:REQUIRES_SKILL{proficiency:8.54}]->(java)\n" +
-            "CREATE (role)-[:REQUIRES_SKILL{proficiency:4.3}]->(scala)\n" +
-            "CREATE (role)-[:REQUIRES_SKILL{proficiency:9.75}]->(neo4j)\n" +
-            "\n" +
-            "CREATE (bob)-[:HAS_SKILL{proficiency:10}]->(java)\n" +
-            "CREATE (bob)-[:HAS_SKILL{proficiency:7.5}]->(neo4j)\n" +
-            "CREATE (bob)-[:HAS_SKILL]->(scala)\n" +
-            "CREATE (jim)-[:HAS_SKILL{proficiency:8.25}]->(java)\n" +
-            "CREATE (jim)-[:HAS_SKILL{proficiency:7.1}]->(scala)";
 
-    // cosine similarity taken from here: https://neo4j.com/graphgist/a7c915c8-a3d6-43b9-8127-1836fecc6e2f
-    // euclid distance taken from here: https://neo4j.com/blog/real-time-recommendation-engine-data-science/
-    // euclid similarity taken from here: http://stats.stackexchange.com/a/158285
-    // pearson similarity taken from here: http://guides.neo4j.com/sandbox/recommendations
+        "  CREATE  "+
+        "  (java:Skill {name: 'Java'}), " +
+        "  (neo4j:Skill {name: 'Neo4j'}), " +
+        "  (nodejs:Skill {name: 'NodeJS'}), " +
+        "  (scala:Skill {name: 'Scala'}), " +
+        "  (jim:Employee {name: 'Jim'}), " +
+        "  (bob:Employee {name: 'Bob'}), " +
+        "  (role:Role {name: 'Role 1-Analytics Manager'}), " +
+        " " +
+        "  (role)-[:REQUIRES_SKILL {proficiency:8.54}]->(java), " +
+        "  (role)-[:REQUIRES_SKILL {proficiency:4.3}]->(scala), " +
+        "  (role)-[:REQUIRES_SKILL {proficiency:9.75}]->(neo4j), " +
+        " " +
+        "  (bob)-[:HAS_SKILL {proficiency:10}]->(java), " +
+        "  (bob)-[:HAS_SKILL {proficiency:7.5}]->(neo4j), " +
+        "  (bob)-[:HAS_SKILL]->(scala), " +
+        "  (jim)-[:HAS_SKILL {proficiency:8.25}]->(java), " +
+        "  (jim)-[:HAS_SKILL {proficiency:7.1}]->(scala)";
+
+
 
     @BeforeEach
     void setUp() throws Exception {
@@ -68,7 +73,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
     }
 
     @Test
-    public void testCosineSimilarityWithSomeWeightPropertiesNull() {
+    void testCosineSimilarityWithSomeWeightPropertiesNull() {
         String controlQuery =
             "MATCH (p1:Employee)-[x:HAS_SKILL]->(sk:Skill)<-[y:REQUIRES_SKILL] -(p2:Role {name:'Role 1-Analytics Manager'})\n" +
             "WITH sum(x.proficiency * y.proficiency) AS xyDotProduct,\n" +
@@ -100,7 +105,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
     }
 
     @Test
-    public void testCosineSimilarityWithSomeRelationshipsNull() {
+    void testCosineSimilarityWithSomeRelationshipsNull() {
         String controlQuery =
             "MATCH (p1:Employee)\n" +
             "MATCH (sk:Skill)<-[y:REQUIRES_SKILL] -(p2:Role {name:'Role 1-Analytics Manager'})\n" +
@@ -142,7 +147,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
     }
 
     @Test
-    public void testPearsonSimilarityWithSomeRelationshipsNull() {
+    void testPearsonSimilarityWithSomeRelationshipsNull() {
         String controlQuery =
             "MATCH (p2:Role {name:'Role 1-Analytics Manager'})-[s:REQUIRES_SKILL]->(:Skill) WITH p2, avg(s.proficiency) AS p2Mean " +
             "MATCH (p1:Employee)\n" +
@@ -178,7 +183,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
     }
 
     @Test
-    public void testEuclideanDistance() {
+    void testEuclideanDistance() {
         String controlQuery =
             "MATCH (p1:Employee)\n" +
             "MATCH (sk:Skill)<-[y:REQUIRES_SKILL] -(p2:Role {name:'Role 1-Analytics Manager'})\n" +
@@ -207,7 +212,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
     }
 
     @Test
-    public void testJaccardSimilarity() {
+    void testJaccardSimilarity() {
         String controlQuery =
             "MATCH (p1:Employee)-[:HAS_SKILL]->(sk)<-[:HAS_SKILL]-(p2)\n" +
             "WITH p1,p2,size((p1)-[:HAS_SKILL]->()) AS d1, size((p2)-[:HAS_SKILL]->()) AS d2, count(DISTINCT sk) AS intersection\n" +
@@ -304,7 +309,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
     }
 
     @Test
-    public void testOverlapSimilarity() {
+    void testOverlapSimilarity() {
         String controlQuery =
             "MATCH (p1:Employee)-[:HAS_SKILL]->(sk)<-[:HAS_SKILL]-(p2)\n" +
             "WITH p1,p2,size((p1)-[:HAS_SKILL]->()) as d1, size((p2)-[:HAS_SKILL]->()) as d2, count(distinct sk) as intersection\n" +
@@ -331,7 +336,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
     }
 
     @Test
-    public void testEuclideanSimilarity() {
+    void testEuclideanSimilarity() {
         String controlQuery =
             "MATCH (p1:Employee)\n" +
             "MATCH (sk:Skill)<-[y:REQUIRES_SKILL] -(p2:Role {name:'Role 1-Analytics Manager'})\n" +
@@ -374,4 +379,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
 
         runQuery("RETURN gds.alpha.similarity.jaccard([1, null, 2], [null, 1, 3])");
     }
+
 }
+
+

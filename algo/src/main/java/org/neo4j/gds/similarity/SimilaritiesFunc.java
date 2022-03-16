@@ -62,9 +62,8 @@ public class SimilaritiesFunc {
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2
     ) {
-        validateInput(vector1, vector2);
 
-        int len = Math.min(vector1.size(), vector2.size());
+        int len = validateLength(vector1, vector2);
         double[] weights1 = new double[len];
         double[] weights2 = new double[len];
 
@@ -98,9 +97,8 @@ public class SimilaritiesFunc {
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2
     ) {
-        validateInput(vector1, vector2);
+        int len = validateLength(vector1, vector2);
 
-        int len = Math.min(vector1.size(), vector2.size());
         double[] weights1 = new double[len];
         double[] weights2 = new double[len];
 
@@ -163,9 +161,9 @@ public class SimilaritiesFunc {
     }
 
     private double pearsonForNumberVectors(List<Number> vector1, List<Number> vector2) {
-        validateInput(vector1, vector2);
 
-        int len = vector1.size();
+        int len = validateLength(vector1, vector2);
+
         double[] weights1 = new double[len];
         double[] weights2 = new double[len];
 
@@ -187,13 +185,11 @@ public class SimilaritiesFunc {
         return v1Mappings;
     }
 
-    private void validateInput(
-        @Name("vector1") List<Number> vector1,
-        @Name("vector2") List<Number> vector2
-    ) {
+    private int validateLength(List<Number> vector1, List<Number> vector2) {
         if (vector1.size() != vector2.size() || vector1.isEmpty()) {
             throw new RuntimeException("Vectors must be non-empty and of the same size");
         }
+        return vector1.size();
     }
 
     /**
