@@ -128,7 +128,11 @@ The result from this formula is a non-negative value, but is not necessarily bou
 
 Finally, when multiple properties are specified, the similarity of the two neighbors is the mean of the similarities of the individual properties, i.e. the simple mean of the numbers, each of which is in the range `[0, 1]`, giving a total score also in the `[0, 1]` range.
 
-NB: The validity of this mean is highly context dependent, so take care when applying it to your data domain.
+[NOTE]
+====
+The validity of this mean is highly context dependent, so take care when applying it to your data domain.
+====
+
 
 [[algorithms-knn-introduction-sampling]]
 === Initial neighbor sampling
