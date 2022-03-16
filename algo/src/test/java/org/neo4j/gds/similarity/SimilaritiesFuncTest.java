@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  *
@@ -49,10 +48,11 @@ class SimilaritiesFuncTest extends BaseProcTest {
 
     @Test
     void testCosineSimilarityOppositeDirections() {
-        runQueryWithResultConsumer(
-            "RETURN gds.alpha.similarity.cosine([1.0, 1.0], [-1.0, -1.0]) AS similarity", result -> {
-                assertThat(result.next().get("similarity")).isEqualTo(-1.0);
-            });
+        var left = new ArrayList<Number>(Arrays.asList(1, 1));
+        var right=new ArrayList<Number>(Arrays.asList(-1,-1));
+        double actual = new SimilaritiesFunc().cosineSimilarity(left, right);
+        assertEquals(-1.0, actual);
+
     }
 
     @ParameterizedTest
@@ -60,10 +60,6 @@ class SimilaritiesFuncTest extends BaseProcTest {
     void jaccardSimilarityShouldWorkWithDuplicates(List<Number> left, List<Number> right, double expected) {
         double actual = new SimilaritiesFunc().jaccardSimilarity(left, right);
         assertEquals(expected, actual);
-        runQueryWithResultConsumer(
-            "RETURN gds.alpha.similarity.jaccard("+Arrays.toString(left.toArray()) +","+Arrays.toString(right.toArray())+") AS jaccardSim", result -> {
-                assertEquals(expected, result.next().get("jaccardSim"));
-            });
     }
 
     static Stream<Arguments> listsWithDuplicates() {
@@ -127,21 +123,41 @@ class SimilaritiesFuncTest extends BaseProcTest {
     }
 
     @Test
-    void testSimilarityFunctionsHandlesNullValues() {
-        runQuery("RETURN gds.alpha.similarity.cosine([1, null, 2], [null, 1, 3])");
+    void testCosineWithNulls() {
+        var left=new ArrayList<Number>(Arrays.asList(null, 1, 3));
+        var right=new ArrayList<Number>(Arrays.asList(1, null, 2));
+        assertEquals(0, new SimilaritiesFunc().cosineSimilarity(left,right));
+    }
+    @Test
+    void testEuclideanSimilarityWithNulls() {
+        var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
+        var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
+        assertEquals(0, new SimilaritiesFunc().euclideanSimilarity(left, right));
+    }
+    @Test
+    void testEuclideanDistanceWithNulls() {
+        var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
+        var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
+        assertEquals(0, new SimilaritiesFunc().euclideanDistance(left, right));
+    }
 
-        runQuery("RETURN gds.alpha.similarity.euclidean([1, null, 2], [null, 1, 3])");
-
-        runQuery("RETURN gds.alpha.similarity.euclideanDistance([1, null, 2], [null, 1, 3])");
-
-        runQuery("RETURN gds.alpha.similarity.pearson([1, null, 2], [null, 1, 3])");
-
-        runQuery("RETURN gds.alpha.similarity.overlap([1, null, 2], [null, 1, 3])");
-
-        runQuery("RETURN gds.alpha.similarity.jaccard([1, null, 2], [null, 1, 3])");
-
-        runQuery("RETURN gds.alpha.similarity.pearson(['lala', 2, 3], [null, 1, 3])");
-
+    @Test
+    void testPearsonWithNulls() {
+        var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
+        var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
+        assertEquals(0, new SimilaritiesFunc().pearsonSimilarity(left, right));
+    }
+    @Test
+    void testOverlapWithNulls() {
+        var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
+        var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
+        assertEquals(0.5, new SimilaritiesFunc().overlapSimilarity(left, right));
+    }
+        @Test
+    void testJaccardWithNulls() {
+        var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
+        var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
+        assertEquals(1 / 3.0, new SimilaritiesFunc().jaccardSimilarity(left, right));
     }
 
 }
