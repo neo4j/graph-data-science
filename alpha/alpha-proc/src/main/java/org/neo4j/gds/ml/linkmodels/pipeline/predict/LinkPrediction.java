@@ -28,7 +28,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 
 public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResult> {
-
+    static final int MIN_NODE_BATCH_SIZE = 10;
     private final LinkLogisticRegressionData modelData;
     private final LinkFeatureExtractor linkFeatureExtractor;
     private final Graph graph;
