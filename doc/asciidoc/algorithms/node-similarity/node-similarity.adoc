@@ -44,13 +44,9 @@ The Node Similarity algorithm compares each node that has outgoing relationships
 For every node `n`, we collect the outgoing neighborhood `N(n)` of that node, that is, all nodes `m` such that there is a relationship from `n` to `m`.
 For each pair `n`, `m`, the algorithm computes a similarity for that pair that equals the outcome of the selected similarity metric for `N(n)` and `N(m)`.
 
-The complexity of this comparison grows quadratically with the number of nodes to compare.
-The algorithm reduces the complexity by ignoring disconnected nodes.
+Node Similarity has time complexity O(n^3^) and space complexity O(n^2^). We compute and store neighbour sets in time and space O(n^2^), then compute pairwise similarity scores in time O(n^3^).
 
-In addition to computational complexity, the memory requirement for producing results also scales roughly quadratically.
-In order to bound memory usage, the algorithm requires an explicit limit on the number of results to compute per node.
-This is the 'topK' parameter.
-It can be set to any value, except 0.
+In order to bound memory usage you can specify an explicit limit on the number of results to output per node, this is the 'topK' parameter. It can be set to any value, except 0. You will lose precision in the overall computation of course, and running time is unaffected - we still have to compute results before potentially throwing them away.
 
 The output of the algorithm are new relationships between pairs of the first node set.
 Similarity scores are expressed via relationship properties.
