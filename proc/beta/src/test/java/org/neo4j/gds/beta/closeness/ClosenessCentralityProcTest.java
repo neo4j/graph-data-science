@@ -33,11 +33,11 @@ import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
-import org.neo4j.gds.graphbuilder.DefaultBuilder;
-import org.neo4j.gds.graphbuilder.GraphBuilder;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jGraphExtension;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
 
 import java.util.List;
 import java.util.Map;
@@ -47,51 +47,76 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Neo4jGraphExtension
 class ClosenessCentralityProcTest extends BaseProcTest {
 
-    public static final String TYPE = "TYPE";
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (n0:Node)" +
+        ", (n1:Node)" +
+        ", (n2:Node)" +
+        ", (n3:Node)" +
+        ", (n4:Node)" +
+        ", (n5:Node)" +
+        ", (n6:Node)" +
+        ", (n7:Node)" +
+        ", (n8:Node)" +
+        ", (n9:Node)" +
+        ", (n10:Node)" +
+
+        // first ring
+        ", (n1)-[:TYPE]->(n2)" +
+        ", (n2)-[:TYPE]->(n3)" +
+        ", (n3)-[:TYPE]->(n4)" +
+        ", (n4)-[:TYPE]->(n5)" +
+        ", (n5)-[:TYPE]->(n1)" +
+
+        ", (n0)-[:TYPE]->(n0)" +
+        ", (n1)-[:TYPE]->(n0)" +
+        ", (n2)-[:TYPE]->(n0)" +
+        ", (n3)-[:TYPE]->(n0)" +
+        ", (n4)-[:TYPE]->(n0)" +
+        ", (n5)-[:TYPE]->(n0)" +
+
+        // second ring
+        ", (n6)-[:TYPE]->(n7)" +
+        ", (n7)-[:TYPE]->(n8)" +
+        ", (n8)-[:TYPE]->(n9)" +
+        ", (n9)-[:TYPE]->(n10)" +
+        ", (n10)-[:TYPE]->(n6)" +
+
+        ", (n0)-[:TYPE]->(n0)" +
+        ", (n0)-[:TYPE]->(n1)" +
+        ", (n0)-[:TYPE]->(n2)" +
+        ", (n0)-[:TYPE]->(n3)" +
+        ", (n0)-[:TYPE]->(n4)" +
+        ", (n0)-[:TYPE]->(n5)" +
+        ", (n0)-[:TYPE]->(n6)" +
+        ", (n0)-[:TYPE]->(n7)" +
+        ", (n0)-[:TYPE]->(n8)" +
+        ", (n0)-[:TYPE]->(n9)" +
+        ", (n0)-[:TYPE]->(n10)";
+
+    @Inject
+    private IdFunction idFunction;
 
     private List<Map<String, Object>> expectedCentralityResult;
 
     @BeforeEach
     void setupGraph() throws Exception {
-        DefaultBuilder builder = GraphBuilder.create(db)
-                .setLabel("Node")
-                .setRelationship(TYPE);
-
-        RelationshipType type = RelationshipType.withName(TYPE);
-
-        /*
-         * create two rings of nodes where each node of ring A
-         * is connected to center while center is connected to
-         * each node of ring B.
-         */
-        Node center = builder.newDefaultBuilder()
-                .setLabel("Node")
-                .createNode();
-
-        long centerNodeId = center.getId();
-
-        builder.newRingBuilder()
-            .createRing(5)
-            .forEachNodeInTx(node -> node.createRelationshipTo(center, type))
-            .newRingBuilder()
-            .createRing(5)
-            .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
-            .close();
-
         expectedCentralityResult = List.of(
-            Map.of("nodeId", centerNodeId, "centrality", Matchers.closeTo(1.0, 0.01)),
-            Map.of("nodeId", 1L, "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", 2L, "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", 3L, "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", 4L, "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", 5L, "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", 6L, "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", 7L, "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", 8L, "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", 9L, "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", 10L, "centrality", Matchers.closeTo(0.588, 0.01))
+            Map.of("nodeId", idFunction.of("n0"), "centrality", Matchers.closeTo(1.0, 0.01)),
+            Map.of("nodeId", idFunction.of("n1"), "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n2"), "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n3"), "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n4"), "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n5"), "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n6"), "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n7"), "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n8"), "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n9"), "centrality", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n10"), "centrality", Matchers.closeTo(0.588, 0.01))
         );
 
         registerProcedures(
