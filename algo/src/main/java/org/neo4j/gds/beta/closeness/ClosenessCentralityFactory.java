@@ -43,7 +43,6 @@ public class ClosenessCentralityFactory<CONFIG extends ClosenessCentralityConfig
         );
     }
 
-
     @Override
     public String taskName() {
         return "ClosenessCentrality";
@@ -51,6 +50,10 @@ public class ClosenessCentralityFactory<CONFIG extends ClosenessCentralityConfig
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.leaf(taskName(), graph.nodeCount());
+        return Tasks.task(
+            taskName(),
+            Tasks.leaf("Farness computation"),
+            Tasks.leaf("Closeness computation", graph.nodeCount())
+        );
     }
 }

@@ -95,7 +95,7 @@ class ClosenessCentralityDirectedTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var result = algo.compute().getCentrality();
+        var result = algo.compute().centralities();
         assertThat(result.get(idFunction.of("a"))).isEqualTo(2 / 3.0);
         assertThat(result.get(idFunction.of("b"))).isEqualTo(1);
         assertThat(result.get(idFunction.of("c"))).isEqualTo(0);
@@ -114,7 +114,7 @@ class ClosenessCentralityDirectedTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var result = algo.compute().getCentrality();
+        var result = algo.compute().centralities();
         assertThat(result.get(idFunction.of("a"))).isEqualTo(4 / 15.0);
         assertThat(result.get(idFunction.of("b"))).isEqualTo(2 / 5.0);
         assertThat(result.get(idFunction.of("c"))).isEqualTo(0);

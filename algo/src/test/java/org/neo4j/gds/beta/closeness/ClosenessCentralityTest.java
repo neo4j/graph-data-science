@@ -93,7 +93,7 @@ class ClosenessCentralityTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var result = algo.compute().getCentrality();
+        var result = algo.compute().centralities();
 
         assertThat(result.get(idFunction.of("a"))).isCloseTo(0.4, Offset.offset(0.01));
         assertThat(result.get(idFunction.of("b"))).isCloseTo(0.57, Offset.offset(0.01));

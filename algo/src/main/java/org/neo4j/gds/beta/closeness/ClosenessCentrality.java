@@ -35,7 +35,7 @@ import java.util.concurrent.ExecutorService;
  * Utilizes the MSBFS for counting the farness between nodes.
  * See MSBFS documentation.
  */
-public class ClosenessCentrality extends Algorithm<ClosenessCentrality> {
+public class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
 
     static double centrality(long farness, long componentSize, long nodeCount, boolean wassermanFaust) {
         if (farness == 0L) {
@@ -72,8 +72,36 @@ public class ClosenessCentrality extends Algorithm<ClosenessCentrality> {
         this.component = PagedAtomicIntegerArray.newArray(nodeCount);
     }
 
-    public HugeDoubleArray getCentrality() {
-        final HugeDoubleArray cc = HugeDoubleArray.newArray(nodeCount);
+    @Override
+    public ClosenessCentralityResult compute() {
+        progressTracker.beginSubTask();
+        computeFarness();
+        var centralities = computeCloseness();
+        progressTracker.endSubTask();
+
+        return ImmutableClosenessCentralityResult.of(centralities);
+    }
+
+    @Override
+    public void release() {}
+
+    private void computeFarness() {
+        progressTracker.beginSubTask();
+        final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
+            int len = sourceNodeIds.size();
+            farness.add(nodeId, len * depth);
+            component.add(nodeId, len);
+            progressTracker.logProgress();
+        };
+        MultiSourceBFS
+            .aggregatedNeighborProcessing(graph.nodeCount(), graph, consumer)
+            .run(concurrency, executorService);
+        progressTracker.endSubTask();
+    }
+
+    private HugeDoubleArray computeCloseness() {
+        progressTracker.beginSubTask();
+        var cc = HugeDoubleArray.newArray(nodeCount);
         for (int i = 0; i < nodeCount; i++) {
             cc.set(i, centrality(
                 farness.get(i),
@@ -82,28 +110,7 @@ public class ClosenessCentrality extends Algorithm<ClosenessCentrality> {
                 wassermanFaust
             ));
         }
+        progressTracker.endSubTask();
         return cc;
     }
-
-    @Override
-    public ClosenessCentrality compute() {
-        progressTracker.beginSubTask();
-        final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
-            int len = sourceNodeIds.size();
-            farness.add(nodeId, len * depth);
-            component.add(nodeId, len);
-            progressTracker.logProgress();
-        };
-
-        MultiSourceBFS
-            .aggregatedNeighborProcessing(graph.nodeCount(), graph, consumer)
-            .run(concurrency, executorService);
-
-        progressTracker.endSubTask();
-        return this;
-    }
-
-    @Override
-    public void release() {}
-
 }

@@ -73,7 +73,7 @@ class ClosenessCentralityDiscoTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var result = algo.compute().getCentrality();
+        var result = algo.compute().centralities();
         assertThat(result.get(idFunction.of("a"))).isCloseTo(0.5, Offset.offset(0.01));
         assertThat(result.get(idFunction.of("b"))).isCloseTo(0.5, Offset.offset(0.01));
         assertThat(result.get(idFunction.of("c"))).isCloseTo(0.5, Offset.offset(0.01));
