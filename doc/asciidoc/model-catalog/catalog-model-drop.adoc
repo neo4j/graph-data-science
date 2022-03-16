@@ -38,7 +38,7 @@ include::shared/model-info-result.adoc[]
 == Example
 
 In this section we are going to demonstrate the usage of `gds.beta.model.drop`.
-Assume we trained a model by running `train` on one of our <<algorithms-ml-models, Machine learning algorithms>>.
+Assume we trained a model by running `train` on one of our <<machine-learning, Machine learning algorithms>>.
 
 [role=query-example]
 --

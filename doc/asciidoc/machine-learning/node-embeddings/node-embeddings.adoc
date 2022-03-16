@@ -1,4 +1,4 @@
-[[algorithms-node-embeddings]]
+[[node-embeddings]]
 = Node embeddings
 
 [abstract]
@@ -11,15 +11,14 @@ These vectors, also called embeddings, can be used for machine learning.
 The Neo4j Graph Data Science library contains the following node embedding algorithms:
 
 * Production-quality
-** <<algorithms-embeddings-fastrp, FastRP>>
+** <<fastrp, FastRP>>
 
 * Beta
-** <<algorithms-embeddings-graph-sage, GraphSAGE>>
-** <<beta-algorithms-embeddings-node2vec, Node2Vec>>
-
+** <<graph-sage, GraphSAGE>>
+** <<node2vec, Node2Vec>>
 
 include::fastrp/fastrp.adoc[leveloffset=+1]
 
-include::beta/graph-sage/graph-sage.adoc[leveloffset=+1]
+include::graph-sage/graph-sage.adoc[leveloffset=+1]
 
-include::beta/node2vec/node2vec.adoc[leveloffset=+1]
+include::node2vec/node2vec.adoc[leveloffset=+1]

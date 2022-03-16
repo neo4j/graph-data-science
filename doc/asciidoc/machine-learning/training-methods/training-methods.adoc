@@ -1,4 +1,4 @@
-[[algorithms-ml-training-methods]]
+[[ml-training-methods]]
 = Training methods
 
 [abstract]
@@ -6,15 +6,15 @@
 This section describes supervised machine learning methods for training pipelines in the Neo4j Graph Data Science library.
 --
 
-<<algorithms-ml-nodeclassification-pipelines, Node Classification Pipelines>> and <<algorithms-ml-linkprediction-pipelines, Link Prediction Pipelines>> are trained using supervised machine learning methods.
-Currently, GDS supports two such methods, namely <<algorithms-ml-training-methods-logistic-regression>> and <<algorithms-ml-training-methods-random-forest>>.
+<<nodeclassification-pipelines, Node Classification Pipelines>> and <<linkprediction-pipelines, Link Prediction Pipelines>> are trained using supervised machine learning methods.
+Currently, GDS supports two such methods, namely <<machine-learning-training-methods-logistic-regression>> and <<machine-learning-training-methods-random-forest>>.
 Each of these methods have several hyperparameters that one can set to influence the training.
 The objective of this page is to give a brief overview of logistic regression and random forest, as well as advice on how to tune their hyperparameters.
 
-See <<algorithms-ml-nodeclassification-configure-model-parameters, this section>> for how to add model candidates to node classification pipelines, and <<algorithms-ml-linkprediction-configure-model-parameters, this section>> for link prediction.
+See <<nodeclassification-pipelines-configure-model-parameters, this section>> for how to add model candidates to node classification pipelines, and <<linkprediction-configure-model-parameters, this section>> for link prediction.
 
 
-[[algorithms-ml-training-methods-logistic-regression]]
+[[machine-learning-training-methods-logistic-regression]]
 [.beta]
 == Logistic regression
 
@@ -56,7 +56,7 @@ The gradient updates are computed batch-wise on batches of `batchSize` samples, 
 Thus, `batchSize` can affect the convergence rate, but since the algorithms above optimize convex functions, the resulting model is in theory (approximately) unique.
 
 
-[[algorithms-ml-training-methods-random-forest]]
+[[machine-learning-training-methods-random-forest]]
 [.alpha]
 == Random forest
 

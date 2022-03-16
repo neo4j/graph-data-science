@@ -267,26 +267,6 @@
             </d:tocentry>
         </d:tocentry>
 
-        <d:tocentry linkend="algorithms-node-embeddings"><?dbhtml filename="algorithms/node-embeddings/index.html"?>
-            <d:tocentry linkend="algorithms-embeddings-fastrp"><?dbhtml filename="algorithms/fastrp/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="algorithms-embeddings-graph-sage"><?dbhtml filename="algorithms/graph-sage/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="beta-algorithms-embeddings-node2vec"><?dbhtml filename="algorithms/node2vec/index.html"?>
-            </d:tocentry>
-        </d:tocentry>
-
-        <d:tocentry linkend="algorithms-ml-models"><?dbhtml filename="algorithms/ml-models/index.html"?>
-            <d:tocentry linkend="algorithms-ml-models-preprocessing"><?dbhtml filename="algorithms/ml-models/pre-processing/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="algorithms-ml-nodeclassification-pipelines"><?dbhtml filename="algorithms/ml-models/nodeclassification-pipelines/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="algorithms-ml-linkprediction-pipelines"><?dbhtml filename="algorithms/ml-models/linkprediction-pipelines/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="algorithms-ml-training-methods"><?dbhtml filename="algorithms/ml-models/training-methods/index.html"?>
-            </d:tocentry>
-        </d:tocentry>
-
         <d:tocentry linkend="algorithms-auxiliary">
             <?dbhtml filename="algorithms/auxiliary/index.html"?>
             <d:tocentry linkend="graph-generation">
@@ -308,6 +288,29 @@
 
         <d:tocentry linkend="algorithms-pregel-api">
             <?dbhtml filename="algorithms/pregel-api/index.html"?>
+        </d:tocentry>
+    </d:tocentry>
+
+    <d:tocentry linkend="machine-learning">
+        <?dbhtml filename="machine-learning/machine-learning/index.html"?>
+
+        <d:tocentry linkend="ml-preprocessing"><?dbhtml filename="machine-learning/pre-processing/index.html"?>
+        </d:tocentry>
+
+        <d:tocentry linkend="node-embeddings"><?dbhtml filename="machine-learning/node-embeddings/index.html"?>
+            <d:tocentry linkend="fastrp"><?dbhtml filename="machine-learning/node-embeddings/fastrp/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="graph-sage"><?dbhtml filename="machine-learning/node-embeddings/graph-sage/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="node2vec"><?dbhtml filename="machine-learning/node-embeddings/node2vec/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
+        <d:tocentry linkend="nodeclassification-pipelines"><?dbhtml filename="machine-learning/nodeclassification-pipelines/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="linkprediction-pipelines"><?dbhtml filename="machine-learning/linkprediction-pipelines/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="ml-training-methods"><?dbhtml filename="machine-learning/training-methods/index.html"?>
         </d:tocentry>
     </d:tocentry>
 

@@ -128,4 +128,4 @@ Some notable exceptions to this are:
 * The Python client also contains specific functionality for inspecting graphs from the <<graph-catalog-ops, GDS Graph Catalog>>, using a client-side <<python-client-graph-object, graph object>>.
 Similarly, models from the <<model-catalog-ops, GDS Model Catalog>> can be inspected using a client-side <<python-client-model-object, model object>>.
 * Cypher functions and procedures of GDS that take references to graphs and/or models as strings for input typically instead take <<python-client-graph-object, graph objects>> and/or <<python-client-model-object, model objects>> as input in the Python client API.
-* To configure and use <<algorithms-ml-models, machine learning pipelines>> in GDS, specific <<python-client-pipelines, pipeline objects>> are used in the Python client.
+* To configure and use <<machine-learning, machine learning pipelines>> in GDS, specific <<python-client-pipelines, pipeline objects>> are used in the Python client.

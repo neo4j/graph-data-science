@@ -1,20 +1,20 @@
-[[algorithms-ml-nodeclassification-pipelines-train]]
+[[nodeclassification-pipelines-train]]
 == Training the pipeline
 
 The train mode, `gds.beta.pipeline.nodeClassification.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
 Running this mode results in a classification model of type `NodeClassification`, which is then stored in the <<model-catalog-ops, model catalog>>.
-The classification model can be <<algorithms-node-classification-pipelines-predict, applied>> to a possibly different graph which classifies nodes.
+The classification model can be <<nodeclassification-pipelines-predict, applied>> to a possibly different graph which classifies nodes.
 
 More precisely, the training proceeds as follows:
 
 . Apply `nodeLabels` and `relationshipType` filters to the graph.
-. Apply the node property steps, added according to <<algorithms-ml-nodeclassification-adding-node-properties, Adding node properties>>, on the whole graph.
-. Select node properties to be used as features, as specified in <<algorithms-ml-nodeclassification-adding-features, Adding features>>.
-. Split the input graph into two parts: the train graph and the test graph. This is described in <<algorithms-ml-nodeclassification-configure-splits, Configuring the node splits>>.
+. Apply the node property steps, added according to <<nodeclassification-pipelines-adding-node-properties, Adding node properties>>, on the whole graph.
+. Select node properties to be used as features, as specified in <<nodeclassification-pipelines-adding-features, Adding features>>.
+. Split the input graph into two parts: the train graph and the test graph. This is described in <<nodeclassification-pipelines-configure-splits, Configuring the node splits>>.
 These graphs are internally managed and exist only for the duration of the training.
 . Split the nodes in the train graph using stratified k-fold cross-validation.
-The number of folds `k` can be configured as described in <<algorithms-ml-nodeclassification-configure-splits, Configuring the node splits>>.
-. Each model candidate defined in the <<algorithms-ml-nodeclassification-configure-model-parameters,parameter space>> is trained on each train set and evaluated on the respective validation set for every fold. The training process uses a logistic regression algorithm, and the evaluation uses the specified <<algorithms-ml-nodeclassification-pipeline-metrics,metric>>.
+The number of folds `k` can be configured as described in <<nodeclassification-pipelines-configure-splits, Configuring the node splits>>.
+. Each model candidate defined in the <<nodeclassification-pipelines-configure-model-parameters,parameter space>> is trained on each train set and evaluated on the respective validation set for every fold. The training process uses a logistic regression algorithm, and the evaluation uses the specified <<nodeclassification-pipeline-metrics,metric>>.
 . Choose the best performing model according to the highest average score for the primary metric.
 . Retrain the winning model on the entire train graph.
 . Evaluate the performance of the winning model on the whole train graph as well as the test graph.
@@ -26,7 +26,7 @@ The actual steps as well as their ordering in the implementation may differ.
 
 NOTE: A step can only use node properties that are already present in the input graph or produced by steps, which were added before.
 
-[[algorithms-ml-nodeclassification-pipeline-metrics]]
+[[nodeclassification-pipeline-metrics]]
 === Metrics
 
 The Node Classification model in the Neo4j GDS library supports the following evaluation metrics:
@@ -65,7 +65,7 @@ CALL gds.beta.pipeline.nodeClassification.train(
   configuration: Map
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
 .Configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -76,7 +76,7 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 | <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']   | yes      | Filter the named graph using the given relationship types.
 | <<common-configuration-concurrency,concurrency>>              | Integer           | 4       | yes      | The number of concurrent threads used for running the algorithm.
 | targetProperty                                                | String            | n/a     | no       | The class of the node. Must be of type Integer.
-| metrics                                                       | List of String    | n/a     | no       | <<algorithms-ml-nodeclassification-pipeline-metrics,Metrics>> used to evaluate the models.
+| metrics                                                       | List of String    | n/a     | no       | <<nodeclassification-pipeline-metrics,Metrics>> used to evaluate the models.
 | randomSeed                                                    | Integer           | n/a     | yes      | Seed for the random number generator used during training.
 | modelName                                                     | String            | n/a     | no       | The name of the model to train, must not exist in the Model Catalog.
 |===
@@ -150,7 +150,7 @@ The structure of `modelInfo` is:
 <9> The `validation` entry summarizes the metric results over the `validation` set.
 --
 
-[[algorithms-ml-nodeclassification-examples-train]]
+[[nodeclassification-pipelines-examples-train]]
 === Example
 
 In this section we will show examples of running a Node Classification training pipeline on a concrete graph.
@@ -185,7 +185,7 @@ With the graph in Neo4j we can now project it into the graph catalog to prepare 
 We do this using a native projection targeting the `House` and `UnknownHouse` labels.
 We will also project the `sizeOfStory` property to use as a model feature, and the `class` property to use as a target feature.
 
-include::../../shared/examples-named-native-note.adoc[]
+include::../../algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query, group=nc]
@@ -198,11 +198,11 @@ CALL gds.graph.project('myGraph', {
 )
 ----
 
-[[algorithms-ml-nodeclassification-examples-train-memory-estimation]]
+[[nodeclassification-pipelines-examples-train-memory-estimation]]
 ==== Memory Estimation
 :mode: train
 
-include::../../shared/examples-estimate-intro.adoc[]
+include::../../algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example, group=nc]
 --
@@ -236,7 +236,7 @@ NOTE: If a node property step does not have an estimation implemented, the step 
 In the following examples we will demonstrate running the Node Classification training pipeline on this graph.
 We will train a model to predict the class in which a house belongs, based on its `sizePerStory` property.
 
-[[algorithms-ml-nodeclassification-pipeline-examples-train-query]]
+[[nodeclassification-pipelines-examples-train-query]]
 [role=query-example, group=nc]
 --
 .The following will train a model using a pipeline:

@@ -1,4 +1,4 @@
-[[beta-algorithms-embeddings-node2vec]]
+[[node2vec]]
 [.beta]
 = Node2Vec
 :entity: node
@@ -61,9 +61,9 @@ CALL gds.beta.node2vec.stream(
   embedding: List of Float
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
 
 include::specific-configuration.adoc[]
 
@@ -96,9 +96,9 @@ YIELD
   configuration: Map
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-mutate-configuration-named-graph.adoc[]
 
 include::specific-configuration.adoc[]
 
@@ -135,9 +135,9 @@ YIELD
   configuration: Map
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-write-configuration-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-write-configuration-named-graph.adoc[]
 
 include::specific-configuration.adoc[]
 

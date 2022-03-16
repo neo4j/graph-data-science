@@ -35,7 +35,7 @@ include::shared/pipeline-info-result.adoc[]
 == Example
 
 In this section we are going to demonstrate the usage of `gds.beta.pipeline.drop`.
-To exemplify this, we first create a <<algorithms-ml-linkprediction-pipelines, link prediction pipeline>>.
+To exemplify this, we first create a <<linkprediction-pipelines, link prediction pipeline>>.
 
 .Creating a link prediction training pipelines:
 [source, cypher, role=noplay setup-query]

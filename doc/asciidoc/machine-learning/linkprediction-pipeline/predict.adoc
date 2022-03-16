@@ -4,7 +4,7 @@
 :entity: relationship
 
 In the previous sections we have seen how to build up a Link Prediction training pipeline and train it to produce a predictive model.
-After <<algorithms-ml-linkprediction-pipelines-train, training>>, the runnable model is of type `{modelType}` and resides in the <<model-catalog-ops,model catalog>>.
+After <<linkprediction-pipelines-train, training>>, the runnable model is of type `{modelType}` and resides in the <<model-catalog-ops,model catalog>>.
 
 The trained model can then be applied to a graph in the graph catalog to create a new relationship type containing the predicted links.
 The relationships also have a property which stores the predicted probability of the link, which can be seen as a relative measure of the model's prediction confidence.
@@ -48,7 +48,7 @@ YIELD
   configuration: Map
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
 // not reusing common-configuration/common-mutate-configuration-named-graph.adoc as mutateProperty has a default
 .Configuration
@@ -96,9 +96,9 @@ YIELD
   probability: Float
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
 
 include::specific-predict-configuration.adoc[]
 
@@ -119,7 +119,7 @@ include::specific-predict-configuration.adoc[]
 
 In this example we will show how to use a trained model to predict new relationships in your projected graph.
 In order to do this, we must first have an already trained model registered in the Model Catalog.
-We will use the model which we trained in the <<algorithms-ml-linkprediction-pipeline-examples-train-query, train example>> which we gave the name `lp-pipeline-model`.
+We will use the model which we trained in the <<linkprediction-pipeline-examples-train-query, train example>> which we gave the name `lp-pipeline-model`.
 The algorithm excludes predictions for existing relationships in the graph as well as self-loops.
 
 There are two different strategies for choosing which node pairs to consider when predicting new links, exhaustive search and approximate search.
@@ -139,7 +139,7 @@ The stream procedure will yield a node pair only once.
 ==== Memory Estimation
 
 :mode: stream
-include::../../shared/examples-estimate-intro.adoc[]
+include::../../algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
 --
@@ -201,7 +201,7 @@ We can see, that our model predicts the most likely link is between Alice and Ch
 ==== Mutate
 
 In these examples we will show how to write the predictions to your projected graph.
-We will use the model `lp-pipeline-model`, that we trained in the <<algorithms-ml-linkprediction-pipelines-train, train example>>.
+We will use the model `lp-pipeline-model`, that we trained in the <<linkprediction-pipelines-train, train example>>.
 
 
 [[algorithms-link-prediction-pipelines-predict-examples-exhaustive]]

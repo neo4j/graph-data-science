@@ -1,4 +1,4 @@
-[[algorithms-ml-nodeclassification-pipelines]]
+[[nodeclassification-pipelines]]
 = Node classification pipelines
 :entity: node
 :result: predicted property
@@ -10,7 +10,7 @@ This section describes Node classification pipelines in the Neo4j Graph Data Sci
 --
 
 
-[[algorithms-ml-nodeclassification-pipelines-intro]]
+[[nodeclassification-pipelines-intro]]
 == Introduction
 
 Node Classification is a common machine learning task applied to graphs: training models to classify nodes.
@@ -20,37 +20,37 @@ GDS supports both binary and multi-class node classification.
 
 In GDS, we have Node Classification pipelines which offer an end-to-end workflow, from feature extraction to node classification.
 The training pipelines reside in the <<pipeline-catalog-ops,pipeline catalog>>.
-When a training pipeline is <<algorithms-ml-nodeclassification-pipelines-train,executed>>, a classification model is created and stored in the <<model-catalog-ops,model catalog>>.
+When a training pipeline is <<nodeclassification-pipelines-train,executed>>, a classification model is created and stored in the <<model-catalog-ops,model catalog>>.
 
 A training pipeline is a sequence of two phases:
 [upperroman]
 . The graph is augmented with new node properties in a series of steps.
 . The augmented graph is used for training a node classification model.
 
-One can <<algorithms-ml-nodeclassification-adding-node-properties,configure>> which steps should be included above.
+One can <<nodeclassification-pipelines-adding-node-properties,configure>> which steps should be included above.
 The steps execute GDS algorithms that create new node properties.
-After configuring the node property steps, one can <<algorithms-ml-nodeclassification-adding-features,select>> a subset of node properties to be used as features.
+After configuring the node property steps, one can <<nodeclassification-pipelines-adding-features,select>> a subset of node properties to be used as features.
 The training phase (II) trains multiple model candidates using cross-validation, selects the best one, and reports relevant performance metrics.
 
-After <<algorithms-ml-nodeclassification-pipelines-train, training the pipeline>>, a classification model is created.
+After <<nodeclassification-pipelines-train, training the pipeline>>, a classification model is created.
 This model includes the node property steps and feature configuration from the training pipeline and uses them to generate the relevant features for classifying unlabeled nodes.
 The classification model can be applied to predict the class of previously unseen nodes.
 In addition to the predicted class for each node, the predicted probability for each class may also be retained on the nodes.
 The order of the probabilities matches the order of the classes registered in the model.
 
-NOTE: <<algorithms-node-classification-pipelines-predict, Classification>> can only be done with a classification model (not with a training pipeline).
+NOTE: <<nodeclassification-pipelines-predict, Classification>> can only be done with a classification model (not with a training pipeline).
 
 The rest of this page is divided as follows:
 
-* <<algorithms-ml-nodeclassification-creating-a-pipeline, Creating a pipeline>>
-* <<algorithms-ml-nodeclassification-adding-node-properties, Adding node properties>>
-* <<algorithms-ml-nodeclassification-adding-features, Adding features>>
-* <<algorithms-ml-nodeclassification-configure-splits, Configuring the node splits>>
-* <<algorithms-ml-nodeclassification-configure-model-parameters, Configuring the model parameter space>>
-* <<algorithms-ml-nodeclassification-pipelines-train, Training the pipeline>>
-* <<algorithms-node-classification-pipelines-predict, Applying a classification model to make predictions>>
+* <<nodeclassification-creating-a-pipeline, Creating a pipeline>>
+* <<nodeclassification-pipelines-adding-node-properties, Adding node properties>>
+* <<nodeclassification-pipelines-adding-features, Adding features>>
+* <<nodeclassification-pipelines-configure-splits, Configuring the node splits>>
+* <<nodeclassification-pipelines-configure-model-parameters, Configuring the model parameter space>>
+* <<nodeclassification-pipelines-train, Training the pipeline>>
+* <<nodeclassification-pipelines-predict, Applying a classification model to make predictions>>
 
-[[algorithms-ml-nodeclassification-creating-a-pipeline]]
+[[nodeclassification-creating-a-pipeline]]
 == Creating a pipeline
 
 The first step of building a new pipeline is to create one using `gds.beta.pipeline.nodeClassification.create`.
@@ -108,17 +108,17 @@ CALL gds.beta.pipeline.nodeClassification.create('pipe')
 
 This shows that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
 
-[[algorithms-ml-nodeclassification-adding-node-properties]]
+[[nodeclassification-pipelines-adding-node-properties]]
 == Adding node properties
 
 A node classification pipeline can execute one or several GDS algorithms in mutate mode that create node properties in the in-memory graph.
-Such steps producing node properties can be chained one after another and created properties can later be used as <<algorithms-ml-nodeclassification-adding-features, features>>.
-Moreover, the node property steps that are added to the training pipeline will be executed both when <<algorithms-ml-nodeclassification-pipelines-train, training>> a model and when the classification pipeline is <<algorithms-link-prediction-pipelines-predict, applied for classification>>.
+Such steps producing node properties can be chained one after another and created properties can later be used as <<nodeclassification-pipelines-adding-features, features>>.
+Moreover, the node property steps that are added to the training pipeline will be executed both when <<nodeclassification-pipelines-train, training>> a model and when the classification pipeline is <<nodeclassification-pipelines-predict, applied for classification>>.
 
 The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
 The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
 
-For example, <<algorithms-ml-models-preprocessing, pre-processing algorithms>> can be used as node property steps.
+For example, <<ml-preprocessing, pre-processing algorithms>> can be used as node property steps.
 
 === Syntax
 
@@ -177,7 +177,7 @@ The `scaledSizes` property can be later used as a feature.
 --
 
 
-[[algorithms-ml-nodeclassification-adding-features]]
+[[nodeclassification-pipelines-adding-features]]
 == Adding features
 
 A Node Classification Pipeline allows you to select a subset of the available node properties to be used as features for the machine learning model.
@@ -233,17 +233,17 @@ YIELD name, featureProperties
 |===
 --
 
-[[algorithms-ml-nodeclassification-configure-splits]]
+[[nodeclassification-pipelines-configure-splits]]
 == Configuring the node splits
 
-Node Classification Pipelines manage splitting the nodes into several sets for training, testing and validating the models defined in the <<algorithms-ml-nodeclassification-configure-model-parameters,parameter space>>.
+Node Classification Pipelines manage splitting the nodes into several sets for training, testing and validating the models defined in the <<nodeclassification-pipelines-configure-model-parameters,parameter space>>.
 Configuring the splitting is optional, and if omitted, splitting will be done using default settings.
 The splitting configuration of a pipeline can be inspected by using `gds.beta.model.list` and possibly only yielding `splitConfig`.
 
 The node splits are used in the training process as follows:
 
-. The input graph is split into two parts: the train graph and the test graph. See the <<algorithms-ml-nodeclassification-configure-splits-train-test-image,example below>>.
-. The train graph is further divided into a number of validation folds, each consisting of a train part and a validation part. See the <<algorithms-ml-nodeclassification-configure-splits-validation-image, animation below>>.
+. The input graph is split into two parts: the train graph and the test graph. See the <<nodeclassification-pipelines-configure-splits-train-test-image,example below>>.
+. The train graph is further divided into a number of validation folds, each consisting of a train part and a validation part. See the <<nodeclassification-pipelines-configure-splits-validation-image, animation below>>.
 . Each model candidate is trained on each train part and evaluated on the respective validation part.
 . The model with the highest average score according to the primary metric will win the training.
 . The winning model will then be retrained on the entire train graph.
@@ -253,12 +253,12 @@ The node splits are used in the training process as follows:
 Below we illustrate an example for a graph with 12 nodes.
 First we use a `holdoutFraction` of 0.25 to split into train and test subgraphs.
 
-[[algorithms-ml-nodeclassification-configure-splits-train-test-image]]
+[[nodeclassification-pipelines-configure-splits-train-test-image]]
 image::train-test-splitting/train-test-split.svg[train-test-image,width="500"]
 
 Then we carry out three validation folds, where we first split the train subgraph into 3 disjoint subsets (s1, s2 and s3), and then alternate which subset is used for validation. For each fold, all candidate models are trained in the red nodes, and validated in the green nodes.
 
-[[algorithms-ml-nodeclassification-configure-splits-validation-image]]
+[[nodeclassification-pipelines-configure-splits-validation-image]]
 image::train-test-splitting/validation-folds-node-classification.gif[validation-folds-image,width="500"]
 // The images were generated using arrows.app. The arrow files are stored in the shared google drive
 // in "GDS Team (GDS, Morpheus)/Doc Images/train-test-splitting-illustrations-for-docs"
@@ -295,7 +295,7 @@ YIELD
 [opts="header",cols="1,1,1,4"]
 |===
 | Name               | Type    | Default | Description
-| validationFolds    | Integer | 3       | Number of divisions of the training graph used during <<algorithms-ml-nodeclassification-pipelines-train,model selection>>.
+| validationFolds    | Integer | 3       | Number of divisions of the training graph used during <<nodeclassification-pipelines-train,model selection>>.
 | testFraction       | Double  | 0.3     | Fraction of the graph reserved for testing. Must be in the range (0, 1). The fraction used for the training is `1 - testFraction`.
 |===
 
@@ -323,18 +323,18 @@ YIELD splitConfig
 | {testFraction=0.2, validationFolds=5}
 |===
 
-We now reconfigured the splitting of the pipeline, which will be applied during <<algorithms-ml-nodeclassification-pipelines-train, training>>.
+We now reconfigured the splitting of the pipeline, which will be applied during <<nodeclassification-pipelines-train, training>>.
 --
 
-[[algorithms-ml-nodeclassification-configure-model-parameters]]
+[[nodeclassification-pipelines-configure-model-parameters]]
 == Adding model candidates
 
 A pipeline contains a collection of configurations for model candidates which is initially empty.
 This collection is called the _parameter space_.
 Prior to training one or several model configurations can and should be added to the _parameter space_ with the `gds.beta.pipeline.nodeClassification.addLogisticRegression` and `gds.alpha.pipeline.nodeClassification.addRandomForest` procedures.
-For information about the available training methods in GDS, logistic regression and random forest, see <<algorithms-ml-training-methods>>.
+For information about the available training methods in GDS, logistic regression and random forest, see <<ml-training-methods>>.
 
-In <<algorithms-ml-nodeclassification-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
+In <<nodeclassification-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
 
 The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
 
@@ -375,7 +375,7 @@ YIELD
 | config          | Map         | The logistic regression config for a potential model. The allowed parameters for a model are defined in the next table.
 |===
 
-include::../../ml-models/logisticRegressionConfig.adoc[]
+include::../training-methods/logisticRegressionConfig.adoc[]
 
 include::pipelineInfoResult.adoc[]
 --
@@ -409,7 +409,7 @@ YIELD
 | config          | Map         | The random forest config for a potential model. The allowed parameters for a model are defined in the next table.
 |===
 
-include::../../ml-models/randomForestConfig.adoc[]
+include::../training-methods//randomForestConfig.adoc[]
 
 include::pipelineInfoResult.adoc[]
 --
@@ -454,12 +454,12 @@ RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.Logistic
 --
 
 The `parameterSpace` in the pipeline now contains the three different model candidates, expanded with the default values.
-Each specified model candidate will be tried out during the model selection in <<algorithms-ml-nodeclassification-pipelines-train, training>>.
+Each specified model candidate will be tried out during the model selection in <<nodeclassification-pipelines-train, training>>.
 
 [NOTE]
 ====
 These are somewhat naive examples of how to add and configure model candidates.
-Please see <<algorithms-ml-training-methods>> for more information on how to tune the configuration parameters of each method.
+Please see <<ml-training-methods>> for more information on how to tune the configuration parameters of each method.
 ====
 
 

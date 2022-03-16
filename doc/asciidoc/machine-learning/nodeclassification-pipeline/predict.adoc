@@ -1,10 +1,10 @@
-[[algorithms-node-classification-pipelines-predict]]
+[[nodeclassification-pipelines-predict]]
 == Applying a trained model for prediction
 :modelType: NodeClassification
 :entity: node
 
 In the previous sections we have seen how to build up a Node Classification training pipeline and train it to produce a classification pipeline.
-After <<algorithms-ml-nodeclassification-pipelines-train, training>>, the runnable model is of type `{modelType}` and resides in the <<model-catalog-ops, model catalog>>.
+After <<nodeclassification-pipelines-train, training>>, the runnable model is of type `{modelType}` and resides in the <<model-catalog-ops, model catalog>>.
 
 The classification model can be executed with a graph in the graph catalog to predict the class of previously unseen nodes.
 In addition to the predicted class for each node, the predicted probability for each class may also be retained on the nodes.
@@ -36,9 +36,9 @@ YIELD
   predictedProbabilities: List of Float
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
 
 include::specific-stream-configuration.adoc[]
 
@@ -70,9 +70,9 @@ YIELD
   configuration: Map
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-mutate-configuration-named-graph.adoc[]
 
 include::specific-write-mutate-configuration.adoc[]
 
@@ -107,9 +107,9 @@ YIELD
   configuration: Map
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-write-configuration-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-write-configuration-named-graph.adoc[]
 
 include::specific-write-mutate-configuration.adoc[]
 
@@ -128,19 +128,19 @@ include::specific-write-mutate-configuration.adoc[]
 
 ====
 
-[[algorithms-node-classification-pipelines-predict-examples]]
+[[nodeclassification-pipelines-predict-examples]]
 === Example
 
 In the following examples we will show how to use a classification model to predict the class of a node in your in-memory graph.
 In addition to the predicted class, we will also produce the probability for each class in another node property.
 In order to do this, we must first have an already trained model registered in the Model Catalog.
-We will use the model which we trained in the <<algorithms-ml-nodeclassification-pipelines-train, train example>> which we gave the name `'nc-pipeline-model'`.
+We will use the model which we trained in the <<nodeclassification-pipelines-train, train example>> which we gave the name `'nc-pipeline-model'`.
 
-[[algorithms-ml-nodeclassification-examples-predict-memory-estimation]]
+[[nodeclassification-pipelines-examples-predict-memory-estimation]]
 ==== Memory Estimation
 :mode: stream
 
-include::../../shared/examples-estimate-intro.adoc[]
+include::../../algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example, group=nc]
 --
@@ -165,7 +165,7 @@ YIELD bytesMin, bytesMax, requiredMemory
 
 NOTE: If a node property step does not have an estimation implemented, the step will be ignored in the estimation.
 
-[[algorithms-node-classification-pipelines-predict-examples-stream]]
+[[node-classification-pipelines-predict-examples-stream]]
 ==== Stream
 [role=query-example, group=nc]
 --
@@ -201,7 +201,7 @@ Additionally, we see that the model is confident in these predictions, as the co
 
 NOTE: The indices in the `predictedProbabilities` correspond to the order of the classes in the classification model. To inspect the order of the classes, we can look at its `modelInfo` (see <<catalog-model-list, listing models>>).
 
-[[algorithms-ml-nodeclassification-pipeline-examples-mutate]]
+[[nodeclassification-pipelines-examples-mutate]]
 ==== Mutate
 
 The `mutate` execution mode updates the named graph with a new node property containing the predicted class for that node.
@@ -234,7 +234,7 @@ CALL gds.beta.pipeline.nodeClassification.predict.mutate('myGraph', {
 Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 3 `UnknownHouse` nodes.
 
 
-[[algorithms-ml-nodeclassification-pipeline-examples-write]]
+[[nodeclassification-pipelines-examples-write]]
 ==== Write
 
 The `write` execution mode writes the predicted property for each node as a property to the Neo4j database.

@@ -1,9 +1,9 @@
 [[algorithms]]
-= Algorithms
+= Graph Algorithms
 
 [abstract]
 --
-This chapter describes each of the algorithms in the Neo4j Graph Data Science library, including algorithm tiers, execution modes and general syntax.
+This chapter describes each of the graph algorithms in the Neo4j Graph Data Science library, including algorithm tiers, execution modes and general syntax.
 --
 
 The Neo4j Graph Data Science (GDS) library contains many graph algorithms.
@@ -20,8 +20,6 @@ This chapter is divided into the following sections:
 * <<algorithms-similarity>>
 * <<algorithms-path-finding>>
 * <<algorithms-linkprediction>>
-* <<algorithms-node-embeddings>>
-* <<algorithms-ml-models>>
 * <<algorithms-auxiliary>>
 * <<algorithms-pregel-api>>
 
@@ -36,10 +34,6 @@ include::algorithms-similarity.adoc[leveloffset=+1]
 include::algorithms-path-finding.adoc[leveloffset=+1]
 
 include::algorithms-link-prediction.adoc[leveloffset=+1]
-
-include::algorithms-node-embeddings.adoc[leveloffset=+1]
-
-include::algorithms-ml-models.adoc[leveloffset=+1]
 
 include::algorithms-auxiliary.adoc[leveloffset=+1]
 

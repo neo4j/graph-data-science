@@ -1,4 +1,4 @@
-[[algorithms-embeddings-fastrp]]
+[[fastrp]]
 = Fast Random Projection
 :entity: node
 :result: embedding
@@ -13,7 +13,7 @@ This section describes the Fast Random Projection (FastRP) node embedding algori
 :undirected:
 :homogeneous:
 :weighted:
-include::../shared/algorithm-traits.adoc[]
+include::../../../algorithms/shared/algorithm-traits.adoc[]
 
 
 [[algorithms-embeddings-fastrp-introduction]]
@@ -172,7 +172,7 @@ If you expect only outgoing or incoming relationships to be informative for a pr
 [[algorithms-embeddings-fastrp-syntax]]
 == Syntax
 
-include::../shared/syntax-intro-named-graph.adoc[]
+include::../../../algorithms/shared/syntax-intro-named-graph.adoc[]
 
 .FastRP syntax per mode
 [.tabbed-example, caption = ]
@@ -192,9 +192,9 @@ CALL gds.fastRP.stream(
   embedding: List of Float
 ----
 
-include::../common-configuration/common-parameters-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
 
 include::specific-configuration.adoc[]
 
@@ -223,9 +223,9 @@ CALL gds.fastRP.stats(
   configuration: Map
 ----
 
-include::../common-configuration/common-parameters-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
 
 include::specific-configuration.adoc[]
 
@@ -259,9 +259,9 @@ CALL gds.fastRP.mutate(
   configuration: Map
 ----
 
-include::../common-configuration/common-parameters-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-mutate-configuration-named-graph.adoc[]
 
 include::specific-configuration.adoc[]
 
@@ -296,9 +296,9 @@ CALL gds.fastRP.write(
   configuration: Map
 ----
 
-include::../common-configuration/common-parameters-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../common-configuration/common-write-configuration-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-write-configuration-named-graph.adoc[]
 
 include::specific-configuration.adoc[]
 
@@ -325,7 +325,7 @@ include::specific-configuration.adoc[]
 :algorithm-name: FastRP node embedding
 :graph-description: social network
 :image-file: fastrp.svg
-include::../shared/examples-intro.adoc[]
+include::../../../algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
@@ -359,7 +359,7 @@ For the relationships we will use the `UNDIRECTED` orientation.
 This is because the FastRP algorithm has been measured to compute more predictive node embeddings in undirected graphs.
 We will also add the `weight` relationship property which we will make use of when running the weighted version of FastRP.
 
-include::../shared/examples-named-native-note.adoc[]
+include::../../../algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'persons'.
 [source, cypher, role=noplay graph-project-query]
@@ -382,7 +382,7 @@ CALL gds.graph.project(
 === Memory Estimation
 
 :mode: stream
-include::../shared/examples-estimate-intro.adoc[]
+include::../../../algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
 --
@@ -406,7 +406,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 === Stream
 
 :stream-details: For example, we can collect the results and pass them into a similarity algorithm.
-include::../shared/examples-stream-intro.adoc[]
+include::../../../algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
 --
@@ -451,7 +451,7 @@ However, this does not necessarily mean that the pairwise distances of two node 
 === Stats
 
 :stats-syntax: algorithms-embeddings-fastrp-syntax
-include::../shared/examples-stats-intro.adoc[]
+include::../../../algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
 --
@@ -477,7 +477,7 @@ We can however see that the algorithm has successfully processed all seven nodes
 [[algorithms-embeddings-fastrp-examples-mutate]]
 === Mutate
 
-include::../shared/examples-mutate-intro.adoc[]
+include::../../../algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
 --
@@ -510,7 +510,7 @@ To find out how to inspect the new schema of the in-memory graph, see <<catalog-
 [[algorithms-embeddings-fastrp-examples-write]]
 === Write
 
-include::../shared/examples-write-intro.adoc[]
+include::../../../algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example]
 --

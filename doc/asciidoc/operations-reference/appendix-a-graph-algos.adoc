@@ -85,7 +85,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.betweenness.mutate.estimate`
 | `gds.betweenness.write`
 | `gds.betweenness.write.estimate`
-.8+<.^| <<algorithms-embeddings-fastrp, Fast Random Projection>>
+.8+<.^| <<fastrp, Fast Random Projection>>
 | `gds.fastRP.mutate`
 | `gds.fastRP.mutate.estimate`
 | `gds.fastRP.stats`
@@ -190,7 +190,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.beta.closeness.mutate`
 | `gds.beta.closeness.stream`
 | `gds.beta.closeness.write`
-.8+<.^|<<algorithms-embeddings-graph-sage, GraphSAGE>>
+.8+<.^|<<graph-sage, GraphSAGE>>
 | `gds.beta.graphSage.stream`
 | `gds.beta.graphSage.stream.estimate`
 | `gds.beta.graphSage.mutate`
@@ -215,7 +215,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.beta.modularityOptimization.stream.estimate`
 | `gds.beta.modularityOptimization.write`
 | `gds.beta.modularityOptimization.write.estimate`
-.6+<.^|<<beta-algorithms-embeddings-node2vec, Node2Vec>>
+.6+<.^|<<node2vec, Node2Vec>>
 | `gds.beta.node2vec.mutate`
 | `gds.beta.node2vec.mutate.estimate`
 | `gds.beta.node2vec.stream`
@@ -284,7 +284,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.spanningTree.kmin.write`
 | `gds.alpha.spanningTree.maximum.write`
 | `gds.alpha.spanningTree.minimum.write`
-.12+<.^| <<algorithms-ml-linkprediction-pipelines, Link Prediction Pipeline>>
+.12+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
 | `gds.beta.pipeline.linkPrediction.create`
 | `gds.beta.pipeline.linkPrediction.addNodeProperty`
 | `gds.beta.pipeline.linkPrediction.addFeature`
@@ -297,7 +297,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.beta.pipeline.linkPrediction.predict.mutate.estimate`
 | `gds.beta.pipeline.linkPrediction.predict.stream`
 | `gds.beta.pipeline.linkPrediction.predict.stream.estimate`
-.14+<.^| <<algorithms-ml-nodeclassification-pipelines, Node Classification Pipeline>>
+.14+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
 | `gds.beta.pipeline.nodeClassification.create`
 | `gds.beta.pipeline.nodeClassification.addNodeProperty`
 | `gds.beta.pipeline.nodeClassification.selectFeatures`

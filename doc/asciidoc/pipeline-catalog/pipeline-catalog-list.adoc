@@ -34,7 +34,7 @@ include::shared/pipeline-info-result.adoc[]
 
 Once we have created training pipelines in the catalog we can see information about either all of them or a single model using its name.
 
-To exemplify listing pipelines, we create a <<algorithms-ml-nodeclassification-pipelines, node classification pipeline>> and a <<algorithms-ml-linkprediction-pipelines, link prediction pipeline>> so that we have something to list.
+To exemplify listing pipelines, we create a <<nodeclassification-pipelines, node classification pipeline>> and a <<linkprediction-pipelines, link prediction pipeline>> so that we have something to list.
 
 .Creating a link prediction training pipelines:
 [source, cypher, role=noplay setup-query]
