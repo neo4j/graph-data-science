@@ -59,8 +59,9 @@ public final class LogisticRegressionClassifier implements Classifier {
             return (id, features, classifier) -> {
                 var affinity = 0D;
                 double[] featuresForNode = features.get(id);
+                var weights = classifier.data().weights().data();
                 for (int i = 0; i < features.featureDimension(); i++) {
-                    affinity += classifier.data().weights().data().dataAt(i) * featuresForNode[i];
+                    affinity += weights.dataAt(i) * featuresForNode[i];
                 }
                 var sigmoid = Sigmoid.sigmoid(affinity + classifier.data().bias().data().dataAt(0));
 
