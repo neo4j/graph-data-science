@@ -35,7 +35,6 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 
 public class ExhaustiveLinkPrediction extends LinkPrediction {
-    private static final int MIN_NODE_BATCH_SIZE = 10;
     private final int topN;
     private final double threshold;
 
