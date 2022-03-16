@@ -35,28 +35,30 @@ Below is a description of the methods on such objects:
 .Node classification pipeline methods
 [opts="header",cols="2m,2m,2m,3"]
 |===
-| Name                    | Arguments              | Return type            | Description
-| addNodeProperty         | procedure_name: str, +
-                            config: **kwargs       | dict[str, any]         | <<nodeclassification-pipelines-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
-| selectFeatures          | node_properties: +
-                            Union[str, list[str]]  | dict[str, any]         | <<nodeclassification-pipelines-adding-features, Select node properties to be used as features>>.
-| configureSplit          | config: **kwargs       | dict[str, any]         | <<nodeclassification-pipelines-configure-splits, Configure the train-test dataset split>>.
-| configureParams         | parameter_space: +
-                            list[dict[str, any]]   | dict[str, any]         | <<nodeclassification-pipelines-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
-| train                   | G: Graph, +
+| Name                  | Arguments                | Return type                     | Description
+| addNodeProperty       | procedure_name: str, +
+                            config: **kwargs       | dict[str, any]                  | <<nodeclassification-pipelines-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+| selectFeatures        | node_properties: +
+                            Union[str, list[str]]  | dict[str, any]                  | <<nodeclassification-pipelines-adding-features, Select node properties to be used as features>>.
+| configureSplit        | config: **kwargs         | dict[str, any]                  | <<nodeclassification-pipelines-configure-splits, Configure the train-test dataset split>>.
+| addLogisticRegression | parameter_space: +
+                            dict[str, any]         | dict[str, any]                  | <<nodeclassification-pipelines-configure-model-parameters, Add a logistic regression model configuration to train as a candidate in the model selection phase>>.
+| addRandomForest       | parameter_space: +
+                            dict[str, any]         | dict[str, any]                  | <<nodeclassification-pipelines-configure-model-parameters, Add a random forest model configuration to train as a candidate in the model selection phase>>.
+| train                 | G: Graph, +
                             config: **kwargs       | NCPredictionPipeline, +
-                                                             dict[str, any] | <<nodeclassification-pipelines-train, Train the pipeline on the given input graph using given keyword arguments>>.
-| train_estimate          | G: Graph, +
-                            config: **kwargs       | dict[str, any]         | <<nodeclassification-pipelines-examples-train-memory-estimation, Estimate training the pipeline on the given input graph using given keyword arguments>>.
-| node_property_steps     | -                      | list[dict[str, any]]   | Returns the node property steps of the pipeline.
-| feature_properties      | -                      | list[dict[str, any]]   | Returns a list of the selected feature properties for the pipeline.
-| split_config            | -                      | dict[str, any]         | Returns the configuration set up for train-test splitting of the dataset.
-| parameter_space         | -                      | list[dict[str, any]]   | Returns the model parameter space set up for model selection when training.
-| name                    | -                      | str                    | The name of the pipeline as it appears in the pipeline catalog.
-| type                    | -                      | str                    | The type of pipeline.
-| creation_time           | -                      | neo4j.time.Datetime    | Time when the pipeline was created.
-| drop                    | -                      | None                   | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
-| exists                  | -                      | bool                   | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
+                                                             dict[str, any]          | <<nodeclassification-pipelines-train, Train the pipeline on the given input graph using given keyword arguments>>.
+| train_estimate        | G: Graph, +
+                            config: **kwargs       | dict[str, any]                  | <<nodeclassification-pipelines-examples-train-memory-estimation, Estimate training the pipeline on the given input graph using given keyword arguments>>.
+| node_property_steps   | -                        | list[dict[str, any]]            | Returns the node property steps of the pipeline.
+| feature_properties    | -                        | list[dict[str, any]]            | Returns a list of the selected feature properties for the pipeline.
+| split_config          | -                        | dict[str, any]                  | Returns the configuration set up for train-test splitting of the dataset.
+| parameter_space       | -                        | dict[str, list[dict[str, any]]] | Returns the model parameter space set up for model selection when training.
+| name                  | -                        | str                             | The name of the pipeline as it appears in the pipeline catalog.
+| type                  | -                        | str                             | The type of pipeline.
+| creation_time         | -                        | neo4j.time.Datetime             | Time when the pipeline was created.
+| drop                  | -                        | None                            | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
+| exists                | -                        | bool                            | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
 |===
 
 There are two main differences when comparing the methods above that map to procedures of the Cypher API:
@@ -92,7 +94,8 @@ assert len(steps) == 1
 assert steps[0]["feature"] == "rank"
 
 # Configure the model training do to 2-fold cross-validation over tolerance
-pipe.configureParams([{"tolerance": 0.01}, {"tolerance": 0.001}])
+pipe.addLogisticRegression({"tolerance": 0.01})
+pipe.addLogisticRegression({"tolerance": 0.001})
 
 # Train the pipeline targeting node property "my-class" as label and "ACCURACY" as only metric
 trained_pipe_model, res = pipe.train(G, modelName="my-model", targetProperty="my-class", metrics=["ACCURACY"])
@@ -177,28 +180,30 @@ Below is a description of the methods on such objects:
 .Link prediction pipeline methods
 [opts="header",cols="2m,2m,2m,3"]
 |===
-| Name                | Arguments              | Return type             | Description
-| addNodeProperty     | procedure_name: str, +
-                        config: **kwargs       | dict[str, any]          | <<linkprediction-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
-| addFeature          | feature_type: str, +
-                        config: **kwargs       | dict[str, any]          | <<linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
-| configureSplit      | config: **kwargs       | dict[str, any]          | <<linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
-| configureParams     | parameter_space: +
-                        list[dict[str, any]]   | dict[str, any]          | <<linkprediction-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
-| train               | G: Graph, +
-                        config: **kwargs       | LPPredictionPipeline, +
-                                                 dict[str, any]          | <<linkprediction-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
-| train_estimate      | G: Graph, +
-                        config: **kwargs       | dict[str, any]          | <<linkprediction-pipeline-examples-train-estimate, Estimate training the pipeline on the given input graph using given keyword arguments>>.
-| node_property_steps | -                      | list[dict[str, any]]    | Returns the node property steps of the pipeline.
-| feature_steps       | -                      | list[dict[str, any]]    | Returns a list of the selected feature steps for the pipeline.
-| split_config        | -                      | dict[str, any]          | Returns the configuration set up for feature-train-test splitting of the dataset.
-| parameter_space     | -                      | list[dict[str, any]]    | Returns the model parameter space set up for model selection when training.
-| name                | -                      | str                     | The name of the pipeline as it appears in the pipeline catalog.
-| type                | -                      | str                     | The type of pipeline.
-| creation_time       | -                      | neo4j.time.Datetime     | Time when the pipeline was created.
-| drop                | -                      | None                    | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
-| exists              | -                      | bool                    | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
+| Name                  | Arguments              | Return type                     | Description
+| addNodeProperty       | procedure_name: str, +
+                        config: **kwargs         | dict[str, any]                  | <<linkprediction-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+| addFeature            | feature_type: str, +
+                        config: **kwargs         | dict[str, any]                  | <<linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
+| configureSplit        | config: **kwargs       | dict[str, any]                  | <<linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
+| addLogisticRegression | parameter_space: +
+                          dict[str, any]         | dict[str, any]                  | <<linkprediction-configure-model-parameters, Add a logistic regression model configuration to train as a candidate in the model selection phase>>.
+| addRandomForest       | parameter_space: +
+                          dict[str, any]         | dict[str, any]                  | <<linkprediction-configure-model-parameters, Add a random forest model configuration to train as a candidate in the model selection phase>>.
+| train                 | G: Graph, +
+config: **kwargs        | LPPredictionPipeline, +
+                                                  dict[str, any]                   | <<linkprediction-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
+| train_estimate        | G: Graph, +
+                        config: **kwargs         | dict[str, any]                  | <<linkprediction-pipeline-examples-train-estimate, Estimate training the pipeline on the given input graph using given keyword arguments>>.
+| node_property_steps   | -                      | list[dict[str, any]]            | Returns the node property steps of the pipeline.
+| feature_steps         | -                      | list[dict[str, any]]            | Returns a list of the selected feature steps for the pipeline.
+| split_config          | -                      | dict[str, any]                  | Returns the configuration set up for feature-train-test splitting of the dataset.
+| parameter_space       | -                      | dict[str, list[dict[str, any]]] | Returns the model parameter space set up for model selection when training.
+| name                  | -                      | str                             | The name of the pipeline as it appears in the pipeline catalog.
+| type                  | -                      | str                             | The type of pipeline.
+| creation_time         | -                      | neo4j.time.Datetime             | Time when the pipeline was created.
+| drop                  | -                      | None                            | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
+| exists                | -                      | bool                            | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
 |===
 
 There are two main differences when comparing the methods above that map to procedures of the Cypher API:
@@ -235,6 +240,9 @@ assert steps[0]["name"] == "HADAMARD"
 
 # Specify the fractions we want for our dataset split
 pipe.configureSplit(trainFraction=0.2, testFraction=0.1)
+
+# Add a random forest model with default configuration
+pipe.addRandomForest()
 
 # Train the pipeline and produce a model named "my-model"
 trained_pipe_model, res = pipe.train(G, modelName="my-model")
@@ -301,4 +309,3 @@ catalog_contains_pipe = gds.beta.pipeline.exists(pipe)
 
 gds.beta.model.drop(pipe) #  same as pipe.drop()
 ----
-
