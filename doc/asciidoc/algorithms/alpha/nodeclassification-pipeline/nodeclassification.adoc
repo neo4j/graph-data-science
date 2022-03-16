@@ -349,7 +349,7 @@ The parameter space of a pipeline can be inspected using `gds.beta.model.list` a
 ----
 CALL gds.beta.pipeline.nodeClassification.addLogisticRegression(
   pipelineName: String,
-  config: List of Map
+  config: Map
 )
 YIELD
   name: String,
