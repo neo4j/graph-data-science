@@ -57,16 +57,9 @@ public class SimilaritiesFunc {
         @Name("vector2") List<Number> vector2
     ) {
         int len = validateLength(vector1, vector2);
-
-        double[] weights1 = new double[len];
-        double[] weights2 = new double[len];
-
-        for (int i = 0; i < len; i++) {
-            weights1[i] = getDoubleValue(vector1.get(i));
-            weights2[i] = getDoubleValue(vector2.get(i));
-        }
-
-        return Intersections.cosine(weights1, weights2, len);
+        var left = toArray(vector1);
+        var right = toArray(vector2);
+        return Intersections.cosine(left, right, len);
     }
 
     @UserFunction("gds.alpha.similarity.pearson")
@@ -76,15 +69,9 @@ public class SimilaritiesFunc {
         @Name("vector2") List<Number> vector2
     ) {
         int len = validateLength(vector1, vector2);
-
-        double[] weights1 = new double[len];
-        double[] weights2 = new double[len];
-
-        for (int i = 0; i < len; i++) {
-            weights1[i] = getDoubleValue(vector1.get(i));
-            weights2[i] = getDoubleValue(vector2.get(i));
-        }
-        return Intersections.pearson(weights1, weights2, len);
+        var left = toArray(vector1);
+        var right = toArray(vector2);
+        return Intersections.pearson(left, right, len);
     }
 
     @UserFunction("gds.alpha.similarity.euclideanDistance")
@@ -94,16 +81,9 @@ public class SimilaritiesFunc {
         @Name("vector2") List<Number> vector2
     ) {
         int len = validateLength(vector1, vector2);
-
-        double[] weights1 = new double[len];
-        double[] weights2 = new double[len];
-
-        for (int i = 0; i < len; i++) {
-            weights1[i] = getDoubleValue(vector1.get(i));
-            weights2[i] = getDoubleValue(vector2.get(i));
-        }
-
-        return Math.sqrt(Intersections.sumSquareDelta(weights1, weights2, len));
+        var left = toArray(vector1);
+        var right = toArray(vector2);
+        return Math.sqrt(Intersections.sumSquareDelta(left, right, len));
     }
 
     @UserFunction("gds.alpha.similarity.euclidean")
@@ -134,6 +114,15 @@ public class SimilaritiesFunc {
 
         long denominator = Math.min(vector1.size(), vector2.size());
         return denominator == 0 ? 0 : (double) intersection / denominator;
+    }
+
+    private double[] toArray(List<Number> input) {
+        var length = input.size();
+        var weights = new double[length];
+        for (int i = 0; i < length; i++) {
+            weights[i] = getDoubleValue(input.get(i));
+        }
+        return weights;
     }
 
     private int validateLength(List<Number> vector1, List<Number> vector2) {
