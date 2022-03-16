@@ -32,13 +32,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-/**
- *
- * cosine similarity taken from here: https://neo4j.com/graphgist/a7c915c8-a3d6-43b9-8127-1836fecc6e2f
- * euclid distance taken from here: https://neo4j.com/blog/real-time-recommendation-engine-data-science/
- * euclid similarity taken from here: http://stats.stackexchange.com/a/158285
- * pearson similarity taken from here: http://guides.neo4j.com/sandbox/recommendations
- */
+
 class SimilaritiesFuncTest extends BaseProcTest {
 
     @BeforeEach
@@ -49,7 +43,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
     @Test
     void testCosineSimilarityOppositeDirections() {
         var left = new ArrayList<Number>(Arrays.asList(1, 1));
-        var right=new ArrayList<Number>(Arrays.asList(-1,-1));
+        var right = new ArrayList<Number>(Arrays.asList(-1, -1));
         double actual = new SimilaritiesFunc().cosineSimilarity(left, right);
         assertEquals(-1.0, actual);
 
@@ -67,49 +61,49 @@ class SimilaritiesFuncTest extends BaseProcTest {
             Arguments.of(
                 new ArrayList<Number>(Arrays.asList(1, 1)),
                 new ArrayList<Number>(Arrays.asList(1, 2)),
-                1/3D
+                1 / 3D
             ),
             Arguments.of(
                 new ArrayList<Number>(Arrays.asList(1, 1, 2)),
                 new ArrayList<Number>(Arrays.asList(1, 3, 3)),
-                1/5D
+                1 / 5D
             ),
             Arguments.of(
                 new ArrayList<Number>(Arrays.asList(1, 2)),
                 new ArrayList<Number>(Arrays.asList(2, 1)),
-                2/2D
+                2 / 2D
             ),
             Arguments.of(
-                new ArrayList<Number>(Arrays.asList(Long.MAX_VALUE,              1)),
+                new ArrayList<Number>(Arrays.asList(Long.MAX_VALUE, 1)),
                 new ArrayList<Number>(Arrays.asList((double) Long.MAX_VALUE - 1, 1)),
-                1/3D
+                1 / 3D
             ),
             Arguments.of(
-                new ArrayList<Number>(Arrays.asList(Long.MAX_VALUE,     1)),
+                new ArrayList<Number>(Arrays.asList(Long.MAX_VALUE, 1)),
                 new ArrayList<Number>(Arrays.asList(Long.MAX_VALUE - 1, 1)),
-                1/3D
+                1 / 3D
             ),
             Arguments.of(
-                new ArrayList<Number>(Arrays.asList(Integer.MAX_VALUE,     1)),
+                new ArrayList<Number>(Arrays.asList(Integer.MAX_VALUE, 1)),
                 new ArrayList<Number>(Arrays.asList(Integer.MAX_VALUE - 1, 1)),
-                1/3D
+                1 / 3D
             ),
             Arguments.of(
                 new ArrayList<Number>(Arrays.asList(16605, 16605, 16605, 150672)),
                 new ArrayList<Number>(Arrays.asList(16605, 16605, 150672, 16605)),
-                4/4D
+                4 / 4D
             ), Arguments.of(
-                new ArrayList<Number>(Arrays.asList(4159.0, 4159,   4159.0, 4159)),
-                new ArrayList<Number>(Arrays.asList(4159,   4159.0, 4159,   1337.0)),
-                3/5D
+                new ArrayList<Number>(Arrays.asList(4159.0, 4159, 4159.0, 4159)),
+                new ArrayList<Number>(Arrays.asList(4159, 4159.0, 4159, 1337.0)),
+                3 / 5D
             ), Arguments.of(
                 new ArrayList<Number>(Arrays.asList(4159, 1337, 1337, 1337)),
                 new ArrayList<Number>(Arrays.asList(1337, 4159, 4159, 4159)),
-                2/6D
+                2 / 6D
             ), Arguments.of(
                 new ArrayList<Number>(Arrays.asList(1, 2, 2)),
                 new ArrayList<Number>(Arrays.asList(2, 2, 3)),
-                2/4D
+                2 / 4D
             ), Arguments.of(
                 new ArrayList<Number>(Arrays.asList(null, 2, 2)),
                 new ArrayList<Number>(Arrays.asList(2, 2, null, null)),
@@ -124,16 +118,18 @@ class SimilaritiesFuncTest extends BaseProcTest {
 
     @Test
     void testCosineWithNulls() {
-        var left=new ArrayList<Number>(Arrays.asList(null, 1, 3));
-        var right=new ArrayList<Number>(Arrays.asList(1, null, 2));
-        assertEquals(0, new SimilaritiesFunc().cosineSimilarity(left,right));
+        var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
+        var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
+        assertEquals(0, new SimilaritiesFunc().cosineSimilarity(left, right));
     }
+
     @Test
     void testEuclideanSimilarityWithNulls() {
         var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
         var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
         assertEquals(0, new SimilaritiesFunc().euclideanSimilarity(left, right));
     }
+
     @Test
     void testEuclideanDistanceWithNulls() {
         var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
@@ -147,13 +143,15 @@ class SimilaritiesFuncTest extends BaseProcTest {
         var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
         assertEquals(0, new SimilaritiesFunc().pearsonSimilarity(left, right));
     }
+
     @Test
     void testOverlapWithNulls() {
         var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
         var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
         assertEquals(0.5, new SimilaritiesFunc().overlapSimilarity(left, right));
     }
-        @Test
+
+    @Test
     void testJaccardWithNulls() {
         var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
         var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
@@ -161,5 +159,3 @@ class SimilaritiesFuncTest extends BaseProcTest {
     }
 
 }
-
-
