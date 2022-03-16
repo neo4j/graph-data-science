@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.models.Features;
 import org.neo4j.gds.models.FeaturesFactory;
@@ -105,7 +106,8 @@ class ClassificationRandomForestTest {
                 .numberOfDecisionTrees(1)
                 .build(),
             false,
-            Optional.of(42L)
+            Optional.of(42L),
+            ProgressTracker.NULL_TRACKER
         );
 
         var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -135,7 +137,8 @@ class ClassificationRandomForestTest {
                 .numberOfDecisionTrees(20)
                 .build(),
             false,
-            Optional.of(1337L)
+            Optional.of(1337L),
+            ProgressTracker.NULL_TRACKER
         );
 
         var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -164,7 +167,8 @@ class ClassificationRandomForestTest {
                 .numberOfDecisionTrees(20)
                 .build(),
             true,
-            Optional.of(1337L)
+            Optional.of(1337L),
+            ProgressTracker.NULL_TRACKER
         );
 
         randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -187,7 +191,8 @@ class ClassificationRandomForestTest {
                 .numberOfDecisionTrees(5)
                 .build(),
             false,
-            Optional.of(1337L)
+            Optional.of(1337L),
+            ProgressTracker.NULL_TRACKER
         );
 
         HugeLongArray mutableTrainSet = HugeLongArray.newArray(NUM_SAMPLES / 2);

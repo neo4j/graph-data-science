@@ -26,6 +26,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.decisiontree.ClassificationDecisionTreeTrain;
 import org.neo4j.gds.decisiontree.DecisionTreeLoss;
 import org.neo4j.gds.decisiontree.DecisionTreePredict;
@@ -39,8 +40,11 @@ import org.neo4j.gds.models.Trainer;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class ClassificationRandomForestTrainer implements Trainer {
 
@@ -49,6 +53,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
     private final int concurrency;
     private final boolean computeOutOfBagError;
     private final SplittableRandom random;
+    private final ProgressTracker progressTracker;
     private Optional<Double> outOfBagError = Optional.empty();
 
     public ClassificationRandomForestTrainer(
@@ -56,13 +61,15 @@ public class ClassificationRandomForestTrainer implements Trainer {
         LocalIdMap classIdMap,
         RandomForestTrainConfig config,
         boolean computeOutOfBagError,
-        Optional<Long> randomSeed
+        Optional<Long> randomSeed,
+        ProgressTracker progressTracker
     ) {
         this.classIdMap = classIdMap;
         this.config = config;
         this.concurrency = concurrency;
         this.computeOutOfBagError = computeOutOfBagError;
         this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
+        this.progressTracker = progressTracker;
     }
 
     public ClassificationRandomForestPredictor train(
@@ -81,6 +88,10 @@ public class ClassificationRandomForestTrainer implements Trainer {
 
         int numberOfDecisionTrees = config.numberOfDecisionTrees();
         var lossFunction = GiniIndex.fromOriginalLabels(allLabels, classIdMap);
+
+        progressTracker.setVolume(numberOfDecisionTrees);
+        var numberOfTreesTrained = new AtomicInteger(0);
+
         var tasks = IntStream.range(0, numberOfDecisionTrees).mapToObj(unused ->
             new TrainDecisionTreeTask<>(
                 maybePredictions,
@@ -91,7 +102,9 @@ public class ClassificationRandomForestTrainer implements Trainer {
                 allLabels,
                 classIdMap,
                 lossFunction,
-                trainSet
+                trainSet,
+                progressTracker,
+                numberOfTreesTrained
             )
         ).collect(Collectors.toList());
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
@@ -125,6 +138,8 @@ public class ClassificationRandomForestTrainer implements Trainer {
         private final LocalIdMap classIdMap;
         private final LOSS lossFunction;
         private final ReadOnlyHugeLongArray trainSet;
+        private final ProgressTracker progressTracker;
+        private final AtomicInteger numberOfTreesTrained;
 
         TrainDecisionTreeTask(
             Optional<HugeAtomicLongArray> maybePredictions,
@@ -135,7 +150,9 @@ public class ClassificationRandomForestTrainer implements Trainer {
             HugeLongArray allLabels,
             LocalIdMap classIdMap,
             LOSS lossFunction,
-            ReadOnlyHugeLongArray trainSet
+            ReadOnlyHugeLongArray trainSet,
+            ProgressTracker progressTracker,
+            AtomicInteger numberOfTreesTrained
         ) {
             this.maybePredictions = maybePredictions;
             this.decisionTreeTrainConfig = decisionTreeTrainConfig;
@@ -146,6 +163,8 @@ public class ClassificationRandomForestTrainer implements Trainer {
             this.classIdMap = classIdMap;
             this.lossFunction = lossFunction;
             this.trainSet = trainSet;
+            this.progressTracker = progressTracker;
+            this.numberOfTreesTrained = numberOfTreesTrained;
         }
 
         public DecisionTreePredict<Integer> trainedTree() {
@@ -181,6 +200,14 @@ public class ClassificationRandomForestTrainer implements Trainer {
                 bootstrappedDataset.trainSetIndices(),
                 predictionsCache
             ));
+
+            progressTracker.logProgress(
+                1,
+                formatWithLocale(":: trained decision tree %d out of %d",
+                    numberOfTreesTrained.incrementAndGet(),
+                    randomForestTrainConfig.numberOfDecisionTrees()
+                )
+            );
         }
 
         private BootstrappedDataset bootstrappedDataset() {

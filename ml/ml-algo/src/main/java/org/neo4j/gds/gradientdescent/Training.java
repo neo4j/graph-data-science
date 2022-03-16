@@ -24,8 +24,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -62,10 +60,6 @@ public class Training {
         this.progressTracker = progressTracker;
         this.trainSize = trainSize;
         this.terminationFlag = terminationFlag;
-    }
-
-    public static Task progressTask(String taskName) {
-        return Tasks.iterativeOpen(taskName, () -> List.of(Tasks.leaf("Epoch")));
     }
 
     public static MemoryEstimation memoryEstimation(
@@ -109,15 +103,13 @@ public class Training {
 
         while (!stopper.terminated()) {
             terminationFlag.assertRunning();
-            progressTracker.beginSubTask("Epoch");
 
             trainEpoch(objective, queueSupplier.get(), concurrency, updater);
             lastLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
             stopper.registerLoss(lastLoss);
             epoch++;
 
-            progressTracker.logMessage(StringFormatting.formatWithLocale("Loss: %s", lastLoss));
-            progressTracker.endSubTask("Epoch");
+            progressTracker.logProgress(1, StringFormatting.formatWithLocale(":: Epoch %d with loss %s", epoch, lastLoss));
         }
         progressTracker.logMessage(StringFormatting.formatWithLocale(
             "%s after %d epochs. Initial loss: %s, Last loss: %s.%s",

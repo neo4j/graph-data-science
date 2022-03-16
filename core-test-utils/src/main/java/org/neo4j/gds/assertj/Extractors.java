@@ -20,24 +20,26 @@
 package org.neo4j.gds.assertj;
 
 import org.assertj.core.api.iterable.ThrowingExtractor;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Pattern;
 
 public final class Extractors {
 
     private static final Pattern TIME_MEASUREMENTS_PATTERN = Pattern.compile("(\\d+\\s*)(ms|s|min)");
+    private static final Pattern FLOATING_POINT_PATTERN = Pattern.compile("([\\d]+\\.[\\d]{1,12})[\\d]*");
 
     private Extractors() {}
 
-    @NotNull
     public static ThrowingExtractor<String, String, RuntimeException> removingThreadId() {
         return message -> message
             .substring(message.indexOf("] ") + 2);
     }
 
-    @NotNull
     public static ThrowingExtractor<String, String, RuntimeException> replaceTimings() {
         return message -> TIME_MEASUREMENTS_PATTERN.matcher(message).replaceAll("`some time`");
+    }
+
+    public static ThrowingExtractor<String, String, RuntimeException> keepingFixedNumberOfDecimals() {
+        return msg -> FLOATING_POINT_PATTERN.matcher(msg).replaceAll("$1");
     }
 }

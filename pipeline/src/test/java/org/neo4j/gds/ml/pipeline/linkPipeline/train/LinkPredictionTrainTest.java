@@ -25,10 +25,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -43,6 +47,7 @@ import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.TrainingMethod;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.models.randomforest.RandomForestTrainConfigImpl;
 
 import java.util.List;
@@ -51,6 +56,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
 class LinkPredictionTrainTest {
@@ -349,6 +356,110 @@ class LinkPredictionTrainTest {
                 actualRange.max
             )
             .isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
+    }
+
+    @Test
+    void logProgressRF() {
+        var pipeline = new LinkPredictionPipeline();
+        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
+            .validationFolds(2)
+            .negativeSamplingRatio(1)
+            .trainFraction(0.5)
+            .testFraction(0.5)
+            .build());
+
+        pipeline.addTrainerConfig(
+            TrainingMethod.RandomForest,
+            RandomForestTrainConfigImpl.builder().numberOfDecisionTrees(5).build()
+        );
+
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
+
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            LinkPredictionTrain.progressTask(),
+            log,
+            1,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        new LinkPredictionTrain(
+            trainGraph,
+            trainGraph,
+            pipeline,
+            LinkPredictionTrainConfig
+                .builder()
+                .modelName("DUMMY")
+                .graphName("DUMMY")
+                .pipeline("DUMMY")
+                .concurrency(4)
+                .build(),
+            progressTracker
+        ).compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "LinkPredictionTrain :: train best model :: Start",
+                "LinkPredictionTrain :: train best model :: trained decision tree 1 out of 5",
+                "LinkPredictionTrain :: train best model :: trained decision tree 2 out of 5",
+                "LinkPredictionTrain :: train best model :: trained decision tree 3 out of 5",
+                "LinkPredictionTrain :: train best model :: trained decision tree 4 out of 5",
+                "LinkPredictionTrain :: train best model :: trained decision tree 5 out of 5",
+                "LinkPredictionTrain :: train best model :: Finished"
+            );
+    }
+
+    @Test
+    void logProgressLR() {
+        var pipeline = new LinkPredictionPipeline();
+        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
+            .validationFolds(2)
+            .negativeSamplingRatio(1)
+            .trainFraction(0.5)
+            .testFraction(0.5)
+            .build());
+
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression,
+            LogisticRegressionTrainConfigImpl.builder().maxEpochs(5).minEpochs(5).build()
+        );
+
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
+
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            LinkPredictionTrain.progressTask(),
+            log,
+            1,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        new LinkPredictionTrain(
+            trainGraph,
+            trainGraph,
+            pipeline,
+            LinkPredictionTrainConfig
+                .builder()
+                .modelName("DUMMY")
+                .graphName("DUMMY")
+                .pipeline("DUMMY")
+                .concurrency(4)
+                .build(),
+            progressTracker
+        ).compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(keepingFixedNumberOfDecimals())
+            .contains(
+                "LinkPredictionTrain :: train best model :: Start",
+                "LinkPredictionTrain :: train best model :: Epoch 1 with loss 0.688097317504",
+                "LinkPredictionTrain :: train best model :: Epoch 2 with loss 0.683213654690",
+                "LinkPredictionTrain :: train best model :: Epoch 3 with loss 0.678498422872",
+                "LinkPredictionTrain :: train best model :: Epoch 4 with loss 0.673952840083",
+                "LinkPredictionTrain :: train best model :: Epoch 5 with loss 0.669576960529",
+                "LinkPredictionTrain :: train best model :: Finished"
+            );
     }
 
     private LinkPredictionPipeline linkPredictionPipeline() {
