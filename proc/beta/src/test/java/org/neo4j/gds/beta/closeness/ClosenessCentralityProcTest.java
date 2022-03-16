@@ -130,7 +130,9 @@ class ClosenessCentralityProcTest extends BaseProcTest {
 
     @Test
     void testClosenessStream() {
-        String query = gdsCypher()
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds.beta.closeness")
             .streamMode()
             .yields("nodeId", "centrality");
 
@@ -139,7 +141,9 @@ class ClosenessCentralityProcTest extends BaseProcTest {
 
     @Test
     void testClosenessWrite() {
-        String query = gdsCypher()
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds.beta.closeness")
             .writeMode()
             .addParameter("writeProperty", "centrality")
             .yields();
@@ -162,7 +166,9 @@ class ClosenessCentralityProcTest extends BaseProcTest {
 
     @Test
     void testClosenessMutate() {
-        String query = gdsCypher()
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds.beta.closeness")
             .mutateMode()
             .addParameter("mutateProperty", "centrality")
             .yields();
@@ -208,10 +214,5 @@ class ClosenessCentralityProcTest extends BaseProcTest {
                 "ClosenessCentrality :: WriteNodeProperties"
             );
         });
-    }
-
-    private GdsCypher.ModeBuildStage gdsCypher() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
-        return GdsCypher.call(DEFAULT_GRAPH_NAME).algo("gds.beta.closeness");
     }
 }
