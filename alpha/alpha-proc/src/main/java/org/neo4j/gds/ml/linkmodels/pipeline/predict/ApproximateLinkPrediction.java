@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class ApproximateLinkPrediction extends LinkPrediction {
+    static final int MIN_NODE_BATCH_SIZE = 10;
     private final KnnBaseConfig knnConfig;
 
     public ApproximateLinkPrediction(
