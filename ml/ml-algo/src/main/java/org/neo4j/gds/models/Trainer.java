@@ -21,9 +21,14 @@ package org.neo4j.gds.models;
 
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public interface Trainer {
 
     Classifier train(Features features, HugeLongArray labels, ReadOnlyHugeLongArray trainSet);
 
+    static Task progressTask(String taskName) {
+        return Tasks.leaf(taskName);
+    }
 }

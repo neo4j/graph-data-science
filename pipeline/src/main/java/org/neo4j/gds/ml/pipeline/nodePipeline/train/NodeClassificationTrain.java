@@ -38,7 +38,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gradientdescent.GradientDescentConfig;
-import org.neo4j.gds.gradientdescent.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.nodemodels.BestMetricData;
@@ -175,16 +174,16 @@ public final class NodeClassificationTrain {
                 () -> List.of(Tasks.iterativeFixed("Model Candidate", () -> List.of(
                         Tasks.task(
                             "Split",
-                            Training.progressTask("Training"),
+                            Trainer.progressTask("Training"),
                             Tasks.leaf("Evaluate")
                         )
                     ), validationFolds)
                 ),
                 paramsSize
             ),
-            Training.progressTask("TrainSelectedOnRemainder"),
+            Trainer.progressTask("TrainSelectedOnRemainder"),
             Tasks.leaf("EvaluateSelectedModel"),
-            Training.progressTask("RetrainSelectedModel")
+            Trainer.progressTask("RetrainSelectedModel")
         );
     }
 

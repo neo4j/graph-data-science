@@ -35,7 +35,6 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.gradientdescent.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -50,6 +49,7 @@ import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.models.Trainer;
 import org.neo4j.gds.models.TrainerConfig;
 import org.neo4j.gds.models.TrainerFactory;
 import org.neo4j.gds.models.TrainingMethod;
@@ -108,7 +108,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             LinkPredictionTrain.class.getSimpleName(),
             Tasks.leaf("extract train features"),
             Tasks.leaf("select model"),
-            Training.progressTask("train best model"),
+            Trainer.progressTask("train best model"),
             Tasks.leaf("compute train metrics"),
             Tasks.task(
                 "evaluate on test data",

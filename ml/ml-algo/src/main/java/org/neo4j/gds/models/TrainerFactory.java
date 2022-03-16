@@ -59,7 +59,8 @@ public class TrainerFactory {
                     classIdMap,
                     (RandomForestTrainConfig) config,
                     false,
-                    randomSeed
+                    randomSeed,
+                    progressTracker
                 );
             }
             default:
