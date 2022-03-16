@@ -40,15 +40,15 @@ class DfsStreamComputationResultConsumer implements ComputationResultConsumer<DF
         ExecutionContext executionContext
     ) {
         return TraverseStreamComputationResultConsumer.consume(
-            computationResult.graph().isEmpty(),
-            computationResult.graph()::toOriginalNodeId,
-            computationResult.result(),
             computationResult.config().sourceNode(),
+            computationResult.result(),
+            computationResult.graph()::toOriginalNodeId,
+            computationResult.graph().isEmpty(),
             DfsStreamResult::new,
-            pathFactoryFacade,
             executionContext.containsOutputField("path"),
-            executionContext.internalTransaction(),
-            DfsStreamProc.NEXT
+            pathFactoryFacade,
+            DfsStreamProc.NEXT,
+            executionContext.internalTransaction()
         );
     }
 }

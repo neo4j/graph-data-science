@@ -36,15 +36,15 @@ final class TraverseStreamComputationResultConsumer {
     private TraverseStreamComputationResultConsumer() {}
 
     static <T> Stream<T> consume(
-        boolean graphIsEmpty,
-        LongUnaryOperator toOriginalNodeId,
-        @Nullable HugeLongArray nodes,
         long sourceNodeId,
+        @Nullable HugeLongArray nodes,
+        LongUnaryOperator toOriginalNodeId,
+        boolean graphIsEmpty,
         ConcreteResultTransformer<T> resultTransformer,
-        PathFactoryFacade pathFactoryFacade,
         boolean shouldReturnPath,
-        Transaction internalTransaction,
-        RelationshipType relationshipType
+        PathFactoryFacade pathFactoryFacade,
+        RelationshipType relationshipType,
+        Transaction internalTransaction
     ) {
         if (graphIsEmpty || null == nodes) {
             return Stream.empty();
@@ -75,6 +75,6 @@ final class TraverseStreamComputationResultConsumer {
 
     @FunctionalInterface
     interface ConcreteResultTransformer<T> {
-        T transform(long sourceNodeId, List<Long> nodeList, @Nullable Path path);
+        T transform(long sourceNodeId, @Nullable List<Long> nodeList, @Nullable Path path);
     }
 }

@@ -40,15 +40,15 @@ class BfsStreamComputationResultConsumer implements ComputationResultConsumer<BF
         ExecutionContext executionContext
     ) {
         return TraverseStreamComputationResultConsumer.consume(
-            computationResult.graph().isEmpty(),
-            computationResult.graph()::toOriginalNodeId,
-            computationResult.result(),
             computationResult.config().sourceNode(),
+            computationResult.result(),
+            computationResult.graph()::toOriginalNodeId,
+            computationResult.graph().isEmpty(),
             BfsStreamResult::new,
-            pathFactoryFacade,
             executionContext.containsOutputField("path"),
-            executionContext.internalTransaction(),
-            BfsStreamProc.NEXT
+            pathFactoryFacade,
+            BfsStreamProc.NEXT,
+            executionContext.internalTransaction()
         );
     }
 }

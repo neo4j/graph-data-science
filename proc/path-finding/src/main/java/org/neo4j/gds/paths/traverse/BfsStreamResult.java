@@ -23,32 +23,15 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphdb.Path;
 
 import java.util.List;
-import java.util.Objects;
 
 public final class BfsStreamResult {
-    public final Long sourceNode;
+    public final long sourceNode;
     public final List<Long> nodeIds;
     public final Path path;
 
-    BfsStreamResult(long sourceNode, List<Long> nodes, @Nullable Path path) {
+    BfsStreamResult(long sourceNode, @Nullable List<Long> nodes, @Nullable Path path) {
         this.sourceNode = sourceNode;
         this.nodeIds = nodes;
         this.path = path;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BfsStreamResult that = (BfsStreamResult) o;
-        return sourceNode.equals(that.sourceNode) && nodeIds.equals(that.nodeIds) && Objects.equals(
-            path,
-            that.path
-        );
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(sourceNode, nodeIds, path);
     }
 }

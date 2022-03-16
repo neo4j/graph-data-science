@@ -40,15 +40,15 @@ class TraverseStreamComputationResultConsumerTest {
     void shouldNotComputePath() {
         var pathFactoryFacadeMock = mock(PathFactoryFacade.class);
         var result = TraverseStreamComputationResultConsumer.consume(
-            false,
-            l -> l,
-            HugeLongArray.of(1L, 2L),
             0L,
-            TestResult::new,
-            pathFactoryFacadeMock,
+            HugeLongArray.of(1L, 2L),
+            l -> l,
             false,
-            mock(InternalTransaction.class),
-            RelationshipType.withName("TEST")
+            TestResult::new,
+            false,
+            pathFactoryFacadeMock,
+            RelationshipType.withName("TEST"),
+            mock(InternalTransaction.class)
         );
 
         verifyNoInteractions(pathFactoryFacadeMock);
@@ -67,15 +67,15 @@ class TraverseStreamComputationResultConsumerTest {
         var pathFactoryFacadeMock = mock(PathFactoryFacade.class);
         doReturn(mock(Path.class)).when(pathFactoryFacadeMock).createPath(any(), any(), any());
         var result = TraverseStreamComputationResultConsumer.consume(
-            false,
-            l -> l,
-            HugeLongArray.of(1L, 2L),
             0L,
+            HugeLongArray.of(1L, 2L),
+            l -> l,
+            false,
             TestResult::new,
-            pathFactoryFacadeMock,
             true,
-            mock(InternalTransaction.class),
-            RelationshipType.withName("TEST")
+            pathFactoryFacadeMock,
+            RelationshipType.withName("TEST"),
+            mock(InternalTransaction.class)
         );
 
         assertThat(result)
@@ -92,7 +92,7 @@ class TraverseStreamComputationResultConsumerTest {
         public final List<Long> nodeIds;
         public final Path path;
 
-        TestResult(long sourceNode, List<Long> nodes, @Nullable Path path) {
+        TestResult(long sourceNode, @Nullable List<Long> nodes, @Nullable Path path) {
             this.sourceNode = sourceNode;
             this.nodeIds = nodes;
             this.path = path;
