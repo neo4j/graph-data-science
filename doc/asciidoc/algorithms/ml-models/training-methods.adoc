@@ -50,17 +50,80 @@ In our experience, reasonable values for `patience` are in the range `1` to `3`.
 It is also possible, via `minEpochs`, to control a minimum number of epochs before the above termination criteria enter into play.
 
 The training algorithm applied to the above algorithms is gradient descent.
-The gradient updates are computed batch-wise on batches of `batchSize` examples, and batches are computed concurrently on `concurrency` threads.
+The gradient updates are computed batch-wise on batches of `batchSize` samples, and batches are computed concurrently on `concurrency` threads.
 Thus, `batchSize` can affect the convergence rate, but since the algorithms above optimize convex functions, the resulting model is in theory (approximately) unique.
 
 
 [[algorithms-ml-training-methods-random-forest]]
 === Random forest
 
+Random forest is a popular supervised machine learning method for classification (and regression) that consists of using several https://en.wikipedia.org/wiki/Decision_tree[decision trees], and combining the trees' predictions into an overall prediction.
+To train the random forest is to train each of its decision trees independently.
+Each decision tree is typically trained on a slightly different part of the training set, and may look at different features for its node splits.
 
-// overview
+Random forest predictions are made by simply taking the majority votes of its decision trees.
+The idea is that the difference in how each decision tree is trained will help avoid overfitting which is not uncommon when just training a single decision tree on the entire training set.
+
+The approach of combining several predictors (in this case decision trees) is also known as _ensemble learning_, and using different parts of the training set for each predictor is often referred to as _bootstrap aggregating_ or _bagging_.
+
+The loss used by the decision trees in GDS is the https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity[Gini impurity].
+
+https://en.wikipedia.org/wiki/Random_forest[Click here] for more details on random forest.
 
 // TODO: ADD LINK TO addRandomForest procs here!
 
-
 ==== Tuning the hyperparameters
+
+In order to balance matters such as bias vs variance of the model, and speed vs memory consumption of the training, GDS exposes several hyperparameters that one can tune.
+Each of these are described below.
+
+
+===== Number of decision trees
+
+This parameter sets the number of decision trees that will be part of the random forest.
+
+Having a too small number of trees could mean that the model will overfit to some parts of the dataset.
+
+A larger number of trees will in general mean that the training takes longer, and the memory consumption might be a bit higher.
+
+
+===== Max features ratio
+
+For each node split in a decision tree, a set of features of the feature vectors are considered.
+The number of such features considered is the `maxFeatureRatio` multiplied by the feature dimension of the input feature vectors.
+If the number of features to be considered are fewer than the total number of features, a subset of all features are sampled (without replacement).
+This is sometimes referred to as _feature bagging_.
+
+A high (close to 1.0) max features ratio means that the training will take longer as there are more options for how to split nodes in the decision trees.
+It will also mean that each decision tree will be better at predictions over the training set.
+While this is positive in some sense, it might also mean that each decision tree will overfit on the training set.
+
+
+===== Max depth
+
+This parameter sets the maximum depth of the decision trees in the random forest.
+
+A high maximum depth means that the training might take longer, as more node splits might need to be considered.
+The memory footprint of the produced prediction model might also be higher since the trees simply may be larger (deeper).
+
+A deeper decision tree may be able to better fit to the training set, but that may also mean that it overfits.
+
+
+===== Min split size
+
+This parameter sets the minimum number of training samples required to be present in a node of a decision tree in order for it to be split during training.
+
+A large split size means less specialization on the training set, and thus possibly worse performance on the training set, but possibly avoiding overfitting.
+It will likely also mean that the training will be faster as probably fewer node splits will be considered.
+
+
+===== Number of samples ratio
+
+Each decision tree in the random forest is trained using a subset of the training set.
+This subset is sampled with replacement, meaning that a feature vector of the training may be sampled several times for a single decision tree.
+The number of training samples for each decision tree is the `numberOfSamplesRatio` multiplied by the total number of samples in the training set.
+
+A high ratio will likely imply better generalization for each decision tree, but not necessarily so for the random forest overall.
+Training will also take longer as more feature vectors will need to be considered in each node split of each decision tree.
+
+The special value of 0.0 means that all feature vectors of the training set will be used for training by every decision tree of the random forest (so no sampling).
