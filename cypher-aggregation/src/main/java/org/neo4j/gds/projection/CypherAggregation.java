@@ -70,6 +70,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CypherAggregation extends BaseProc {
@@ -292,8 +293,7 @@ public final class CypherAggregation extends BaseProc {
                 .nodes(this.idMapBuilder)
                 .orientation(Orientation.NATURAL)
                 .aggregation(Aggregation.NONE)
-                // TODO: concurrency from config
-                .concurrency(4);
+                .concurrency(DEFAULT_CONCURRENCY);
 
             if (this.relationshipPropertySchemas != null) {
                 for (var ignored : this.relationshipPropertySchemas) {
