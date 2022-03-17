@@ -19,7 +19,7 @@ Please see the table below.
 | `modelName`
 | This parameter is now only configured in `gds.beta.pipeline.nodeClassification.train`.
 | `featuresProperties`
-| This parameter is now only configured in `gds.beta.pipeline.nodeClassification.selectFeatures`. There's now also a procedure `gds.beta.pipeline.nodeClassification.addNodeProperty` to add compute node properties for the input graph in the training pipeline and produced classification model.
+| This parameter is now only configured in `gds.beta.pipeline.nodeClassification.selectFeatures`. There's now also a procedure `gds.beta.pipeline.nodeClassification.addNodeProperty` to compute node properties for the input graph in the training pipeline and produced classification model.
 | `targetProperty`
 | This parameter is now only configured in `gds.beta.pipeline.nodeClassification.train`.
 | `holdoutFraction`

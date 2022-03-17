@@ -19,7 +19,7 @@ Please see the table below.
 | `modelName`
 | This parameter is now only configured in `gds.beta.pipeline.linkPrediction.train`.
 | `featuresProperties` and `linkFeatureCombiner`
-| These parameters are now moved to the procedure `gds.beta.pipeline.linkPrediction.addFeatures` where they are referred to as `nodeProperties` and `featureType` respectively. There's now also a procedure `gds.beta.pipeline.linkPrediction.addNodeProperty` to add compute node properties for the input graph in the training pipeline and produced classification model.
+| These parameters are now moved to the procedure `gds.beta.pipeline.linkPrediction.addFeatures` where they are referred to as `nodeProperties` and `featureType` respectively. There's now also a procedure `gds.beta.pipeline.linkPrediction.addNodeProperty` to compute node properties for the input graph in the training pipeline and produced classification model.
 | `trainRelationshipType` and `testRelationshipType`
 | These parameters are now deprecated, and instead `gds.beta.pipeline.linkPrediction.configureSplit` should be used to set up the dataset split.
 | `validationFolds`
