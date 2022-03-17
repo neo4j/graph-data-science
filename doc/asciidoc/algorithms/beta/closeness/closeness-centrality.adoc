@@ -1,5 +1,5 @@
 [[algorithms-closeness-centrality]]
-[.alpha]
+[.beta]
 = Closeness Centrality
 
 [abstract]
@@ -13,8 +13,6 @@ Closeness centrality is a way of detecting nodes that are able to spread informa
 The closeness centrality of a node measures its average farness (inverse distance) to all other nodes.
 Nodes with a high closeness score have the shortest distances to all other nodes.
 // end::introduction[]
-
-include::alpha-note.adoc[]
 
 
 [[algorithms-closeness-centrality-context]]
