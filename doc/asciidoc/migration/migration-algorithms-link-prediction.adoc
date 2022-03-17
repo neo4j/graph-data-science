@@ -1,8 +1,8 @@
 [[migration-algorithms-link-prediction]]
 = Link Prediction
 
-The non-pipeline version of link prediction has been completely removed and replaced by <<linkprediction-pipelines, link prediction pipelines>>.
-Before training a link prediction model, you now need to <<linkprediction-creating-a-pipeline, create>> and configure a training pipeline.
+The original alpha version of link prediction has been completely removed and incorporated into <<linkprediction-pipelines, link prediction pipelines>>.
+Before training a link prediction model, you must <<linkprediction-creating-a-pipeline, create>> and configure a training pipeline.
 
 
 == Train

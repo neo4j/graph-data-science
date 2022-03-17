@@ -1,8 +1,8 @@
 [[migration-algorithms-node-classification]]
 = Node Classification
 
-The non-pipeline version of node classification has been completely removed and replaced by <<nodeclassification-pipelines, node classification pipelines>>.
-Before training a node classification model, you now need to <<nodeclassification-creating-a-pipeline, create>> and configure a training pipeline.
+The original alpha version of node classification has been completely removed and incorporated into <<nodeclassification-pipelines, node classification pipelines>>.
+Before training a node classification model, you must <<nodeclassification-creating-a-pipeline, create>> and configure a training pipeline.
 
 
 == Train
