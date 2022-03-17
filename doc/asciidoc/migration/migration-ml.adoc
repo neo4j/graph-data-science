@@ -1,5 +1,5 @@
 [[migration-ml]]
-= Machine Learning Migration
+= Machine Learning
 
 [abstract]
 --

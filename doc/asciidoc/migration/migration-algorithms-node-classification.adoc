@@ -49,3 +49,16 @@ These procedures are `gds.beta.pipeline.nodeClassification.predict.[mutate,strea
 | `batchSize`
 | Batch size is optimized internally and no longer user-configurable.
 |===
+
+.Prediction procedure replacements:
+[options=header, cols="m,m"]
+|===
+| 1.x
+| 2.x
+| gds.alpha.ml.nodeClassification.predict.stream
+| gds.beta.pipeline.nodeClassification.predict.stream
+| gds.alpha.ml.nodeClassification.predict.mutate
+| gds.beta.pipeline.nodeClassification.predict.mutate
+| gds.alpha.ml.nodeClassification.predict.write
+| gds.beta.pipeline.nodeClassification.predict.write
+|===
