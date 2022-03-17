@@ -40,23 +40,13 @@ import java.util.concurrent.ExecutorService;
  */
 public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
 
-    static double centrality(long farness, long componentSize, long nodeCount, boolean wassermanFaust) {
-        if (farness == 0L) {
-            return 0.0D;
-        }
-        if (wassermanFaust) {
-            return (componentSize / ((double) farness)) * ((componentSize) / (nodeCount - 1.0D));
-        }
-        return componentSize / ((double) farness);
-    }
-
     private final Graph graph;
     private final long nodeCount;
     private final int concurrency;
     private final ExecutorService executorService;
-    private final boolean wassermanFaust;
     private final PagedAtomicIntegerArray farness;
     private final PagedAtomicIntegerArray component;
+    private final CentralityComputer centralityComputer;
 
     public static ClosenessCentrality of(
         Graph graph,
@@ -64,10 +54,17 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
+        var nodeCount = graph.nodeCount();
+        var centralityComputer = config.useWassermanFaust()
+            ? new WassermanFaustCentralityComputer(nodeCount)
+            : new DefaultCentralityComputer();
         return new ClosenessCentrality(
             graph,
+            nodeCount,
             config.concurrency(),
-            config.improved(),
+            centralityComputer,
+            PagedAtomicIntegerArray.newArray(nodeCount),
+            PagedAtomicIntegerArray.newArray(nodeCount),
             executorService,
             progressTracker
         );
@@ -75,19 +72,22 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
 
     private ClosenessCentrality(
         Graph graph,
+        long nodeCount,
         int concurrency,
-        boolean wassermanFaust,
+        CentralityComputer centralityComputer,
+        PagedAtomicIntegerArray farness,
+        PagedAtomicIntegerArray component,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.nodeCount = graph.nodeCount();
+        this.nodeCount = nodeCount;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        this.wassermanFaust = wassermanFaust;
-        this.farness = PagedAtomicIntegerArray.newArray(nodeCount);
-        this.component = PagedAtomicIntegerArray.newArray(nodeCount);
+        this.centralityComputer = centralityComputer;
+        this.farness = farness;
+        this.component = component;
     }
 
     @Override
@@ -112,7 +112,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
             progressTracker.logProgress();
         };
         MultiSourceBFS
-            .aggregatedNeighborProcessing(graph.nodeCount(), graph, consumer)
+            .aggregatedNeighborProcessing(nodeCount, graph, consumer)
             .run(concurrency, executorService);
         progressTracker.endSubTask();
     }
@@ -124,13 +124,11 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
 
         var tasks = PartitionUtils.rangePartition(
             concurrency,
-            graph.nodeCount(),
+            nodeCount,
             partition -> (Runnable) () -> {
-                partition.consume(nodeId -> closeness.set(nodeId, centrality(
+                partition.consume(nodeId -> closeness.set(nodeId, centralityComputer.centrality(
                     farness.get(nodeId),
-                    component.get(nodeId),
-                    nodeCount,
-                    wassermanFaust
+                    component.get(nodeId)
                 )));
                 progressTracker.logProgress(partition.nodeCount());
             },

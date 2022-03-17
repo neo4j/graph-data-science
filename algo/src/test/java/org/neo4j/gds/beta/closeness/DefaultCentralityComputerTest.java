@@ -19,23 +19,25 @@
  */
 package org.neo4j.gds.beta.closeness;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface ClosenessCentralityConfig extends AlgoBaseConfig {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    @Value.Default
-    default boolean useWassermanFaust() {
-        return false;
-    }
+class DefaultCentralityComputerTest {
 
-    static ClosenessCentralityConfig of(CypherMapWrapper config) {
-        return new ClosenessCentralityConfigImpl(config);
+    @ParameterizedTest
+    @CsvSource({
+        "5, 5, 1.0",
+        "10, 5, 0.5",
+        "0, 0, 0",
+    })
+    void centrality(long farness, long componentSize, double expectedScore) {
+
+        var centralityComputer = new DefaultCentralityComputer();
+
+        assertThat(centralityComputer.centrality(farness, componentSize))
+            .isEqualTo(expectedScore, Offset.offset(0.01));
     }
 }

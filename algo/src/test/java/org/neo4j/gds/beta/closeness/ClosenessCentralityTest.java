@@ -38,7 +38,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.beta.closeness.ClosenessCentrality.centrality;
 import static org.neo4j.gds.compat.TestLog.INFO;
 
 /**
@@ -106,26 +105,6 @@ class ClosenessCentralityTest {
         assertThat(result.get(idFunction.of("c"))).isCloseTo(0.66, Offset.offset(0.01));
         assertThat(result.get(idFunction.of("d"))).isCloseTo(0.57, Offset.offset(0.01));
         assertThat(result.get(idFunction.of("e"))).isCloseTo(0.4, Offset.offset(0.01));
-    }
-
-    @Test
-    void testCentralityFormula() {
-        /*
-            C(u) = \frac{n - 1}{\sum_{v=1}^{n-1} d(v, u)}
-
-            C_{WF}(u) = \frac{n-1}{N-1} \frac{n - 1}{\sum_{v=1}^{n-1} d(v, u)}
-
-            where `d(v, u)` is the shortest-path distance between `v` and `u`
-                  `n` is the number of nodes that can reach `u`
-                  `N` is the number of nodes in the graph
-         */
-
-        assertEquals(1.0, centrality(5, 5, 10, false), 0.01);
-        assertEquals(0.5, centrality(10, 5, 10, false), 0.01);
-        assertEquals(0, centrality(0, 0, 10, false), 0.01);
-
-        assertEquals(5 / 9D, centrality(5, 5, 10, true), 0.01);
-        assertEquals(1.25, centrality(5, 5, 5, true), 0.01);
     }
 
     @Test

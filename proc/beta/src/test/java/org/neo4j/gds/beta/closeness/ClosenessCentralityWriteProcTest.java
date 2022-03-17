@@ -32,7 +32,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ClosenessCentralityWriteProcTest extends ClosenessCentralityProcTest<ClosenessCentralityWriteConfig> {
 
-    public static final String WRITE_PROPERTY = "centrality";
+    private static final String WRITE_PROPERTY = "score";
 
     @Override
     public Class<? extends AlgoBaseProc<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, ?>> getProcedureClazz() {
@@ -62,10 +62,17 @@ class ClosenessCentralityWriteProcTest extends ClosenessCentralityProcTest<Close
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
+
+            assertThat(row.get("configuration"))
+                .isNotNull()
+                .isInstanceOf(Map.class);
+
             assertThat(row.getNumber("writeMillis")).isNotEqualTo(-1L);
             assertThat(row.getNumber("preProcessingMillis")).isNotEqualTo(-1L);
             assertThat(row.getNumber("computeMillis")).isNotEqualTo(-1L);
-            assertThat(row.getNumber("nodes")).isEqualTo(11L);
+            assertThat(row.getNumber("nodePropertiesWritten")).isEqualTo(11L);
+            
+            assertThat(row.get("configuration")).isNotNull();
 
             assertThat(row.get("centralityDistribution")).isEqualTo(Map.of(
                 "max", 1.0000038146972656,

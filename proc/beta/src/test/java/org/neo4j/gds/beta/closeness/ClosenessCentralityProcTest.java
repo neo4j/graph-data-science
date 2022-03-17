@@ -88,7 +88,7 @@ abstract class ClosenessCentralityProcTest<CONFIG extends ClosenessCentralityCon
     @Inject
     private IdFunction idFunction;
 
-    protected List<Map<String, Object>> expectedCentralityResult;
+    List<Map<String, Object>> expectedCentralityResult;
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -119,17 +119,17 @@ abstract class ClosenessCentralityProcTest<CONFIG extends ClosenessCentralityCon
         );
 
         expectedCentralityResult = List.of(
-            Map.of("nodeId", idFunction.of("n0"), "centrality", Matchers.closeTo(1.0, 0.01)),
-            Map.of("nodeId", idFunction.of("n1"), "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n2"), "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n3"), "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n4"), "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n5"), "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n6"), "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n7"), "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n8"), "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n9"), "centrality", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n10"), "centrality", Matchers.closeTo(0.588, 0.01))
+            Map.of("nodeId", idFunction.of("n0"), "score", Matchers.closeTo(1.0, 0.01)),
+            Map.of("nodeId", idFunction.of("n1"), "score", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n2"), "score", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n3"), "score", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n4"), "score", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n5"), "score", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n6"), "score", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n7"), "score", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n8"), "score", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n9"), "score", Matchers.closeTo(0.588, 0.01)),
+            Map.of("nodeId", idFunction.of("n10"), "score", Matchers.closeTo(0.588, 0.01))
         );
     }
 }

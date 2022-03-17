@@ -89,23 +89,21 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
             computeResult.config().concurrency()
         ).withMutateProperty(computeResult.config().mutateProperty());
         return ClosenessCentralityProc
-            .resultBuilder(procResultBuilder, computeResult)
-            .withNodeCount(computeResult.graph().nodeCount());
+            .resultBuilder(procResultBuilder, computeResult);
     }
 
     public static final class MutateResult {
 
         public final long nodePropertiesWritten;
         public final long postProcessingMillis;
-        public final long nodes;
         public final long preProcessingMillis;
         public final long computeMillis;
         public final long mutateMillis;
         public final String mutateProperty;
         public final Map<String, Object> centralityDistribution;
+        public final Map<String, Object> configuration;
 
         MutateResult(
-            long nodes,
             long nodePropertiesWritten,
             long preProcessingMillis,
             long computeMillis,
@@ -115,8 +113,6 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
             @Nullable Map<String, Object> centralityDistribution,
             Map<String, Object> config
         ) {
-
-            this.nodes = nodes;
             this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.mutateMillis = mutateMillis;
@@ -124,6 +120,7 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
             this.centralityDistribution = centralityDistribution;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.postProcessingMillis = postProcessingMillis;
+            this.configuration = config;
         }
 
         static final class Builder extends AbstractCentralityResultBuilder<ClosenessCentralityMutateProc.MutateResult> {
@@ -141,7 +138,6 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
             @Override
             public ClosenessCentralityMutateProc.MutateResult buildResult() {
                 return new ClosenessCentralityMutateProc.MutateResult(
-                    nodeCount,
                     nodePropertiesWritten,
                     preProcessingMillis,
                     computeMillis,

@@ -89,22 +89,21 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
                 .config()
                 .writeProperty()),
             computeResult
-        ).withNodeCount(computeResult.graph().nodeCount());
+        );
     }
 
     public static final class WriteResult {
 
         public final long nodePropertiesWritten;
         public final long postProcessingMillis;
-        public final long nodes;
         public final long preProcessingMillis;
         public final long computeMillis;
         public final long writeMillis;
         public final String writeProperty;
         public final Map<String, Object> centralityDistribution;
+        public final Map<String, Object> configuration;
 
         WriteResult(
-            long nodes,
             long nodePropertiesWritten,
             long preProcessingMillis,
             long computeMillis,
@@ -114,8 +113,6 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
             @Nullable Map<String, Object> centralityDistribution,
             Map<String, Object> config
         ) {
-
-            this.nodes = nodes;
             this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
@@ -123,6 +120,7 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
             this.centralityDistribution = centralityDistribution;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.postProcessingMillis = postProcessingMillis;
+            this.configuration = config;
         }
 
         static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
@@ -140,7 +138,6 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
             @Override
             public WriteResult buildResult() {
                 return new WriteResult(
-                    nodeCount,
                     nodePropertiesWritten,
                     preProcessingMillis,
                     computeMillis,

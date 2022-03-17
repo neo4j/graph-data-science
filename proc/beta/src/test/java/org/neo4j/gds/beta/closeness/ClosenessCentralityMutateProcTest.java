@@ -36,7 +36,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ClosenessCentralityMutateProcTest extends ClosenessCentralityProcTest<ClosenessCentralityMutateConfig> {
 
-    public static final String MUTATE_PROPERTY = "centrality";
+    private static final String MUTATE_PROPERTY = "score";
 
     @BeforeEach
     void setup() throws Exception {
@@ -74,7 +74,9 @@ class ClosenessCentralityMutateProcTest extends ClosenessCentralityProcTest<Clos
             assertThat(row.getNumber("mutateMillis")).isNotEqualTo(-1L);
             assertThat(row.getNumber("preProcessingMillis")).isNotEqualTo(-1L);
             assertThat(row.getNumber("computeMillis")).isNotEqualTo(-1L);
-            assertThat(row.getNumber("nodes")).isEqualTo(11L);
+            assertThat(row.getNumber("nodePropertiesWritten")).isEqualTo(11L);
+
+            assertThat(row.get("configuration")).isNotNull();
 
             assertThat(row.get("centralityDistribution")).isEqualTo(Map.of(
                 "max", 1.0000038146972656,

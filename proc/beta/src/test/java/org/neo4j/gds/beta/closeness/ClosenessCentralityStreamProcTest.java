@@ -42,7 +42,7 @@ class ClosenessCentralityStreamProcTest extends ClosenessCentralityProcTest<Clos
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.closeness")
             .streamMode()
-            .yields("nodeId", "centrality");
+            .yields("nodeId", "score");
 
         assertCypherResult(query, expectedCentralityResult);
     }

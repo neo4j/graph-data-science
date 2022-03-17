@@ -19,23 +19,14 @@
  */
 package org.neo4j.gds.beta.closeness;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+public class DefaultCentralityComputer implements CentralityComputer {
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface ClosenessCentralityConfig extends AlgoBaseConfig {
+    @Override
+    public double centrality(long farness, long componentSize) {
+        if (farness == 0L) {
+            return 0.0D;
+        }
 
-    @Value.Default
-    default boolean useWassermanFaust() {
-        return false;
-    }
-
-    static ClosenessCentralityConfig of(CypherMapWrapper config) {
-        return new ClosenessCentralityConfigImpl(config);
+        return componentSize / ((double) farness);
     }
 }
