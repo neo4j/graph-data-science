@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.closeness;
 
+import org.assertj.core.api.SoftAssertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.AlgoBaseProcTest;
@@ -32,8 +33,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
 import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @Neo4jGraphExtension
 abstract class ClosenessCentralityProcTest<CONFIG extends ClosenessCentralityConfig> extends BaseProcTest implements AlgoBaseProcTest<ClosenessCentrality, CONFIG, ClosenessCentralityResult> {
@@ -98,14 +97,18 @@ abstract class ClosenessCentralityProcTest<CONFIG extends ClosenessCentralityCon
 
     @Override
     public void assertResultEquals(ClosenessCentralityResult result1, ClosenessCentralityResult result2) {
+        var assertions = new SoftAssertions();
+
         var left = result1.centralities();
         var right = result2.centralities();
 
-        assertThat(left.size()).as("Result size").isEqualTo(right.size());
+        assertions.assertThat(left.size()).as("Result size").isEqualTo(right.size());
 
         for (long i = 0; i < left.size(); i++) {
-            assertThat(left.get(i)).as("Value at index " + i).isEqualTo(right.get(i));
+            assertions.assertThat(left.get(i)).as("Value at index " + i).isEqualTo(right.get(i));
         }
+
+        assertions.assertAll();
     }
 
     @BeforeEach
