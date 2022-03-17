@@ -31,6 +31,8 @@ import org.neo4j.gds.core.model.ModelCatalogExtension;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -38,6 +40,7 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.models.ClassifierFactory;
 import org.neo4j.gds.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
 
@@ -242,16 +245,25 @@ class NodeClassificationPredictTest {
         modelCatalog.set(model);
 
         var log = Neo4jProxy.testLog();
-        var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory<>(modelCatalog).build(
-            graph,
-            ImmutableNodeClassificationPredictConfig.builder()
-                .modelName(modelName)
-                .includePredictedProbabilities(false)
-                .concurrency(1)
-                .build(),
+        var progressTracker = new TaskProgressTracker(
+            NodeClassificationPredict.progressTask(graph),
             log,
-            EmptyTaskRegistryFactory.INSTANCE
+            1,
+            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyUserLogRegistryFactory.INSTANCE
         );
+
+
+        var mcnlrPredict = new NodeClassificationPredict(
+            ClassifierFactory.create(model.data()),
+            graph,
+            100,
+            1,
+            false,
+            model.trainConfig().featureProperties(),
+            progressTracker
+        );
+
         mcnlrPredict.compute();
 
         var messagesInOrder = log.getMessages(INFO);
