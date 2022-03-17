@@ -29,7 +29,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class DfsAlgorithmFactory<CONFIG extends DfsBaseConfig> extends GraphAlgorithmFactory<DFS, CONFIG> {
+public class DfsAlgorithmFactory<CONFIG extends DfsBaseConfig> extends GraphAlgorithmFactory<DFS, CONFIG> {
 
     @Override
     public DFS build(
