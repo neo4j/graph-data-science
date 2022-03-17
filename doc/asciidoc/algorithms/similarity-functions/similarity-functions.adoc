@@ -1,6 +1,22 @@
 [[similarity-functions]]
 = Similarity functions
 
-The GDS library provides a set of useful functions that can be used to calculate similarity between two vectors.
+The GDS library provides a set of measures that can be used to calculate similarity between two vectors of numbers.
 
+[[table-product]]
+[role=procedure-listing]
+[opts=header,cols="1, 1"]
+|===
+| Similarity Function name  | Formula
+| `gds.similarity.jaccard` |
 
+image::nodesim-formulas/jacard_nodesim.svg
+
+| `gds.similarity.overlap` |
+
+image::nodesim-formulas/overlap_nodesim.svg
+
+| `gds.similarity.cosine` | 1
+| `gds.similarity.pearson` | 1
+| `gds.similarity.euclideanDistance` | 1
+| `gds.similarity.euclidean` | 1
