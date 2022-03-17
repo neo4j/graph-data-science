@@ -453,7 +453,7 @@ CALL gds.alpha.pipeline.linkPrediction.addRandomForest(
 YIELD
   name: String,
   nodePropertySteps: List of Map,
-  featureSteps: List of String,
+  featureSteps: List of Map,
   splitConfig: Map,
   parameterSpace: Map
 ----
