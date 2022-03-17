@@ -62,10 +62,15 @@ class ClosenessCentralityWriteProcTest extends ClosenessCentralityProcTest<Close
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
+
+            assertThat(row.get("configuration"))
+                .isNotNull()
+                .isInstanceOf(Map.class);
+
             assertThat(row.getNumber("writeMillis")).isNotEqualTo(-1L);
             assertThat(row.getNumber("preProcessingMillis")).isNotEqualTo(-1L);
             assertThat(row.getNumber("computeMillis")).isNotEqualTo(-1L);
-            assertThat(row.getNumber("nodes")).isEqualTo(11L);
+            assertThat(row.getNumber("nodePropertiesWritten")).isEqualTo(11L);
 
             assertThat(row.get("centralityDistribution")).isEqualTo(Map.of(
                 "max", 1.0000038146972656,
