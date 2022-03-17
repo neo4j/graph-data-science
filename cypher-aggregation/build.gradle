@@ -1,7 +1,7 @@
 apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: GDS Cypher Aggregation'
-group = 'com.neo4j.gds'
+group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
