@@ -31,8 +31,6 @@ where `CE` is the https://en.wikipedia.org/wiki/Cross_entropy#Cross-entropy_loss
 To avoid overfitting one may also add a https://en.wikipedia.org/wiki/Regularization_(mathematics)[regularization] term to the loss.
 In GDS, this we provide the option of adding `l2` regularization.
 
-https://en.wikipedia.org/wiki/Logistic_regression[Click here] for more details on logistic regression.
-
 
 === Tuning the hyperparameters
 
@@ -70,8 +68,6 @@ The idea is that the difference in how each decision tree is trained will help a
 The approach of combining several predictors (in this case decision trees) is also known as _ensemble learning_, and using different parts of the training set for each predictor is often referred to as _bootstrap aggregating_ or _bagging_.
 
 The loss used by the decision trees in GDS is the https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity[Gini impurity].
-
-https://en.wikipedia.org/wiki/Random_forest[Click here] for more details on random forest.
 
 
 === Tuning the hyperparameters
