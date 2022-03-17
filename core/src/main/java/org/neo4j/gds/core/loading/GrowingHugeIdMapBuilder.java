@@ -58,13 +58,12 @@ public final class GrowingHugeIdMapBuilder implements IdMapBuilder {
     public IdMap build(
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
-        int concurrency,
-        boolean checkDuplicateIds
+        int concurrency
     ) {
         allocators.close();
-        return checkDuplicateIds
-            ? HugeIdMapBuilderOps.buildChecked(this.arrayBuilder.build(size()), size(), labelInformationBuilder, highestNodeId, concurrency)
-            : HugeIdMapBuilderOps.build(this.arrayBuilder.build(size()), size(), labelInformationBuilder, highestNodeId, concurrency);
+        long nodeCount = size();
+        var graphIds = this.arrayBuilder.build(nodeCount);
+        return HugeIdMapBuilderOps.build(graphIds, nodeCount, labelInformationBuilder, highestNodeId, concurrency);
     }
 
     public HugeLongArray array() {
@@ -73,9 +72,5 @@ public final class GrowingHugeIdMapBuilder implements IdMapBuilder {
 
     public long size() {
         return allocationIndex.get();
-    }
-
-    private long upperAllocation(long lower, long nodes) {
-        return lower + nodes;
     }
 }

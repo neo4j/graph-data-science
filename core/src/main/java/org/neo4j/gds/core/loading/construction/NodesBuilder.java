@@ -192,42 +192,16 @@ public final class NodesBuilder {
     }
 
     public IdMapAndProperties build() {
-        return build(maxOriginalId, false);
+        return build(maxOriginalId);
     }
 
-    public IdMapAndProperties buildChecked() {
-        return build(maxOriginalId, true);
-    }
-
-    public IdMapAndProperties buildChecked(long highestNeoId) {
-        return build(highestNeoId, true);
-    }
-
-    /**
-     * Closes the NodesBuilder without flushing the internal buffers.
-     * The given exception is thrown, once the thread local builders
-     * are closed.
-     *
-     * This method must be called in case of an error while using the
-     * NodesBuilder.
-     */
-    public void close(RuntimeException exception) {
-        this.threadLocalBuilder.close();
-        throw exception;
-    }
-
-    public IdMapAndProperties build(long highestNeoId, boolean checkDuplicateIds) {
+    public IdMapAndProperties build(long highestNeoId) {
         // Flush remaining buffer contents
         this.threadLocalBuilder.forEach(ThreadLocalBuilder::flush);
         // Clean up resources held by local builders
         this.threadLocalBuilder.close();
 
-        var idMap = this.idMapBuilder.build(
-            labelInformationBuilder,
-            highestNeoId,
-            concurrency,
-            checkDuplicateIds
-        );
+        var idMap = this.idMapBuilder.build(labelInformationBuilder, highestNeoId, concurrency);
 
         Optional<Map<NodeLabel, Map<String, NodeProperties>>> nodeProperties = Optional.empty();
         if (hasProperties) {
@@ -248,6 +222,19 @@ public final class NodesBuilder {
             );
         }
         return nodePropertiesByLabel;
+    }
+
+    /**
+     * Closes the NodesBuilder without flushing the internal buffers.
+     * The given exception is thrown, once the thread local builders
+     * are closed.
+     *
+     * This method must be called in case of an error while using the
+     * NodesBuilder.
+     */
+    public void close(RuntimeException exception) {
+        this.threadLocalBuilder.close();
+        throw exception;
     }
 
     private int getOrCreateLabelTokenId(NodeLabel nodeLabel) {
@@ -305,7 +292,8 @@ public final class NodesBuilder {
 
     private static class ThreadLocalBuilder implements AutoCloseable {
 
-        private final long[] anyLabelArray = {ANY_LABEL};
+        private static final long NOT_INITIALIZED = -42L;
+        private final long[] anyLabelArray = {NOT_INITIALIZED};
 
         private final LongAdder importedNodes;
         private final LongPredicate seenNodeIdPredicate;
@@ -315,8 +303,6 @@ public final class NodesBuilder {
         private final NodeImporter nodeImporter;
         private final IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey;
         private final List<Map<String, Value>> batchNodeProperties;
-
-        private boolean isClosed = false;
 
         ThreadLocalBuilder(
             LongAdder importedNodes,
@@ -374,8 +360,7 @@ public final class NodesBuilder {
 
         private long[] labelTokens(NodeLabelToken nodeLabels) {
             if (nodeLabels.isEmpty()) {
-                anyLabelArray[0] = labelTokenIdFn.apply(NodeLabel.ALL_NODES);
-                return anyLabelArray;
+                return anyLabelArray();
             }
 
             long[] labelIds = new long[nodeLabels.size()];
@@ -448,6 +433,14 @@ public final class NodesBuilder {
             }
 
             return propertiesImported;
+        }
+
+        private long[] anyLabelArray() {
+            var anyLabelArray = this.anyLabelArray;
+            if (anyLabelArray[0] == NOT_INITIALIZED) {
+                anyLabelArray[0] = labelTokenIdFn.apply(NodeLabel.ALL_NODES);
+            }
+            return anyLabelArray;
         }
     }
 }

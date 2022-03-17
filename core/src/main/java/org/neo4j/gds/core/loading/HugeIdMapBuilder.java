@@ -65,13 +65,12 @@ public final class HugeIdMapBuilder implements IdMapBuilder {
     public IdMap build(
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
-        int concurrency,
-        boolean checkDuplicateIds
+        int concurrency
     ) {
         adders.close();
-        return checkDuplicateIds
-            ? HugeIdMapBuilderOps.buildChecked(this.array(), this.size(), labelInformationBuilder, highestNodeId, concurrency)
-            : HugeIdMapBuilderOps.build(this.array(), this.size(), labelInformationBuilder, highestNodeId, concurrency);
+        long nodeCount = this.size();
+        var graphIds = this.array();
+        return HugeIdMapBuilderOps.build(graphIds, nodeCount, labelInformationBuilder, highestNodeId, concurrency);
     }
 
     public HugeLongArray array() {

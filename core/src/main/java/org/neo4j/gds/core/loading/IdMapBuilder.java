@@ -27,7 +27,6 @@ public interface IdMapBuilder {
     IdMap build(
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
-        int concurrency,
-        boolean checkDuplicateIds
+        int concurrency
     );
 }
