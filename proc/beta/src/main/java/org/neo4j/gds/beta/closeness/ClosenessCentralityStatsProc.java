@@ -70,7 +70,6 @@ public class ClosenessCentralityStatsProc extends StatsProc<ClosenessCentrality,
         );
     }
 
-    @SuppressWarnings("unused")
     public static class StatsResult extends StandardStatsResult {
 
         public final Map<String, Object> centralityDistribution;
@@ -87,7 +86,7 @@ public class ClosenessCentralityStatsProc extends StatsProc<ClosenessCentrality,
         }
 
         static final class Builder extends AbstractCentralityResultBuilder<StatsResult> {
-            protected Builder(ProcedureCallContext callContext, int concurrency) {
+            private Builder(ProcedureCallContext callContext, int concurrency) {
                 super(callContext, concurrency);
             }
 
