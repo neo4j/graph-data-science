@@ -83,15 +83,16 @@ public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentralit
         return ClosenessCentralityProc.algorithmFactory();
     }
 
+    // TODO: remove this and use `org.neo4j.gds.common.CentralityStreamResult` when productizing.
     public static final class StreamResult {
 
         public final long nodeId;
 
-        public final double centrality;
+        public final double score;
 
-        public StreamResult(long nodeId, double centrality) {
+        StreamResult(long nodeId, double score) {
             this.nodeId = nodeId;
-            this.centrality = centrality;
+            this.score = score;
         }
     }
 

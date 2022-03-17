@@ -36,7 +36,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ClosenessCentralityMutateProcTest extends ClosenessCentralityProcTest<ClosenessCentralityMutateConfig> {
 
-    public static final String MUTATE_PROPERTY = "centrality";
+    private static final String MUTATE_PROPERTY = "score";
 
     @BeforeEach
     void setup() throws Exception {

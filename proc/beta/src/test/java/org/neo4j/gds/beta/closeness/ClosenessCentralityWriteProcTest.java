@@ -32,7 +32,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ClosenessCentralityWriteProcTest extends ClosenessCentralityProcTest<ClosenessCentralityWriteConfig> {
 
-    public static final String WRITE_PROPERTY = "centrality";
+    private static final String WRITE_PROPERTY = "score";
 
     @Override
     public Class<? extends AlgoBaseProc<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, ?>> getProcedureClazz() {
