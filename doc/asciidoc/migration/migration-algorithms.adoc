@@ -10,6 +10,8 @@ include::migration-algorithms-betweenness-centrality.adoc[leveloffset=+1]
 
 include::migration-algorithms-bfs.adoc[leveloffset=+1]
 
+include::migration-closeness-centrality.adoc[leveloffset=+1]
+
 include::migration-algorithms-dfs.adoc[leveloffset=+1]
 
 include::migration-algorithms-knn.adoc[leveloffset=+1]
