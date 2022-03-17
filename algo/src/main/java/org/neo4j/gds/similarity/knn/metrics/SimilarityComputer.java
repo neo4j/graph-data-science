@@ -20,8 +20,8 @@
 package org.neo4j.gds.similarity.knn.metrics;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.NodePropertyContainer;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import org.neo4j.gds.similarity.knn.metrics.LongArrayPropertySimilarityComputer.SortedLongArrayProperties;
@@ -38,14 +38,6 @@ public interface SimilarityComputer {
         return Double.isFinite(similarity) ? similarity : 0.0;
     }
 
-    default void throwForNode(long nodeId, String propertyName) {
-        throw new IllegalArgumentException(formatWithLocale(
-            "Missing node property `%s` for node with id `%s`.",
-            propertyName,
-            nodeId
-        ));
-    }
-
     double similarity(long firstNodeId, long secondNodeId);
 
     static SimilarityComputer ofProperties(Graph graph, List<KnnNodePropertySpec> knnNodeProperties) {
@@ -55,7 +47,7 @@ public interface SimilarityComputer {
         return new CombinedSimilarityComputer(graph, knnNodeProperties);
     }
 
-    static SimilarityComputer ofProperty(NodePropertyContainer graph, KnnNodePropertySpec knnNodePropertySpec) {
+    static SimilarityComputer ofProperty(Graph graph, KnnNodePropertySpec knnNodePropertySpec) {
         var propertyName = knnNodePropertySpec.name();
         var nodeProperties = Objects.requireNonNull(
             graph.nodeProperties(propertyName),
@@ -65,29 +57,31 @@ public interface SimilarityComputer {
         if (knnNodePropertySpec.metric() == SimilarityMetric.DEFAULT) {
             knnNodePropertySpec.setMetric(SimilarityMetric.defaultMetricForType(nodeProperties.valueType()));
         }
-        return ofProperty(propertyName, nodeProperties, knnNodePropertySpec.metric());
+        return ofProperty(graph, propertyName, nodeProperties, knnNodePropertySpec.metric());
     }
 
-    static SimilarityComputer ofProperty(String propertyName, NodeProperties nodeProperties) {
-        return ofProperty(propertyName, nodeProperties, SimilarityMetric.defaultMetricForType(nodeProperties.valueType()));
+    static SimilarityComputer ofProperty(IdMap idMap, String propertyName, NodeProperties nodeProperties) {
+        return ofProperty(idMap, propertyName, nodeProperties, SimilarityMetric.defaultMetricForType(nodeProperties.valueType()));
     }
 
     static SimilarityComputer ofProperty(
+        IdMap idMap,
         String name,
         NodeProperties properties,
         SimilarityMetric defaultSimilarityMetric
     ) {
+        var checkedProperties = new NullCheckingNodeProperties(properties, name, idMap);
         switch (properties.valueType()) {
             case LONG:
-                return ofLongProperty(properties);
+                return ofLongProperty(checkedProperties);
             case DOUBLE:
-                return ofDoubleProperty(properties);
+                return ofDoubleProperty(checkedProperties);
             case DOUBLE_ARRAY:
-                return ofDoubleArrayProperty(name, properties, defaultSimilarityMetric);
+                return ofDoubleArrayProperty(name, checkedProperties, defaultSimilarityMetric);
             case FLOAT_ARRAY:
-                return ofFloatArrayProperty(name, properties, defaultSimilarityMetric);
+                return ofFloatArrayProperty(name, checkedProperties, defaultSimilarityMetric);
             case LONG_ARRAY:
-                return ofLongArrayProperty(name, new SortedLongArrayProperties(properties), defaultSimilarityMetric);
+                return ofLongArrayProperty(name, new SortedLongArrayProperties(checkedProperties), defaultSimilarityMetric);
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "The property [%s] has an unsupported type [%s].",
@@ -108,11 +102,11 @@ public interface SimilarityComputer {
     static SimilarityComputer ofFloatArrayProperty(String name, NodeProperties properties, SimilarityMetric metric) {
         switch (metric) {
             case COSINE:
-                return new FloatArrayPropertySimilarityComputer(name, properties, Cosine::floatMetric);
+                return new FloatArrayPropertySimilarityComputer(properties, Cosine::floatMetric);
             case EUCLIDEAN:
-                return new FloatArrayPropertySimilarityComputer(name, properties, Euclidean::floatMetric);
+                return new FloatArrayPropertySimilarityComputer(properties, Euclidean::floatMetric);
             case PEARSON:
-                return new FloatArrayPropertySimilarityComputer(name, properties, Pearson::floatMetric);
+                return new FloatArrayPropertySimilarityComputer(properties, Pearson::floatMetric);
             default:
                 throw unsupportedSimilarityMetric(name, properties.valueType(), metric);
         }
@@ -125,11 +119,11 @@ public interface SimilarityComputer {
     ) {
         switch (similarityMetric) {
             case COSINE:
-                return new DoubleArrayPropertySimilarityComputer(propertyName, nodeProperties, Cosine::doubleMetric);
+                return new DoubleArrayPropertySimilarityComputer(nodeProperties, Cosine::doubleMetric);
             case EUCLIDEAN:
-                return new DoubleArrayPropertySimilarityComputer(propertyName, nodeProperties, Euclidean::doubleMetric);
+                return new DoubleArrayPropertySimilarityComputer(nodeProperties, Euclidean::doubleMetric);
             case PEARSON:
-                return new DoubleArrayPropertySimilarityComputer(propertyName, nodeProperties, Pearson::doubleMetric);
+                return new DoubleArrayPropertySimilarityComputer(nodeProperties, Pearson::doubleMetric);
             default:
                 throw unsupportedSimilarityMetric(propertyName, nodeProperties.valueType(), similarityMetric);
         }
@@ -138,9 +132,9 @@ public interface SimilarityComputer {
     static SimilarityComputer ofLongArrayProperty(String propertyName, NodeProperties nodeProperties, SimilarityMetric similarityMetric) {
         switch (similarityMetric) {
             case JACCARD:
-                return new LongArrayPropertySimilarityComputer(propertyName, nodeProperties, Jaccard::metric);
+                return new LongArrayPropertySimilarityComputer(nodeProperties, Jaccard::metric);
             case OVERLAP:
-                return new LongArrayPropertySimilarityComputer(propertyName, nodeProperties, Overlap::metric);
+                return new LongArrayPropertySimilarityComputer(nodeProperties, Overlap::metric);
             default:
                 throw unsupportedSimilarityMetric(propertyName, nodeProperties.valueType(), similarityMetric);
         }

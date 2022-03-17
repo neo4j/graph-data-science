@@ -33,7 +33,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;
@@ -228,7 +230,8 @@ class SimilarityComputerTest {
     @Test
     void doubleArraySimilarityComputerHandlesNullProperties() {
         NodeProperties props = new DoubleArrayTestProperties(nodeId -> null);
-        var sim = SimilarityComputer.ofDoubleArrayProperty(
+        var sim = SimilarityComputer.ofProperty(
+            new DirectIdMap(2),
             "doubleArrayProperty",
             props,
             SimilarityMetric.defaultMetricForType(ValueType.DOUBLE_ARRAY)
@@ -241,7 +244,8 @@ class SimilarityComputerTest {
     @Test
     void floatArraySimilarityComputerHandlesNullProperties() {
         NodeProperties props = new FloatArrayTestProperties(nodeId -> null);
-        var sim = SimilarityComputer.ofFloatArrayProperty(
+        var sim = SimilarityComputer.ofProperty(
+            new DirectIdMap(2),
             "floatArrayProperty",
             props,
             SimilarityMetric.defaultMetricForType(ValueType.FLOAT_ARRAY)
@@ -253,14 +257,26 @@ class SimilarityComputerTest {
 
     @Test
     void longArraySimilarityComputerHandlesNullProperties() {
-        NodeProperties props = new LongArrayTestProperties(nodeId -> null);
-        var sim = SimilarityComputer.ofLongArrayProperty(
-            "longArrayProperty",
-            props,
-            SimilarityMetric.defaultMetricForType(ValueType.LONG_ARRAY)
-        );
-        assertThatThrownBy(() -> sim.similarity(0, 1))
-            .isInstanceOf(IllegalArgumentException.class)
+        var nodeCount = 2;
+        NodeProperties props = new LongArrayNodeProperties() {
+            @Override
+            public long[] longArrayValue(long nodeId) {
+                return null;
+            }
+
+            @Override
+            public long size() {
+                return nodeCount;
+            }
+        };
+        var idMap = new DirectIdMap(nodeCount);
+        assertThatThrownBy(() ->
+            SimilarityComputer.ofProperty(
+                idMap,
+                "longArrayProperty",
+                props,
+                SimilarityMetric.defaultMetricForType(ValueType.LONG_ARRAY)
+            )).isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Missing node property `longArrayProperty` for node with id");
     }
 

@@ -27,12 +27,10 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import java.util.Arrays;
 
 final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
-    private final String propertyName;
     private final NodeProperties nodeProperties;
     private final LongArraySimilarityMetric metric;
 
-    LongArrayPropertySimilarityComputer(String propertyName, NodeProperties nodeProperties, LongArraySimilarityMetric metric) {
-        this.propertyName = propertyName;
+    LongArrayPropertySimilarityComputer(NodeProperties nodeProperties, LongArraySimilarityMetric metric) {
         if (nodeProperties.valueType() != ValueType.LONG_ARRAY) {
             throw new IllegalArgumentException("The property is not of type LONG_ARRAY");
         }
@@ -44,12 +42,6 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
     public double similarity(long firstNodeId, long secondNodeId) {
         var left = nodeProperties.longArrayValue(firstNodeId);
         var right = nodeProperties.longArrayValue(secondNodeId);
-        if (left == null) {
-            throwForNode(firstNodeId, propertyName);
-        }
-        if (right == null) {
-            throwForNode(secondNodeId, propertyName);
-        }
         return metric.compute(left, right);
     }
 

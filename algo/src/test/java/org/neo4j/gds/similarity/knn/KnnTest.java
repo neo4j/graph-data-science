@@ -279,7 +279,7 @@ class KnnTest {
         var knn = Knn.create(
             graph,
             knnConfig,
-            SimilarityComputer.ofProperty("knn", nodeProperties),
+            SimilarityComputer.ofProperty(graph, "knn", nodeProperties),
             new KnnNeighborFilterFactory(graph.nodeCount()),
             knnContext
         );
@@ -311,7 +311,7 @@ class KnnTest {
                 .concurrency(1)
                 .randomSeed(42L)
                 .build(),
-            SimilarityComputer.ofProperty("{knn}", nodeProperties),
+            SimilarityComputer.ofProperty(graph, "{knn}", nodeProperties),
             new KnnNeighborFilterFactory(graph.nodeCount()),
             ImmutableKnnContext.builder().build()
         );

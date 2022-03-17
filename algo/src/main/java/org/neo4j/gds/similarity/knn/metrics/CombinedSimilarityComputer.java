@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.knn.metrics;
 
-import org.neo4j.gds.api.NodePropertyContainer;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 
 import java.util.List;
@@ -28,7 +28,7 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
     private final SimilarityComputer[] similarityComputers;
     private final int numOfProperties;
 
-    CombinedSimilarityComputer(NodePropertyContainer graph, List<KnnNodePropertySpec> propertyNames) {
+    CombinedSimilarityComputer(Graph graph, List<KnnNodePropertySpec> propertyNames) {
         this.numOfProperties = propertyNames.size();
         this.similarityComputers = new SimilarityComputer[numOfProperties];
 

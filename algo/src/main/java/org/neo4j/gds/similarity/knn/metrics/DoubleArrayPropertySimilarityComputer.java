@@ -23,12 +23,10 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
 final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer {
-    private final String propertyName;
     private final NodeProperties nodeProperties;
     private final DoubleArraySimilarityMetric metric;
 
-    DoubleArrayPropertySimilarityComputer(String propertyName, NodeProperties nodeProperties, DoubleArraySimilarityMetric metric) {
-        this.propertyName = propertyName;
+    DoubleArrayPropertySimilarityComputer(NodeProperties nodeProperties, DoubleArraySimilarityMetric metric) {
         this.metric = metric;
         if (nodeProperties.valueType() != ValueType.DOUBLE_ARRAY) {
             throw new IllegalArgumentException("The property is not of type DOUBLE_ARRAY");
@@ -40,12 +38,6 @@ final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer 
     public double similarity(long firstNodeId, long secondNodeId) {
         var left = nodeProperties.doubleArrayValue(firstNodeId);
         var right = nodeProperties.doubleArrayValue(secondNodeId);
-        if (left == null) {
-            throwForNode(firstNodeId, propertyName);
-        }
-        if (right == null) {
-            throwForNode(secondNodeId, propertyName);
-        }
         return metric.compute(left, right);
     }
 }

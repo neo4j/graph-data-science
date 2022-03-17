@@ -24,6 +24,7 @@ import net.jqwik.api.From;
 import net.jqwik.api.Property;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -43,8 +44,9 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
     ) {
         int nodeCount = nAndK.getOne();
         int k = nAndK.getTwo();
+        var idMap = new DirectIdMap(nodeCount);
 
-        var allNeighbors = HugeObjectArray.newArray(
+            var allNeighbors = HugeObjectArray.newArray(
             NeighborList.class,
             nodeCount
         );
@@ -62,7 +64,9 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
         };
 
         var similarityComputer = SimilarityComputer.ofProperty(
-            "myProperty", nodeProperties,
+            idMap,
+            "myProperty",
+            nodeProperties,
             SimilarityMetric.LONG_PROPERTY_METRIC
         );
 
