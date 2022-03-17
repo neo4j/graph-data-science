@@ -242,7 +242,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.maxkcut.mutate.estimate`
 | `gds.alpha.maxkcut.stream`
 | `gds.alpha.maxkcut.stream.estimate`
-.2+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
+.2+<.^|<<algorithms-harmonic-centrality, Harmonic Centrality>>
 | `gds.alpha.closeness.harmonic.stream`
 | `gds.alpha.closeness.harmonic.write`
 .1+<.^|<<algorithms-collapse-path, Collapse Path>>
