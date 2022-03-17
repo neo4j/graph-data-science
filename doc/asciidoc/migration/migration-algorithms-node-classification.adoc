@@ -1,0 +1,11 @@
+[[migration-algorithms-node-classification-pipeline-predict]]
+= Node Classification Pipeline predict
+
+.Changes in configuration
+[options=header, cols=2]
+|===
+| 1.x
+| 2.x
+| `batchSize`
+| Batch size is optimized internally and no longer user-configurable.
+|===

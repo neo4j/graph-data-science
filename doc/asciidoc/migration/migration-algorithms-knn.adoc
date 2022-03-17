@@ -1,5 +1,5 @@
 [[migration-algorithms-knn]]
-= Node Classification Pipeline predict
+= K-Nearest Neighbors
 
 .Changes in configuration
 [options=header, cols=2]
