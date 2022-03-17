@@ -11,7 +11,7 @@ Currently, GDS supports two such methods, namely <<machine-learning-training-met
 Each of these methods have several hyperparameters that one can set to influence the training.
 The objective of this page is to give a brief overview of logistic regression and random forest, as well as advice on how to tune their hyperparameters.
 
-See <<nodeclassification-pipelines-configure-model-parameters, this section>> for how to add model candidates to node classification pipelines, and <<linkprediction-configure-model-parameters, this section>> for link prediction.
+Configuring and training model candidates using these methods is supported for <<nodeclassification-pipelines-configure-model-parameters, Node Classification>> and <<linkprediction-configure-model-parameters, Link Prediction>> pipelines.
 
 
 [[machine-learning-training-methods-logistic-regression]]
@@ -21,12 +21,12 @@ See <<nodeclassification-pipelines-configure-model-parameters, this section>> fo
 Logistic regression is a fundamental supervised machine learning classification method.
 The model is trained by minimizing a weighted loss function, typically using something like gradient descent (the Adam optimizer in GDS).
 
-The weights are in the form of a `[c,d]` sized matrix `W` and a bias vector `b` of length `c`, where `d` is the feature dimension and `c` is equal the number of classes in the multiclass case, and 1 in the binary case.
+The weights are in the form of a `[c,d]` sized matrix `W` and a bias vector `b` of length `c`, where `d` is the feature dimension and `c` is equal to the number of classes.
 The loss function is then defined as:
 
-`CE(softmax(W&#8901;x + b))`
+`CE(softmax(Wx + b))`
 
-where `CE` is the https://en.wikipedia.org/wiki/Cross_entropy#Cross-entropy_loss_function_and_logistic_regression[cross entropy loss], `softmax` is the https://en.wikipedia.org/wiki/Softmax_function[softmax function], and `x` is a `d` length feature vector training sample.
+where `CE` is the https://en.wikipedia.org/wiki/Cross_entropy#Cross-entropy_loss_function_and_logistic_regression[cross entropy loss], `softmax` is the https://en.wikipedia.org/wiki/Softmax_function[softmax function], and `x` is a feature vector training sample of length `d`.
 
 To avoid overfitting one may also add a https://en.wikipedia.org/wiki/Regularization_(mathematics)[regularization] term to the loss.
 In GDS, this we provide the option of adding `l2` regularization.
@@ -128,4 +128,5 @@ The number of training samples for each decision tree is the `numberOfSamplesRat
 A high ratio will likely imply better generalization for each decision tree, but not necessarily so for the random forest overall.
 Training will also take longer as more feature vectors will need to be considered in each node split of each decision tree.
 
-The special value of 0.0 means that all feature vectors of the training set will be used for training by every decision tree of the random forest (so no sampling).
+The special value of 0.0 is used to indicate no sampling.
+In this case all feature vectors of the training set will be used for training by every decision tree in the random forest.
