@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.StandardMutateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -92,16 +93,11 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
             .resultBuilder(procResultBuilder, computeResult);
     }
 
-    public static final class MutateResult {
+    public static final class MutateResult extends StandardMutateResult {
 
         public final long nodePropertiesWritten;
-        public final long postProcessingMillis;
-        public final long preProcessingMillis;
-        public final long computeMillis;
-        public final long mutateMillis;
         public final String mutateProperty;
         public final Map<String, Object> centralityDistribution;
-        public final Map<String, Object> configuration;
 
         MutateResult(
             long nodePropertiesWritten,
@@ -113,14 +109,10 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
             @Nullable Map<String, Object> centralityDistribution,
             Map<String, Object> config
         ) {
-            this.preProcessingMillis = preProcessingMillis;
-            this.computeMillis = computeMillis;
-            this.mutateMillis = mutateMillis;
+            super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, config);
             this.mutateProperty = mutateProperty;
             this.centralityDistribution = centralityDistribution;
             this.nodePropertiesWritten = nodePropertiesWritten;
-            this.postProcessingMillis = postProcessingMillis;
-            this.configuration = config;
         }
 
         static final class Builder extends AbstractCentralityResultBuilder<ClosenessCentralityMutateProc.MutateResult> {

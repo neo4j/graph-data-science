@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.StandardWriteResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -92,16 +93,11 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
         );
     }
 
-    public static final class WriteResult {
+    public static final class WriteResult extends StandardWriteResult {
 
         public final long nodePropertiesWritten;
-        public final long postProcessingMillis;
-        public final long preProcessingMillis;
-        public final long computeMillis;
-        public final long writeMillis;
         public final String writeProperty;
         public final Map<String, Object> centralityDistribution;
-        public final Map<String, Object> configuration;
 
         WriteResult(
             long nodePropertiesWritten,
@@ -113,14 +109,10 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
             @Nullable Map<String, Object> centralityDistribution,
             Map<String, Object> config
         ) {
-            this.preProcessingMillis = preProcessingMillis;
-            this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
+            super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, config);
             this.writeProperty = writeProperty;
             this.centralityDistribution = centralityDistribution;
             this.nodePropertiesWritten = nodePropertiesWritten;
-            this.postProcessingMillis = postProcessingMillis;
-            this.configuration = config;
         }
 
         static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
