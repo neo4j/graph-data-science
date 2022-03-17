@@ -106,7 +106,7 @@ class ClosenessCentralityDirectedTest {
     void testCentralityWithWassermanFaust() {
         var algo = ClosenessCentrality.of(
             graph,
-            ImmutableClosenessCentralityStreamConfig.builder().improved(true).build(),
+            ImmutableClosenessCentralityStreamConfig.builder().useWassermanFaust(true).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );

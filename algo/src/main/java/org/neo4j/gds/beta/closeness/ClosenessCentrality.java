@@ -67,7 +67,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         return new ClosenessCentrality(
             graph,
             config.concurrency(),
-            config.improved(),
+            config.useWassermanFaust(),
             executorService,
             progressTracker
         );

@@ -31,7 +31,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 public interface ClosenessCentralityConfig extends AlgoBaseConfig {
 
     @Value.Default
-    default boolean improved() {
+    default boolean useWassermanFaust() {
         return false;
     }
 
