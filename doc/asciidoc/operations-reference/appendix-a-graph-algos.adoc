@@ -156,6 +156,13 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.shortestPath.astar.write.estimate`
 | `gds.shortestPath.astar.mutate`
 | `gds.shortestPath.astar.mutate.estimate`
+| Cosine Similarity | `_gds.similarity.cosine_`
+.2+<.^|Euclidean Similarity
+| `_gds.similarity.euclidean_`
+| `_gds.similarity.euclideanDistance_`
+| Jaccard Similarity | `_gds.similarity.jaccard_`
+| Overlap Similarity | `_gds.similarity.overlap_`
+| Pearson Similarity | `_gds.similarity.pearson_`
 .8+<.^|<<algorithms-knn, K-Nearest Neighbors>>
 | `gds.knn.mutate`
 | `gds.knn.mutate.estimate`
@@ -262,13 +269,6 @@ include::../algorithms/algorithm-tiers.adoc[]
 .2+<.^|<<algorithms-scale-properties, Scale Properties>>
 | `gds.alpha.scaleProperties.mutate`
 | `gds.alpha.scaleProperties.stream`
-| Cosine Similarity | `_gds.alpha.similarity.cosine_`
-.2+<.^|Euclidean Similarity
-| `_gds.alpha.similarity.euclidean_`
-| `_gds.alpha.similarity.euclideanDistance_`
-| Jaccard Similarity | `_gds.alpha.similarity.jaccard_`
-| Overlap Similarity | `_gds.alpha.similarity.overlap_`
-| Pearson Similarity | `_gds.alpha.similarity.pearson_`
 .8+<.^|<<algorithms-sllpa, Speaker-Listener Label Propagation>>
 | `gds.alpha.sllpa.mutate`
 | `gds.alpha.sllpa.mutate.estimate`
