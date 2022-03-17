@@ -395,6 +395,11 @@ In <<algorithms-ml-nodeclassification-pipelines-train, Training the pipeline>>, 
 
 The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
 
+[NOTE]
+====
+At least one model candidate must be added to the pipeline before training it.
+====
+
 
 === Syntax
 
