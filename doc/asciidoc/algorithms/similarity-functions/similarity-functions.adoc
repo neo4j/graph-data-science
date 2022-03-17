@@ -3,7 +3,7 @@
 
 == Definitions
 
-The GDS library provides a set of measures that can be used to calculate similarity between two arrays p~s~, p~t~ of numbers.
+The Neo4j GDS library provides a set of measures that can be used to calculate similarity between two arrays p~s~, p~t~ of numbers.
 
 The similarity functions can be classified into two groups.
 The first is `categorical` measures which treat the arrays as sets and calculate similarity based on the intersection between the two sets.
