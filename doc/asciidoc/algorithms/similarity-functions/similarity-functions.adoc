@@ -1,0 +1,6 @@
+[[similarity-functions]]
+= Similarity functions
+
+The GDS library provides a set of useful functions that can be used to calculate similarity between two vectors.
+
+
