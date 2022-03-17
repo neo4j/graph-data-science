@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity.knn.metrics;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -41,52 +42,28 @@ public class NullCheckingNodeProperties implements NodeProperties {
     @Override
     public double[] doubleArrayValue(long nodeId) {
         var value = properties.doubleArrayValue(nodeId);
-        if (value == null) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Missing node property `%s` for node with id `%s`.",
-                name,
-                idMap.toOriginalNodeId(nodeId)
-            ));
-        }
+        check(nodeId, value);
         return value;
     }
 
     @Override
     public float[] floatArrayValue(long nodeId) {
         var value = properties.floatArrayValue(nodeId);
-        if (value == null) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Missing node property `%s` for node with id `%s`.",
-                name,
-                idMap.toOriginalNodeId(nodeId)
-            ));
-        }
+        check(nodeId, value);
         return value;
     }
 
     @Override
     public long[] longArrayValue(long nodeId) {
         var value = properties.longArrayValue(nodeId);
-        if (value == null) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Missing node property `%s` for node with id `%s`.",
-                name,
-                idMap.toOriginalNodeId(nodeId)
-            ));
-        }
+        check(nodeId, value);
         return value;
     }
 
     @Override
     public Object getObject(long nodeId) {
         var value = properties.getObject(nodeId);
-        if (value == null) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Missing node property `%s` for node with id `%s`.",
-                name,
-                idMap.toOriginalNodeId(nodeId)
-            ));
-        }
+        check(nodeId, value);
         return value;
     }
 
@@ -98,18 +75,23 @@ public class NullCheckingNodeProperties implements NodeProperties {
     @Override
     public Value value(long nodeId) {
         var value = properties.value(nodeId);
-        if (value == null) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Missing node property `%s` for node with id `%s`.",
-                name,
-                idMap.toOriginalNodeId(nodeId)
-            ));
-        }
+        check(nodeId, value);
         return value;
     }
 
     @Override
     public long size() {
         return properties.size();
+    }
+
+    private void check(long nodeId, @Nullable Object value) {
+        if (value == null) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Missing `%s` node property `%s` for node with id `%s`.",
+                properties.valueType().cypherName(),
+                name,
+                idMap.toOriginalNodeId(nodeId)
+            ));
+        }
     }
 }

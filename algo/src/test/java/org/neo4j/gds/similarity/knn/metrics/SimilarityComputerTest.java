@@ -238,7 +238,7 @@ class SimilarityComputerTest {
         );
         assertThatThrownBy(() -> sim.similarity(0, 1))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Missing node property `doubleArrayProperty` for node with id");
+            .hasMessageContaining("Missing `List of Float` node property `doubleArrayProperty` for node with id");
     }
 
     @Test
@@ -252,7 +252,7 @@ class SimilarityComputerTest {
         );
         assertThatThrownBy(() -> sim.similarity(0, 1))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Missing node property `floatArrayProperty` for node with id");
+            .hasMessageContaining("Missing `List of Float` node property `floatArrayProperty` for node with id");
     }
 
     @Test
@@ -277,7 +277,7 @@ class SimilarityComputerTest {
                 props,
                 SimilarityMetric.defaultMetricForType(ValueType.LONG_ARRAY)
             )).isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Missing node property `longArrayProperty` for node with id");
+            .hasMessageContaining("Missing `List of Integer` node property `longArrayProperty` for node with id");
     }
 
     static Stream<SimilarityComputer> nonFiniteSimilarities() {

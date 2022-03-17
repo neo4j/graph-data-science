@@ -82,7 +82,7 @@ class NullCheckingNodePropertiesTest {
         var nonNullProps = new NullCheckingNodeProperties(nullProps, "propertyName", graph);
         assertThatThrownBy(() -> nonNullProps.doubleArrayValue(1))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Missing node property `propertyName` for node with id `1`.");
+            .hasMessageContaining("Missing `List of Float` node property `propertyName` for node with id `1`.");
     }
 
     @Test
@@ -91,7 +91,7 @@ class NullCheckingNodePropertiesTest {
         var nonNullProps = new NullCheckingNodeProperties(nullProps, "propertyName", graph);
         assertThatThrownBy(() -> nonNullProps.floatArrayValue(1))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Missing node property `propertyName` for node with id `1`.");
+            .hasMessageContaining("Missing `List of Float` node property `propertyName` for node with id `1`.");
     }
 
     @Test
@@ -100,6 +100,6 @@ class NullCheckingNodePropertiesTest {
         var nonNullProps = new NullCheckingNodeProperties(nullProps, "propertyName", graph);
         assertThatThrownBy(() -> nonNullProps.longArrayValue(1))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Missing node property `propertyName` for node with id `1`.");
+            .hasMessageContaining("Missing `List of Integer` node property `propertyName` for node with id `1`.");
     }
 }
