@@ -292,14 +292,14 @@ include::../../shared/examples-mutate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.closeness.mutate('myGraph', { mutateProperty: 'centrality' })
-YIELD centralityDistribution, nodes
-RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore, nodes
+YIELD centralityDistribution, nodePropertiesWritten
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore, nodePropertiesWritten
 ----
 
 .Results
 [opts="header"]
 |===
-| minimumScore      | meanScore         | nodes
+| minimumScore      | meanScore         | nodePropertiesWritten
 | 0.399999618530273 | 0.521904373168945 | 5
 |===
 --
@@ -315,14 +315,14 @@ include::../../shared/examples-write-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.closeness.write('myGraph', { writeProperty: 'centrality' })
-YIELD centralityDistribution, nodes
-RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore, nodes
+YIELD centralityDistribution, nodePropertiesWritten
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore, nodePropertiesWritten
 ----
 
 .Results
 [opts="header"]
 |===
-| minimumScore      | meanScore         | nodes
+| minimumScore      | meanScore         | nodePropertiesWritten
 | 0.399999618530273 | 0.521904373168945 | 5
 |===
 --
