@@ -6,21 +6,17 @@
 This chapter provides explanations and examples for the supervised machine learning in the Neo4j Graph Data Science library.
 --
 
-The machine learning procedures in Neo4j GDS allow you to train supervised machine learning models.
-Models can then be accessed via the <<model-catalog-ops, Model catalog>> and used to make predictions about your graph.
+In GDS, our pipelines offer an end-to-end workflow, from feature extraction to training and applying machine learning models.
+Pipelines can be inspected through the <<pipeline-catalog-ops>>.
+The trained models can then be accessed via the <<model-catalog-ops, Model catalog>> and used to make predictions about your graph.
 
-To help with working with the ML models, there are additional guides for pre-processing and hyperparameter tuning available in:
+To help with building the ML models, there are additional guides for pre-processing and hyperparameter tuning available in:
 
 * <<ml-preprocessing, Pre-processing>>
 * <<ml-training-methods, Training methods>>
 
-The Neo4j GDS library includes the following algorithms to train and apply machine learning models, grouped by quality tier:
+The Neo4j GDS library includes the following pipelines to train and apply machine learning models, grouped by quality tier:
 
 * Beta
 ** <<nodeclassification-pipelines, Node Classification Pipelines>>
 ** <<linkprediction-pipelines, Link Prediction Pipelines>>
-
-For managing the creating pipelines and models:
-
-* <<model-catalog-ops>> -- A detailed guide to the model catalog and utility procedures included in the Neo4j Graph Data Science library.
-* <<pipeline-catalog-ops>> -- A detailed guide to the pipeline catalog and utility procedures included in the Neo4j Graph Data Science library.
