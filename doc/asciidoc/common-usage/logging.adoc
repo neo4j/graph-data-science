@@ -99,7 +99,7 @@ YIELD
 
 [[logging-user-warnings]]
 [.alpha]
-=== User Log
+== User Log
 
 Hints and warnings can also be tracked through the GDS library and be accessed via Cypher queries.
 The GDS library keeps track for each user their 100 most recent tasks that have generated hints or warnings and stores them in memory.
