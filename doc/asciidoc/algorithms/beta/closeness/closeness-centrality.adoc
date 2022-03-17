@@ -116,9 +116,9 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header"]
 |===
-| Name       | Type     | Description
-| nodeId     | Integer  | Node ID.
-| centrality | Float    | Closeness centrality score.
+| Name      | Type     | Description
+| nodeId    | Integer  | Node ID.
+| score     | Float    | Closeness centrality score.
 |===
 ======
 
@@ -256,16 +256,16 @@ include::../../shared/examples-stream-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.closeness.stream('myGraph')
-YIELD nodeId, centrality
-RETURN gds.util.asNode(nodeId).id AS id, centrality
-ORDER BY centrality DESC
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).id AS id, score
+ORDER BY score DESC
 ----
 
 // tag::stream-sample-graph-result[]
 .Results
 [opts="header",cols="1,1"]
 |===
-| id    | centrality
+| id    | score
 | "C"   | 0.6666666666666666
 | "B"   | 0.5714285714285714
 | "D"   | 0.5714285714285714
