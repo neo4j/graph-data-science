@@ -85,7 +85,7 @@ This parameter sets the number of decision trees that will be part of the random
 
 Having a too small number of trees could mean that the model will overfit to some parts of the dataset.
 
-A larger number of trees will in general mean that the training takes longer, and the memory consumption might be a bit higher.
+A larger number of trees will in general mean that the training takes longer, and the memory consumption will be higher.
 
 
 ==== Max feature ratio
