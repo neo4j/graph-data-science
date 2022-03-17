@@ -436,7 +436,6 @@ include::pipelineInfoResult.adoc[]
 
 [.include-with-random-forest]
 ======
-
 [.pipeline-add-rf-syntax]
 --
 .Configure the train parameters syntax
@@ -466,7 +465,7 @@ include::../../ml-models/randomForestConfig.adoc[]
 
 include::pipelineInfoResult.adoc[]
 --
-=====
+======
 ====
 
 
