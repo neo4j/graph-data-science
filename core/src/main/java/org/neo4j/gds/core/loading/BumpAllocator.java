@@ -84,10 +84,11 @@ public final class BumpAllocator<PAGE> {
     }
 
     private long insertMultiplePages(int uptoPage, PAGE page) {
-        var currentPageId = (int) ALLOCATED_PAGES.get(this);
-        if (currentPageId < uptoPage) {
+        var currentNumPages = (int) ALLOCATED_PAGES.get(this);
+        int newNumPages = uptoPage + 1;
+        if (currentNumPages < newNumPages) {
             int pageToSkip = page == null ? NO_SKIP : uptoPage;
-            grow(uptoPage, pageToSkip);
+            grow(newNumPages, pageToSkip);
         }
 
         if (page != null) {
@@ -99,16 +100,16 @@ public final class BumpAllocator<PAGE> {
             }
         }
 
-        while (currentPageId < uptoPage) {
-            int allocatedPage = (int) ALLOCATED_PAGES.compareAndExchange(this, currentPageId, uptoPage);
-            if (allocatedPage == currentPageId) {
-                currentPageId = uptoPage;
+        while (currentNumPages < newNumPages) {
+            int nextNumPages = (int) ALLOCATED_PAGES.compareAndExchange(this, currentNumPages, newNumPages);
+            if (nextNumPages == currentNumPages) {
+                currentNumPages = newNumPages;
                 break;
             }
-            currentPageId = allocatedPage;
+            currentNumPages = nextNumPages;
         }
 
-        return PageUtil.capacityFor(currentPageId, PAGE_SHIFT);
+        return PageUtil.capacityFor(currentNumPages, PAGE_SHIFT);
     }
 
     private long insertExistingPage(PAGE page) {
