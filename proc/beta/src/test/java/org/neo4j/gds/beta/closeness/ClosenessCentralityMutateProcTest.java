@@ -76,6 +76,8 @@ class ClosenessCentralityMutateProcTest extends ClosenessCentralityProcTest<Clos
             assertThat(row.getNumber("computeMillis")).isNotEqualTo(-1L);
             assertThat(row.getNumber("nodePropertiesWritten")).isEqualTo(11L);
 
+            assertThat(row.get("configuration")).isNotNull();
+
             assertThat(row.get("centralityDistribution")).isEqualTo(Map.of(
                 "max", 1.0000038146972656,
                 "mean", 0.6256675720214844,

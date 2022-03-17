@@ -101,6 +101,7 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
         public final long mutateMillis;
         public final String mutateProperty;
         public final Map<String, Object> centralityDistribution;
+        public final Map<String, Object> configuration;
 
         MutateResult(
             long nodePropertiesWritten,
@@ -119,6 +120,7 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
             this.centralityDistribution = centralityDistribution;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.postProcessingMillis = postProcessingMillis;
+            this.configuration = config;
         }
 
         static final class Builder extends AbstractCentralityResultBuilder<ClosenessCentralityMutateProc.MutateResult> {

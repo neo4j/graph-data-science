@@ -138,7 +138,8 @@ YIELD
   computeMillis: Integer,
   postProcessingMillis: Integer,
   mutateMillis: Integer,
-  centralityDistribution: Map
+  centralityDistribution: Map,
+  configuration: Map
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
@@ -177,7 +178,8 @@ YIELD
   computeMillis: Integer,
   postProcessingMillis: Integer,
   writeMillis: Integer,
-  centralityDistribution: Map
+  centralityDistribution: Map,
+  configuration: Map
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
