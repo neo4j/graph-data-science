@@ -1,11 +1,23 @@
 [[algorithms-closeness-centrality]]
 [.beta]
 = Closeness Centrality
+:entity: node
+:result: centrality
+:algorithm: Closeness Centrality
 
 [abstract]
 --
 This section describes the Closeness Centrality algorithm in the Neo4j Graph Data Science library.
 --
+
+:directed:
+:undirected:
+:homogeneous:
+include::../../shared/algorithm-traits.adoc[]
+
+
+[[algorithms-closeness-centrality-intro]]
+== Introduction
 
 // tag::introduction[]
 Closeness centrality is a way of detecting nodes that are able to spread information very efficiently through a graph.
@@ -13,10 +25,6 @@ Closeness centrality is a way of detecting nodes that are able to spread informa
 The closeness centrality of a node measures its average farness (inverse distance) to all other nodes.
 Nodes with a high closeness score have the shortest distances to all other nodes.
 // end::introduction[]
-
-
-[[algorithms-closeness-centrality-context]]
-== History and explanation
 
 // tag::explanation[]
 For each node _u_, the Closeness Centrality algorithm calculates the sum of its distances to all other nodes, based on calculating the shortest paths between all pairs of nodes.
@@ -36,17 +44,18 @@ The formula for *normalized closeness centrality* of node _u_ is as follows:
 `normalized closeness centrality(_u_) = (number of nodes - 1) / sum(distance from _u_ to all other nodes)`
 // end::formula[]
 
- Wasserman and Faust have proposed an improved formula for dealing with unconnected graphs.
+Wasserman and Faust have proposed an improved formula for dealing with unconnected graphs.
 Assuming that _n_  is the number of nodes reachable from _u_ (counting also itself),
-their corrected formula for a given node _u_ is given as follows
+their corrected formula for a given node _u_ is given as follows:
 
 `Wasserman-Faust normalized closeness centrality(_u_) = (_n_-1)^2/ ((number of nodes - 1) * sum(distance from _u_ to all other nodes))`
 
 Note that in the case of a directed graph, closeness centrality is defined alternatively.
 That is, rather than considering distances from _u_ to every other node, we instead sum and average the distance from every other node to _u_.
 
-[[algorithms-closeness-centrality-usecase]]
-== Use-cases - when to use the Closeness Centrality algorithm
+
+[[algorithms-closeness-centrality-considerations]]
+=== Use-cases - when to use the Closeness Centrality algorithm
 
 // tag::use-case[]
 
@@ -64,7 +73,7 @@ This process is described by Florian Boudin in https://www.aclweb.org/anthology/
 
 
 [[algorithms-closeness-centrality-limitations]]
-== Constraints - when not to use the Closeness Centrality algorithm
+=== Constraints - when not to use the Closeness Centrality algorithm
 
 // tag::constraint[]
 * Academically, closeness centrality works best on connected graphs.
@@ -77,125 +86,140 @@ In practice, a variation on the original formula is used so that we don't run in
 
 [[algorithms-closeness-centrality-syntax]]
 == Syntax
-[.include-with-mutate]
-======
-.The following will run the algorithm and mutate the in-memory graph.
-[source,cypher,role=noplay]
-----
-CALL gds.beta.closeness.mutate(
-  graphName: string,
-  configuration: map
-)
-YIELD nodes, preProcessingMillis, computeMillis, mutateMillis, centralityDistribution
-----
 
-.Parameters
-[opts="header",cols="1,1,1,1,5"]
-|===
-| Name                          | Type    | Default                | Optional | Description
-| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
-Also provides the default value for 'readConcurrency' and 'mutateConcurrency'.
-| readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| mutateConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for mutating the in-memory graph.
-| mutateProperty                 | string  | 'centrality'           | yes      | The node property in the GDS graph to which the centrality is written.
-| improved                      | boolean | false                  | yes      | Denotes whether the Wasserman-Faust formula is used.
-|===
+include::../../shared/syntax-intro-named-graph.adoc[]
 
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name                   | Type      | Description
-| nodes                  | int       | The number of nodes considered.
-| preProcessingMillis    | int       | Milliseconds for preprocessing the data.
-| computeMillis          | int       | Milliseconds for running the algorithm.
-| postProcessingMillis   | int       | Milliseconds for computing the centrality distribution.
-| mutateMillis            | int       | Milliseconds for mutating the GDS graph.
-| mutateProperty          | string    | The node property updated in the GDS graph.
-| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
-|===
-
-======
-[.include-with-write]
-======
-.The following will run the algorithm and write back results:
-[source,cypher,role=noplay]
-----
-CALL gds.beta.closeness.write(
-  graphName: string,
-  configuration: map
-)
-YIELD nodes, preProcessingMillis, computeMillis, writeMillis, centralityDistribution
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,5"]
-|===
-| Name                          | Type    | Default                | Optional | Description
-| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
-Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| writeProperty                 | string  | 'centrality'           | yes      | The property name written back to.
-| improved                      | boolean | false                  | yes      | Denotes whether the Wasserman-Faust formula is used.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name                   | Type      | Description
-| nodes                  | int       | The number of nodes considered.
-| preProcessingMillis    | int       | Milliseconds for preprocessing the data.
-| computeMillis          | int       | Milliseconds for running the algorithm.
-| postProcessingMillis   | int       | Milliseconds for computing the centrality distribution.
-| writeMillis            | int       | Milliseconds for writing result data back.
-| writeProperty          | string    | The property name written back to.
-| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
-|===
-======
+.Closeness Centrality syntax per mode
+[.tabbed-example, caption = ]
+====
 
 [.include-with-stream]
 ======
-.The following will run the algorithm and stream results:
+.Run Closeness Centrality in stream mode on a named graph.
 [source,cypher,role=noplay]
 ----
 CALL gds.beta.closeness.stream(
-  graphName: string,
-  configuration: map
+  graphName: String,
+  configuration: Map
 )
-YIELD nodeId, centrality
+YIELD
+  nodeId: Integer,
+  centrality: Float
 ----
 
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name                          | Type    | Default                | Optional | Description
-| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm.Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-|===
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
 
 .Results
 [opts="header"]
 |===
-| Name       | Type  | Description
-| node       | long  | Node ID
-| centrality | float | Closeness centrality score
+| Name       | Type     | Description
+| nodeId     | Integer  | Node ID.
+| centrality | Float    | Closeness centrality score.
 |===
-
 ======
 
-[[algorithms-closeness-centrality-sample]]
-== Closeness Centrality algorithm sample
 
-image::closeness_centrality.png[]
-
-.The following will create a sample graph:
-[source, cypher, role=noplay]
+[.include-with-mutate]
+======
+.Run Betweenness Centrality in mutate mode on a named graph.
+[source,cypher,role=noplay]
 ----
-CREATE (a:Node{id:"A"}),
-       (b:Node{id:"B"}),
-       (c:Node{id:"C"}),
-       (d:Node{id:"D"}),
-       (e:Node{id:"E"}),
+CALL gds.beta.closeness.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodes: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  centralityDistribution: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type         | Description
+| nodes                  | Integer      | The number of nodes considered.
+| preProcessingMillis    | Integer      | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer      | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer      | Milliseconds for computing the statistics.
+| mutateMillis           | Integer      | Milliseconds for mutating the GDS graph.
+| mutateProperty         | String       | The node property updated in the GDS graph.
+| centralityDistribution | Map          | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+|===
+======
+
+
+[.include-with-write]
+======
+.Run Closeness Centrality in write mode on a named graph.
+[source,cypher,role=noplay]
+----
+CALL gds.beta.closeness.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodes: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  centralityDistribution: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type         | Description
+| nodes                  | Integer      | The number of nodes considered.
+| preProcessingMillis    | Integer      | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer      | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer      | Milliseconds for computing the statistics.
+| writeMillis            | Integer      | Milliseconds for mutating the GDS graph.
+| writeProperty          | String       | The node property updated in the GDS graph.
+| centralityDistribution | Map          | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+|===
+======
+
+====
+
+
+[[algorithms-closeness-centrality-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: sample
+:image-file: closeness-centrality-graph.png
+include::../../shared/examples-intro.adoc[]
+
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE (a:Node {id:"A"}),
+       (b:Node {id:"B"}),
+       (c:Node {id:"C"}),
+       (d:Node {id:"D"}),
+       (e:Node {id:"E"}),
        (a)-[:LINK]->(b),
        (b)-[:LINK]->(a),
        (b)-[:LINK]->(c),
@@ -206,18 +230,34 @@ CREATE (a:Node{id:"A"}),
        (e)-[:LINK]->(d);
 ----
 
-.The following will project and store a named graph:
-[source, cypher, role=noplay]
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `Node` nodes and the `LINK` relationships.
+
+include::../../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project('graph', 'Node', 'LINK')
+CALL gds.graph.project('myGraph', 'Node', 'LINK')
 ----
 
-.The following will run the algorithm and stream results:
+In the following examples we will demonstrate using the Closeness Centrality algorithm on this graph.
+
+
+[[algorithms-closeness-centrality-examples-stream]]
+=== Stream
+
+:stream-details: For example, we can order the results to find the nodes with the highest closeness centrality.
+include::../../shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.closeness.stream('graph', {})
+CALL gds.beta.closeness.stream('myGraph')
 YIELD nodeId, centrality
-RETURN gds.util.asNode(nodeId).name AS user, centrality
+RETURN gds.util.asNode(nodeId).id AS id, centrality
 ORDER BY centrality DESC
 ----
 
@@ -225,13 +265,14 @@ ORDER BY centrality DESC
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name | Centrality weight
-| C    | 0.6666666666666666
-| B    | 0.5714285714285714
-| D    | 0.5714285714285714
-| A    | 0.4
-| E    | 0.4
+| id    | centrality
+| "C"   | 0.6666666666666666
+| "B"   | 0.5714285714285714
+| "D"   | 0.5714285714285714
+| "A"   | 0.4
+| "E"   | 0.4
 |===
+--
 // end::stream-sample-graph-result[]
 
 // tag::stream-sample-graph-explanation[]
@@ -240,41 +281,48 @@ A and E don't have close ties to many other nodes, so their scores are lower.
 Any node that has a direct connection to all other nodes would score 1.
 // end::stream-sample-graph-explanation[]
 
-.The following will run the algorithm and write back results:
+[[algorithms-closeness-centrality-examples-mutate]]
+=== Mutate
+
+include::../../shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.closeness.write('graph', {
-  writeProperty: 'centrality'
-}) YIELD nodes, writeProperty
+CALL gds.beta.closeness.mutate('myGraph', { mutateProperty: 'centrality' })
+YIELD centralityDistribution, nodes
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore, nodes
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header"]
 |===
-| nodes | writeProperty
-| 5     | "centrality"
+| minimumScore      | meanScore         | nodes
+| 0.399999618530273 | 0.521904373168945 | 5
 |===
+--
 
+[[algorithms-closeness-centrality-examples-write]]
+=== Write
 
-Calculation:
+include::../../shared/examples-write-intro.adoc[]
 
-- count farness in each msbfs-callback
-- divide by N-1
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.closeness.write('myGraph', { writeProperty: 'centrality' })
+YIELD centralityDistribution, nodes
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore, nodes
+----
 
-`N = 5`        // number of nodes
-
-`k = N-1 = 4`  // used for normalization
-
-....
-     A     B     C     D     E
- --|-----------------------------
- A | 0     1     2     3     4       // farness between each pair of nodes
- B | 1     0     1     2     3
- C | 2     1     0     1     2
- D | 3     2     1     0     1
- E | 4     3     2     1     0
- --|-----------------------------
- S | 10    7     6     7     10      // raw closeness centrality
- ==|=============================
-k/S| 0.4  0.57  0.67  0.57   0.4     // normalized closeness centrality
-....
+.Results
+[opts="header"]
+|===
+| minimumScore      | meanScore         | nodes
+| 0.399999618530273 | 0.521904373168945 | 5
+|===
+--
