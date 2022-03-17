@@ -88,10 +88,10 @@ Having a too small number of trees could mean that the model will overfit to som
 A larger number of trees will in general mean that the training takes longer, and the memory consumption might be a bit higher.
 
 
-==== Max features ratio
+==== Max feature ratio
 
 For each node split in a decision tree, a set of features of the feature vectors are considered.
-The number of such features considered is the `maxFeatureRatio` multiplied by the feature dimension of the input feature vectors.
+The number of such features considered is the `maxFeatureRatio` multiplied by the total number of features.
 If the number of features to be considered are fewer than the total number of features, a subset of all features are sampled (without replacement).
 This is sometimes referred to as _feature bagging_.
 
@@ -113,6 +113,7 @@ A deeper decision tree may be able to better fit to the training set, but that m
 ===== Min split size
 
 This parameter sets the minimum number of training samples required to be present in a node of a decision tree in order for it to be split during training.
+To split a node means to continue the tree construction process to add further children below the node.
 
 A large split size means less specialization on the training set, and thus possibly worse performance on the training set, but possibly avoiding overfitting.
 It will likely also mean that the training will be faster as probably fewer node splits will be considered.
