@@ -7,8 +7,9 @@ Before training a node classification model, you must <<nodeclassification-creat
 
 == Train
 
-Parts of the training are now configured in specific configuration procedures of the training pipeline, before its train call.
-Some are moved to the <<nodeclassification-pipelines-train, pipeline train procedure>>.
+Some parts of the training are now configured in specific configuration procedures for the training pipeline.
+These must precede calling the `train` procedure in order to be effective.
+The remaining parts are moved to the <<nodeclassification-pipelines-train, pipeline train procedure>>.
 Please see the table below.
 
 .Changes in configuration for train
