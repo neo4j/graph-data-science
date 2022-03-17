@@ -224,7 +224,7 @@ YIELD bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | bytesMin  | bytesMax  | requiredMemory
-| 66690312  | 66722272  | +"[63 MiB ... 63 MiB]"+
+| 66787480  | 66862560  | +"[63 MiB ... 63 MiB]"+
 |===
 --
 

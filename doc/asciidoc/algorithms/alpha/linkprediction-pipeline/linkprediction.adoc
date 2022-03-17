@@ -47,7 +47,7 @@ The rest of this page is divided as follows:
 * <<algorithms-ml-linkprediction-adding-node-properties, Adding node properties>>
 * <<algorithms-ml-linkprediction-adding-features, Adding link features>>
 * <<algorithms-ml-linkprediction-configure-splits, Configuring the relationship splits>>
-* <<algorithms-ml-linkprediction-configure-model-parameters, Configuring the model parameters>>
+* <<algorithms-ml-linkprediction-configure-model-parameters, Configuring the model parameter space>>
 * <<algorithms-ml-linkprediction-pipelines-train, Training the pipeline>>
 * <<algorithms-link-prediction-pipelines-predict, Applying a trained model for prediction>>
 
@@ -384,21 +384,31 @@ We now reconfigured the splitting of the pipeline, which will be applied during 
 --
 
 [[algorithms-ml-linkprediction-configure-model-parameters]]
-== Configuring the model parameters
+== Adding model candidates
 
 A pipeline contains a collection of configurations for model candidates which is initially empty.
 This collection is called the _parameter space_.
-Prior to training one or several model configurations can and should be added to the _parameter space_ with the `gds.beta.pipeline.linkPrediction.addLogisticRegression` and `gds.alpha.pipeline.linkPrediction.addRandomForest` modes.
-In <<algorithms-ml-linkprediction-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
+Prior to training one or several model configurations can and should be added to the _parameter space_ with the `gds.beta.pipeline.linkPrediction.addLogisticRegression` and `gds.alpha.pipeline.linkPrediction.addRandomForest` procedures.
+For information about the available training methods in GDS, logistic regression and random forest, see <<algorithms-ml-training-methods>>.
 
-The allowed model parameters are listed in the table <<linkprediction-pipelines-model-configuration-table>>.
+In <<algorithms-ml-nodeclassification-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
 
 The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
+
+[NOTE]
+====
+At least one model candidate must be added to the pipeline before training it.
+====
 
 
 === Syntax
 
-[.pipeline-configure-params-syntax]
+
+[.tabbed-example, caption = ]
+====
+[.include-with-logistic-regression]
+======
+[.pipeline-add-lr-syntax]
 --
 .Configure the train parameters syntax
 [source, cypher, role=noplay]
@@ -412,7 +422,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureSteps: List of Map,
   splitConfig: Map,
-  parameterSpace: List of Map
+  parameterSpace: Map
 ----
 
 .Parameters
@@ -420,48 +430,94 @@ YIELD
 |===
 | Name            | Type        | Description
 | pipelineName    | String      | The name of the pipeline.
-| config          | Map         | The logistic regression config. The allowed parameters for a model are defined in the next table.
+| config          | Map         | The logistic regression config for a model candidate. The allowed parameters for a model are defined in the next table.
 |===
 
-[[linkprediction-pipelines-model-configuration-table]]
-.Model configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name                | Type    | Default         | Optional | Description
-| penalty             | Float   | 0.0             | yes      | Penalty used for the logistic regression. By default, no penalty is applied.
-| batchSize           | Integer | 100             | yes      | Number of nodes per batch.
-| minEpochs           | Integer | 1               | yes      | Minimum number of training epochs.
-| maxEpochs           | Integer | 100             | yes      | Maximum number of training epochs.
-| patience            | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
-| tolerance           | Float   | 0.001           | yes      | The minimal improvement of the loss to be considered productive.
-|===
+include::../../ml-models/logisticRegressionConfig.adoc[]
 
 include::pipelineInfoResult.adoc[]
 --
+======
+
+[.include-with-random-forest]
+======
+[.pipeline-add-rf-syntax]
+--
+.Configure the train parameters syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.linkPrediction.addRandomForest(
+  pipelineName: String,
+  config: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  parameterSpace: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type        | Description
+| pipelineName    | String      | The name of the pipeline.
+| config          | Map         | The random forest config for a model candidate. The allowed parameters for a model are defined in the next table.
+|===
+
+include::../../ml-models/randomForestConfig.adoc[]
+
+include::pipelineInfoResult.adoc[]
+--
+======
+====
 
 
 === Example
 
-// TODO add another example
+We can add multiple model candidates to our pipeline.
+
+[source, cypher, role=noplay query-example, no-result=true, group=lp]
+.The following will add a logistic regression model:
+--
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {penalty: 0.0625})
+YIELD parameterSpace
+--
+
+[source, cypher, role=noplay query-example, no-result=true, group=lp]
+.The following will add a random forest model:
+--
+CALL gds.alpha.pipeline.linkPrediction.addRandomForest('pipe', {numberOfDecisionTrees: 5})
+YIELD parameterSpace
+--
+
 [role=query-example,group=lp]
 --
-.The following will configure the parameter space of the pipeline:
+.The following will add another logistic regression model:
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {maxEpochs: 500})
 YIELD parameterSpace
+RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace
 ----
 
 .Results
-[opts="header",cols="1"]
+[opts="header",cols="1, 1"]
 |===
-| parameterSpace
-| {RandomForest=[], LogisticRegression=[{maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]}
+| randomForestSpace | logisticRegressionSpace
+| [{maxDepth=2147483647, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}, {maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]
 |===
-
-The `parameterSpace` in the pipeline now contains the three different model parameters, expanded with the default values.
-Each specified model configuration will be tried out during the model selection in <<algorithms-ml-linkprediction-pipelines-train, training>>.
 --
+
+The `parameterSpace` in the pipeline now contains the three different model candidates, expanded with the default values.
+Each specified model candidate will be tried out during the model selection in <<algorithms-ml-linkprediction-pipelines-train, training>>.
+
+[NOTE]
+====
+These are somewhat naive examples of how to add and configure model candidates.
+Please see <<algorithms-ml-training-methods>> for more information on how to tune the configuration parameters of each method.
+====
 
 include::training.adoc[]
 

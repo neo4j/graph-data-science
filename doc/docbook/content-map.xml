@@ -279,11 +279,11 @@
         <d:tocentry linkend="algorithms-ml-models"><?dbhtml filename="algorithms/ml-models/index.html"?>
             <d:tocentry linkend="algorithms-ml-models-preprocessing"><?dbhtml filename="algorithms/ml-models/pre-processing/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="algorithms-ml-models-tuning"><?dbhtml filename="algorithms/ml-models/models-tuning/index.html"?>
-            </d:tocentry>
             <d:tocentry linkend="algorithms-ml-nodeclassification-pipelines"><?dbhtml filename="algorithms/ml-models/nodeclassification-pipelines/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="algorithms-ml-linkprediction-pipelines"><?dbhtml filename="algorithms/ml-models/linkprediction-pipelines/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-ml-training-methods"><?dbhtml filename="algorithms/ml-models/training-methods/index.html"?>
             </d:tocentry>
         </d:tocentry>
 

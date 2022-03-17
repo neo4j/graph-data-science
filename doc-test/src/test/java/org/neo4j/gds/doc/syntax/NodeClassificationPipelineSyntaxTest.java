@@ -21,7 +21,7 @@ package org.neo4j.gds.doc.syntax;
 
 import java.util.List;
 
-class LinkPredictionPipelineSyntaxTest extends SyntaxTestBase {
+class NodeClassificationPipelineSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
@@ -40,6 +40,6 @@ class LinkPredictionPipelineSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/linkprediction-pipeline/linkprediction.adoc";
+        return "algorithms/alpha/nodeclassification-pipeline/nodeclassification.adoc";
     }
 }
