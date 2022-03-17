@@ -20,6 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.beta.closeness.ClosenessCentralityMutateProc;
+import org.neo4j.gds.beta.closeness.ClosenessCentralityStatsProc;
 import org.neo4j.gds.beta.closeness.ClosenessCentralityStreamProc;
 import org.neo4j.gds.beta.closeness.ClosenessCentralityWriteProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -38,6 +39,7 @@ class ClosenessCentralityDocTest extends DocTestBase {
     protected List<Class<?>> procedures() {
         return List.of(
             ClosenessCentralityStreamProc.class,
+            ClosenessCentralityStatsProc.class,
             ClosenessCentralityWriteProc.class,
             ClosenessCentralityMutateProc.class,
             GraphProjectProc.class
