@@ -1,7 +1,46 @@
-[[migration-algorithms-node-classification-pipeline-predict]]
-= Node Classification Pipeline predict
+[[migration-algorithms-node-classification]]
+= Node Classification
 
-.Changes in configuration
+The non-pipeline version of node classification has been completely removed and replaced by <<algorithms-ml-nodeclassification-pipelines, node classification pipelines>>.
+Before training a node classification model, you now need to <<algorithms-ml-nodeclassification-creating-a-pipeline, create>> and configure a training pipeline.
+
+
+== Train
+
+Parts of the training are now configured in specific configuration procedures of the training pipeline, before its train call.
+Some are moved to the <<algorithms-ml-nodeclassification-pipelines-train, pipeline train procedure>>.
+Please see the table below.
+
+.Changes in configuration for train
+[options=header, cols=2]
+|===
+| 1.x
+| 2.x
+| `modelName`
+| This parameter is now only configured in `gds.beta.pipeline.nodeClassification.train`.
+| `featuresProperties`
+| This parameter is now only configured in `gds.beta.pipeline.nodeClassification.selectFeatures`. There's now also a procedure `gds.beta.pipeline.nodeClassification.addNodeProperty` to add compute node properties for the input graph in the training pipeline and produced classification model.
+| `targetProperty`
+| This parameter is now only configured in `gds.beta.pipeline.nodeClassification.train`.
+| `holdoutFraction`
+| This parameter is now named `testFraction` and configured in `gds.beta.pipeline.nodeClassification.configureSplit`.
+| `validationFolds`
+| This parameter is now only configured in `gds.beta.pipeline.nodeClassification.configureSplit`.
+| `metrics`
+| This parameter is now only configured in `gds.beta.pipeline.nodeClassification.train`.
+| `params`
+| This parameter is now configured in `gds.beta.pipeline.nodeClassification.addLogisticRegression` where it's in the form of a configuration for one model candidate, and the procedure can be called several time to add several model candidates configurations. There's now also the option of using random forest as a model candidate with `gds.alpha.pipeline.nodeClassification.addRandomForest`.
+| `randomSeed`
+| This parameter is now only configured in `gds.beta.pipeline.nodeClassification.train`.
+|===
+
+
+== Predict
+
+Apart from the parameters listed below, the API for node classification prediction is the same as before but with different procedures.
+These procedures are `gds.beta.pipeline.nodeClassification.predict.[mutate,stream,write]`.
+
+.Changes in configuration for predict
 [options=header, cols=2]
 |===
 | 1.x
