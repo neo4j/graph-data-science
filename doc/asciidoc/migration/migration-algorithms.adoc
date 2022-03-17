@@ -15,3 +15,5 @@ include::migration-algorithms-dfs.adoc[leveloffset=+1]
 include::migration-algorithms-knn.adoc[leveloffset=+1]
 
 include::migration-algorithms-node-classification.adoc[leveloffset=+1]
+
+include::migration-algorithms-link-prediction.adoc[leveloffset=+1]

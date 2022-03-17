@@ -1,0 +1,40 @@
+[[migration-algorithms-link-prediction]]
+= Link Prediction
+
+The non-pipeline version of link prediction has been completely removed and replaced by <<algorithms-ml-linkprediction-pipelines, link prediction pipelines>>.
+Before training a link prediction model, you now need to <<algorithms-ml-linkprediction-creating-a-pipeline, create>> and configure a training pipeline.
+
+
+== Train
+
+Parts of the training are now configured in specific configuration procedures of the training pipeline, before its train call.
+Some are moved to the <<algorithms-ml-linkprediction-pipelines-train, pipeline train procedure>>.
+Please see the table below.
+
+.Changes in configuration for train
+[options=header, cols=2]
+|===
+| 1.x
+| 2.x
+| `modelName`
+| This parameter is now only configured in `gds.beta.pipeline.linkPrediction.train`.
+| `featuresProperties` and `linkFeatureCombiner`
+| These parameters are now moved to the procedure `gds.beta.pipeline.linkPrediction.addFeatures` where they are referred to as `nodeProperties` and `featureType` respectively. There's now also a procedure `gds.beta.pipeline.linkPrediction.addNodeProperty` to add compute node properties for the input graph in the training pipeline and produced classification model.
+| `trainRelationshipType` and `testRelationshipType`
+| These parameters are now deprecated, and instead `gds.beta.pipeline.linkPrediction.configureSplit` should be used to set up the dataset split.
+| `validationFolds`
+| This parameter is now only configured in `gds.beta.pipeline.linkPrediction.configureSplit`.
+| `negativeClassWeight`
+| This parameter is now only configured in `gds.beta.pipeline.linkPrediction.train`.
+| `params`
+| This parameter is now configured in `gds.beta.pipeline.linkPrediction.addLogisticRegression` where it's in the form of a configuration for one model candidate, and the procedure can be called several time to add several model candidates configurations. There's now also the option of using random forest as a model candidate with `gds.alpha.pipeline.linkPrediction.addRandomForest`.
+| `randomSeed`
+| This parameter is now only configured in `gds.beta.pipeline.linkPrediction.train`.
+|===
+
+
+== Predict
+
+The API for link prediction classification is the same as before, but with different procedures.
+These procedures are `gds.beta.pipeline.linkPrediction.predict.[mutate,stream]`.
+However, there's no longer a `write` mode for link prediction classification, but it's still possible to emulate this behavior using the `mutate` mode followed by `gds.graph.writeRelationships`.
