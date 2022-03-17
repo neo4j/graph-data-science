@@ -31,7 +31,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.splitting.EdgeSplitter;
 
 import java.util.List;
 import java.util.Optional;

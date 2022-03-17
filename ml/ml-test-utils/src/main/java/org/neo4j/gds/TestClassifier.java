@@ -21,8 +21,8 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.models.Classifier;
-import org.neo4j.gds.models.Features;
+import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.Features;
 
 public abstract class TestClassifier implements Classifier {
     public Matrix predictProbabilities(Batch batch, Features features) {

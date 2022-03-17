@@ -33,8 +33,8 @@ import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.models.Classifier;
-import org.neo4j.gds.models.ClassifierFactory;
+import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.ClassifierFactory;
 
 import java.util.List;
 import java.util.Map;

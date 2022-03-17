@@ -34,10 +34,10 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.models.Classifier;
-import org.neo4j.gds.models.logisticregression.ImmutableLogisticRegressionData;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.util.List;
 import java.util.Map;

@@ -25,10 +25,10 @@ import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPredictPipelineBaseConfig;
+import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
-import org.neo4j.gds.models.Classifier;
-import org.neo4j.gds.models.TrainingMethod;
 
 import java.util.List;
 import java.util.Map;

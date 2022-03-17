@@ -25,8 +25,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.splitting.SplitRelationships;
-import org.neo4j.gds.splitting.SplitRelationshipsMutateConfig;
 
 import java.util.Collection;
 import java.util.Optional;

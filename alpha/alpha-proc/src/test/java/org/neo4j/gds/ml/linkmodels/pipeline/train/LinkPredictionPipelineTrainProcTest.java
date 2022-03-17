@@ -41,9 +41,9 @@ import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcs;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddTrainerMethodProcs;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.model.catalog.ModelDropProc;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 
 import java.util.List;
 import java.util.Map;

@@ -32,9 +32,9 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.models.Classifier;
-import org.neo4j.gds.models.FeaturesFactory;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
+import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.FeaturesFactory;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 
 import java.util.List;
 import java.util.Optional;

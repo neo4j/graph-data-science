@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
-import org.neo4j.gds.splitting.EdgeSplitter;
+import org.neo4j.gds.ml.splitting.EdgeSplitter;
 
 import java.util.List;
 import java.util.Map;

@@ -20,10 +20,10 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.metrics.ImmutableModelStats;
-import org.neo4j.gds.metrics.LinkMetric;
-import org.neo4j.gds.metrics.ModelStats;
-import org.neo4j.gds.models.TrainerConfig;
+import org.neo4j.gds.ml.metrics.ImmutableModelStats;
+import org.neo4j.gds.ml.metrics.LinkMetric;
+import org.neo4j.gds.ml.metrics.ModelStats;
+import org.neo4j.gds.ml.models.TrainerConfig;
 
 import java.util.EnumMap;
 import java.util.HashMap;

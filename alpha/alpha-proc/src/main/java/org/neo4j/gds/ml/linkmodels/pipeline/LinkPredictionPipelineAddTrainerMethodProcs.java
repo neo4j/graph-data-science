@@ -21,11 +21,11 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
-import org.neo4j.gds.models.TrainingMethod;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.models.randomforest.RandomForestTrainConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

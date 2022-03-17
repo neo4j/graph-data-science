@@ -24,8 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.models.TrainingMethod;
-import org.neo4j.gds.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
 
 import java.util.List;
 import java.util.Map;

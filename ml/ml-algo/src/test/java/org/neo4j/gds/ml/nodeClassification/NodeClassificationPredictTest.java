@@ -34,10 +34,10 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.models.ClassifierFactory;
-import org.neo4j.gds.models.logisticregression.ImmutableLogisticRegressionData;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.ml.models.ClassifierFactory;
+import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 
 import java.util.List;
 

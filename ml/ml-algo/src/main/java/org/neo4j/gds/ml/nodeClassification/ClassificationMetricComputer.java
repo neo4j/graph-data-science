@@ -22,12 +22,12 @@ package org.neo4j.gds.ml.nodeClassification;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.metrics.ClassificationMetric;
-import org.neo4j.gds.metrics.Metric;
-import org.neo4j.gds.metrics.MetricComputer;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.models.Classifier;
-import org.neo4j.gds.models.Features;
+import org.neo4j.gds.ml.metrics.ClassificationMetric;
+import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.MetricComputer;
+import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.Features;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.List;

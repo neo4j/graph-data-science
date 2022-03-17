@@ -26,9 +26,9 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.gradientdescent.GradientDescentConfig;
-import org.neo4j.gds.models.Features;
-import org.neo4j.gds.models.FeaturesFactory;
+import org.neo4j.gds.ml.gradientdescent.GradientDescentConfig;
+import org.neo4j.gds.ml.models.Features;
+import org.neo4j.gds.ml.models.FeaturesFactory;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -22,10 +22,10 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.train;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.metrics.BestMetricData;
-import org.neo4j.gds.metrics.Metric;
+import org.neo4j.gds.ml.metrics.BestMetricData;
+import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
-import org.neo4j.gds.models.TrainerConfig;
+import org.neo4j.gds.ml.models.TrainerConfig;
 
 import java.util.List;
 import java.util.Map;

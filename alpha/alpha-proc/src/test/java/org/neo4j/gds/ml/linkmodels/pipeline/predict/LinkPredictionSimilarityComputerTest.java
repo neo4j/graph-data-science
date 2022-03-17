@@ -33,8 +33,8 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
-import org.neo4j.gds.models.logisticregression.ImmutableLogisticRegressionData;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
+import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 
 import java.util.List;

@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.models.Features;
+import org.neo4j.gds.ml.models.Features;
 
 @ValueClass
 interface FeaturesAndLabels {

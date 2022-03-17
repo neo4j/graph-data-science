@@ -25,16 +25,16 @@ import org.neo4j.gds.TestFeatures;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.decisiontree.DecisionTreePredict;
-import org.neo4j.gds.decisiontree.TreeNode;
+import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.core.batch.ListBatch;
 import org.neo4j.gds.ml.core.batch.SingletonBatch;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.models.ClassifierFactory;
-import org.neo4j.gds.models.Features;
-import org.neo4j.gds.models.FeaturesFactory;
-import org.neo4j.gds.models.randomforest.ImmutableRandomForestData;
+import org.neo4j.gds.ml.models.ClassifierFactory;
+import org.neo4j.gds.ml.models.Features;
+import org.neo4j.gds.ml.models.FeaturesFactory;
+import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestData;
 
 import java.util.List;
 

@@ -23,14 +23,14 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.executor.GdsCallableFinder;
+import org.neo4j.gds.ml.models.TrainerConfig;
+import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
-import org.neo4j.gds.models.TrainerConfig;
-import org.neo4j.gds.models.TrainingMethod;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.models.randomforest.RandomForestTrainConfigImpl;
 
 import java.util.List;
 import java.util.Map;

@@ -31,7 +31,7 @@ import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
-import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.ml.models.Classifier;
 
 import java.util.List;
 import java.util.Map;

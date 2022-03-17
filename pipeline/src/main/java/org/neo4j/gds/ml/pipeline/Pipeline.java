@@ -24,8 +24,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.utils.TimeUtil;
-import org.neo4j.gds.models.TrainerConfig;
-import org.neo4j.gds.models.TrainingMethod;
+import org.neo4j.gds.ml.models.TrainerConfig;
+import org.neo4j.gds.ml.models.TrainingMethod;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;

@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.models.Features;
+import org.neo4j.gds.ml.models.Features;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestLocalIdMap.identityMapOf;
-import static org.neo4j.gds.metrics.AllClassMetric.F1_WEIGHTED;
+import static org.neo4j.gds.ml.metrics.AllClassMetric.F1_WEIGHTED;
 
 class ClassificationMetricComputerTest {
 

@@ -29,8 +29,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.splitting.SplitRelationshipsBaseConfig;
-import org.neo4j.gds.splitting.SplitRelationshipsBaseConfigImpl;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfigImpl;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;

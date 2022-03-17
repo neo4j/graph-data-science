@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
-import org.neo4j.gds.models.TrainerConfig;
-import org.neo4j.gds.models.TrainingMethod;
-import org.neo4j.gds.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.TrainerConfig;
+import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.util.List;
 import java.util.Map;

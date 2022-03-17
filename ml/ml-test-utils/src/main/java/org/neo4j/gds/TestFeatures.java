@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.models.Features;
+import org.neo4j.gds.ml.models.Features;
 
 public final class TestFeatures implements Features {
 
