@@ -20,7 +20,7 @@ Please see the table below.
 | `modelName`
 | This parameter is now only configured in `gds.beta.pipeline.nodeClassification.train`.
 | `featuresProperties`
-| This parameter is now only configured in `gds.beta.pipeline.nodeClassification.selectFeatures`. There's now also a procedure `gds.beta.pipeline.nodeClassification.addNodeProperty` to compute node properties for the input graph in the training pipeline and produced classification model.
+| This parameter is replaced by `gds.beta.pipeline.nodeClassification.selectFeatures`. There is now also a procedure `gds.beta.pipeline.nodeClassification.addNodeProperty` to compute node properties for the input graph in the training pipeline and produced classification model.
 | `targetProperty`
 | This parameter is now only configured in `gds.beta.pipeline.nodeClassification.train`.
 | `holdoutFraction`
@@ -30,7 +30,7 @@ Please see the table below.
 | `metrics`
 | This parameter is now only configured in `gds.beta.pipeline.nodeClassification.train`.
 | `params`
-| This parameter is now configured in `gds.beta.pipeline.nodeClassification.addLogisticRegression` where it's in the form of a configuration for one model candidate, and the procedure can be called several time to add several model candidates configurations. There's now also the option of using random forest as a model candidate with `gds.alpha.pipeline.nodeClassification.addRandomForest`.
+| This parameter is replaced by `gds.beta.pipeline.nodeClassification.addLogisticRegression`, allowing configuration for a single model candidate. The procedure can be called several times to add several model candidates. There is also a new option for using random forest as a model candidate with `gds.alpha.pipeline.nodeClassification.addRandomForest`.
 | `randomSeed`
 | This parameter is now only configured in `gds.beta.pipeline.nodeClassification.train`.
 |===

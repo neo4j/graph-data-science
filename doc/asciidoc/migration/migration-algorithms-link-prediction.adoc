@@ -28,7 +28,7 @@ Please see the table below.
 | `negativeClassWeight`
 | This parameter is now only configured in `gds.beta.pipeline.linkPrediction.train`.
 | `params`
-| This parameter is now configured in `gds.beta.pipeline.linkPrediction.addLogisticRegression` where it's in the form of a configuration for one model candidate, and the procedure can be called several time to add several model candidates configurations. There's now also the option of using random forest as a model candidate with `gds.alpha.pipeline.linkPrediction.addRandomForest`.
+| This parameter is replaced by `gds.beta.pipeline.linkPrediction.addLogisticRegression`, allowing configuration for a single model candidate. The procedure can be called several times to add several model candidates. There is also a new option for using random forest as a model candidate with `gds.alpha.pipeline.linkPrediction.addRandomForest`.
 | `randomSeed`
 | This parameter is now only configured in `gds.beta.pipeline.linkPrediction.train`.
 |===
