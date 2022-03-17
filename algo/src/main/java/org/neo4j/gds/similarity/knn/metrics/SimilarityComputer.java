@@ -70,18 +70,29 @@ public interface SimilarityComputer {
         NodeProperties properties,
         SimilarityMetric defaultSimilarityMetric
     ) {
-        var checkedProperties = new NullCheckingNodeProperties(properties, name, idMap);
         switch (properties.valueType()) {
             case LONG:
-                return ofLongProperty(checkedProperties);
+                return ofLongProperty(properties);
             case DOUBLE:
-                return ofDoubleProperty(checkedProperties);
+                return ofDoubleProperty(properties);
             case DOUBLE_ARRAY:
-                return ofDoubleArrayProperty(name, checkedProperties, defaultSimilarityMetric);
+                return ofDoubleArrayProperty(
+                    name,
+                    new NullCheckingNodeProperties(properties, name, idMap),
+                    defaultSimilarityMetric
+                );
             case FLOAT_ARRAY:
-                return ofFloatArrayProperty(name, checkedProperties, defaultSimilarityMetric);
+                return ofFloatArrayProperty(
+                    name,
+                    new NullCheckingNodeProperties(properties, name, idMap),
+                    defaultSimilarityMetric
+                );
             case LONG_ARRAY:
-                return ofLongArrayProperty(name, new SortedLongArrayProperties(checkedProperties), defaultSimilarityMetric);
+                return ofLongArrayProperty(
+                    name,
+                    new SortedLongArrayProperties(new NullCheckingNodeProperties(properties, name, idMap)),
+                    defaultSimilarityMetric
+                );
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "The property [%s] has an unsupported type [%s].",
