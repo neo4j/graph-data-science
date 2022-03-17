@@ -15,6 +15,7 @@ See <<algorithms-ml-nodeclassification-configure-model-parameters, this section>
 
 
 [[algorithms-ml-training-methods-logistic-regression]]
+[.beta]
 == Logistic regression
 
 Logistic regression is a fundamental supervised machine learning classification method.
@@ -56,6 +57,7 @@ Thus, `batchSize` can affect the convergence rate, but since the algorithms abov
 
 
 [[algorithms-ml-training-methods-random-forest]]
+[.alpha]
 == Random forest
 
 Random forest is a popular supervised machine learning method for classification (and regression) that consists of using several https://en.wikipedia.org/wiki/Decision_tree[decision trees], and combining the trees' predictions into an overall prediction.
