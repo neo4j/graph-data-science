@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.collections.PageUtil;
 
 import java.lang.invoke.MethodHandles;
@@ -193,10 +194,6 @@ public final class BumpAllocator<PAGE> {
             this.offset = PAGE_SIZE;
         }
 
-        public LocalPositionalAllocator<PAGE> asPositionalAllocator() {
-            return new LocalPositionalAllocator<>(this.globalAllocator);
-        }
-
         /**
          * Inserts slice into the allocator, returns global address
          */
@@ -208,21 +205,16 @@ public final class BumpAllocator<PAGE> {
             return insertData(targets, Math.min(length, targetLength), this.top, targetLength);
         }
 
-        public void insertAt(long address, PAGE targets, int length) {
-            long top = this.top;
-
-        }
-
         private long insertData(PAGE targets, int length, long address, int targetsLength) {
             int maxOffset = PAGE_SIZE - length;
             if (maxOffset >= this.offset) {
                 doAllocate(targets, length);
                 return address;
             }
-            return slowPathAllocate(targets, length, maxOffset, address, targetsLength);
+            return slowPathAllocate(targets, length, maxOffset, targetsLength);
         }
 
-        private long slowPathAllocate(PAGE targets, int length, int maxOffset, long address, int targetsLength) {
+        private long slowPathAllocate(PAGE targets, int length, int maxOffset, int targetsLength) {
             if (maxOffset < 0) {
                 return oversizingAllocate(targets, length, targetsLength);
             }
@@ -301,7 +293,7 @@ public final class BumpAllocator<PAGE> {
             }
         }
 
-        private PAGE allocateNewPages(long offset, PAGE targets, int length, int targetsLength) {
+        private @Nullable PAGE allocateNewPages(long offset, PAGE targets, int length, int targetsLength) {
             int pageId = PageUtil.pageIndex(offset, PAGE_SHIFT);
 
             PAGE existingPage = null;
