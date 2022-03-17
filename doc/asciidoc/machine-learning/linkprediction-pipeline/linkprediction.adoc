@@ -388,7 +388,11 @@ We now reconfigured the splitting of the pipeline, which will be applied during 
 
 A pipeline contains a collection of configurations for model candidates which is initially empty.
 This collection is called the _parameter space_.
-Prior to training one or several model configurations can and should be added to the _parameter space_ with the `gds.beta.pipeline.linkPrediction.addLogisticRegression` and `gds.alpha.pipeline.linkPrediction.addRandomForest` procedures.
+One or more model configurations must be added to the _parameter space_ of the training pipeline, using one of the following procedures:
+
+* `gds.beta.pipeline.linkPrediction.addLogisticRegression`
+* `gds.alpha.pipeline.linkPrediction.addRandomForest`
+
 For information about the available training methods in GDS, logistic regression and random forest, see <<ml-training-methods>>.
 
 In <<nodeclassification-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
