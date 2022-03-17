@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,7 +33,7 @@ class HugeIdMapBuilderOpsTest {
             1,
             nodeId,
             1,
-            builder -> (start, end) -> builder.set(nodeId, 0L)
+            HugeLongArray.of(nodeId)
         );
 
         assertTrue(hugeSparseLongArray.contains(nodeId));

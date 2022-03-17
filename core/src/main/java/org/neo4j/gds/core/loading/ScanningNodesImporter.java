@@ -174,8 +174,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         var idMap = idMapBuilder.build(
             labelInformationBuilder,
             Math.max(dimensions.highestPossibleNodeCount() - 1, 0),
-            concurrency,
-            false
+            concurrency
         );
 
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter == null

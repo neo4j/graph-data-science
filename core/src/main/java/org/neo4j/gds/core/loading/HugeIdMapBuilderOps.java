@@ -25,11 +25,8 @@ import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.core.utils.BiLongConsumer;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-
-import java.util.function.Function;
 
 public final class HugeIdMapBuilderOps {
 
@@ -48,32 +45,7 @@ public final class HugeIdMapBuilderOps {
             nodeCount,
             highestNodeId,
             concurrency,
-            add(graphIds)
-        );
-
-        var labelInformation = labelInformationBuilder.build(nodeCount, nodeToGraphIds::get);
-
-        return new HugeIdMap(
-            graphIds,
-            nodeToGraphIds,
-            labelInformation,
-            nodeCount,
-            highestNodeId
-        );
-    }
-
-    static HugeIdMap buildChecked(
-        HugeLongArray graphIds,
-        long nodeCount,
-        LabelInformation.Builder labelInformationBuilder,
-        long highestNodeId,
-        int concurrency
-    ) throws DuplicateNodeIdException {
-        HugeSparseLongArray nodeToGraphIds = buildSparseIdMap(
-            nodeCount,
-            highestNodeId,
-            concurrency,
-            addChecked(graphIds)
+            graphIds
         );
 
         var labelInformation = labelInformationBuilder.build(nodeCount, nodeToGraphIds::get);
@@ -92,7 +64,7 @@ public final class HugeIdMapBuilderOps {
         long nodeCount,
         long highestNodeId,
         int concurrency,
-        Function<HugeSparseLongArray.Builder, BiLongConsumer> nodeAdder
+        HugeLongArray graphIds
     ) {
         HugeSparseLongArray.Builder idMapBuilder = HugeSparseLongArray.builder(
             IdMap.NOT_FOUND,
@@ -100,16 +72,13 @@ public final class HugeIdMapBuilderOps {
             // need to be able to store a node with `id = highestNodeId`.
             highestNodeId + 1
         );
-        ParallelUtil.readParallel(concurrency, nodeCount, Pools.DEFAULT, nodeAdder.apply(idMapBuilder));
+        ParallelUtil.readParallel(
+            concurrency,
+            nodeCount,
+            Pools.DEFAULT,
+            (start, end) -> addNodes(graphIds, idMapBuilder, start, end)
+        );
         return idMapBuilder.build();
-    }
-
-    static Function<HugeSparseLongArray.Builder, BiLongConsumer> add(HugeLongArray graphIds) {
-        return builder -> (start, end) -> addNodes(graphIds, builder, start, end);
-    }
-
-    private static Function<HugeSparseLongArray.Builder, BiLongConsumer> addChecked(HugeLongArray graphIds) {
-        return builder -> (start, end) -> addAndCheckNodes(graphIds, builder, start, end);
     }
 
     private static void addNodes(
@@ -126,28 +95,6 @@ public final class HugeIdMapBuilderOps {
                 long internalId = cursor.base + offset;
                 for (int i = offset; i < limit; ++i, ++internalId) {
                     builder.set(array[i], internalId);
-                }
-            }
-        }
-    }
-
-    private static void addAndCheckNodes(
-        HugeLongArray graphIds,
-        HugeSparseLongArray.Builder builder,
-        long startNode,
-        long endNode
-    ) throws DuplicateNodeIdException {
-        try (HugeCursor<long[]> cursor = graphIds.initCursor(graphIds.newCursor(), startNode, endNode)) {
-            while (cursor.next()) {
-                long[] array = cursor.array;
-                int offset = cursor.offset;
-                int limit = cursor.limit;
-                long internalId = cursor.base + offset;
-                for (int i = offset; i < limit; ++i, ++internalId) {
-                    boolean addedAsNewId = builder.setIfAbsent(array[i], internalId);
-                    if (!addedAsNewId) {
-                        throw new DuplicateNodeIdException(array[i]);
-                    }
                 }
             }
         }

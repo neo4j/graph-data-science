@@ -199,7 +199,7 @@ public class HugeIdMap implements IdMap {
             newNodeCount,
             nodeToGraphIds.capacity(),
             concurrency,
-            HugeIdMapBuilderOps.add(newGraphIds)
+            newGraphIds
         );
 
         LabelInformation newLabelInformation = labelInformation.filter(nodeLabels);
