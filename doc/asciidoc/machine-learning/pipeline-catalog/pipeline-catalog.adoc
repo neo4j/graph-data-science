@@ -7,9 +7,11 @@ This section details the pipeline catalog operations available to manage named t
 --
 
 In GDS, we have machine learning pipelines which offer an end-to-end workflow, from graph feature extraction to model training.
-One such example is the <<linkprediction-pipelines, link prediction pipeline>>.
+This includes the following:
+
+* <<nodeclassification-pipelines, Node Classification pipelines>>
+* <<linkprediction-pipelines, Link Prediction pipelines>>
 
 The pipeline catalog is a concept within the GDS library that allows managing multiple training pipelines by name.
-
 
 This chapter explains the available pipeline catalog operations.
