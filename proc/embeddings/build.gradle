@@ -12,6 +12,7 @@ dependencies {
 
     api project(':proc-common')
 
+    implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')

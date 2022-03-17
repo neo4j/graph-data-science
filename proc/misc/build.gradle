@@ -24,5 +24,6 @@ dependencies {
     }
 
     testImplementation project(':proc-test')
+    testImplementation project(':algo-common')
     testImplementation project(':ml-core')
 }

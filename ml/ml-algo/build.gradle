@@ -14,6 +14,7 @@ dependencies {
     compileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 
+    implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':core')
     implementation project(':memory-usage')
@@ -29,5 +30,6 @@ dependencies {
     testAnnotationProcessor group: 'org.immutables',           name: 'value',            version: ver.'immutables'
 
     testImplementation project(':test-utils')
+    testImplementation project(':algo-common')
     testImplementation project(':ml-test-utils')
 }

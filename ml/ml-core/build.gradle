@@ -30,8 +30,6 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':string-formatting')
 
-    api(project(':algo-common'))
-
     // TEST DEPENDENCIES
 
     testCompileOnly group: 'org.immutables',      name: 'value-annotations',    version: ver.'immutables'
