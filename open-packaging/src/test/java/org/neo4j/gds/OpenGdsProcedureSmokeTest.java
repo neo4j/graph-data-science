@@ -380,12 +380,12 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.linkprediction.totalNeighbors",
         "gds.alpha.linkprediction.sameCommunity",
 
-        "gds.alpha.similarity.cosine",
-        "gds.alpha.similarity.euclidean",
-        "gds.alpha.similarity.euclideanDistance",
-        "gds.alpha.similarity.jaccard",
-        "gds.alpha.similarity.overlap",
-        "gds.alpha.similarity.pearson",
+        "gds.similarity.cosine",
+        "gds.similarity.euclidean",
+        "gds.similarity.euclideanDistance",
+        "gds.similarity.jaccard",
+        "gds.similarity.overlap",
+        "gds.similarity.pearson",
 
         "gds.alpha.ml.oneHotEncoding",
 
