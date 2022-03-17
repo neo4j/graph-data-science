@@ -27,13 +27,19 @@ import org.neo4j.values.storable.Value;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NullCheckingNodeProperties implements NodeProperties {
+public final class NullCheckingNodeProperties implements NodeProperties {
+
+    public static NullCheckingNodeProperties create(NodeProperties properties, String name, IdMap idMap) {
+        var valueType = properties.valueType();
+        assert valueType != ValueType.DOUBLE && valueType != ValueType.LONG: "Don't use NullCheckingNodeProperties for primitive properties";
+        return new NullCheckingNodeProperties(properties, name, idMap);
+    }
 
     private final NodeProperties properties;
     private final String name;
     private final IdMap idMap;
 
-    NullCheckingNodeProperties(NodeProperties properties, String name, IdMap idMap) {
+    private NullCheckingNodeProperties(NodeProperties properties, String name, IdMap idMap) {
         this.properties = properties;
         this.name = name;
         this.idMap = idMap;

@@ -78,19 +78,19 @@ public interface SimilarityComputer {
             case DOUBLE_ARRAY:
                 return ofDoubleArrayProperty(
                     name,
-                    new NullCheckingNodeProperties(properties, name, idMap),
+                    NullCheckingNodeProperties.create(properties, name, idMap),
                     defaultSimilarityMetric
                 );
             case FLOAT_ARRAY:
                 return ofFloatArrayProperty(
                     name,
-                    new NullCheckingNodeProperties(properties, name, idMap),
+                    NullCheckingNodeProperties.create(properties, name, idMap),
                     defaultSimilarityMetric
                 );
             case LONG_ARRAY:
                 return ofLongArrayProperty(
                     name,
-                    new SortedLongArrayProperties(new NullCheckingNodeProperties(properties, name, idMap)),
+                    new SortedLongArrayProperties(NullCheckingNodeProperties.create(properties, name, idMap)),
                     defaultSimilarityMetric
                 );
             default:
