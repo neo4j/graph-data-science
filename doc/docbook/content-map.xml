@@ -176,6 +176,9 @@
             <d:tocentry linkend="algorithms-knn">
                 <?dbhtml filename="algorithms/knn/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="similarity-functions">
+                <?dbhtml filename="algorithms/similarity-functions/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="algorithms-path-finding">

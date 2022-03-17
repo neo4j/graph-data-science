@@ -1,22 +1,186 @@
 [[similarity-functions]]
 = Similarity functions
 
-The GDS library provides a set of measures that can be used to calculate similarity between two vectors of numbers.
+== Definitions
+
+The GDS library provides a set of measures that can be used to calculate similarity between two arrays p~s~, p~t~ of numbers.
+
+The similarity functions can be classified into two groups.
+The first is `categorical` measures which treat the arrays as sets and calculate similarity based on the intersection between the two sets.
+The second is `numerical` measures which compute similarity based on how close the numbers at each position are to each other.
 
 [[table-product]]
 [role=procedure-listing]
-[opts=header,cols="1, 1"]
+[opts=header,cols="3, 4a,1"]
 |===
-| Similarity Function name  | Formula
-| `gds.similarity.jaccard` |
+| Similarity Function name  | Formula | Value range
+| `gds.similarity.jaccard` footnote:categorical[Categorical] | image::knn-formulas/jacard.svg[] | [0,1]
 
-image::nodesim-formulas/jacard_nodesim.svg
+| `gds.similarity.overlap` footnote:categorical[]| image::knn-formulas/overlap.svg[] | [0, 1]
 
-| `gds.similarity.overlap` |
+| `gds.similarity.cosine` footnote:numerical[Numerical]| image::knn-formulas/cosine.svg[] | [-1, 1]
+| `gds.similarity.pearson` footnote:numerical[]| image::knn-formulas/pearson.svg[] | [-1, 1]
+| `gds.similarity.euclideanDistance` footnote:numerical[] | image::knn-formulas/ed.svg[] | [0, &#8734;)
+| `gds.similarity.euclidean` footnote:numerical[]| image::knn-formulas/euclidean.svg[] |(0, 1]
+|===
 
-image::nodesim-formulas/overlap_nodesim.svg
+== Examples
 
-| `gds.similarity.cosine` | 1
-| `gds.similarity.pearson` | 1
-| `gds.similarity.euclideanDistance` | 1
-| `gds.similarity.euclidean` | 1
+An example of usage for each function is provided below:
+
+[role=query-example]
+--
+.Jaccard similarity function
+[source,cypher,role=noplay]
+----
+RETURN gds.similarity.jaccard(
+  [1.0, 5.0, 3.0, 6.7],
+  [5.0, 2.5, 3.1, 9.0]
+) AS jaccardSimilarity
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| jaccardSimilarity
+| 0.142857142857143
+|===
+--
+
+[role=query-example]
+--
+.Overlap similarity function
+[source,cypher,role=noplay]
+----
+RETURN gds.similarity.overlap(
+  [1.0, 5.0, 3.0, 6.7],
+  [5.0, 2.5, 3.1, 9.0]
+) AS overlapSimilarity
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| overlapSimilarity
+| 0.25
+|===
+--
+
+[role=query-example]
+--
+.Cosine similarity function
+[source,cypher,role=noplay]
+----
+RETURN gds.similarity.cosine(
+  [1.0, 5.0, 3.0, 6.7],
+  [5.0, 2.5, 3.1, 9.0]
+) AS cosineSimilarity
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| cosineSimilarity
+| 0.882757381034594
+|===
+--
+
+[role=query-example]
+--
+.Pearson similarity function
+[source,cypher,role=noplay]
+----
+RETURN gds.similarity.pearson(
+  [1.0, 5.0, 3.0, 6.7],
+  [5.0, 2.5, 3.1, 9.0]
+) AS pearsonSimilarity
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| pearsonSimilarity
+| 0.468277483648113
+|===
+--
+
+[role=query-example]
+--
+.Euclidean similarity function
+[source,cypher,role=noplay]
+----
+RETURN gds.similarity.euclidean(
+  [1.0, 5.0, 3.0, 6.7],
+  [5.0, 2.5, 3.1, 9.0]
+)  AS euclideanSimilarity
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| euclideanSimilarity
+| 0.160030485454022
+|===
+--
+
+[role=query-example]
+--
+.Euclidean distance function
+[source,cypher,role=noplay]
+----
+RETURN gds.similarity.euclideanDistance(
+  [1.0, 5.0, 3.0, 6.7],
+  [5.0, 2.5, 3.1, 9.0]
+) AS euclideanDistance
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| euclideanDistance
+| 5.248809388804284
+|===
+--
+
+The functions can also compute results when one or more values in the provided vectors are `null`.
+In the case of functions based on intersection such as Jaccard or Overlap, the null values are excluded from the set and the computation.
+In the rest of the functions the `null` value is replaced with a `0.0` value.
+See the examples below.
+
+[role=query-example]
+--
+.Jaccard with null values
+[source,cypher,role=noplay]
+----
+RETURN gds.similarity.jaccard(
+  [1.0, null, 3.0],
+  [1.0, 2.0, 3.0]
+) AS jaccardSimilarity
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| jaccardSimilarity
+| 0.666666666666667
+|===
+--
+
+[role=query-example]
+--
+.Cosine with null values
+[source,cypher,role=noplay]
+----
+RETURN gds.similarity.cosine(
+  [1.0, null, 3.0],
+  [1.0, 2.0, 3.0]
+) AS cosineSimilarity
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| cosineSimilarity
+| 0.845154254728517
+|===
+--

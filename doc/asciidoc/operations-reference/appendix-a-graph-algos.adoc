@@ -156,7 +156,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.shortestPath.astar.write.estimate`
 | `gds.shortestPath.astar.mutate`
 | `gds.shortestPath.astar.mutate.estimate`
-.6+<.^| <<similarity-functions, Similarity functions>>
+.6+<.^|<<similarity-functions, Similarity functions>>
 | `gds.similarity.cosine`
 | `gds.similarity.euclidean`
 | `gds.similarity.euclideanDistance`
