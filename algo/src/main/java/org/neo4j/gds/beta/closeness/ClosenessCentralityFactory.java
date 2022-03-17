@@ -34,15 +34,13 @@ public class ClosenessCentralityFactory<CONFIG extends ClosenessCentralityConfig
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new ClosenessCentrality(
+        return ClosenessCentrality.of(
             graph,
-            configuration.concurrency(),
-            configuration.improved(),
+            configuration,
             Pools.DEFAULT,
             progressTracker
         );
     }
-
 
     @Override
     public String taskName() {
@@ -51,6 +49,10 @@ public class ClosenessCentralityFactory<CONFIG extends ClosenessCentralityConfig
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.leaf(taskName(), graph.nodeCount());
+        return Tasks.task(
+            taskName(),
+            Tasks.leaf("Farness computation"),
+            Tasks.leaf("Closeness computation", graph.nodeCount())
+        );
     }
 }

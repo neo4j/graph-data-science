@@ -43,7 +43,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.beta.closeness.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityMutateProc.MutateResult, ClosenessCentralityMutateConfig> {
+public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityMutateProc.MutateResult, ClosenessCentralityMutateConfig> {
 
     @Override
     public String name() {
@@ -58,7 +58,6 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
     ) {
         return mutate(compute(graphName, configuration));
     }
-
 
     @Override
     protected ClosenessCentralityMutateConfig newConfig(String username, CypherMapWrapper config) {
@@ -76,13 +75,13 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityMutateConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityMutateConfig> computationResult) {
         return ClosenessCentralityProc.nodeProperties(computationResult);
     }
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityMutateConfig> computeResult,
+        ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
         var procResultBuilder = new MutateResult.Builder(
@@ -94,7 +93,6 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
             .withNodeCount(computeResult.graph().nodeCount());
     }
 
-    @SuppressWarnings("unused")
     public static final class MutateResult {
 
         public final long nodePropertiesWritten;
@@ -131,7 +129,7 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
         static final class Builder extends AbstractCentralityResultBuilder<ClosenessCentralityMutateProc.MutateResult> {
             public String mutateProperty;
 
-            protected Builder(ProcedureCallContext callContext, int concurrency) {
+            private Builder(ProcedureCallContext callContext, int concurrency) {
                 super(callContext, concurrency);
             }
 

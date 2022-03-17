@@ -21,15 +21,16 @@ package org.neo4j.gds.beta.closeness;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.PagedAtomicIntegerArray;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.BfsConsumer;
 import org.neo4j.gds.msbfs.MultiSourceBFS;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 /**
  * Normalized Closeness Centrality
@@ -37,7 +38,7 @@ import java.util.stream.Stream;
  * Utilizes the MSBFS for counting the farness between nodes.
  * See MSBFS documentation.
  */
-public class ClosenessCentrality extends Algorithm<ClosenessCentrality> {
+public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
 
     static double centrality(long farness, long componentSize, long nodeCount, boolean wassermanFaust) {
         if (farness == 0L) {
@@ -57,7 +58,22 @@ public class ClosenessCentrality extends Algorithm<ClosenessCentrality> {
     private final PagedAtomicIntegerArray farness;
     private final PagedAtomicIntegerArray component;
 
-    public ClosenessCentrality(
+    public static ClosenessCentrality of(
+        Graph graph,
+        ClosenessCentralityConfig config,
+        ExecutorService executorService,
+        ProgressTracker progressTracker
+    ) {
+        return new ClosenessCentrality(
+            graph,
+            config.concurrency(),
+            config.improved(),
+            executorService,
+            progressTracker
+        );
+    }
+
+    private ClosenessCentrality(
         Graph graph,
         int concurrency,
         boolean wassermanFaust,
@@ -74,32 +90,20 @@ public class ClosenessCentrality extends Algorithm<ClosenessCentrality> {
         this.component = PagedAtomicIntegerArray.newArray(nodeCount);
     }
 
-    public HugeDoubleArray getCentrality() {
-        final HugeDoubleArray cc = HugeDoubleArray.newArray(nodeCount);
-        for (int i = 0; i < nodeCount; i++) {
-            cc.set(i, centrality(
-                farness.get(i),
-                component.get(i),
-                nodeCount,
-                wassermanFaust
-            ));
-        }
-        return cc;
-    }
+    @Override
+    public ClosenessCentralityResult compute() {
+        progressTracker.beginSubTask();
+        computeFarness();
+        var centralities = computeCloseness();
+        progressTracker.endSubTask();
 
-    public Stream<ClosenessCentrality.Result> resultStream() {
-        return LongStream.range(0L, nodeCount)
-            .mapToObj(nodeId -> new ClosenessCentrality.Result(
-                graph.toOriginalNodeId(nodeId),
-                centrality(farness.get(nodeId), component.get(nodeId), nodeCount, wassermanFaust)
-            ));
+        return ImmutableClosenessCentralityResult.of(centralities);
     }
 
     @Override
     public void release() {}
 
-    @Override
-    public ClosenessCentrality compute() {
+    private void computeFarness() {
         progressTracker.beginSubTask();
         final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
             int len = sourceNodeIds.size();
@@ -107,35 +111,36 @@ public class ClosenessCentrality extends Algorithm<ClosenessCentrality> {
             component.add(nodeId, len);
             progressTracker.logProgress();
         };
-
         MultiSourceBFS
             .aggregatedNeighborProcessing(graph.nodeCount(), graph, consumer)
             .run(concurrency, executorService);
-
         progressTracker.endSubTask();
-        return this;
     }
 
-    /**
-     * Result class used for streaming
-     */
-    public static final class Result {
+    private HugeAtomicDoubleArray computeCloseness() {
+        progressTracker.beginSubTask();
 
-        public final long nodeId;
+        var closeness = HugeAtomicDoubleArray.newArray(nodeCount);
 
-        public final double centrality;
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            graph.nodeCount(),
+            partition -> (Runnable) () -> {
+                partition.consume(nodeId -> closeness.set(nodeId, centrality(
+                    farness.get(nodeId),
+                    component.get(nodeId),
+                    nodeCount,
+                    wassermanFaust
+                )));
+                progressTracker.logProgress(partition.nodeCount());
+            },
+            Optional.empty()
+        );
 
-        public Result(long nodeId, double centrality) {
-            this.nodeId = nodeId;
-            this.centrality = centrality;
-        }
+        ParallelUtil.run(tasks, executorService);
 
-        @Override
-        public String toString() {
-            return "Result{" +
-                    "nodeId=" + nodeId +
-                    ", centrality=" + centrality +
-                    '}';
-        }
+        progressTracker.endSubTask();
+        
+        return closeness;
     }
 }

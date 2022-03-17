@@ -17,21 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl;
+package org.neo4j.gds.beta.closeness;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.beta.closeness.ClosenessCentrality;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -64,30 +61,22 @@ class ClosenessCentralityDiscoTest {
     private Graph graph;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @Test
     void testHuge() {
-        final ClosenessCentrality algo = new ClosenessCentrality(
+        var algo = ClosenessCentrality.of(
             graph,
-            2,
-            true,
+            ImmutableClosenessCentralityStreamConfig.builder().concurrency(2).improved(true).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
-
-        algo.compute();
-
-        var actual = algo.resultStream().collect(Collectors.toMap(r -> r.nodeId, r -> r.centrality));
-
-        var expected = Map.of(
-            idFunction.of("a"), 0.5,
-            idFunction.of("b"), 0.5,
-            idFunction.of("c"), 0.5,
-            idFunction.of("d"), 0.25,
-            idFunction.of("e"), 0.25
-        );
-
-        assertThat(actual).isEqualTo(expected);
+        
+        var result = algo.compute().centralities();
+        assertThat(result.get(idFunction.of("a"))).isCloseTo(0.5, Offset.offset(0.01));
+        assertThat(result.get(idFunction.of("b"))).isCloseTo(0.5, Offset.offset(0.01));
+        assertThat(result.get(idFunction.of("c"))).isCloseTo(0.5, Offset.offset(0.01));
+        assertThat(result.get(idFunction.of("d"))).isCloseTo(0.25, Offset.offset(0.01));
+        assertThat(result.get(idFunction.of("e"))).isCloseTo(0.25, Offset.offset(0.01));
     }
 }

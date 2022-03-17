@@ -38,7 +38,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.beta.closeness.stream", description = DESCRIPTION, executionMode = STREAM)
-public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentrality.Result, ClosenessCentralityStreamConfig> {
+public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStreamProc.StreamResult, ClosenessCentralityStreamConfig> {
 
     @Override
     public String name() {
@@ -47,7 +47,7 @@ public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentralit
 
     @Procedure(value = "gds.beta.closeness.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<ClosenessCentrality.Result> stream(
+    public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -59,14 +59,12 @@ public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentralit
     }
 
     @Override
-    protected ClosenessCentrality.Result streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
-    ) {
-        return new ClosenessCentrality.Result(originalNodeId, nodeProperties.doubleValue(internalNodeId));
+    protected StreamResult streamResult(long originalNodeId, long internalNodeId, NodeProperties nodeProperties) {
+        return new StreamResult(originalNodeId, nodeProperties.doubleValue(internalNodeId));
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityStreamConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStreamConfig> computationResult) {
         return ClosenessCentralityProc.nodeProperties(computationResult);
     }
 
@@ -83,6 +81,18 @@ public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentralit
     @Override
     public GraphAlgorithmFactory<ClosenessCentrality, ClosenessCentralityStreamConfig> algorithmFactory() {
         return ClosenessCentralityProc.algorithmFactory();
+    }
+
+    public static final class StreamResult {
+
+        public final long nodeId;
+
+        public final double centrality;
+
+        public StreamResult(long nodeId, double centrality) {
+            this.nodeId = nodeId;
+            this.centrality = centrality;
+        }
     }
 
 }

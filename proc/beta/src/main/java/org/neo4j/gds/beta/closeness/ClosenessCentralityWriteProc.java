@@ -43,7 +43,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.beta.closeness.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityWriteProc.WriteResult, ClosenessCentralityWriteConfig> {
+public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteProc.WriteResult, ClosenessCentralityWriteConfig> {
 
     @Override
     public String name() {
@@ -75,13 +75,13 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityWriteConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig> computationResult) {
         return ClosenessCentralityProc.nodeProperties(computationResult);
     }
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<ClosenessCentrality, ClosenessCentrality, ClosenessCentralityWriteConfig> computeResult,
+        ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return ClosenessCentralityProc.resultBuilder(
@@ -92,7 +92,6 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
         ).withNodeCount(computeResult.graph().nodeCount());
     }
 
-    @SuppressWarnings("unused")
     public static final class WriteResult {
 
         public final long nodePropertiesWritten;
@@ -129,7 +128,7 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
         static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
             public String writeProperty;
 
-            protected Builder(ProcedureCallContext callContext, int concurrency) {
+            private Builder(ProcedureCallContext callContext, int concurrency) {
                 super(callContext, concurrency);
             }
 
