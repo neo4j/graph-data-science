@@ -193,8 +193,9 @@ include::../algorithms/algorithm-tiers.adoc[]
 [opts=header,cols="1, 1"]
 |===
 |Algorithm name | Operation
-.3+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
+.4+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
 | `gds.beta.closeness.mutate`
+| `gds.beta.closeness.stats`
 | `gds.beta.closeness.stream`
 | `gds.beta.closeness.write`
 .8+<.^|<<graph-sage, GraphSAGE>>
