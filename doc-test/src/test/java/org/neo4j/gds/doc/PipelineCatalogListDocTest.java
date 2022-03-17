@@ -40,7 +40,7 @@ class PipelineCatalogListDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pipeline-catalog/pipeline-catalog-list.adoc";
+        return "machine-learning/pipeline-catalog/pipeline-catalog-list.adoc";
     }
 
     @AfterEach

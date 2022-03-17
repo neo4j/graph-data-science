@@ -14,7 +14,7 @@ include::python-client-gds-object.adoc[]
 == Constructing a model object
 
 There are several ways of constructing a model object.
-One of the simplest is to train a <<algorithms-embeddings-graph-sage, GraphSAGE>> model.
+One of the simplest is to train a <<graph-sage, GraphSAGE>> model.
 Supposing we have a graph `G` that have an integer node property "price", we could do the following:
 
 [source,python]
@@ -83,7 +83,7 @@ gds.beta.model.drop(model)          #  same as model.drop()
 [[python-client-model-object-graphsage]]
 === GraphSAGE
 
-As exemplified above in <<python-client-model-object-constructing>>, training a GraphSAGE model with the Python client is analogous to <<algorithms-embeddings-graph-sage, its Cypher counterpart>>.
+As exemplified above in <<python-client-model-object-constructing>>, training a GraphSAGE model with the Python client is analogous to <<graph-sage, its Cypher counterpart>>.
 
 Once trained, in addition to the <<python-client-model-object-inspecting, methods above>>, the GraphSAGE model object will have the following methods.
 

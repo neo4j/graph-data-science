@@ -89,38 +89,6 @@
         </d:tocentry>
     </d:tocentry>
 
-    <d:tocentry linkend="pipeline-catalog-ops">
-        <?dbhtml filename="pipeline-catalog/index.html"?>
-        <d:tocentry linkend="pipeline-catalog-list">
-            <?dbhtml filename="pipeline-catalog/list/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="pipeline-catalog-exists">
-            <?dbhtml filename="pipeline-catalog/exists/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="pipeline-catalog-drop">
-            <?dbhtml filename="pipeline-catalog/drop/index.html"?>
-        </d:tocentry>
-    </d:tocentry>
-
-    <d:tocentry linkend="model-catalog-ops">
-        <?dbhtml filename="model-catalog/index.html"?>
-        <d:tocentry linkend="catalog-model-list">
-            <?dbhtml filename="model-catalog/list/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="catalog-model-exists">
-            <?dbhtml filename="model-catalog/exists/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="catalog-model-drop">
-            <?dbhtml filename="model-catalog/drop/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="catalog-model-store">
-            <?dbhtml filename="model-catalog/store/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="catalog-model-publish">
-            <?dbhtml filename="model-catalog/publish/index.html"?>
-        </d:tocentry>
-    </d:tocentry>
-
     <d:tocentry linkend="algorithms">
         <?dbhtml filename="algorithms/index.html"?>
         <d:tocentry linkend="algorithms-syntax">
@@ -267,26 +235,6 @@
             </d:tocentry>
         </d:tocentry>
 
-        <d:tocentry linkend="algorithms-node-embeddings"><?dbhtml filename="algorithms/node-embeddings/index.html"?>
-            <d:tocentry linkend="algorithms-embeddings-fastrp"><?dbhtml filename="algorithms/fastrp/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="algorithms-embeddings-graph-sage"><?dbhtml filename="algorithms/graph-sage/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="beta-algorithms-embeddings-node2vec"><?dbhtml filename="algorithms/node2vec/index.html"?>
-            </d:tocentry>
-        </d:tocentry>
-
-        <d:tocentry linkend="algorithms-ml-models"><?dbhtml filename="algorithms/ml-models/index.html"?>
-            <d:tocentry linkend="algorithms-ml-models-preprocessing"><?dbhtml filename="algorithms/ml-models/pre-processing/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="algorithms-ml-nodeclassification-pipelines"><?dbhtml filename="algorithms/ml-models/nodeclassification-pipelines/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="algorithms-ml-linkprediction-pipelines"><?dbhtml filename="algorithms/ml-models/linkprediction-pipelines/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="algorithms-ml-training-methods"><?dbhtml filename="algorithms/ml-models/training-methods/index.html"?>
-            </d:tocentry>
-        </d:tocentry>
-
         <d:tocentry linkend="algorithms-auxiliary">
             <?dbhtml filename="algorithms/auxiliary/index.html"?>
             <d:tocentry linkend="graph-generation">
@@ -308,6 +256,63 @@
 
         <d:tocentry linkend="algorithms-pregel-api">
             <?dbhtml filename="algorithms/pregel-api/index.html"?>
+        </d:tocentry>
+    </d:tocentry>
+
+    <d:tocentry linkend="machine-learning">
+        <?dbhtml filename="machine-learning/machine-learning/index.html"?>
+
+        <d:tocentry linkend="ml-preprocessing"><?dbhtml filename="machine-learning/pre-processing/index.html"?>
+        </d:tocentry>
+
+        <d:tocentry linkend="node-embeddings"><?dbhtml filename="machine-learning/node-embeddings/index.html"?>
+            <d:tocentry linkend="fastrp"><?dbhtml filename="machine-learning/node-embeddings/fastrp/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="graph-sage"><?dbhtml filename="machine-learning/node-embeddings/graph-sage/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="node2vec"><?dbhtml filename="machine-learning/node-embeddings/node2vec/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
+        <d:tocentry linkend="nodeclassification-pipelines"><?dbhtml filename="machine-learning/nodeclassification-pipelines/index.html"?>
+        </d:tocentry>
+
+        <d:tocentry linkend="linkprediction-pipelines"><?dbhtml filename="machine-learning/linkprediction-pipelines/index.html"?>
+        </d:tocentry>
+
+        <d:tocentry linkend="pipeline-catalog-ops">
+            <?dbhtml filename="pipeline-catalog/index.html"?>
+            <d:tocentry linkend="pipeline-catalog-list">
+                <?dbhtml filename="pipeline-catalog/list/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="pipeline-catalog-exists">
+                <?dbhtml filename="pipeline-catalog/exists/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="pipeline-catalog-drop">
+                <?dbhtml filename="pipeline-catalog/drop/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
+        <d:tocentry linkend="model-catalog-ops">
+            <?dbhtml filename="model-catalog/index.html"?>
+            <d:tocentry linkend="catalog-model-list">
+                <?dbhtml filename="model-catalog/list/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="catalog-model-exists">
+                <?dbhtml filename="model-catalog/exists/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="catalog-model-drop">
+                <?dbhtml filename="model-catalog/drop/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="catalog-model-store">
+                <?dbhtml filename="model-catalog/store/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="catalog-model-publish">
+                <?dbhtml filename="model-catalog/publish/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
+        <d:tocentry linkend="ml-training-methods"><?dbhtml filename="machine-learning/training-methods/index.html"?>
         </d:tocentry>
     </d:tocentry>
 

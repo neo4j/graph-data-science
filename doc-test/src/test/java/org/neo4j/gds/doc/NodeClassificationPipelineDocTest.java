@@ -67,6 +67,6 @@ class NodeClassificationPipelineDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/nodeclassification-pipeline/nodeclassification.adoc";
+        return "machine-learning/nodeclassification-pipeline/nodeclassification.adoc";
     }
 }

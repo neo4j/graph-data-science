@@ -42,7 +42,7 @@ class FastRPDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/fastrp/fastrp.adoc";
+        return "machine-learning/node-embeddings/fastrp/fastrp.adoc";
     }
 
 }

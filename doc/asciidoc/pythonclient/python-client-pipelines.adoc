@@ -1,7 +1,7 @@
 [[python-client-pipelines]]
 = Machine learning pipelines
 
-The Python client has special support for <<algorithms-ml-linkprediction-pipelines>> and <<algorithms-ml-nodeclassification-pipelines>>.
+The Python client has special support for <<linkprediction-pipelines>> and <<nodeclassification-pipelines>>.
 The GDS pipelines are represented as pipeline objects.
 
 The Python method calls to _create_ the pipelines match their Cypher counterparts exactly.
@@ -14,12 +14,12 @@ include::python-client-gds-object.adoc[]
 
 == Node classification
 
-This section outlines how to use the Python client to build, configure and train a <<algorithms-ml-nodeclassification-pipelines, node classification pipeline>>, as well as how to use the model that training produces for predictions.
+This section outlines how to use the Python client to build, configure and train a <<nodeclassification-pipelines, node classification pipeline>>, as well as how to use the model that training produces for predictions.
 
 
 === Pipeline
 
-The creation of the node classification pipeline is very similar to <<algorithms-ml-nodeclassification-creating-a-pipeline, how it's done in Cypher>>.
+The creation of the node classification pipeline is very similar to <<nodeclassification-creating-a-pipeline, how it's done in Cypher>>.
 To create a new node classification pipeline one would make the following call:
 
 [source,python]
@@ -37,17 +37,17 @@ Below is a description of the methods on such objects:
 |===
 | Name                    | Arguments              | Return type            | Description
 | addNodeProperty         | procedure_name: str, +
-                            config: **kwargs       | dict[str, any]         | <<algorithms-ml-nodeclassification-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+                            config: **kwargs       | dict[str, any]         | <<nodeclassification-pipelines-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
 | selectFeatures          | node_properties: +
-                            Union[str, list[str]]  | dict[str, any]         | <<algorithms-ml-nodeclassification-adding-features, Select node properties to be used as features>>.
-| configureSplit          | config: **kwargs       | dict[str, any]         | <<algorithms-ml-nodeclassification-configure-splits, Configure the train-test dataset split>>.
+                            Union[str, list[str]]  | dict[str, any]         | <<nodeclassification-pipelines-adding-features, Select node properties to be used as features>>.
+| configureSplit          | config: **kwargs       | dict[str, any]         | <<nodeclassification-pipelines-configure-splits, Configure the train-test dataset split>>.
 | configureParams         | parameter_space: +
-                            list[dict[str, any]]   | dict[str, any]         | <<algorithms-ml-nodeclassification-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
+                            list[dict[str, any]]   | dict[str, any]         | <<nodeclassification-pipelines-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
 | train                   | G: Graph, +
                             config: **kwargs       | NCPredictionPipeline, +
-                                                             dict[str, any] | <<algorithms-ml-nodeclassification-pipelines-train, Train the pipeline on the given input graph using given keyword arguments>>.
+                                                             dict[str, any] | <<nodeclassification-pipelines-train, Train the pipeline on the given input graph using given keyword arguments>>.
 | train_estimate          | G: Graph, +
-                            config: **kwargs       | dict[str, any]         | <<algorithms-ml-nodeclassification-examples-train-memory-estimation, Estimate training the pipeline on the given input graph using given keyword arguments>>.
+                            config: **kwargs       | dict[str, any]         | <<nodeclassification-pipelines-examples-train-memory-estimation, Estimate training the pipeline on the given input graph using given keyword arguments>>.
 | node_property_steps     | -                      | list[dict[str, any]]   | Returns the node property steps of the pipeline.
 | feature_properties      | -                      | list[dict[str, any]]   | Returns a list of the selected feature properties for the pipeline.
 | split_config            | -                      | dict[str, any]         | Returns the configuration set up for train-test splitting of the dataset.
@@ -66,7 +66,7 @@ There are two main differences when comparing the methods above that map to proc
 
 Another difference is that the `train` Python call takes a <<python-client-graph-object, graph object>> instead of a graph name, and returns a `NCModel` <<python-client-model-object, model object>> that we can run predictions with as well as a `dict[str, any]` with the metadata from the training.
 
-Please consult the <<algorithms-ml-nodeclassification-pipelines, node classification Cypher documentation>> for information about what kind of input the methods expect.
+Please consult the <<nodeclassification-pipelines, node classification Cypher documentation>> for information about what kind of input the methods expect.
 
 
 [[python-client-pipelines-nodeclassification-pipe-example]]
@@ -113,22 +113,22 @@ In addition to inheriting the methods common to all <<python-client-model-object
 |===
 | Name                    | Arguments        | Return type          | Description
 | predict_mutate          | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<algorithms-ml-nodeclassification-pipeline-examples-mutate, Predict classes for nodes of the input graph and mutate graph with predictions>>.
+                            config: **kwargs | dict[str, any]       | <<nodeclassification-pipelines-examples-mutate, Predict classes for nodes of the input graph and mutate graph with predictions>>.
 | predict_mutate_estimate | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<algorithms-ml-nodeclassification-examples-predict-memory-estimation, Estimate predicting classes for nodes of the input graph and mutating graph with predictions>>.
+                            config: **kwargs | dict[str, any]       | <<nodeclassification-pipelines-examples-predict-memory-estimation, Estimate predicting classes for nodes of the input graph and mutating graph with predictions>>.
 | predict_stream          | G: Graph, +
-                            config: **kwargs | list[dict[str, any]] | <<algorithms-node-classification-pipelines-predict-examples-stream, Predict classes for nodes of the input graph and stream the results>>.
+                            config: **kwargs | list[dict[str, any]] | <<node-classification-pipelines-predict-examples-stream, Predict classes for nodes of the input graph and stream the results>>.
 | predict_stream_estimate | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<algorithms-ml-nodeclassification-examples-predict-memory-estimation, Estimate predicting classes for nodes of the input graph and streaming the results>>.
+                            config: **kwargs | dict[str, any]       | <<nodeclassification-pipelines-examples-predict-memory-estimation, Estimate predicting classes for nodes of the input graph and streaming the results>>.
 | predict_write           | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<algorithms-ml-nodeclassification-pipeline-examples-write, Predict classes for nodes of the input graph and write results back to the database>>.
+                            config: **kwargs | dict[str, any]       | <<nodeclassification-pipelines-examples-write, Predict classes for nodes of the input graph and write results back to the database>>.
 
 | predict_write_estimate  | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<algorithms-ml-nodeclassification-examples-predict-memory-estimation, Estimate predicting classes for nodes of the input graph and writing the results back to the database>>.
+                            config: **kwargs | dict[str, any]       | <<nodeclassification-pipelines-examples-predict-memory-estimation, Estimate predicting classes for nodes of the input graph and writing the results back to the database>>.
 | metrics                 | -                | dict[str, any]       | Returns values for the metrics specified when training, for this particular model.
 |===
 
-One can note that the predict methods are indeed very similar to <<algorithms-node-classification-pipelines-predict, their Cypher counterparts>>.
+One can note that the predict methods are indeed very similar to <<nodeclassification-pipelines-predict, their Cypher counterparts>>.
 The three main differences are that:
 
 * They take a <<python-client-graph-object, graph object>> instead of a graph name.
@@ -155,12 +155,12 @@ assert len(results) == H.node_count()
 
 == Link prediction
 
-This section outlines how to use the Python client to build, configure and train a <<algorithms-ml-linkprediction-pipelines, link prediction pipeline>>, as well as how to use the model that training produces for predictions.
+This section outlines how to use the Python client to build, configure and train a <<linkprediction-pipelines, link prediction pipeline>>, as well as how to use the model that training produces for predictions.
 
 
 === Pipeline
 
-The creation of the link prediction pipeline is very similar to <<algorithms-ml-linkprediction-creating-a-pipeline, how it's done in Cypher>>.
+The creation of the link prediction pipeline is very similar to <<linkprediction-creating-a-pipeline, how it's done in Cypher>>.
 To create a new link prediction pipeline one would make the following call:
 
 
@@ -179,17 +179,17 @@ Below is a description of the methods on such objects:
 |===
 | Name                | Arguments              | Return type             | Description
 | addNodeProperty     | procedure_name: str, +
-                        config: **kwargs       | dict[str, any]          | <<algorithms-ml-linkprediction-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+                        config: **kwargs       | dict[str, any]          | <<linkprediction-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
 | addFeature          | feature_type: str, +
-                        config: **kwargs       | dict[str, any]          | <<algorithms-ml-linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
-| configureSplit      | config: **kwargs       | dict[str, any]          | <<algorithms-ml-linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
+                        config: **kwargs       | dict[str, any]          | <<linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
+| configureSplit      | config: **kwargs       | dict[str, any]          | <<linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
 | configureParams     | parameter_space: +
-                        list[dict[str, any]]   | dict[str, any]          | <<algorithms-ml-linkprediction-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
+                        list[dict[str, any]]   | dict[str, any]          | <<linkprediction-configure-model-parameters, Configure the model parameter space used during the model selection phase>>.
 | train               | G: Graph, +
                         config: **kwargs       | LPPredictionPipeline, +
-                                                 dict[str, any]          | <<algorithms-ml-linkprediction-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
+                                                 dict[str, any]          | <<linkprediction-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
 | train_estimate      | G: Graph, +
-                        config: **kwargs       | dict[str, any]          | <<algorithms-ml-linkprediction-pipeline-examples-train-estimate, Estimate training the pipeline on the given input graph using given keyword arguments>>.
+                        config: **kwargs       | dict[str, any]          | <<linkprediction-pipeline-examples-train-estimate, Estimate training the pipeline on the given input graph using given keyword arguments>>.
 | node_property_steps | -                      | list[dict[str, any]]    | Returns the node property steps of the pipeline.
 | feature_steps       | -                      | list[dict[str, any]]    | Returns a list of the selected feature steps for the pipeline.
 | split_config        | -                      | dict[str, any]          | Returns the configuration set up for feature-train-test splitting of the dataset.
@@ -208,7 +208,7 @@ There are two main differences when comparing the methods above that map to proc
 
 Another difference is that the `train` Python call takes a <<python-client-graph-object, graph object>> instead of a graph name, and returns a `LPModel` <<python-client-model-object, model object>> that we can run predictions with as well as a `dict[str, any]` with the metadata from the training.
 
-Please consult the <<algorithms-ml-linkprediction-pipelines, link prediction Cypher documentation>> for information about what kind of input the methods expect.
+Please consult the <<linkprediction-pipelines, link prediction Cypher documentation>> for information about what kind of input the methods expect.
 
 
 [[python-client-pipelines-linkprediction-pipe-example]]
