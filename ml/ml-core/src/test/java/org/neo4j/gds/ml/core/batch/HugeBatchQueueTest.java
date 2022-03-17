@@ -17,12 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml;
+package org.neo4j.gds.ml.core.batch;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
