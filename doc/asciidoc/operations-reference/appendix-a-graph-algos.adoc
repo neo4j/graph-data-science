@@ -156,13 +156,13 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.shortestPath.astar.write.estimate`
 | `gds.shortestPath.astar.mutate`
 | `gds.shortestPath.astar.mutate.estimate`
-| Cosine Similarity | `_gds.similarity.cosine_`
-.2+<.^|Euclidean Similarity
-| `_gds.similarity.euclidean_`
-| `_gds.similarity.euclideanDistance_`
-| Jaccard Similarity | `_gds.similarity.jaccard_`
-| Overlap Similarity | `_gds.similarity.overlap_`
-| Pearson Similarity | `_gds.similarity.pearson_`
+.6+<.^| <<similarity-functions, Similarity functions>>
+| `gds.similarity.cosine`
+| `gds.similarity.euclidean`
+| `gds.similarity.euclideanDistance`
+| `gds.similarity.jaccard`
+| `gds.similarity.overlap`
+| `gds.similarity.pearson`
 .8+<.^|<<algorithms-knn, K-Nearest Neighbors>>
 | `gds.knn.mutate`
 | `gds.knn.mutate.estimate`
