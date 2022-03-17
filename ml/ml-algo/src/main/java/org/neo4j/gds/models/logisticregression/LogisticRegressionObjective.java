@@ -21,25 +21,23 @@ package org.neo4j.gds.models.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.models.Features;
 import org.neo4j.gds.gradientdescent.Objective;
-import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ConstantScale;
-import org.neo4j.gds.ml.core.functions.CrossEntropyLoss;
 import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.ReducedCrossEntropyLoss;
+import org.neo4j.gds.ml.core.functions.Softmax;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
+import org.neo4j.gds.models.Features;
 
 import java.util.List;
 
@@ -51,59 +49,27 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
     private final Features features;
     private final HugeLongArray labels;
 
-    //TODO: add support for number of classes and Fudge only in NC
-    public static long sizeOfBatchInBytes(int batchSize, int featureDim) {
-        // we consider each variable in the computation graph
-        var batchedTargets = Matrix.sizeInBytes(batchSize, 1);
-        var features = Matrix.sizeInBytes(batchSize, featureDim);
-
-        var weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(
-            Dimensions.matrix(batchSize, featureDim),
-            Dimensions.matrix(1, featureDim)
-        );
-
-        var sigmoid = weightedFeatures;
-        var unpenalizedLoss = Scalar.sizeInBytes();
-        var l2norm = Scalar.sizeInBytes();
-        var constantScale = Scalar.sizeInBytes();
-        var elementSum = Scalar.sizeInBytes();
-
-        var bias = weightedFeatures;
-        var penalty = l2norm + constantScale;
-
-        // 2 * x == computing data and gradient for this computation variable
-        return MemoryUsage.sizeOfInstance(LogisticRegressionClassifier.class) +
-               Weights.sizeInBytes(1, featureDim) + // only gradient as data is the model data
-               batchedTargets +
-               features +
-               2 * weightedFeatures +
-               2 * bias +
-               2 * sigmoid +
-               2 * unpenalizedLoss +
-               2 * penalty +
-               2 * elementSum;
-    }
-
-    //TODO: fix me and merge with above method
     @SuppressWarnings({"PointlessArithmeticExpression", "UnnecessaryLocalVariable"})
-    public static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {
+    public static long sizeOfBatchInBytes(boolean isReduced, int batchSize, int numberOfFeatures, int numberOfClasses) {
         // perThread
-        var batchLocalWeightGradient = Weights.sizeInBytes(numberOfClasses, numberOfFeatures);
+        int normalizedNumberOfClasses = isReduced ? (numberOfClasses - 1) : numberOfClasses;
+        var batchLocalWeightGradient = Weights.sizeInBytes(normalizedNumberOfClasses, numberOfFeatures);
         var targets = Matrix.sizeInBytes(batchSize, 1);
         var weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(
-            Dimensions.matrix(batchSize, numberOfFeatures),
-            Dimensions.matrix(numberOfClasses, numberOfFeatures)
+            batchSize,
+            normalizedNumberOfClasses
         );
-        var softMax = weightedFeatures;
-        var unpenalizedLoss = CrossEntropyLoss.sizeInBytes();
+        var softMax = Softmax.sizeInBytes(batchSize, numberOfClasses);
+        var unpenalizedLoss = ReducedCrossEntropyLoss.sizeInBytes();
         var l2norm = L2NormSquared.sizeInBytesOfApply();
-        var constantScale = L2NormSquared.sizeInBytesOfApply(); //
+        var constantScale = l2norm;
         var elementSum = constantScale;
 
         long sizeOfPredictionsVariableInBytes = LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(
             batchSize,
             numberOfFeatures,
-            numberOfClasses
+            numberOfClasses,
+            normalizedNumberOfClasses
         );
 
         long sizeOfComputationGraphForTrainEpoch =

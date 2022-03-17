@@ -47,35 +47,31 @@ public final class LogisticRegressionTrainer implements Trainer {
     private final boolean reduceClassCount;
     private final int concurrency;
 
-    public static MemoryEstimation estimate(LogisticRegressionTrainConfig llrConfig, MemoryRange linkFeatureDimension) {
-        return MemoryEstimations.builder("train model")
-            .add("model data", LogisticRegressionData.memoryEstimationBinaryReduced(linkFeatureDimension))
-            .add("update weights", Training.memoryEstimation(linkFeatureDimension, 1, 1))
+    public static MemoryEstimation memoryEstimation(
+        boolean isReduced,
+        int numberOfClasses,
+        MemoryRange featureDimension,
+        int batchSize
+    ) {
+        return MemoryEstimations.builder("train logistic regression", LogisticRegressionTrainer.class)
+            .add("model data", LogisticRegressionData.memoryEstimation(isReduced, numberOfClasses, featureDimension))
+            .add("update weights", Training.memoryEstimation(featureDimension, numberOfClasses))
             .perThread(
                 "computation graph",
-                linkFeatureDimension.apply(featureDim -> LogisticRegressionObjective.sizeOfBatchInBytes(
-                    llrConfig.batchSize(),
-                    Math.toIntExact(featureDim)
-                ))
+                featureDimension.apply(dim ->
+                    sizeInBytesOfComputationGraph(
+                        isReduced,
+                        batchSize,
+                        (int) dim,
+                        numberOfClasses
+                    )
+                )
             )
             .build();
     }
 
-    public static MemoryEstimation memoryEstimation(
-        int numberOfClasses,
-        int numberOfFeatures,
-        int batchSize
-    ) {
-        var CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA = 1;
-        return MemoryEstimations.builder(LogisticRegressionTrainer.class)
-            .add("model data", LogisticRegressionData.memoryEstimation(numberOfClasses, numberOfFeatures))
-            .add("training", Training.memoryEstimation(numberOfFeatures, numberOfClasses, CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA))
-            .perThread("computation graph", sizeInBytesOfComputationGraph(batchSize, numberOfFeatures, numberOfClasses))
-            .build();
-    }
-
-    private static long sizeInBytesOfComputationGraph(int batchSize, int numberOfFeatures, int numberOfClasses) {
-        return LogisticRegressionObjective.sizeOfBatchInBytes(batchSize, numberOfFeatures, numberOfClasses);
+    private static long sizeInBytesOfComputationGraph(boolean isReduced, int batchSize, int numberOfFeatures, int numberOfClasses) {
+        return LogisticRegressionObjective.sizeOfBatchInBytes(isReduced, batchSize, numberOfFeatures, numberOfClasses);
     }
 
 

@@ -48,8 +48,8 @@ public class AdamOptimizer implements Updater {
 
     private int iteration = 0;
 
-    public static long sizeInBytes(int rows, int cols, int numberOfWeights) {
-        var termSize = Weights.sizeInBytes(rows, cols) * numberOfWeights;
+    public static long sizeInBytes(int rows, int cols) {
+        var termSize = Weights.sizeInBytes(rows, cols);
         return sizeOfInstance(AdamOptimizer.class) +
                 2 * termSize + // fields
                 2 * termSize; // working memory: mCap, vCap

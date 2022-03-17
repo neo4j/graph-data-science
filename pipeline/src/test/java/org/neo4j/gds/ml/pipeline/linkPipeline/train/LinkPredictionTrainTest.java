@@ -114,22 +114,22 @@ class LinkPredictionTrainTest {
             Arguments.of(
                 "Default",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.1).validationFolds(2).build(),
-                MemoryRange.of(82_136, 2_485_096)
+                MemoryRange.of(80_784, 2_577_824)
             ),
             Arguments.of(
                 "Higher test-set",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.6).trainFraction(0.1).validationFolds(2).build(),
-                MemoryRange.of(184_536, 6_507_496)
+                MemoryRange.of(183_184, 6_600_224)
             ),
             Arguments.of(
                 "Higher train-set",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.6).validationFolds(2).build(),
-                MemoryRange.of(188_056, 6_040_616)
+                MemoryRange.of(186_704, 6_133_344)
             ),
             Arguments.of(
                 "Higher validation folds",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.6).validationFolds(5).build(),
-                MemoryRange.of(214_312, 6_066_872)
+                MemoryRange.of(212_960, 6_159_600)
             )
         );
     }
@@ -144,19 +144,19 @@ class LinkPredictionTrainTest {
 
         return Stream.of(
             Arguments.of("LLR batchSize 10",
-                TrainingMethod.LogisticRegression, List.of(llrConfigs.get(0)), MemoryRange.of(34_728, 1_026_488)
+                TrainingMethod.LogisticRegression, List.of(llrConfigs.get(0)), MemoryRange.of(36_256, 1_122_096)
             ),
             Arguments.of(
                 "LLR batchSize 100",
                 TrainingMethod.LogisticRegression,
                 List.of(llrConfigs.get(1)),
-                MemoryRange.of(83_688, 2_486_648)
+                MemoryRange.of(82_336, 2_579_376)
             ),
             Arguments.of(
                 "LLR batchSize 10,100",
                 TrainingMethod.LogisticRegression,
                 llrConfigs,
-                MemoryRange.of(83_688, 2_486_648)
+                MemoryRange.of(82_336, 2_579_376)
             ),
             Arguments.of(
                 "RF",
@@ -230,10 +230,10 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "  10,   10, 58_776, 1_685_576",
-        "  10,  100, 61_080, 1_758_440",
-        "  10, 1000, 83_688, 2_486_648",
-        "1000, 1000, 83_688, 2_486_648"
+        "  10,   10, 57_424, 1_778_304",
+        "  10,  100, 59_728, 1_851_168",
+        "  10, 1000, 82_336, 2_579_376",
+        "1000, 1000, 82_336, 2_579_376"
     })
     void estimateWithDifferentGraphSizes(int nodeCount, int relationshipCount, int expectedMinEstimation, int expectedMaxEstimation) {
         var trainConfig = LinkPredictionTrainConfig
@@ -325,9 +325,9 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "  1,  41_280, 1_244_720",
-        "  2,  55_416, 1_658_696",
-        "  4,  83_688, 2_486_648",
+        "  1,  41_296, 1_280_016",
+        "  2,  54_976, 1_713_136",
+        "  4,  82_336, 2_579_376",
     })
     void estimateWithConcurrency(int concurrency, int expectedMinEstimation, int expectedMaxEstimation) {
         var trainConfig = LinkPredictionTrainConfig

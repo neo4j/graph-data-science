@@ -196,8 +196,9 @@ public final class NodeClassificationTrain {
     ) {
         // There's no memory estimation support for Random forest yet.
         MemoryEstimation training = LogisticRegressionTrainer.memoryEstimation(
+            false,
             fudgedClassCount,
-            fudgedFeatureCount,
+            MemoryRange.of(fudgedFeatureCount),
             maxBatchSize
         );
 
@@ -214,6 +215,7 @@ public final class NodeClassificationTrain {
             .fixed("computation graph", LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(
                 BatchQueue.DEFAULT_BATCH_SIZE,
                 fudgedFeatureCount,
+                fudgedClassCount,
                 fudgedClassCount
             ))
             .build();

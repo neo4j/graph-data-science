@@ -64,32 +64,29 @@ public class Training {
 
     public static MemoryEstimation memoryEstimation(
         int numberOfFeatures,
-        int numberOfClasses,
-        int numberOfWeights
+        int numberOfClasses
     ) {
-        return memoryEstimation(MemoryRange.of(numberOfFeatures), numberOfClasses, numberOfWeights);
+        return memoryEstimation(MemoryRange.of(numberOfFeatures), numberOfClasses);
     }
 
     public static MemoryEstimation memoryEstimation(
         MemoryRange numberOfFeaturesRange,
-        int numberOfClasses,
-        int numberOfWeights
+        int numberOfClasses
     ) {
         return MemoryEstimations.builder(Training.class)
             .add(MemoryEstimations.of(
                     "updater",
                     numberOfFeaturesRange.apply(features -> AdamOptimizer.sizeInBytes(
-                        numberOfClasses,
-                        Math.toIntExact(features),
-                        numberOfWeights
-                    ))
+                            numberOfClasses,
+                            Math.toIntExact(features)
+                        )
+                    )
                 )
             )
             .perThread(
                 "weight gradients",
                 numberOfFeaturesRange
                     .apply(features -> Weights.sizeInBytes(numberOfClasses, Math.toIntExact(features)))
-                    .times(numberOfWeights)
             )
             .build();
     }

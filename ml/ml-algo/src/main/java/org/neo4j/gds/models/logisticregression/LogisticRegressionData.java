@@ -74,21 +74,15 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
         return ImmutableLogisticRegressionData.builder().bias(bias).weights(weights).classIdMap(classIdMap).build();
     }
 
-    static MemoryEstimation memoryEstimationBinaryReduced(MemoryRange featureDimension) {
-        return MemoryEstimations.builder(LogisticRegressionData.class)
-            .fixed("weights", featureDimension.apply(featureDim -> Weights.sizeInBytes(
-                1,
-                Math.toIntExact(featureDim)
-            )))
-            .fixed("bias", Weights.sizeInBytes(1, 1))
-            .build();
-    }
-
-    static MemoryEstimation memoryEstimation(int numberOfClasses, int numberOfFeatures) {
+    static MemoryEstimation memoryEstimation(boolean isReduced, int numberOfClasses, MemoryRange featureDimension) {
+        int normalizedNumberOfClasses = isReduced ? (numberOfClasses - 1) : numberOfClasses;
         return MemoryEstimations.builder(LogisticRegressionData.class)
             .add("classIdMap", LocalIdMap.memoryEstimation(numberOfClasses))
-            .fixed("weights", Weights.sizeInBytes(numberOfClasses, numberOfFeatures))
-            .fixed("bias", Weights.sizeInBytes(numberOfClasses, 1))
+            .fixed("weights", featureDimension.apply(featureDim -> Weights.sizeInBytes(
+                normalizedNumberOfClasses,
+                Math.toIntExact(featureDim)
+            )))
+            .fixed("bias", Weights.sizeInBytes(normalizedNumberOfClasses, 1))
             .build();
     }
 

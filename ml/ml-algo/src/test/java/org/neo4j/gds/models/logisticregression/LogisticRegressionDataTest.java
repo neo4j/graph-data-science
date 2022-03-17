@@ -33,16 +33,16 @@ class LogisticRegressionDataTest {
     @Test
     void shouldEstimateMemory() {
         var dimensions = GraphDimensions.of(0);
-        var _04_05 = LogisticRegressionData.memoryEstimation(4, 5)
+        var _04_05 = LogisticRegressionData.memoryEstimation(false, 4, MemoryRange.of(5))
             .estimate(dimensions, 1)
             .memoryUsage();
-        var _04_10 = LogisticRegressionData.memoryEstimation(4, 10)
+        var _04_10 = LogisticRegressionData.memoryEstimation(false, 4, MemoryRange.of(10))
             .estimate(dimensions, 1)
             .memoryUsage();
-        var _08_05 = LogisticRegressionData.memoryEstimation(8, 5)
+        var _08_05 = LogisticRegressionData.memoryEstimation(false, 8, MemoryRange.of(5))
             .estimate(dimensions, 1)
             .memoryUsage();
-        var _08_10 = LogisticRegressionData.memoryEstimation(8, 10)
+        var _08_10 = LogisticRegressionData.memoryEstimation(false, 8, MemoryRange.of(10))
             .estimate(dimensions, 1)
             .memoryUsage();
 
@@ -55,10 +55,10 @@ class LogisticRegressionDataTest {
         assertThat(_08_05.max).isEqualTo(2 * _04_05.max - overheadForOneNLRData);
         assertThat(_08_10.max).isEqualTo(2 * _04_10.max - overheadForOneNLRData);
 
-        var _04_20 = LogisticRegressionData.memoryEstimation(4, 20)
+        var _04_20 = LogisticRegressionData.memoryEstimation(false, 4, MemoryRange.of(20))
             .estimate(dimensions, 1)
             .memoryUsage();
-        var _04_30 = LogisticRegressionData.memoryEstimation(4, 30)
+        var _04_30 = LogisticRegressionData.memoryEstimation(false, 4, MemoryRange.of(30))
             .estimate(dimensions, 1)
             .memoryUsage();
 
@@ -77,16 +77,16 @@ class LogisticRegressionDataTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "100,  0, 100,   56, 856",
-        "1000, 0, 100,   56, 856",
-        "100,  50, 500, 456, 4056",
-        "1000, 50, 500, 456, 4056"
+        "100,   0, 100, 168,   968",
+        "1000,  0, 100, 168,   968",
+        "100,  50, 500, 568, 4_168",
+        "1000, 50, 500, 568, 4_168"
     })
     void shouldEstimateCorrectlyBinaryReduced(int relCount, int minFeatureCount, int maxFeatureCount, int minEstimation, int maxEstimation) {
         var estimatedFeatureCount = MemoryRange.of(minFeatureCount, maxFeatureCount);
         var dimensions = GraphDimensions.of(1000L, relCount);
         var memoryEstimation = LogisticRegressionData
-            .memoryEstimationBinaryReduced(estimatedFeatureCount)
+            .memoryEstimation(true, 2, estimatedFeatureCount)
             .estimate(dimensions, 5000);
 
         assertThat(memoryEstimation.memoryUsage()).isEqualTo(MemoryRange.of(minEstimation, maxEstimation));

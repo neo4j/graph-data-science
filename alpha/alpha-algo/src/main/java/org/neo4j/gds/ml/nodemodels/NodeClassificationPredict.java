@@ -79,7 +79,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
             builder.perNode("predicted probabilities", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfDoubleArray(classCount)));
         }
         builder.perNode("predicted classes", HugeLongArray::memoryEstimation);
-        builder.fixed("computation graph", LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount));
+        builder.fixed("computation graph", LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount, classCount));
         return builder.build();
     }
 
@@ -103,7 +103,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
                 dim.nodeCount(),
                 minBatchSize,
                 threads
-            ), featureCount, classCount))
+            ), featureCount, classCount, classCount))
         );
         return builder.build();
     }

@@ -36,7 +36,6 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.Features;
 
-import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
 import static org.neo4j.gds.ml.core.Dimensions.matrix;
 
 public final class LogisticRegressionClassifier implements Classifier {
@@ -91,19 +90,24 @@ public final class LogisticRegressionClassifier implements Classifier {
         return new LogisticRegressionClassifier(data, predictionStrategy);
     }
 
-    public static long sizeOfPredictionsVariableInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {
+    public static long sizeOfPredictionsVariableInBytes(
+        int batchSize,
+        int numberOfFeatures,
+        int numberOfClasses,
+        int normalizedNumberOfClasses
+    ) {
         var dimensionsOfFirstMatrix = matrix(batchSize, numberOfFeatures);
-        var dimensionsOfSecondMatrix = matrix(numberOfClasses, numberOfFeatures);
-        var resultRows = dimensionsOfFirstMatrix[ROWS_INDEX];
-        var resultCols = dimensionsOfSecondMatrix[ROWS_INDEX]; // transposed second operand means we get the rows
+        var softmaxSize = numberOfClasses == normalizedNumberOfClasses
+            ? Softmax.sizeInBytes(batchSize, numberOfClasses)
+            : ReducedSoftmax.sizeInBytes(batchSize, numberOfClasses);
         return
             sizeOfFeatureExtractorsInBytes(numberOfFeatures) +
             Constant.sizeInBytes(dimensionsOfFirstMatrix) +
             MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(
-                dimensionsOfFirstMatrix,
-                dimensionsOfSecondMatrix
+                batchSize,
+                normalizedNumberOfClasses
             ) +
-            Softmax.sizeInBytes(resultRows, resultCols);
+            softmaxSize;
     }
 
     private static long sizeOfFeatureExtractorsInBytes(int numberOfFeatures) {

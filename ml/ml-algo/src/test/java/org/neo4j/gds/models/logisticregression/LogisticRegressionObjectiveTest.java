@@ -226,18 +226,18 @@ class LogisticRegressionObjectiveTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        " 10,   1, 1_008",
-        "100,   1, 6_768",
-        " 10, 100, 9_720",
+        " 10,   1,    904",
+        "100,   1,  5_944",
+        " 10, 100, 12_784",
     })
     void shouldEstimateMemoryUsage(int batchSize, int featureDim, long expected) {
-        var memoryUsageInBytes = LogisticRegressionObjective.sizeOfBatchInBytes(batchSize, featureDim);
+        var memoryUsageInBytes = LogisticRegressionObjective.sizeOfBatchInBytes(true, batchSize, featureDim, 2);
         assertThat(memoryUsageInBytes).isEqualTo(expected);
     }
 
     @Test
     void shouldEstimateMemoryUsage() {
-        var memoryUsageInBytes = LogisticRegressionObjective.sizeOfBatchInBytes(100, 10, 10);
+        var memoryUsageInBytes = LogisticRegressionObjective.sizeOfBatchInBytes(false, 100, 10, 10);
 
         var weightGradient = 8 * 10 * 10 + 16;      // 8 bytes for a double * numberOfClasses * numberOfFeatures + 16 for the double array
         var makeTargets = 8 * 100 * 1 + 16;         // 8 bytes for a double * batchSize * 1 for the single target property + 16 for the double array

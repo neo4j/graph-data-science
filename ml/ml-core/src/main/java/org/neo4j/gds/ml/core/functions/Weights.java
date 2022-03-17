@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -72,6 +73,10 @@ public class Weights<T extends Tensor<T>> extends AbstractVariable<T> {
 
     public static long sizeInBytes(int rows, int cols) {
         return Matrix.sizeInBytes(rows, cols);
+    }
+
+    public static MemoryRange sizeInBytes(int rows, MemoryRange cols) {
+        return cols.apply(col -> Matrix.sizeInBytes(rows, (int) col));
     }
 
     @Override

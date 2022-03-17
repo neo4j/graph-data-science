@@ -35,7 +35,7 @@ public class ReducedSoftmax extends SingleParentVariable<Matrix, Matrix> {
     }
 
     public static long sizeInBytes(int rows, int cols) {
-        return Matrix.sizeInBytes(rows, cols);
+        return Matrix.sizeInBytes(rows, cols - 1);
     }
 
     @Override

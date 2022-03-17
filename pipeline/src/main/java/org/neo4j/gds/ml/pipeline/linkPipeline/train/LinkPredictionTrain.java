@@ -416,7 +416,12 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                     .fixed("Stats map builder train", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
                     .fixed("Stats map builder validation", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
                     .max("Train model and compute train metrics", List.of(
-                            LogisticRegressionTrainer.estimate((LogisticRegressionTrainConfig) llrConfig, linkFeatureDimension),
+                        LogisticRegressionTrainer.memoryEstimation(
+                            true,
+                            2,
+                            linkFeatureDimension,
+                            ((LogisticRegressionTrainConfig) llrConfig).batchSize()
+                        ),
                             estimateComputeTrainMetrics(pipeline.splitConfig())
                         )
                     ).build()

@@ -33,9 +33,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<Matrix> {
 
-    public static long sizeInBytes(int[] dimensionsOfFirstMatrix, int[] dimensionsOfSecondMatrix) {
-        // transposed second operand means the result dimensions are rows(FIRST_MATRIX) x rows(SECOND_MATRIX)
-        return Matrix.sizeInBytes(dimensionsOfFirstMatrix[ROWS_INDEX], dimensionsOfSecondMatrix[ROWS_INDEX]);
+    public static long sizeInBytes(int leftMatrixNumRows, int rightMatrixNumRows) {
+        return Matrix.sizeInBytes(leftMatrixNumRows, rightMatrixNumRows);
     }
 
     private final Variable<Matrix> A;

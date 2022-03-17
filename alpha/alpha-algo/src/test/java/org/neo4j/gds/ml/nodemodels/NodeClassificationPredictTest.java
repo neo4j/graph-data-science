@@ -274,7 +274,7 @@ class NodeClassificationPredictTest {
         // one thousand longs, plus overhead of a HugeLongArray
         var predictedClasses = 8 * 1000 + 40;
         // The predictions variable is tested elsewhere
-        var predictionsVariable = LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount);
+        var predictionsVariable = LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount, classCount);
 
         var expected = instance + predictedClasses + predictionsVariable;
 

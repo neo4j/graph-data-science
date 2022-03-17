@@ -55,7 +55,7 @@ class LogisticRegressionClassifierTest {
 
     @Test
     public void shouldEstimateMemoryUsage() {
-        var memoryUsageInBytes = LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(100, 10, 10);
+        var memoryUsageInBytes = LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(100, 10, 10, 10);
 
         int memoryUsageOfFeatureExtractors = 320; // 32 bytes * number of features
         int memoryUsageOfFeatureMatrix = 8016; // 8 bytes * batch size * number of features + 16
