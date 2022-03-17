@@ -39,7 +39,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.train.RelationshipSplitter.splitEstimation;
-import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallRelationshipSets;
+import static org.neo4j.gds.util.TrainingSetWarnings.warnForSmallRelationshipSets;
 
 public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPredictionTrainConfig, LinkPredictionPipeline, LinkPredictionTrainResult> {
 

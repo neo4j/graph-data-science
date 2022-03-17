@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationPredict;
+import org.neo4j.gds.ml.nodeClassification.NodeClassificationPredict;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;

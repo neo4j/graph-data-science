@@ -45,7 +45,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
+import org.neo4j.gds.metrics.LinkMetric;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;

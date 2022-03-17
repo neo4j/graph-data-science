@@ -31,6 +31,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.splitting.EdgeSplitter;
 
 import java.util.List;
 import java.util.Optional;
@@ -204,7 +205,8 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         runQuery(query);
 
         var graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore();
-        var testGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("test"), Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY));
+        var testGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("test"), Optional.of(
+            EdgeSplitter.RELATIONSHIP_PROPERTY));
         var trainGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("train"), Optional.empty());
         assertTrue(trainGraph.isUndirected());
         assertFalse(testGraph.isUndirected());

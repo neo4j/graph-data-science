@@ -31,7 +31,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationPredict;
+import org.neo4j.gds.ml.nodeClassification.NodeClassificationPredict;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;

@@ -21,12 +21,12 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
-import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.FeaturesFactory;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 import org.neo4j.gds.similarity.knn.NeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
+import org.neo4j.gds.splitting.EdgeSplitter;
 
 class LinkPredictionSimilarityComputer implements SimilarityComputer {
 

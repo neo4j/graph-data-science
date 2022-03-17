@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.nodemodels.BestMetricData;
+import org.neo4j.gds.metrics.BestMetricData;
+import org.neo4j.gds.metrics.LinkMetric;
 import org.neo4j.gds.models.TrainerConfig;
 
 import java.util.Map;

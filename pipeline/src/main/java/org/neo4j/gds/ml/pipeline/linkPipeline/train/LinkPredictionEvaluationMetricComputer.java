@@ -22,11 +22,11 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.metrics.LinkMetric;
+import org.neo4j.gds.metrics.SignedProbabilities;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
-import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.models.Classifier;
+import org.neo4j.gds.splitting.EdgeSplitter;
 
 import java.util.Map;
 import java.util.function.Function;
