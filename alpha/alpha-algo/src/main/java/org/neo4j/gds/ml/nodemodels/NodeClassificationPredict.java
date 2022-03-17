@@ -29,6 +29,8 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.models.Classifier;
 import org.neo4j.gds.models.FeaturesFactory;
@@ -65,6 +67,10 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         this.batchSize = batchSize;
         this.produceProbabilities = produceProbabilities;
         this.featureProperties = featureProperties;
+    }
+
+    public static Task progressTask(Graph graph) {
+        return Tasks.leaf("Node classification predict", graph.nodeCount());
     }
 
     public static MemoryEstimation memoryEstimation(boolean produceProbabilities, int batchSize, int featureCount, int classCount) {

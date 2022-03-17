@@ -21,16 +21,16 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.InjectModelCatalog;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -38,11 +38,12 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.models.ClassifierFactory;
 import org.neo4j.gds.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.models.logisticregression.LogisticRegressionClassifier;
+import org.neo4j.gds.models.logisticregression.LogisticRegressionData;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Percentage.withPercentage;
@@ -214,44 +215,35 @@ class NodeClassificationPredictTest {
         classIdMap.toMapped(0);
         var featureProperties = List.of("a", "b");
         var modelName = "model";
-        var model = Model.of(
-            "",
-            modelName,
-            "",
-            GraphSchema.empty(),
-            ImmutableLogisticRegressionData.builder()
-                .weights(new Weights<>(new Matrix(new double[]{
-                    1.12730619, -0.84532386
-                }, 1, 2)))
-                .bias(Weights.ofVector(
-                    0.93216654
-                ))
-                .classIdMap(classIdMap)
-                .build(),
-            ImmutableNodeClassificationTrainConfig
-                .builder()
-                .modelName(modelName)
-                .targetProperty("foo")
-                .featureProperties(featureProperties)
-                .holdoutFraction(0.2)
-                .validationFolds(4)
-                .addParam(Map.of("penalty", 1.0))
-                .build(),
-            NodeClassificationModelInfo.defaultConfig()
-        );
-        modelCatalog.set(model);
+        LogisticRegressionData modelData = ImmutableLogisticRegressionData.builder()
+            .weights(new Weights<>(new Matrix(new double[]{
+                1.12730619, -0.84532386
+            }, 1, 2)))
+            .bias(Weights.ofVector(
+                0.93216654
+            ))
+            .classIdMap(classIdMap)
+            .build();
 
         var log = Neo4jProxy.testLog();
-        var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory<>(modelCatalog).build(
-            graph,
-            ImmutableNodeClassificationPredictConfig.builder()
-                .modelName(modelName)
-                .includePredictedProbabilities(false)
-                .concurrency(1)
-                .build(),
+        var progressTracker = new TaskProgressTracker(
+            NodeClassificationPredict.progressTask(graph),
             log,
-            EmptyTaskRegistryFactory.INSTANCE
+            1,
+            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyUserLogRegistryFactory.INSTANCE
         );
+
+        var mcnlrPredict = new NodeClassificationPredict(
+            ClassifierFactory.create(modelData),
+            graph,
+            100,
+            1,
+            false,
+            featureProperties,
+            progressTracker
+        );
+
         mcnlrPredict.compute();
 
         var messagesInOrder = log.getMessages(INFO);
@@ -266,7 +258,6 @@ class NodeClassificationPredictTest {
                 "Node classification predict 100%",
                 "Node classification predict :: Finished"
             );
-        modelCatalog.dropOrThrow("", modelName);
     }
 
     @Test
