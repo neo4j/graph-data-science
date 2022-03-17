@@ -3,5 +3,4 @@
 |===
 | Name                          | Type    | Default | Optional | Description
 | includePredictedProbabilities | Boolean | false   | yes      | Whether to return the probability for each class. If `false` then `null` is returned in `predictedProbabilites`. The order of the classes can be inspected in the `modelInfo` of the classification model (see <<catalog-model-list, listing models>>).
-| batchSize                     | Integer | 100     | yes      | Number of nodes per batch.
 |===
