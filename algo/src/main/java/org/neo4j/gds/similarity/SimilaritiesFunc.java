@@ -38,8 +38,8 @@ public class SimilaritiesFunc {
     private static final String CATEGORY_KEY = "category";
     private static final String WEIGHT_KEY = "weight";
 
-    @UserFunction("gds.alpha.similarity.jaccard")
-    @Description("RETURN gds.alpha.similarity.jaccard(vector1, vector2) - Given two collection vectors, calculate Jaccard similarity")
+    @UserFunction("gds.similarity.jaccard")
+    @Description("RETURN gds.similarity.jaccard(vector1, vector2) - Given two collection vectors, calculate Jaccard similarity")
     public double jaccardSimilarity(
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2
@@ -50,8 +50,8 @@ public class SimilaritiesFunc {
         return jaccard(vector1, vector2);
     }
 
-    @UserFunction("gds.alpha.similarity.cosine")
-    @Description("RETURN gds.alpha.similarity.cosine(vector1, vector2) - Given two collection vectors, calculate cosine similarity")
+    @UserFunction("gds.similarity.cosine")
+    @Description("RETURN gds.similarity.cosine(vector1, vector2) - Given two collection vectors, calculate cosine similarity")
     public double cosineSimilarity(
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2
@@ -62,8 +62,8 @@ public class SimilaritiesFunc {
         return Intersections.cosine(left, right, len);
     }
 
-    @UserFunction("gds.alpha.similarity.pearson")
-    @Description("RETURN gds.alpha.similarity.pearson(vector1, vector2) - Given two collection vectors, calculate pearson similarity")
+    @UserFunction("gds.similarity.pearson")
+    @Description("RETURN gds.similarity.pearson(vector1, vector2) - Given two collection vectors, calculate pearson similarity")
     public double pearsonSimilarity(
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2
@@ -74,8 +74,8 @@ public class SimilaritiesFunc {
         return Intersections.pearson(left, right, len);
     }
 
-    @UserFunction("gds.alpha.similarity.euclideanDistance")
-    @Description("RETURN gds.alpha.similarity.euclideanDistance(vector1, vector2) - Given two collection vectors, calculate the euclidean distance (square root of the sum of the squared differences)")
+    @UserFunction("gds.similarity.euclideanDistance")
+    @Description("RETURN gds.similarity.euclideanDistance(vector1, vector2) - Given two collection vectors, calculate the euclidean distance (square root of the sum of the squared differences)")
     public double euclideanDistance(
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2
@@ -86,8 +86,8 @@ public class SimilaritiesFunc {
         return Math.sqrt(Intersections.sumSquareDelta(left, right, len));
     }
 
-    @UserFunction("gds.alpha.similarity.euclidean")
-    @Description("RETURN gds.alpha.similarity.euclidean(vector1, vector2) - Given two collection vectors, calculate similarity based on euclidean distance")
+    @UserFunction("gds.similarity.euclidean")
+    @Description("RETURN gds.similarity.euclidean(vector1, vector2) - Given two collection vectors, calculate similarity based on euclidean distance")
     public double euclideanSimilarity(
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2
@@ -95,8 +95,8 @@ public class SimilaritiesFunc {
         return 1.0D / (1 + euclideanDistance(vector1, vector2));
     }
 
-    @UserFunction("gds.alpha.similarity.overlap")
-    @Description("RETURN gds.alpha.similarity.overlap(vector1, vector2) - Given two collection vectors, calculate overlap similarity")
+    @UserFunction("gds.similarity.overlap")
+    @Description("RETURN gds.similarity.overlap(vector1, vector2) - Given two collection vectors, calculate overlap similarity")
     public double overlapSimilarity(
         @Name("vector1") List<Number> vector1,
         @Name("vector2") List<Number> vector2

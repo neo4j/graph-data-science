@@ -36,7 +36,7 @@ class SimilaritiesFuncWithCypherTest extends BaseTest {
     @Test
     void testCosineFunction() {
         runQueryWithResultConsumer(
-            "RETURN gds.alpha.similarity.cosine([1.0, 0.5], [0.5, 0.5]) AS score",
+            "RETURN gds.similarity.cosine([1.0, 0.5], [0.5, 0.5]) AS score",
             result -> assertEquals(0.75 / Math.sqrt(0.625), result.next().get("score"))
         );
     }
@@ -44,7 +44,7 @@ class SimilaritiesFuncWithCypherTest extends BaseTest {
     @Test
     void testEuclideanFunction() {
         runQueryWithResultConsumer(
-            "RETURN gds.alpha.similarity.euclidean([1.0, 0.5], [0.5, 0.5]) AS score",
+            "RETURN gds.similarity.euclidean([1.0, 0.5], [0.5, 0.5]) AS score",
             result -> assertEquals(1.0 / (1.0 + Math.sqrt(0.25 + 0)), result.next().get("score"))
         );
     }
@@ -52,7 +52,7 @@ class SimilaritiesFuncWithCypherTest extends BaseTest {
     @Test
     void testEuclideanDistanceFunction() {
         runQueryWithResultConsumer(
-            "RETURN gds.alpha.similarity.euclideanDistance([1.0, 0.5], [0.5, 0.5]) AS score",
+            "RETURN gds.similarity.euclideanDistance([1.0, 0.5], [0.5, 0.5]) AS score",
             result -> assertEquals(Math.sqrt(0.25 + 0), result.next().get("score"))
         );
     }
@@ -60,7 +60,7 @@ class SimilaritiesFuncWithCypherTest extends BaseTest {
     @Test
     void testPearsonFunction() {
         runQueryWithResultConsumer(
-            "RETURN gds.alpha.similarity.pearson([1.0, 0.5], [0.5, 0.5]) AS score",
+            "RETURN gds.similarity.pearson([1.0, 0.5], [0.5, 0.5]) AS score",
             result -> assertEquals(0.0, result.next().get("score"))
         );
     }
@@ -68,7 +68,7 @@ class SimilaritiesFuncWithCypherTest extends BaseTest {
     @Test
     void testOverlapFunction() {
         runQueryWithResultConsumer(
-            "RETURN gds.alpha.similarity.overlap([1, 5], [5, 5]) AS score",
+            "RETURN gds.similarity.overlap([1, 5], [5, 5]) AS score",
             result -> assertEquals(1.0 / 2.0, result.next().get("score"))
         );
     }
@@ -76,7 +76,7 @@ class SimilaritiesFuncWithCypherTest extends BaseTest {
     @Test
     void testJaccardFunction() {
         runQueryWithResultConsumer(
-            "RETURN gds.alpha.similarity.jaccard([1, 5], [5, 5]) AS score",
+            "RETURN gds.similarity.jaccard([1, 5], [5, 5]) AS score",
             result -> assertEquals(1.0 / 3.0, result.next().get("score"))
         );
     }
