@@ -241,7 +241,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         // Find the portion of `traversedNodes` that contains the actual result, doesn't account for target node, hence the `if` statement.
         var nodesLengthToRetain = traversedNodesLength.get();
         if (targetFoundIndex.get() != Long.MAX_VALUE) {
-            nodesLengthToRetain = targetFoundIndex.intValue() + 1;
+            nodesLengthToRetain = targetFoundIndex.longValue() + 1;
         }
 
         var result = traversedNodes.copyOf(nodesLengthToRetain);
