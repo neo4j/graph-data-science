@@ -23,6 +23,19 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.function.DoubleUnaryOperator;
 
+/**
+ * A {@code double} value that may be updated atomically.
+ *
+ * See the {@link VarHandle} specification for descriptions
+ * of the properties of atomic accesses.
+ *
+ * The implementation is based on a {@link VarHandle} guarding
+ * the access to a primitive {@code double} field. For double,
+ * numeric (e.g. {@code getAndAdd}) as well as bitwise
+ * (e.g. {@code getOpaque}) atomic update method access modes
+ * compare values using their bitwise representation
+ * (see {@link Double#doubleToRawLongBits(double)}).
+ */
 public final class AtomicDouble extends Number {
 
     private static final VarHandle VALUE;
