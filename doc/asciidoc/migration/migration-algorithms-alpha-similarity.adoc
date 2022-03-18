@@ -1,0 +1,25 @@
+[[migration-algorithms-alpha-similarity]]
+= Alpha similarity algorithms
+
+The alpha similarity procedures have been removed.
+Use KNN or Node Similarity instead.
+The similarity metrics for these can now be configured.
+
+Knn::
+Cosine, Euclidean, Jaccard, Overlap, Pearson
+
+Node Similarity::
+Jaccard, Overlap
+
+The alpha similarity functions have been promoted to product tier.
+
+[options=header]
+|===
+| 1.x                                      | 2.x
+| `gds.alpha.similarity.cosine`            | `gds.similarity.cosine`
+| `gds.alpha.similarity.euclidean`         | `gds.similarity.euclidean`
+| `gds.alpha.similarity.euclideanDistance` | `gds.similarity.euclideanDistance`
+| `gds.alpha.similarity.jaccard`           | `gds.similarity.jaccard`
+| `gds.alpha.similarity.overlap`           | `gds.similarity.overlap`
+| `gds.alpha.similarity.pearson`           | `gds.similarity.pearson`
+|===
