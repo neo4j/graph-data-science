@@ -11,17 +11,15 @@ The second is `numerical` measures which compute similarity based on how close t
 
 [[table-product]]
 [role=procedure-listing]
-[opts=header,cols="3, 4a,1"]
+[opts=header,cols="3, 3a, 1, 1m"]
 |===
-| Similarity Function name  | Formula | Value range
-| `gds.similarity.jaccard` footnote:categorical[Categorical] | image::knn-formulas/jacard.svg[] | [0,1]
-
-| `gds.similarity.overlap` footnote:categorical[]| image::knn-formulas/overlap.svg[] | [0, 1]
-
-| `gds.similarity.cosine` footnote:numerical[Numerical]| image::knn-formulas/cosine.svg[] | [-1, 1]
-| `gds.similarity.pearson` footnote:numerical[]| image::knn-formulas/pearson.svg[] | [-1, 1]
-| `gds.similarity.euclideanDistance` footnote:numerical[] | image::knn-formulas/ed.svg[] | [0, &#8734;)
-| `gds.similarity.euclidean` footnote:numerical[]| image::knn-formulas/euclidean.svg[] |(0, 1]
+| Similarity Function name           | Formula                             | Type        | Value range
+| `gds.similarity.jaccard`           | image::knn-formulas/jacard.svg[]    | Categorical | [0,1]
+| `gds.similarity.overlap`           | image::knn-formulas/overlap.svg[]   | Categorical | [0, 1]
+| `gds.similarity.cosine`            | image::knn-formulas/cosine.svg[]    | Numerical   | [-1, 1]
+| `gds.similarity.pearson`           | image::knn-formulas/pearson.svg[]   | Numerical   | [-1, 1]
+| `gds.similarity.euclideanDistance` | image::knn-formulas/ed.svg[]        | Numerical   | [0, &#8734;)
+| `gds.similarity.euclidean`         | image::knn-formulas/euclidean.svg[] | Numerical   | (0, 1]
 |===
 
 == Examples
