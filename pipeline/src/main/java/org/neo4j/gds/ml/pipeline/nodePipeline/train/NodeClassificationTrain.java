@@ -37,7 +37,7 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.ml.gradientdescent.GradientDescentConfig;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.BestModelStats;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
@@ -46,20 +46,17 @@ import org.neo4j.gds.ml.metrics.MetricComputer;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
 import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.metrics.StatsMap;
-import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
 import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainer;
+import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
@@ -69,7 +66,6 @@ import org.openjdk.jol.util.Multiset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
@@ -97,40 +93,35 @@ public final class NodeClassificationTrain {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
-    public static MemoryEstimation estimate(NodeClassificationPipeline pipeline, NodeClassificationPipelineTrainConfig config) {
+    public static MemoryEstimation estimate(
+        NodeClassificationPipeline pipeline,
+        NodeClassificationPipelineTrainConfig config
+    ) {
         var fudgedClassCount = 1000;
         var fudgedFeatureCount = 500;
         var holdoutFraction = pipeline.splitConfig().testFraction();
         var validationFolds = pipeline.splitConfig().validationFolds();
 
-        // Can only derive this for LR atm.
-        Optional<MemoryEstimation> maybeModelTrainingEstimation = Optional.empty();
-
-        if (!pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression).isEmpty()) {
-            var maxBatchSize = pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)
-                .stream()
-                .mapToInt(trainConfig -> ((GradientDescentConfig) trainConfig).batchSize())
-                .max()
-                .orElseThrow();
-
-            var modelSelection = modelTrainAndEvaluateMemoryUsage(
-                maxBatchSize,
+        var modelSelection = modelTrainAndEvaluateMemoryUsage(
+            pipeline,
+            fudgedClassCount,
+            fudgedFeatureCount,
+            (nodeCount) -> (long) (nodeCount * (1 - holdoutFraction) * (validationFolds - 1) / validationFolds),
+            (nodeCount) -> (long) (nodeCount * (1 - holdoutFraction) * (1 / validationFolds))
+        );
+        var bestModelEvaluation = delegateEstimation(
+            modelTrainAndEvaluateMemoryUsage(
+                pipeline,
                 fudgedClassCount,
                 fudgedFeatureCount,
-                (nodeCount) -> (long) (nodeCount * holdoutFraction * (validationFolds - 1) / validationFolds)
-            );
-            var bestModelEvaluation = delegateEstimation(
-                modelTrainAndEvaluateMemoryUsage(
-                    maxBatchSize,
-                    fudgedClassCount,
-                    fudgedFeatureCount,
-                    (nodeCount) -> (long) (nodeCount * holdoutFraction)
-                ),
-                "best model evaluation"
-            );
+                (nodeCount) -> (long) (nodeCount * (1 - holdoutFraction)),
+                (nodeCount) -> (long) (nodeCount * holdoutFraction)
+            ),
+            "best model evaluation"
+        );
 
-            maybeModelTrainingEstimation = Optional.of(maxEstimation(List.of(modelSelection, bestModelEvaluation)));
-        }
+        var modelTrainingEstimation = maxEstimation(List.of(modelSelection, bestModelEvaluation));
+
         // Final step is to retrain the best model with the entire node set.
         // Training memory is independent of node set size so we can skip that last estimation.
         var builder = MemoryEstimations.builder()
@@ -139,16 +130,19 @@ public final class NodeClassificationTrain {
             .add("metrics", MetricSpecification.memoryEstimation(fudgedClassCount))
             .perNode("node IDs", HugeLongArray::memoryEstimation)
             .add("outer split", FractionSplitter.estimate(1 - holdoutFraction))
-            .add("inner split", StratifiedKFoldSplitter.memoryEstimationForNodeSet(validationFolds, 1 - holdoutFraction))
-            .add("stats map train", StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates()))
-            .add("stats map validation", StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates()));
-
-        if (maybeModelTrainingEstimation.isPresent()) {
-            builder.add("max of model selection and best model evaluation", maybeModelTrainingEstimation.get());
-        } else {
-            // There's no memory estimation support for random forest yet.
-            builder.add(MemoryEstimations.of("max of model selection and best model evaluation (unknown)", MemoryRange.of(0)));
-        }
+            .add(
+                "inner split",
+                StratifiedKFoldSplitter.memoryEstimationForNodeSet(validationFolds, 1 - holdoutFraction)
+            )
+            .add(
+                "stats map train",
+                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates())
+            )
+            .add(
+                "stats map validation",
+                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates())
+            )
+            .add("max of model selection and best model evaluation", modelTrainingEstimation);
 
         if (!pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest).isEmpty()) {
             // Having a random forest model candidate forces using eager feature extraction.
@@ -189,39 +183,72 @@ public final class NodeClassificationTrain {
 
     @NotNull
     private static MemoryEstimation modelTrainAndEvaluateMemoryUsage(
-        int maxBatchSize,
+        NodeClassificationPipeline pipeline,
         int fudgedClassCount,
         int fudgedFeatureCount,
-        LongUnaryOperator nodeSetSize
+        LongUnaryOperator trainSetSize,
+        LongUnaryOperator testSetSize
     ) {
-        // There's no memory estimation support for Random forest yet.
-        MemoryEstimation training = LogisticRegressionTrainer.memoryEstimation(
-            false,
-            fudgedClassCount,
-            MemoryRange.of(fudgedFeatureCount),
-            maxBatchSize
-        );
+        var foldEstimations = pipeline
+            .trainingParameterSpace()
+            .values()
+            .stream()
+            .flatMap(List::stream)
+            .map(config -> {
+                var training = TrainerFactory.memoryEstimation(
+                    config,
+                    trainSetSize,
+                    fudgedClassCount,
+                    MemoryRange.of(fudgedFeatureCount),
+                    false
+                );
+                var evaluation = estimateEvaluation(
+                    config,
+                    trainSetSize,
+                    testSetSize,
+                    fudgedClassCount,
+                    fudgedFeatureCount,
+                    false
+                );
 
-        MemoryEstimation metricsComputation = MemoryEstimations.builder("computing metrics")
+                return MemoryEstimations.maxEstimation(List.of(training, evaluation));
+            })
+            .collect(Collectors.toList());
+
+
+        return MemoryEstimations.builder("model selection")
+            .max(foldEstimations)
+            .build();
+    }
+
+    public static MemoryEstimation estimateEvaluation(
+        TrainerConfig config,
+        LongUnaryOperator trainSetSize,
+        LongUnaryOperator testSetSize,
+        int fudgedClassCount,
+        int fudgedFeatureCount,
+        boolean isReduced
+    ) {
+        return MemoryEstimations.builder("computing metrics")
             .perNode("local targets", (nodeCount) -> {
-                var sizeOfLargePartOfAFold = nodeSetSize.applyAsLong(nodeCount);
+                var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
                 return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
             })
             .perNode("predicted classes", (nodeCount) -> {
-                var sizeOfLargePartOfAFold = nodeSetSize.applyAsLong(nodeCount);
+                var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
                 return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
             })
+            .rangePerNode(
+                "classifier",
+                (nodeCount) -> ClassifierFactory.memoryEstimation(
+                    config,
+                    trainSetSize.applyAsLong(nodeCount),
+                    fudgedClassCount,
+                    fudgedFeatureCount,
+                    isReduced
+                )
+            )
             .fixed("probabilities", sizeOfDoubleArray(fudgedClassCount))
-            .fixed("computation graph", LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(
-                BatchQueue.DEFAULT_BATCH_SIZE,
-                fudgedFeatureCount,
-                fudgedClassCount,
-                fudgedClassCount
-            ))
-            .build();
-
-        return MemoryEstimations.builder("model selection")
-            .max(List.of(training, metricsComputation))
             .build();
     }
 
@@ -289,7 +316,10 @@ public final class NodeClassificationTrain {
         return Tuples.pair(targets, classCounts);
     }
 
-    private static List<Metric> createMetrics(NodeClassificationPipelineTrainConfig config, Multiset<Long> globalClassCounts) {
+    private static List<Metric> createMetrics(
+        NodeClassificationPipelineTrainConfig config,
+        Multiset<Long> globalClassCounts
+    ) {
         return config.metrics()
             .stream()
             .flatMap(spec -> spec.createMetrics(globalClassCounts.keys()))
@@ -468,8 +498,14 @@ public final class NodeClassificationTrain {
             Function.identity(),
             metric ->
                 BestMetricData.of(
-                    BestModelStats.findBestModelStats(modelSelectResult.trainStats().get(metric), modelSelectResult.bestParameters()),
-                    BestModelStats.findBestModelStats(modelSelectResult.validationStats().get(metric), modelSelectResult.bestParameters()),
+                    BestModelStats.findBestModelStats(
+                        modelSelectResult.trainStats().get(metric),
+                        modelSelectResult.bestParameters()
+                    ),
+                    BestModelStats.findBestModelStats(
+                        modelSelectResult.validationStats().get(metric),
+                        modelSelectResult.bestParameters()
+                    ),
                     outerTrainMetrics.get(metric),
                     testMetrics.get(metric)
                 )
@@ -496,7 +532,9 @@ public final class NodeClassificationTrain {
     @ValueClass
     public interface ModelSelectResult {
         TrainerConfig bestParameters();
+
         Map<Metric, List<ModelStats>> trainStats();
+
         Map<Metric, List<ModelStats>> validationStats();
 
         static ModelSelectResult of(

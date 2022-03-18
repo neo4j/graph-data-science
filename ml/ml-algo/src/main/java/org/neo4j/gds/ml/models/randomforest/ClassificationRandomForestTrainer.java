@@ -44,6 +44,7 @@ import org.neo4j.gds.ml.models.Trainer;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -77,31 +78,47 @@ public class ClassificationRandomForestTrainer implements Trainer {
     }
 
     public static MemoryEstimation memoryEstimation(
-        long numberOfTrainingSamples,
+        LongUnaryOperator numberOfTrainingSamples,
         int numberOfClasses,
-        int featureDimension,
+        MemoryRange featureDimension,
         RandomForestTrainConfig config
     ) {
         // Since we don't expose Out-of-bag-error (yet) we do not take it into account here either.
 
-        int numberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio(featureDimension) * featureDimension);
+        int minNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.min) * featureDimension.min);
+        int maxNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.max) * featureDimension.max);
 
         return MemoryEstimations.builder("Training", ClassificationRandomForestTrainer.class)
-            .add(MemoryEstimations.of(
+            .rangePerNode(
                 "Classifier",
-                ClassificationRandomForestPredictor.memoryEstimation(numberOfTrainingSamples, numberOfClasses, config)
-            ))
-            .add(MemoryEstimations.of("GiniIndex Loss", GiniIndex.memoryEstimation(numberOfTrainingSamples)))
-            .perThread(
-                "Decision tree training",
-                TrainDecisionTreeTask.memoryEstimation(
-                    config.maxDepth(),
-                    config.minSplitSize(),
-                    numberOfTrainingSamples,
+                nodeCount -> ClassificationRandomForestPredictor.memoryEstimation(
+                    numberOfTrainingSamples.applyAsLong(nodeCount),
                     numberOfClasses,
-                    numberOfBaggedFeatures,
-                    config.numberOfSamplesRatio()
+                    config
                 )
+            ).rangePerNode(
+                "GiniIndex Loss",
+                nodeCount -> GiniIndex.memoryEstimation(numberOfTrainingSamples.applyAsLong(nodeCount))
+            ).perGraphDimension(
+                "Decision tree training",
+                (dim, concurrency) ->
+                    TrainDecisionTreeTask.memoryEstimation(
+                        config.maxDepth(),
+                        config.minSplitSize(),
+                        numberOfTrainingSamples.applyAsLong(dim.nodeCount()),
+                        numberOfClasses,
+                        minNumberOfBaggedFeatures,
+                        config.numberOfSamplesRatio()
+                    ).union(
+                        TrainDecisionTreeTask.memoryEstimation(
+                            config.maxDepth(),
+                            config.minSplitSize(),
+                            numberOfTrainingSamples.applyAsLong(dim.nodeCount()),
+                            numberOfClasses,
+                            maxNumberOfBaggedFeatures,
+                            config.numberOfSamplesRatio()
+                        )
+                    ).times(concurrency)
             )
             .build();
     }

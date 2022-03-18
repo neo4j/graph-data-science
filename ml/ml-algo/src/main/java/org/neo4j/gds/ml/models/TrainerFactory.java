@@ -20,6 +20,8 @@
 package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
@@ -28,6 +30,7 @@ import org.neo4j.gds.ml.models.randomforest.ClassificationRandomForestTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 
 import java.util.Optional;
+import java.util.function.LongUnaryOperator;
 
 public class TrainerFactory {
 
@@ -61,6 +64,34 @@ public class TrainerFactory {
                     false,
                     randomSeed,
                     progressTracker
+                );
+            }
+            default:
+                throw new IllegalStateException("No such training method.");
+        }
+    }
+
+    public static MemoryEstimation memoryEstimation(
+        TrainerConfig config,
+        LongUnaryOperator numberOfTrainingExamples,
+        int numberOfClasses,
+        MemoryRange featureDimension,
+        boolean isReduced
+    ) {
+        switch (TrainingMethod.valueOf(config.methodName())) {
+            case LogisticRegression:
+                return LogisticRegressionTrainer.memoryEstimation(
+                    isReduced,
+                    numberOfClasses,
+                    featureDimension,
+                    ((LogisticRegressionTrainConfig) config).batchSize()
+                );
+            case RandomForest: {
+                return ClassificationRandomForestTrainer.memoryEstimation(
+                    numberOfTrainingExamples,
+                    numberOfClasses,
+                    featureDimension,
+                    (RandomForestTrainConfig) config
                 );
             }
             default:

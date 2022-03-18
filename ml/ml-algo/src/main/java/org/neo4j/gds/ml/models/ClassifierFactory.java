@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.ml.models;
 
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.ClassificationRandomForestPredictor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestData;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 
 public final class ClassifierFactory {
 
@@ -36,6 +39,33 @@ public final class ClassifierFactory {
                 return LogisticRegressionClassifier.from((LogisticRegressionData) classifierData);
             case RandomForest:
                 return new ClassificationRandomForestPredictor((RandomForestData) classifierData);
+            default:
+                throw new IllegalStateException("No such classifier.");
+        }
+    }
+
+    public static MemoryRange memoryEstimation(
+        TrainerConfig trainerConfig,
+        long numberOfTrainingSamples,
+        int numberOfClasses,
+        int featureDimension,
+        boolean isReduced
+    ) {
+        switch (TrainingMethod.valueOf(trainerConfig.methodName())) {
+            case LogisticRegression:
+                int normalizedNumberOfClasses = isReduced ? (numberOfClasses - 1) : numberOfClasses;
+                return MemoryRange.of(LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(
+                    ((LogisticRegressionTrainConfig) trainerConfig).batchSize(),
+                    featureDimension,
+                    numberOfClasses,
+                    normalizedNumberOfClasses
+                ));
+            case RandomForest:
+                return ClassificationRandomForestPredictor.memoryEstimation(
+                    numberOfTrainingSamples,
+                    numberOfClasses,
+                    (RandomForestTrainConfig) trainerConfig
+                );
             default:
                 throw new IllegalStateException("No such classifier.");
         }
