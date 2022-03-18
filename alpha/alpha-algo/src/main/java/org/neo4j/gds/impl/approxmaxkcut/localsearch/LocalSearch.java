@@ -20,6 +20,7 @@
 package org.neo4j.gds.impl.approxmaxkcut.localsearch;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
@@ -96,7 +97,7 @@ public class LocalSearch {
      */
     public void compute(
         HugeByteArray candidateSolution,
-        HugeAtomicDoubleArray cost,
+        AtomicDouble cost,
         AtomicLongArray cardinalities,
         Supplier<Boolean> running
     ) {
@@ -147,7 +148,7 @@ public class LocalSearch {
         }
         progressTracker.endSubTask();
 
-        cost.set(0, 0);
+        cost.set(0);
         var costTasks = degreePartition.stream()
             .map(partition ->
                 new ComputeCost(

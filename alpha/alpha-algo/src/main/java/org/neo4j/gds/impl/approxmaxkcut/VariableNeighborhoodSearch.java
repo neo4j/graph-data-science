@@ -20,7 +20,7 @@
 package org.neo4j.gds.impl.approxmaxkcut;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
@@ -38,7 +38,7 @@ class VariableNeighborhoodSearch {
     private final ApproxMaxKCutConfig config;
     private final LocalSearch localSearch;
     private final HugeByteArray[] candidateSolutions;
-    private final HugeAtomicDoubleArray[] costs;
+    private final AtomicDouble[] costs;
     private final ProgressTracker progressTracker;
     private HugeByteArray neighborSolution;
     private AtomicLongArray neighborCardinalities;
@@ -50,7 +50,7 @@ class VariableNeighborhoodSearch {
         ApproxMaxKCutConfig config,
         LocalSearch localSearch,
         HugeByteArray[] candidateSolutions,
-        HugeAtomicDoubleArray[] costs,
+        AtomicDouble[] costs,
         ProgressTracker progressTracker
     ) {
         this.graph = graph;
@@ -70,7 +70,7 @@ class VariableNeighborhoodSearch {
         var bestCandidateSolution = candidateSolutions[candidateIdx];
         var bestCardinalities = currentCardinalities;
         var bestCost = costs[candidateIdx];
-        var neighborCost = HugeAtomicDoubleArray.newArray(1);
+        var neighborCost = new AtomicDouble();
         var currentOrder = 0;
 
         progressTracker.beginSubTask();
@@ -96,7 +96,7 @@ class VariableNeighborhoodSearch {
 
             localSearch.compute(neighborSolution, neighborCost, neighborCardinalities, running);
 
-            if (comparator.compare(neighborCost.get(0), bestCost.get(0))) {
+            if (comparator.compare(neighborCost.get(), bestCost.get())) {
                 var tmpCandidateSolution = bestCandidateSolution;
                 bestCandidateSolution = neighborSolution;
                 neighborSolution = tmpCandidateSolution;
@@ -105,7 +105,7 @@ class VariableNeighborhoodSearch {
                 bestCardinalities = neighborCardinalities;
                 neighborCardinalities = tmpCardinalities;
 
-                bestCost.set(0, neighborCost.get(0));
+                bestCost.set(neighborCost.get());
 
                 // Start from scratch with the new candidate.
                 currentOrder = 0;

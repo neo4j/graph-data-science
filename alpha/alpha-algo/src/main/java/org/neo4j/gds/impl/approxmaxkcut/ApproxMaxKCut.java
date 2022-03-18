@@ -23,7 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
@@ -57,7 +57,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
     private final PlaceNodesRandomly placeNodesRandomly;
     private final LocalSearch localSearch;
     private final HugeByteArray[] candidateSolutions;
-    private final HugeAtomicDoubleArray[] costs;
+    private final AtomicDouble[] costs;
     private VariableNeighborhoodSearch variableNeighborhoodSearch;
     private AtomicLongArray currentCardinalities;
 
@@ -79,12 +79,12 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
             HugeByteArray.newArray(graph.nodeCount())
         };
 
-        this.costs = new HugeAtomicDoubleArray[]{
-            HugeAtomicDoubleArray.newArray(1),
-            HugeAtomicDoubleArray.newArray(1),
+        this.costs = new AtomicDouble[]{
+            new AtomicDouble(),
+            new AtomicDouble(),
         };
-        costs[0].set(0, config.minimize() ? Double.MAX_VALUE : Double.MIN_VALUE);
-        costs[1].set(0, config.minimize() ? Double.MAX_VALUE : Double.MIN_VALUE);
+        costs[0].set(config.minimize() ? Double.MAX_VALUE : Double.MIN_VALUE);
+        costs[1].set(config.minimize() ? Double.MAX_VALUE : Double.MIN_VALUE);
 
         this.currentCardinalities = new AtomicLongArray(config.k());
 
@@ -168,7 +168,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
 
             // Store the newly computed candidate solution if it was better than the previous. Then reuse the previous data
             // structures to make a new solution candidate if we are doing more iterations.
-            if (comparator.compare(currCost.get(0), costs[bestIdx].get(0))) {
+            if (comparator.compare(currCost.get(), costs[bestIdx].get())) {
                 var tmp = bestIdx;
                 bestIdx = currIdx;
                 currIdx = tmp;
@@ -177,7 +177,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
 
         progressTracker.endSubTask();
 
-        return CutResult.of(candidateSolutions[bestIdx], costs[bestIdx].get(0));
+        return CutResult.of(candidateSolutions[bestIdx], costs[bestIdx].get());
     }
 
     @Override

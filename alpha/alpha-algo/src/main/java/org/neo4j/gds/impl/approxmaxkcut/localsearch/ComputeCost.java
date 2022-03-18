@@ -21,7 +21,7 @@ package org.neo4j.gds.impl.approxmaxkcut.localsearch;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -32,7 +32,7 @@ final class ComputeCost implements Runnable {
     private final double defaultWeight;
     private final LocalSearch.WeightTransformer weightTransformer;
     private final HugeByteArray candidateSolution;
-    private final HugeAtomicDoubleArray cost;
+    private final AtomicDouble cost;
     private final Partition partition;
     private final ProgressTracker progressTracker;
 
@@ -41,7 +41,7 @@ final class ComputeCost implements Runnable {
         double defaultWeight,
         LocalSearch.WeightTransformer weightTransformer,
         HugeByteArray candidateSolution,
-        HugeAtomicDoubleArray cost,
+        AtomicDouble cost,
         Partition partition,
         ProgressTracker progressTracker
     ) {
@@ -70,7 +70,7 @@ final class ComputeCost implements Runnable {
                     return true;
                 }
             ));
-        cost.update(0, current -> current + localCost.doubleValue());
+        cost.getAndAdd(localCost.doubleValue());
 
         progressTracker.logProgress(partition.nodeCount());
     }

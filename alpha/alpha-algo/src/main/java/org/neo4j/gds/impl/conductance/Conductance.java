@@ -19,16 +19,15 @@
  */
 package org.neo4j.gds.impl.conductance;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.collections.HugeSparseDoubleArray;
+import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -229,7 +228,7 @@ public class Conductance extends Algorithm<Conductance.Result> {
             Double.NaN,
             maxCommunityId
         );
-        var globalConductanceSum = HugeAtomicDoubleArray.newArray(1);
+        var globalConductanceSum = new AtomicDouble();
         var globalValidCommunities = new AtomicLong();
         var internalCounts = relCounts.internalCounts();
         var externalCounts = relCounts.externalCounts();
@@ -239,7 +238,7 @@ public class Conductance extends Algorithm<Conductance.Result> {
             final long endOffset = index == config.concurrency() - 1
                 ? startOffset + communitiesPerBatch + communitiesRemainder
                 : startOffset + communitiesPerBatch;
-            var conductanceSum = new MutableDouble(0.0);
+            double conductanceSum = 0.0;
             long validCommunities = 0;
 
             for (long community = startOffset; community < Math.min(endOffset, internalCounts.capacity()); community++) {
@@ -251,11 +250,11 @@ public class Conductance extends Algorithm<Conductance.Result> {
 
                 double localConductance = externalCount / (externalCount + internalCount);
                 conductancesBuilder.set(community, localConductance);
-                conductanceSum.add(localConductance);
+                conductanceSum += localConductance;
                 validCommunities += 1;
             }
 
-            globalConductanceSum.update(0, current -> current + conductanceSum.doubleValue());
+            globalConductanceSum.getAndAdd(conductanceSum);
             globalValidCommunities.addAndGet(validCommunities);
 
             progressTracker.logProgress(endOffset - startOffset);
@@ -265,7 +264,7 @@ public class Conductance extends Algorithm<Conductance.Result> {
 
         progressTracker.endSubTask();
 
-        return Result.of(conductancesBuilder.build(), globalConductanceSum.get(0) / globalValidCommunities.longValue());
+        return Result.of(conductancesBuilder.build(), globalConductanceSum.get() / globalValidCommunities.longValue());
     }
 
     private final class CountRelationships implements Runnable {
