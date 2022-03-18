@@ -15,5 +15,3 @@ include::migration-closeness-centrality.adoc[leveloffset=+1]
 include::migration-algorithms-dfs.adoc[leveloffset=+1]
 
 include::migration-algorithms-knn.adoc[leveloffset=+1]
-
-include::migration-algorithms-node-classification-pipeline-predict.adoc[leveloffset=+1]

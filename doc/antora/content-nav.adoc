@@ -133,3 +133,4 @@
 *** xref:appendix-b/migration-graph-drop/index.adoc[]
 *** xref:appendix-b/migration-memory-estimation/index.adoc[]
 *** xref:appendix-b/migration-algorithms/index.adoc[]
+*** xref:appendix-b/migration-ml/index.adoc[]

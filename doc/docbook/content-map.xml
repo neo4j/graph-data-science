@@ -406,6 +406,9 @@
             <d:tocentry linkend="migration-algorithms">
                 <?dbhtml filename="appendix-b/migration-algorithms/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="migration-ml">
+                <?dbhtml filename="appendix-b/migration-ml/index.html"?>
+            </d:tocentry>
         </d:tocentry>
     </d:tocentry>
 
