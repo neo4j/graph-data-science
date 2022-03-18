@@ -55,12 +55,18 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
 
     public static MemoryRange memoryEstimation(
         int maxDepth,
+        int minSplitSize,
         long numberOfTrainingSamples,
         long numberOfBaggedFeatures,
         int numberOfClasses
     ) {
         return MemoryRange.of(sizeOfInstance(ClassificationDecisionTreeTrain.class))
-            .add(DecisionTreeTrain.memoryEstimation(maxDepth, numberOfTrainingSamples, numberOfBaggedFeatures))
+            .add(DecisionTreeTrain.memoryEstimation(
+                maxDepth,
+                minSplitSize,
+                numberOfTrainingSamples,
+                numberOfBaggedFeatures
+            ))
             .add(sizeOfLongArray(numberOfClasses));
     }
 

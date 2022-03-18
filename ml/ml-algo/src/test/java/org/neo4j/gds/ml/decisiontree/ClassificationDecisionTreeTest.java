@@ -201,12 +201,20 @@ class ClassificationDecisionTreeTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "     6, 100_000, 56,  5_096",
-        "    10, 100_000, 56, 81_896",
-        " 8_000,     500, 56, 39_976"
+        // When maxDepth is limiting tree size minSplitSize does not matter.
+        "     6, 100_000,  2, 56,     5_096",
+        "     6, 100_000,  4, 56,     5_096",
+        // Scales with maxDepth when maxDepth is limiting tree size.
+        "    10, 100_000,  2, 56,    81_896",
+        // maxDepth does not matter for small training sets.
+        "   100,     500,  2, 56,    39_976",
+        " 8_000,     500,  2, 56,    39_976",
+        // Max should scale almost inverse linearly with minSplitSize.
+        " 8_000, 100_000,  2, 56, 79_99_976",
+        " 8_000, 100_000, 20, 56,   799_976"
     })
-    void predictMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
-        var range = DecisionTreePredict.memoryEstimation(maxDepth, numberOfTrainingSamples);
+    void predictMemoryEstimation(int maxDepth, long numberOfTrainingSamples, int minSplitSize, long expectedMin, long expectedMax) {
+        var range = DecisionTreePredict.memoryEstimation(maxDepth, numberOfTrainingSamples, minSplitSize);
 
         assertThat(range.min).isEqualTo(expectedMin);
         assertThat(range.max).isEqualTo(expectedMax);
@@ -214,12 +222,14 @@ class ClassificationDecisionTreeTest {
 
     @ParameterizedTest
     @CsvSource(value = {
+        // Scales with training set size even if maxDepth limits tree size.
         "  6,  1_000,  32_456,    46_208",
         "  6, 10_000, 320_456,   406_208",
+        // Scales with maxDepth when maxDepth is limiting tree size.
         " 20, 10_000, 320_456, 1_202_912"
     })
     void trainMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
-        var range = ClassificationDecisionTreeTrain.memoryEstimation(maxDepth, numberOfTrainingSamples, 10, 10);
+        var range = ClassificationDecisionTreeTrain.memoryEstimation(maxDepth, 2, numberOfTrainingSamples, 10, 10);
 
         assertThat(range.min).isEqualTo(expectedMin);
         assertThat(range.max).isEqualTo(expectedMax);

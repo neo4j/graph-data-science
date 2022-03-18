@@ -53,10 +53,11 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     // Does not include the class itself as it will be inherited anyway.
     public static MemoryRange memoryEstimation(
         int maxDepth,
+        int minSplitSize,
         long numberOfTrainingSamples,
         long numberOfBaggedFeatures
     ) {
-        var predictorEstimation = DecisionTreePredict.memoryEstimation(maxDepth, numberOfTrainingSamples);
+        var predictorEstimation = DecisionTreePredict.memoryEstimation(maxDepth, numberOfTrainingSamples, minSplitSize);
 
         // Stack implies DFS so will at most have 2 * maxDepth entries.
         long maxItemsOnStack = 2L * maxDepth;

@@ -56,7 +56,9 @@ public class ClassificationRandomForestPredictor implements Classifier {
         RandomForestTrainConfig config
     ) {
         var sizeOfDecisionTreesList = MemoryRange.of(sizeOfInstance(ObjectArrayList.class))
-            .add(DecisionTreePredict.memoryEstimation(config.maxDepth(), numberOfTrainingSamples).times(config.numberOfDecisionTrees()));
+            .add(DecisionTreePredict
+                .memoryEstimation(config.maxDepth(), numberOfTrainingSamples, config.minSplitSize())
+                .times(config.numberOfDecisionTrees()));
         var predictionsCacheSize = MemoryRange.of(sizeOfDoubleArray(numberOfClasses))
             .add(sizeOfIntArray(numberOfClasses));
 

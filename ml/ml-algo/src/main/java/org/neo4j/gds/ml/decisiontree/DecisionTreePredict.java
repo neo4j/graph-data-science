@@ -25,12 +25,13 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 public class DecisionTreePredict<PREDICTION> {
 
-    public static MemoryRange memoryEstimation(int maxDepth, long numberOfTrainingSamples) {
+    public static MemoryRange memoryEstimation(int maxDepth, long numberOfTrainingSamples, int minSplitSize) {
         long maxNumLeafNodes = (long) Math.ceil(
             Math.min(
                 Math.pow(2, maxDepth),
-                // There's at least one training example per leaf node.
-                numberOfTrainingSamples
+                // The parent of any leaf node must have had at least minSplitSize samples.
+                // The number of parents of leaves is therefore limited by numberOfTrainingSamples / minSplitSize.
+                2 * (double) (numberOfTrainingSamples / minSplitSize)
             )
         );
         long maxNumNodes = 2 * maxNumLeafNodes - 1;

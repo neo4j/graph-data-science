@@ -96,6 +96,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
                 "Decision tree training",
                 TrainDecisionTreeTask.memoryEstimation(
                     config.maxDepth(),
+                    config.minSplitSize(),
                     numberOfTrainingSamples,
                     numberOfClasses,
                     numberOfBaggedFeatures,
@@ -202,6 +203,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
 
         public static MemoryRange memoryEstimation(
             int maxDepth,
+            int minSplitSize,
             long numberOfTrainingSamples,
             int numberOfClasses,
             int numberOfBaggedFeatures,
@@ -218,6 +220,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
                 .add(FeatureBagger.memoryEstimation(numberOfBaggedFeatures))
                 .add(ClassificationDecisionTreeTrain.memoryEstimation(
                     maxDepth,
+                    minSplitSize,
                     usedNumberOfTrainingSamples,
                     numberOfBaggedFeatures,
                     numberOfClasses
