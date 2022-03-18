@@ -114,6 +114,7 @@ When a user calls procedure `gds.alpha.userLog`, their respective list of genera
 CALL gds.alpha.userLog()
 YIELD
   taskName,
+  timeStarted,
   message
 ----
 
@@ -134,7 +135,7 @@ This generates a warning which can be accessed via the user log as seen below.
 
 [source,cypher,role=noplay]
 ----
-CALL gds.beta.listProgress()
+CALL gds.alpha.userLog()
 YIELD
   taskName,
   message
