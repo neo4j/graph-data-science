@@ -107,6 +107,23 @@ class AtomicDoubleTest {
         assertThat(atomicValue.get()).isEqualTo(v0);
     }
 
+    @Test
+    void compareAndSetParallel() {
+        var concurrency = 4;
+        var value = new AtomicDouble();
+
+        execute(concurrency, () -> {
+            for (int j = 0; j < 42; j++) {
+                var current = value.get();
+                while (!value.compareAndSet(current, current + j)) {
+                    current = value.get();
+                }
+            }
+        });
+
+        assertThat(value.get()).isEqualTo(concurrency * 42 * 41 / 2.0);
+    }
+
     @Property
     void weakCompareAndSetPlainPositive(@ForAll double v0, @ForAll double v1) {
         var atomicValue = new AtomicDouble(v0);
@@ -200,6 +217,31 @@ class AtomicDoubleTest {
 
         assertThat(v0).isEqualTo(witness);
         assertThat(atomicValue.get()).isEqualTo(v0);
+    }
+
+    @Test
+    void compareAndExchangeParallel() {
+        var concurrency = 4;
+        var value = new AtomicDouble();
+
+        execute(concurrency, () -> {
+            for (int j = 0; j < 42; j++) {
+                var current = value.get();
+
+                while (true) {
+                    var next = current + j;
+                    var witness = value.compareAndExchange(current, next);
+
+                    if (Double.compare(witness, current) == 0) {
+                        break;
+                    }
+
+                    current = witness;
+                }
+            }
+        });
+
+        assertThat(value.get()).isEqualTo(concurrency * 42 * 41 / 2.0);
     }
 
     @Property
