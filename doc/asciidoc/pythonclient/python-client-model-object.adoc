@@ -22,7 +22,7 @@ Supposing we have a graph `G` that have an integer node property "price", we cou
 model, res = gds.beta.graphSage.train(G, modelName="my-model", featureProperties=["price"])
 ----
 
-where `model` is the model object, and `res` is a `dict[str, any]` containing metadata from the underlying procedure call.
+where `model` is the model object, and `res` is a pandas `Series` containing metadata from the underlying procedure call.
 
 Similarly, we can also get model objects from training <<python-client-pipelines, machine learning pipelines>>.
 
@@ -45,8 +45,8 @@ There are convenience methods on all model objects that let us extract informati
 | Name          | Arguments | Return type         | Description
 | name          | -         | str                 | The name of the model as it appears in the model catalog.
 | type          | -         | str                 | The type of model it is, eg. "graphSage".
-| train_config  | -         | dict[str, any]      | The configuration used for training the model.
-| graph_schema  | -         | dict[str, any]      | The schema of the graph on which the model was trained.
+| train_config  | -         | Series              | The configuration used for training the model.
+| graph_schema  | -         | Series              | The schema of the graph on which the model was trained.
 | loaded        | -         | bool                | `True` if the model is <<catalog-model-load, loaded>> in the in-memory model catalog, `False` otherwise.
 | stored        | -         | bool                | `True` if the model is <<catalog-model-store, stored>> on disk, `False` otherwise.
 | creation_time | -         | neo4j.time.Datetime | Time when the model was created.
@@ -76,7 +76,7 @@ For instance, supposing we have a model object `model`, we could:
 # Store the model on disk (GDS Enterprise Edition)
 _ = gds.alpha.model.store(model)
 
-gds.beta.model.drop(model)          #  same as model.drop()
+gds.beta.model.drop(model)  # same as model.drop()
 ----
 
 
@@ -90,14 +90,14 @@ Once trained, in addition to the <<python-client-model-object-inspecting, method
 .GraphSAGE model methods
 [opts="header",cols="5m,5m,6m,11"]
 |===
-| Name           | Arguments        | Return type          | Description
+| Name           | Arguments        | Return type | Description
 | predict_mutate | G: Graph, +
-                   config: **kwargs | dict[str, any]       | <<graph-sage-trained-model-example-mutate, Predict embeddings for nodes of the input graph and mutate graph with predictions>>.
+                   config: **kwargs | Series      | <<graph-sage-trained-model-example-mutate, Predict embeddings for nodes of the input graph and mutate graph with predictions>>.
 | predict_stream | G: Graph, +
-                   config: **kwargs | list[dict[str, any]] | <<graph-sage-trained-model-example, Predict embeddings for nodes of the input graph and stream the results>>.
+                   config: **kwargs | DataFrame   | <<graph-sage-trained-model-example, Predict embeddings for nodes of the input graph and stream the results>>.
 | predict_write  | G: Graph, +
-                   config: **kwargs | dict[str, any]       | <<graph-sage-trained-model-example-write, Predict embeddings for nodes of the input graph and write the results back to the database>>.
-| metrics        | -                | dict[str, any] | Returns values for the metrics computed when training.
+                   config: **kwargs | Series      | <<graph-sage-trained-model-example-write, Predict embeddings for nodes of the input graph and write the results back to the database>>.
+| metrics        | -                | Series      | Returns values for the metrics computed when training.
 |===
 
 Suppose then that we have a trained GraphSAGE model `gs_model` and a graph `H` for which we would like to derive node embeddings. Then we could do the following:
