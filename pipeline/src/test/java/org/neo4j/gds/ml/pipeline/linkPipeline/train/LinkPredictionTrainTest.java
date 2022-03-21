@@ -168,7 +168,7 @@ class LinkPredictionTrainTest {
                     .maxFeaturesRatio(1.0D)
                     .numberOfDecisionTrees(1)
                     .build()),
-                MemoryRange.of(26_128, 810_128)
+                MemoryRange.of(60_368, 900_128)
             )
         );
     }

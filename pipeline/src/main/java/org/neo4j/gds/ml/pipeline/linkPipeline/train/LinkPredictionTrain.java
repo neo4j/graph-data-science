@@ -34,24 +34,21 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.ml.metrics.BestMetricData;
-import org.neo4j.gds.ml.metrics.LinkMetric;
-import org.neo4j.gds.ml.metrics.ModelStats;
-import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.core.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
+import org.neo4j.gds.ml.metrics.BestMetricData;
+import org.neo4j.gds.ml.metrics.LinkMetric;
+import org.neo4j.gds.ml.metrics.ModelStats;
+import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
-import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainer;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
@@ -193,18 +190,36 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         pipeline.trainingParameterSpace().values().stream().flatMap(List::stream).forEach(modelParams -> {
             var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
-            var validationStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
+            var validationStatsBuilder = new LinkModelStatsBuilder(
+                modelParams,
+                pipeline.splitConfig().validationFolds()
+            );
             for (TrainingExamplesSplit relSplit : validationSplits) {
                 // train each model candidate on the train sets
                 var trainSet = relSplit.trainSet();
                 var validationSet = relSplit.testSet();
                 // the below calls intentionally suppress progress logging of individual models
-                var classifier = trainModel(trainData, ReadOnlyHugeLongArray.of(trainSet), modelParams, ProgressTracker.NULL_TRACKER);
+                var classifier = trainModel(
+                    trainData,
+                    ReadOnlyHugeLongArray.of(trainSet),
+                    modelParams,
+                    ProgressTracker.NULL_TRACKER
+                );
 
                 // evaluate each model candidate on the train and validation sets
-                computeTrainMetric(trainData, classifier, ReadOnlyHugeLongArray.of(trainSet), ProgressTracker.NULL_TRACKER)
+                computeTrainMetric(
+                    trainData,
+                    classifier,
+                    ReadOnlyHugeLongArray.of(trainSet),
+                    ProgressTracker.NULL_TRACKER
+                )
                     .forEach(trainStatsBuilder::update);
-                computeTrainMetric(trainData, classifier, ReadOnlyHugeLongArray.of(validationSet), ProgressTracker.NULL_TRACKER)
+                computeTrainMetric(
+                    trainData,
+                    classifier,
+                    ReadOnlyHugeLongArray.of(validationSet),
+                    ProgressTracker.NULL_TRACKER
+                )
                     .forEach(validationStatsBuilder::update);
             }
 
@@ -393,7 +408,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                     "Test"
                 )
             ))
-            .add(estimateModelSelection(pipeline, fudgedLinkFeatureDim, numberOfMetrics))
+            .add(estimateTrainingAndEvaluation(pipeline, fudgedLinkFeatureDim, numberOfMetrics))
             // we do not consider the training of the best model on the outer train set as the memory estimation is at most the maximum of the model training during the model selection
             // this assumes the training is independent of the relationship set size
             .add("Outer train stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
@@ -402,7 +417,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             .build();
     }
 
-    private static MemoryEstimation estimateModelSelection(
+    private static MemoryEstimation estimateTrainingAndEvaluation(
         LinkPredictionPipeline pipeline,
         MemoryRange linkFeatureDimension,
         int numberOfMetrics
@@ -410,18 +425,15 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var splitConfig = pipeline.splitConfig();
         var maxEstimationOverModelCandidates = maxEstimation(
             "Max over model candidates",
-            // There's no memory estimation support for Random forest yet.
-            pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression).stream()
-                .map(llrConfig -> MemoryEstimations.builder("Train and evaluate model")
+            pipeline.trainingParameterSpace()
+                .values()
+                .stream()
+                .flatMap(List::stream)
+                .map(trainerConfig -> MemoryEstimations.builder("Train and evaluate model")
                     .fixed("Stats map builder train", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
                     .fixed("Stats map builder validation", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
                     .max("Train model and compute train metrics", List.of(
-                        LogisticRegressionTrainer.memoryEstimation(
-                            true,
-                            2,
-                            linkFeatureDimension,
-                            ((LogisticRegressionTrainConfig) llrConfig).batchSize()
-                        ),
+                            estimateTraining(pipeline.splitConfig(), trainerConfig, linkFeatureDimension),
                             estimateComputeTrainMetrics(pipeline.splitConfig())
                         )
                     ).build()
@@ -448,13 +460,32 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             .build();
     }
 
+    private static MemoryEstimation estimateTraining(
+        LinkPredictionSplitConfig splitConfig,
+        TrainerConfig trainerConfig,
+        MemoryRange linkFeatureDimension
+    ) {
+        return MemoryEstimations.setup(
+            "Training", dim ->
+                TrainerFactory.memoryEstimation(
+                    trainerConfig,
+                    unused -> dim.relationshipCounts().get(RelationshipType.of(splitConfig.trainRelationshipType())),
+                    2,
+                    linkFeatureDimension,
+                    true
+                )
+        );
+    }
+
     private static MemoryEstimation estimateComputeTrainMetrics(LinkPredictionSplitConfig splitConfig) {
         return MemoryEstimations
             .builder("Compute train metrics")
             .perGraphDimension(
                 "Sorted probabilities",
                 (dim, threads) -> {
-                    long trainSetSize = dim.relationshipCounts().get(RelationshipType.of(splitConfig.trainRelationshipType()));
+                    long trainSetSize = dim
+                        .relationshipCounts()
+                        .get(RelationshipType.of(splitConfig.trainRelationshipType()));
                     return LinkPredictionEvaluationMetricComputer.estimate(trainSetSize);
                 }
             ).build();
