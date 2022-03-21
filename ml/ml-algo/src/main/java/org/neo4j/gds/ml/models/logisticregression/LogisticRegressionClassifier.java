@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.models.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -35,6 +36,7 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Features;
+import org.neo4j.gds.ml.models.TrainerConfig;
 
 import static org.neo4j.gds.ml.core.Dimensions.matrix;
 
@@ -110,6 +112,24 @@ public final class LogisticRegressionClassifier implements Classifier {
             softmaxSize;
     }
 
+    public static MemoryRange runtimeOverheadMemoryEstimation(
+        TrainerConfig trainerConfig,
+        int featureDimension,
+        int numberOfClasses,
+        boolean isReduced
+    ) {
+        int normalizedNumberOfClasses = isReduced ? (numberOfClasses - 1) : numberOfClasses;
+
+        return MemoryRange.of(
+            LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(
+                ((LogisticRegressionTrainConfig) trainerConfig).batchSize(),
+                featureDimension,
+                numberOfClasses,
+                normalizedNumberOfClasses
+            )
+        );
+    }
+
     private static long sizeOfFeatureExtractorsInBytes(int numberOfFeatures) {
         return FeatureExtraction.memoryUsageInBytes(numberOfFeatures);
     }
@@ -146,7 +166,9 @@ public final class LogisticRegressionClassifier implements Classifier {
         var batchFeatures = new Matrix(batch.size(), features.featureDimension());
         var batchFeaturesOffset = new MutableInt();
 
-        batch.nodeIds().forEach(id -> batchFeatures.setRow(batchFeaturesOffset.getAndIncrement(), features.get(id)));
+        batch
+            .nodeIds()
+            .forEach(id -> batchFeatures.setRow(batchFeaturesOffset.getAndIncrement(), features.get(id)));
 
         return new Constant<>(batchFeatures);
     }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.models;
 
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
@@ -26,6 +27,8 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.ClassificationRandomForestPredictor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
+
+import java.util.function.LongUnaryOperator;
 
 public final class ClassifierFactory {
 
@@ -44,28 +47,39 @@ public final class ClassifierFactory {
         }
     }
 
-    public static MemoryRange memoryEstimation(
+    public static MemoryRange runtimeOverheadMemoryEstimation(
         TrainerConfig trainerConfig,
-        long numberOfTrainingSamples,
         int numberOfClasses,
         int featureDimension,
         boolean isReduced
     ) {
         switch (TrainingMethod.valueOf(trainerConfig.methodName())) {
             case LogisticRegression:
-                int normalizedNumberOfClasses = isReduced ? (numberOfClasses - 1) : numberOfClasses;
-                return MemoryRange.of(LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(
-                    ((LogisticRegressionTrainConfig) trainerConfig).batchSize(),
+                return LogisticRegressionClassifier.runtimeOverheadMemoryEstimation(
+                    trainerConfig,
                     featureDimension,
                     numberOfClasses,
-                    normalizedNumberOfClasses
-                ));
-            case RandomForest:
-                return ClassificationRandomForestPredictor.memoryEstimation(
-                    numberOfTrainingSamples,
-                    numberOfClasses,
-                    (RandomForestTrainConfig) trainerConfig
+                    isReduced
                 );
+            case RandomForest:
+                return ClassificationRandomForestPredictor.runtimeOverheadMemoryEstimation(numberOfClasses);
+            default:
+                throw new IllegalStateException("No such classifier.");
+        }
+    }
+
+    public static MemoryEstimation dataMemoryEstimation(
+        TrainerConfig trainerConfig,
+        LongUnaryOperator numberOfTrainingSamples,
+        int numberOfClasses,
+        int featureDimension,
+        boolean isReduced
+    ) {
+        switch (TrainingMethod.valueOf(trainerConfig.methodName())) {
+            case LogisticRegression:
+                return LogisticRegressionData.memoryEstimation(isReduced, numberOfClasses, MemoryRange.of(featureDimension));
+            case RandomForest:
+                return RandomForestData.memoryEstimation(numberOfTrainingSamples, (RandomForestTrainConfig) trainerConfig);
             default:
                 throw new IllegalStateException("No such classifier.");
         }

@@ -31,13 +31,16 @@ public interface Classifier {
     LocalIdMap classIdMap();
 
     double[] predictProbabilities(long id, Features features);
+
     Matrix predictProbabilities(Batch batch, Features features);
 
     ClassifierData data();
 
     interface ClassifierData {
         TrainingMethod trainerMethod();
+
         LocalIdMap classIdMap();
+
         int featureDimension();
     }
 }

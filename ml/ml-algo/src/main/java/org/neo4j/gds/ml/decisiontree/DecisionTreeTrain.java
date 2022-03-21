@@ -59,8 +59,10 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     ) {
         var predictorEstimation = DecisionTreePredict.memoryEstimation(maxDepth, numberOfTrainingSamples, minSplitSize);
 
-        // Stack implies DFS so will at most have 2 * maxDepth entries.
-        long maxItemsOnStack = 2L * maxDepth;
+        // The actual depth of the produced tree is capped by the number of samples to populate the leaves.
+        long normalizedMaxDepth = Math.min(maxDepth, numberOfTrainingSamples - minSplitSize + 2);
+        // Stack implies DFS, so will at most have 2 * normalizedMaxDepth entries for a binary tree.
+        long maxItemsOnStack = 2L * normalizedMaxDepth;
         var maxStackSize = MemoryRange.of(sizeOfInstance(ArrayDeque.class))
             .add(MemoryRange.of(1, maxItemsOnStack).times(sizeOfInstance(ImmutableStackRecord.class)))
             .add(MemoryRange.of(

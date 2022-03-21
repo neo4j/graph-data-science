@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.models.randomforest;
 
-import com.carrotsearch.hppc.ObjectArrayList;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -50,21 +49,10 @@ public class ClassificationRandomForestPredictor implements Classifier {
         this.data = data;
     }
 
-    public static MemoryRange memoryEstimation(
-        long numberOfTrainingSamples,
-        int numberOfClasses,
-        RandomForestTrainConfig config
-    ) {
-        var sizeOfDecisionTreesList = MemoryRange.of(sizeOfInstance(ObjectArrayList.class))
-            .add(DecisionTreePredict
-                .memoryEstimation(config.maxDepth(), numberOfTrainingSamples, config.minSplitSize())
-                .times(config.numberOfDecisionTrees()));
-        var predictionsCacheSize = MemoryRange.of(sizeOfDoubleArray(numberOfClasses))
-            .add(sizeOfIntArray(numberOfClasses));
-
+    public static MemoryRange runtimeOverheadMemoryEstimation(int numberOfClasses) {
         return MemoryRange.of(sizeOfInstance(ClassificationRandomForestPredictor.class))
-            .add(sizeOfDecisionTreesList)
-            .add(predictionsCacheSize);
+            .add(sizeOfDoubleArray(numberOfClasses))
+            .add(sizeOfIntArray(numberOfClasses));
     }
 
     @Override

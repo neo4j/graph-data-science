@@ -226,7 +226,7 @@ class ClassificationDecisionTreeTest {
         "  6,  1_000,  32_456,    46_208",
         "  6, 10_000, 320_456,   406_208",
         // Scales with maxDepth when maxDepth is limiting tree size.
-        " 20, 10_000, 320_456, 1_202_912"
+        " 20, 10_000, 320_456, 1_202_912",
     })
     void trainMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
         var range = ClassificationDecisionTreeTrain.memoryEstimation(maxDepth, 2, numberOfTrainingSamples, 10, 10);

@@ -280,7 +280,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             Arguments.of(
                 List.of(TrainingMethod.RandomForest),
                 List.of(RandomForestTrainConfigImpl.builder().build()),
-                MemoryRange.of(97_992L, 165_232L)
+                MemoryRange.of(123_808L, 231_048L)
             ),
             Arguments.of(
                 List.of(TrainingMethod.LogisticRegression, TrainingMethod.RandomForest),

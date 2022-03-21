@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -215,36 +216,15 @@ class ClassificationRandomForestTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        // Max should almost scale linearly with numberOfDecisionTrees.
-        "     6, 100_000,  10,   1,  2,   248,      5_288",
-        "     6, 100_000,  10, 100,  2, 5_792,    509_792",
-        // Max should increase with maxDepth when maxDepth limiting factor of trees' sizes.
-        "    10, 100_000,  10,   1,  2,   248,     82_088",
-        // Min should increase with class sized arrays caching.
-        "    10, 100_000, 100,   1,  2,  1_328,    83_168",
-        // Max should scale almost inverse linearly with minSplitSize.
-        "   800, 100_000, 100,   1,  2,  1_328, 8_001_248",
-        "   800, 100_000, 100,   1, 10,  1_328, 1_601_248",
+        "  10,   168,   168",
+        " 100, 1_248, 1_248"
     })
-    void predictMemoryEstimation(
-        int maxDepth,
-        long numberOfTrainingSamples,
+    void predictOverheadMemoryEstimation(
         int numberOfClasses,
-        int numTrees,
-        int minSplitSize,
         long expectedMin,
         long expectedMax
     ) {
-        var config = RandomForestTrainConfigImpl.builder()
-            .maxDepth(maxDepth)
-            .numberOfDecisionTrees(numTrees)
-            .minSplitSize(minSplitSize)
-            .build();
-        var estimation = ClassificationRandomForestPredictor.memoryEstimation(
-            numberOfTrainingSamples,
-            numberOfClasses,
-            config
-        );
+        var estimation = ClassificationRandomForestPredictor.runtimeOverheadMemoryEstimation(numberOfClasses);
 
         assertThat(estimation.min).isEqualTo(expectedMin);
         assertThat(estimation.max).isEqualTo(expectedMax);
@@ -252,19 +232,19 @@ class ClassificationRandomForestTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "     6, 100_000,  10, 10, 1,   1, 0.1, 1.0, 4_501_194,   5_312_002",
+        "     6, 100_000,  10, 10, 1,   1, 0.1, 1.0,  4_501_042,   5_311_850",
         // Should increase fairly little with more trees if training set big.
-        "    10, 100_000,  10, 10, 1,  10, 0.1, 1.0, 4_501_698,   6_203_210",
+        "    10, 100_000,  10, 10, 1,  10, 0.1, 1.0,  4_501_546,   6_203_058",
         // Should be capped by number of training examples, despite high max depth.
-        " 8_000,     500,  10, 10, 1,   1, 0.1, 1.0,    23_694,   1_127_526",
+        " 8_000,     500,  10, 10, 1,   1, 0.1, 1.0,     23_542,    167_374",
         // Should increase very little when having more classes.
-        "    10, 100_000, 100, 10, 1,  10, 0.1, 1.0, 4_503_498,   6_205_010",
+        "    10, 100_000, 100, 10, 1,  10, 0.1, 1.0,  4_502_266,   6_203_778",
         // Should increase very little when using more features for splits.
-        "    10, 100_000, 100, 10, 1,  10, 0.9, 1.0, 4_503_570,   6_205_174",
+        "    10, 100_000, 100, 10, 1,  10, 0.9, 1.0,  4_502_338,   6_203_942",
         // Should decrease a lot when sampling fewer training examples per tree.
-        "    10, 100_000, 100, 10, 1,  10, 0.1, 0.2, 1_223_498,   2_285_010",
+        "    10, 100_000, 100, 10, 1,  10, 0.1, 0.2,  1_222_266,   2_283_778",
         // Should almost be x4 when concurrency * 4.
-        "    10, 100_000, 100, 10, 4,  10, 0.1, 1.0, 16_808_184, 21_159_032",
+        "    10, 100_000, 100, 10, 4,  10, 0.1, 1.0, 16_806_952,  21_157_800",
     })
     void trainMemoryEstimation(
         int maxDepth,
@@ -285,9 +265,9 @@ class ClassificationRandomForestTest {
             .numberOfSamplesRatio(numberOfSamplesRatio)
             .build();
         var estimator = ClassificationRandomForestTrainer.memoryEstimation(
-            numberOfTrainingSamples,
+            unused -> numberOfTrainingSamples,
             numberOfClasses,
-            featureDimension,
+            MemoryRange.of(featureDimension),
             config
         );
         // Does not depend on node count, only indirectly so with the size of the training set.

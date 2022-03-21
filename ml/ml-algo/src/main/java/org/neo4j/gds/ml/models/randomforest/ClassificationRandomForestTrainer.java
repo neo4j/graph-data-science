@@ -89,14 +89,8 @@ public class ClassificationRandomForestTrainer implements Trainer {
         int maxNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.max) * featureDimension.max);
 
         return MemoryEstimations.builder("Training", ClassificationRandomForestTrainer.class)
+            .add(RandomForestData.memoryEstimation(numberOfTrainingSamples, config))
             .rangePerNode(
-                "Classifier",
-                nodeCount -> ClassificationRandomForestPredictor.memoryEstimation(
-                    numberOfTrainingSamples.applyAsLong(nodeCount),
-                    numberOfClasses,
-                    config
-                )
-            ).rangePerNode(
                 "GiniIndex Loss",
                 nodeCount -> GiniIndex.memoryEstimation(numberOfTrainingSamples.applyAsLong(nodeCount))
             ).perGraphDimension(

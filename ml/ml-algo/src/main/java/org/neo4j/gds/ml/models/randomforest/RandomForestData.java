@@ -19,13 +19,20 @@
  */
 package org.neo4j.gds.ml.models.randomforest;
 
+import com.carrotsearch.hppc.ObjectArrayList;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
 import java.util.List;
+import java.util.function.LongUnaryOperator;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 @ValueClass
 public interface RandomForestData extends Classifier.ClassifierData {
@@ -35,5 +42,26 @@ public interface RandomForestData extends Classifier.ClassifierData {
     @Value.Derived
     default TrainingMethod trainerMethod() {
         return TrainingMethod.RandomForest;
+    }
+
+    static MemoryEstimation memoryEstimation(
+        LongUnaryOperator numberOfTrainingExamples,
+        RandomForestTrainConfig config
+    ) {
+        return MemoryEstimations.builder("Random forest model data", RandomForestData.class)
+            .rangePerNode(
+                "Decision trees",
+                nodeCount ->
+                    MemoryRange.of(sizeOfInstance(ObjectArrayList.class))
+                        .add(DecisionTreePredict
+                                .memoryEstimation(
+                                    config.maxDepth(),
+                                    numberOfTrainingExamples.applyAsLong(nodeCount),
+                                    config.minSplitSize()
+                                )
+                                .times(config.numberOfDecisionTrees())
+                        )
+            )
+            .build();
     }
 }

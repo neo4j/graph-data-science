@@ -238,11 +238,20 @@ public final class NodeClassificationTrain {
                 var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
                 return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
             })
-            .rangePerNode(
-                "classifier",
-                (nodeCount) -> ClassifierFactory.memoryEstimation(
+            .add(
+                "classifier model",
+                ClassifierFactory.dataMemoryEstimation(
                     config,
-                    trainSetSize.applyAsLong(nodeCount),
+                    trainSetSize,
+                    fudgedClassCount,
+                    fudgedFeatureCount,
+                    isReduced
+                )
+            )
+            .rangePerNode(
+                "classifier runtime",
+                (nodeCount) -> ClassifierFactory.runtimeOverheadMemoryEstimation(
+                    config,
                     fudgedClassCount,
                     fudgedFeatureCount,
                     isReduced
