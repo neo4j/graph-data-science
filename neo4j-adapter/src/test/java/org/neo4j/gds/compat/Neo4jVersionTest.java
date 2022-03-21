@@ -22,8 +22,10 @@ package org.neo4j.gds.compat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.kernel.internal.Version;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -36,9 +38,6 @@ class Neo4jVersionTest {
         "4.3.0, V_4_3",
         "4.4.0, V_4_4",
         "4.4.12, V_4_4",
-        "4.4.4-drop01.0, V_4_4_drop10",
-        "5.0.0-dev, V_Dev",
-        "dev, V_Dev",
     })
     void testParse(String input, Neo4jVersion expected) {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
@@ -48,5 +47,16 @@ class Neo4jVersionTest {
     void shouldNotRespectVersionOverride() {
         System.setProperty(Neo4jVersionTest.CUSTOM_VERSION_SETTING, "foobidoobie");
         assertNotEquals(Version.getNeo4jVersion(), Neo4jVersion.neo4jVersion());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "5.0.0-dev",
+        "dev"
+    })
+    void testUnsupportedVersions(String input) {
+        assertThatThrownBy(() -> Neo4jVersion.parse(input).name())
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessage("Cannot run on Neo4j Version " + input);
     }
 }
