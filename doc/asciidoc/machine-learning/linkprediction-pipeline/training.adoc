@@ -15,7 +15,7 @@ These graphs are internally managed and exist only for the duration of the train
 . Split the training instances using stratified k-fold cross-validation.
 The number of folds `k` can be configured using `validationFolds` in `gds.beta.pipeline.linkPrediction.configureSplit`.
 . Train each model candidate given by the <<linkprediction-configure-model-parameters,parameter space>> for each of the folds and evaluate the model on the respective validation set.
-The training process uses a logistic regression algorithm, and the evaluation uses the <<linkprediction-pipelines-metrics, AUCPR metric>>.
+The training process uses a logistic regression or random forest algorithm, and the evaluation uses the <<linkprediction-pipelines-metrics, AUCPR metric>>.
 . Declare as winner the model with the highest average metric across the folds.
 . Re-train the winning model on the whole training set and evaluate it on both the `train` and `test` sets.
 In order to evaluate on the `test` set, the feature pipeline is first applied again as for the `train` set.
