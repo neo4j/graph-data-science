@@ -26,7 +26,7 @@ G, res = gds.graph.project(
 )
 ----
 
-where `G` is a `Graph` object, and `res` is a `dict[str, any]` containing metadata from the underlying procedure call.
+where `G` is a `Graph` object, and `res` is a pandas `Series` containing metadata from the underlying procedure call.
 
 Note that all projection syntax variants are supported by way of specifying a Python `dict` or `list` for the node and relationship projection arguments.
 To specify configuration parameters corresponding to the keys of the procedure's `configuration` map, we give named keyword arguments, like for `concurrency=4` above.
@@ -63,7 +63,7 @@ There are convenience methods on the graph object that let us extract informatio
 | relationship_count      | -          | int              | The relationship count of the projected graph.
 | node_properties         | label: str | list[str]        | A list of the node properties present on the nodes with the node label provided as input.
 | relationship_properties | type: str  | list[str]        | A list of the relationship properties present on the relationships with the relationship type provided as input.
-| degree_distribution     | -          | dict[str, float] | The average out-degree of generated nodes.
+| degree_distribution     | -          | Series           | The average out-degree of generated nodes.
 | density                 | -          | float            | Density of the graph.
 | size_in_bytes           | -          | int              | Number of bytes used in the Java heap to store the graph.
 | memory_usage            | -          | str              | Human-readable description of `size_in_bytes`.
@@ -95,7 +95,7 @@ G, _ = gds.graph.project(...)
 
 res = gds.wcc.stream(G)
 
-gds.graph.drop(G)          #  same as G.drop()
+gds.graph.drop(G)  # same as G.drop()
 ----
 
 In most Cypher operations where a graph name is required, the graph object is used in the Python client instead.
