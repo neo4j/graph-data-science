@@ -5,8 +5,8 @@ The design philosophy of the Python client is to mimic the GDS Cypher API in Pyt
 The Python client will translate the Python code written by the user to a corresponding Cypher query which it will then run on the Neo4j server using a Neo4j Python driver connection.
 
 The Python client attempts to be as pythonic as possible to maximize convenience for users accustomed to and experienced with Python environments.
-As such standard Python types are used as much as possible.
-However, to be consistent with the Cypher surface the general return value of calling a method corresponding to a Cypher procedure will be in the form of a table (i.e. `list[dict[str, any]]` in Python).
+As such standard Python and pandas types are used as much as possible.
+However, to be consistent with the Cypher surface the general return value of calling a method corresponding to a Cypher procedure will be in the form of a table (a pandas `DataFrame` in Python).
 Read more about this in <<python-client-getting-started-mapping>>.
 
 The root component of the Python client is the `GraphDataScience` object.
@@ -115,13 +115,13 @@ There are some general principles for how the Cypher API maps to the Python clie
 * Method calls corresponding to Cypher procedures (preceded by `CALL` in the docs) return:
 +
 --
-* A table as a Python `list[dict[str, any]]`, if the procedure returns several rows (eg. stream mode algorithm calls).
-* A row as a Python `dict[str, any]`, if the procedure returns exactly one row (eg. stats mode algorithm calls).
+* A table as a pandas `DataFrame`, if the procedure returns several rows (eg. stream mode algorithm calls).
+* A row as a pandas `Series`, if the procedure returns exactly one row (eg. stats mode algorithm calls).
 --
 +
 Some notable exceptions to this are:
 
-** Procedures instantiating <<python-client-graph-object, graph objects>> and <<python-client-model-object, model objects>> have two return values: a graph or model object, and a row of metadata from the underlying procedure call.
+** Procedures instantiating <<python-client-graph-object, graph objects>> and <<python-client-model-object, model objects>> have two return values: a graph or model object, and a row of metadata (typically a pandas `Series`) from the underlying procedure call.
 ** Any methods on <<python-client-pipelines, pipeline>>, <<python-client-graph-object, graph>> or <<python-client-model-object, model>> objects (native to the Python client) mapping to Cypher procedures.
 ** `gds.version()` which returns a string.
 * Method calls corresponding to Cypher functions (preceded by `RETURN` in the docs) will simply return the value the function returns.
