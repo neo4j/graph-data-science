@@ -381,12 +381,13 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             logService,
             executionMonitor,
             additionalInitialIds,
+            new EmptyLogTailMetadata(),
             dbConfig,
             Monitor.NO_MONITOR,
             jobScheduler,
             badCollector,
             TransactionLogInitializer.getLogFilesInitializer(),
-            new IndexImporterFactoryImpl(dbConfig),
+            new IndexImporterFactoryImpl(),
             EmptyMemoryTracker.INSTANCE,
             new CursorContextFactory(PageCacheTracer.NULL, EmptyVersionContextSupplier.EMPTY)
         );
