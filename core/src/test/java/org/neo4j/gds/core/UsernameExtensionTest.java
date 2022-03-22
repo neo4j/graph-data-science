@@ -52,7 +52,7 @@ class UsernameExtensionTest {
                 .addExtension(new UsernameExtension())
                 .build();
             var db = dbms.database(DEFAULT_DATABASE_NAME);
-            var ignored = db.executeTransactionally("CALL dbms.procedures()", Map.of(), Result::resultAsString);
+            var ignored = db.executeTransactionally("SHOW PROCEDURES", Map.of(), Result::resultAsString);
             dbms.shutdown();
         };
         assertThat(runCapturingStdOut(runnable)).isEmpty();
@@ -70,7 +70,7 @@ class UsernameExtensionTest {
                 .build();
             var db = dbms.database(DEFAULT_DATABASE_NAME);
             GraphDatabaseApiProxy.registerProcedures(db, UsernameProc.class);
-            var ignored = db.executeTransactionally("CALL dbms.procedures()", Map.of(), Result::resultAsString);
+            var ignored = db.executeTransactionally("SHOW PROCEDURES", Map.of(), Result::resultAsString);
             dbms.shutdown();
         };
         assertThat(runCapturingStdOut(runnable)).isEmpty();
