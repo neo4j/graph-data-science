@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -113,7 +114,7 @@ public final class KnnNodePropertySpecParser {
             SimilarityMetric similarityMetric;
             if (value != null) {
                 try {
-                    similarityMetric = SimilarityMetric.valueOf(value);
+                    similarityMetric = SimilarityMetric.valueOf(value.toUpperCase(Locale.ENGLISH));
                     knnNodeProperties.add(new KnnNodePropertySpec(key, similarityMetric));
                 } catch (IllegalArgumentException ex) {
                     throw new IllegalArgumentException(

@@ -20,9 +20,12 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityMetric;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -101,6 +104,16 @@ class KnnNodePropertySpecParserTest {
                 SimilarityMetric.EUCLIDEAN,
                 SimilarityMetric.OVERLAP
             );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"cosine", "euCLIDean", "jACcaRd", "OVERLAP", "Pearson"})
+    void shouldAcceptMetricsRegardlessOfCase(String metric) {
+        var input = "property";
+        assertThat(KnnNodePropertySpecParser.parse(Map.of(input, metric)))
+            .singleElement()
+            .extracting(spec -> spec.metric().name())
+            .isEqualTo(metric.toUpperCase(Locale.ENGLISH));
     }
 
     @Test
