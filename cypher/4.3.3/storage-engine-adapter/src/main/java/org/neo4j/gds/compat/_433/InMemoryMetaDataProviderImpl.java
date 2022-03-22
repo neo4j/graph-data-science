@@ -21,10 +21,18 @@ package org.neo4j.gds.compat._433;
 
 import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractTransactionIdStore;
+import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository;
 import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.storageengine.api.TransactionId;
 
 public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvider {
-    private final InMemoryTransactionIdStoreImpl transactionIdStore = new InMemoryTransactionIdStoreImpl();
+
+    private final InMemoryTransactionIdStoreImpl transactionIdStore;
+
+    InMemoryMetaDataProviderImpl() {
+        super(new InMemoryLogVersionRepository());
+        this.transactionIdStore = new InMemoryTransactionIdStoreImpl();
+    }
 
     @Override
     public long[] getLastClosedTransaction() {
@@ -54,5 +62,59 @@ public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvid
             missingLogs,
             cursorContext
         );
+    }
+
+    @Override
+    public void setCurrentLogVersion(long version, CursorContext cursorContext) {
+        this.logVersionRepository.setCurrentLogVersion(version, cursorContext);
+    }
+
+    @Override
+    public long incrementAndGetVersion(CursorContext cursorContext) {
+        return this.logVersionRepository.incrementAndGetVersion(cursorContext);
+    }
+
+    @Override
+    public void setCheckpointLogVersion(long version, CursorContext cursorContext) {
+        this.logVersionRepository.setCheckpointLogVersion(version, cursorContext);
+    }
+
+    @Override
+    public long incrementAndGetCheckpointLogVersion(CursorContext cursorContext) {
+        return this.logVersionRepository.incrementAndGetCheckpointLogVersion(cursorContext);
+    }
+
+    @Override
+    public void transactionCommitted(long transactionId, int checksum, long commitTimestamp, CursorContext cursorContext) {
+        this.transactionIdStore().transactionCommitted(transactionId, checksum, commitTimestamp, cursorContext);
+    }
+
+    @Override
+    public TransactionId getUpgradeTransaction() {
+        return this.transactionIdStore().getUpgradeTransaction();
+    }
+
+    @Override
+    public void setLastCommittedAndClosedTransactionId(
+        long transactionId,
+        int checksum,
+        long commitTimestamp,
+        long byteOffset,
+        long logVersion,
+        CursorContext cursorContext
+    ) {
+        this.transactionIdStore().setLastCommittedAndClosedTransactionId(
+            transactionId,
+            checksum,
+            commitTimestamp,
+            byteOffset,
+            logVersion,
+            cursorContext
+        );
+    }
+
+    @Override
+    public void flush(CursorContext cursorContext) {
+        this.transactionIdStore().flush(cursorContext);
     }
 }

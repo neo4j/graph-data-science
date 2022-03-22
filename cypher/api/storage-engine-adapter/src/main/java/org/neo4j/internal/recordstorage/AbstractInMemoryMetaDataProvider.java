@@ -31,12 +31,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 public abstract class AbstractInMemoryMetaDataProvider implements MetadataProvider {
-    private final InMemoryLogVersionRepository logVersionRepository = new InMemoryLogVersionRepository();
-    private final ExternalStoreId externalStoreId = new ExternalStoreId(UUID.randomUUID());
+    private final ExternalStoreId externalStoreId;
+    protected final AbstractInMemoryLogVersionRepository logVersionRepository;
+
+    protected AbstractInMemoryMetaDataProvider(AbstractInMemoryLogVersionRepository logVersionRepository) {
+        this.logVersionRepository = logVersionRepository;
+        this.externalStoreId = new ExternalStoreId(UUID.randomUUID());
+    }
 
     public abstract AbstractTransactionIdStore transactionIdStore();
 
-    public InMemoryLogVersionRepository logVersionRepository() {
+    AbstractInMemoryLogVersionRepository logVersionRepository() {
         return logVersionRepository;
     }
 
@@ -50,28 +55,8 @@ public abstract class AbstractInMemoryMetaDataProvider implements MetadataProvid
     }
 
     @Override
-    public void setCurrentLogVersion(long version, CursorContext cursorContext) {
-        this.logVersionRepository.setCurrentLogVersion(version, cursorContext);
-    }
-
-    @Override
-    public long incrementAndGetVersion(CursorContext cursorContext) {
-        return this.logVersionRepository.incrementAndGetVersion(cursorContext);
-    }
-
-    @Override
     public long getCheckpointLogVersion() {
         return this.logVersionRepository.getCheckpointLogVersion();
-    }
-
-    @Override
-    public void setCheckpointLogVersion(long version, CursorContext cursorContext) {
-        this.logVersionRepository.setCheckpointLogVersion(version, cursorContext);
-    }
-
-    @Override
-    public long incrementAndGetCheckpointLogVersion(CursorContext cursorContext) {
-        return this.logVersionRepository.incrementAndGetCheckpointLogVersion(cursorContext);
     }
 
     @Override
@@ -94,12 +79,6 @@ public abstract class AbstractInMemoryMetaDataProvider implements MetadataProvid
         return this.transactionIdStore().committingTransactionId();
     }
 
-
-    @Override
-    public void transactionCommitted(long transactionId, int checksum, long commitTimestamp, CursorContext cursorContext) {
-        this.transactionIdStore().transactionCommitted(transactionId, checksum, commitTimestamp, cursorContext);
-    }
-
     @Override
     public long getLastCommittedTransactionId() {
         return this.transactionIdStore().getLastCommittedTransactionId();
@@ -111,37 +90,8 @@ public abstract class AbstractInMemoryMetaDataProvider implements MetadataProvid
     }
 
     @Override
-    public TransactionId getUpgradeTransaction() {
-        return this.transactionIdStore().getUpgradeTransaction();
-    }
-
-    @Override
     public long getLastClosedTransactionId() {
         return this.transactionIdStore().getLastClosedTransactionId();
-    }
-
-    @Override
-    public void setLastCommittedAndClosedTransactionId(
-        long transactionId,
-        int checksum,
-        long commitTimestamp,
-        long byteOffset,
-        long logVersion,
-        CursorContext cursorContext
-    ) {
-        this.transactionIdStore().setLastCommittedAndClosedTransactionId(
-            transactionId,
-            checksum,
-            commitTimestamp,
-            byteOffset,
-            logVersion,
-            cursorContext
-        );
-    }
-
-    @Override
-    public void flush(CursorContext cursorContext) {
-        this.transactionIdStore().flush(cursorContext);
     }
 
     @Override
