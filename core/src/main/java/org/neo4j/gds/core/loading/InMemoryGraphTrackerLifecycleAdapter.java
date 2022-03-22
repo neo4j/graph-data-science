@@ -59,6 +59,16 @@ public class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter imple
         databaseIsShuttingDown(eventContext.getDatabaseName());
     }
 
+    // The @override is missing for compatibility reasons
+    public void databaseCreate(DatabaseEventContext eventContext) {
+
+    }
+
+    // The @override is missing for compatibility reasons
+    public void databaseDrop(DatabaseEventContext eventContext) {
+
+    }
+
     private void databaseIsShuttingDown(String databaseName) {
         var databaseIds = databaseManager.registeredDatabases().keySet();
         var namedDatabaseId = databaseIds
