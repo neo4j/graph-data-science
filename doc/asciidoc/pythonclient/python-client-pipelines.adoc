@@ -27,7 +27,7 @@ To create a new node classification pipeline one would make the following call:
 pipe, res = gds.beta.pipeline.nodeClassification.create("my-pipe")
 ----
 
-where `pipe` is a pipeline object, and `res` is a `dict[str, any]` containing metadata from the underlying procedure call.
+where `pipe` is a pipeline object, and `res` is a pandas `Series` containing metadata from the underlying procedure call.
 
 To then go on to build, configure and train the pipeline we would call methods directly on the node classification pipeline object.
 Below is a description of the methods on such objects:
@@ -35,30 +35,30 @@ Below is a description of the methods on such objects:
 .Node classification pipeline methods
 [opts="header",cols="2m,2m,2m,3"]
 |===
-| Name                  | Arguments                | Return type                     | Description
+| Name                  | Arguments                | Return type             | Description
 | addNodeProperty       | procedure_name: str, +
-                            config: **kwargs       | dict[str, any]                  | <<nodeclassification-pipelines-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+                            config: **kwargs       | Series                  | <<nodeclassification-pipelines-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
 | selectFeatures        | node_properties: +
-                            Union[str, list[str]]  | dict[str, any]                  | <<nodeclassification-pipelines-adding-features, Select node properties to be used as features>>.
-| configureSplit        | config: **kwargs         | dict[str, any]                  | <<nodeclassification-pipelines-configure-splits, Configure the train-test dataset split>>.
+                            Union[str, list[str]]  | Series                  | <<nodeclassification-pipelines-adding-features, Select node properties to be used as features>>.
+| configureSplit        | config: **kwargs         | Series                  | <<nodeclassification-pipelines-configure-splits, Configure the train-test dataset split>>.
 | addLogisticRegression | parameter_space: +
-                            dict[str, any]         | dict[str, any]                  | <<nodeclassification-pipelines-configure-model-parameters, Add a logistic regression model configuration to train as a candidate in the model selection phase>>.
+                            dict[str, any]         | Series                  | <<nodeclassification-pipelines-configure-model-parameters, Add a logistic regression model configuration to train as a candidate in the model selection phase>>.
 | addRandomForest       | parameter_space: +
-                            dict[str, any]         | dict[str, any]                  | <<nodeclassification-pipelines-configure-model-parameters, Add a random forest model configuration to train as a candidate in the model selection phase>>.
+                            dict[str, any]         | Series                  | <<nodeclassification-pipelines-configure-model-parameters, Add a random forest model configuration to train as a candidate in the model selection phase>>.
 | train                 | G: Graph, +
                             config: **kwargs       | NCPredictionPipeline, +
-                                                             dict[str, any]          | <<nodeclassification-pipelines-train, Train the pipeline on the given input graph using given keyword arguments>>.
+                                                             Series          | <<nodeclassification-pipelines-train, Train the pipeline on the given input graph using given keyword arguments>>.
 | train_estimate        | G: Graph, +
-                            config: **kwargs       | dict[str, any]                  | <<nodeclassification-pipelines-examples-train-memory-estimation, Estimate training the pipeline on the given input graph using given keyword arguments>>.
-| node_property_steps   | -                        | list[dict[str, any]]            | Returns the node property steps of the pipeline.
-| feature_properties    | -                        | list[dict[str, any]]            | Returns a list of the selected feature properties for the pipeline.
-| split_config          | -                        | dict[str, any]                  | Returns the configuration set up for train-test splitting of the dataset.
-| parameter_space       | -                        | dict[str, list[dict[str, any]]] | Returns the model parameter space set up for model selection when training.
-| name                  | -                        | str                             | The name of the pipeline as it appears in the pipeline catalog.
-| type                  | -                        | str                             | The type of pipeline.
-| creation_time         | -                        | neo4j.time.Datetime             | Time when the pipeline was created.
-| drop                  | -                        | None                            | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
-| exists                | -                        | bool                            | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
+                            config: **kwargs       | Series                  | <<nodeclassification-pipelines-examples-train-memory-estimation, Estimate training the pipeline on the given input graph using given keyword arguments>>.
+| node_property_steps   | -                        | DataFrame               | Returns the node property steps of the pipeline.
+| feature_properties    | -                        | Series                  | Returns a list of the selected feature properties for the pipeline.
+| split_config          | -                        | Series                  | Returns the configuration set up for train-test splitting of the dataset.
+| parameter_space       | -                        | Series                  | Returns the model parameter space set up for model selection when training.
+| name                  | -                        | str                     | The name of the pipeline as it appears in the pipeline catalog.
+| type                  | -                        | str                     | The type of pipeline.
+| creation_time         | -                        | neo4j.time.Datetime     | Time when the pipeline was created.
+| drop                  | -                        | None                    | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
+| exists                | -                        | bool                    | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
 |===
 
 There are two main differences when comparing the methods above that map to procedures of the Cypher API:
@@ -66,7 +66,7 @@ There are two main differences when comparing the methods above that map to proc
 * As the Python methods are called on the pipeline object, one does not need to provide a name when calling them.
 * Configuration parameters in the Cypher calls are represented by named keyword arguments in the Python method calls.
 
-Another difference is that the `train` Python call takes a <<python-client-graph-object, graph object>> instead of a graph name, and returns a `NCModel` <<python-client-model-object, model object>> that we can run predictions with as well as a `dict[str, any]` with the metadata from the training.
+Another difference is that the `train` Python call takes a <<python-client-graph-object, graph object>> instead of a graph name, and returns a `NCModel` <<python-client-model-object, model object>> that we can run predictions with as well as a pandas `Series` with the metadata from the training.
 
 Please consult the <<nodeclassification-pipelines, node classification Cypher documentation>> for information about what kind of input the methods expect.
 
@@ -112,23 +112,23 @@ As we saw in the previous section, node classification models are created when t
 In addition to inheriting the methods common to all <<python-client-model-object, model objects>>, node classification models have the following methods:
 
 .Node classification model methods
-[opts="header",cols="8m,6m,7m,11"]
+[opts="header",cols="8m,6m,4m,13"]
 |===
-| Name                    | Arguments        | Return type          | Description
+| Name                    | Arguments        | Return type | Description
 | predict_mutate          | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<nodeclassification-pipelines-examples-mutate, Predict classes for nodes of the input graph and mutate graph with predictions>>.
+                            config: **kwargs | Series      | <<nodeclassification-pipelines-examples-mutate, Predict classes for nodes of the input graph and mutate graph with predictions>>.
 | predict_mutate_estimate | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<nodeclassification-pipelines-examples-predict-memory-estimation, Estimate predicting classes for nodes of the input graph and mutating graph with predictions>>.
+                            config: **kwargs | Series      | <<nodeclassification-pipelines-examples-predict-memory-estimation, Estimate predicting classes for nodes of the input graph and mutating graph with predictions>>.
 | predict_stream          | G: Graph, +
-                            config: **kwargs | list[dict[str, any]] | <<node-classification-pipelines-predict-examples-stream, Predict classes for nodes of the input graph and stream the results>>.
+                            config: **kwargs | DataFrame   | <<node-classification-pipelines-predict-examples-stream, Predict classes for nodes of the input graph and stream the results>>.
 | predict_stream_estimate | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<nodeclassification-pipelines-examples-predict-memory-estimation, Estimate predicting classes for nodes of the input graph and streaming the results>>.
+                            config: **kwargs | Series      | <<nodeclassification-pipelines-examples-predict-memory-estimation, Estimate predicting classes for nodes of the input graph and streaming the results>>.
 | predict_write           | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<nodeclassification-pipelines-examples-write, Predict classes for nodes of the input graph and write results back to the database>>.
+                            config: **kwargs | Series      | <<nodeclassification-pipelines-examples-write, Predict classes for nodes of the input graph and write results back to the database>>.
 
 | predict_write_estimate  | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<nodeclassification-pipelines-examples-predict-memory-estimation, Estimate predicting classes for nodes of the input graph and writing the results back to the database>>.
-| metrics                 | -                | dict[str, any]       | Returns values for the metrics specified when training, for this particular model.
+                            config: **kwargs | Series      | <<nodeclassification-pipelines-examples-predict-memory-estimation, Estimate predicting classes for nodes of the input graph and writing the results back to the database>>.
+| metrics                 | -                | Series      | Returns values for the metrics specified when training, for this particular model.
 |===
 
 One can note that the predict methods are indeed very similar to <<nodeclassification-pipelines-predict, their Cypher counterparts>>.
@@ -172,7 +172,7 @@ To create a new link prediction pipeline one would make the following call:
 pipe, res = gds.beta.pipeline.linkPrediction.create("my-pipe")
 ----
 
-where `pipe` is a pipeline object, and `res` is a `dict[str, any]` containing metadata from the underlying procedure call.
+where `pipe` is a pipeline object, and `res` is a pandas `Series` containing metadata from the underlying procedure call.
 
 To then go on to build, configure and train the pipeline we would call methods directly on the link prediction pipeline object.
 Below is a description of the methods on such objects:
@@ -180,30 +180,30 @@ Below is a description of the methods on such objects:
 .Link prediction pipeline methods
 [opts="header",cols="2m,2m,2m,3"]
 |===
-| Name                  | Arguments              | Return type                     | Description
+| Name                  | Arguments              | Return type         | Description
 | addNodeProperty       | procedure_name: str, +
-                        config: **kwargs         | dict[str, any]                  | <<linkprediction-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+                        config: **kwargs         | Series              | <<linkprediction-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
 | addFeature            | feature_type: str, +
-                        config: **kwargs         | dict[str, any]                  | <<linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
-| configureSplit        | config: **kwargs       | dict[str, any]                  | <<linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
+                        config: **kwargs         | Series              | <<linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
+| configureSplit        | config: **kwargs       | Series              | <<linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
 | addLogisticRegression | parameter_space: +
-                          dict[str, any]         | dict[str, any]                  | <<linkprediction-configure-model-parameters, Add a logistic regression model configuration to train as a candidate in the model selection phase>>.
+                          dict[str, any]         | Series              | <<linkprediction-configure-model-parameters, Add a logistic regression model configuration to train as a candidate in the model selection phase>>.
 | addRandomForest       | parameter_space: +
-                          dict[str, any]         | dict[str, any]                  | <<linkprediction-configure-model-parameters, Add a random forest model configuration to train as a candidate in the model selection phase>>.
+                          dict[str, any]         | Series              | <<linkprediction-configure-model-parameters, Add a random forest model configuration to train as a candidate in the model selection phase>>.
 | train                 | G: Graph, +
 config: **kwargs        | LPPredictionPipeline, +
-                                                  dict[str, any]                   | <<linkprediction-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
+                                                  Series               | <<linkprediction-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
 | train_estimate        | G: Graph, +
-                        config: **kwargs         | dict[str, any]                  | <<linkprediction-pipeline-examples-train-estimate, Estimate training the pipeline on the given input graph using given keyword arguments>>.
-| node_property_steps   | -                      | list[dict[str, any]]            | Returns the node property steps of the pipeline.
-| feature_steps         | -                      | list[dict[str, any]]            | Returns a list of the selected feature steps for the pipeline.
-| split_config          | -                      | dict[str, any]                  | Returns the configuration set up for feature-train-test splitting of the dataset.
-| parameter_space       | -                      | dict[str, list[dict[str, any]]] | Returns the model parameter space set up for model selection when training.
-| name                  | -                      | str                             | The name of the pipeline as it appears in the pipeline catalog.
-| type                  | -                      | str                             | The type of pipeline.
-| creation_time         | -                      | neo4j.time.Datetime             | Time when the pipeline was created.
-| drop                  | -                      | None                            | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
-| exists                | -                      | bool                            | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
+                        config: **kwargs         | Series              | <<linkprediction-pipeline-examples-train-estimate, Estimate training the pipeline on the given input graph using given keyword arguments>>.
+| node_property_steps   | -                      | DataFrame           | Returns the node property steps of the pipeline.
+| feature_steps         | -                      | DataFrame           | Returns a list of the selected feature steps for the pipeline.
+| split_config          | -                      | Series              | Returns the configuration set up for feature-train-test splitting of the dataset.
+| parameter_space       | -                      | Series              | Returns the model parameter space set up for model selection when training.
+| name                  | -                      | str                 | The name of the pipeline as it appears in the pipeline catalog.
+| type                  | -                      | str                 | The type of pipeline.
+| creation_time         | -                      | neo4j.time.Datetime | Time when the pipeline was created.
+| drop                  | -                      | None                | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
+| exists                | -                      | bool                | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
 |===
 
 There are two main differences when comparing the methods above that map to procedures of the Cypher API:
@@ -211,7 +211,7 @@ There are two main differences when comparing the methods above that map to proc
 * As the Python methods are called on the pipeline object, one does not need to provide a name when calling them.
 * Configuration parameters in the Cypher calls are represented by named keyword arguments in the Python method calls.
 
-Another difference is that the `train` Python call takes a <<python-client-graph-object, graph object>> instead of a graph name, and returns a `LPModel` <<python-client-model-object, model object>> that we can run predictions with as well as a `dict[str, any]` with the metadata from the training.
+Another difference is that the `train` Python call takes a <<python-client-graph-object, graph object>> instead of a graph name, and returns a `LPModel` <<python-client-model-object, model object>> that we can run predictions with as well as a pandas `Series` with the metadata from the training.
 
 Please consult the <<linkprediction-pipelines, link prediction Cypher documentation>> for information about what kind of input the methods expect.
 
@@ -252,24 +252,25 @@ assert res["trainMillis"] >= 0
 A model referred to as "my-model" in the <<model-catalog-ops, GDS Model Catalog>> is produced.
 In the next section we will go over how to use that model to make predictions.
 
+
 === Model
 
 As we saw in the previous section, link prediction models are created when training a link prediction pipeline.
 In addition to inheriting the methods common to all <<python-client-model-object, model objects>>, link prediction models have the following methods:
 
 .Link prediction model methods
-[opts="header",cols="8m,6m,7m,11"]
+[opts="header",cols="8m,6m,4m,13"]
 |===
-| Name                    | Arguments        | Return type          | Description
+| Name                    | Arguments        | Return type | Description
 | predict_mutate          | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<algorithms-link-prediction-pipelines-predict-examples-mutate, Predict links between non-neighboring nodes of the input graph and mutate graph with predictions>>.
+                            config: **kwargs | Series      | <<algorithms-link-prediction-pipelines-predict-examples-mutate, Predict links between non-neighboring nodes of the input graph and mutate graph with predictions>>.
 | predict_mutate_estimate | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<algorithms-link-prediction-pipelines-predict-examples-estimate, Estimate predicting links between non-neighboring nodes of the input graph and mutating graph with predictions>>.
+                            config: **kwargs | Series      | <<algorithms-link-prediction-pipelines-predict-examples-estimate, Estimate predicting links between non-neighboring nodes of the input graph and mutating graph with predictions>>.
 | predict_stream          | G: Graph, +
-                            config: **kwargs | list[dict[str, any]] | <<algorithms-link-prediction-pipelines-predict-examples-stream, Predict links between non-neighboring nodes of the input graph and stream the results>>.
+                            config: **kwargs | DataFrame   | <<algorithms-link-prediction-pipelines-predict-examples-stream, Predict links between non-neighboring nodes of the input graph and stream the results>>.
 | predict_stream_estimate | G: Graph, +
-                            config: **kwargs | dict[str, any]       | <<algorithms-link-prediction-pipelines-predict-examples-estimate, Estimate predicting links between non-neighboring nodes of the input graph and streaming the results>>.
-| metrics                 | -                | dict[str, any]       | Returns values for the metrics used when training, for this particular model.
+                            config: **kwargs | Series      | <<algorithms-link-prediction-pipelines-predict-examples-estimate, Estimate predicting links between non-neighboring nodes of the input graph and streaming the results>>.
+| metrics                 | -                | Series      | Returns values for the metrics used when training, for this particular model.
 |===
 
 One can note that the predict methods are indeed very similar to <<algorithms-link-prediction-pipelines-predict, their Cypher counterparts>>.
@@ -293,7 +294,7 @@ assert metrics["AUCPR"]["test"] >= 0.85
 
 # Predict on `H` and mutate it with the relationship predictions
 results = trained_pipe_model.predict_mutate(H, topN=5, mutateRelationshipType="PRED_REL")
-assert result["relationshipsWritten"] == 5 * 2  #  Undirected relationships written
+assert result["relationshipsWritten"] == 5 * 2  # Undirected relationships
 ----
 
 
@@ -307,5 +308,5 @@ For instance, supposing we have a pipeline object `pipe`, we could:
 ----
 catalog_contains_pipe = gds.beta.pipeline.exists(pipe)
 
-gds.beta.model.drop(pipe) #  same as pipe.drop()
+gds.beta.model.drop(pipe)  # same as pipe.drop()
 ----
