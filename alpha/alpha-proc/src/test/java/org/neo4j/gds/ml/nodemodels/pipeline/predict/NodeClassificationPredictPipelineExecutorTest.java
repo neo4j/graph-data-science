@@ -51,8 +51,10 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestData;
+import org.neo4j.gds.models.randomforest.RandomForestTrainConfigImpl;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.ArrayList;
@@ -121,7 +123,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 "",
                 CypherMapWrapper.empty()
                     .withEntry("modelName", "model")
-                    .withEntry("includePredictedProbabilities",true)
+                    .withEntry("includePredictedProbabilities", true)
                     .withEntry("graphName", GRAPH_NAME)
             );
 
@@ -151,7 +153,10 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
             assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.nodeCount());
             assertThat(predictionResult.predictedProbabilities()).isPresent();
-            assertThat(predictionResult.predictedProbabilities().orElseThrow().size()).isEqualTo(graphStore.nodeCount());
+            assertThat(predictionResult
+                .predictedProbabilities()
+                .orElseThrow()
+                .size()).isEqualTo(graphStore.nodeCount());
 
             assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
             assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
@@ -165,7 +170,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 "",
                 CypherMapWrapper.empty()
                     .withEntry("modelName", "model")
-                    .withEntry("includePredictedProbabilities",true)
+                    .withEntry("includePredictedProbabilities", true)
                     .withEntry("graphName", GRAPH_NAME)
             );
 
@@ -196,7 +201,10 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
             assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.nodeCount());
             assertThat(predictionResult.predictedProbabilities()).isPresent();
-            assertThat(predictionResult.predictedProbabilities().orElseThrow().size()).isEqualTo(graphStore.nodeCount());
+            assertThat(predictionResult
+                .predictedProbabilities()
+                .orElseThrow()
+                .size()).isEqualTo(graphStore.nodeCount());
 
             assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
             assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
@@ -210,7 +218,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 "",
                 CypherMapWrapper.empty()
                     .withEntry("modelName", "model")
-                    .withEntry("includePredictedProbabilities",true)
+                    .withEntry("includePredictedProbabilities", true)
                     .withEntry("graphName", GRAPH_NAME)
             );
 
@@ -243,7 +251,10 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var predictionResult = pipelineExecutor.compute();
             assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.nodeCount());
             assertThat(predictionResult.predictedProbabilities()).isPresent();
-            assertThat(predictionResult.predictedProbabilities().orElseThrow().size()).isEqualTo(graphStore.nodeCount());
+            assertThat(predictionResult
+                .predictedProbabilities()
+                .orElseThrow()
+                .size()).isEqualTo(graphStore.nodeCount());
 
             assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
             assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
@@ -257,7 +268,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 "",
                 CypherMapWrapper.empty()
                     .withEntry("modelName", "model")
-                    .withEntry("includePredictedProbabilities",true)
+                    .withEntry("includePredictedProbabilities", true)
                     .withEntry("graphName", GRAPH_NAME)
             );
 
@@ -299,7 +310,10 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
             var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
-                new NodeClassificationPredictPipelineAlgorithmFactory<>(caller.executionContext(), modelCatalog).progressTask(graphStore, config),
+                new NodeClassificationPredictPipelineAlgorithmFactory<>(
+                    caller.executionContext(),
+                    modelCatalog
+                ).progressTask(graphStore, config),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE
@@ -341,7 +355,10 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
     void validateFeaturesExistOnGraph() {
         addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 3, List.of("a", "b", "d"));
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var factory = new NodeClassificationPredictPipelineAlgorithmFactory<>(caller.executionContext(), modelCatalog);
+            var factory = new NodeClassificationPredictPipelineAlgorithmFactory<>(
+                caller.executionContext(),
+                modelCatalog
+            );
             var streamConfig = ImmutableNodeClassificationPredictPipelineBaseConfig.builder()
                 .username(getUsername())
                 .modelName(MODEL_NAME)
@@ -384,4 +401,54 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
     }
 
+
+    @Test
+    void shouldEstimateMemoryWithRandomForest() {
+        var pipeline = new NodeClassificationPipeline();
+        var root = new TreeNode<>(0);
+        var modelData = ImmutableRandomForestData
+            .builder()
+            .addDecisionTree(new DecisionTreePredict<>(root))
+            .featureDimension(3)
+            .classIdMap(LinkPredictionTrain.makeClassIdMap())
+            .build();
+
+        Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model = Model.of(
+            getUsername(),
+            "model",
+            NodeClassificationPipeline.MODEL_TYPE,
+            GraphSchema.empty(),
+            modelData,
+            NodeClassificationPipelineTrainConfig.builder()
+                .modelName("model")
+                .graphName(GRAPH_NAME)
+                .pipeline("DUMMY")
+                .targetProperty("foo")
+                .build(),
+            NodeClassificationPipelineModelInfo.builder()
+                .classes(modelData.classIdMap().originalIdsList())
+                .bestParameters(RandomForestTrainConfigImpl.builder().build())
+                .metrics(Map.of())
+                .trainingPipeline(pipeline.copy())
+                .build()
+        );
+
+        var config = new NodeClassificationPredictPipelineBaseConfigImpl.Builder()
+            .concurrency(1)
+            .graphName(GRAPH_NAME)
+            .modelName(model.name())
+            .includePredictedProbabilities(true)
+            .username("user")
+            .build();
+
+        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, modelCatalog);
+        assertMemoryEstimation(
+            () -> memoryEstimation,
+            graphStore.nodeCount(),
+            graphStore.relationshipCount(),
+            config.concurrency(),
+            448L,
+            448L
+        );
+    }
 }

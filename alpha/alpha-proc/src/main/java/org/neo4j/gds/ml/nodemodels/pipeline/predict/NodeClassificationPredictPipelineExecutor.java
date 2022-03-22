@@ -80,10 +80,12 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         var predictionEstimation = MemoryEstimations.builder().add(
             "Pipeline Predict",
             NodeClassificationPredict.memoryEstimationWithDerivedBatchSize(
+                model.data().trainerMethod(),
                 configuration.includePredictedProbabilities(),
                 MIN_BATCH_SIZE,
                 featureCount,
-                classCount
+                classCount,
+                false
             )
         ).build();
 

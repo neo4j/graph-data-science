@@ -54,6 +54,7 @@ import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
@@ -202,8 +203,13 @@ public final class NodeClassificationTrain {
                     MemoryRange.of(fudgedFeatureCount),
                     false
                 );
+
+                int batchSize = config instanceof LogisticRegressionTrainConfig
+                    ? ((LogisticRegressionTrainConfig) config).batchSize()
+                    : 0; // Not used
                 var evaluation = estimateEvaluation(
                     config,
+                    batchSize,
                     trainSetSize,
                     testSetSize,
                     fudgedClassCount,
@@ -223,6 +229,7 @@ public final class NodeClassificationTrain {
 
     public static MemoryEstimation estimateEvaluation(
         TrainerConfig config,
+        int batchSize,
         LongUnaryOperator trainSetSize,
         LongUnaryOperator testSetSize,
         int fudgedClassCount,
@@ -251,7 +258,8 @@ public final class NodeClassificationTrain {
             .rangePerNode(
                 "classifier runtime",
                 (nodeCount) -> ClassifierFactory.runtimeOverheadMemoryEstimation(
-                    config,
+                    TrainingMethod.valueOf(config.methodName()),
+                    batchSize,
                     fudgedClassCount,
                     fudgedFeatureCount,
                     isReduced

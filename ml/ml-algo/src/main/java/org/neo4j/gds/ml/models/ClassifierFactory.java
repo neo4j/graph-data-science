@@ -23,7 +23,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.ClassificationRandomForestPredictor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
@@ -48,15 +47,16 @@ public final class ClassifierFactory {
     }
 
     public static MemoryRange runtimeOverheadMemoryEstimation(
-        TrainerConfig trainerConfig,
+        TrainingMethod method,
+        int batchSize,
         int numberOfClasses,
         int featureDimension,
         boolean isReduced
     ) {
-        switch (TrainingMethod.valueOf(trainerConfig.methodName())) {
+        switch (method) {
             case LogisticRegression:
                 return LogisticRegressionClassifier.runtimeOverheadMemoryEstimation(
-                    trainerConfig,
+                    batchSize,
                     featureDimension,
                     numberOfClasses,
                     isReduced

@@ -36,7 +36,6 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Features;
-import org.neo4j.gds.ml.models.TrainerConfig;
 
 import static org.neo4j.gds.ml.core.Dimensions.matrix;
 
@@ -113,7 +112,7 @@ public final class LogisticRegressionClassifier implements Classifier {
     }
 
     public static MemoryRange runtimeOverheadMemoryEstimation(
-        TrainerConfig trainerConfig,
+        int batchSize,
         int featureDimension,
         int numberOfClasses,
         boolean isReduced
@@ -122,7 +121,7 @@ public final class LogisticRegressionClassifier implements Classifier {
 
         return MemoryRange.of(
             LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(
-                ((LogisticRegressionTrainConfig) trainerConfig).batchSize(),
+                batchSize,
                 featureDimension,
                 numberOfClasses,
                 normalizedNumberOfClasses

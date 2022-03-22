@@ -25,7 +25,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -33,7 +32,9 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.FeaturesFactory;
+import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 
 import java.util.List;
@@ -73,19 +74,9 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         return Tasks.leaf("Node classification predict", graph.nodeCount());
     }
 
-    public static MemoryEstimation memoryEstimation(boolean produceProbabilities, int batchSize, int featureCount, int classCount) {
-        var builder = MemoryEstimations.builder(NodeClassificationPredict.class);
-        if (produceProbabilities) {
-            builder.perNode("predicted probabilities", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfDoubleArray(classCount)));
-        }
-        builder.perNode("predicted classes", HugeLongArray::memoryEstimation);
-        builder.fixed("computation graph", LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount, classCount));
-        return builder.build();
-    }
-
-    public static MemoryEstimation memoryEstimationWithDerivedBatchSize(
+    public static MemoryEstimation memoryEstimation(
         boolean produceProbabilities,
-        int minBatchSize,
+        int batchSize,
         int featureCount,
         int classCount
     ) {
@@ -97,13 +88,44 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
             );
         }
         builder.perNode("predicted classes", HugeLongArray::memoryEstimation);
-        builder.perGraphDimension(
+        builder.fixed(
             "computation graph",
-            (dim, threads) -> MemoryRange.of(LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(BatchQueue.computeBatchSize(
-                dim.nodeCount(),
-                minBatchSize,
-                threads
-            ), featureCount, classCount, classCount))
+            LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(
+                batchSize,
+                featureCount,
+                classCount,
+                classCount
+            )
+        );
+        return builder.build();
+    }
+
+    public static MemoryEstimation memoryEstimationWithDerivedBatchSize(
+        TrainingMethod method,
+        boolean produceProbabilities,
+        int minBatchSize,
+        int featureCount,
+        int classCount,
+        boolean isReduced
+    ) {
+        var builder = MemoryEstimations.builder(NodeClassificationPredict.class);
+        if (produceProbabilities) {
+            builder.perNode(
+                "predicted probabilities",
+                nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfDoubleArray(classCount))
+            );
+        }
+        builder.perNode("predicted classes", HugeLongArray::memoryEstimation);
+        builder.perGraphDimension(
+            "classifier runtime",
+            (dim, threads) ->
+                ClassifierFactory.runtimeOverheadMemoryEstimation(
+                    method,
+                    BatchQueue.computeBatchSize(dim.nodeCount(), minBatchSize, threads),
+                    classCount,
+                    featureCount,
+                    isReduced
+                )
         );
         return builder.build();
     }
@@ -151,6 +173,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
     public interface NodeClassificationResult {
 
         HugeLongArray predictedClasses();
+
         Optional<HugeObjectArray<double[]>> predictedProbabilities();
 
         static NodeClassificationResult of(
