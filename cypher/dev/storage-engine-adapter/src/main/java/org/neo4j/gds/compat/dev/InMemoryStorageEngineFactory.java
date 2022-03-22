@@ -31,18 +31,17 @@ import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.IndexImporterFactory;
 import org.neo4j.internal.batchimport.Monitor;
 import org.neo4j.internal.batchimport.ReadBehaviour;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.LenientStoreInput;
-import org.neo4j.internal.id.IdController;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.id.ScanOnOpenReadOnlyIdGeneratorFactory;
 import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractInMemoryStorageEngineFactory;
+import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository;
 import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory;
 import org.neo4j.internal.recordstorage.InMemoryStorageReaderDev;
 import org.neo4j.internal.recordstorage.StoreTokens;
@@ -54,16 +53,15 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
-import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.api.index.IndexProviderMap;
-import org.neo4j.kernel.impl.store.MetaDataStore;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.StoreFactory;
 import org.neo4j.kernel.impl.store.StoreType;
 import org.neo4j.kernel.impl.store.cursor.CachedStoreCursors;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
+import org.neo4j.kernel.impl.transaction.log.LogTailMetadata;
 import org.neo4j.lock.LockService;
 import org.neo4j.logging.InternalLog;
 import org.neo4j.logging.InternalLogProvider;
@@ -75,12 +73,14 @@ import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.CommandReaderFactory;
 import org.neo4j.storageengine.api.ConstraintRuleAccessor;
 import org.neo4j.storageengine.api.LogFilesInitializer;
+import org.neo4j.storageengine.api.LogVersionRepository;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.SchemaRule44;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.storageengine.api.StoreVersionCheck;
+import org.neo4j.storageengine.api.TransactionIdStore;
 import org.neo4j.storageengine.migration.SchemaRuleMigrationAccess;
 import org.neo4j.storageengine.migration.StoreMigrationParticipant;
 import org.neo4j.token.DelegatingTokenHolder;
@@ -103,6 +103,8 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import static org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker.readOnly;
+import static org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker.writable;
+import static org.neo4j.kernel.impl.transaction.log.LogTailMetadata.EMPTY_LOG_TAIL;
 
 @ServiceProvider
 public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineFactory {
@@ -119,17 +121,17 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         PageCache pageCache,
         TokenHolders tokenHolders,
         SchemaState schemaState,
-        ConstraintRuleAccessor constraintRuleAccessor,
+        ConstraintRuleAccessor constraintSemantics,
         IndexConfigCompleter indexConfigCompleter,
         LockService lockService,
         IdGeneratorFactory idGeneratorFactory,
-        IdController idController,
         DatabaseHealth databaseHealth,
         InternalLogProvider internalLogProvider,
         InternalLogProvider userLogProvider,
         RecoveryCleanupWorkCollector recoveryCleanupWorkCollector,
         boolean createStoreIfNotExists,
         DatabaseReadOnlyChecker readOnlyChecker,
+        LogTailMetadata logTailMetadata,
         MemoryTracker memoryTracker,
         CursorContextFactory cursorContextFactory
     ) {
@@ -141,7 +143,8 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
             fs,
             internalLogProvider,
             cursorContextFactory,
-            readOnlyChecker
+            readOnlyChecker,
+            logTailMetadata
         );
 
         factory.openNeoStores(createStoreIfNotExists, StoreType.LABEL_TOKEN).close();
@@ -170,31 +173,10 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
     }
 
     @Override
-    public void setExternalStoreUUID(
-        FileSystemAbstraction fileSystemAbstraction,
-        DatabaseLayout databaseLayout,
-        PageCache pageCache,
-        CursorContext cursorContext,
-        UUID uuid
-    ) {
-        MetaDataStore.getDatabaseIdUuid(pageCache, RecordDatabaseLayout.convert(databaseLayout).metadataStore(), databaseLayout.getDatabaseName(), cursorContext);
-    }
-
-    @Override
     public DatabaseLayout databaseLayout(
         Neo4jLayout neo4jLayout, String databaseName
     ) {
         return RecordDatabaseLayout.of(neo4jLayout, databaseName);
-    }
-
-    @Override
-    public IndexConfig matchingBatchImportIndexConfiguration(
-        FileSystemAbstraction fileSystemAbstraction,
-        DatabaseLayout databaseLayout,
-        PageCache pageCache,
-        CursorContextFactory cursorContextFactory
-    ) {
-        return new IndexConfig();
     }
 
     @Override
@@ -241,8 +223,9 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         Config config,
         MemoryTracker memoryTracker,
         ReadBehaviour readBehaviour,
-        boolean b,
-        CursorContextFactory cursorContextFactory
+        boolean compactNodeIdSpace,
+        CursorContextFactory cursorContextFactory,
+        LogTailMetadata logTailMetadata
     ) {
         NeoStores neoStores = (new StoreFactory(
             databaseLayout,
@@ -252,7 +235,8 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
             fileSystemAbstraction,
             NullLogProvider.getInstance(),
             cursorContextFactory,
-            readOnly()
+            readOnly(),
+            logTailMetadata
         )).openAllNeoStores();
         return new LenientStoreInput(
             neoStores,
@@ -280,12 +264,13 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
 
     @Override
     public MetadataProvider transactionMetaDataStore(
-        FileSystemAbstraction fileSystemAbstraction,
+        FileSystemAbstraction fs,
         DatabaseLayout databaseLayout,
         Config config,
         PageCache pageCache,
-        DatabaseReadOnlyChecker databaseReadOnlyChecker,
-        CursorContextFactory cursorContextFactory
+        DatabaseReadOnlyChecker readOnlyChecker,
+        CursorContextFactory contextFactory,
+        LogTailMetadata logTailMetadata
     ) {
         return metadataProvider();
     }
@@ -336,6 +321,11 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
             }
 
             @Override
+            public void deleteSchemaRule(long id) {
+
+            }
+
+            @Override
             public long nextId() {
                 return 0;
             }
@@ -362,12 +352,12 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
 
     @Override
     public List<SchemaRule44> load44SchemaRules(
-        FileSystemAbstraction fileSystemAbstraction,
+        FileSystemAbstraction fs,
         PageCache pageCache,
         Config config,
         DatabaseLayout databaseLayout,
-        PageCacheTracer pageCacheTracer,
-        CursorContextFactory cursorContextFactory
+        CursorContextFactory contextFactory,
+        LogTailMetadata logTailMetadata
     ) {
         return List.of();
     }
@@ -383,7 +373,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
     ) {
         StoreFactory factory =
             new StoreFactory( layout, config, new ScanOnOpenReadOnlyIdGeneratorFactory(), pageCache, fs,
-                NullLogProvider.getInstance(), cursorContextFactory, readOnly() );
+                NullLogProvider.getInstance(), cursorContextFactory, readOnly(), LogTailMetadata.EMPTY_LOG_TAIL );
         try ( NeoStores stores = factory.openNeoStores( false,
             StoreType.PROPERTY_KEY_TOKEN, StoreType.PROPERTY_KEY_TOKEN_NAME,
             StoreType.LABEL_TOKEN, StoreType.LABEL_TOKEN_NAME,
@@ -484,5 +474,39 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         CursorContextFactory cursorContextFactory
     ) {
 
+    }
+
+    @Override
+    public TransactionIdStore readOnlyTransactionIdStore(LogTailMetadata logTailMetadata) {
+        return metadataProvider().transactionIdStore();
+    }
+
+    @Override
+    public LogVersionRepository readOnlyLogVersionRepository(LogTailMetadata logTailMetadata) {
+        return new InMemoryLogVersionRepository();
+    }
+
+    @Override
+    public void resetMetadata(
+        FileSystemAbstraction fs,
+        DatabaseLayout databaseLayout,
+        Config config,
+        PageCache pageCache,
+        CursorContextFactory contextFactory,
+        StoreId storeId,
+        UUID externalStoreId
+    ) throws IOException {
+        try (var metadataProvider = transactionMetaDataStore(
+            fs,
+            databaseLayout,
+            config,
+            pageCache,
+            writable(),
+            contextFactory,
+            EMPTY_LOG_TAIL
+        );
+             var cursorContext = contextFactory.create("resetMetadata")) {
+            metadataProvider.regenerateMetadata(storeId, externalStoreId, cursorContext);
+        }
     }
 }

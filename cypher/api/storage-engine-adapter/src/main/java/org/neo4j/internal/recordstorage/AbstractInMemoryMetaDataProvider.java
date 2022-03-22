@@ -41,7 +41,7 @@ public abstract class AbstractInMemoryMetaDataProvider implements MetadataProvid
 
     public abstract AbstractTransactionIdStore transactionIdStore();
 
-    AbstractInMemoryLogVersionRepository logVersionRepository() {
+    public AbstractInMemoryLogVersionRepository logVersionRepository() {
         return logVersionRepository;
     }
 

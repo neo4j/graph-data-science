@@ -38,6 +38,7 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.impl.store.MetaDataStore;
 import org.neo4j.kernel.impl.store.StoreFactory;
 import org.neo4j.kernel.impl.store.StoreType;
 import org.neo4j.lock.LockService;
@@ -48,14 +49,18 @@ import org.neo4j.monitoring.DatabaseHealth;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.CommandReaderFactory;
 import org.neo4j.storageengine.api.ConstraintRuleAccessor;
+import org.neo4j.storageengine.api.LogVersionRepository;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageEngine;
+import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.storageengine.api.StoreVersionCheck;
+import org.neo4j.storageengine.api.TransactionIdStore;
 import org.neo4j.storageengine.migration.SchemaRuleMigrationAccess;
 import org.neo4j.storageengine.migration.StoreMigrationParticipant;
 import org.neo4j.token.TokenHolders;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -211,5 +216,42 @@ public class InMemoryStorageEngineFactory433 extends AbstractInMemoryStorageEngi
         MemoryTracker memoryTracker
     ) {
         return schemaRuleMigrationAccess();
+    }
+
+    @Override
+    public TransactionIdStore readOnlyTransactionIdStore(
+        FileSystemAbstraction fileSystem,
+        DatabaseLayout databaseLayout,
+        PageCache pageCache,
+        CursorContext cursorContext
+    ) {
+        return metadataProvider().transactionIdStore();
+    }
+
+    @Override
+    public LogVersionRepository readOnlyLogVersionRepository(
+        DatabaseLayout databaseLayout, PageCache pageCache, CursorContext cursorContext
+    ) {
+        return metadataProvider.logVersionRepository();
+    }
+
+    @Override
+    public void setStoreId(
+        FileSystemAbstraction fs,
+        DatabaseLayout databaseLayout,
+        PageCache pageCache,
+        CursorContext cursorContext,
+        StoreId storeId,
+        long upgradeTxChecksum,
+        long upgradeTxCommitTimestamp
+    ) throws IOException {
+        MetaDataStore.setStoreId(pageCache,
+            databaseLayout.metadataStore(),
+            storeId,
+            upgradeTxChecksum,
+            upgradeTxCommitTimestamp,
+            databaseLayout.getDatabaseName(),
+            cursorContext
+        );
     }
 }

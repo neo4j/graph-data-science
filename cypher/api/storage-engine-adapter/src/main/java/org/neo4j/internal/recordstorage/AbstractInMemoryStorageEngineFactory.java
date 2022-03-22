@@ -24,15 +24,12 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.impl.store.MetaDataStore;
-import org.neo4j.storageengine.api.LogVersionRepository;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.storageengine.api.StorageFilesState;
 import org.neo4j.storageengine.api.StoreId;
-import org.neo4j.storageengine.api.TransactionIdStore;
 import org.neo4j.storageengine.migration.RollingUpgradeCompatibility;
 import org.neo4j.storageengine.migration.SchemaRuleMigrationAccess;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -55,24 +52,7 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
         return false;
     }
 
-    @Override
-    public TransactionIdStore readOnlyTransactionIdStore(
-        FileSystemAbstraction fileSystem,
-        DatabaseLayout databaseLayout,
-        PageCache pageCache,
-        CursorContext cursorContext
-    ) {
-        return metadataProvider().transactionIdStore();
-    }
-
     protected abstract AbstractInMemoryMetaDataProvider metadataProvider();
-
-    @Override
-    public LogVersionRepository readOnlyLogVersionRepository(
-        DatabaseLayout databaseLayout, PageCache pageCache, CursorContext cursorContext
-    ) {
-        return metadataProvider().logVersionRepository();
-    }
 
     protected abstract SchemaRuleMigrationAccess schemaRuleMigrationAccess();
 
@@ -86,26 +66,6 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
         FileSystemAbstraction fs, DatabaseLayout databaseLayout, PageCache pageCache, CursorContext cursorContext
     ) {
         return StoreId.UNKNOWN;
-    }
-
-    @Override
-    public void setStoreId(
-        FileSystemAbstraction fs,
-        DatabaseLayout databaseLayout,
-        PageCache pageCache,
-        CursorContext cursorContext,
-        StoreId storeId,
-        long upgradeTxChecksum,
-        long upgradeTxCommitTimestamp
-    ) throws IOException {
-        MetaDataStore.setStoreId(pageCache,
-            databaseLayout.metadataStore(),
-            storeId,
-            upgradeTxChecksum,
-            upgradeTxCommitTimestamp,
-            databaseLayout.getDatabaseName(),
-            cursorContext
-        );
     }
 
     @Override
