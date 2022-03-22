@@ -29,6 +29,7 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
+import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.KernelVersion;
@@ -50,7 +51,6 @@ import org.neo4j.storageengine.api.StoreFileMetadata;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.TransactionApplicationMode;
 import org.neo4j.storageengine.api.txstate.ReadableTransactionState;
-import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
 
@@ -65,8 +65,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
+    private final DatabaseLayout databaseLayout;
     private final TokenHolders tokenHolders;
-    private final BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
+    private final InMemoryTransactionStateVisitor txStateVisitor;
     private final Supplier<CommandCreationContext> commandCreationContextSupplier;
     private final TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
     private final CountsStore countsStore;
@@ -77,27 +78,27 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders,
         BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn,
-        BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
+        BiFunction<CypherGraphStore, TokenHolders, InMemoryTransactionStateVisitor> txStateVisitorFn,
         MetadataProvider metadataProvider,
         Supplier<CommandCreationContext> commandCreationContextSupplier,
         TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
     ) {
+        this.databaseLayout = databaseLayout;
         this.tokenHolders = tokenHolders;
         var graphName = InMemoryDatabaseCreationCatalog.getRegisteredDbCreationGraphName(databaseLayout.getDatabaseName());
         this.graphStore = getGraphStoreFromCatalog(graphName);
-        this.txStateVisitorFn = txStateVisitorFn;
+        this.txStateVisitor = txStateVisitorFn.apply(graphStore, tokenHolders);
         this.commandCreationContextSupplier = commandCreationContextSupplier;
         this.storageReaderFn = storageReaderFn;
         initializeTokenHolders();
         graphStore.initialize(tokenHolders);
+        graphStore.registerPropertyRemovalCallback(txStateVisitor::removeNodeProperty);
         this.countsStore = countsStoreFn.apply(graphStore, tokenHolders);
         this.metadataProvider = metadataProvider;
     }
 
     protected void createCommands(ReadableTransactionState txState) throws KernelException {
-        try (var txStateVisitor = txStateVisitorFn.apply(graphStore, tokenHolders)) {
-            txState.accept(txStateVisitor);
-        }
+        txState.accept(txStateVisitor);
     }
 
     @Override
@@ -112,7 +113,6 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     @Override
     public void apply(CommandsToApply batch, TransactionApplicationMode mode) {
-
     }
 
     @Override
@@ -130,6 +130,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     @Override
     public void shutdown() {
+        InMemoryDatabaseCreationCatalog.removeDatabaseEntry(databaseLayout.getDatabaseName());
     }
 
     @Override

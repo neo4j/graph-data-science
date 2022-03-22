@@ -44,6 +44,11 @@ public final class InMemoryDatabaseCreationCatalog {
         return CATALOG.get(Neo4jProxy.validateExternalDatabaseName(databaseName));
     }
 
+    public static void removeDatabaseEntry(String databaseName) {
+        var normalizedDatabaseName = Neo4jProxy.validateExternalDatabaseName(databaseName);
+        CATALOG.remove(normalizedDatabaseName);
+    }
+
     public static void removeAllRegisteredDbCreations() {
         CATALOG.clear();
     }

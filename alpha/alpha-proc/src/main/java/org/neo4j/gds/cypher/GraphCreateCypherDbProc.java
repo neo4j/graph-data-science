@@ -21,24 +21,18 @@ package org.neo4j.gds.cypher;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.common.Edition;
-import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementException;
-import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.catalog.CatalogProc;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.StorageEngineProxy;
-import org.neo4j.gds.core.cypher.CypherGraphStore;
-import org.neo4j.gds.core.loading.CatalogRequest;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.storageengine.InMemoryDatabaseCreator;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.core.cypher.CypherGraphStoreCatalogHelper.setWrappedGraphStore;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -61,11 +55,7 @@ public class GraphCreateCypherDbProc extends CatalogProc {
                 validateNeo4jEnterpriseEdition();
                 MutableLong createMillis = new MutableLong(0);
                 try (ProgressTimer ignored = ProgressTimer.start(createMillis::setValue)) {
-                    var dbms = GraphDatabaseApiProxy.resolveDependency(api, DatabaseManagementService.class);
-                    var graphStoreWithConfig = GraphStoreCatalog.get(CatalogRequest.of(username(), databaseId()), graphName);
-                    var cypherGraphStore = new CypherGraphStore(graphStoreWithConfig.graphStore());
-                    setWrappedGraphStore(graphStoreWithConfig.config(), cypherGraphStore);
-                    StorageEngineProxy.createInMemoryDatabase(dbms, dbName, graphName, Config.defaults());
+                    InMemoryDatabaseCreator.createDatabase(api, username(), databaseId(), graphName, dbName);
                 }
 
                 return new CreateCypherDbResult(dbName, graphName, createMillis.getValue());
