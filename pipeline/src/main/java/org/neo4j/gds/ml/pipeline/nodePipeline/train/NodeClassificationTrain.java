@@ -221,7 +221,6 @@ public final class NodeClassificationTrain {
             })
             .collect(Collectors.toList());
 
-
         return MemoryEstimations.builder("model selection")
             .max(foldEstimations)
             .build();

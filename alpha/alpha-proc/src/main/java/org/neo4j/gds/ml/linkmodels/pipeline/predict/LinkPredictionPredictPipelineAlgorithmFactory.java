@@ -104,7 +104,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             modelCatalog,
             linkPredictionPipeline,
             configuration,
-            model.data().featureDimension()
+            model.data()
         );
     }
 }

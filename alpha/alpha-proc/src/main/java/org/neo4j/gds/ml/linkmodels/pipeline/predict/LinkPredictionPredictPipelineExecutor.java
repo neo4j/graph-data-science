@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
@@ -32,6 +33,8 @@ import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.ClassifierFactory;
+import org.neo4j.gds.ml.models.TrainingMethod;
 
 import java.util.List;
 import java.util.Map;
@@ -86,7 +89,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         ModelCatalog modelCatalog,
         LinkPredictionPipeline pipeline,
         LinkPredictionPredictPipelineBaseConfig configuration,
-        int linkFeatureDimension
+        Classifier.ClassifierData classifierData
     ) {
         MemoryEstimation maxOverNodePropertySteps = PipelineExecutor.estimateNodePropertySteps(
             modelCatalog,
@@ -95,9 +98,27 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
             configuration.relationshipTypes()
         );
 
-        var predictEstimation = configuration.isApproximateStrategy()
+        var strategyEstimation = configuration.isApproximateStrategy()
             ? ApproximateLinkPrediction.estimate(configuration)
-            : ExhaustiveLinkPrediction.estimate(configuration, linkFeatureDimension);
+            : ExhaustiveLinkPrediction.estimate(configuration, classifierData.featureDimension());
+
+        MemoryRange classificationRange;
+        // LR prediction requires no computation graph overhead in the binary case.
+        if (classifierData.trainerMethod() == TrainingMethod.LogisticRegression) {
+            classificationRange = MemoryRange.of(0);
+        } else {
+            classificationRange = ClassifierFactory.runtimeOverheadMemoryEstimation(
+                classifierData.trainerMethod(),
+                1,
+                2,
+                classifierData.featureDimension(),
+                true
+            );
+        }
+        var predictEstimation= MemoryEstimations.builder("Model prediction")
+            .add("Strategy runtime", strategyEstimation)
+            .add(MemoryEstimations.of("Classifier runtime", classificationRange))
+            .build();
 
         return MemoryEstimations.builder(LinkPredictionPredictPipelineExecutor.class)
             .max("Pipeline execution", List.of(maxOverNodePropertySteps, predictEstimation))

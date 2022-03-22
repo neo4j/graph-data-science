@@ -66,6 +66,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
@@ -298,7 +299,10 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
-                new LinkPredictionPredictPipelineAlgorithmFactory<>(caller.executionContext(), modelCatalog).progressTask(graphStore, config),
+                new LinkPredictionPredictPipelineAlgorithmFactory<>(
+                    caller.executionContext(),
+                    modelCatalog
+                ).progressTask(graphStore, config),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE
@@ -334,5 +338,68 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 .extracting(replaceTimings())
                 .containsExactly(expectedMessages.toArray(String[]::new));
         });
+    }
+
+    @Test
+    void shouldEstimateMemoryWithLogisticRegression() {
+        var pipeline = new LinkPredictionPipeline();
+        var modelData = ImmutableLogisticRegressionData.of(
+            LinkPredictionTrain.makeClassIdMap(),
+            new Weights<>(
+                new Matrix(
+                    new double[]{2.0, 1.0, -3.0, -1.0},
+                    1,
+                    4
+                )),
+            Weights.ofVector(0.0)
+        );
+
+        var config = new LinkPredictionPredictPipelineBaseConfigImpl.Builder()
+            .concurrency(1)
+            .graphName(GRAPH_NAME)
+            .topN(10)
+            .modelName("model")
+            .username("user")
+            .build();
+
+        var memoryEstimation = LinkPredictionPredictPipelineExecutor.estimate(modelCatalog, pipeline, config, modelData);
+        assertMemoryEstimation(
+            () -> memoryEstimation,
+            graphStore.nodeCount(),
+            graphStore.relationshipCount(),
+            config.concurrency(),
+            529L,
+            529L
+        );
+    }
+
+    @Test
+    void shouldEstimateMemoryWithRandomForest() {
+        var pipeline = new LinkPredictionPipeline();
+        var root = new TreeNode<>(0);
+        var modelData = ImmutableRandomForestData
+            .builder()
+            .addDecisionTree(new DecisionTreePredict<>(root))
+            .featureDimension(2)
+            .classIdMap(LinkPredictionTrain.makeClassIdMap())
+            .build();
+
+        var config = new LinkPredictionPredictPipelineBaseConfigImpl.Builder()
+            .concurrency(1)
+            .graphName(GRAPH_NAME)
+            .topN(10)
+            .modelName("model")
+            .username("user")
+            .build();
+
+        var memoryEstimation = LinkPredictionPredictPipelineExecutor.estimate(modelCatalog, pipeline, config, modelData);
+        assertMemoryEstimation(
+            () -> memoryEstimation,
+            graphStore.nodeCount(),
+            graphStore.relationshipCount(),
+            config.concurrency(),
+            585L,
+            585L
+        );
     }
 }
