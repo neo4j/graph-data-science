@@ -34,7 +34,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class BfsAlgorithmFactory<CONFIG extends BfsBaseConfig> extends GraphAlgorithmFactory<BFS, CONFIG> {
+public class BfsAlgorithmFactory<CONFIG extends BfsBaseConfig> extends GraphAlgorithmFactory<BFS, CONFIG> {
 
     @Override
     public BFS build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
