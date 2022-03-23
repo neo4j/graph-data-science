@@ -60,7 +60,6 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class BFS extends Algorithm<HugeLongArray> {
 
     private static final int DEFAULT_DELTA = 64;
-    static final int IGNORE_NODE = -1;
     public static final int ALL_DEPTHS_ALLOWED = -1;
 
     private final long sourceNodeId;
@@ -118,7 +117,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         long maximumDepth
     ) {
 
-        var nodeCount = Math.toIntExact(graph.nodeCount());
+        var nodeCount = graph.nodeCount();
 
         var traversedNodes = HugeLongArray.newArray(nodeCount);
         var weights = HugeDoubleArray.newArray(nodeCount);
@@ -242,7 +241,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         // Find the portion of `traversedNodes` that contains the actual result, doesn't account for target node, hence the `if` statement.
         var nodesLengthToRetain = traversedNodesLength.get();
         if (targetFoundIndex.get() != Long.MAX_VALUE) {
-            nodesLengthToRetain = targetFoundIndex.intValue() + 1;
+            nodesLengthToRetain = targetFoundIndex.longValue() + 1;
         }
 
         var result = traversedNodes.copyOf(nodesLengthToRetain);
