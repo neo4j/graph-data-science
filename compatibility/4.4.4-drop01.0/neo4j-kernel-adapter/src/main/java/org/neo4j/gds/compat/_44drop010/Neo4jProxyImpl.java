@@ -28,6 +28,7 @@ import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.gds.compat.CustomAccessMode;
+import org.neo4j.gds.compat.GdsDatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
@@ -93,6 +94,7 @@ import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.values.storable.ValueGroup;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -479,5 +481,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
         return new VirtualRelationshipImpl(id, startNode, endNode, type);
+    }
+
+    @Override
+    public GdsDatabaseManagementServiceBuilder databaseManagementServiceBuilder(Path storeDir) {
+        return new GdsDatabaseManagementServiceBuilderImpl(storeDir);
     }
 }

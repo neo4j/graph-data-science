@@ -64,6 +64,7 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -345,6 +346,10 @@ public final class Neo4jProxy {
 
     public static Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
         return IMPL.virtualRelationship(id, startNode, endNode, type);
+    }
+
+    public static GdsDatabaseManagementServiceBuilder databaseManagementServiceBuilder(Path storeDir) {
+        return IMPL.databaseManagementServiceBuilder(storeDir);
     }
 
     private Neo4jProxy() {

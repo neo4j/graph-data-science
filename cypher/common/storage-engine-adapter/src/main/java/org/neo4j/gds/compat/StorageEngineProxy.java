@@ -24,7 +24,6 @@ import org.neo4j.configuration.Config;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
@@ -100,9 +99,7 @@ public final class StorageEngineProxy {
         return IMPL.startAndGetInMemoryDatabase(dbms, dbName);
     }
 
-    public static DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(
-        DatabaseManagementServiceBuilder dbmsBuilder
-    ) {
+    public static GdsDatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(GdsDatabaseManagementServiceBuilder dbmsBuilder) {
         return IMPL.setSkipDefaultIndexesOnCreationSetting(dbmsBuilder);
     }
 
