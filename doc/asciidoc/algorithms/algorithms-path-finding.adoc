@@ -15,13 +15,13 @@ The Neo4j GDS library includes the following path finding algorithms, grouped by
 ** <<algorithms-dijkstra-single-source, Dijkstra Single-Source Shortest Path>>
 ** <<algorithms-astar, A* Shortest Path>>
 ** <<algorithms-yens, Yen's Shortest Path>>
+** <<algorithms-bfs, Breadth First Search>>
+** <<algorithms-dfs, Depth First Search>>
 * Beta
 ** <<beta-algorithms-random-walk, Random Walk>>
 * Alpha
 ** <<alpha-algorithms-minimum-weight-spanning-tree, Minimum Weight Spanning Tree>>
 ** <<alpha-algorithm-all-pairs-shortest-path, All Pairs Shortest Path>>
-** <<algorithms-bfs, Breadth First Search>>
-** <<algorithms-dfs, Depth First Search>>
 
 include::shortest-path/delta-single-source.adoc[leveloffset=+1]
 
@@ -33,12 +33,12 @@ include::shortest-path/astar.adoc[leveloffset=+1]
 
 include::shortest-path/yens.adoc[leveloffset=+1]
 
+include::bfs/bfs.adoc[leveloffset=+1]
+
+include::dfs/dfs.adoc[leveloffset=+1]
+
 include::beta/randomWalk/beta-random-walk.adoc[leveloffset=+1]
 
 include::alpha/alpha-minimum-weight-spanning-tree.adoc[leveloffset=+1]
 
 include::alpha/alpha-all-pairs-shortest-path.adoc[leveloffset=+1]
-
-include::bfs/bfs.adoc[leveloffset=+1]
-
-include::dfs/dfs.adoc[leveloffset=+1]
