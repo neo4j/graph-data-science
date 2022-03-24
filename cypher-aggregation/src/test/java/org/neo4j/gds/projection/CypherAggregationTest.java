@@ -126,6 +126,33 @@ class CypherAggregationTest extends BaseProcTest {
             .returns(4L, Graph::relationshipCount);
     }
 
+    @Test
+    void testArbitraryIds() {
+        assertCypherResult(
+            "UNWIND(range(13, 37)) AS source " +
+            "WITH source, source + 42 AS target " +
+            "WITH gds.alpha.graph.project('g', source, target) AS g " +
+            "RETURN g.nodeCount AS nodes, g.relationshipCount AS rels",
+            List.of(Map.of("nodes", (37L - 13L + 1L) * 2L, "rels", 37L - 13L + 1L))
+        );
+
+        assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
+        var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+
+        for (long source = 13L; source < 37; source++) {
+            long sourceNodeId = graph.toMappedNodeId(source);
+            long expectedOriginalId = (source - 13L) * 2L;
+            long expectedTargetId = source + 42L;
+            assertThat(sourceNodeId).isEqualTo(expectedOriginalId);
+            graph.forEachRelationship(sourceNodeId, (s, targetNodeId) -> {
+                assertThat(targetNodeId).isEqualTo(expectedOriginalId + 1L);
+                long target = graph.toOriginalNodeId(targetNodeId);
+                assertThat(target).isEqualTo(expectedTargetId);
+                return true;
+            });
+        }
+    }
+
     @Nested
     class LargerGraphTest extends RandomGraphTestCase {
 
