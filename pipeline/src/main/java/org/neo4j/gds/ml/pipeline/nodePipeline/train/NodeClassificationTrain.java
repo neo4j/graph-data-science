@@ -100,23 +100,23 @@ public final class NodeClassificationTrain {
     ) {
         var fudgedClassCount = 1000;
         var fudgedFeatureCount = 500;
-        var holdoutFraction = pipeline.splitConfig().testFraction();
-        var validationFolds = pipeline.splitConfig().validationFolds();
+        NodeClassificationSplitConfig splitConfig = pipeline.splitConfig();
+        var testFraction = splitConfig.testFraction();
 
         var modelSelection = modelTrainAndEvaluateMemoryUsage(
             pipeline,
             fudgedClassCount,
             fudgedFeatureCount,
-            (nodeCount) -> (long) (nodeCount * (1 - holdoutFraction) * (validationFolds - 1) / validationFolds),
-            (nodeCount) -> (long) (nodeCount * (1 - holdoutFraction) * (1 / validationFolds))
+            splitConfig::foldTrainSetSize,
+            splitConfig::foldTestSetSize
         );
         var bestModelEvaluation = delegateEstimation(
             modelTrainAndEvaluateMemoryUsage(
                 pipeline,
                 fudgedClassCount,
                 fudgedFeatureCount,
-                (nodeCount) -> (long) (nodeCount * (1 - holdoutFraction)),
-                (nodeCount) -> (long) (nodeCount * holdoutFraction)
+                splitConfig::trainSetSize,
+                splitConfig::testSetSize
             ),
             "best model evaluation"
         );
@@ -130,10 +130,10 @@ public final class NodeClassificationTrain {
             .rangePerNode("global class counts", __ -> MemoryRange.of(2 * Long.BYTES, fudgedClassCount * Long.BYTES))
             .add("metrics", MetricSpecification.memoryEstimation(fudgedClassCount))
             .perNode("node IDs", HugeLongArray::memoryEstimation)
-            .add("outer split", FractionSplitter.estimate(1 - holdoutFraction))
+            .add("outer split", FractionSplitter.estimate(1 - testFraction))
             .add(
                 "inner split",
-                StratifiedKFoldSplitter.memoryEstimationForNodeSet(validationFolds, 1 - holdoutFraction)
+                StratifiedKFoldSplitter.memoryEstimationForNodeSet(splitConfig.validationFolds(), 1 - testFraction)
             )
             .add(
                 "stats map train",
@@ -236,11 +236,11 @@ public final class NodeClassificationTrain {
         boolean isReduced
     ) {
         return MemoryEstimations.builder("computing metrics")
-            .perNode("local targets", (nodeCount) -> {
+            .perNode("local targets", nodeCount -> {
                 var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
                 return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
             })
-            .perNode("predicted classes", (nodeCount) -> {
+            .perNode("predicted classes", nodeCount -> {
                 var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
                 return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
             })
@@ -256,7 +256,7 @@ public final class NodeClassificationTrain {
             )
             .rangePerNode(
                 "classifier runtime",
-                (nodeCount) -> ClassifierFactory.runtimeOverheadMemoryEstimation(
+                nodeCount -> ClassifierFactory.runtimeOverheadMemoryEstimation(
                     TrainingMethod.valueOf(config.methodName()),
                     batchSize,
                     fudgedClassCount,

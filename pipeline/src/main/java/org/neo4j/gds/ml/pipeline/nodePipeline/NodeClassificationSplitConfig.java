@@ -83,4 +83,32 @@ public interface NodeClassificationSplitConfig extends ToMapConvertible {
         validateNodeSetSize(numberNodesInTrainSet, MIN_TRAIN_SET_SIZE, "train", "`testFraction` is too high");
         validateNodeSetSize(numberNodesInValidationSet, MIN_SET_SIZE, "validation", "`validationFolds` or `testFraction` is too high");
     }
+
+    @Value.Auxiliary
+    @Value.Derived
+    @Configuration.Ignore
+    default long testSetSize(long nodeCount) {
+        return (long) (testFraction() * nodeCount);
+    }
+
+    @Value.Auxiliary
+    @Value.Derived
+    @Configuration.Ignore
+    default long trainSetSize(long nodeCount) {
+        return (long) (nodeCount * (1 - testFraction()));
+    }
+
+    @Value.Auxiliary
+    @Value.Derived
+    @Configuration.Ignore
+    default long foldTrainSetSize(long nodeCount) {
+        return trainSetSize(nodeCount) * (validationFolds() - 1) / validationFolds();
+    }
+
+    @Value.Auxiliary
+    @Value.Derived
+    @Configuration.Ignore
+    default long foldTestSetSize(long nodeCount) {
+        return trainSetSize(nodeCount) * (1 / validationFolds());
+    }
 }
