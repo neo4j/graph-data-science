@@ -77,7 +77,7 @@ public class MemoryUsageValidator {
         } else {
             var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
             var useMaxMemoryEstimation = neo4jConfig.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
-            validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation);
+            validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation, log);
         }
 
         return memoryTreeWithDimensions.memoryTree.memoryUsage();
@@ -86,13 +86,15 @@ public class MemoryUsageValidator {
     static void validateMemoryUsage(
         MemoryTreeWithDimensions memoryTreeWithDimensions,
         long availableBytes,
-        boolean useMaxMemoryEstimation
+        boolean useMaxMemoryEstimation,
+        Log log
     ) {
         if (useMaxMemoryEstimation) {
             validateMemoryUsage(
                 availableBytes,
                 memoryTreeWithDimensions.memoryTree.memoryUsage().max,
                 "maximum",
+                log,
                 "Consider resizing your Aura instance via console.neo4j.io.",
                 "Alternatively, use 'sudo: true' to override the memory validation.",
                 "Overriding the validation is at your own risk.",
@@ -102,7 +104,8 @@ public class MemoryUsageValidator {
             validateMemoryUsage(
                 availableBytes,
                 memoryTreeWithDimensions.memoryTree.memoryUsage().min,
-                "minimum"
+                "minimum",
+                log
             );
         }
     }
@@ -111,6 +114,7 @@ public class MemoryUsageValidator {
         long availableBytes,
         long requiredBytes,
         String memoryString,
+        Log log,
         String... messages
     ) {
         if (requiredBytes > availableBytes) {
@@ -134,7 +138,9 @@ public class MemoryUsageValidator {
                 errorMessage.add(message);
             }
 
-            throw new IllegalStateException(errorMessage.toString());
+            var message = errorMessage.toString();
+            log.info(message);
+            throw new IllegalStateException(message);
         }
     }
 }

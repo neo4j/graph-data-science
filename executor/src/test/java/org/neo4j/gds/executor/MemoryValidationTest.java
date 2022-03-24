@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.logging.NullLog;
 
 import java.util.stream.Stream;
 
@@ -64,7 +65,8 @@ class MemoryValidationTest {
         assertDoesNotThrow(() -> MemoryUsageValidator.validateMemoryUsage(
             memoryTreeWithDimensions,
             10_000,
-            useMaxMemoryUsage
+            useMaxMemoryUsage,
+            NullLog.getInstance()
         ));
     }
 
@@ -77,7 +79,8 @@ class MemoryValidationTest {
         assertThatThrownBy(() -> MemoryUsageValidator.validateMemoryUsage(
             memoryTreeWithDimensions,
             1,
-            false
+            false,
+            NullLog.getInstance()
         ))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Procedure was blocked since minimum estimated memory");
@@ -92,7 +95,8 @@ class MemoryValidationTest {
         assertThatThrownBy(() -> MemoryUsageValidator.validateMemoryUsage(
             memoryTreeWithDimensions,
             1,
-            true
+            true,
+            NullLog.getInstance()
         ))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Procedure was blocked since maximum estimated memory")
