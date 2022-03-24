@@ -21,12 +21,13 @@ package org.neo4j.gds.similarity.knn;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityMetric;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -107,13 +108,23 @@ class KnnNodePropertySpecParserTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"cosine", "euCLIDean", "jACcaRd", "OVERLAP", "Pearson"})
-    void shouldAcceptMetricsRegardlessOfCase(String metric) {
+    @MethodSource("metrics")
+    void shouldAcceptMetricsRegardlessOfCase(String metric, SimilarityMetric expectedMetricValue) {
         var input = "property";
         assertThat(KnnNodePropertySpecParser.parse(Map.of(input, metric)))
             .singleElement()
-            .extracting(spec -> spec.metric().name())
-            .isEqualTo(metric.toUpperCase(Locale.ENGLISH));
+            .extracting(KnnNodePropertySpec::metric)
+            .isEqualTo(expectedMetricValue);
+    }
+
+    public static Stream<Arguments> metrics() {
+        return Stream.of(
+            Arguments.of("cosine", SimilarityMetric.COSINE),
+            Arguments.of("euCLIDean", SimilarityMetric.EUCLIDEAN),
+            Arguments.of("jACcaRd", SimilarityMetric.JACCARD),
+            Arguments.of("OVERLAP", SimilarityMetric.OVERLAP),
+            Arguments.of("Pearson", SimilarityMetric.PEARSON)
+        );
     }
 
     @Test

@@ -22,9 +22,14 @@ package org.neo4j.gds.similarity.knn.metrics;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public enum SimilarityMetric {
     JACCARD, OVERLAP, COSINE, EUCLIDEAN, PEARSON, LONG_PROPERTY_METRIC, DOUBLE_PROPERTY_METRIC, DEFAULT;
+
+    public static SimilarityMetric parse(String value) {
+        return SimilarityMetric.valueOf(toUpperCaseWithLocale(value));
+    }
 
     public static SimilarityMetric defaultMetricForType(ValueType valueType) {
         switch (valueType) {
