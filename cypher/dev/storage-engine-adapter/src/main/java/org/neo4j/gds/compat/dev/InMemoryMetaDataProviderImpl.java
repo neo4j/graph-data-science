@@ -21,11 +21,21 @@ package org.neo4j.gds.compat.dev;
 
 import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractTransactionIdStore;
+import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.storageengine.api.ClosedTransactionMetadata;
+import org.neo4j.storageengine.api.StoreId;
+
+import java.util.UUID;
 
 public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvider {
-    private final InMemoryTransactionIdStoreImpl transactionIdStore = new InMemoryTransactionIdStoreImpl();
+
+    private final InMemoryTransactionIdStoreImpl transactionIdStore;
+
+    InMemoryMetaDataProviderImpl() {
+        super(new InMemoryLogVersionRepository());
+        this.transactionIdStore = new InMemoryTransactionIdStoreImpl();
+    }
 
     @Override
     public ClosedTransactionMetadata getLastClosedTransaction() {
@@ -38,16 +48,14 @@ public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvid
         long logVersion,
         long byteOffset,
         int checksum,
-        long commitTimestamp,
-        CursorContext cursorContext
+        long commitTimestamp
     ) {
         this.transactionIdStore.transactionClosed(
             transactionId,
             logVersion,
             byteOffset,
             checksum,
-            commitTimestamp,
-            cursorContext
+            commitTimestamp
         );
     }
 
@@ -56,19 +64,60 @@ public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvid
         long transactionId,
         long logVersion,
         long byteOffset,
-        boolean missingLogs,
         int checksum,
-        long commitTimestamp,
-        CursorContext cursorContext
+        long commitTimestamp
     ) {
         this.transactionIdStore.resetLastClosedTransaction(
             transactionId,
             logVersion,
             byteOffset,
-            missingLogs,
+            checksum,
+            commitTimestamp
+        );
+    }
+
+    @Override
+    public void regenerateMetadata(
+        StoreId storeId, UUID externalStoreUUID, CursorContext cursorContext
+    ) {
+
+    }
+
+    @Override
+    public void setCurrentLogVersion(long version) {
+        logVersionRepository.setCurrentLogVersion(version);
+    }
+
+    @Override
+    public long incrementAndGetVersion() {
+        return logVersionRepository.incrementAndGetVersion();
+    }
+
+    @Override
+    public void setCheckpointLogVersion(long version) {
+        logVersionRepository.setCheckpointLogVersion(version);
+    }
+
+    @Override
+    public long incrementAndGetCheckpointLogVersion() {
+        return logVersionRepository.incrementAndGetCheckpointLogVersion();
+    }
+
+    @Override
+    public void transactionCommitted(long transactionId, int checksum, long commitTimestamp) {
+        transactionIdStore.transactionCommitted(transactionId, checksum, commitTimestamp);
+    }
+
+    @Override
+    public void setLastCommittedAndClosedTransactionId(
+        long transactionId, int checksum, long commitTimestamp, long byteOffset, long logVersion
+    ) {
+        transactionIdStore.setLastCommittedAndClosedTransactionId(
+            transactionId,
             checksum,
             commitTimestamp,
-            cursorContext
+            byteOffset,
+            logVersion
         );
     }
 

@@ -36,29 +36,31 @@ public class ListProc {
     @Context
     public KernelTransaction transaction;
 
-    private static final String QUERY =
-            " CALL dbms.procedures() " +
-            " YIELD name, signature, description " +
-            " WHERE (name STARTS WITH 'algo.' OR name STARTS WITH 'gds.')" +
-            " AND name <> 'gds.list'" +
-            " AND ($name IS NULL OR name CONTAINS $name) " +
-            " RETURN name, signature, description, 'procedure' AS type " +
-            " ORDER BY name " +
-            " UNION " +
-            " CALL dbms.functions() " +
-            " YIELD name, signature, description " +
-            " WHERE (name STARTS WITH 'algo.' OR name STARTS WITH 'gds.') AND ($name IS NULL OR name CONTAINS $name) " +
-            " RETURN name, signature, description, 'function' AS type " +
-            " ORDER BY name";
+    private static final String PROCEDURE_QUERY =
+        " SHOW PROCEDURES " +
+        " YIELD name, signature, description " +
+        " WHERE (name STARTS WITH 'algo.' OR name STARTS WITH 'gds.')" +
+        " AND name <> 'gds.list'" +
+        " AND ($name IS NULL OR name CONTAINS $name) " +
+        " RETURN name, signature, description, 'procedure' AS type " +
+        " ORDER BY name";
+
+    private static final String FUNCTION_QUERY =
+        " SHOW FUNCTIONS " +
+        " YIELD name, signature, description " +
+        " WHERE (name STARTS WITH 'algo.' OR name STARTS WITH 'gds.') AND ($name IS NULL OR name CONTAINS $name) " +
+        " RETURN name, signature, description, 'function' AS type " +
+        " ORDER BY name";
 
     private static final String DESCRIPTION = "CALL gds.list - lists all algorithm procedures, their description and signature";
 
     @Procedure("gds.list")
     @Description(DESCRIPTION)
     public Stream<ListResult> list(@Name(value = "name", defaultValue = "") String name) {
-        return runQueryWithoutClosingTheResult(transaction, QUERY, singletonMap("name", name))
-            .stream()
-            .map(ListResult::new);
+        return Stream.concat(
+            runQueryWithoutClosingTheResult(transaction, PROCEDURE_QUERY, singletonMap("name", name)).stream(),
+            runQueryWithoutClosingTheResult(transaction, FUNCTION_QUERY, singletonMap("name", name)).stream()
+        ).map(ListResult::new);
     }
 
     @SuppressWarnings("unused")

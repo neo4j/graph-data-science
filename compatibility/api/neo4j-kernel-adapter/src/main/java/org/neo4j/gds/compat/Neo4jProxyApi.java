@@ -189,7 +189,6 @@ public interface Neo4jProxyApi {
         Mode mode,
         boolean admin,
         String deprecated,
-        String[] allowed,
         String description,
         String warning,
         boolean eager,

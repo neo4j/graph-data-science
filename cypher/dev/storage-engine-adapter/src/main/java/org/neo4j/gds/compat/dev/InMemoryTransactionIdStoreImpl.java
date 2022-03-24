@@ -42,8 +42,7 @@ public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
         long logVersion,
         long byteOffset,
         int checksum,
-        long commitTimestamp,
-        CursorContext cursorContext
+        long commitTimestamp
     ) {
         this.closedTransactionId.offer(transactionId, new long[]{logVersion, byteOffset, checksum, commitTimestamp});
     }
@@ -53,12 +52,20 @@ public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
         long transactionId,
         long logVersion,
         long byteOffset,
-        boolean missingLogs,
         int checksum,
-        long commitTimestamp,
-        CursorContext cursorContext
+        long commitTimestamp
     ) {
         this.closedTransactionId.set(transactionId, new long[]{logVersion, byteOffset, checksum, commitTimestamp});
+    }
+
+    @Override
+    public void transactionCommitted(long transactionId, int checksum, long commitTimestamp) {
+    }
+
+    @Override
+    public void setLastCommittedAndClosedTransactionId(
+        long transactionId, int checksum, long commitTimestamp, long byteOffset, long logVersion
+    ) {
     }
 
     @Override

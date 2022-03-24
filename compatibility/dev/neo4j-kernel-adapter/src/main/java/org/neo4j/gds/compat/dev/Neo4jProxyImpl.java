@@ -91,6 +91,7 @@ import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
+import org.neo4j.kernel.impl.transaction.log.EmptyLogTailMetadata;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
@@ -380,12 +381,13 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             logService,
             executionMonitor,
             additionalInitialIds,
+            new EmptyLogTailMetadata(),
             dbConfig,
             Monitor.NO_MONITOR,
             jobScheduler,
             badCollector,
             TransactionLogInitializer.getLogFilesInitializer(),
-            new IndexImporterFactoryImpl(dbConfig),
+            new IndexImporterFactoryImpl(),
             EmptyMemoryTracker.INSTANCE,
             new CursorContextFactory(PageCacheTracer.NULL, EmptyVersionContextSupplier.EMPTY)
         );
@@ -424,7 +426,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         Mode mode,
         boolean admin,
         String deprecated,
-        String[] allowed,
         String description,
         String warning,
         boolean eager,
@@ -440,7 +441,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             mode,
             admin,
             deprecated,
-            allowed,
             description,
             warning,
             eager,
