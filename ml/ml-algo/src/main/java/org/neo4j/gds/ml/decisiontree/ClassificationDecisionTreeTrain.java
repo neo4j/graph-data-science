@@ -61,7 +61,7 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         int numberOfClasses
     ) {
         return MemoryRange.of(sizeOfInstance(ClassificationDecisionTreeTrain.class))
-            .add(DecisionTreeTrain.memoryEstimation(
+            .add(DecisionTreeTrain.estimateTree(
                 maxDepth,
                 minSplitSize,
                 numberOfTrainingSamples,

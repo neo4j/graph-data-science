@@ -19,26 +19,7 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-
 public class DecisionTreePredict<PREDICTION> {
-
-    public static MemoryRange memoryEstimation(int maxDepth, long numberOfTrainingSamples, int minSplitSize) {
-        long maxNumLeafNodes = (long) Math.ceil(
-            Math.min(
-                Math.pow(2, maxDepth),
-                // The parent of any leaf node must have had at least minSplitSize samples.
-                // The number of parents of leaves is therefore limited by numberOfTrainingSamples / minSplitSize.
-                2 * (double) (numberOfTrainingSamples / minSplitSize)
-            )
-        );
-        long maxNumNodes = 2 * maxNumLeafNodes - 1;
-        return MemoryRange.of(sizeOfInstance(DecisionTreePredict.class))
-            // Minimum size of tree depends on class distribution.
-            .add(MemoryRange.of(1, maxNumNodes).times(TreeNode.memoryEstimation()));
-    }
 
     private final TreeNode<PREDICTION> root;
 
