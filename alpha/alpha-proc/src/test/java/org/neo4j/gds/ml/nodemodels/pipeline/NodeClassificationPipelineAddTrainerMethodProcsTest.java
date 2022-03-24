@@ -23,9 +23,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -65,6 +65,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "penalty", 0.0,
                             "patience", 1,
                             "batchSize", 100,
+                        "learningRate", 0.001,
                             "tolerance", 0.001
                         ))
                 )
@@ -118,6 +119,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "patience", 1,
                             "methodName", TrainingMethod.LogisticRegression.name(),
                             "batchSize", 100,
+                            "learningRate", 0.001,
                             "tolerance", 0.001
                         ),
                         Map.of(
@@ -127,6 +129,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "patience", 1,
                             "methodName", TrainingMethod.LogisticRegression.name(),
                             "batchSize", 100,
+                            "learningRate", 0.001,
                             "tolerance", 0.001
                         )
                     ))

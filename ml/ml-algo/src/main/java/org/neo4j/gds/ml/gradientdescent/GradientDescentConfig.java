@@ -57,4 +57,8 @@ public interface GradientDescentConfig extends ToMapConvertible {
     default double tolerance() {
         return 1e-3;
     }
+
+    default double learningRate() {
+        return 0.001;
+    }
 }

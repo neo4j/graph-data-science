@@ -64,6 +64,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                         "patience", 1,
                         "methodName", TrainingMethod.LogisticRegression.name(),
                         "batchSize", 100,
+                        "learningRate", 0.001,
                         "tolerance", 0.001
                     )))
                 ))
@@ -91,6 +92,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "patience", 1,
                             "methodName", TrainingMethod.LogisticRegression.name(),
                             "batchSize", 100,
+                            "learningRate", 0.001,
                             "tolerance", 0.001
                         ),
                         Map.of(
@@ -100,6 +102,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "patience", 1,
                             "methodName", TrainingMethod.LogisticRegression.name(),
                             "batchSize", 100,
+                            "learningRate", 0.001,
                             "tolerance", 0.001
                         )
                     ))
