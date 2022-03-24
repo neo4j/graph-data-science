@@ -49,7 +49,6 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.procedure.Description;
@@ -116,8 +115,8 @@ public final class CypherAggregation extends BaseProc {
         @UserAggregationUpdate
         public void update(
             @Name("graphName") String graphName,
-            @Name("sourceNode") Node sourceNode,
-            @Nullable @Name(value = "targetNode", defaultValue = "null") Node targetNode,
+            @Name("sourceNode") Object sourceNode,
+            @Nullable @Name(value = "targetNode", defaultValue = "null") Object targetNode,
             @Nullable @Name(value = "nodesConfig", defaultValue = "null") Map<String, Object> nodesConfig,
             @Nullable @Name(value = "relationshipConfig", defaultValue = "null") Map<String, Object> relationshipConfig
         ) {
@@ -240,7 +239,7 @@ public final class CypherAggregation extends BaseProc {
         }
 
         private @NotNull NodeLabelToken labelsConfig(
-            Node node,
+            Object node,
             String nodeLabelKey,
             @NotNull Map<String, Object> nodesConfig
         ) {
@@ -258,9 +257,14 @@ public final class CypherAggregation extends BaseProc {
             return nodeLabels;
         }
 
-        private @Nullable NodeLabelToken tryLabelsConfig(Node node, @Nullable Object nodeLabels) {
+        private @Nullable NodeLabelToken tryLabelsConfig(Object node, @Nullable Object nodeLabels) {
             if (Boolean.TRUE.equals(nodeLabels)) {
-                return NodeLabelTokens.ofNullable(node.getLabels());
+                if (node instanceof Node) {
+                    return NodeLabelTokens.ofNullable(((Node) node).getLabels());
+                }
+                throw new IllegalArgumentException(
+                    "Using `true` to load all labels does only work if the node is a Neo4j node object"
+                );
             }
 
             if (Boolean.FALSE.equals(nodeLabels)) {
@@ -323,15 +327,26 @@ public final class CypherAggregation extends BaseProc {
             return values;
         }
 
+        private long extractNodeId(Object node) {
+            if (node instanceof Node) {
+                return ((Node) node).getId();
+            } else if (node instanceof Number) {
+                return ((Number) node).longValue();
+            } else {
+                String nodeType = node == null ? "NULL" : node.getClass().getName();
+                throw new IllegalArgumentException("The node has to be either a NODE or an INTEGER, but got " + nodeType);
+            }
+        }
+
         private long loadNode(
-            Entity node,
+            Object node,
             NodeLabelToken nodeLabels,
             @Nullable Map<String, Value> nodeProperties
         ) {
             assert this.idMapBuilder != null;
             return (nodeProperties == null)
-                ? this.idMapBuilder.addNode(node.getId(), nodeLabels)
-                : this.idMapBuilder.addNodeWithProperties(node.getId(), nodeProperties, nodeLabels);
+                ? this.idMapBuilder.addNode(extractNodeId(node), nodeLabels)
+                : this.idMapBuilder.addNodeWithProperties(extractNodeId(node), nodeProperties, nodeLabels);
         }
 
         private static double loadOneRelationshipProperty(
