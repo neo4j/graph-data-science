@@ -37,18 +37,18 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
-import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
+import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 
 import java.util.List;
 import java.util.Map;
@@ -168,7 +168,7 @@ class LinkPredictionTrainTest {
                     .maxFeaturesRatio(1.0D)
                     .numberOfDecisionTrees(1)
                     .build()),
-                MemoryRange.of(60_368, 900_128)
+                MemoryRange.of(59_808, 899_568)
             )
         );
     }

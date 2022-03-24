@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.ClassificationDecisionTreeTrain;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeLoss;
@@ -225,8 +226,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
 
             var bootstrappedDatasetEstimation = MemoryRange
                 .of(HugeLongArray.memoryEstimation(usedNumberOfTrainingSamples))
-                .add(sizeOfInstance(BitSet.class))
-                .add(usedNumberOfTrainingSamples);
+                .add(MemoryUsage.sizeOfBitset(usedNumberOfTrainingSamples));
 
             return MemoryRange.of(sizeOfInstance(TrainDecisionTreeTask.class))
                 .add(FeatureBagger.memoryEstimation(numberOfBaggedFeatures))

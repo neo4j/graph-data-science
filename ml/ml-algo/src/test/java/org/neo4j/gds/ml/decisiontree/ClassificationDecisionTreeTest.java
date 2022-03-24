@@ -213,7 +213,7 @@ class ClassificationDecisionTreeTest {
         " 8_000, 100_000,  2, 56, 79_99_976",
         " 8_000, 100_000, 20, 56,   799_976"
     })
-    void predictMemoryEstimation(int maxDepth, long numberOfTrainingSamples, int minSplitSize, long expectedMin, long expectedMax) {
+    void estimateDecisionTree(int maxDepth, long numberOfTrainingSamples, int minSplitSize, long expectedMin, long expectedMax) {
         var range = DecisionTreeTrain.estimateTree(maxDepth, numberOfTrainingSamples, minSplitSize);
 
         assertThat(range.min).isEqualTo(expectedMin);

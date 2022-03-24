@@ -232,19 +232,19 @@ class ClassificationRandomForestTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "     6, 100_000,  10, 10, 1,   1, 0.1, 1.0,  4_501_042,   5_311_850",
+        "     6, 100_000,  10, 10, 1,   1, 0.1, 1.0,  4413562,   5224370",
         // Should increase fairly little with more trees if training set big.
-        "    10, 100_000,  10, 10, 1,  10, 0.1, 1.0,  4_501_546,   6_203_058",
+        "    10, 100_000,  10, 10, 1,  10, 0.1, 1.0,  4414066,   6115578",
         // Should be capped by number of training examples, despite high max depth.
-        " 8_000,     500,  10, 10, 1,   1, 0.1, 1.0,     23_542,    167_374",
+        " 8_000,     500,  10, 10, 1,   1, 0.1, 1.0,    23122,    166954",
         // Should increase very little when having more classes.
-        "    10, 100_000, 100, 10, 1,  10, 0.1, 1.0,  4_502_266,   6_203_778",
+        "    10, 100_000, 100, 10, 1,  10, 0.1, 1.0,  4414786,   6116298",
         // Should increase very little when using more features for splits.
-        "    10, 100_000, 100, 10, 1,  10, 0.9, 1.0,  4_502_338,   6_203_942",
+        "    10, 100_000, 100, 10, 1,  10, 0.9, 1.0,  4414858,   6116462",
         // Should decrease a lot when sampling fewer training examples per tree.
-        "    10, 100_000, 100, 10, 1,  10, 0.1, 0.2,  1_222_266,   2_283_778",
+        "    10, 100_000, 100, 10, 1,  10, 0.1, 0.2,  1204786,   2266298",
         // Should almost be x4 when concurrency * 4.
-        "    10, 100_000, 100, 10, 4,  10, 0.1, 1.0, 16_806_952,  21_157_800",
+        "    10, 100_000, 100, 10, 4,  10, 0.1, 1.0, 16457032,  20807880",
     })
     void trainMemoryEstimation(
         int maxDepth,
@@ -273,7 +273,8 @@ class ClassificationRandomForestTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), concurrency).memoryUsage();
 
-        assertThat(estimation.min).isEqualTo(expectedMin);
-        assertThat(estimation.max).isEqualTo(expectedMax);
+        assertThat(estimation)
+            .withFailMessage("Got (%s, %s)", estimation.min, estimation.max)
+            .isEqualTo(MemoryRange.of(expectedMin, expectedMax));
     }
 }
