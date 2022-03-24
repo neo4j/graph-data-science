@@ -113,7 +113,7 @@ public final class KnnNodePropertySpecParser {
             SimilarityMetric similarityMetric;
             if (value != null) {
                 try {
-                    similarityMetric = SimilarityMetric.valueOf(value);
+                    similarityMetric = SimilarityMetric.parse(value);
                     knnNodeProperties.add(new KnnNodePropertySpec(key, similarityMetric));
                 } catch (IllegalArgumentException ex) {
                     throw new IllegalArgumentException(
