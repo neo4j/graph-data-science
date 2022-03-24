@@ -84,7 +84,7 @@ source_id = gds.find_node_id(["City"], {"name": "New York"})
 target_id = gds.find_node_id(["City"], {"name": "Philadelphia"})
 
 res = gds.shortestPath.dijkstra.stream(G, sourceNode=source_id, targetNode=target_id)
-assert res[0]["totalCost"] == 100
+assert res["totalCost"][0] == 100
 ----
 
 `gds.find_node_id` takes a list of node labels and a dictionary of node property key-value pairs.
