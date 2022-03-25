@@ -44,6 +44,7 @@ public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelation
         var relationshipId = ((LongReference) reference).id;
         var relationshipCursor = new InMemoryRelationshipScanCursor(graphStore, tokenHolders);
         relationshipCursor.single(relationshipId);
+        relationshipCursor.next();
         relationshipCursor.properties(this, new InMemoryPropertySelectionImpl(selection));
     }
 
