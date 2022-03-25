@@ -55,6 +55,8 @@ The training algorithm applied to the above algorithms is gradient descent.
 The gradients are computed concurrently on batches of `batchSize` samples using `concurrency` many threads.
 At the end of an epoch the gradients are summed and scaled before updating the weights.
 Therefore `batchSize` and `concurrency` do not affect model quality, but are very useful to tune for training speed.
+When updating the weights, we move in the direction dictated by the Adam optimizer based on the loss function's gradients.
+How much we move per weights update, you can configure via the `learningRate` parameter.
 
 
 [[machine-learning-training-methods-random-forest]]

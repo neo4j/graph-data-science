@@ -92,7 +92,7 @@ public class Training {
     }
 
     public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
-        Updater updater = new AdamOptimizer(objective.weights());
+        Updater updater = new AdamOptimizer(objective.weights(), config.learningRate());
         int epoch = 0;
         var stopper = TrainingStopper.defaultStopper(config);
         double initialLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
