@@ -155,6 +155,39 @@ RETURN
 --
 
 
+=== Arbitrary source and target ID values
+
+So far, the examples showed how to project a graph based on existing nodes.
+It is also possible to pass INTEGER values directly.
+
+[role=query-example]
+--
+.Project arbitrary id values:
+[source, cypher, role=noplay]
+----
+UNWIND [ [42, 84], [13, 37], [19, 84] ] AS sourceAndTarget
+WITH sourceAndTarget[0] AS source, sourceAndTarget[1] AS target
+WITH gds.alpha.graph.project('arbitrary', source, target) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1m"]
+|===
+| graph       | nodes | rels
+| "arbitrary" | 5     | 3
+|===
+--
+
+[NOTE]
+--
+The projected graph does not know that the IDs did not originate from an existing node.
+Any procedure that interacts with the underlying db (such as the `.write` procedures)
+will likely produce wrong results or trigger exceptions.
+--
+
+
 === Multi-graph
 
 A multi-graph is a graph with multiple node labels and relationship types.
