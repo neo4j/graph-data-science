@@ -29,13 +29,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.extension.GdlExtension;
@@ -54,10 +51,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType;
-import static org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph.DUMMY_PROPERTY;
 
 @GdlExtension
 class GraphSageModelTrainerTest {
@@ -175,54 +169,6 @@ class GraphSageModelTrainerTest {
         assertThat(secondLayerSelfWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION));
         assertThat(secondLayerNeighborsWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION));
         assertThat(secondLayerBias).containsExactly(Dimensions.vector(EMBEDDING_DIMENSION));
-    }
-
-    @Test
-    void testLogging() {
-        var config = ImmutableGraphSageTrainConfig.builder()
-            .addFeatureProperties(DUMMY_PROPERTY)
-            .embeddingDimension(EMBEDDING_DIMENSION)
-            .modelName("model")
-            .epochs(2)
-            .maxIterations(2)
-            .tolerance(1e-10)
-            .learningRate(0.001)
-            .randomSeed(42L)
-            .build();
-
-        var log = Neo4jProxy.testLog();
-
-        var algo = new GraphSageTrainAlgorithmFactory().build(
-            graph,
-            config,
-            log,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        algo.compute();
-
-        var messagesInOrder = log.getMessages(INFO);
-
-        assertThat(messagesInOrder)
-            // avoid asserting on the thread id
-            .extracting(removingThreadId())
-            .containsExactly(
-                "GraphSageTrain :: Start",
-                "GraphSageTrain :: train epoch 1 of 2 :: Start",
-                "GraphSageTrain :: train epoch 1 of 2 :: iteration 1 of 2 :: Start",
-                "GraphSageTrain :: train epoch 1 of 2 :: iteration 1 of 2 :: LOSS: 531.5699087433",
-                "GraphSageTrain :: train epoch 1 of 2 :: iteration 1 of 2 100%",
-                "GraphSageTrain :: train epoch 1 of 2 :: iteration 1 of 2 :: Finished",
-                "GraphSageTrain :: train epoch 1 of 2 :: iteration 2 of 2 :: Start",
-                "GraphSageTrain :: train epoch 1 of 2 :: iteration 2 of 2 100%",
-                "GraphSageTrain :: train epoch 1 of 2 :: iteration 2 of 2 :: Finished",
-                "GraphSageTrain :: train epoch 1 of 2 :: Finished",
-                "GraphSageTrain :: train epoch 2 of 2 :: Start",
-                "GraphSageTrain :: train epoch 2 of 2 :: iteration 1 of 2 :: Start",
-                "GraphSageTrain :: train epoch 2 of 2 :: iteration 1 of 2 100%",
-                "GraphSageTrain :: train epoch 2 of 2 :: iteration 1 of 2 :: Finished",
-                "GraphSageTrain :: train epoch 2 of 2 :: Finished",
-                "GraphSageTrain :: Finished"
-            );
     }
 
     @Test
