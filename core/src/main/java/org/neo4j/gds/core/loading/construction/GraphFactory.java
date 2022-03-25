@@ -51,13 +51,14 @@ import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
@@ -119,7 +120,7 @@ public final class GraphFactory {
             threadCount,
             new ObjectIntScatterMap<>(),
             new IntObjectHashMap<>(),
-            new IntObjectHashMap<>(),
+            new ConcurrentHashMap<>(),
             idMapBuilder,
             labelInformation,
             hasProperties.orElse(false),
@@ -139,8 +140,6 @@ public final class GraphFactory {
 
         var elementIdentifierLabelTokenMapping = new ObjectIntScatterMap<NodeLabel>();
         var labelTokenNodeLabelMapping = new IntObjectHashMap<List<NodeLabel>>();
-        var builderByLabelTokenAndPropertyToken = new IntObjectHashMap<Map<String, NodePropertiesFromStoreBuilder>>();
-
         var labelTokenCounter = new MutableInt(0);
         nodeLabels.forEach(nodeLabel -> {
             int labelToken = nodeLabel == NodeLabel.ALL_NODES
@@ -149,21 +148,19 @@ public final class GraphFactory {
 
             elementIdentifierLabelTokenMapping.put(nodeLabel, labelToken);
             labelTokenNodeLabelMapping.put(labelToken, List.of(nodeLabel));
-            builderByLabelTokenAndPropertyToken.put(labelToken, new HashMap<>());
-
-            nodeSchema.properties().get(nodeLabel).forEach((propertyKey, propertySchema) ->
-                builderByLabelTokenAndPropertyToken.get(labelToken).put(
-                    propertyKey,
-                    NodePropertiesFromStoreBuilder.of(propertySchema.defaultValue(), concurrency)
-                ));
         });
+
+        var propertyBuildersByPropertyKey = nodeSchema.unionProperties().entrySet().stream().collect(toMap(
+            Map.Entry::getKey,
+            e -> NodePropertiesFromStoreBuilder.of(e.getValue().defaultValue(), concurrency)
+        ));
 
         return new NodesBuilder(
             maxOriginalId,
             concurrency,
             elementIdentifierLabelTokenMapping,
             labelTokenNodeLabelMapping,
-            builderByLabelTokenAndPropertyToken,
+            new ConcurrentHashMap<>(propertyBuildersByPropertyKey),
             idMapBuilder,
             hasLabelInformation,
             nodeSchema.hasProperties(),
@@ -296,6 +293,31 @@ public final class GraphFactory {
             nodeSchemaBuilder.build(),
             Collections.emptyMap(),
             RelationshipType.of("REL"),
+            relationships
+        );
+    }
+
+    public static HugeGraph create(
+        IdMap idMap,
+        Map<String, NodeProperties> nodeProperties,
+        RelationshipType relationshipType,
+        Relationships relationships
+    ) {
+        var nodeSchemaBuilder = NodeSchema.builder();
+        idMap.availableNodeLabels().forEach(label -> {
+            nodeProperties.forEach((propertyKey, propertyValues) -> nodeSchemaBuilder.addProperty(
+                label,
+                propertyKey,
+                propertyValues.valueType()
+            ));
+            nodeSchemaBuilder.addLabel(label);
+        });
+
+        return create(
+            idMap,
+            nodeSchemaBuilder.build(),
+            nodeProperties,
+            relationshipType,
             relationships
         );
     }

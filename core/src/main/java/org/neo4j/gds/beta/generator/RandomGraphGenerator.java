@@ -133,7 +133,6 @@ public final class RandomGraphGenerator {
 
             return GraphFactory.create(
                 idMap,
-                nodeProperties.nodeSchema(),
                 nodeProperties.nodeProperties(),
                 relationshipType,
                 relationshipsBuilder.build()

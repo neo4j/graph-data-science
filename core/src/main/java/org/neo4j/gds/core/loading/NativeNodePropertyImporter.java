@@ -43,8 +43,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.IGNORE;
 
@@ -84,7 +84,7 @@ public final class NativeNodePropertyImporter {
         }
     }
 
-    public Map<NodeLabel, Map<PropertyMapping, NodeProperties>> result(IdMap idMap) {
+    public Map<PropertyMapping, NodeProperties> result(IdMap idMap) {
         return buildersByLabel.build(idMap);
     }
 
@@ -187,46 +187,59 @@ public final class NativeNodePropertyImporter {
             Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
             int concurrency
         ) {
+            var propertyBuildersByKey = new HashMap<String, NodePropertiesFromStoreBuilder>();
+
+             propertyMappingsByLabel
+                 .values()
+                 .stream()
+                 .flatMap(propertyMappings -> propertyMappings.mappings().stream())
+                 .forEach(propertyMapping -> propertyBuildersByKey.putIfAbsent(
+                     propertyMapping.propertyKey(),
+                     NodePropertiesFromStoreBuilder.of(
+                         propertyMapping.defaultValue(),
+                         concurrency
+                     )
+                 ));
+
             var instance = new BuildersByLabel();
             for (var entry : propertyMappingsByLabel.entrySet()) {
                 var label = entry.getKey();
                 for (var propertyMapping : entry.getValue()) {
-                    var builder = NodePropertiesFromStoreBuilder.of(
-                        propertyMapping.defaultValue(),
-                        concurrency
-                    );
-                    instance.put(label, propertyMapping, builder);
+                    instance.put(label, propertyMapping, propertyBuildersByKey.get(propertyMapping.propertyKey()));
                 }
             }
             return instance;
         }
 
-        private final Map<NodeLabel, Map<PropertyMapping, NodePropertiesFromStoreBuilder>> builders;
+        private final Map<String, NodePropertiesFromStoreBuilder> buildersByPropertyKey;
+        private final Map<String, PropertyMapping> propertyMappings;
+        private final Map<NodeLabel, Map<PropertyMapping, NodePropertiesFromStoreBuilder>> buildersByLabel;
 
         private BuildersByLabel() {
-            this.builders = new HashMap<>();
+            this.buildersByLabel = new HashMap<>();
+            this.propertyMappings = new HashMap<>();
+            this.buildersByPropertyKey = new HashMap<>();
         }
 
         private void put(NodeLabel label, PropertyMapping propertyMapping, NodePropertiesFromStoreBuilder builder) {
-            builders
+            propertyMappings.put(propertyMapping.propertyKey(), propertyMapping);
+            buildersByPropertyKey.put(propertyMapping.propertyKey(), builder);
+            buildersByLabel
                 .computeIfAbsent(label, __ -> new HashMap<>())
                 .computeIfAbsent(propertyMapping, __ -> builder);
         }
 
         void forEach(BiConsumer<NodeLabel, Map<PropertyMapping, NodePropertiesFromStoreBuilder>> action) {
-            builders.forEach(action);
+            buildersByLabel.forEach(action);
         }
 
-        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> build(IdMap idMap) {
-            return builders
+        Map<PropertyMapping, NodeProperties> build(IdMap idMap) {
+            return buildersByPropertyKey
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        builderEntry -> builderEntry.getValue().build(idMap)
-                    ))
+                .collect(toMap(
+                    entry -> propertyMappings.get(entry.getKey()),
+                    entry -> entry.getValue().build(idMap)
                 ));
         }
     }

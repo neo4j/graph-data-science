@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.NodeProperties;
@@ -126,16 +125,15 @@ class CypherNodeLoader extends CypherRecordLoader<IdMapAndProperties> {
         return QueryType.NODE;
     }
 
-    private static Map<NodeLabel, Map<PropertyMapping, NodeProperties>> propertiesWithPropertyMappings(Map<NodeLabel, Map<String, NodeProperties>> properties) {
-        return properties
-            .entrySet()
+    private static Map<PropertyMapping, NodeProperties> propertiesWithPropertyMappings(Map<String, NodeProperties> properties) {
+        return properties.entrySet()
             .stream()
             .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
-                    propertiesByKey -> PropertyMapping.of(propertiesByKey.getKey(), propertiesByKey.getValue().valueType().fallbackValue()),
-                    Map.Entry::getValue
-                ))
+                propertiesByKey -> PropertyMapping.of(
+                    propertiesByKey.getKey(),
+                    propertiesByKey.getValue().valueType().fallbackValue()
+                ),
+                Map.Entry::getValue
             ));
     }
 }

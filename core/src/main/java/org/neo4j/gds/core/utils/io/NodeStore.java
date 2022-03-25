@@ -124,11 +124,10 @@ public class NodeStore {
             });
         }
 
-        graphStore.nodePropertyKeys().forEach((label, propertyKeys) -> {
+        graphStore.nodeLabels().forEach(label -> {
             var properties = nodeProperties.computeIfAbsent(label.name, k -> new HashMap<>());
-
-            propertyKeys.forEach(propertyKey -> {
-                properties.put(propertyKey, graphStore.nodePropertyValues(label, propertyKey));
+            graphStore.schema().nodeSchema().propertySchemasFor(label).forEach(propertySchema -> {
+                properties.put(propertySchema.key(), graphStore.nodePropertyValues(propertySchema.key()));
             });
         });
 
