@@ -55,8 +55,8 @@ import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -203,12 +203,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         MutableInt typeCounter = new MutableInt(0);
         MutableInt propertyCounter = new MutableInt(0);
 
-        var propertyKeys = graphStore
-            .nodePropertyKeys()
-            .values()
-            .stream()
-            .flatMap(Set::stream)
-            .collect(Collectors.toSet());
+        var propertyKeys = new HashSet<>(graphStore.nodePropertyKeys());
         propertyKeys.addAll(graphStore.relationshipPropertyKeys());
         propertyKeys.forEach(propertyKey ->
             tokenHolders

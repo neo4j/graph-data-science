@@ -96,7 +96,7 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
                 nodeProperties = this.nodePropertiesCache.get(propertyKeyId);
             } else {
                 nodeProperties = createUpdatableNodeProperty(propertyKeyId, propertyValue);
-                graphStore.nodeLabels().forEach(nodeLabel -> graphStore.addNodeProperty(nodeLabel, propertyKey, nodeProperties));
+                graphStore.addNodeProperty(graphStore.nodeLabels(), propertyKey, nodeProperties);
             }
             nodeProperties.updatePropertyValue(nodeId, propertyValue);
         });
