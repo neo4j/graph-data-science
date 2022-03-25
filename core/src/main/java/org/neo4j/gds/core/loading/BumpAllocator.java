@@ -181,7 +181,7 @@ public final class BumpAllocator<PAGE> {
         int lengthOfPage(PAGE page);
     }
 
-    public static final class LocalAllocator<PAGE> {
+    static final class LocalAllocator<PAGE> {
 
         private final BumpAllocator<PAGE> globalAllocator;
 
@@ -258,7 +258,7 @@ public final class BumpAllocator<PAGE> {
         }
     }
 
-    public static final class LocalPositionalAllocator<PAGE> {
+    static final class LocalPositionalAllocator<PAGE> {
 
         private final BumpAllocator<PAGE> globalAllocator;
         private long capacity;

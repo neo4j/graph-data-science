@@ -87,7 +87,7 @@ public final class CompressedAdjacencyListBuilder implements AdjacencyListBuilde
         }
 
         @Override
-        public long write(byte[] targets, int length, long desiredAddress) {
+        public long write(byte[] targets, int length, long address) {
             return allocator.insert(targets, length);
         }
     }

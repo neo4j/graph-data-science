@@ -34,7 +34,7 @@ public interface AdjacencyListBuilder<PAGE, T> {
 
     interface Allocator<PAGE> extends AutoCloseable {
 
-        long write(PAGE targets, int length, long desiredAddress);
+        long write(PAGE targets, int length, long address);
 
         @Override
         void close();

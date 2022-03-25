@@ -87,7 +87,7 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
         }
 
         @Override
-        public long write(long[] properties, int length, long desiredAddress) {
+        public long write(long[] properties, int length, long address) {
             return allocator.insert(properties, length);
         }
     }
@@ -105,9 +105,9 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
         }
 
         @Override
-        public long write(long[] properties, int length, long desiredAddress) {
-            allocator.insertAt(desiredAddress, properties, length);
-            return desiredAddress;
+        public long write(long[] properties, int length, long address) {
+            allocator.insertAt(address, properties, length);
+            return address;
         }
     }
 }
