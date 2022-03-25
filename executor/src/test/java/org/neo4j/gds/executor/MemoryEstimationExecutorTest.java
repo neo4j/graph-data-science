@@ -98,6 +98,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             Map.of("mutateProperty", "foo")
         );
 
+        GraphStoreCatalog.removeAllLoadedGraphs();
         estimationResult.forEach(row -> {
             assertThat(row.nodeCount).isEqualTo(0);
             assertThat(row.bytesMin).isGreaterThan(0);
