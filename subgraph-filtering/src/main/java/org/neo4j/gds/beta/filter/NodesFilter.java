@@ -20,7 +20,6 @@
 package org.neo4j.gds.beta.filter;
 
 import com.carrotsearch.hppc.AbstractIterator;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
@@ -44,13 +43,10 @@ import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 final class NodesFilter {
 
@@ -58,30 +54,30 @@ final class NodesFilter {
     interface FilteredNodes {
         IdMap idMap();
 
-        Map<NodeLabel, NodePropertyStore> propertyStores();
+        NodePropertyStore propertyStores();
     }
 
     static FilteredNodes filterNodes(
-        GraphStore graphStore,
+        GraphStore inputGraphStore,
         Expression expression,
         int concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
-        var inputNodes = graphStore.nodes();
+        var inputNodes = inputGraphStore.nodes();
 
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(concurrency)
             .maxOriginalId(inputNodes.highestNeoId())
-            .hasLabelInformation(!graphStore.nodeLabels().isEmpty())
+            .hasLabelInformation(!inputGraphStore.nodeLabels().isEmpty())
             .build();
 
         var partitions = PartitionUtils
-            .rangePartition(concurrency, graphStore.nodeCount(), Function.identity(), Optional.empty())
+            .rangePartition(concurrency, inputGraphStore.nodeCount(), Function.identity(), Optional.empty())
             .iterator();
 
         var tasks = NodeFilterTask.of(
-            graphStore,
+            inputGraphStore,
             expression,
             partitions,
             nodesBuilder,
@@ -97,8 +93,8 @@ final class NodesFilter {
 
         progressTracker.beginSubTask();
         var filteredNodePropertyStores = filterNodeProperties(
+            inputGraphStore,
             filteredIdMap,
-            graphStore,
             concurrency,
             progressTracker
         );
@@ -110,40 +106,14 @@ final class NodesFilter {
             .build();
     }
 
-    private static Map<NodeLabel, NodePropertyStore> filterNodeProperties(
-        IdMap filteredIdMap,
+    private static NodePropertyStore filterNodeProperties(
         GraphStore inputGraphStore,
+        IdMap filteredIdMap,
         int concurrency,
         ProgressTracker progressTracker
     ) {
-        return filteredIdMap
-            .availableNodeLabels()
-            .stream()
-            .collect(Collectors.toMap(
-                Function.identity(),
-                nodeLabel -> {
-                    var propertyKeys = inputGraphStore.nodePropertyKeys(nodeLabel);
+        var propertyKeys = inputGraphStore.nodePropertyKeys();
 
-                    return createNodePropertyStore(
-                        inputGraphStore,
-                        filteredIdMap,
-                        nodeLabel,
-                        propertyKeys,
-                        concurrency,
-                        progressTracker
-                    );
-                }
-            ));
-    }
-
-    private static NodePropertyStore createNodePropertyStore(
-        GraphStore inputGraphStore,
-        IdMap filteredIdMap,
-        NodeLabel nodeLabel,
-        Collection<String> propertyKeys,
-        int concurrency,
-        ProgressTracker progressTracker
-    ) {
         progressTracker.beginSubTask(filteredIdMap.nodeCount() * propertyKeys.size());
 
         var builder = NodePropertyStore.builder();
@@ -151,7 +121,7 @@ final class NodesFilter {
         var inputMapping = inputGraphStore.nodes();
 
         propertyKeys.forEach(propertyKey -> {
-            var nodeProperties = inputGraphStore.nodePropertyValues(nodeLabel, propertyKey);
+            var nodeProperties = inputGraphStore.nodePropertyValues(propertyKey);
             var propertyState = inputGraphStore.nodePropertyState(propertyKey);
 
             NodePropertiesBuilder<?> nodePropertiesBuilder = getPropertiesBuilder(
@@ -268,11 +238,11 @@ final class NodesFilter {
         private final Expression expression;
         private final EvaluationContext.NodeEvaluationContext nodeContext;
         private final ProgressTracker progressTracker;
-        private final GraphStore graphStore;
+        private final GraphStore inputGraphStore;
         private final NodesBuilder nodesBuilder;
 
         static Iterator<NodeFilterTask> of(
-            GraphStore graphStore,
+            GraphStore inputGraphStore,
             Expression expression,
             Iterator<Partition> partitions,
             NodesBuilder nodesBuilder,
@@ -288,7 +258,7 @@ final class NodesFilter {
                     return new NodeFilterTask(
                         partitions.next(),
                         expression,
-                        graphStore,
+                        inputGraphStore,
                         nodesBuilder,
                         progressTracker
                     );
@@ -299,21 +269,21 @@ final class NodesFilter {
         private NodeFilterTask(
             Partition partition,
             Expression expression,
-            GraphStore graphStore,
+            GraphStore inputGraphStore,
             NodesBuilder nodesBuilder,
             ProgressTracker progressTracker
         ) {
             this.partition = partition;
             this.expression = expression;
-            this.graphStore = graphStore;
+            this.inputGraphStore = inputGraphStore;
             this.nodesBuilder = nodesBuilder;
-            this.nodeContext = new EvaluationContext.NodeEvaluationContext(graphStore);
+            this.nodeContext = new EvaluationContext.NodeEvaluationContext(inputGraphStore);
             this.progressTracker = progressTracker;
         }
 
         @Override
         public void run() {
-            var idMap = graphStore.nodes();
+            var idMap = inputGraphStore.nodes();
             partition.consume(node -> {
                 nodeContext.init(node);
                 if (expression.evaluate(nodeContext) == Expression.TRUE) {

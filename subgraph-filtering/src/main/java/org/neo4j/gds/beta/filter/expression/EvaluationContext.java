@@ -24,11 +24,11 @@ import com.carrotsearch.hppc.ObjectIntScatterMap;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class EvaluationContext {
 
@@ -39,35 +39,22 @@ public abstract class EvaluationContext {
     public static class NodeEvaluationContext extends EvaluationContext {
 
         private final GraphStore graphStore;
-        private final AtomicReference<NodeLabel> labelForPropertyReference;
         private long nodeId;
 
         public NodeEvaluationContext(GraphStore graphStore) {
             this.graphStore = graphStore;
-            labelForPropertyReference = new AtomicReference<>();
         }
 
         @Override
         double getProperty(String propertyKey, ValueType propertyType) {
-            labelForPropertyReference.set(null);
-            graphStore.nodes().forEachNodeLabel(nodeId, (nodeLabel -> {
-                if (graphStore.hasNodeProperty(nodeLabel, propertyKey)) {
-                    labelForPropertyReference.set(nodeLabel);
-                    return false;
-                }
-                return true;
-            }));
 
-            var labelForProperty = labelForPropertyReference.get();
-            if (labelForProperty == null) {
+            if (!graphStore.hasNodeProperty(propertyKey)) {
                 return DefaultValue.DOUBLE_DEFAULT_FALLBACK;
             } else {
-                if (propertyType == ValueType.LONG) {
-                    return Double.longBitsToDouble(graphStore
-                        .nodePropertyValues(labelForProperty, propertyKey)
-                        .longValue(nodeId));
-                }
-                return graphStore.nodePropertyValues(labelForProperty, propertyKey).doubleValue(nodeId);
+                NodeProperties nodeProperties = graphStore.nodePropertyValues(propertyKey);
+                return propertyType == ValueType.LONG
+                    ? Double.longBitsToDouble(nodeProperties.longValue(nodeId))
+                    : nodeProperties.doubleValue(nodeId);
             }
         }
 
