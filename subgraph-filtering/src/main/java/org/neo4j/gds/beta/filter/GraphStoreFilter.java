@@ -23,6 +23,8 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.beta.filter.expression.ExpressionParser;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
@@ -35,13 +37,12 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 public final class GraphStoreFilter {
 
     public static Task progressTask(GraphStore graphStore) {
-        var nodePropertyCount = graphStore.nodePropertyKeys().values().stream().mapToInt(Set::size).sum();
+        var nodePropertyCount = graphStore.nodePropertyKeys().size();
         return progressTask(
             graphStore.nodeCount(),
             nodePropertyCount,
@@ -105,8 +106,11 @@ public final class GraphStoreFilter {
                 progressTracker
             );
 
+            var filteredSchema = filterSchema(graphStore.schema(), filteredNodes, filteredRelationships);
+
             return CSRGraphStore.of(
                 graphStore.databaseId(),
+                filteredSchema,
                 filteredNodes.idMap(),
                 filteredNodes.propertyStores(),
                 filteredRelationships.topology(),
@@ -159,6 +163,15 @@ public final class GraphStoreFilter {
 
     private static String replaceStarWithTrue(String filter) {
         return filter.equals(ElementProjection.PROJECT_ALL) ? "true" : filter;
+    }
+
+    private static GraphSchema filterSchema(GraphSchema inputGraphSchema, NodesFilter.FilteredNodes filteredNodes, RelationshipsFilter.FilteredRelationships filteredRelationships) {
+        var nodeSchema = inputGraphSchema.nodeSchema().filter(filteredNodes.idMap().availableNodeLabels());
+        RelationshipSchema relationshipSchema = inputGraphSchema
+            .relationshipSchema()
+            .filter(filteredRelationships.topology().keySet());
+
+        return GraphSchema.of(nodeSchema, relationshipSchema);
     }
 
     private GraphStoreFilter() {}

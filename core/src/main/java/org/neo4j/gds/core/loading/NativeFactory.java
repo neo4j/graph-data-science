@@ -28,6 +28,10 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.NodeProperty;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
@@ -109,7 +113,8 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             if (isLoading) {
                 builder.max(List.of(
                     relationshipEstimationDuringLoading(relationshipType, relationshipProjection, undirected),
-                    relationshipEstimationAfterLoading(relationshipType, relationshipProjection, undirected)));
+                    relationshipEstimationAfterLoading(relationshipType, relationshipProjection, undirected)
+                ));
             } else {
                 builder.add(MemoryEstimations.builder(HugeGraph.class).build());
                 builder.add(relationshipEstimationAfterLoading(relationshipType, relationshipProjection, undirected));
@@ -136,12 +141,21 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         );
 
         // Offsets and degrees are eagerly initialized and exist next to the fully populated AdjacencyBuffer
-        duringLoadingEstimation.perNode(formatWithLocale("offsets for '%s'", relationshipType), HugeLongArray::memoryEstimation);
-        duringLoadingEstimation.perNode(formatWithLocale("degrees for '%s'", relationshipType), HugeIntArray::memoryEstimation);
-        relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> duringLoadingEstimation.perNode(
-            formatWithLocale("property '%s.%s'", relationshipType, resolvedPropertyMapping.propertyKey()),
+        duringLoadingEstimation.perNode(
+            formatWithLocale("offsets for '%s'", relationshipType),
             HugeLongArray::memoryEstimation
-        ));
+        );
+        duringLoadingEstimation.perNode(
+            formatWithLocale("degrees for '%s'", relationshipType),
+            HugeIntArray::memoryEstimation
+        );
+        relationshipProjection
+            .properties()
+            .mappings()
+            .forEach(resolvedPropertyMapping -> duringLoadingEstimation.perNode(
+                formatWithLocale("property '%s.%s'", relationshipType, resolvedPropertyMapping.propertyKey()),
+                HugeLongArray::memoryEstimation
+            ));
 
         return duringLoadingEstimation.build();
     }
@@ -208,6 +222,51 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             loadingContext.log(),
             graphProjectConfig.readConcurrency(),
             loadingContext.taskRegistryFactory()
+        );
+    }
+
+    @Override
+    protected GraphSchema computeGraphSchema(
+        IdMapAndProperties idMapAndProperties, RelationshipsAndProperties relationshipsAndProperties
+    ) {
+        var nodeSchemaBuilder = NodeSchema.builder();
+        storeConfig
+            .nodeProjections()
+            .projections()
+            .forEach((nodeLabel, nodeProjection) -> nodeProjection.properties().mappings().forEach(propertyMapping -> {
+                String propertyKey = propertyMapping.propertyKey();
+                NodeProperty nodeProperty = idMapAndProperties
+                    .properties()
+                    .nodeProperties()
+                    .get(propertyMapping.propertyKey());
+
+                nodeSchemaBuilder.addProperty(
+                    nodeLabel,
+                    propertyKey,
+                    nodeProperty.propertySchema()
+                );
+            }));
+        // in case there were no properties add all labels
+        idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
+
+        var relationshipSchemaBuilder = RelationshipSchema.builder();
+        storeConfig
+            .relationshipProjections()
+            .projections()
+            .forEach((relType, relProjection) -> relProjection.properties().forEach(propertyMapping -> {
+                String propertyKey = propertyMapping.propertyKey();
+                relationshipSchemaBuilder.addProperty(
+                    relType,
+                    propertyKey,
+                    relationshipsAndProperties.properties().get(relType).get(propertyKey).propertySchema()
+                );
+            }));
+        // in case there were no properties add all relationship types
+        relationshipsAndProperties.relationships().keySet().forEach(relationshipSchemaBuilder::addRelationshipType);
+
+        return GraphSchema.of(
+            nodeSchemaBuilder.build(),
+            relationshipSchemaBuilder.build()
         );
     }
 

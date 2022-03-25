@@ -20,10 +20,8 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.ImmutableNodePropertyStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.NodePropertyStore;
@@ -31,14 +29,17 @@ import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,8 +70,14 @@ public final class CSRGraphStoreUtil {
             relationshipType
         );
 
+        RelationshipSchema.Builder relationshipSchemaBuilder = RelationshipSchema.builder().addRelationshipType(relationshipType);
+        relationshipProperty.ifPresent(property -> relationshipSchemaBuilder.addProperty(relationshipType, property, ValueType.DOUBLE));
+
+        var schema = GraphSchema.of(graph.schema().nodeSchema(), relationshipSchemaBuilder.build());
+
         return new CSRGraphStore(
             databaseId,
+            schema,
             graph.idMap(),
             nodeProperties,
             topology,
@@ -80,30 +87,23 @@ public final class CSRGraphStoreUtil {
     }
 
     @NotNull
-    private static Map<NodeLabel, NodePropertyStore> constructNodePropertiesFromGraph(HugeGraph graph) {
-        Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>();
+    private static NodePropertyStore constructNodePropertiesFromGraph(HugeGraph graph) {
+        var nodePropertyStoreBuilder = NodePropertyStore.builder();
+
         graph
             .schema()
             .nodeSchema()
-            .properties()
-            .forEach((nodeLabel, propertySchemas) -> {
-                var nodePropertyStoreBuilder = NodePropertyStore.builder();
+            .unionProperties()
+            .forEach((propertyKey, propertySchema) -> nodePropertyStoreBuilder.putIfAbsent(
+                propertyKey,
+                NodeProperty.of(propertyKey,
+                    propertySchema.state(),
+                    graph.nodeProperties(propertyKey),
+                    propertySchema.defaultValue()
+                )
+            ));
 
-                propertySchemas.forEach((propertyKey, propertySchema) -> {
-                    nodePropertyStoreBuilder.putIfAbsent(
-                        propertyKey,
-                        NodeProperty.of(propertyKey,
-                            propertySchema.state(),
-                            graph.nodeProperties(propertyKey),
-                            propertySchema.defaultValue()
-                        )
-                    );
-                });
-                nodePropertyStores.put(nodeLabel, nodePropertyStoreBuilder.build());
-
-            });
-
-        return nodePropertyStores;
+        return nodePropertyStoreBuilder.build();
     }
 
     @NotNull
@@ -157,39 +157,23 @@ public final class CSRGraphStoreUtil {
 
     public static void extractNodeProperties(
         GraphStoreBuilder graphStoreBuilder,
-        Function<NodeLabel, Map<String, PropertySchema>> nodeSchema,
-        Map<NodeLabel, Map<String, NodeProperties>> nodeProperties
+        Function<String, PropertySchema> nodeSchema,
+        Map<String, NodeProperties> nodeProperties
     ) {
-        nodeProperties.forEach((label, propertyMap) -> {
-            var nodeStoreProperties = propertyKeyToNodePropertyMapping(nodeSchema, label, propertyMap);
-            graphStoreBuilder.putNodePropertyStores(label, ImmutableNodePropertyStore.of(nodeStoreProperties));
+        NodePropertyStore.Builder propertyStoreBuilder = NodePropertyStore.builder();
+        nodeProperties.forEach((propertyKey, propertyValues) -> {
+            var propertySchema = nodeSchema.apply(propertyKey);
+            propertyStoreBuilder.putIfAbsent(
+                propertyKey,
+                NodeProperty.of(
+                    propertyKey,
+                    propertySchema.state(),
+                    propertyValues,
+                    propertySchema.defaultValue()
+                )
+            );
         });
-    }
-
-    private static Map<String, NodeProperty> propertyKeyToNodePropertyMapping(
-        Function<NodeLabel, Map<String, PropertySchema>> nodeSchema,
-        NodeLabel label,
-        Map<String, NodeProperties> propertyMap
-    ) {
-        var propertySchemaForLabel = nodeSchema.apply(label);
-        var propertyMapping = new HashMap<String, NodeProperty>(propertyMap.size());
-        propertyMap.forEach((propertyKey, propertyValue) -> {
-            var nodeProperty = nodePropertiesFrom(propertyValue, propertySchemaForLabel.get(propertyKey));
-            propertyMapping.put(propertyKey, nodeProperty);
-        });
-        return propertyMapping;
-    }
-
-    private static NodeProperty nodePropertiesFrom(
-        NodeProperties nodeProperties,
-        PropertySchema propertySchema
-    ) {
-        return NodeProperty.of(
-            propertySchema.key(),
-            propertySchema.state(),
-            nodeProperties,
-            propertySchema.defaultValue()
-        );
+        graphStoreBuilder.nodePropertyStore(propertyStoreBuilder.build());
     }
 
     public static RelationshipPropertyStore buildRelationshipPropertyStore(
@@ -219,6 +203,45 @@ public final class CSRGraphStoreUtil {
 
         return propertyStoreBuilder.build();
     }
+
+    public static GraphSchema computeGraphSchema(
+        IdMapAndProperties idMapAndProperties,
+        RelationshipsAndProperties relationshipsAndProperties
+    ) {
+        var nodeSchemaBuilder = NodeSchema.builder();
+        idMapAndProperties
+            .idMap()
+            .availableNodeLabels()
+            .forEach(label -> idMapAndProperties
+                .properties()
+                .nodeProperties()
+                .forEach((propertyKey, propertyValues) -> nodeSchemaBuilder.addProperty(
+                    label,
+                    propertyKey,
+                    propertyValues.propertySchema()
+                )));
+
+        idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
+
+        var relationshipSchemaBuilder = RelationshipSchema.builder();
+        relationshipsAndProperties
+            .properties()
+            .forEach((relType, propertyStore) -> propertyStore
+                .relationshipProperties()
+                .forEach((propertyKey, propertyValues) -> relationshipSchemaBuilder.addProperty(
+                    relType,
+                    propertyKey,
+                    propertyValues.propertySchema()
+                )));
+
+        relationshipsAndProperties.relationships().keySet().forEach(relationshipSchemaBuilder::addRelationshipType);
+
+        return GraphSchema.of(
+            nodeSchemaBuilder.build(),
+            relationshipSchemaBuilder.build()
+        );
+    }
+
 
     private CSRGraphStoreUtil() {}
 }

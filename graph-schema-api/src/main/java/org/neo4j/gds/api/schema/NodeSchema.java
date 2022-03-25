@@ -26,7 +26,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -67,7 +66,8 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Propert
             return addProperty(
                 key,
                 propertyName,
-                PropertySchema.of(propertyName,
+                PropertySchema.of(
+                    propertyName,
                     valueType,
                     valueType.fallbackValue(),
                     PropertyState.PERSISTENT
@@ -84,7 +84,14 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Propert
         }
 
         public Builder addLabel(NodeLabel key) {
-            this.properties.putIfAbsent(key, Collections.emptyMap());
+            this.properties.putIfAbsent(key, new LinkedHashMap<>());
+            return this;
+        }
+
+        public Builder removeProperty(String propertyName) {
+            this.properties.forEach((label, propertyMappings) -> {
+                propertyMappings.remove(propertyName);
+            });
             return this;
         }
     }

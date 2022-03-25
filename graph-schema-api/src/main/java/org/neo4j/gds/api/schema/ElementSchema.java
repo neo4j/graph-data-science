@@ -58,6 +58,11 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFI
     }
 
     @Value.Default
+    default boolean hasProperty(ELEMENT_IDENTIFIER elementIdentifier, String propertyKey) {
+        return (!properties().get(elementIdentifier).isEmpty() && properties().get(elementIdentifier).containsKey(propertyKey));
+    }
+
+    @Value.Default
     default List<PROPERTY_SCHEMA> propertySchemasFor(ELEMENT_IDENTIFIER elementIdentifier) {
         var propertySchemaForTypes = filter(Set.of(elementIdentifier));
         return new ArrayList<>(propertySchemaForTypes.unionProperties().values());

@@ -26,6 +26,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.schema.ImmutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
@@ -61,6 +62,7 @@ public final class CsvGraphStoreImporter {
     private final GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder;
     private final int concurrency;
 
+    private final ImmutableGraphSchema.Builder graphSchemaBuilder;
     private final GraphStoreBuilder graphStoreBuilder;
     private final Log log;
     private final TaskRegistryFactory taskRegistryFactory;
@@ -95,6 +97,7 @@ public final class CsvGraphStoreImporter {
         this.relationshipVisitorBuilder = relationshipVisitorBuilder;
         this.concurrency = concurrency;
         this.importPath = importPath;
+        this.graphSchemaBuilder = ImmutableGraphSchema.builder();
         this.graphStoreBuilder = new GraphStoreBuilder().concurrency(concurrency);
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;
@@ -106,6 +109,7 @@ public final class CsvGraphStoreImporter {
         progressTracker.beginSubTask();
         try {
             importGraph(fileInput);
+            graphStoreBuilder.schema(graphSchemaBuilder.build());
             return ImmutableUserGraphStore.of(fileInput.userName(), graphStoreBuilder.build());
         } finally {
             progressTracker.endSubTask();
@@ -142,6 +146,7 @@ public final class CsvGraphStoreImporter {
     ) {
         progressTracker.beginSubTask();
         NodeSchema nodeSchema = fileInput.nodeSchema();
+        graphSchemaBuilder.nodeSchema(nodeSchema);
 
         GraphInfo graphInfo = fileInput.graphInfo();
         graphStoreBuilder.databaseId(graphInfo.namedDatabaseId());
@@ -165,7 +170,7 @@ public final class CsvGraphStoreImporter {
 
         var idMapAndProperties = nodesBuilder.build();
         graphStoreBuilder.nodes(idMapAndProperties.idMap());
-        var schemaProperties = nodeSchema.properties();
+        var schemaProperties = nodeSchema.unionProperties();
         CSRGraphStoreUtil.extractNodeProperties(
             graphStoreBuilder,
             schemaProperties::get,
@@ -180,6 +185,8 @@ public final class CsvGraphStoreImporter {
         progressTracker.beginSubTask();
         ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipSchema = fileInput.relationshipSchema();
+        graphSchemaBuilder.relationshipSchema(relationshipSchema);
+
         this.relationshipVisitorBuilder
             .withRelationshipSchema(relationshipSchema)
             .withNodes(nodes)
