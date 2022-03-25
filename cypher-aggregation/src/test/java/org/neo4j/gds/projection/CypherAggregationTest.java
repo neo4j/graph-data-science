@@ -157,7 +157,6 @@ class CypherAggregationTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource({"13.37, FLOAT", "true, BOOLEAN", "false, BOOLEAN", "null, NULL", "\"42\", STRING", "[42], LIST", "[13.37], LIST", "{foo:42}, MAP", "{foo:13.37}, MAP"})
     void testInvalidArbitraryIds(String idLiteral, String invalidType) {
-        System.out.println("idLiteral = " + idLiteral);
         var query = formatWithLocale(
             "WITH %s AS source RETURN gds.alpha.graph.project('g', source)",
             idLiteral
