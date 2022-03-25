@@ -344,41 +344,6 @@ public final class ParallelUtil {
         return futures;
     }
 
-    public static void run(
-        final Collection<? extends Runnable> tasks,
-        final Runnable selfTask,
-        final ExecutorService executor,
-        Collection<Future<?>> futures
-    ) {
-
-        if (tasks.isEmpty()) {
-            selfTask.run();
-            return;
-        }
-
-        if (null == executor) {
-            tasks.forEach(Runnable::run);
-            selfTask.run();
-            return;
-        }
-
-        if (executor.isShutdown() || executor.isTerminated()) {
-            throw new IllegalStateException("Executor is shut down");
-        }
-
-        if (futures == null) {
-            futures = new ArrayList<>(tasks.size());
-        } else {
-            futures.clear();
-        }
-
-        for (Runnable task : tasks) {
-            futures.add(executor.submit(task));
-        }
-
-        awaitTermination(futures);
-    }
-
     /**
      * Try to run all tasks for their side-effects using at most
      * {@code concurrency} threads at once.
