@@ -298,10 +298,13 @@ public final class BumpAllocator<PAGE> {
         private @Nullable PAGE allocateNewPages(long offset, @NotNull PAGE page, int length, int targetsLength) {
             int pageId = PageUtil.pageIndex(offset, PAGE_SHIFT);
 
+            // We don't want the global allocator to create a new page (while also holding the lock)
+            // when we know that we throw it away afterwards. This is the case when we have an oversized page.
             @Nullable PAGE existingPage = null;
             if (length > PAGE_SIZE) {
                 if (length < targetsLength) {
-                    // need to create a smaller slice
+                    // We have an oversized page but it contains additional buffer space at the end
+                    // We create a new copy of that page that is the exact size to fit all data
                     page = globalAllocator.pageFactory.copyOfPage(page, length);
                 }
                 existingPage = page;
@@ -310,7 +313,8 @@ public final class BumpAllocator<PAGE> {
             this.capacity = globalAllocator.insertMultiplePages(pageId, existingPage);
 
             if (existingPage != null) {
-                // we already inserted that page
+                // We had an oversized page and already inserted it
+                // We return null to tell the caller that the data doesn't need to be inserted again
                 return null;
             }
             return page;
