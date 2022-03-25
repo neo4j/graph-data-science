@@ -21,14 +21,16 @@ package org.neo4j.gds.compat.dev;
 
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipPropertyCursor;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.gds.storageengine.InMemoryRelationshipCursor;
 import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
+import org.neo4j.storageengine.api.StorageRelationshipCursor;
 import org.neo4j.token.TokenHolders;
 
 public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelationshipPropertyCursor {
 
-    public InMemoryRelationshipPropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
+    InMemoryRelationshipPropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders);
     }
 
@@ -43,8 +45,16 @@ public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelation
     public void initRelationshipProperties(
         Reference reference, PropertySelection propertySelection, long ownerReference
     ) {
-        reset();
-        setId(((LongReference) reference).id);
-        this.selection = new InMemoryPropertySelectionImpl(propertySelection);
+        var relationshipId = ((LongReference) reference).id;
+        var relationshipCursor = new InMemoryRelationshipScanCursor(graphStore, tokenHolders);
+        relationshipCursor.single(relationshipId);
+        relationshipCursor.next();
+        relationshipCursor.properties(this, new InMemoryPropertySelectionImpl(propertySelection));
+    }
+
+    @Override
+    public void initRelationshipProperties(StorageRelationshipCursor relationshipCursor, PropertySelection selection) {
+        var inMemoryRelationshipCursor = (InMemoryRelationshipCursor) relationshipCursor;
+        inMemoryRelationshipCursor.properties(this, selection);
     }
 }

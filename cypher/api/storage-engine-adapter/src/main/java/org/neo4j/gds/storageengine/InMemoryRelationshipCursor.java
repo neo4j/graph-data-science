@@ -49,7 +49,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
 
     private AdjacencyCursor adjacencyCursor;
     private PropertyCursor[] propertyCursors;
-    private double[] propertyValuesCache;
+    private final double[] propertyValuesCache;
     private int relationshipTypeOffset;
     private int relationshipContextIndex;
     private int[] propertyIds;
