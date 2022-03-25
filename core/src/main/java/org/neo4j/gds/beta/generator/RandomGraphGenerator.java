@@ -27,7 +27,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.UnionNodeProperties;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
@@ -49,8 +48,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class RandomGraphGenerator {
@@ -239,28 +238,14 @@ public final class RandomGraphGenerator {
             })
         );
 
-        // Construct union node properties
-        Map<String, NodeProperties> unionProperties = propertyNameToLabels.entrySet().stream().collect(Collectors.toMap(
+        Map<String, NodeProperties> generatedProperties = propertyNameToProducers.entrySet().stream().collect(toMap(
             Map.Entry::getKey,
-            entry -> {
-                var propertyName = entry.getKey();
-                var nodeLabels = entry.getValue();
-
-                // generate properties
-                var propertyProducer = propertyNameToProducers.get(propertyName);
-                var nodeProperties = generateProperties(propertyProducer);
-
-                var nodeLabelToProperties = nodeLabels
-                    .stream()
-                    .collect(Collectors.toMap(Function.identity(), nodeLabel -> nodeProperties));
-
-                return new UnionNodeProperties(idMap, nodeLabelToProperties);
-            }
+            entry -> generateProperties(entry.getValue())
         ));
 
         // Create a corresponding node schema
         var nodeSchemaBuilder = NodeSchema.builder();
-        unionProperties.forEach((propertyKey, property) -> {
+        generatedProperties.forEach((propertyKey, property) -> {
             propertyNameToLabels.get(propertyKey).forEach(nodeLabel ->
                 nodeSchemaBuilder.addProperty(
                     nodeLabel,
@@ -270,7 +255,7 @@ public final class RandomGraphGenerator {
         });
 
         return ImmutableNodePropertiesAndSchema.builder()
-            .nodeProperties(unionProperties)
+            .nodeProperties(generatedProperties)
             .nodeSchema(nodeSchemaBuilder.build())
             .build();
     }
