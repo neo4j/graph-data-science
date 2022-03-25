@@ -38,6 +38,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
 import org.neo4j.gds.ml.core.samplers.WeightedUniformSampler;
 import org.neo4j.gds.ml.core.subgraph.NeighborhoodSampler;
+import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
@@ -229,7 +230,15 @@ public class GraphSageModelTrainer {
 
         long[] totalBatch = addSamplesPerBatchNode(batch, localGraph);
 
-        Variable<Matrix> embeddingVariable = embeddingsComputationGraph(localGraph, useWeights, totalBatch, features, layers, featureFunction);
+        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, useWeights, totalBatch, layers);
+
+        Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
+            localGraph,
+            subGraphs.get(subGraphs.size() - 1).originalNodeIds(),
+            features
+        );
+
+        Variable<Matrix> embeddingVariable = embeddingsComputationGraph(subGraphs, layers, batchedFeaturesExtractor);
 
         return new GraphSageLoss(
             useWeights ? localGraph::relationshipProperty : UNWEIGHTED,
