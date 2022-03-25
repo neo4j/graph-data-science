@@ -42,8 +42,8 @@ In addition, the optional `sourceNodeProperties`, `targetNodeProperties`, and `r
 ----
 RETURN gds.alpha.graph.project(
     graphName: String,
-    sourceNode: Node,
-    targetNode: Node,
+    sourceNode: Node or Integer,
+    targetNode: Node or Integer,
     nodesConfig: Map,
     relationshipConfig: Map
 ) YIELD
