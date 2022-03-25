@@ -21,27 +21,52 @@ package org.neo4j.gds.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphRemoveNodePropertiesConfig extends GraphExportNodePropertiesConfig {
+public interface GraphRemoveNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {
+    @Configuration.Parameter
+    Optional<String> graphName();
+
+    @Configuration.Parameter
+    List<String> nodeProperties();
+
 
     static GraphRemoveNodePropertiesConfig of(
         String graphName,
         List<String> nodeProperties,
-        List<String> nodeLabels,
         CypherMapWrapper config
     ) {
         return new GraphRemoveNodePropertiesConfigImpl(
             Optional.of(graphName),
             nodeProperties,
-            nodeLabels,
             config
         );
+    }
+
+    @Configuration.Ignore
+    default void validate(GraphStore graphStore) {
+        List<String> invalidProperties = nodeProperties()
+            .stream()
+            .filter(nodeProperty -> !graphStore.hasNodeProperty(nodeProperty))
+            .collect(Collectors.toList());
+
+        if (!invalidProperties.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Could not find property key(s) %s. Defined keys: %s.",
+                StringJoining.join(invalidProperties),
+                StringJoining.join(graphStore.nodePropertyKeys())
+            ));
+        }
     }
 }
