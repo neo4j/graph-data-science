@@ -143,7 +143,7 @@ public abstract class PipelineExecutor<
         pipeline.nodePropertySteps().forEach(step -> {
             var intermediateProperty = step.config().get(MUTATE_PROPERTY_KEY);
             if (intermediateProperty instanceof String) {
-                nodeLabels.forEach(label -> graphstore.removeNodeProperty(label, ((String) intermediateProperty)));
+                graphstore.removeNodeProperty(((String) intermediateProperty));
             }
         });
     }

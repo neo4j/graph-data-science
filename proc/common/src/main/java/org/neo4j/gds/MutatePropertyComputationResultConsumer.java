@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public final class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig, RESULT>
@@ -76,15 +77,11 @@ public final class MutatePropertyComputationResultConsumer<ALGO extends Algorith
             GraphStore graphStore = computationResult.graphStore();
             Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
 
-            maybeTranslatedProperties.forEach(nodeProperty -> {
-                for (NodeLabel label : labelsToUpdate) {
-                    graphStore.addNodeProperty(
-                        label,
-                        nodeProperty.propertyKey(),
-                        nodeProperty.properties()
-                    );
-                }
-            });
+            maybeTranslatedProperties.forEach(nodeProperty -> graphStore.addNodeProperty(
+                new HashSet<>(labelsToUpdate),
+                nodeProperty.propertyKey(),
+                nodeProperty.properties()
+            ));
 
             resultBuilder.withNodePropertiesWritten(maybeTranslatedProperties.size() * computationResult.graph().nodeCount());
         }

@@ -66,6 +66,7 @@ public class NodePropertyFunc {
 
         GraphStore graphStore = GraphStoreCatalog.get(CatalogRequest.of(username.username(), api.databaseId()), graphName).graphStore();
         boolean projectAll = nodeLabel.equals(PROJECT_ALL);
+        var nodeLabelType = projectAll ? NodeLabel.ALL_NODES : NodeLabel.of(nodeLabel);
 
         if (projectAll) {
             long labelsWithProperty = graphStore.nodeLabels().stream()
@@ -79,7 +80,7 @@ public class NodePropertyFunc {
                 ));
             }
         } else {
-            if (!graphStore.hasNodeProperty(singletonList(NodeLabel.of(nodeLabel)), propertyKey)) {
+            if (!graphStore.hasNodeProperty(singletonList(nodeLabelType), propertyKey)) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Node projection '%s' does not have property key '%s'. Available keys: %s.",
                     nodeLabel,
@@ -95,9 +96,11 @@ public class NodePropertyFunc {
             throw new IllegalArgumentException(formatWithLocale("Node id %d does not exist.", nodeId.longValue()));
         }
 
-        var propertyValues = projectAll
-            ? graphStore.nodePropertyValues(propertyKey) // builds UnionNodeProperties and returns the first matching property
-            : graphStore.nodePropertyValues(NodeLabel.of(nodeLabel), propertyKey);
+        if (!projectAll && !graphStore.nodes().hasLabel(internalId, nodeLabelType)) {
+            return null;
+        }
+
+        var propertyValues = graphStore.nodePropertyValues(propertyKey);
 
         switch (propertyValues.valueType()) {
             case LONG:

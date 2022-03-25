@@ -43,7 +43,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -178,12 +177,7 @@ public class GraphStoreExportProc extends BaseProc {
     }
 
     private void validateAdditionalNodeProperties(GraphStore graphStore, PropertyMappings additionalNodeProperties) {
-        var nodeProperties = graphStore
-            .nodePropertyKeys()
-            .values()
-            .stream()
-            .flatMap(Collection::stream)
-            .collect(Collectors.toSet());
+        var nodeProperties = graphStore.nodePropertyKeys();
         var duplicateProperties = additionalNodeProperties
             .stream()
             .map(PropertyMapping::neoPropertyKey)
