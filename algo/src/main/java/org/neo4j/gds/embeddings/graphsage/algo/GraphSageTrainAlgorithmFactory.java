@@ -31,8 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
-
-import java.util.List;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
@@ -80,17 +79,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
 
     @Override
     public Task progressTask(Graph graph, GraphSageTrainConfig config) {
-        return Tasks.iterativeDynamic(
-            taskName(),
-            () -> List.of(
-                Tasks.iterativeDynamic(
-                    "train epoch",
-                    () -> List.of(Tasks.leaf("iteration")),
-                    config.maxIterations()
-                )
-            ),
-            config.epochs()
-        );
+        return Tasks.task(taskName(), GraphSageModelTrainer.progressTasks(config));
     }
 
     private MemoryEstimation estimate(GraphSageTrainConfig config, long nodeCount, int labelCount) {
