@@ -37,6 +37,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static org.neo4j.gds.compat.MapUtil.map;
@@ -179,8 +180,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
         NodeProperties identityProperties = new IdentityProperties(expectedPropertyCount);
-        graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", identityProperties);
-        graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", identityProperties);
+        graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
 
         String graphWriteQuery = formatWithLocale(
             "CALL gds.graph.streamNodeProperties(" +
@@ -264,8 +264,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
         NodeProperties identityProperties = new IdentityProperties(expectedPropertyCount);
-        graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", identityProperties);
-        graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", identityProperties);
+        graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
 
         String graphWriteQuery = formatWithLocale(
             "CALL gds.graph.streamNodeProperty(" +

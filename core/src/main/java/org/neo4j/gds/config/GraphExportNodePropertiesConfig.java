@@ -24,7 +24,6 @@ import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
@@ -33,7 +32,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.singletonList;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface GraphExportNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {
@@ -64,7 +62,7 @@ public interface GraphExportNodePropertiesConfig extends BaseConfig, Concurrency
             nodeLabelIdentifiers(graphStore).forEach(nodeLabel -> {
                     List<String> invalidProperties = nodeProperties()
                         .stream()
-                        .filter(nodeProperty -> !graphStore.hasNodeProperty(singletonList(nodeLabel), nodeProperty))
+                        .filter(nodeProperty -> !graphStore.hasNodeProperty(List.of(nodeLabel), nodeProperty))
                         .collect(Collectors.toList());
 
                     if (!invalidProperties.isEmpty()) {
@@ -82,11 +80,11 @@ public interface GraphExportNodePropertiesConfig extends BaseConfig, Concurrency
             // validate that at least one label has all the properties
             boolean hasValidLabel = nodeLabelIdentifiers(graphStore).stream()
                 .anyMatch(nodeLabel -> graphStore
-                    .nodePropertyKeys(singletonList(nodeLabel))
+                    .nodePropertyKeys(List.of(nodeLabel))
                     .containsAll(nodeProperties()));
 
             if (!hasValidLabel) {
-                throw new IllegalArgumentException(StringFormatting.formatWithLocale(
+                throw new IllegalArgumentException(formatWithLocale(
                     "Expecting at least one node projection to contain property key(s) %s.",
                     StringJoining.join(nodeProperties())
                 ));

@@ -126,6 +126,7 @@ class GraphStoreRelationshipVisitorTest {
 
         Map<? extends RelationshipType, ? extends RelationshipPropertyStore> propertyStores = actualRelationships.properties();
         return new GraphStoreBuilder()
+            .schema(expectedGraph.schema())
             .relationshipPropertyStores(propertyStores)
             .relationships(actualRelationships.topologies())
             .nodes(expectedGraph)

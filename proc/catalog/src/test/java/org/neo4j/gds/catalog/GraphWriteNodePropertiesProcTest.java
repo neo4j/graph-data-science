@@ -45,6 +45,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -222,8 +223,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
         NodeProperties identityProperties = new IdentityProperties(expectedPropertyCount);
-        graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", identityProperties);
-        graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", identityProperties);
+        graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
 
         assertCypherResult(
             "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp3'])",

@@ -24,8 +24,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.UnionNodeProperties;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -34,44 +32,10 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 @GdlExtension
 class GraphStoreNodeVisitorTest {
-
-    public static Map<String, NodeProperties> unionNodePropertiesOrThrow(NodesBuilder.IdMapAndProperties idMapAndProperties) {
-        Optional<Map<String, NodeProperties>> result;
-        var nodeProperties = idMapAndProperties.nodeProperties();
-        var idMap = idMapAndProperties.idMap();
-        if (nodeProperties.isEmpty()) {
-            result = Optional.empty();
-        } else {
-            Map<String, Map<NodeLabel, NodeProperties>> nodePropertiesByKeyAndLabel = new HashMap<>();
-            nodeProperties.get().forEach((nodeLabel, propertiesByKey) -> {
-                propertiesByKey.forEach((propertyKey, propertyValues) -> {
-                    nodePropertiesByKeyAndLabel
-                        .computeIfAbsent(propertyKey, __ -> new HashMap<>())
-                        .put(nodeLabel, propertyValues);
-                });
-            });
-            Map<String, NodeProperties> unionNodeProperties = nodePropertiesByKeyAndLabel
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    entry -> new UnionNodeProperties(idMap, entry.getValue())
-                ));
-            result = Optional.of(unionNodeProperties);
-        }
-
-        return result.orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
-    }
-
     @GdlGraph
     static String DB_CYPHER = "CREATE" +
                               "  (a:A {prop1: 42L, prop2: [1.0, 2.0]})" +
@@ -107,7 +71,7 @@ class GraphStoreNodeVisitorTest {
 
         var idMapAndProperties = nodesBuilder.build();
         var idMap = idMapAndProperties.idMap();
-        var nodeProperties = unionNodePropertiesOrThrow(idMapAndProperties);
+        var nodeProperties = idMapAndProperties.nodeProperties().orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
         var relationships = GraphFactory.emptyRelationships(idMap);
         HugeGraph actualGraph = GraphFactory.create(
             idMap,
