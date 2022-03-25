@@ -263,7 +263,7 @@
     </d:tocentry>
 
     <d:tocentry linkend="machine-learning">
-        <?dbhtml filename="machine-learning/machine-learning/index.html"?>
+        <?dbhtml filename="machine-learning/index.html"?>
 
         <d:tocentry linkend="ml-preprocessing"><?dbhtml filename="machine-learning/pre-processing/index.html"?>
         </d:tocentry>
