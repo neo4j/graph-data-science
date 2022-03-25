@@ -81,7 +81,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     public static MemoryRange estimateTree(int maxDepth, long numberOfTrainingSamples, int minSplitSize) {
         long maxNumLeafNodes = (long) Math.ceil(
             Math.min(
-                Math.pow(2, maxDepth),
+                Math.pow(2.0, maxDepth),
                 // The parent of any leaf node must have had at least minSplitSize samples.
                 // The number of parents of leaves is therefore limited by numberOfTrainingSamples / minSplitSize.
                 2 * (double) (numberOfTrainingSamples / minSplitSize)
