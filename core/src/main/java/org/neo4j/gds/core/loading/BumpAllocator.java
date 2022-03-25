@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.collections.PageUtil;
 
 import java.lang.invoke.MethodHandles;
@@ -69,6 +71,10 @@ public final class BumpAllocator<PAGE> {
         return new LocalAllocator<>(this);
     }
 
+    LocalPositionalAllocator<PAGE> newLocalPositionalAllocator() {
+        return new LocalPositionalAllocator<>(this);
+    }
+
     PAGE[] intoPages() {
         return pages;
     }
@@ -79,7 +85,36 @@ public final class BumpAllocator<PAGE> {
         return PageUtil.capacityFor(pageIndex, PAGE_SHIFT);
     }
 
-    private long insertExistingPage(PAGE page) {
+    private long insertMultiplePages(int uptoPage, @Nullable PAGE page) {
+        var currentNumPages = (int) ALLOCATED_PAGES.get(this);
+        int newNumPages = uptoPage + 1;
+        if (currentNumPages < newNumPages) {
+            int pageToSkip = page == null ? NO_SKIP : uptoPage;
+            grow(newNumPages, pageToSkip);
+        }
+
+        if (page != null) {
+            growLock.lock();
+            try {
+                this.pages[uptoPage] = page;
+            } finally {
+                growLock.unlock();
+            }
+        }
+
+        while (currentNumPages < newNumPages) {
+            int nextNumPages = (int) ALLOCATED_PAGES.compareAndExchange(this, currentNumPages, newNumPages);
+            if (nextNumPages == currentNumPages) {
+                currentNumPages = newNumPages;
+                break;
+            }
+            currentNumPages = nextNumPages;
+        }
+
+        return PageUtil.capacityFor(currentNumPages, PAGE_SHIFT);
+    }
+
+    private long insertExistingPage(@NotNull PAGE page) {
         int pageIndex = (int) ALLOCATED_PAGES.getAndAdd(this, 1);
         grow(pageIndex + 1, pageIndex);
 
@@ -146,7 +181,7 @@ public final class BumpAllocator<PAGE> {
         int lengthOfPage(PAGE page);
     }
 
-    public static final class LocalAllocator<PAGE> {
+    static final class LocalAllocator<PAGE> {
 
         private final BumpAllocator<PAGE> globalAllocator;
 
@@ -163,24 +198,24 @@ public final class BumpAllocator<PAGE> {
         /**
          * Inserts slice into the allocator, returns global address
          */
-        public long insert(PAGE targets, int length) {
+        public long insert(@NotNull PAGE targets, int length) {
             // targetLength is the length of the array that is provided ({@code == targets.length}).
             // This value can be greater than `length` if the provided array is some sort of a buffer.
             // We need this to determine if we need to make a slice-copy of the targets array or not.
             var targetLength = globalAllocator.pageFactory.lengthOfPage(targets);
-            return insertData(targets, Math.min(length, targetLength), top, targetLength);
+            return insertData(targets, Math.min(length, targetLength), this.top, targetLength);
         }
 
-        private long insertData(PAGE targets, int length, long address, int targetsLength) {
+        private long insertData(@NotNull PAGE targets, int length, long address, int targetsLength) {
             int maxOffset = PAGE_SIZE - length;
-            if (maxOffset >= offset) {
+            if (maxOffset >= this.offset) {
                 doAllocate(targets, length);
                 return address;
             }
-            return slowPathAllocate(targets, length, maxOffset, address, targetsLength);
+            return slowPathAllocate(targets, length, maxOffset, targetsLength);
         }
 
-        private long slowPathAllocate(PAGE targets, int length, int maxOffset, long address, int targetsLength) {
+        private long slowPathAllocate(@NotNull PAGE targets, int length, int maxOffset, int targetsLength) {
             if (maxOffset < 0) {
                 return oversizingAllocate(targets, length, targetsLength);
             }
@@ -192,7 +227,7 @@ public final class BumpAllocator<PAGE> {
          * Since we are storing all degrees into a single page and thus never have to switch pages
          * and keep the offsets as if this page would be of the correct size, we might just get by.
          */
-        private long oversizingAllocate(PAGE targets, int length, int targetsLength) {
+        private long oversizingAllocate(@NotNull PAGE targets, int length, int targetsLength) {
             if (length < targetsLength) {
                 // need to create a smaller slice
                 targets = globalAllocator.pageFactory.copyOfPage(targets, length);
@@ -200,7 +235,7 @@ public final class BumpAllocator<PAGE> {
             return globalAllocator.insertExistingPage(targets);
         }
 
-        private long prefetchAllocate(PAGE targets, int length) {
+        private long prefetchAllocate(@NotNull PAGE targets, int length) {
             long address = prefetchAllocate();
             doAllocate(targets, length);
             return address;
@@ -216,10 +251,73 @@ public final class BumpAllocator<PAGE> {
         }
 
         @SuppressWarnings("SuspiciousSystemArraycopy")
-        private void doAllocate(PAGE targets, int length) {
-            System.arraycopy(targets, 0, page, offset, length);
+        private void doAllocate(@NotNull PAGE targets, int length) {
+            System.arraycopy(targets, 0, this.page, offset, length);
             offset += length;
             top += length;
+        }
+    }
+
+    static final class LocalPositionalAllocator<PAGE> {
+
+        private final BumpAllocator<PAGE> globalAllocator;
+        private long capacity;
+
+        private LocalPositionalAllocator(BumpAllocator<PAGE> globalAllocator) {
+            this.globalAllocator = globalAllocator;
+            this.capacity = 0;
+        }
+
+        /**
+         * Inserts slice into the allocator at the given position
+         */
+        public void insertAt(long offset, @NotNull PAGE page, int length) {
+            // targetLength is the length of the array that is provided ({@code == page.length}).
+            // This value can be greater than `length` if the provided array is a buffer of some sort.
+            // We need this to determine if we need to make a slice-copy of the page array or not.
+            var targetLength = globalAllocator.pageFactory.lengthOfPage(page);
+            insertData(offset, page, Math.min(length, targetLength), this.capacity, targetLength);
+        }
+
+        private void insertData(long offset, @NotNull PAGE page, int length, long capacity, int targetsLength) {
+            @Nullable PAGE pageToInsert = page;
+            if (offset + length > capacity) {
+                pageToInsert = allocateNewPages(offset, page, length, targetsLength);
+            }
+
+            if (pageToInsert != null) {
+                int pageId = PageUtil.pageIndex(offset, PAGE_SHIFT);
+                int pageOffset = PageUtil.indexInPage(offset, PAGE_MASK);
+                PAGE allocatedPage = this.globalAllocator.pages[pageId];
+
+                //noinspection SuspiciousSystemArraycopy
+                System.arraycopy(pageToInsert, 0, allocatedPage, pageOffset, length);
+            }
+        }
+
+        private @Nullable PAGE allocateNewPages(long offset, @NotNull PAGE page, int length, int targetsLength) {
+            int pageId = PageUtil.pageIndex(offset, PAGE_SHIFT);
+
+            // We don't want the global allocator to create a new page (while also holding the lock)
+            // when we know that we throw it away afterwards. This is the case when we have an oversized page.
+            @Nullable PAGE existingPage = null;
+            if (length > PAGE_SIZE) {
+                if (length < targetsLength) {
+                    // We have an oversized page but it contains additional buffer space at the end
+                    // We create a new copy of that page that is the exact size to fit all data
+                    page = globalAllocator.pageFactory.copyOfPage(page, length);
+                }
+                existingPage = page;
+            }
+
+            this.capacity = globalAllocator.insertMultiplePages(pageId, existingPage);
+
+            if (existingPage != null) {
+                // We had an oversized page and already inserted it
+                // We return null to tell the caller that the data doesn't need to be inserted again
+                return null;
+            }
+            return page;
         }
     }
 }
