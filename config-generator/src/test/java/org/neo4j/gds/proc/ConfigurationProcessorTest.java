@@ -146,7 +146,9 @@ class ConfigurationProcessorTest {
             e("[negative.class.does.not.exist#foo] is not a valid fully qualified method name: The class [negative.class.does.not.exist] cannot be found", 41, 5),
             e("No suitable method found that matches [methodDoesNotExist]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int]", 44, 5),
             e("No suitable method found that matches [negative.InvalidConversionsClasses#methodDoesNotExist]. Make sure that the method is static, public, unary, not generic, does not declare any exception and returns [int]", 47, 5),
-            e("[negative.InvalidConversionsClasses#] is not a valid fully qualified method name: it must start with a fully qualified class name followed by a '#' and then the method name", 50, 5)
+            e("[negative.InvalidConversionsClasses#] is not a valid fully qualified method name: it must start with a fully qualified class name followed by a '#' and then the method name", 50, 5),
+            e("[negative.InvalidConversionsClasses.invalidIdentifier] is not a valid identifier, see the @Configuration.ConvertWith documentation.", 53, 5),
+            e("[negative.invalid identifier] is not a valid identifier, see the @Configuration.ConvertWith documentation.", 56, 5)
         );
     }
 

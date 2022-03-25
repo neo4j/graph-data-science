@@ -515,6 +515,13 @@ final class GenerateConfiguration {
         }
 
         if (!converter.contains("#")) {
+            if (!SourceVersion.isIdentifier(converter)) {
+                return converterError(
+                    method,
+                    "[%s] is not a valid identifier, see the @Configuration.ConvertWith documentation.",
+                    converter
+                );
+            }
             return memberDefinition(
                 names,
                 member,

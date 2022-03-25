@@ -49,4 +49,10 @@ public interface InvalidConversionsClasses {
 
     @Configuration.ConvertWith("negative.InvalidConversionsClasses#")
     int missingMethodName();
+
+    @Configuration.ConvertWith("negative.InvalidConversionsClasses.invalidIdentifier")
+    int dotMakesIdentifierInvalid();
+
+    @Configuration.ConvertWith("negative.invalid identifier")
+    int spaceMakesIdentifierInvalid();
 }
