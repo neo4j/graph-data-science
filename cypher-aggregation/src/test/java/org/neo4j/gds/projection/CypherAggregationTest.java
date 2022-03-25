@@ -54,6 +54,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class CypherAggregationTest extends BaseProcTest {
 
@@ -124,6 +125,61 @@ class CypherAggregationTest extends BaseProcTest {
             .returns(6L, Graph::nodeCount)
             // only relationships between :A nodes
             .returns(4L, Graph::relationshipCount);
+    }
+
+    @Test
+    void testArbitraryIds() {
+        assertCypherResult(
+            "UNWIND(range(13, 37)) AS source " +
+            "WITH source, source + 42 AS target " +
+            "WITH gds.alpha.graph.project('g', source, target) AS g " +
+            "RETURN g.nodeCount AS nodes, g.relationshipCount AS rels",
+            List.of(Map.of("nodes", (37L - 13L + 1L) * 2L, "rels", 37L - 13L + 1L))
+        );
+
+        assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
+        var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+
+        for (long source = 13L; source < 37; source++) {
+            long sourceNodeId = graph.toMappedNodeId(source);
+            long expectedOriginalId = (source - 13L) * 2L;
+            long expectedTargetId = source + 42L;
+            assertThat(sourceNodeId).isEqualTo(expectedOriginalId);
+            graph.forEachRelationship(sourceNodeId, (s, targetNodeId) -> {
+                assertThat(targetNodeId).isEqualTo(expectedOriginalId + 1L);
+                long target = graph.toOriginalNodeId(targetNodeId);
+                assertThat(target).isEqualTo(expectedTargetId);
+                return true;
+            });
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"13.37, FLOAT", "true, BOOLEAN", "false, BOOLEAN", "null, NULL", "\"42\", STRING", "[42], LIST", "[13.37], LIST", "{foo:42}, MAP", "{foo:13.37}, MAP"})
+    void testInvalidArbitraryIds(String idLiteral, String invalidType) {
+        var query = formatWithLocale(
+            "WITH %s AS source RETURN gds.alpha.graph.project('g', source)",
+            idLiteral
+        );
+        assertThatThrownBy(() -> runQuery(query))
+            .getRootCause()
+            .hasMessage("The node has to be either a NODE or an INTEGER, but got " + invalidType);
+    }
+
+    @Test
+    void testInvalidRelationshipAsArbitraryId() {
+        var query = "MATCH ()-[r]-() RETURN gds.alpha.graph.project('g', r)";
+        assertThatThrownBy(() -> runQuery(query))
+            .getRootCause()
+            .hasMessage("The node has to be either a NODE or an INTEGER, but got RELATIONSHIP");
+    }
+
+    @Test
+    void testInvalidPathAsArbitraryId() {
+        var query = "MATCH p=()-[]-() RETURN gds.alpha.graph.project('g', p)";
+        assertThatThrownBy(() -> runQuery(query))
+            .getRootCause()
+            .hasMessage("The node has to be either a NODE or an INTEGER, but got PATH");
     }
 
     @Nested
