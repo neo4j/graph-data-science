@@ -39,7 +39,6 @@ import org.neo4j.values.storable.NumberType;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -92,8 +91,13 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
-    public Map<NodeLabel, Set<String>> nodePropertyKeys() {
+    public Set<String> nodePropertyKeys() {
         return graphStore.nodePropertyKeys();
+    }
+
+    @Override
+    public boolean hasNodeProperty(String propertyKey) {
+        return graphStore.hasNodeProperty(propertyKey);
     }
 
     @Override
@@ -112,20 +116,13 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
-    public NodeProperty nodeProperty(NodeLabel label, String propertyKey) {
-        return graphStore.nodeProperty(label, propertyKey);
-    }
-
-    @Override
     public NodeProperty nodeProperty(String propertyKey) {
         return graphStore.nodeProperty(propertyKey);
     }
 
     @Override
-    public ValueType nodePropertyType(
-        NodeLabel label, String propertyKey
-    ) {
-        return graphStore.nodePropertyType(label, propertyKey);
+    public ValueType nodePropertyType(String propertyKey) {
+        return graphStore.nodePropertyType(propertyKey);
     }
 
     @Override
@@ -139,22 +136,15 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
-    public NodeProperties nodePropertyValues(
-        NodeLabel label, String propertyKey
-    ) {
-        return graphStore.nodePropertyValues(label, propertyKey);
-    }
-
-    @Override
     public void addNodeProperty(
-        NodeLabel nodeLabel, String propertyKey, NodeProperties propertyValues
+       Set<NodeLabel> nodeLabels, String propertyKey, NodeProperties propertyValues
     ) {
-        graphStore.addNodeProperty(nodeLabel, propertyKey, propertyValues);
+        graphStore.addNodeProperty(nodeLabels, propertyKey, propertyValues);
     }
 
     @Override
-    public void removeNodeProperty(NodeLabel nodeLabel, String propertyKey) {
-        graphStore.removeNodeProperty(nodeLabel, propertyKey);
+    public void removeNodeProperty(String propertyKey) {
+        graphStore.removeNodeProperty(propertyKey);
     }
 
     @Override
