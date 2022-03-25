@@ -372,9 +372,8 @@ public final class CypherAggregation extends BaseProc {
             } else if (node == null) {
                 nodeType = "NULL";
             } else {
-                // should not happen unless new types are intoduces
-                // into the Cypher procedure framework
-                nodeType = "UNKNOWN";
+                // should not happen unless new types are introduced into the procedure framework
+                nodeType = "UNKNOWN: " + node.getClass().getName();
             }
 
             return new IllegalArgumentException("The node has to be either a NODE or an INTEGER, but got " + nodeType);
