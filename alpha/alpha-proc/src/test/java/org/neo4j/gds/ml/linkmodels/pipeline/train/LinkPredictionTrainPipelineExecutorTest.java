@@ -46,6 +46,9 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.metrics.LinkMetric;
+import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -57,9 +60,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.ImmutableLinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
-import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
 
@@ -418,7 +418,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         );
 
         return Stream.of(
-            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(69_824, 2_174_864)),
+            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(69_728, 2_174_768)),
             Arguments.of("only FastRP", List.of(fastRP), MemoryRange.of(6_204_288)),
             Arguments.of("Both", List.of(degreeCentr, fastRP), MemoryRange.of(6_204_288))
         );

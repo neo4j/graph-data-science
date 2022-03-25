@@ -451,11 +451,11 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             .add(maxEstimationOverModelCandidates)
             .add(
                 "Inner train stats map",
-                StatsMap.memoryEstimation(numberOfMetrics, pipeline.trainingParameterSpace().size(), 1)
+                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelCandidates(), 1)
             )
             .add(
                 "Validation stats map",
-                StatsMap.memoryEstimation(numberOfMetrics, pipeline.trainingParameterSpace().size(), 1)
+                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelCandidates(), 1)
             )
             .build();
     }
