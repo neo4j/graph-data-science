@@ -55,7 +55,6 @@ import java.util.function.Function;
 import java.util.function.LongPredicate;
 
 import static java.util.stream.Collectors.toMap;
-import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
