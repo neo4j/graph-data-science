@@ -19,19 +19,29 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.eclipse.collections.api.tuple.primitive.LongLongPair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.mem.BitUtil;
 
 import java.util.ArrayList;
@@ -48,8 +58,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph.DUMMY_PROPERTY;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
@@ -57,9 +70,17 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+@GdlExtension
 class GraphSageTrainAlgorithmFactoryTest {
 
     private static final int SOME_REASONABLE_VALUE = 100;
+
+    @SuppressFBWarnings("HSC_HUGE_SHARED_STRING_CONSTANT")
+    @GdlGraph
+    private static final String GDL = GraphSageTestGraph.GDL;
+
+    @Inject
+    private Graph graph;
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     @ParameterizedTest(name = "{0}")
@@ -434,6 +455,59 @@ class GraphSageTrainAlgorithmFactoryTest {
             .add(pair(5, "updateAdamOptimizer"));
 
         assertThat(flatten(actualEstimation)).containsExactlyElementsOf(expectedTreeStructure.build().collect(toList()));
+    }
+
+    @Test
+    void testLogging() {
+        var config = ImmutableGraphSageTrainConfig.builder()
+            .addFeatureProperties(DUMMY_PROPERTY)
+            .embeddingDimension(64)
+            .modelName("model")
+            .epochs(2)
+            .maxIterations(2)
+            .tolerance(1e-10)
+            .learningRate(0.001)
+            .randomSeed(42L)
+            .build();
+
+        var log = Neo4jProxy.testLog();
+
+        var algo = new GraphSageTrainAlgorithmFactory().build(
+            graph,
+            config,
+            log,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+        algo.compute();
+
+        var messagesInOrder = log.getMessages(INFO);
+
+        AssertionsForInterfaceTypes.assertThat(messagesInOrder)
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .containsExactly(
+                "GraphSageTrain :: Start",
+                "GraphSageTrain :: Prepare batches :: Start",
+                "GraphSageTrain :: Prepare batches 100%",
+                "GraphSageTrain :: Prepare batches :: Finished",
+                "GraphSageTrain :: Train model :: Start",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Start",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Start",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: LOSS: 531.5699087433",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 100%",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Finished",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Start",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 100%",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Finished",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Finished",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Start",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Start",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 100%",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Finished",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Finished",
+                "GraphSageTrain :: Train model :: Finished",
+                "GraphSageTrain :: Finished"
+            );
     }
 
     private static List<IntObjectPair<String>> flatten(MemoryTree memoryTree) {

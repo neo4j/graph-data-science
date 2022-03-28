@@ -27,8 +27,10 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class GraphSageEmbeddingsGenerator {
@@ -89,13 +91,23 @@ public class GraphSageEmbeddingsGenerator {
         HugeObjectArray<double[]> result
     ) {
         return () -> {
-            Variable<Matrix> embeddingVariable = GraphSageHelper.embeddingsComputationGraph(
+            List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(
                 graph,
                 isWeighted,
                 partition.stream().toArray(),
-                features,
+                layers
+            );
+
+            Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
+                graph,
+                subGraphs.get(subGraphs.size() - 1).originalNodeIds(),
+                features
+            );
+
+            Variable<Matrix> embeddingVariable = GraphSageHelper.embeddingsComputationGraph(
+                subGraphs,
                 layers,
-                featureFunction
+                batchedFeaturesExtractor
             );
 
             Matrix embeddings = new ComputationContext().forward(embeddingVariable);

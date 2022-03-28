@@ -30,6 +30,8 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -38,6 +40,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
 import org.neo4j.gds.ml.core.samplers.WeightedUniformSampler;
 import org.neo4j.gds.ml.core.subgraph.NeighborhoodSampler;
+import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
@@ -107,8 +110,23 @@ public class GraphSageModelTrainer {
         this.randomSeed = config.randomSeed().orElseGet(() -> ThreadLocalRandom.current().nextLong());
     }
 
+    public static List<Task> progressTasks(GraphSageTrainConfig config) {
+        return List.of(
+            Tasks.leaf("Prepare batches"),
+            Tasks.iterativeDynamic(
+                "Train model",
+                () -> List.of(Tasks.iterativeDynamic(
+                    "Epoch",
+                    () -> List.of(Tasks.leaf("Iteration")),
+                    config.maxIterations()
+                )),
+                config.epochs()
+            )
+        );
+    }
+
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("GraphSageTrain");
 
         var layers = layerConfigsFunction.apply(graph).stream()
             .map(LayerFactory::createLayer)
@@ -119,30 +137,70 @@ public class GraphSageModelTrainer {
             weights.addAll(layer.weights());
         }
 
+        progressTracker.beginSubTask("Prepare batches");
+
         var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
-            batch -> new BatchTask(lossFunction(batch, graph, features, layers), weights, tolerance)
+            batch -> createBatchTask(graph, features, layers, weights, batch)
         );
+
+        progressTracker.endSubTask("Prepare batches");
 
         double previousLoss = Double.MAX_VALUE;
         boolean converged = false;
         var epochLosses = new ArrayList<Double>();
+
+        progressTracker.beginSubTask("Train model");
+
         for (int epoch = 1; epoch <= epochs; epoch++) {
-            progressTracker.beginSubTask();
+            progressTracker.beginSubTask("Epoch");
 
             double newLoss = trainEpoch(batchTasks, weights);
             epochLosses.add(newLoss);
-            progressTracker.endSubTask();
+            progressTracker.endSubTask("Epoch");
             if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
                 converged = true;
                 break;
             }
             previousLoss = newLoss;
         }
-        progressTracker.endSubTask();
+
+        progressTracker.endSubTask("Train model");
+        progressTracker.endSubTask("GraphSageTrain");
 
         return ModelTrainResult.of(epochLosses, converged, layers);
+    }
+
+    private BatchTask createBatchTask(
+        Graph graph,
+        HugeObjectArray<double[]> features,
+        Layer[] layers,
+        ArrayList<Weights<? extends Tensor<?>>> weights,
+        Partition batch
+    ) {
+        var localGraph = graph.concurrentCopy();
+
+        long[] totalBatch = addSamplesPerBatchNode(batch, localGraph);
+
+        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, useWeights, totalBatch, layers);
+
+        Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
+            localGraph,
+            subGraphs.get(subGraphs.size() - 1).originalNodeIds(),
+            features
+        );
+
+        Variable<Matrix> embeddingVariable = embeddingsComputationGraph(subGraphs, layers, batchedFeaturesExtractor);
+
+        GraphSageLoss lossFunction = new GraphSageLoss(
+            useWeights ? localGraph::relationshipProperty : UNWEIGHTED,
+            embeddingVariable,
+            totalBatch,
+            negativeSampleWeight
+        );
+
+        return new BatchTask(lossFunction, weights, tolerance, progressTracker);
     }
 
     private double trainEpoch(List<BatchTask> batchTasks, List<Weights<? extends Tensor<?>>> weights) {
@@ -151,7 +209,7 @@ public class GraphSageModelTrainer {
         double totalLoss = Double.NaN;
         int iteration = 1;
         for (;iteration <= maxIterations; iteration++) {
-            progressTracker.beginSubTask();
+            progressTracker.beginSubTask("Iteration");
 
             // run forward + maybe backward for each Batch
             ParallelUtil.runWithConcurrency(concurrency, batchTasks, executor);
@@ -174,7 +232,7 @@ public class GraphSageModelTrainer {
 
             progressTracker.logMessage(formatWithLocale("LOSS: %.10f", totalLoss));
 
-            progressTracker.endSubTask();
+            progressTracker.endSubTask("Iteration");
         }
 
         return totalLoss;
@@ -186,17 +244,20 @@ public class GraphSageModelTrainer {
         private final List<Weights<? extends Tensor<?>>> weightVariables;
         private List<? extends Tensor<?>> weightGradients;
         private final double tolerance;
+        private final ProgressTracker progressTracker;
         private boolean converged;
         private double prevLoss;
 
         BatchTask(
             Variable<Scalar> lossFunction,
             List<Weights<? extends Tensor<?>>> weightVariables,
-            double tolerance
+            double tolerance,
+            ProgressTracker progressTracker
         ) {
             this.lossFunction = lossFunction;
             this.weightVariables = weightVariables;
             this.tolerance = tolerance;
+            this.progressTracker = progressTracker;
         }
 
         @Override
@@ -213,6 +274,8 @@ public class GraphSageModelTrainer {
 
             localCtx.backward(lossFunction);
             weightGradients = weightVariables.stream().map(localCtx::gradient).collect(Collectors.toList());
+
+            progressTracker.logProgress();
         }
 
         public double loss() {
@@ -222,21 +285,6 @@ public class GraphSageModelTrainer {
         List<? extends Tensor<?>> weightGradients() {
             return weightGradients;
         }
-    }
-
-    private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features, Layer[] layers) {
-        var localGraph = graph.concurrentCopy();
-
-        long[] totalBatch = addSamplesPerBatchNode(batch, localGraph);
-
-        Variable<Matrix> embeddingVariable = embeddingsComputationGraph(localGraph, useWeights, totalBatch, features, layers, featureFunction);
-
-        return new GraphSageLoss(
-            useWeights ? localGraph::relationshipProperty : UNWEIGHTED,
-            embeddingVariable,
-            totalBatch,
-            negativeSampleWeight
-        );
     }
 
     private long[] addSamplesPerBatchNode(Partition batch, Graph localGraph) {
