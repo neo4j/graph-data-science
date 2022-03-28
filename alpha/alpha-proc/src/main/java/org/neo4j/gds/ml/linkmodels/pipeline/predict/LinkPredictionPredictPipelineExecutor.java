@@ -34,7 +34,7 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 
 import java.util.List;
 import java.util.Map;
@@ -42,13 +42,13 @@ import java.util.Optional;
 
 public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     LinkPredictionPredictPipelineBaseConfig,
-    LinkPredictionTrainingPipeline,
+    LinkPredictionPredictPipeline,
     LinkPredictionResult
     > {
     private final Classifier classifier;
 
     public LinkPredictionPredictPipelineExecutor(
-        LinkPredictionTrainingPipeline pipeline,
+        LinkPredictionPredictPipeline pipeline,
         Classifier classifier,
         LinkPredictionPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
@@ -87,7 +87,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
 
     public static MemoryEstimation estimate(
         ModelCatalog modelCatalog,
-        LinkPredictionTrainingPipeline pipeline,
+        LinkPredictionPredictPipeline pipeline,
         LinkPredictionPredictPipelineBaseConfig configuration,
         Classifier.ClassifierData classifierData
     ) {

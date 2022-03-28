@@ -181,11 +181,9 @@ class LinkPredictionTrainTest {
 
         var result = runLinkPrediction(trainConfig);
 
-        assertThat(result.modelSelectionStatistics().trainStats().get(LinkMetric.AUCPR).size()).isEqualTo(result
-            .model()
-            .customInfo()
-            .trainingPipeline()
-            .numberOfModelCandidates());
+        assertThat(result.modelSelectionStatistics().trainStats().get(LinkMetric.AUCPR).size()).isEqualTo(
+            linkPredictionPipeline().numberOfModelCandidates()
+        );
 
         var actualModel = result.model();
 

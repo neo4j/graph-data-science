@@ -47,6 +47,7 @@ import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
@@ -368,7 +369,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             LinkPredictionModelInfo.of(
                 bestParameters,
                 winnerMetrics,
-                pipeline.copy()
+                LinkPredictionPredictPipeline.from(pipeline)
             )
         );
     }

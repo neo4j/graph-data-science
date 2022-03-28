@@ -41,19 +41,6 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
         this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
     }
 
-    public LinkPredictionTrainingPipeline copy() {
-        var copied = new LinkPredictionTrainingPipeline();
-        copied.featureSteps.addAll(featureSteps);
-        copied.nodePropertySteps.addAll(nodePropertySteps);
-
-        trainingParameterSpace().forEach((key, value) ->
-            copied.setTrainingParameterSpace(key, new ArrayList<>(value))
-        );
-
-        copied.setSplitConfig(splitConfig);
-        return copied;
-    }
-
 
     @Override
     public String type() {

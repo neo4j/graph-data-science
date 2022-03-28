@@ -54,7 +54,7 @@ import org.neo4j.gds.ml.models.randomforest.ClassificationRandomForestPredictor;
 import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestData;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
@@ -127,8 +127,10 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new LinkPredictionTrainingPipeline();
-            pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
+            var pipeline = new LinkPredictionPredictPipeline(
+                List.of(),
+                List.of(new L2FeatureStep(List.of("a", "b", "c")))
+            );
 
             var modelData = ImmutableLogisticRegressionData.of(
                 LinkPredictionTrain.makeClassIdMap(),
@@ -173,8 +175,10 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new LinkPredictionTrainingPipeline();
-            pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
+            var pipeline = new LinkPredictionPredictPipeline(
+                List.of(),
+                List.of(new L2FeatureStep(List.of("a", "b", "c")))
+            );
 
             var root = new TreeNode<>(0);
             var modelData = ImmutableRandomForestData
@@ -216,12 +220,13 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new LinkPredictionTrainingPipeline();
-            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
-                "degree",
-                Map.of("mutateProperty", "degree")
-            ));
-            pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
+            var pipeline = new LinkPredictionPredictPipeline(
+                List.of(NodePropertyStepFactory.createNodePropertyStep(
+                    "degree",
+                    Map.of("mutateProperty", "degree")
+                )),
+                List.of(new L2FeatureStep(List.of("a", "b", "c", "degree")))
+            );
 
             var modelData = ImmutableLogisticRegressionData.of(
                 LinkPredictionTrain.makeClassIdMap(),
@@ -264,12 +269,13 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new LinkPredictionTrainingPipeline();
-            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
-                "degree",
-                Map.of("mutateProperty", "degree")
-            ));
-            pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
+            var pipeline = new LinkPredictionPredictPipeline(
+                List.of(NodePropertyStepFactory.createNodePropertyStep(
+                    "degree",
+                    Map.of("mutateProperty", "degree")
+                )),
+                List.of(new L2FeatureStep(List.of("a", "b", "c", "degree")))
+            );
 
             var modelData = ImmutableLogisticRegressionData.of(
                 LinkPredictionTrain.makeClassIdMap(),
@@ -342,7 +348,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void shouldEstimateMemoryWithLogisticRegression() {
-        var pipeline = new LinkPredictionTrainingPipeline();
+        var pipeline = LinkPredictionPredictPipeline.EMPTY;
         var modelData = ImmutableLogisticRegressionData.of(
             LinkPredictionTrain.makeClassIdMap(),
             new Weights<>(
@@ -375,7 +381,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void shouldEstimateMemoryWithRandomForest() {
-        var pipeline = new LinkPredictionTrainingPipeline();
+        var pipeline = LinkPredictionPredictPipeline.EMPTY;
         var root = new TreeNode<>(0);
         var modelData = ImmutableRandomForestData
             .builder()

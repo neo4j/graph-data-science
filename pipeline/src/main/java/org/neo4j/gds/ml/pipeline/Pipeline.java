@@ -19,13 +19,44 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface Pipeline<FEATURE_STEP extends FeatureStep> extends ToMapConvertible {
 
     List<ExecutableNodePropertyStep> nodePropertySteps();
 
     List<FEATURE_STEP> featureSteps();
+
+    default void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {
+        Set<String> invalidProperties = featurePropertiesMissingFromGraph(graphStore, config);
+
+        if (!invalidProperties.isEmpty()) {
+            throw missingNodePropertiesFromFeatureSteps(invalidProperties);
+        }
+    }
+
+    default Set<String> featurePropertiesMissingFromGraph(GraphStore graphStore, AlgoBaseConfig config) {
+        var graphProperties = graphStore.nodePropertyKeys(config.nodeLabelIdentifiers(graphStore));
+
+        return featureSteps()
+            .stream()
+            .flatMap(step -> step.inputNodeProperties().stream())
+            .filter(property -> !graphProperties.contains(property))
+            .collect(Collectors.toSet());
+    }
+
+    static IllegalArgumentException missingNodePropertiesFromFeatureSteps(Set<String> invalidProperties) {
+        return new IllegalArgumentException(formatWithLocale(
+            "Node properties %s defined in the feature steps do not exist in the graph or part of the pipeline",
+            invalidProperties.stream().sorted().collect(Collectors.toList())
+        ));
+    }
 }
