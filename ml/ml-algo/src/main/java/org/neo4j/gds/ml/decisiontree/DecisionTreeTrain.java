@@ -84,7 +84,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
                 Math.pow(2.0, maxDepth),
                 // The parent of any leaf node must have had at least minSplitSize samples.
                 // The number of parents of leaves is therefore limited by numberOfTrainingSamples / minSplitSize.
-                2 * (double) (numberOfTrainingSamples / minSplitSize)
+                2 * Math.ceil((double) numberOfTrainingSamples / minSplitSize)
             )
         );
         long maxNumNodes = 2 * maxNumLeafNodes - 1;
