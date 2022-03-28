@@ -29,15 +29,15 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
-import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -72,7 +72,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         int dimensionOfNodeFeatures,
         List<String> nodeFeatures
     ){
-        var pipeline = new NodeClassificationPipeline();
+        var pipeline = new NodeClassificationTrainingPipeline();
 
         pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
             "degree",
@@ -100,7 +100,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         return Model.of(
             username,
             "model",
-            NodeClassificationPipeline.MODEL_TYPE,
+            NodeClassificationTrainingPipeline.MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
             NodeClassificationPipelineTrainConfig.builder()

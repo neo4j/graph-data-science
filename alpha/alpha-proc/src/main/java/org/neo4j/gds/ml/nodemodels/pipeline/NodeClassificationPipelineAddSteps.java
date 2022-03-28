@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +38,7 @@ public final class NodeClassificationPipelineAddSteps {
         String taskName,
         Map<String, Object> procedureConfig
     ) {
-        var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationPipeline.class);
+        var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationTrainingPipeline.class);
 
         pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
 
@@ -50,7 +50,7 @@ public final class NodeClassificationPipelineAddSteps {
         String pipelineName,
         Object nodeProperties
     ) {
-        var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationPipeline.class);
+        var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationTrainingPipeline.class);
 
         if (nodeProperties instanceof String) {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of((String) nodeProperties));

@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainResult;
@@ -41,12 +41,12 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.ml.linkmodels.pipeline.train.RelationshipSplitter.splitEstimation;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallRelationshipSets;
 
-public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPredictionTrainConfig, LinkPredictionPipeline, LinkPredictionTrainResult> {
+public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPredictionTrainConfig, LinkPredictionTrainingPipeline, LinkPredictionTrainResult> {
 
     private final RelationshipSplitter relationshipSplitter;
 
     public LinkPredictionTrainPipelineExecutor(
-        LinkPredictionPipeline pipeline,
+        LinkPredictionTrainingPipeline pipeline,
         LinkPredictionTrainConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
@@ -70,7 +70,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
         );
     }
 
-    public static MemoryEstimation estimate(ModelCatalog modelCatalog, LinkPredictionPipeline pipeline, LinkPredictionTrainConfig configuration) {
+    public static MemoryEstimation estimate(ModelCatalog modelCatalog, LinkPredictionTrainingPipeline pipeline, LinkPredictionTrainConfig configuration) {
         PipelineExecutor.validateTrainingParameterSpace(pipeline);
 
         var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.relationshipTypes());

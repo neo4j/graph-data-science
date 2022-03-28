@@ -56,8 +56,8 @@ import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
@@ -82,7 +82,7 @@ public final class NodeClassificationTrain {
 
     private final Graph graph;
     private final NodeClassificationPipelineTrainConfig config;
-    private final NodeClassificationPipeline pipeline;
+    private final NodeClassificationTrainingPipeline pipeline;
     private final Features features;
     private final HugeLongArray targets;
     private final LocalIdMap classIdMap;
@@ -95,7 +95,7 @@ public final class NodeClassificationTrain {
     private final TerminationFlag terminationFlag;
 
     public static MemoryEstimation estimate(
-        NodeClassificationPipeline pipeline,
+        NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config
     ) {
         var fudgedClassCount = 1000;
@@ -184,7 +184,7 @@ public final class NodeClassificationTrain {
 
     @NotNull
     private static MemoryEstimation modelTrainAndEvaluateMemoryUsage(
-        NodeClassificationPipeline pipeline,
+        NodeClassificationTrainingPipeline pipeline,
         int fudgedClassCount,
         int fudgedFeatureCount,
         LongUnaryOperator trainSetSize,
@@ -270,7 +270,7 @@ public final class NodeClassificationTrain {
 
     public static NodeClassificationTrain create(
         Graph graph,
-        NodeClassificationPipeline pipeline,
+        NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
         ProgressTracker progressTracker
     ) {
@@ -344,7 +344,7 @@ public final class NodeClassificationTrain {
 
     private NodeClassificationTrain(
         Graph graph,
-        NodeClassificationPipeline pipeline,
+        NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
         Features features,
         HugeLongArray targets,
@@ -497,7 +497,7 @@ public final class NodeClassificationTrain {
         return Model.of(
             config.username(),
             config.modelName(),
-            NodeClassificationPipeline.MODEL_TYPE,
+            NodeClassificationTrainingPipeline.MODEL_TYPE,
             graph.schema(),
             classifier.data(),
             config,

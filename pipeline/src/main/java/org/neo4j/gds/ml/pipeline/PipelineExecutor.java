@@ -41,7 +41,7 @@ import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
 public abstract class PipelineExecutor<
     PIPELINE_CONFIG extends AlgoBaseConfig,
-    PIPELINE extends Pipeline<?>,
+    PIPELINE extends TrainingPipeline<?>,
     RESULT
 > extends Algorithm<RESULT> {
 
@@ -86,7 +86,7 @@ public abstract class PipelineExecutor<
         return MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations);
     }
 
-    public static void validateTrainingParameterSpace(Pipeline pipeline) {
+    public static void validateTrainingParameterSpace(TrainingPipeline pipeline) {
         if (pipeline.numberOfModelCandidates() == 0) {
             throw new IllegalArgumentException("Need at least one model candidate for training.");
         }

@@ -42,35 +42,35 @@ class LinkPredictionPipelineTest {
 
     @Test
     void canCreateEmptyPipeline() {
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
 
         assertThat(pipeline)
-            .returns(List.of(), LinkPredictionPipeline::featureSteps)
-            .returns(List.of(), LinkPredictionPipeline::nodePropertySteps)
-            .returns(LinkPredictionSplitConfig.DEFAULT_CONFIG, LinkPredictionPipeline::splitConfig);
+            .returns(List.of(), LinkPredictionTrainingPipeline::featureSteps)
+            .returns(List.of(), LinkPredictionTrainingPipeline::nodePropertySteps)
+            .returns(LinkPredictionSplitConfig.DEFAULT_CONFIG, LinkPredictionTrainingPipeline::splitConfig);
 
         assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)).isEmpty();
     }
 
     @Test
     void canAddFeatureSteps() {
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         var hadamardFeatureStep = new HadamardFeatureStep(List.of("a"));
         pipeline.addFeatureStep(hadamardFeatureStep);
 
         assertThat(pipeline)
-            .returns(List.of(hadamardFeatureStep), LinkPredictionPipeline::featureSteps);
+            .returns(List.of(hadamardFeatureStep), LinkPredictionTrainingPipeline::featureSteps);
 
         var cosineFeatureStep = new CosineFeatureStep(List.of("b", "c"));
         pipeline.addFeatureStep(cosineFeatureStep);
 
         assertThat(pipeline)
-            .returns(List.of(hadamardFeatureStep, cosineFeatureStep), LinkPredictionPipeline::featureSteps);
+            .returns(List.of(hadamardFeatureStep, cosineFeatureStep), LinkPredictionTrainingPipeline::featureSteps);
     }
 
     @Test
     void canAddNodePropertySteps() {
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
 
         GdsCallableFinder.GdsCallableDefinition callableDefinition = GdsCallableFinder
             .findByName("gds.testProc.mutate", List.of())
@@ -79,13 +79,13 @@ class LinkPredictionPipelineTest {
         pipeline.addNodePropertyStep(step);
 
         assertThat(pipeline)
-            .returns(List.of(step), LinkPredictionPipeline::nodePropertySteps);
+            .returns(List.of(step), LinkPredictionTrainingPipeline::nodePropertySteps);
 
         var otherStep = new NodePropertyStep(callableDefinition, Map.of("mutateProperty", "pr2"));
         pipeline.addNodePropertyStep(otherStep);
 
         assertThat(pipeline)
-            .returns(List.of(step, otherStep), LinkPredictionPipeline::nodePropertySteps);
+            .returns(List.of(step, otherStep), LinkPredictionTrainingPipeline::nodePropertySteps);
     }
 
     @Test
@@ -98,7 +98,7 @@ class LinkPredictionPipelineTest {
             .maxDepth(19)
             .build();
 
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(lrConfig));
         pipeline.setTrainingParameterSpace(TrainingMethod.RandomForest, List.of(rfConfg));
 
@@ -115,7 +115,7 @@ class LinkPredictionPipelineTest {
         var config2 = LogisticRegressionTrainConfig.of(Map.of("penalty", 1337));
         var config3 = LogisticRegressionTrainConfig.of(Map.of("penalty", 42));
 
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
             config1
         ));
@@ -131,17 +131,17 @@ class LinkPredictionPipelineTest {
 
     @Test
     void canSetSplitConfig() {
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
         pipeline.setSplitConfig(splitConfig);
 
         assertThat(pipeline)
-            .returns(splitConfig, LinkPredictionPipeline::splitConfig);
+            .returns(splitConfig, LinkPredictionTrainingPipeline::splitConfig);
     }
 
     @Test
     void overridesTheSplitConfig() {
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
         pipeline.setSplitConfig(splitConfig);
 
@@ -149,7 +149,7 @@ class LinkPredictionPipelineTest {
         pipeline.setSplitConfig(splitConfigOverride);
 
         assertThat(pipeline)
-            .returns(splitConfigOverride, LinkPredictionPipeline::splitConfig);
+            .returns(splitConfigOverride, LinkPredictionTrainingPipeline::splitConfig);
     }
 
     @Nested
@@ -157,7 +157,7 @@ class LinkPredictionPipelineTest {
 
         @Test
         void returnsCorrectDefaultsMap() {
-            var pipeline = new LinkPredictionPipeline();
+            var pipeline = new LinkPredictionTrainingPipeline();
             assertThat(pipeline.toMap())
                 .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace")
                 .satisfies(pipelineMap -> {
@@ -183,7 +183,7 @@ class LinkPredictionPipelineTest {
 
         @Test
         void returnsCorrectMapWithFullConfiguration() {
-            var pipeline = new LinkPredictionPipeline();
+            var pipeline = new LinkPredictionTrainingPipeline();
             var step = new NodePropertyStep(
                 TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
                 Map.of("mutateProperty", "prop1")
@@ -255,7 +255,7 @@ class LinkPredictionPipelineTest {
 
         @Test
         void deepCopiesFeatureSteps() {
-            var pipeline = new LinkPredictionPipeline();
+            var pipeline = new LinkPredictionTrainingPipeline();
             var hadamardFeatureStep = new HadamardFeatureStep(List.of("a"));
             pipeline.addFeatureStep(hadamardFeatureStep);
 
@@ -274,7 +274,7 @@ class LinkPredictionPipelineTest {
 
         @Test
         void deepCopiesNodePropertySteps() {
-            var pipeline = new LinkPredictionPipeline();
+            var pipeline = new LinkPredictionTrainingPipeline();
             var step = new NodePropertyStep(
                 TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
                 Map.of("mutateProperty", "prop1")
@@ -299,7 +299,7 @@ class LinkPredictionPipelineTest {
 
         @Test
         void deepCopiesParameterSpace() {
-            var pipeline = new LinkPredictionPipeline();
+            var pipeline = new LinkPredictionTrainingPipeline();
             pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
                 LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
                 LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
@@ -323,7 +323,7 @@ class LinkPredictionPipelineTest {
 
         @Test
         void doesntDeepCopySplitConfig() {
-            var pipeline = new LinkPredictionPipeline();
+            var pipeline = new LinkPredictionTrainingPipeline();
             var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
 

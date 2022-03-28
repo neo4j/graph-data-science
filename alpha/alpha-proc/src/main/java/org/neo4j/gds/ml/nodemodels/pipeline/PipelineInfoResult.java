@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
-import org.neo4j.gds.ml.pipeline.Pipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class PipelineInfoResult {
     public final Map<String, Object> splitConfig;
     public final Object parameterSpace;
 
-    PipelineInfoResult(String pipelineName, NodeClassificationPipeline pipeline) {
+    PipelineInfoResult(String pipelineName, NodeClassificationTrainingPipeline pipeline) {
         this.name = pipelineName;
         this.nodePropertySteps = pipeline
             .nodePropertySteps()
@@ -43,6 +43,6 @@ public class PipelineInfoResult {
             .collect(Collectors.toList());
         this.featureProperties = pipeline.featureProperties();
         this.splitConfig = pipeline.splitConfig().toMap();
-        this.parameterSpace = Pipeline.toMapParameterSpace(pipeline.trainingParameterSpace());
+        this.parameterSpace = TrainingPipeline.toMapParameterSpace(pipeline.trainingParameterSpace());
     }
 }

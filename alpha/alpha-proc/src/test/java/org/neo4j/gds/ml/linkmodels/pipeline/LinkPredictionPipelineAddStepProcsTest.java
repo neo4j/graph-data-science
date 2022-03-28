@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 
 import java.util.List;
 import java.util.Map;
@@ -226,7 +226,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
 
     @Test
     void shouldThrowIfAddingNodePropertyToANonLPPipeline() {
-        PipelineCatalog.set(getUsername(), "ncPipe", new NodeClassificationPipeline());
+        PipelineCatalog.set(getUsername(), "ncPipe", new NodeClassificationTrainingPipeline());
 
         assertError(
             "CALL gds.beta.pipeline.linkPrediction.addNodeProperty('ncPipe', 'pageRank', {mutateProperty: 'pr'})",
@@ -236,7 +236,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
 
     @Test
     void shouldThrowIfAddingFeatureToANonPipeline() {
-        PipelineCatalog.set(getUsername(), "ncPipe", new NodeClassificationPipeline());
+        PipelineCatalog.set(getUsername(), "ncPipe", new NodeClassificationTrainingPipeline());
         assertError(
             "CALL gds.beta.pipeline.linkPrediction.addFeature('ncPipe', 'pageRank', {mutateProperty: 'pr'})",
             "The pipeline `ncPipe` is of type `Node classification training pipeline`, but expected type `Link prediction training pipeline`"

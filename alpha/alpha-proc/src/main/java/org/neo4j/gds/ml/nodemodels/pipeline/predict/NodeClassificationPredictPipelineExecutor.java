@@ -27,14 +27,14 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.nodeClassification.NodeClassificationPredict;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.models.ClassifierFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -42,14 +42,14 @@ import java.util.Optional;
 
 public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     NodeClassificationPredictPipelineBaseConfig,
-    NodeClassificationPipeline,
+    NodeClassificationTrainingPipeline,
     NodeClassificationPredict.NodeClassificationResult
     > {
     private static final int MIN_BATCH_SIZE = 100;
     private final Classifier.ClassifierData modelData;
 
     public NodeClassificationPredictPipelineExecutor(
-        NodeClassificationPipeline pipeline,
+        NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,

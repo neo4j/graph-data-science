@@ -21,11 +21,11 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -43,7 +43,7 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationPipeline.class);
+        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationTrainingPipeline.class);
 
         var lrConfig = LogisticRegressionTrainConfig.of(config);
 
@@ -60,7 +60,7 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name(value = "config") Map<String, Object> randomForestConfig
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationPipeline.class);
+        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationTrainingPipeline.class);
 
         var trainConfig = RandomForestTrainConfig.of(randomForestConfig);
         validateConfig(CypherMapWrapper.create(randomForestConfig), trainConfig.configKeys());

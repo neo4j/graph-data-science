@@ -40,7 +40,7 @@ import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
@@ -208,7 +208,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
     @Test
     void shouldNotPredictExistingLinks() {
         int topK = 50;
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
         var modelData = ImmutableLogisticRegressionData.of(

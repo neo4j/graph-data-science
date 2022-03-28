@@ -20,27 +20,27 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline;
 
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.pipeline.Pipeline;
+import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatureStep> {
+public class NodeClassificationTrainingPipeline extends TrainingPipeline<NodeClassificationFeatureStep> {
     public static final String PIPELINE_TYPE = "Node classification training pipeline";
     public static final String MODEL_TYPE = "NodeClassification";
 
 
     private NodeClassificationSplitConfig splitConfig;
 
-    public NodeClassificationPipeline() {
+    public NodeClassificationTrainingPipeline() {
         super();
         this.splitConfig = NodeClassificationSplitConfig.DEFAULT_CONFIG;
     }
 
-    public NodeClassificationPipeline copy() {
-        var copied = new NodeClassificationPipeline();
+    public NodeClassificationTrainingPipeline copy() {
+        var copied = new NodeClassificationTrainingPipeline();
         copied.featureSteps.addAll(featureSteps);
         copied.nodePropertySteps.addAll(nodePropertySteps);
 

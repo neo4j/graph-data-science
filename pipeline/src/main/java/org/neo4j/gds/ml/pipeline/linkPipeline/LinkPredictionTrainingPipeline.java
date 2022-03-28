@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.pipeline.Pipeline;
+import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,19 +30,19 @@ import java.util.Optional;
 
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 
-public class LinkPredictionPipeline extends Pipeline<LinkFeatureStep> {
+public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeatureStep> {
 
     public static final String PIPELINE_TYPE = "Link prediction training pipeline";
 
     private LinkPredictionSplitConfig splitConfig;
 
-    public LinkPredictionPipeline() {
+    public LinkPredictionTrainingPipeline() {
         super();
         this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
     }
 
-    public LinkPredictionPipeline copy() {
-        var copied = new LinkPredictionPipeline();
+    public LinkPredictionTrainingPipeline copy() {
+        var copied = new LinkPredictionTrainingPipeline();
         copied.featureSteps.addAll(featureSteps);
         copied.nodePropertySteps.addAll(nodePropertySteps);
 

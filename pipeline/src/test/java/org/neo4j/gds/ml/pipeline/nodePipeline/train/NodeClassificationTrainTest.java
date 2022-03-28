@@ -35,15 +35,15 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.metrics.AllClassMetric;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
 import org.neo4j.gds.ml.metrics.ModelStats;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfigImpl;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfigImpl;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 
 import java.util.Arrays;
 import java.util.List;
@@ -96,7 +96,7 @@ class NodeClassificationTrainTest {
 
         var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
 
-        var pipeline = new NodeClassificationPipeline();
+        var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
@@ -155,7 +155,7 @@ class NodeClassificationTrainTest {
     void shouldProduceDifferentMetricsForDifferentTrainings(MetricSpecification metricSpecification) {
         var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
 
-        var bananasPipeline = new NodeClassificationPipeline();
+        var bananasPipeline = new NodeClassificationTrainingPipeline();
         bananasPipeline.setSplitConfig(SPLIT_CONFIG);
 
         bananasPipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));
@@ -184,7 +184,7 @@ class NodeClassificationTrainTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var arrayPipeline = new NodeClassificationPipeline();
+        var arrayPipeline = new NodeClassificationTrainingPipeline();
         arrayPipeline.setSplitConfig(SPLIT_CONFIG);
 
         arrayPipeline.addFeatureStep(NodeClassificationFeatureStep.of("arrayProperty"));
@@ -237,7 +237,7 @@ class NodeClassificationTrainTest {
     @ParameterizedTest
     @MethodSource("metricArguments")
     void shouldLogProgress(MetricSpecification metricSpecification) {
-        var pipeline = new NodeClassificationPipeline();
+        var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));
 
@@ -363,7 +363,7 @@ class NodeClassificationTrainTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void seededNodeClassification(int concurrency) {
-        var pipeline = new NodeClassificationPipeline();
+        var pipeline = new NodeClassificationTrainingPipeline();
 
         pipeline.setSplitConfig(SPLIT_CONFIG);
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));

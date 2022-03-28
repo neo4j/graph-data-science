@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -49,7 +49,7 @@ class PipelineDropProcTest extends BaseProcTest {
     @Test
     void dropsPipeline() {
         String pipeName = "testPipe";
-        var pipe = new NodeClassificationPipeline();
+        var pipe = new NodeClassificationTrainingPipeline();
 
         PipelineCatalog.set(
             getUsername(),
@@ -73,7 +73,7 @@ class PipelineDropProcTest extends BaseProcTest {
                     ),
                     "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", pipeName,
-                    "pipelineType", NodeClassificationPipeline.PIPELINE_TYPE
+                    "pipelineType", NodeClassificationTrainingPipeline.PIPELINE_TYPE
                 )
             )
         );

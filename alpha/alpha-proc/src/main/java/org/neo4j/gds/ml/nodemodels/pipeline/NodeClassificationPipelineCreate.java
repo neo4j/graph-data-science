@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 
 public class NodeClassificationPipelineCreate {
 
@@ -30,7 +30,7 @@ public class NodeClassificationPipelineCreate {
     public static PipelineInfoResult create(String username, String pipelineName) {
         StringIdentifierValidations.validateNoWhiteCharacter(pipelineName, "pipelineName");
 
-        var pipeline = new NodeClassificationPipeline();
+        var pipeline = new NodeClassificationTrainingPipeline();
 
         PipelineCatalog.set(username, pipelineName, pipeline);
 

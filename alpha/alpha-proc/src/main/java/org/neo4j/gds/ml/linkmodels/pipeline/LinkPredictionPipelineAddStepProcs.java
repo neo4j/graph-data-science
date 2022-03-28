@@ -23,7 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfigurationImpl;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -47,7 +47,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         @Name("procedureName") String taskName,
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionPipeline.class);
+        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
         validateRelationshipProperty(pipeline, procedureConfig);
 
         pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
@@ -62,7 +62,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         @Name("featureType") String featureType,
         @Name("configuration") Map<String, Object> config
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionPipeline.class);
+        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
 
         var parsedConfig = new LinkFeatureStepConfigurationImpl(CypherMapWrapper.create(config));
 
@@ -73,7 +73,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
 
     // check if adding would result in more than one relationshipWeightProperty
     private void validateRelationshipProperty(
-        LinkPredictionPipeline pipeline,
+        LinkPredictionTrainingPipeline pipeline,
         Map<String, Object> procedureConfig
     ) {
         if (!procedureConfig.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) return;
