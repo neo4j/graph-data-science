@@ -128,8 +128,6 @@ public class GraphSageModelTrainer {
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
         progressTracker.beginSubTask("GraphSageTrain");
 
-        progressTracker.beginSubTask("Prepare batches");
-
         var layers = layerConfigsFunction.apply(graph).stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
@@ -138,6 +136,8 @@ public class GraphSageModelTrainer {
         for (Layer layer : layers) {
             weights.addAll(layer.weights());
         }
+
+        progressTracker.beginSubTask("Prepare batches");
 
         var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
