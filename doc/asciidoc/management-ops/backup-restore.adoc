@@ -8,6 +8,8 @@
 This section explains how to back up and restore graphs and models in the Neo4j Graph Data Science library.
 --
 
+include::../common-usage/not-on-aurads-note.adoc[]
+
 In the Neo4j Graph Data Science library, graphs and machine learning models are stored in-memory.
 This is necessary mainly for performance reasons but has the disadvantage that data will be lost after shutting down the database.
 There are already concepts to circumvent this limitation, such as running algorithms in <<running-algos-write, write mode>>, <<catalog-graph-export-csv, exporting graphs to csv>> or <<model-catalog-store-ops, storing models>>.
