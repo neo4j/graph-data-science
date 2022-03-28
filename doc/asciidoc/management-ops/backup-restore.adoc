@@ -28,12 +28,26 @@ The `gds.export.location` parameter must be configured for this feature.
 .Back-up in-memory graphs and models
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.backup
+CALL gds.alpha.backup(configuration: Map)
 YIELD
   backupId: String,
   backupTime: LocalDateTime,
   exportMillis: Long
 ----
+
+.Parameters
+[opts="header",cols"1,1,1,4"]
+|===
+| Name          | Type | Optional | Description
+| configuration | Map  | yes      | Additional parameters to configure the backup.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name        | Type    | Default | Description
+| concurrency | Integer | 4       | The number of concurrent threads used for performing the backup.
+|===
 
 .Results
 [opts="header",cols="1,1,4"]
