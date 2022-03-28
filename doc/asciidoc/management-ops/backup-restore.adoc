@@ -67,13 +67,27 @@ YIELD
 .Restore graphs and models
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.restore
+CALL gds.alpha.restore(configuration: Map)
 YIELD
   restoredGraph: String,
   restoredModel: String,
   status: String,
   restoreMillis: Long
 ----
+
+.Parameters
+[opts="header",cols"1,1,1,4"]
+|===
+| Name          | Type | Optional | Description
+| configuration | Map  | yes      | Additional parameters to configure the restore.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name        | Type    | Default | Description
+| concurrency | Integer | 4       | The number of concurrent threads used for performing the restore.
+|===
 
 .Results
 [opts="header",cols="1,1,4"]
