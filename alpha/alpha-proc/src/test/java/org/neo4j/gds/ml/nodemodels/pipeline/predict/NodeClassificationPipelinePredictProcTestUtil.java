@@ -35,12 +35,14 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class NodeClassificationPipelinePredictProcTestUtil {
@@ -72,17 +74,16 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         int dimensionOfNodeFeatures,
         List<String> nodeFeatures
     ){
-        var pipeline = new NodeClassificationTrainingPipeline();
+        var pipeline = new NodeClassificationPredictPipeline(
+            List.of(NodePropertyStepFactory.createNodePropertyStep(
+                "degree",
+                Map.of("mutateProperty", "degree")
+            )),
+            Stream.concat(nodeFeatures.stream(), Stream.of("degree"))
+                .map(NodeClassificationFeatureStep::of)
+                .collect(Collectors.toList())
+        );
 
-        pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
-            "degree",
-            Map.of("mutateProperty", "degree")
-        ));
-        for (String nodeFeature : nodeFeatures) {
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of(nodeFeature));
-        }
-
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("degree"));
         var weights = Matrix.create(0.0, 2, dimensionOfNodeFeatures + 1);
         var bias = Vector.create(0, 2);
         var value = new MutableDouble();
@@ -113,7 +114,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 .classes(modelData.classIdMap().originalIdsList())
                 .bestParameters(LogisticRegressionTrainConfig.of(Map.of()))
                 .metrics(Map.of())
-                .trainingPipeline(pipeline.copy())
+                .pipeline(pipeline)
                 .build()
         );
     }

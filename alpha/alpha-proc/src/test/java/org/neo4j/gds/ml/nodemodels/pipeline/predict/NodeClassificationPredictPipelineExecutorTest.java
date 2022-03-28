@@ -53,6 +53,7 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
@@ -129,10 +130,14 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new NodeClassificationTrainingPipeline();
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
+            var pipeline = new NodeClassificationPredictPipeline(
+                List.of(),
+                List.of(
+                    NodeClassificationFeatureStep.of("a"),
+                    NodeClassificationFeatureStep.of("b"),
+                    NodeClassificationFeatureStep.of("c")
+                )
+            );
 
             var weights = new double[]{
                 -2.0, -1.0, 3.0,
@@ -176,10 +181,14 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new NodeClassificationTrainingPipeline();
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
+            var pipeline = new NodeClassificationPredictPipeline(
+                List.of(),
+                List.of(
+                    NodeClassificationFeatureStep.of("a"),
+                    NodeClassificationFeatureStep.of("b"),
+                    NodeClassificationFeatureStep.of("c")
+                )
+            );
 
             var root = new TreeNode<>(0);
             var modelData = ImmutableRandomForestData
@@ -224,15 +233,19 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new NodeClassificationTrainingPipeline();
-            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
-                "degree",
-                Map.of("mutateProperty", "degree")
-            ));
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("degree"));
+            var pipeline = new NodeClassificationPredictPipeline(
+                List.of(NodePropertyStepFactory.createNodePropertyStep(
+                    "degree",
+                    Map.of("mutateProperty", "degree")
+                )),
+                List.of(
+                    NodeClassificationFeatureStep.of("a"),
+                    NodeClassificationFeatureStep.of("b"),
+                    NodeClassificationFeatureStep.of("c"),
+                    NodeClassificationFeatureStep.of("degree")
+                )
+            );
+
             var weights = new double[]{
                 1.0, 1.0, -2.0, -1.0,
                 0.0, -1.5, -1.3, 2.6
@@ -274,15 +287,19 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new NodeClassificationTrainingPipeline();
-            pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
-                "degree",
-                Map.of("mutateProperty", "degree")
-            ));
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of("degree"));
+            var pipeline = new NodeClassificationPredictPipeline(
+                List.of(NodePropertyStepFactory.createNodePropertyStep(
+                    "degree",
+                    Map.of("mutateProperty", "degree")
+                )),
+                List.of(
+                    NodeClassificationFeatureStep.of("a"),
+                    NodeClassificationFeatureStep.of("b"),
+                    NodeClassificationFeatureStep.of("c"),
+                    NodeClassificationFeatureStep.of("degree")
+                )
+            );
+
             var weights = new double[]{
                 1.0, 1.0, -2.0, -1.0,
                 0.0, -1.5, -1.3, 2.6
@@ -306,7 +323,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .classes(modelData.classIdMap().originalIdsList())
                     .bestParameters(LogisticRegressionTrainConfig.of(Map.of()))
                     .metrics(Map.of())
-                    .trainingPipeline(pipeline.copy())
+                    .pipeline(pipeline)
                     .build()
             ));
 
@@ -406,7 +423,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void shouldEstimateMemoryWithRandomForest() {
-        var pipeline = new NodeClassificationTrainingPipeline();
         var root = new TreeNode<>(0);
         var modelData = ImmutableRandomForestData
             .builder()
@@ -431,7 +447,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 .classes(modelData.classIdMap().originalIdsList())
                 .bestParameters(RandomForestTrainConfigImpl.builder().build())
                 .metrics(Map.of())
-                .trainingPipeline(pipeline.copy())
+                .pipeline(NodeClassificationPredictPipeline.EMPTY)
                 .build()
         );
 

@@ -32,7 +32,7 @@ import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.nodeClassification.NodeClassificationPredict;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 
@@ -42,14 +42,14 @@ import java.util.Optional;
 
 public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     NodeClassificationPredictPipelineBaseConfig,
-    NodeClassificationTrainingPipeline,
+    NodeClassificationPredictPipeline,
     NodeClassificationPredict.NodeClassificationResult
     > {
     private static final int MIN_BATCH_SIZE = 100;
     private final Classifier.ClassifierData modelData;
 
     public NodeClassificationPredictPipelineExecutor(
-        NodeClassificationTrainingPipeline pipeline,
+        NodeClassificationPredictPipeline pipeline,
         NodeClassificationPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
@@ -66,7 +66,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         NodeClassificationPredictPipelineBaseConfig configuration,
         ModelCatalog modelCatalog
     ) {
-        var pipeline = model.customInfo().trainingPipeline();
+        var pipeline = model.customInfo().pipeline();
         var classCount = model.customInfo().classes().size();
         var featureCount = model.data().featureDimension();
 

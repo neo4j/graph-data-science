@@ -25,7 +25,7 @@ import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @ValueClass
 public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
 
-    NodeClassificationTrainingPipeline trainingPipeline();
+    NodeClassificationPredictPipeline pipeline();
 
     /**
      * The distinct values of the target property which represent the
@@ -63,7 +63,7 @@ public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
                 entry -> entry.getKey().toString(),
                 entry -> entry.getValue().toMap()
             )),
-            "trainingPipeline", trainingPipeline().toMap()
+            "pipeline", pipeline().toMap()
         );
     }
 

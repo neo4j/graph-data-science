@@ -177,7 +177,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
                     "test",0.799999992
                 ));
 
-            var featurePipeline = modelInfo.extractingByKey("trainingPipeline", soMap)
+            var featurePipeline = modelInfo.extractingByKey("pipeline", soMap)
                 .containsKey("splitConfig")
                 .containsKey("trainingParameterSpace")
                 .extractingByKey("featurePipeline", soMap);

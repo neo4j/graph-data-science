@@ -54,7 +54,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
             config.modelName(),
             config.username()
         ).customInfo()
-            .trainingPipeline();
+            .pipeline();
 
         return Tasks.task(
             taskName(),
@@ -83,7 +83,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
             configuration.modelName(),
             configuration.username()
         );
-        var nodeClassificationPipeline = model.customInfo().trainingPipeline();
+        var nodeClassificationPipeline = model.customInfo().pipeline();
         return new NodeClassificationPredictPipelineExecutor(
             nodeClassificationPipeline,
             configuration,

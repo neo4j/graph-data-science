@@ -57,6 +57,7 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
@@ -497,7 +498,7 @@ public final class NodeClassificationTrain {
             .classes(classIdMap.originalIdsList())
             .bestParameters(modelSelectResult.bestParameters())
             .metrics(metricResults)
-            .trainingPipeline(pipeline.copy())
+            .pipeline(NodeClassificationPredictPipeline.from(pipeline))
             .build();
 
         return Model.of(
