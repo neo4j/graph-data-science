@@ -87,6 +87,8 @@
         </d:tocentry>
         <d:tocentry linkend="administration"><?dbhtml filename="management-ops/administration/index.html"?>
         </d:tocentry>
+        <d:tocentry linkend="backup-restore"><?dbhtml filename="management-ops/backup-restore/index.html"?>
+        </d:tocentry>
     </d:tocentry>
 
     <d:tocentry linkend="algorithms">

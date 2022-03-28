@@ -31,6 +31,7 @@
 ** xref:management-ops/utility-functions/index.adoc[]
 ** xref:management-ops/create-cypher-db/index.adoc[]
 ** xref:management-ops/administration/index.adoc[]
+** xref:management-ops/backup-restore/index.adoc[]
 * xref:algorithms/index.adoc[]
 ** xref:algorithms/syntax/index.adoc[]
 ** xref:algorithms/centrality/index.adoc[]
