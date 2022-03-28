@@ -177,10 +177,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
                     "test",0.799999992
                 ));
 
-            var featurePipeline = modelInfo.extractingByKey("pipeline", soMap)
-                .containsKey("splitConfig")
-                .containsKey("trainingParameterSpace")
-                .extractingByKey("featurePipeline", soMap);
+            var featurePipeline = modelInfo.extractingByKey("pipeline", soMap);
 
             featurePipeline
                 .extractingByKey("nodePropertySteps", InstanceOfAssertFactories.LIST)
@@ -198,7 +195,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         }, "a modelInfo map");
 
         var modelSelectionStatsCheck = new Condition<>(mss -> {
-            var modelInfo = assertThat(mss).asInstanceOf(soMap)
+            assertThat(mss).asInstanceOf(soMap)
                 .containsKey("bestParameters")
                 .containsKey("trainStats")
                 .containsKey("validationStats");
