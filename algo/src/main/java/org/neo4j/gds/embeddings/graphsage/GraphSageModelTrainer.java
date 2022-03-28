@@ -142,7 +142,7 @@ public class GraphSageModelTrainer {
         var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
-            batch -> new BatchTask(lossFunction(batch, graph, features, layers), weights, tolerance, progressTracker)
+            batch -> createBatchTask(graph, features, layers, weights, batch)
         );
 
         progressTracker.endSubTask("Prepare batches");
@@ -170,6 +170,37 @@ public class GraphSageModelTrainer {
         progressTracker.endSubTask("GraphSageTrain");
 
         return ModelTrainResult.of(epochLosses, converged, layers);
+    }
+
+    private BatchTask createBatchTask(
+        Graph graph,
+        HugeObjectArray<double[]> features,
+        Layer[] layers,
+        ArrayList<Weights<? extends Tensor<?>>> weights,
+        Partition batch
+    ) {
+        var localGraph = graph.concurrentCopy();
+
+        long[] totalBatch = addSamplesPerBatchNode(batch, localGraph);
+
+        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, useWeights, totalBatch, layers);
+
+        Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
+            localGraph,
+            subGraphs.get(subGraphs.size() - 1).originalNodeIds(),
+            features
+        );
+
+        Variable<Matrix> embeddingVariable = embeddingsComputationGraph(subGraphs, layers, batchedFeaturesExtractor);
+
+        GraphSageLoss lossFunction = new GraphSageLoss(
+            useWeights ? localGraph::relationshipProperty : UNWEIGHTED,
+            embeddingVariable,
+            totalBatch,
+            negativeSampleWeight
+        );
+
+        return new BatchTask(lossFunction, weights, tolerance, progressTracker);
     }
 
     private double trainEpoch(List<BatchTask> batchTasks, List<Weights<? extends Tensor<?>>> weights) {
@@ -254,29 +285,6 @@ public class GraphSageModelTrainer {
         List<? extends Tensor<?>> weightGradients() {
             return weightGradients;
         }
-    }
-
-    private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features, Layer[] layers) {
-        var localGraph = graph.concurrentCopy();
-
-        long[] totalBatch = addSamplesPerBatchNode(batch, localGraph);
-
-        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, useWeights, totalBatch, layers);
-
-        Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
-            localGraph,
-            subGraphs.get(subGraphs.size() - 1).originalNodeIds(),
-            features
-        );
-
-        Variable<Matrix> embeddingVariable = embeddingsComputationGraph(subGraphs, layers, batchedFeaturesExtractor);
-
-        return new GraphSageLoss(
-            useWeights ? localGraph::relationshipProperty : UNWEIGHTED,
-            embeddingVariable,
-            totalBatch,
-            negativeSampleWeight
-        );
     }
 
     private long[] addSamplesPerBatchNode(Partition batch, Graph localGraph) {
