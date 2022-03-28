@@ -7,6 +7,8 @@
 This section describes how the Neo4j Graph Data Science library can be used in a Neo4j Causal Cluster deployment.
 --
 
+include::../common-usage/not-on-aurads-note.adoc[]
+
 It is possible to run GDS as part of Neo4j Causal Cluster deployment.
 Since GDS performs large computations with the full resources of the system it is not suitable to run as part of the cluster's core.
 We make use of a _Read Replica_ instance to deploy the GDS library and process analytical workloads.
