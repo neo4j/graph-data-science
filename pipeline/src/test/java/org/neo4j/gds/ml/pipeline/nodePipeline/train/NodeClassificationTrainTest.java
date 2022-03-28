@@ -36,8 +36,8 @@ import org.neo4j.gds.ml.metrics.AllClassMetric;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
 import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
@@ -101,25 +101,32 @@ class NodeClassificationTrainTest {
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
 
+        var logisticRegressionTrainConfig = LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build();
         pipeline.addTrainerConfig(
             TrainingMethod.LogisticRegression,
-            LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
+            TunableTrainerConfig.of(logisticRegressionTrainConfig.toMap(), TrainingMethod.LogisticRegression)
         );
-        LogisticRegressionTrainConfig expectedWinner = LogisticRegressionTrainConfigImpl
+        var expectedWinner = LogisticRegressionTrainConfigImpl
             .builder()
             .penalty(1 * 2.0 / 3.0 * 0.5)
             .maxEpochs(10000)
             .tolerance(1e-5)
             .build();
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, expectedWinner);
+        pipeline.addTrainerConfig(
+            TrainingMethod.LogisticRegression,
+            TunableTrainerConfig.of(expectedWinner.toMap(), TrainingMethod.LogisticRegression)
+        );
 
         // Should NOT be the winning model, so give it bad hyperparams.
-        pipeline.addTrainerConfig(TrainingMethod.RandomForest, RandomForestTrainConfigImpl.builder()
+        var randomForestTrainConfig = RandomForestTrainConfigImpl.builder()
             .minSplitSize(2)
             .maxDepth(1)
             .numberOfDecisionTrees(1)
             .maxFeaturesRatio(0.1)
-            .build()
+            .build();
+        pipeline.addTrainerConfig(
+            TrainingMethod.RandomForest,
+            TunableTrainerConfig.of(randomForestTrainConfig.toMap(), TrainingMethod.RandomForest)
         );
 
         var config = createConfig("model", metricSpecification, 1L);
@@ -147,7 +154,7 @@ class NodeClassificationTrainTest {
             .isNotCloseTo(model3Score, Percentage.withPercentage(0.2));
 
         var actualWinnerParams = customInfo.bestParameters();
-        assertThat(actualWinnerParams).isEqualTo(expectedWinner);
+        assertThat(actualWinnerParams.toMap()).isEqualTo(expectedWinner.toMap());
     }
 
     @ParameterizedTest
@@ -172,7 +179,7 @@ class NodeClassificationTrainTest {
 
         modelCandidates
             .stream()
-            .map(LogisticRegressionTrainConfig::of)
+            .map(config -> TunableTrainerConfig.of(config, TrainingMethod.LogisticRegression))
             .forEach(candidate -> bananasPipeline.addTrainerConfig(TrainingMethod.LogisticRegression, candidate));
 
         var bananasConfig = createConfig("bananasModel", metricSpecification, 1337L);
@@ -191,7 +198,7 @@ class NodeClassificationTrainTest {
 
         modelCandidates
             .stream()
-            .map(LogisticRegressionTrainConfig::of)
+            .map(config -> TunableTrainerConfig.of(config, TrainingMethod.LogisticRegression))
             .forEach(candidate -> arrayPipeline.addTrainerConfig(TrainingMethod.LogisticRegression, candidate));
 
 
@@ -243,11 +250,17 @@ class NodeClassificationTrainTest {
 
         pipeline.addTrainerConfig(
             TrainingMethod.LogisticRegression,
-            LogisticRegressionTrainConfig.of(Map.of("penalty", 0.0625 * 2.0 / 3.0 * 0.5, "maxEpochs", 100))
+            TunableTrainerConfig.of(
+                Map.of("penalty", 0.0625 * 2.0 / 3.0 * 0.5, "maxEpochs", 100),
+                TrainingMethod.LogisticRegression
+            )
         );
         pipeline.addTrainerConfig(
             TrainingMethod.LogisticRegression,
-            LogisticRegressionTrainConfig.of(Map.of("penalty", 0.125 * 2.0 / 3.0 * 0.5, "maxEpochs", 100))
+            TunableTrainerConfig.of(
+                Map.of("penalty", 0.125 * 2.0 / 3.0 * 0.5, "maxEpochs", 100),
+                TrainingMethod.LogisticRegression
+            )
         );
 
         var config = createConfig("bananasModel", metricSpecification, 42L);
@@ -369,7 +382,7 @@ class NodeClassificationTrainTest {
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));
         pipeline.addTrainerConfig(
             TrainingMethod.LogisticRegression,
-            LogisticRegressionTrainConfig.of(Map.of("penalty", 0.0625, "maxEpochs", 100, "batchSize", 1))
+            TunableTrainerConfig.of(Map.of("penalty", 0.0625, "maxEpochs", 100, "batchSize", 1), TrainingMethod.LogisticRegression)
         );
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()

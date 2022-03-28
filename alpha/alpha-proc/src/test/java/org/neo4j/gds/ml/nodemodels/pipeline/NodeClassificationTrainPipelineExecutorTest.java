@@ -42,6 +42,7 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
@@ -127,8 +128,9 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var metricSpecification = MetricSpecification.parse("F1(class=1)");
         var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
 
-        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(LogisticRegressionTrainConfig.of(
-            Map.of("penalty", 1, "maxEpochs", 1)
+        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(TunableTrainerConfig.of(
+            Map.of("penalty", 1, "maxEpochs", 1),
+            TrainingMethod.LogisticRegression
         )));
 
         pipeline.setSplitConfig(ImmutableNodeClassificationSplitConfig.builder()
@@ -184,7 +186,10 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("array"));
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
+        pipeline.addTrainerConfig(
+            TrainingMethod.LogisticRegression,
+            TunableTrainerConfig.of(Map.of(), TrainingMethod.LogisticRegression)
+        );
 
         var metricSpecification = MetricSpecification.parse("F1(class=1)");
 
@@ -305,7 +310,10 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
 
         for (int i = 0; i < trainerConfigs.size(); i++) {
-            pipeline.addTrainerConfig(trainingMethods.get(i), trainerConfigs.get(i));
+            pipeline.addTrainerConfig(
+                trainingMethods.get(i),
+                TunableTrainerConfig.of(trainerConfigs.get(i).toMap(), trainingMethods.get(i))
+            );
         }
 
         var config = ImmutableNodeClassificationPipelineTrainConfig.builder()

@@ -19,6 +19,18 @@
  */
 package org.neo4j.gds.ml.models;
 
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
+
+import java.util.Map;
+import java.util.function.Function;
+
 public enum TrainingMethod {
-    LogisticRegression, RandomForest
+    LogisticRegression(LogisticRegressionTrainConfig::of), RandomForest(RandomForestTrainConfig::of);
+
+    public final Function<Map<String, Object>, TrainerConfig> createConfig;
+
+    TrainingMethod(Function<Map<String, Object>, TrainerConfig> createConfig) {
+        this.createConfig = createConfig;
+    }
 }

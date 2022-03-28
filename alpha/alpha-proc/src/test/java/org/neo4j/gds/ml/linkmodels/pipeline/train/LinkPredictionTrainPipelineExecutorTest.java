@@ -49,6 +49,7 @@ import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -150,8 +151,14 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .build());
 
         pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-            LogisticRegressionTrainConfig.of(Map.of("patience", 5, "tolerance", 0.00001, "penalty", 100)),
-            LogisticRegressionTrainConfig.of(Map.of("patience", 5, "tolerance", 0.00001, "penalty", 1))
+            TunableTrainerConfig.of(
+                Map.of("patience", 5, "tolerance", 0.00001, "penalty", 100),
+                TrainingMethod.LogisticRegression
+            ),
+            TunableTrainerConfig.of(
+                Map.of("patience", 5, "tolerance", 0.00001, "penalty", 1),
+                TrainingMethod.LogisticRegression
+            )
         ));
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
@@ -319,7 +326,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         pipeline.setTrainingParameterSpace(
             TrainingMethod.LogisticRegression,
-            List.of(LogisticRegressionTrainConfig.of(Map.of("penalty", 1)))
+            List.of(TunableTrainerConfig.of(Map.of("penalty", 1), TrainingMethod.LogisticRegression))
         );
 
         pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
@@ -435,7 +442,10 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .build();
 
         LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
+        pipeline.addTrainerConfig(
+            TrainingMethod.LogisticRegression,
+            TunableTrainerConfig.of(Map.of(), TrainingMethod.LogisticRegression)
+        );
 
         for (NodePropertyStep propertyStep : nodePropertySteps) {
             pipeline.addNodePropertyStep(propertyStep);

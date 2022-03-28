@@ -54,6 +54,7 @@ import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
@@ -195,9 +196,11 @@ public final class NodeClassificationTrain {
             .values()
             .stream()
             .flatMap(List::stream)
-            .map(config -> {
+            .map(tunableTrainerConfig -> {
+                var config = TrainingMethod.valueOf(tunableTrainerConfig.methodName()).createConfig.apply(
+                    tunableTrainerConfig.value);
                 var training = TrainerFactory.memoryEstimation(
-                    config,
+                    tunableTrainerConfig,
                     trainSetSize,
                     fudgedClassCount,
                     MemoryRange.of(fudgedFeatureCount),
@@ -208,7 +211,7 @@ public final class NodeClassificationTrain {
                     ? ((LogisticRegressionTrainConfig) config).batchSize()
                     : 0; // Not used
                 var evaluation = estimateEvaluation(
-                    config,
+                    tunableTrainerConfig,
                     batchSize,
                     trainSetSize,
                     testSetSize,
@@ -227,7 +230,7 @@ public final class NodeClassificationTrain {
     }
 
     public static MemoryEstimation estimateEvaluation(
-        TrainerConfig config,
+        TunableTrainerConfig config,
         int batchSize,
         LongUnaryOperator trainSetSize,
         LongUnaryOperator testSetSize,
@@ -418,36 +421,39 @@ public final class NodeClassificationTrain {
 
     private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
         progressTracker.beginSubTask();
-        pipeline.trainingParameterSpace().values().stream().flatMap(List::stream).forEach(modelParams -> {
-            progressTracker.beginSubTask();
-            var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
-            var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
-
-            for (TrainingExamplesSplit nodeSplit : nodeSplits) {
+        for (TrainingMethod trainingMethod : pipeline.trainingParameterSpace().keySet()) {
+            for (TunableTrainerConfig tunableConfig : pipeline.trainingParameterSpace().get(trainingMethod)) {
+                var modelParams = trainingMethod.createConfig.apply(tunableConfig.value);
                 progressTracker.beginSubTask();
+                var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
+                var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
 
-                var trainSet = nodeSplit.trainSet();
-                var validationSet = nodeSplit.testSet();
+                for (TrainingExamplesSplit nodeSplit : nodeSplits) {
+                    progressTracker.beginSubTask();
 
-                progressTracker.beginSubTask("Training");
-                var classifier = trainModel(trainSet, modelParams);
+                    var trainSet = nodeSplit.trainSet();
+                    var validationSet = nodeSplit.testSet();
 
-                progressTracker.endSubTask("Training");
+                    progressTracker.beginSubTask("Training");
+                    var classifier = trainModel(trainSet, modelParams);
 
-                progressTracker.beginSubTask(validationSet.size() + trainSet.size());
-                metricComputer.computeMetrics(validationSet, classifier).forEach(validationStatsBuilder::update);
-                metricComputer.computeMetrics(trainSet, classifier).forEach(trainStatsBuilder::update);
+                    progressTracker.endSubTask("Training");
+
+                    progressTracker.beginSubTask(validationSet.size() + trainSet.size());
+                    metricComputer.computeMetrics(validationSet, classifier).forEach(validationStatsBuilder::update);
+                    metricComputer.computeMetrics(trainSet, classifier).forEach(trainStatsBuilder::update);
+                    progressTracker.endSubTask();
+
+                    progressTracker.endSubTask();
+                }
                 progressTracker.endSubTask();
 
-                progressTracker.endSubTask();
+                metrics.forEach(metric -> {
+                    validationStats.add(metric, validationStatsBuilder.build(metric));
+                    trainStats.add(metric, trainStatsBuilder.build(metric));
+                });
             }
-            progressTracker.endSubTask();
-
-            metrics.forEach(metric -> {
-                validationStats.add(metric, validationStatsBuilder.build(metric));
-                trainStats.add(metric, trainStatsBuilder.build(metric));
-            });
-        });
+        }
         progressTracker.endSubTask();
 
         var mainMetric = metrics.get(0);

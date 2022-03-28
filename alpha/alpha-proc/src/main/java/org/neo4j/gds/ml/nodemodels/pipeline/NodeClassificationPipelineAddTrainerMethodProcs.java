@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -49,7 +50,10 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
 
         validateConfig(CypherMapWrapper.create(config), lrConfig.configKeys());
 
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, lrConfig);
+        pipeline.addTrainerConfig(
+            TrainingMethod.LogisticRegression,
+            TunableTrainerConfig.of(config, TrainingMethod.LogisticRegression).defaultFilledTunableConfig()
+        );
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }
@@ -65,7 +69,10 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
         var trainConfig = RandomForestTrainConfig.of(randomForestConfig);
         validateConfig(CypherMapWrapper.create(randomForestConfig), trainConfig.configKeys());
 
-        pipeline.addTrainerConfig(TrainingMethod.RandomForest, trainConfig);
+        pipeline.addTrainerConfig(
+            TrainingMethod.RandomForest,
+            TunableTrainerConfig.of(randomForestConfig, TrainingMethod.RandomForest).defaultFilledTunableConfig()
+        );
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }

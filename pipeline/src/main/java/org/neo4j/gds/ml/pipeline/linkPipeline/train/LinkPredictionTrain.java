@@ -46,6 +46,8 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
+import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
@@ -189,49 +191,53 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         progressTracker.setVolume(pipeline.numberOfModelCandidates());
 
-        pipeline.trainingParameterSpace().values().stream().flatMap(List::stream).forEach(modelParams -> {
-            var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
-            var validationStatsBuilder = new LinkModelStatsBuilder(
+        for (TrainingMethod trainingMethod : pipeline.trainingParameterSpace().keySet()) {
+            for (TunableTrainerConfig tunableConfig : pipeline.trainingParameterSpace().get(trainingMethod)) {
+                var modelParams = trainingMethod.createConfig.apply(tunableConfig.value);
+
+                var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
+                var validationStatsBuilder = new LinkModelStatsBuilder(
                 modelParams,
                 pipeline.splitConfig().validationFolds()
             );
-            for (TrainingExamplesSplit relSplit : validationSplits) {
-                // train each model candidate on the train sets
-                var trainSet = relSplit.trainSet();
-                var validationSet = relSplit.testSet();
-                // the below calls intentionally suppress progress logging of individual models
-                var classifier = trainModel(
+                for (TrainingExamplesSplit relSplit : validationSplits) {
+                    // train each model candidate on the train sets
+                    var trainSet = relSplit.trainSet();
+                    var validationSet = relSplit.testSet();
+                    // the below calls intentionally suppress progress logging of individual models
+                    var classifier = trainModel(
                     trainData,
                     ReadOnlyHugeLongArray.of(trainSet),
                     modelParams,
                     ProgressTracker.NULL_TRACKER
                 );
 
-                // evaluate each model candidate on the train and validation sets
-                computeTrainMetric(
+                    // evaluate each model candidate on the train and validation sets
+                    computeTrainMetric(
                     trainData,
                     classifier,
                     ReadOnlyHugeLongArray.of(trainSet),
                     ProgressTracker.NULL_TRACKER
                 )
-                    .forEach(trainStatsBuilder::update);
-                computeTrainMetric(
+                        .forEach(trainStatsBuilder::update);
+                    computeTrainMetric(
                     trainData,
                     classifier,
                     ReadOnlyHugeLongArray.of(validationSet),
                     ProgressTracker.NULL_TRACKER
                 )
-                    .forEach(validationStatsBuilder::update);
+                        .forEach(validationStatsBuilder::update);
+                }
+
+                // insert the candidates' metrics into trainStats and validationStats
+                config.metrics().forEach(metric -> {
+                    validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
+                    trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
+                });
+
+                progressTracker.logProgress();
             }
-
-            // insert the candidates' metrics into trainStats and validationStats
-            config.metrics().forEach(metric -> {
-                validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
-                trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
-            });
-
-            progressTracker.logProgress();
-        });
+        }
 
         // 5. pick the best-scoring model candidate, according to the main metric
         var mainMetric = config.metrics().get(0);
@@ -463,7 +469,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
     private static MemoryEstimation estimateTraining(
         LinkPredictionSplitConfig splitConfig,
-        TrainerConfig trainerConfig,
+        TunableTrainerConfig trainerConfig,
         MemoryRange linkFeatureDimension
     ) {
         return MemoryEstimations.setup(

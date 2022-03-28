@@ -28,4 +28,5 @@ public interface TrainerConfig extends ToMapConvertible {
     @Value.Derived
     @Configuration.Ignore
     String methodName();
+
 }

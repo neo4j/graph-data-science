@@ -22,9 +22,8 @@ package org.neo4j.gds.ml.pipeline.nodePipeline;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 
@@ -91,7 +90,7 @@ class NodeClassificationPipelineTest {
 
     @Test
     void canSetParameterSpace() {
-        var config = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
+        var config = TunableTrainerConfig.of(Map.of("penalty", 19), TrainingMethod.LogisticRegression);
 
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config));
@@ -101,9 +100,9 @@ class NodeClassificationPipelineTest {
 
     @Test
     void overridesTheParameterSpace() {
-        var config1 = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
-        var config2 = LogisticRegressionTrainConfig.of(Map.of("penalty", 1337));
-        var config3 = LogisticRegressionTrainConfig.of(Map.of("penalty", 42));
+        var config1 = TunableTrainerConfig.of(Map.of("penalty", 19), TrainingMethod.LogisticRegression);
+        var config2 = TunableTrainerConfig.of(Map.of("penalty", 1337), TrainingMethod.LogisticRegression);
+        var config3 = TunableTrainerConfig.of(Map.of("penalty", 42), TrainingMethod.LogisticRegression);
 
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config1));
@@ -173,8 +172,8 @@ class NodeClassificationPipelineTest {
             pipeline.addFeatureStep(fooStep);
 
             pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-                LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
-                LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
+                TunableTrainerConfig.of(Map.of("penalty", 1000000), TrainingMethod.LogisticRegression),
+                TunableTrainerConfig.of(Map.of("penalty", 1), TrainingMethod.LogisticRegression)
             ));
 
             var splitConfig = NodeClassificationSplitConfig.testBuilder().testFraction(0.5).build();
@@ -201,7 +200,7 @@ class NodeClassificationPipelineTest {
                 .returns(
                     pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)
                         .stream()
-                        .map(TrainerConfig::toMap)
+                        .map(tunableTrainerConfig -> tunableTrainerConfig.value)
                         .collect(Collectors.toList()),
                     pipelineMap -> ((Map<String, Object>) pipelineMap.get("trainingParameterSpace")).get(TrainingMethod.LogisticRegression.name())
                 );
@@ -259,8 +258,8 @@ class NodeClassificationPipelineTest {
         void deepCopiesParameterSpace() {
             var pipeline = new NodeClassificationTrainingPipeline();
             pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-                LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
-                LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
+                TunableTrainerConfig.of(Map.of("penalty", 1000000), TrainingMethod.LogisticRegression),
+                TunableTrainerConfig.of(Map.of("penalty", 1), TrainingMethod.LogisticRegression)
             ));
 
             var copy = pipeline.copy();

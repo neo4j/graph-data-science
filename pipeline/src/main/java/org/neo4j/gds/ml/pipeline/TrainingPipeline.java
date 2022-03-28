@@ -21,10 +21,9 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.utils.TimeUtil;
-import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -46,15 +45,13 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
     protected final List<FEATURE_STEP> featureSteps;
     private final ZonedDateTime creationTime;
 
-    protected Map<TrainingMethod, List<TrainerConfig>> trainingParameterSpace;
+    protected Map<TrainingMethod, List<TunableTrainerConfig>> trainingParameterSpace;
 
-    public static Map<String, List<Map<String, Object>>> toMapParameterSpace(Map<TrainingMethod, List<TrainerConfig>> parameterSpace) {
+    public static Map<String, List<Map<String, Object>>> toMapParameterSpace(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace) {
         return parameterSpace.entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().name(),
-                entry -> entry.getValue().stream()
-                    .map(ToMapConvertible::toMap)
-                    .collect(Collectors.toList())
+                entry -> entry.getValue().stream().map(TunableTrainerConfig::toMap).collect(Collectors.toList())
             ));
     }
 
@@ -126,15 +123,15 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
         return this.featureSteps;
     }
 
-    public Map<TrainingMethod, List<TrainerConfig>> trainingParameterSpace() {
+    public Map<TrainingMethod, List<TunableTrainerConfig>> trainingParameterSpace() {
         return trainingParameterSpace;
     }
 
-    public void setTrainingParameterSpace(TrainingMethod method, List<TrainerConfig> trainingConfigs) {
+    public void setTrainingParameterSpace(TrainingMethod method, List<TunableTrainerConfig> trainingConfigs) {
         this.trainingParameterSpace.put(method, trainingConfigs);
     }
 
-    public void addTrainerConfig(TrainingMethod method, TrainerConfig trainingConfigs) {
+    public void addTrainerConfig(TrainingMethod method, TunableTrainerConfig trainingConfigs) {
         this.trainingParameterSpace.get(method).add(trainingConfigs);
     }
 

@@ -1,0 +1,67 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.gds.ml.models.automl;
+
+import org.neo4j.gds.ml.models.TrainingMethod;
+
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class TunableTrainerConfig {
+    public final Map<String, Object> value;
+    private final TrainingMethod method;
+
+    private TunableTrainerConfig(Map<String, Object> value, TrainingMethod method) {
+        this.value = value;
+        this.method = method;
+    }
+
+    public static TunableTrainerConfig of(Map<String, Object> value, TrainingMethod method) {
+        return new TunableTrainerConfig(value, method);
+    }
+
+    public TunableTrainerConfig defaultFilledTunableConfig() {
+        var defaultConfig = method.createConfig.apply(Map.of()).toMap();
+        // for Optional values, defaultConfig will not contain the key so we need keys from both maps
+        var mergedConfig = Stream.concat(defaultConfig.keySet().stream(), value.keySet().stream())
+            .distinct()
+            .collect(Collectors.toMap(
+                key -> key,
+                key -> value.getOrDefault(key, defaultConfig.get(key))
+            ));
+        return TunableTrainerConfig.of(mergedConfig, method);
+    }
+
+    public Map<String, Object> toMap() {
+        return value.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
+                if (entry.getValue() instanceof Long) {
+                    return Math.toIntExact((Long) entry.getValue());
+                }
+                return entry.getValue();
+            }));
+    }
+
+    public String methodName() {
+        return method.name();
+    }
+
+}
