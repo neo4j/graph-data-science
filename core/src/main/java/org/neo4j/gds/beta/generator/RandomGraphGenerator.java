@@ -34,13 +34,16 @@ import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeArray;
+import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -213,34 +216,43 @@ public final class RandomGraphGenerator {
         var propertyNameToLabels = new HashMap<String, List<NodeLabel>>();
         var propertyNameToProducers = new HashMap<String, PropertyProducer<?>>();
 
-        nodePropertyProducers.forEach((nodeLabel, propertyProducers) ->
-            propertyProducers.forEach(propertyProducer -> {
-                // map property names to all labels for that property
-                propertyNameToLabels
-                    .computeIfAbsent(propertyProducer.getPropertyName(), ignore -> new ArrayList<>())
-                    .add(nodeLabel);
-                // group producers by property name
-                propertyNameToProducers.merge(
-                    propertyProducer.getPropertyName(),
-                    propertyProducer,
-                    (first, second) -> {
-                        if (!first.equals(second)) {
-                            throw new IllegalArgumentException(formatWithLocale(
-                                "Duplicate node properties with name [%s]. The first property producer is [%s], the second one is [%s].",
-                                first.getPropertyName(),
-                                first,
-                                second
-                            ));
+        nodePropertyProducers.forEach((nodeLabel, propertyProducers) -> {
+                if (nodeLabel != NodeLabel.ALL_NODES && !idMap.availableNodeLabels().contains(nodeLabel)) {
+                    return;
+                }
+
+                propertyProducers.forEach(propertyProducer -> {
+                    // map property names to all labels for that property
+                    propertyNameToLabels
+                        .computeIfAbsent(propertyProducer.getPropertyName(), ignore -> new ArrayList<>())
+                        .add(nodeLabel);
+                    // group producers by property name
+                    propertyNameToProducers.merge(
+                        propertyProducer.getPropertyName(),
+                        propertyProducer,
+                        (first, second) -> {
+                            if (!first.equals(second)) {
+                                throw new IllegalArgumentException(formatWithLocale(
+                                    "Duplicate node properties with name [%s]. The first property producer is [%s], the second one is [%s].",
+                                    first.getPropertyName(),
+                                    first,
+                                    second
+                                ));
+                            }
+                            return first;
                         }
-                        return first;
-                    }
-                );
-            })
+                    );
+                });
+            }
         );
 
         Map<String, NodeProperties> generatedProperties = propertyNameToProducers.entrySet().stream().collect(toMap(
             Map.Entry::getKey,
-            entry -> generateProperties(entry.getValue())
+            entry -> {
+                var nodeLabels = new HashSet<>(propertyNameToLabels.get(entry.getKey()));
+                var nodes = idMap.nodeIterator(nodeLabels);
+                return generateProperties(nodes, entry.getValue());
+            }
         ));
 
         // Create a corresponding node schema
@@ -261,34 +273,43 @@ public final class RandomGraphGenerator {
     }
 
     @SuppressWarnings("unchecked")
-    private NodeProperties generateProperties(PropertyProducer<?> propertyProducer) {
+    private NodeProperties generateProperties(PrimitiveLongIterator nodes, PropertyProducer<?> propertyProducer) {
         switch (propertyProducer.propertyType()) {
             case LONG:
+                var longValues = HugeLongArray.newArray(nodeCount);
+                longValues.fill(DefaultValue.forLong().longValue());
                 return generateProperties(
-                    HugeLongArray.newArray(nodeCount),
+                    nodes,
+                    longValues,
                     (PropertyProducer<long[]>) propertyProducer,
                     HugeLongArray::asNodeProperties
                 );
             case DOUBLE:
+                var doubleValues = HugeDoubleArray.newArray(nodeCount);
+                doubleValues.fill(DefaultValue.forDouble().doubleValue());
                 return generateProperties(
-                    HugeDoubleArray.newArray(nodeCount),
+                    nodes,
+                    doubleValues,
                     (PropertyProducer<double[]>) propertyProducer,
                     HugeDoubleArray::asNodeProperties
                 );
             case DOUBLE_ARRAY:
                 return generateProperties(
+                    nodes,
                     HugeObjectArray.newArray(double[].class, nodeCount),
                     (PropertyProducer<double[][]>) propertyProducer,
                     HugeObjectArray::asNodeProperties
                 );
             case FLOAT_ARRAY:
                 return generateProperties(
+                    nodes,
                     HugeObjectArray.newArray(float[].class, nodeCount),
                     (PropertyProducer<float[][]>) propertyProducer,
                     HugeObjectArray::asNodeProperties
                 );
             case LONG_ARRAY:
                 return generateProperties(
+                    nodes,
                     HugeObjectArray.newArray(long[].class, nodeCount),
                     (PropertyProducer<long[][]>) propertyProducer,
                     HugeObjectArray::asNodeProperties
@@ -299,17 +320,27 @@ public final class RandomGraphGenerator {
     }
 
     private <T, A extends HugeArray<T, ?, A>> NodeProperties generateProperties(
+        PrimitiveLongIterator nodes,
         A values,
         PropertyProducer<T> propertyProducer,
         Function<A, NodeProperties> toProperties
     ) {
         var cursor = values.initCursor(values.newCursor());
-        while (cursor.next()) {
-            var limit = cursor.limit;
-            for (int i = cursor.offset; i < limit; i++) {
-                propertyProducer.setProperty(cursor.array, i, random);
-            }
+        while (nodes.hasNext()) {
+            var i = seek(nodes.next(), cursor);
+            propertyProducer.setProperty(cursor.array, i, random);
         }
         return toProperties.apply(values);
     }
+
+    private <T> int seek(long targetNode, HugeCursor<T> cursor) {
+        while (cursor.base < targetNode && cursor.base + cursor.limit < targetNode) {
+            if (!cursor.next()) {
+                throw new IllegalStateException("");
+            }
+        }
+        return Math.toIntExact(targetNode - cursor.base);
+    }
+
+
 }
