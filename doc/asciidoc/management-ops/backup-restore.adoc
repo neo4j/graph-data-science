@@ -161,7 +161,7 @@ YIELD restoredGraphs
 ----
 
 .Results
-[opts="header",cols="1m,1m"]
+[opts="header",cols="1m"]
 |===
 | restoredGraph
 | "myGraph"
