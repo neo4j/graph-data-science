@@ -214,6 +214,11 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
+    public PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels) {
+        return idMap.nodeIterator(labels);
+    }
+
+    @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId) {
         return relationshipProperty(sourceNodeId, targetNodeId, defaultPropertyValue);
     }

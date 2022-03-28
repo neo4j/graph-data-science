@@ -92,6 +92,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
+    public PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels) {
+        return filteredIdMap.nodeIterator(labels);
+    }
+
+    @Override
     public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
         return filteredIdMap.batchIterables(batchSize);
     }

@@ -120,4 +120,9 @@ public class DirectIdMap implements IdMap {
     public PrimitiveLongIterator nodeIterator() {
         return PrimitiveLongCollections.range(0, nodeCount);
     }
+
+    @Override
+    public PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels) {
+        return nodeIterator();
+    }
 }

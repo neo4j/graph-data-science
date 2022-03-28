@@ -96,6 +96,11 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
+    public PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels) {
+        return idMap.nodeIterator(labels);
+    }
+
+    @Override
     public List<NodeLabel> nodeLabels(long nodeId) {
         return idMap.nodeLabels(nodeId);
     }
