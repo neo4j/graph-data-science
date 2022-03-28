@@ -171,7 +171,6 @@ YIELD
 CALL gds.graph.removeNodeProperties(
     graphName: String,
     nodeProperties: String or List of Strings,
-    nodeLabels: String or List of Strings,
     configuration: Map
 )
 YIELD
@@ -186,7 +185,6 @@ YIELD
 | Name           | Type                       | Optional | Description
 | graphName      | String                     | no       | The name under which the graph is stored in the catalog.
 | nodeProperties | String or List of Strings  | no       | The node properties in the graph to remove.
-| nodeLabels     | String or List of Strings  | yes      | The node labels to remove the node properties from.
 | configuration  | Map                        | yes      | Additional parameters to configure removeNodeProperties.
 |===
 
@@ -421,42 +419,6 @@ YIELD propertiesRemoved
 --
 The above example requires all given properties to be present on _at least one_ projected node label.
 --
-
-==== NodeLabels
-
-Consider we compute the Degree Centrality only for a subset of the graph.
-
-.Compute the Degree Centrality for only the `Book` nodes in our social graph:
-[source, cypher, role=noplay graph-project-query]
-----
-CALL gds.degree.mutate('socialGraph', {nodeLabels: ['Book'], mutateProperty: 'degree'})
-----
-
-The procedure can be configured to remove just the properties for s.
-In the following example, we will only remove the scores from the `Book` nodes.
-
-[role=query-example]
---
-.Remove the `degree` property from the projected `Book` nodes:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.removeNodeProperties('socialGraph', ['degree'], ['Book'])
-YIELD propertiesRemoved
-----
-
-.Results
-[opts="header"]
-|===
-| propertiesRemoved
-| 1
-|===
---
-
-[NOTE]
---
-If the `nodeLabels` parameter is specified, it is required that _all_ given node labels have _all_ of the given properties.
---
-
 
 [[utility-functions-catalog]]
 == Utility functions

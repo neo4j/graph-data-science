@@ -304,20 +304,4 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             "Defined keys: ['newNodeProp1', 'newNodeProp2']."
         );
     }
-
-    @Test
-    void writePropertyTwice() {
-        clearDb();
-        runQuery("CREATE (:A:B)");
-        runQuery("CALL gds.graph.project('myGraph', ['A','B'], '*')");
-
-        runQuery("CALL gds.pageRank.mutate('myGraph', {nodeLabels: ['A'], mutateProperty: 'score'})");
-        runQuery("CALL gds.degree.mutate('myGraph', {nodeLabels: ['B'], mutateProperty: 'score'})");
-
-        runQuery("CALL gds.graph.writeNodeProperties('myGraph', ['score'])");
-
-        // we write per node-label and as `B` > `A`
-        // the degree-score for label `B` is written at last and overwrites the pageRank-score of label `A`
-        assertCypherResult("MATCH (n) RETURN n.score AS score", List.of(Map.of("score", 0D)));
-    }
 }

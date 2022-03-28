@@ -135,6 +135,7 @@ public final class RandomGraphGenerator {
 
             return GraphFactory.create(
                 idMap,
+                nodeProperties.nodeSchema(),
                 nodeProperties.nodeProperties(),
                 relationshipType,
                 relationshipsBuilder.build()
@@ -257,14 +258,20 @@ public final class RandomGraphGenerator {
 
         // Create a corresponding node schema
         var nodeSchemaBuilder = NodeSchema.builder();
-        generatedProperties.forEach((propertyKey, property) -> {
-            propertyNameToLabels.get(propertyKey).forEach(nodeLabel ->
-                nodeSchemaBuilder.addProperty(
-                    nodeLabel,
-                    propertyKey,
-                    property.valueType()
-                ));
-        });
+        generatedProperties.forEach((propertyKey, property) -> propertyNameToLabels
+            .get(propertyKey)
+            .forEach(nodeLabel -> {
+                if (nodeLabel == NodeLabel.ALL_NODES) {
+                    idMap
+                        .availableNodeLabels()
+                        .forEach(actualNodeLabel -> nodeSchemaBuilder.addProperty(actualNodeLabel,
+                            propertyKey,
+                            property.valueType()
+                        ));
+                } else {
+                    nodeSchemaBuilder.addProperty(nodeLabel, propertyKey, property.valueType());
+                }
+            }));
 
         return ImmutableNodePropertiesAndSchema.builder()
             .nodeProperties(generatedProperties)
