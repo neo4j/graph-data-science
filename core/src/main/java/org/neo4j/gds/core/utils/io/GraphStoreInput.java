@@ -26,6 +26,7 @@ import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompatPropertySizeCalculator;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;
+import org.neo4j.internal.batchimport.cache.idmapping.string.LongEncoder;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Group;
 import org.neo4j.internal.batchimport.input.Groups;
@@ -111,9 +112,18 @@ public final class GraphStoreInput implements CompatInput {
         // prepared for more reserved. The only other option would
         // be to scan through all original ids in the id map and
         // perform individual checks with `IdValidator#isReservedId`
-        return nodeStore.idMap.contains(IdValidator.INTEGER_MINUS_ONE)
-            ? new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, batchSize, IdMode.MAPPING)
-            : new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, batchSize, IdMode.ACTUAL);
+        if (nodeStore.idMap.contains(IdValidator.INTEGER_MINUS_ONE)) {
+            try {
+                // We try to encode the highest mapped neo id in order to check if we
+                // exceed the limit. This is the encoder used when using IdType.INTEGER
+                new LongEncoder().encode(nodeStore.idMap.highestNeoId());
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("The range of original ids specified in the graph exceeds the limit", e);
+            }
+            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, batchSize, IdMode.MAPPING);
+        } else {
+            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, batchSize, IdMode.ACTUAL);
+        }
     }
 
     private GraphStoreInput(
