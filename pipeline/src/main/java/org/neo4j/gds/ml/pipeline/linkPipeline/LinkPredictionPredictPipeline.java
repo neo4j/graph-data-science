@@ -41,7 +41,10 @@ public class LinkPredictionPredictPipeline implements Pipeline<LinkFeatureStep> 
     }
 
     public static LinkPredictionPredictPipeline from(Pipeline<LinkFeatureStep> pipeline) {
-        return new LinkPredictionPredictPipeline(pipeline.nodePropertySteps(), pipeline.featureSteps());
+        return new LinkPredictionPredictPipeline(
+            List.copyOf(pipeline.nodePropertySteps()),
+            List.copyOf(pipeline.featureSteps())
+        );
     }
 
     @Override
