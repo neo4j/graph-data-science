@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TunableTrainerConfig {
+public final class TunableTrainerConfig {
     public final Map<String, Object> value;
     private final TrainingMethod method;
 
