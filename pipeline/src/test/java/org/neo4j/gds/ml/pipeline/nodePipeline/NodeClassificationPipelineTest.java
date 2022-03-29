@@ -206,7 +206,6 @@ class NodeClassificationPipelineTest {
                 .returns(
                     pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression)
                         .stream()
-                        .map(TunableTrainerConfig::defaultFilledTunableConfig)
                         .map(TunableTrainerConfig::toMap)
                         .collect(Collectors.toList()),
                     pipelineMap -> ((Map<String, Object>) pipelineMap.get("trainingParameterSpace")).get(TrainingMethod.LogisticRegression.name())

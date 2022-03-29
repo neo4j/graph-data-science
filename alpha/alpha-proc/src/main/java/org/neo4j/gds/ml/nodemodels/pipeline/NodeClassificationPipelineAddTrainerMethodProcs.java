@@ -52,7 +52,7 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
 
         pipeline.addTrainerConfig(
             TrainingMethod.LogisticRegression,
-            TunableTrainerConfig.of(config, TrainingMethod.LogisticRegression).defaultFilledTunableConfig()
+            TunableTrainerConfig.of(config, TrainingMethod.LogisticRegression)
         );
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
@@ -71,7 +71,7 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
 
         pipeline.addTrainerConfig(
             TrainingMethod.RandomForest,
-            TunableTrainerConfig.of(randomForestConfig, TrainingMethod.RandomForest).defaultFilledTunableConfig()
+            TunableTrainerConfig.of(randomForestConfig, TrainingMethod.RandomForest)
         );
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));

@@ -23,6 +23,7 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,19 +37,19 @@ public class TunableTrainerConfig {
     }
 
     public static TunableTrainerConfig of(Map<String, Object> value, TrainingMethod method) {
-        return new TunableTrainerConfig(value, method);
+        return new TunableTrainerConfig(fillDefaults(value, method), method);
     }
 
-    public TunableTrainerConfig defaultFilledTunableConfig() {
+    private static Map<String, Object> fillDefaults(Map<String, Object> value, TrainingMethod method) {
         var defaultConfig = method.createConfig(Map.of()).toMap();
         // for values that have type Optional<?>, defaultConfig will not contain the key so we need keys from both maps
-        var mergedConfig = Stream.concat(defaultConfig.keySet().stream(), value.keySet().stream())
+        // if such keys are missing from the `value` map, then we also do not want to add them
+        return Stream.concat(defaultConfig.keySet().stream(), value.keySet().stream())
             .distinct()
             .collect(Collectors.toMap(
                 key -> key,
-                key -> value.getOrDefault(key, defaultConfig.get(key))
+                key -> value.getOrDefault(key, defaultConfig.getOrDefault(key, Optional.empty()))
             ));
-        return TunableTrainerConfig.of(mergedConfig, method);
     }
 
     public Map<String, Object> toMap() {
