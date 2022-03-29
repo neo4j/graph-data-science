@@ -112,7 +112,7 @@ public final class GraphStoreInput implements CompatInput {
         // prepared for more reserved. The only other option would
         // be to scan through all original ids in the id map and
         // perform individual checks with `IdValidator#isReservedId`
-        if (nodeStore.idMap.contains(IdValidator.INTEGER_MINUS_ONE)) {
+        if (nodeStore.idMap.highestNeoId() > IdValidator.INTEGER_MINUS_ONE && nodeStore.idMap.contains(IdValidator.INTEGER_MINUS_ONE)) {
             try {
                 // We try to encode the highest mapped neo id in order to check if we
                 // exceed the limit. This is the encoder used when using IdType.INTEGER
