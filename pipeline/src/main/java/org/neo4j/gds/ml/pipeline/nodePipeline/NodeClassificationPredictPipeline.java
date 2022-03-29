@@ -43,7 +43,10 @@ public class NodeClassificationPredictPipeline implements Pipeline<NodeClassific
     }
 
     public static NodeClassificationPredictPipeline from(Pipeline<NodeClassificationFeatureStep> pipeline) {
-        return new NodeClassificationPredictPipeline(pipeline.nodePropertySteps(), pipeline.featureSteps());
+        return new NodeClassificationPredictPipeline(
+            List.copyOf(pipeline.nodePropertySteps()),
+            List.copyOf(pipeline.featureSteps())
+        );
     }
 
     @Override
