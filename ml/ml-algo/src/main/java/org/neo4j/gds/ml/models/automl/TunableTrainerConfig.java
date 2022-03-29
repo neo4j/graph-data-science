@@ -23,7 +23,6 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,7 +47,7 @@ public final class TunableTrainerConfig {
             .distinct()
             .collect(Collectors.toMap(
                 key -> key,
-                key -> value.getOrDefault(key, defaultConfig.getOrDefault(key, Optional.empty()))
+                key -> value.getOrDefault(key, defaultConfig.get(key))
             ));
     }
 
