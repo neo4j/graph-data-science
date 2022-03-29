@@ -54,7 +54,6 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
             configuration.pipeline(),
             NodeClassificationTrainingPipeline.class
         );
-        pipeline.validateBeforeExecution(graphStore, configuration);
 
         return new NodeClassificationTrainPipelineExecutor(
             pipeline,

@@ -26,7 +26,9 @@ import org.neo4j.gds.config.ToMapConvertible;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface Pipeline<FEATURE_STEP extends FeatureStep> extends ToMapConvertible {
@@ -34,6 +36,18 @@ public interface Pipeline<FEATURE_STEP extends FeatureStep> extends ToMapConvert
     List<ExecutableNodePropertyStep> nodePropertySteps();
 
     List<FEATURE_STEP> featureSteps();
+
+    default void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {
+        Set<String> invalidProperties = featurePropertiesMissingFromGraph(graphStore, config);
+
+        nodePropertySteps().stream()
+            .flatMap(step -> Stream.ofNullable((String) step.config().get(MUTATE_PROPERTY_KEY)))
+            .forEach(invalidProperties::remove);
+
+        if (!invalidProperties.isEmpty()) {
+            throw Pipeline.missingNodePropertiesFromFeatureSteps(invalidProperties);
+        }
+    }
 
     default void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {
         Set<String> invalidProperties = featurePropertiesMissingFromGraph(graphStore, config);

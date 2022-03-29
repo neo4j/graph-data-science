@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline;
 
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
@@ -70,7 +72,10 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
         this.splitConfig = splitConfig;
     }
 
-    public void validate() {
+    @Override
+    public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {
+        super.validateBeforeExecution(graphStore, config);
+
         if (featureSteps().isEmpty()) {
             throw new IllegalArgumentException(
                 "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.beta.pipeline.linkPrediction.addFeature`.");

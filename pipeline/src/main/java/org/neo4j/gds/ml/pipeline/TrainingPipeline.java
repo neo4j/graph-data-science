@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.TimeUtil;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
@@ -33,9 +31,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -84,18 +80,6 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
     protected abstract Map<String, List<Map<String, Object>>> featurePipelineDescription();
 
     protected abstract Map<String, Object> additionalEntries();
-
-    public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {
-        Set<String> invalidProperties = featurePropertiesMissingFromGraph(graphStore, config);
-
-        this.nodePropertySteps.stream()
-            .flatMap(step -> Stream.ofNullable((String) step.config().get(MUTATE_PROPERTY_KEY)))
-            .forEach(invalidProperties::remove);
-
-        if (!invalidProperties.isEmpty()) {
-            throw Pipeline.missingNodePropertiesFromFeatureSteps(invalidProperties);
-        }
-    }
 
     public int numberOfModelCandidates() {
         return this.trainingParameterSpace()

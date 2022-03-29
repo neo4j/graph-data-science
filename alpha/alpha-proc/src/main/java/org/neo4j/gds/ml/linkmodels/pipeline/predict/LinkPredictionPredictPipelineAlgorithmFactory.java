@@ -79,9 +79,10 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             configuration.modelName(),
             configuration.username()
         );
-        var linkPredictionPipeline = model.customInfo().pipeline();
+        var pipeline = model.customInfo().pipeline();
+
         return new LinkPredictionPredictPipelineExecutor(
-            linkPredictionPipeline,
+            pipeline,
             ClassifierFactory.create(model.data()),
             configuration,
             executionContext,

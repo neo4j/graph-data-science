@@ -38,6 +38,9 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.nodeproperties.LongTestProperties;
 
 import java.util.Collection;
@@ -66,6 +69,7 @@ class PipelineExecutorTest {
     void shouldCleanGraphStoreWhenComputationIsComplete() {
         var pipelineExecutor = new SucceedingPipelineExecutor(
             new BogusNodePropertyPipeline(),
+            graphStore,
             new PipelineExecutorTestConfig(),
             ProgressTracker.NULL_TRACKER
         );
@@ -78,6 +82,7 @@ class PipelineExecutorTest {
     void shouldCleanGraphStoreOnFailureWhenExecuting() {
         var pipelineExecutor = new FailingPipelineExecutor(
             new BogusNodePropertyPipeline(),
+            graphStore,
             new PipelineExecutorTestConfig(),
             ProgressTracker.NULL_TRACKER
         );
@@ -91,6 +96,7 @@ class PipelineExecutorTest {
         var log = Neo4jProxy.testLog();;
         var pipelineExecutor = new SucceedingPipelineExecutor(
             new BogusNodePropertyPipeline(),
+            graphStore,
             new PipelineExecutorTestConfig(),
             new TestProgressTracker(taskTree(), log, 1, EmptyTaskRegistryFactory.INSTANCE)
         );
@@ -113,6 +119,7 @@ class PipelineExecutorTest {
     void shouldCleanGraphStoreWhenNodePropertyStepIsFailing() {
         var pipelineExecutor = new SucceedingPipelineExecutor(
             new FailingNodePropertyPipeline(),
+            graphStore,
             new PipelineExecutorTestConfig(),
             ProgressTracker.NULL_TRACKER
         );
@@ -127,6 +134,7 @@ class PipelineExecutorTest {
         var log = Neo4jProxy.testLog();;
         var pipelineExecutor = new FailingPipelineExecutor(
             new BogusNodePropertyPipeline(),
+            graphStore,
             new PipelineExecutorTestConfig(),
             new TestProgressTracker(taskTree(), log, 1, EmptyTaskRegistryFactory.INSTANCE)
         );
@@ -143,6 +151,26 @@ class PipelineExecutorTest {
                 "FailingPipelineExecutor :: execute node property steps :: Finished"
             );
     }
+
+    @Test
+    void failOnInvalidGraphBeforeExecution() {
+        var invalidGraphStore = GdlFactory.of("(), ()").build();
+        var pipeline = new LinkPredictionPredictPipeline(
+            List.of(),
+            List.of(new L2FeatureStep(List.of("a")))
+        );
+
+        var executor = new FailingPipelineExecutor(
+            pipeline,
+            invalidGraphStore,
+            new PipelineExecutorTestConfig(),
+            ProgressTracker.NULL_TRACKER
+        );
+
+        assertThatThrownBy(executor::compute)
+            .hasMessageContaining("Node properties [a] defined in the feature steps do not exist in the graph or part of the pipeline");
+    }
+
 
     private Task taskTree() {
         return Tasks.task(
@@ -166,9 +194,10 @@ class PipelineExecutorTest {
         }
     }
 
-    private class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, TrainingPipeline<FeatureStep>, String> {
+    private class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<? extends FeatureStep>, String> {
         SucceedingPipelineExecutor(
-            TrainingPipeline<FeatureStep> pipelineStub,
+            Pipeline<? extends FeatureStep> pipelineStub,
+            GraphStore graphStore,
             AlgoBaseConfig config,
             ProgressTracker progressTracker
         ) {
@@ -176,7 +205,7 @@ class PipelineExecutorTest {
                 pipelineStub,
                 config,
                 ExecutionContext.EMPTY,
-                PipelineExecutorTest.this.graphStore,
+                graphStore,
                 "graph",
                 progressTracker
             );
@@ -196,12 +225,14 @@ class PipelineExecutorTest {
 
     private class FailingPipelineExecutor extends SucceedingPipelineExecutor {
         FailingPipelineExecutor(
-            TrainingPipeline<FeatureStep> pipelineStub,
+            Pipeline<? extends FeatureStep> pipelineStub,
+            GraphStore graphStore,
             AlgoBaseConfig config,
             ProgressTracker progressTracker
         ) {
             super(
                 pipelineStub,
+                graphStore,
                 config,
                 progressTracker
             );

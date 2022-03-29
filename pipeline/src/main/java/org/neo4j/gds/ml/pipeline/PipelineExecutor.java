@@ -100,6 +100,8 @@ public abstract class PipelineExecutor<
     public RESULT compute() {
         progressTracker.beginSubTask();
 
+        pipeline.validateBeforeExecution(graphStore, config);
+
         var dataSplits = splitDataset();
         try {
             progressTracker.beginSubTask("execute node property steps");
