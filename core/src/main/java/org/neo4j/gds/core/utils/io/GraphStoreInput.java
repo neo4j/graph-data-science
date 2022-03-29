@@ -107,11 +107,18 @@ public final class GraphStoreInput implements CompatInput {
         RelationshipStore relationshipStore,
         int batchSize
     ) {
+        // Neo reserves node id 2^32 - 1 for handling special internal cases.
+        // If our id space is below that value, we can use actual mapping, i.e.,
+        // we directly forward the internal GDS ids to the batch importer.
+        // If the GDS ids contain the reserved id, we need to fall back to Neo's
+        // id mapping functionality. This however, is limited to external ids up
+        // until 2^58, which is why we need to ensure that we don't exceed that.
+
         // This check is correct for now but will not work if Neo adds
         // more reserved ids. Their API in `IdValidator` seems to be
-        // prepared for more reserved. The only other option would
+        // prepared for more reserved ids. The only other option would
         // be to scan through all original ids in the id map and
-        // perform individual checks with `IdValidator#isReservedId`
+        // perform individual checks with `IdValidator#isReservedId`.
         if (nodeStore.idMap.highestNeoId() > IdValidator.INTEGER_MINUS_ONE && nodeStore.idMap.contains(IdValidator.INTEGER_MINUS_ONE)) {
             try {
                 // We try to encode the highest mapped neo id in order to check if we
