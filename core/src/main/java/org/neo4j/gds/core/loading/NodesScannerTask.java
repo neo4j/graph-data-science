@@ -78,7 +78,7 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
                 .highestPossibleNodeCount(highestPossibleNodeCount)
                 .nodeLabelIds(labels)
                 .capacity(scanner.bufferSize())
-                .hasLabelInformation(!labels.isEmpty())
+                .hasLabelInformation(labels.size() > 1)
                 .readProperty(nodePropertyImporter != null)
                 .build();
 

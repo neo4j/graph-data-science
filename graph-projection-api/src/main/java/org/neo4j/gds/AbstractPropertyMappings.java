@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -92,6 +93,10 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
                 relPropertyMapping.getClass().getSimpleName()
             ));
         }
+    }
+
+    public Set<String> propertyKeys() {
+        return stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet());
     }
 
     public Stream<PropertyMapping> stream() {

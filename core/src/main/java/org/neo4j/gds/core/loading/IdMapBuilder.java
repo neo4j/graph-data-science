@@ -25,7 +25,7 @@ public interface IdMapBuilder {
 
     IdMapAllocator allocate(int batchLength);
     IdMap build(
-        LabelInformation.Builder labelInformationBuilder,
+        LabelInformation.LabelInformationBuilder labelInformationBuilder,
         long highestNodeId,
         int concurrency
     );

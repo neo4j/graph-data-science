@@ -25,6 +25,7 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.CypherLoaderBuilder;
 import org.neo4j.gds.GraphFactoryTestSupport;
 import org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -453,5 +454,19 @@ class GraphLoaderTest extends BaseTest {
             )).graph();
 
         assertGraphEquals(fromGdl("(a)-[:Foo {bar: 3.14D}]->(b), (c)-[:Foo {bar: 1.61D}]->(d)"), graph);
+    }
+
+    @Test
+    void shouldLoadSingleNodeLabelViaNativeLoader() {
+        var graphStore = new StoreLoaderBuilder()
+            .api(db)
+            .graphName("graph")
+            .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
+            .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.all()))
+            .nodeProperties(List.of(PropertyMapping.of("prop1", 42L)))
+            .build()
+            .graphStore();
+
+        assertThat(graphStore.nodeLabels()).containsExactly(NodeLabel.of("AllNodes"));
     }
 }

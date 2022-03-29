@@ -44,7 +44,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, IdMapAndProperties> {
@@ -52,7 +51,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
     private final IndexPropertyMappings.LoadablePropertyMappings propertyMappings;
     private final TerminationFlag terminationFlag;
     private final IdMapBuilder idMapBuilder;
-    private final LabelInformation.Builder labelInformationBuilder;
+    private final LabelInformation.LabelInformationBuilder labelInformationBuilder;
     private final @Nullable NativeNodePropertyImporter nodePropertyImporter;
 
     @Builder.Factory
@@ -75,11 +74,13 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
                 Optional.of(dimensions.nodeCount())
             );
 
-        var labelInformationBuilder =
-            graphProjectConfig.nodeProjections().allProjections().size() == 1
-            && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
-                ? LabelInformation.emptyBuilder()
-                : LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping);
+        LabelInformation.LabelInformationBuilder labelInformationBuilder;
+        if (graphProjectConfig.nodeProjections().allProjections().size() == 1) {
+            var singleLabel = graphProjectConfig.nodeProjections().projections().keySet().stream().findFirst().get();
+            labelInformationBuilder = LabelInformation.emptyBuilder(singleLabel);
+        } else {
+            labelInformationBuilder = LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping);
+        }
 
         var propertyMappings = IndexPropertyMappings.prepareProperties(
             graphProjectConfig,
@@ -115,7 +116,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
         IdMapBuilder idMapBuilder,
-        LabelInformation.Builder labelInformationBuilder
+        LabelInformation.LabelInformationBuilder labelInformationBuilder
     ) {
         super(
             scannerFactory,

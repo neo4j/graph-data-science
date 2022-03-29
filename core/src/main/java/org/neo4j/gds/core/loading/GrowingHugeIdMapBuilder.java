@@ -56,7 +56,7 @@ public final class GrowingHugeIdMapBuilder implements IdMapBuilder {
 
     @Override
     public IdMap build(
-        LabelInformation.Builder labelInformationBuilder,
+        LabelInformation.LabelInformationBuilder labelInformationBuilder,
         long highestNodeId,
         int concurrency
     ) {
