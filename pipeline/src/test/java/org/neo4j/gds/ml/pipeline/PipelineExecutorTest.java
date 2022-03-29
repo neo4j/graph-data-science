@@ -165,9 +165,9 @@ class PipelineExecutorTest {
         }
     }
 
-    private class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<FeatureStep>, String> {
+    private class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, TrainingPipeline<FeatureStep>, String> {
         SucceedingPipelineExecutor(
-            Pipeline<FeatureStep> pipelineStub,
+            TrainingPipeline<FeatureStep> pipelineStub,
             AlgoBaseConfig config,
             ProgressTracker progressTracker
         ) {
@@ -195,7 +195,7 @@ class PipelineExecutorTest {
 
     private class FailingPipelineExecutor extends SucceedingPipelineExecutor {
         FailingPipelineExecutor(
-            Pipeline<FeatureStep> pipelineStub,
+            TrainingPipeline<FeatureStep> pipelineStub,
             AlgoBaseConfig config,
             ProgressTracker progressTracker
         ) {
@@ -283,7 +283,7 @@ class PipelineExecutorTest {
         }
     }
 
-    private class BogusNodePropertyPipeline extends Pipeline<FeatureStep> {
+    private class BogusNodePropertyPipeline extends TrainingPipeline<FeatureStep> {
 
         BogusNodePropertyPipeline() {super();}
 
@@ -314,7 +314,7 @@ class PipelineExecutorTest {
         public void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {}
     }
 
-    private class FailingNodePropertyPipeline extends Pipeline<FeatureStep> {
+    private class FailingNodePropertyPipeline extends TrainingPipeline<FeatureStep> {
 
         FailingNodePropertyPipeline() {super();}
 

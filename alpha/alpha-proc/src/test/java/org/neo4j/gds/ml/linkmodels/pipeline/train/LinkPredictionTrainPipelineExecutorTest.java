@@ -52,9 +52,9 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.ImmutableLinkPredictionTrainConfig;
@@ -140,7 +140,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void testProcedureAndLinkFeatures() {
-        LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
+        LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
 
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
             .validationFolds(2)
@@ -200,7 +200,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void validateLinkFeatureSteps() {
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder().testFraction(0.5).trainFraction(0.5).validationFolds(2).build());
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("scalar", "no-property", "no-prop-2")));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("other-no-property")));
@@ -238,7 +238,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("invalidSplits")
     void failOnEmptySplitGraph(LinkPredictionSplitConfig splitConfig, String expectedError) {
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.setSplitConfig(splitConfig);
 
         var linkPredictionTrainConfig = ImmutableLinkPredictionTrainConfig.builder()
@@ -279,7 +279,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         var invalidGraphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), graphName).graphStore();
 
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder().build());
 
         var linkPredictionTrainConfig = ImmutableLinkPredictionTrainConfig.builder()
@@ -308,7 +308,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void shouldLogProgress() {
-        LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
+        LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
 
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
             .validationFolds(2)
@@ -434,7 +434,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .pipeline("DUMMY")
             .build();
 
-        LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
+        LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
         pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
 
         for (NodePropertyStep propertyStep : nodePropertySteps) {
@@ -462,7 +462,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .pipeline("DUMMY")
             .build();
 
-        LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
+        LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
 
         assertThatThrownBy(() -> LinkPredictionTrainPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config))
             .hasMessage("Need at least one model candidate for training.");

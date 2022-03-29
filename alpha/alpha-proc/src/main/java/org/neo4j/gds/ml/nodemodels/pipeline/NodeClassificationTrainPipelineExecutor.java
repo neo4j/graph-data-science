@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationTrain;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationTrainResult;
@@ -38,12 +38,12 @@ import java.util.Optional;
 
 public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     NodeClassificationPipelineTrainConfig,
-    NodeClassificationPipeline,
+    NodeClassificationTrainingPipeline,
     NodeClassificationTrainResult
 > {
 
     public NodeClassificationTrainPipelineExecutor(
-        NodeClassificationPipeline pipeline,
+        NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
@@ -54,7 +54,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     }
 
     public static MemoryEstimation estimate(
-        NodeClassificationPipeline pipeline,
+        NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig configuration,
         ModelCatalog modelCatalog
     ) {

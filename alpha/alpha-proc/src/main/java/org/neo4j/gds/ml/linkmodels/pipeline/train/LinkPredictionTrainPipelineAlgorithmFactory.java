@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 
@@ -50,7 +50,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
         var pipeline = PipelineCatalog.getTyped(
             trainConfig.username(),
             trainConfig.pipeline(),
-            LinkPredictionPipeline.class
+            LinkPredictionTrainingPipeline.class
         );
         pipeline.validate();
 
@@ -71,7 +71,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
 
     @Override
     public Task progressTask(GraphStore graphStore, LinkPredictionTrainConfig config) {
-        var pipeline = PipelineCatalog.getTyped(config.username(), config.pipeline(), LinkPredictionPipeline.class);
+        var pipeline = PipelineCatalog.getTyped(config.username(), config.pipeline(), LinkPredictionTrainingPipeline.class);
 
         return Tasks.task(
             taskName(),
@@ -89,7 +89,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
         var pipeline = PipelineCatalog.getTyped(
             configuration.username(),
             configuration.pipeline(),
-            LinkPredictionPipeline.class
+            LinkPredictionTrainingPipeline.class
         );
 
         return LinkPredictionTrainPipelineExecutor.estimate(executionContext.modelCatalog(), pipeline, configuration);
@@ -100,7 +100,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
         // inject expected relationship set sizes which are used in the estimation of the TrainPipelineExecutor
         // this allows to compute the MemoryTree over a single graphDimension
         var splitConfig = PipelineCatalog
-            .getTyped(config.username(), config.pipeline(), LinkPredictionPipeline.class)
+            .getTyped(config.username(), config.pipeline(), LinkPredictionTrainingPipeline.class)
             .splitConfig();
 
         return splitConfig.expectedGraphDimensions(graphDimensions.nodeCount(), graphDimensions.relCountUpperBound());

@@ -29,7 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationTrain;
 
@@ -52,7 +52,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
         var pipeline = PipelineCatalog.getTyped(
             configuration.username(),
             configuration.pipeline(),
-            NodeClassificationPipeline.class
+            NodeClassificationTrainingPipeline.class
         );
         pipeline.validateBeforeExecution(graphStore, configuration);
 
@@ -71,7 +71,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
         var pipeline = PipelineCatalog.getTyped(
             configuration.username(),
             configuration.pipeline(),
-            NodeClassificationPipeline.class
+            NodeClassificationTrainingPipeline.class
         );
 
         return MemoryEstimations.builder(NodeClassificationTrainPipelineExecutor.class)
@@ -90,7 +90,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
 
     @Override
     public Task progressTask(GraphStore graphStore, NodeClassificationPipelineTrainConfig config) {
-        var pipeline = PipelineCatalog.getTyped(config.username(), config.pipeline(), NodeClassificationPipeline.class);
+        var pipeline = PipelineCatalog.getTyped(config.username(), config.pipeline(), NodeClassificationTrainingPipeline.class);
 
         return Tasks.task(
             taskName(),

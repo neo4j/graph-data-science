@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -38,7 +38,7 @@ class PipelineCatalogTest {
 
     @Test
     void setPipeline() {
-        var alicesPipeline = new NodeClassificationPipeline();
+        var alicesPipeline = new NodeClassificationTrainingPipeline();
         PipelineCatalog.set(ALICE, "myPipe", alicesPipeline);
 
         assertThat(PipelineCatalog.getAllPipelines(ALICE))
@@ -47,7 +47,7 @@ class PipelineCatalogTest {
 
         assertThat(PipelineCatalog.getAllPipelines("bob")).isEmpty();
 
-        LinkPredictionPipeline bobsPipeline = new LinkPredictionPipeline();
+        LinkPredictionTrainingPipeline bobsPipeline = new LinkPredictionTrainingPipeline();
         PipelineCatalog.set("bob", "myPipe", bobsPipeline);
 
         assertThat(PipelineCatalog.getAllPipelines(ALICE)).containsExactly(
@@ -61,16 +61,16 @@ class PipelineCatalogTest {
 
     @Test
     void failOnSettingExistingPipeline() {
-        PipelineCatalog.set(ALICE, "myPipe", new NodeClassificationPipeline());
+        PipelineCatalog.set(ALICE, "myPipe", new NodeClassificationTrainingPipeline());
 
-        assertThatThrownBy(() -> PipelineCatalog.set(ALICE, "myPipe", new NodeClassificationPipeline()))
+        assertThatThrownBy(() -> PipelineCatalog.set(ALICE, "myPipe", new NodeClassificationTrainingPipeline()))
             .hasMessage("Pipeline named `myPipe` already exists.");
     }
 
     @Test
     void getPipeline() {
-        var onePipe = new NodeClassificationPipeline();
-        var otherPipe = new LinkPredictionPipeline();
+        var onePipe = new NodeClassificationTrainingPipeline();
+        var otherPipe = new LinkPredictionTrainingPipeline();
         PipelineCatalog.set(ALICE, "onePipe", onePipe);
         PipelineCatalog.set(ALICE, "otherPipe", otherPipe);
 
@@ -80,13 +80,13 @@ class PipelineCatalogTest {
 
     @Test
     void getTypedPipeline() {
-        var ncPipe = new NodeClassificationPipeline();
-        var lpPipe = new LinkPredictionPipeline();
+        var ncPipe = new NodeClassificationTrainingPipeline();
+        var lpPipe = new LinkPredictionTrainingPipeline();
         PipelineCatalog.set(ALICE, "onePipe", ncPipe);
         PipelineCatalog.set(ALICE, "lpPipe", lpPipe);
 
-        assertThat(PipelineCatalog.getTyped(ALICE, "onePipe", NodeClassificationPipeline.class)).isSameAs(ncPipe);
-        assertThat(PipelineCatalog.getTyped(ALICE, "lpPipe", LinkPredictionPipeline.class)).isSameAs(lpPipe);
+        assertThat(PipelineCatalog.getTyped(ALICE, "onePipe", NodeClassificationTrainingPipeline.class)).isSameAs(ncPipe);
+        assertThat(PipelineCatalog.getTyped(ALICE, "lpPipe", LinkPredictionTrainingPipeline.class)).isSameAs(lpPipe);
     }
 
     @Test
@@ -97,8 +97,8 @@ class PipelineCatalogTest {
 
     @Test
     void failOnGetTypedOnUnexpectedTypedPipeline() {
-        PipelineCatalog.set(ALICE, "ncPipe", new NodeClassificationPipeline());
-        assertThatThrownBy(() -> PipelineCatalog.getTyped(ALICE, "ncPipe", LinkPredictionPipeline.class))
+        PipelineCatalog.set(ALICE, "ncPipe", new NodeClassificationTrainingPipeline());
+        assertThatThrownBy(() -> PipelineCatalog.getTyped(ALICE, "ncPipe", LinkPredictionTrainingPipeline.class))
             .hasMessage("The pipeline `ncPipe` is of type `Node classification training pipeline`, but expected type `Link prediction training pipeline`.");
     }
 
@@ -106,14 +106,14 @@ class PipelineCatalogTest {
     void exists() {
         assertThat(PipelineCatalog.exists(ALICE, "onePipe")).isFalse();
 
-        PipelineCatalog.set(ALICE, "onePipe", new NodeClassificationPipeline());
+        PipelineCatalog.set(ALICE, "onePipe", new NodeClassificationTrainingPipeline());
 
         assertThat(PipelineCatalog.exists(ALICE, "onePipe")).isTrue();
     }
 
     @Test
     void dropPipeline() {
-        NodeClassificationPipeline onePipe = new NodeClassificationPipeline();
+        NodeClassificationTrainingPipeline onePipe = new NodeClassificationTrainingPipeline();
         PipelineCatalog.set(ALICE, "onePipe", onePipe);
 
         assertThat(PipelineCatalog.drop(ALICE, "onePipe")).isSameAs(onePipe);

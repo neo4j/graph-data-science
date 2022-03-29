@@ -47,8 +47,9 @@ import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
@@ -74,7 +75,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
     private final Graph trainGraph;
     private final Graph validationGraph;
-    private final LinkPredictionPipeline pipeline;
+    private final LinkPredictionTrainingPipeline pipeline;
     private final LinkPredictionTrainConfig config;
     private final LocalIdMap classIdMap;
 
@@ -88,7 +89,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     public LinkPredictionTrain(
         Graph trainGraph,
         Graph validationGraph,
-        LinkPredictionPipeline pipeline,
+        LinkPredictionTrainingPipeline pipeline,
         LinkPredictionTrainConfig config,
         ProgressTracker progressTracker
     ) {
@@ -368,7 +369,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             LinkPredictionModelInfo.of(
                 bestParameters,
                 winnerMetrics,
-                pipeline.copy()
+                LinkPredictionPredictPipeline.from(pipeline)
             )
         );
     }
@@ -379,7 +380,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     }
 
     public static MemoryEstimation estimate(
-        LinkPredictionPipeline pipeline,
+        LinkPredictionTrainingPipeline pipeline,
         LinkPredictionTrainConfig trainConfig
     ) {
         // For the computation of the MemoryTree, this estimation assumes the given input graph dimensions to contain
@@ -418,7 +419,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     }
 
     private static MemoryEstimation estimateTrainingAndEvaluation(
-        LinkPredictionPipeline pipeline,
+        LinkPredictionTrainingPipeline pipeline,
         MemoryRange linkFeatureDimension,
         int numberOfMetrics
     ) {

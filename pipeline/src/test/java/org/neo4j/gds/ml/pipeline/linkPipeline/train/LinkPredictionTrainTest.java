@@ -45,9 +45,9 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 
 import java.util.List;
@@ -181,11 +181,9 @@ class LinkPredictionTrainTest {
 
         var result = runLinkPrediction(trainConfig);
 
-        assertThat(result.modelSelectionStatistics().trainStats().get(LinkMetric.AUCPR).size()).isEqualTo(result
-            .model()
-            .customInfo()
-            .trainingPipeline()
-            .numberOfModelCandidates());
+        assertThat(result.modelSelectionStatistics().trainStats().get(LinkMetric.AUCPR).size()).isEqualTo(
+            linkPredictionPipeline().numberOfModelCandidates()
+        );
 
         var actualModel = result.model();
 
@@ -243,7 +241,7 @@ class LinkPredictionTrainTest {
             .pipeline("DUMMY")
             .build();
 
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
 
         var graphDim = GraphDimensions.of(nodeCount, relationshipCount);
@@ -273,7 +271,7 @@ class LinkPredictionTrainTest {
             .pipeline("DUMMY")
             .build();
 
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
         pipeline.setSplitConfig(splitConfig);
 
@@ -304,7 +302,7 @@ class LinkPredictionTrainTest {
             .pipeline("DUMMY")
             .build();
 
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.setTrainingParameterSpace(trainerMethod, parameterSpace);
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
@@ -338,7 +336,7 @@ class LinkPredictionTrainTest {
             .concurrency(concurrency)
             .build();
 
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
 
         var graphDim = GraphDimensions.of(100, 1_000);
@@ -360,7 +358,7 @@ class LinkPredictionTrainTest {
 
     @Test
     void logProgressRF() {
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
             .validationFolds(2)
             .negativeSamplingRatio(1)
@@ -412,7 +410,7 @@ class LinkPredictionTrainTest {
 
     @Test
     void logProgressLR() {
-        var pipeline = new LinkPredictionPipeline();
+        var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
             .validationFolds(2)
             .negativeSamplingRatio(1)
@@ -462,8 +460,8 @@ class LinkPredictionTrainTest {
             );
     }
 
-    private LinkPredictionPipeline linkPredictionPipeline() {
-        LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
+    private LinkPredictionTrainingPipeline linkPredictionPipeline() {
+        LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
 
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
             .validationFolds(2)

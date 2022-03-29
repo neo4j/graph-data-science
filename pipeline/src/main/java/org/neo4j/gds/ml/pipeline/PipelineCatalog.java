@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -37,13 +37,13 @@ public final class PipelineCatalog {
     private static final ConcurrentHashMap<String, PipelineUserCatalog> userCatalogs = new ConcurrentHashMap<>();
 
     private static final Map<Class<?>, String> classToType = Map.of(
-        NodeClassificationPipeline.class, NodeClassificationPipeline.PIPELINE_TYPE,
-        LinkPredictionPipeline.class, LinkPredictionPipeline.PIPELINE_TYPE
+        NodeClassificationTrainingPipeline.class, NodeClassificationTrainingPipeline.PIPELINE_TYPE,
+        LinkPredictionTrainingPipeline.class, LinkPredictionTrainingPipeline.PIPELINE_TYPE
     );
 
     private PipelineCatalog() { }
 
-    public static void set(String user, String pipelineName, Pipeline<?> pipeline) {
+    public static void set(String user, String pipelineName, TrainingPipeline<?> pipeline) {
         userCatalogs.computeIfAbsent(user, ignore -> new PipelineUserCatalog()).set(pipelineName, pipeline);
     }
 
@@ -51,14 +51,14 @@ public final class PipelineCatalog {
         return userCatalogs.getOrDefault(user, PipelineUserCatalog.EMPTY).exists(pipelineName);
     }
 
-    public static Pipeline<?> get(String user, String pipelineName) {
+    public static TrainingPipeline<?> get(String user, String pipelineName) {
         return userCatalogs.getOrDefault(user, PipelineUserCatalog.EMPTY)
             .get(pipelineName)
             .orElseThrow(() -> createPipelineNotFoundException(user, pipelineName));
     }
 
-    public static <PIPELINE extends Pipeline<?>> PIPELINE getTyped(String user, String pipelineName, Class<PIPELINE> expectedClass) {
-        Pipeline<?> pipeline = get(user, pipelineName);
+    public static <PIPELINE extends TrainingPipeline<?>> PIPELINE getTyped(String user, String pipelineName, Class<PIPELINE> expectedClass) {
+        TrainingPipeline<?> pipeline = get(user, pipelineName);
 
         if (!expectedClass.isInstance(pipeline)) {
             throw new IllegalArgumentException(formatWithLocale(
@@ -72,7 +72,7 @@ public final class PipelineCatalog {
         return (PIPELINE) pipeline;
     }
 
-    public static Pipeline<?> drop(String user, String pipelineName) {
+    public static TrainingPipeline<?> drop(String user, String pipelineName) {
         return userCatalogs.getOrDefault(user, PipelineUserCatalog.EMPTY)
             .drop(pipelineName)
             .orElseThrow(() -> createPipelineNotFoundException(user, pipelineName));
@@ -99,12 +99,12 @@ public final class PipelineCatalog {
     public interface PipelineCatalogEntry {
         String pipelineName();
 
-        Pipeline<?> pipeline();
+        TrainingPipeline<?> pipeline();
     }
 
     static class PipelineUserCatalog {
 
-        private final Map<String, Pipeline<?>> pipelineByName;
+        private final Map<String, TrainingPipeline<?>> pipelineByName;
 
         private static final PipelineUserCatalog EMPTY = new PipelineUserCatalog();
 
@@ -112,7 +112,7 @@ public final class PipelineCatalog {
             this.pipelineByName = new ConcurrentHashMap<>();
         }
 
-        public void set(String pipelineName, Pipeline<?> pipeline) {
+        public void set(String pipelineName, TrainingPipeline<?> pipeline) {
             if (pipelineByName.containsKey(pipelineName)) {
                 throw new IllegalStateException(formatWithLocale(
                     "Pipeline named `%s` already exists.",
@@ -127,11 +127,11 @@ public final class PipelineCatalog {
             return pipelineByName.containsKey(pipelineName);
         }
 
-        public Optional<Pipeline<?>> get(String pipelineName) {
+        public Optional<TrainingPipeline<?>> get(String pipelineName) {
             return Optional.ofNullable(pipelineByName.get(pipelineName));
         }
 
-        public Optional<Pipeline<?>> drop(String pipelineName) {
+        public Optional<TrainingPipeline<?>> drop(String pipelineName) {
             return Optional.ofNullable(pipelineByName.remove(pipelineName));
         }
 

@@ -27,9 +27,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfigImpl;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -55,13 +55,13 @@ class PipelineListProcTest extends BaseProcTest {
     @ParameterizedTest
     @ValueSource(strings = {"gds.beta.pipeline.list()", "gds.beta.pipeline.list(null)"})
     void listsPipelines(String query) {
-        var ncPipe1 = new NodeClassificationPipeline();
+        var ncPipe1 = new NodeClassificationTrainingPipeline();
         ncPipe1.setSplitConfig(NodeClassificationSplitConfigImpl.builder()
             .testFraction(0.8)
             .build()
         );
-        var ncPipe2 = new NodeClassificationPipeline();
-        var lpPipe = new LinkPredictionPipeline();
+        var ncPipe2 = new NodeClassificationTrainingPipeline();
+        var lpPipe = new LinkPredictionTrainingPipeline();
 
         PipelineCatalog.set(getUsername(), "ncPipe1", ncPipe1);
         PipelineCatalog.set(getUsername(), "ncPipe2", ncPipe2);
@@ -84,7 +84,7 @@ class PipelineListProcTest extends BaseProcTest {
                     ),
                     "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", "lpPipe",
-                    "pipelineType", LinkPredictionPipeline.PIPELINE_TYPE
+                    "pipelineType", LinkPredictionTrainingPipeline.PIPELINE_TYPE
                 ),
                 map(
                     "pipelineInfo.splitConfig", Map.of(
@@ -93,7 +93,7 @@ class PipelineListProcTest extends BaseProcTest {
                     ),
                     "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", "ncPipe1",
-                    "pipelineType", NodeClassificationPipeline.PIPELINE_TYPE
+                    "pipelineType", NodeClassificationTrainingPipeline.PIPELINE_TYPE
                 ),
                 map(
                     "pipelineInfo.splitConfig", Map.of(
@@ -102,7 +102,7 @@ class PipelineListProcTest extends BaseProcTest {
                     ),
                     "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", "ncPipe2",
-                    "pipelineType", NodeClassificationPipeline.PIPELINE_TYPE
+                    "pipelineType", NodeClassificationTrainingPipeline.PIPELINE_TYPE
                 )
             )
         );
@@ -122,12 +122,12 @@ class PipelineListProcTest extends BaseProcTest {
 
     @Test
     void returnSpecificPipeline() {
-        var ncPipe1 = new NodeClassificationPipeline();
+        var ncPipe1 = new NodeClassificationTrainingPipeline();
         ncPipe1.setSplitConfig(NodeClassificationSplitConfigImpl.builder()
             .testFraction(0.8)
             .build()
         );
-        var ncPipe2 = new NodeClassificationPipeline();
+        var ncPipe2 = new NodeClassificationTrainingPipeline();
 
         PipelineCatalog.set(getUsername(), "ncPipe1", ncPipe1);
         PipelineCatalog.set(getUsername(), "ncPipe2", ncPipe2);
@@ -144,7 +144,7 @@ class PipelineListProcTest extends BaseProcTest {
                     ),
                     "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", "ncPipe1",
-                    "pipelineType", NodeClassificationPipeline.PIPELINE_TYPE
+                    "pipelineType", NodeClassificationTrainingPipeline.PIPELINE_TYPE
                 )
             )
         );

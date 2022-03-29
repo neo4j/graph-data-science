@@ -28,13 +28,13 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
-import org.neo4j.gds.ml.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
+import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 
 import java.util.List;
 import java.util.Map;
@@ -42,13 +42,13 @@ import java.util.Optional;
 
 public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     LinkPredictionPredictPipelineBaseConfig,
-    LinkPredictionPipeline,
+    LinkPredictionPredictPipeline,
     LinkPredictionResult
     > {
     private final Classifier classifier;
 
     public LinkPredictionPredictPipelineExecutor(
-        LinkPredictionPipeline pipeline,
+        LinkPredictionPredictPipeline pipeline,
         Classifier classifier,
         LinkPredictionPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
@@ -87,7 +87,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
 
     public static MemoryEstimation estimate(
         ModelCatalog modelCatalog,
-        LinkPredictionPipeline pipeline,
+        LinkPredictionPredictPipeline pipeline,
         LinkPredictionPredictPipelineBaseConfig configuration,
         Classifier.ClassifierData classifierData
     ) {

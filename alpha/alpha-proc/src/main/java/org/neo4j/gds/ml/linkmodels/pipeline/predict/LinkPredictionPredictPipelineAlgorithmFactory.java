@@ -48,7 +48,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
     public Task progressTask(GraphStore graphStore, CONFIG config) {
         var trainingPipeline = getTrainedLPPipelineModel(modelCatalog, config.modelName(), config.username())
             .customInfo()
-            .trainingPipeline();
+            .pipeline();
 
         return Tasks.task(
             taskName(),
@@ -79,7 +79,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             configuration.modelName(),
             configuration.username()
         );
-        var linkPredictionPipeline = model.customInfo().trainingPipeline();
+        var linkPredictionPipeline = model.customInfo().pipeline();
         return new LinkPredictionPredictPipelineExecutor(
             linkPredictionPipeline,
             ClassifierFactory.create(model.data()),
@@ -98,7 +98,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             configuration.modelName(),
             configuration.username()
         );
-        var linkPredictionPipeline = model.customInfo().trainingPipeline();
+        var linkPredictionPipeline = model.customInfo().pipeline();
 
         return LinkPredictionPredictPipelineExecutor.estimate(
             modelCatalog,

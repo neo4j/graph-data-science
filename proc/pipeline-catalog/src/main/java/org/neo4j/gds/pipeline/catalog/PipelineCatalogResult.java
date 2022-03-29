@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.pipeline.catalog;
 
-import org.neo4j.gds.ml.pipeline.Pipeline;
+import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class PipelineCatalogResult {
     public final String pipelineType;
     public final ZonedDateTime creationTime;
 
-    public PipelineCatalogResult(Pipeline<?> pipeline, String pipelineName) {
+    public PipelineCatalogResult(TrainingPipeline<?> pipeline, String pipelineName) {
         this.pipelineName = pipelineName;
         pipelineInfo = pipeline.toMap();
         pipelineType = pipeline.type();

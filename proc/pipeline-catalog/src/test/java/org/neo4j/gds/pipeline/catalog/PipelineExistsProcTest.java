@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 
 import java.util.Map;
 
@@ -48,7 +48,7 @@ class PipelineExistsProcTest extends BaseProcTest {
     @Test
     void checksIfPipelineExists() {
         String pipeName = "testPipe";
-        var pipe = new NodeClassificationPipeline();
+        var pipe = new NodeClassificationTrainingPipeline();
 
         PipelineCatalog.set(
             getUsername(),
@@ -64,7 +64,7 @@ class PipelineExistsProcTest extends BaseProcTest {
             singletonList(
                 map(
                     "pipelineName", pipeName,
-                    "pipelineType", NodeClassificationPipeline.PIPELINE_TYPE,
+                    "pipelineType", NodeClassificationTrainingPipeline.PIPELINE_TYPE,
                     "exists", true
                 )
             )

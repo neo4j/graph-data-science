@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 
 import java.util.List;
 import java.util.Map;
@@ -241,7 +241,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldThrowIfAddingNodePropertyToANonPipeline() {
-        PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionPipeline());
+        PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionTrainingPipeline());
 
         assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
             getUsername(),
@@ -257,7 +257,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldThrowIfAddingFeatureToANonPipeline() {
-        PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionPipeline());
+        PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionTrainingPipeline());
 
         assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.selectFeatures(
             getUsername(),

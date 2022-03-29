@@ -28,7 +28,7 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFactory;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationTrainResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -83,7 +83,7 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
 
     @Override
     protected String modelType() {
-        return NodeClassificationPipeline.MODEL_TYPE;
+        return NodeClassificationTrainingPipeline.MODEL_TYPE;
     }
 
     @Override

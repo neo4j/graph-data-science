@@ -35,7 +35,7 @@ public interface LinkPredictionModelInfo extends ToMapConvertible {
 
     Map<LinkMetric, BestMetricData> metrics();
 
-    LinkPredictionPipeline trainingPipeline();
+    LinkPredictionPredictPipeline pipeline();
 
     @Override
     default Map<String, Object> toMap() {
@@ -45,15 +45,15 @@ public interface LinkPredictionModelInfo extends ToMapConvertible {
                 entry -> entry.getKey().name(),
                 entry -> entry.getValue().toMap()
             )),
-            "trainingPipeline", trainingPipeline().toMap()
+            "pipeline", pipeline().toMap()
         );
     }
 
     static LinkPredictionModelInfo of(
         TrainerConfig bestParameters,
         Map<LinkMetric, BestMetricData> metrics,
-        LinkPredictionPipeline trainingPipeline
+        LinkPredictionPredictPipeline pipeline
     ) {
-        return ImmutableLinkPredictionModelInfo.of(bestParameters, metrics, trainingPipeline);
+        return ImmutableLinkPredictionModelInfo.of(bestParameters, metrics, pipeline);
     }
 }

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.pipeline.catalog;
 
-import org.neo4j.gds.ml.pipeline.Pipeline;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -41,7 +41,7 @@ public class PipelineDropProc extends PipelineCatalogProc {
     ) {
         validatePipelineName(pipelineName);
 
-        Pipeline<?> pipeline = null;
+        TrainingPipeline<?> pipeline = null;
 
         if (failIfMissing) {
             pipeline = PipelineCatalog.drop(username(), pipelineName);
