@@ -76,7 +76,7 @@ public final class ClassifierFactory {
         int featureDimension,
         boolean isReduced
     ) {
-        switch (TrainingMethod.valueOf(trainerConfig.methodName())) {
+        switch (trainerConfig.trainingMethod()) {
             case LogisticRegression:
                 return LogisticRegressionData.memoryEstimation(isReduced, numberOfClasses, MemoryRange.of(featureDimension));
             case RandomForest:

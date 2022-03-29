@@ -46,7 +46,6 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
@@ -192,7 +191,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         progressTracker.setVolume(pipeline.numberOfModelCandidates());
 
         pipeline.trainingParameterSpace().values().stream().flatMap(List::stream).forEach(tunableTrainerConfig -> {
-            var trainingMethod = TrainingMethod.valueOf(tunableTrainerConfig.methodName());
+            var trainingMethod = tunableTrainerConfig.trainingMethod();
             var modelParams = trainingMethod.createConfig(tunableTrainerConfig.value);
             var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
             var validationStatsBuilder = new LinkModelStatsBuilder(

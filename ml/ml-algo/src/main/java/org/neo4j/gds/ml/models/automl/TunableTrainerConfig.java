@@ -62,8 +62,8 @@ public final class TunableTrainerConfig {
             }));
     }
 
-    public String methodName() {
-        return method.name();
+    public TrainingMethod trainingMethod() {
+        return method;
     }
 
     @Override

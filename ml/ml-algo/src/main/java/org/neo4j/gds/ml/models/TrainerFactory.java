@@ -79,7 +79,7 @@ public class TrainerFactory {
         MemoryRange featureDimension,
         boolean isReduced
     ) {
-        switch (TrainingMethod.valueOf(config.methodName())) {
+        switch (config.trainingMethod()) {
             case LogisticRegression:
                 return LogisticRegressionTrainer.memoryEstimation(
                     isReduced,

@@ -197,7 +197,7 @@ public final class NodeClassificationTrain {
             .stream()
             .flatMap(List::stream)
             .map(tunableTrainerConfig -> {
-                var config = TrainingMethod.valueOf(tunableTrainerConfig.methodName()).createConfig(
+                var config = tunableTrainerConfig.trainingMethod().createConfig(
                     tunableTrainerConfig.value);
                 var training = TrainerFactory.memoryEstimation(
                     tunableTrainerConfig,
@@ -260,7 +260,7 @@ public final class NodeClassificationTrain {
             .rangePerNode(
                 "classifier runtime",
                 nodeCount -> ClassifierFactory.runtimeOverheadMemoryEstimation(
-                    TrainingMethod.valueOf(config.methodName()),
+                    config.trainingMethod(),
                     batchSize,
                     fudgedClassCount,
                     fudgedFeatureCount,
@@ -423,7 +423,7 @@ public final class NodeClassificationTrain {
         progressTracker.beginSubTask();
 
         pipeline.trainingParameterSpace().values().stream().flatMap(List::stream).forEach(tunableTrainerConfig -> {
-            var trainingMethod = TrainingMethod.valueOf(tunableTrainerConfig.methodName());
+            var trainingMethod = tunableTrainerConfig.trainingMethod();
             var modelParams = trainingMethod.createConfig(tunableTrainerConfig.value);
             progressTracker.beginSubTask();
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
