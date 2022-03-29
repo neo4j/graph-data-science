@@ -23,14 +23,20 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 
 import java.util.Map;
-import java.util.function.Function;
 
 public enum TrainingMethod {
-    LogisticRegression(LogisticRegressionTrainConfig::of), RandomForest(RandomForestTrainConfig::of);
+    LogisticRegression{
+        @Override
+        public TrainerConfig createConfig(Map<String, Object> configMap) {
+            return LogisticRegressionTrainConfig.of(configMap);
+        }
+    },
+    RandomForest{
+        @Override
+        public TrainerConfig createConfig(Map<String, Object> configMap) {
+            return RandomForestTrainConfig.of(configMap);
+        }
+    };
 
-    public final Function<Map<String, Object>, TrainerConfig> createConfig;
-
-    TrainingMethod(Function<Map<String, Object>, TrainerConfig> createConfig) {
-        this.createConfig = createConfig;
-    }
+    public abstract TrainerConfig createConfig(Map<String, Object> configMap);
 }

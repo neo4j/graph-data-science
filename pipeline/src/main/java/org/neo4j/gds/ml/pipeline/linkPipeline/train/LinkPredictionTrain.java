@@ -193,7 +193,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         for (TrainingMethod trainingMethod : pipeline.trainingParameterSpace().keySet()) {
             for (TunableTrainerConfig tunableConfig : pipeline.trainingParameterSpace().get(trainingMethod)) {
-                var modelParams = trainingMethod.createConfig.apply(tunableConfig.value);
+                var modelParams = trainingMethod.createConfig(tunableConfig.value);
 
                 var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
                 var validationStatsBuilder = new LinkModelStatsBuilder(

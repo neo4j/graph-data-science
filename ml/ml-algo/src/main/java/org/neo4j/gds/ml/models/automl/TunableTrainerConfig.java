@@ -40,7 +40,7 @@ public class TunableTrainerConfig {
     }
 
     public TunableTrainerConfig defaultFilledTunableConfig() {
-        var defaultConfig = method.createConfig.apply(Map.of()).toMap();
+        var defaultConfig = method.createConfig(Map.of()).toMap();
         // for Optional values, defaultConfig will not contain the key so we need keys from both maps
         var mergedConfig = Stream.concat(defaultConfig.keySet().stream(), value.keySet().stream())
             .distinct()

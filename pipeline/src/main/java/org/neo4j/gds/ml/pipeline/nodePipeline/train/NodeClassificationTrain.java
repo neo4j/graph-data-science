@@ -197,7 +197,7 @@ public final class NodeClassificationTrain {
             .stream()
             .flatMap(List::stream)
             .map(tunableTrainerConfig -> {
-                var config = TrainingMethod.valueOf(tunableTrainerConfig.methodName()).createConfig.apply(
+                var config = TrainingMethod.valueOf(tunableTrainerConfig.methodName()).createConfig(
                     tunableTrainerConfig.value);
                 var training = TrainerFactory.memoryEstimation(
                     tunableTrainerConfig,
@@ -423,7 +423,7 @@ public final class NodeClassificationTrain {
         progressTracker.beginSubTask();
         for (TrainingMethod trainingMethod : pipeline.trainingParameterSpace().keySet()) {
             for (TunableTrainerConfig tunableConfig : pipeline.trainingParameterSpace().get(trainingMethod)) {
-                var modelParams = trainingMethod.createConfig.apply(tunableConfig.value);
+                var modelParams = trainingMethod.createConfig(tunableConfig.value);
                 progressTracker.beginSubTask();
                 var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
                 var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
