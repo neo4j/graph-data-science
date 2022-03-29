@@ -6,6 +6,8 @@
 This section describes how the Neo4j Graph Data Science library can be used in a Neo4j Fabric deployment.
 --
 
+include::../common-usage/not-on-aurads-note.adoc[]
+
 Neo4j Fabric is a way to store and retrieve data in multiple databases, whether they are on the same Neo4j DBMS or in multiple DBMSs, using a single Cypher query.
 For more information about Fabric itself, please visit the https://neo4j.com/docs/operations-manual/current/fabric/introduction/?ref=blog[documentation].
 
@@ -80,4 +82,3 @@ For every row returned by the first subquery, the operational database is then q
 === Limitations
 
 * It is not possible to run algorithms across shards.
-
