@@ -421,39 +421,39 @@ public final class NodeClassificationTrain {
 
     private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
         progressTracker.beginSubTask();
-        for (TrainingMethod trainingMethod : pipeline.trainingParameterSpace().keySet()) {
-            for (TunableTrainerConfig tunableConfig : pipeline.trainingParameterSpace().get(trainingMethod)) {
-                var modelParams = trainingMethod.createConfig(tunableConfig.value);
+
+        pipeline.trainingParameterSpace().values().stream().flatMap(List::stream).forEach(tunableTrainerConfig -> {
+            var trainingMethod = TrainingMethod.valueOf(tunableTrainerConfig.methodName());
+            var modelParams = trainingMethod.createConfig(tunableTrainerConfig.value);
+            progressTracker.beginSubTask();
+            var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
+            var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
+
+            for (TrainingExamplesSplit nodeSplit : nodeSplits) {
                 progressTracker.beginSubTask();
-                var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
-                var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
 
-                for (TrainingExamplesSplit nodeSplit : nodeSplits) {
-                    progressTracker.beginSubTask();
+                var trainSet = nodeSplit.trainSet();
+                var validationSet = nodeSplit.testSet();
 
-                    var trainSet = nodeSplit.trainSet();
-                    var validationSet = nodeSplit.testSet();
+                progressTracker.beginSubTask("Training");
+                var classifier = trainModel(trainSet, modelParams);
 
-                    progressTracker.beginSubTask("Training");
-                    var classifier = trainModel(trainSet, modelParams);
+                progressTracker.endSubTask("Training");
 
-                    progressTracker.endSubTask("Training");
-
-                    progressTracker.beginSubTask(validationSet.size() + trainSet.size());
-                    metricComputer.computeMetrics(validationSet, classifier).forEach(validationStatsBuilder::update);
-                    metricComputer.computeMetrics(trainSet, classifier).forEach(trainStatsBuilder::update);
-                    progressTracker.endSubTask();
-
-                    progressTracker.endSubTask();
-                }
+                progressTracker.beginSubTask(validationSet.size() + trainSet.size());
+                metricComputer.computeMetrics(validationSet, classifier).forEach(validationStatsBuilder::update);
+                metricComputer.computeMetrics(trainSet, classifier).forEach(trainStatsBuilder::update);
                 progressTracker.endSubTask();
 
-                metrics.forEach(metric -> {
-                    validationStats.add(metric, validationStatsBuilder.build(metric));
-                    trainStats.add(metric, trainStatsBuilder.build(metric));
-                });
+                progressTracker.endSubTask();
             }
-        }
+            progressTracker.endSubTask();
+
+            metrics.forEach(metric -> {
+                validationStats.add(metric, validationStatsBuilder.build(metric));
+                trainStats.add(metric, trainStatsBuilder.build(metric));
+            });
+        });
         progressTracker.endSubTask();
 
         var mainMetric = metrics.get(0);

@@ -191,53 +191,51 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         progressTracker.setVolume(pipeline.numberOfModelCandidates());
 
-        for (TrainingMethod trainingMethod : pipeline.trainingParameterSpace().keySet()) {
-            for (TunableTrainerConfig tunableConfig : pipeline.trainingParameterSpace().get(trainingMethod)) {
-                var modelParams = trainingMethod.createConfig(tunableConfig.value);
-
-                var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
-                var validationStatsBuilder = new LinkModelStatsBuilder(
+        pipeline.trainingParameterSpace().values().stream().flatMap(List::stream).forEach(tunableTrainerConfig -> {
+            var trainingMethod = TrainingMethod.valueOf(tunableTrainerConfig.methodName());
+            var modelParams = trainingMethod.createConfig(tunableTrainerConfig.value);
+            var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
+            var validationStatsBuilder = new LinkModelStatsBuilder(
                 modelParams,
                 pipeline.splitConfig().validationFolds()
             );
-                for (TrainingExamplesSplit relSplit : validationSplits) {
-                    // train each model candidate on the train sets
-                    var trainSet = relSplit.trainSet();
-                    var validationSet = relSplit.testSet();
-                    // the below calls intentionally suppress progress logging of individual models
-                    var classifier = trainModel(
+            for (TrainingExamplesSplit relSplit : validationSplits) {
+                // train each model candidate on the train sets
+                var trainSet = relSplit.trainSet();
+                var validationSet = relSplit.testSet();
+                // the below calls intentionally suppress progress logging of individual models
+                var classifier = trainModel(
                     trainData,
                     ReadOnlyHugeLongArray.of(trainSet),
                     modelParams,
                     ProgressTracker.NULL_TRACKER
                 );
 
-                    // evaluate each model candidate on the train and validation sets
-                    computeTrainMetric(
+                // evaluate each model candidate on the train and validation sets
+                computeTrainMetric(
                     trainData,
                     classifier,
                     ReadOnlyHugeLongArray.of(trainSet),
                     ProgressTracker.NULL_TRACKER
                 )
-                        .forEach(trainStatsBuilder::update);
-                    computeTrainMetric(
+                    .forEach(trainStatsBuilder::update);
+                computeTrainMetric(
                     trainData,
                     classifier,
                     ReadOnlyHugeLongArray.of(validationSet),
                     ProgressTracker.NULL_TRACKER
                 )
-                        .forEach(validationStatsBuilder::update);
-                }
-
-                // insert the candidates' metrics into trainStats and validationStats
-                config.metrics().forEach(metric -> {
-                    validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
-                    trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
-                });
-
-                progressTracker.logProgress();
+                    .forEach(validationStatsBuilder::update);
             }
-        }
+
+            // insert the candidates' metrics into trainStats and validationStats
+            config.metrics().forEach(metric -> {
+                validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
+                trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
+            });
+
+            progressTracker.logProgress();
+        });
 
         // 5. pick the best-scoring model candidate, according to the main metric
         var mainMetric = config.metrics().get(0);
