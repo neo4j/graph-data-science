@@ -54,6 +54,7 @@ import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.ExhaustiveHyperparameterOptimizer;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
@@ -423,7 +424,11 @@ public final class NodeClassificationTrain {
     private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
         progressTracker.beginSubTask();
 
-        pipeline.trainingParameterSpace().values().stream().flatMap(List::stream).forEach(tunableTrainerConfig -> {
+        var hyperParameterOptimizer = new ExhaustiveHyperparameterOptimizer(pipeline.trainingParameterSpace());
+        var candidate = hyperParameterOptimizer.sample();
+
+        while (candidate.isPresent()) {
+            var tunableTrainerConfig = candidate.get().config();
             var trainingMethod = tunableTrainerConfig.trainingMethod();
             var modelParams = trainingMethod.createConfig(tunableTrainerConfig.value);
             progressTracker.beginSubTask();
@@ -454,7 +459,8 @@ public final class NodeClassificationTrain {
                 validationStats.add(metric, validationStatsBuilder.build(metric));
                 trainStats.add(metric, trainStatsBuilder.build(metric));
             });
-        });
+            candidate = hyperParameterOptimizer.sample();
+        }
         progressTracker.endSubTask();
 
         var mainMetric = metrics.get(0);

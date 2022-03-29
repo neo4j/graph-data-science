@@ -46,6 +46,7 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
+import org.neo4j.gds.ml.models.automl.ExhaustiveHyperparameterOptimizer;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
@@ -190,7 +191,10 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         progressTracker.setVolume(pipeline.numberOfModelCandidates());
 
-        pipeline.trainingParameterSpace().values().stream().flatMap(List::stream).forEach(tunableTrainerConfig -> {
+        var hyperParameterOptimizer = new ExhaustiveHyperparameterOptimizer(pipeline.trainingParameterSpace());
+        var candidate = hyperParameterOptimizer.sample();
+        while (candidate.isPresent()) {
+            var tunableTrainerConfig = candidate.get().config();
             var trainingMethod = tunableTrainerConfig.trainingMethod();
             var modelParams = trainingMethod.createConfig(tunableTrainerConfig.value);
             var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
@@ -233,8 +237,9 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
             });
 
+            candidate = hyperParameterOptimizer.sample();
             progressTracker.logProgress();
-        });
+        }
 
         // 5. pick the best-scoring model candidate, according to the main metric
         var mainMetric = config.metrics().get(0);
