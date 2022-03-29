@@ -63,6 +63,7 @@ import org.neo4j.gds.test.TestProc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -130,9 +131,9 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new NodeClassificationPredictPipeline(
-                List.of(),
-                List.of(
+            var pipeline = NodeClassificationPredictPipeline.from(
+                Stream.of(),
+                Stream.of(
                     NodeClassificationFeatureStep.of("a"),
                     NodeClassificationFeatureStep.of("b"),
                     NodeClassificationFeatureStep.of("c")
@@ -181,9 +182,9 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new NodeClassificationPredictPipeline(
-                List.of(),
-                List.of(
+            var pipeline = NodeClassificationPredictPipeline.from(
+                Stream.of(),
+                Stream.of(
                     NodeClassificationFeatureStep.of("a"),
                     NodeClassificationFeatureStep.of("b"),
                     NodeClassificationFeatureStep.of("c")
@@ -233,12 +234,12 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new NodeClassificationPredictPipeline(
-                List.of(NodePropertyStepFactory.createNodePropertyStep(
+            var pipeline = NodeClassificationPredictPipeline.from(
+                Stream.of(NodePropertyStepFactory.createNodePropertyStep(
                     "degree",
                     Map.of("mutateProperty", "degree")
                 )),
-                List.of(
+                Stream.of(
                     NodeClassificationFeatureStep.of("a"),
                     NodeClassificationFeatureStep.of("b"),
                     NodeClassificationFeatureStep.of("c"),
@@ -287,12 +288,12 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new NodeClassificationPredictPipeline(
-                List.of(NodePropertyStepFactory.createNodePropertyStep(
+            var pipeline = NodeClassificationPredictPipeline.from(
+                Stream.of(NodePropertyStepFactory.createNodePropertyStep(
                     "degree",
                     Map.of("mutateProperty", "degree")
                 )),
-                List.of(
+                Stream.of(
                     NodeClassificationFeatureStep.of("a"),
                     NodeClassificationFeatureStep.of("b"),
                     NodeClassificationFeatureStep.of("c"),

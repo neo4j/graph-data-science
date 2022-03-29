@@ -21,20 +21,22 @@ package org.neo4j.gds.ml.pipeline.nodePipeline;
 
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.Pipeline;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class NodeClassificationPredictPipeline implements Pipeline<NodeClassificationFeatureStep> {
+public final class NodeClassificationPredictPipeline implements Pipeline<NodeClassificationFeatureStep> {
     public static final NodeClassificationPredictPipeline EMPTY = new NodeClassificationPredictPipeline(List.of(), List.of());
 
     private final List<ExecutableNodePropertyStep> nodePropertySteps;
     private final List<NodeClassificationFeatureStep> featureSteps;
 
 
-    public NodeClassificationPredictPipeline(
+    private NodeClassificationPredictPipeline(
         List<ExecutableNodePropertyStep> nodePropertySteps,
         List<NodeClassificationFeatureStep> featureSteps
     ) {
@@ -46,6 +48,16 @@ public class NodeClassificationPredictPipeline implements Pipeline<NodeClassific
         return new NodeClassificationPredictPipeline(
             List.copyOf(pipeline.nodePropertySteps()),
             List.copyOf(pipeline.featureSteps())
+        );
+    }
+
+    public static NodeClassificationPredictPipeline from(
+        Stream<NodePropertyStep> nodePropertySteps,
+        Stream<NodeClassificationFeatureStep> featureSteps
+    ) {
+        return new NodeClassificationPredictPipeline(
+            nodePropertySteps.collect(Collectors.toList()),
+            featureSteps.collect(Collectors.toList())
         );
     }
 

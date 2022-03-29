@@ -42,7 +42,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTr
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class NodeClassificationPipelinePredictProcTestUtil {
@@ -74,14 +73,13 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         int dimensionOfNodeFeatures,
         List<String> nodeFeatures
     ){
-        var pipeline = new NodeClassificationPredictPipeline(
-            List.of(NodePropertyStepFactory.createNodePropertyStep(
+        var pipeline = NodeClassificationPredictPipeline.from(
+            Stream.of(NodePropertyStepFactory.createNodePropertyStep(
                 "degree",
                 Map.of("mutateProperty", "degree")
             )),
             Stream.concat(nodeFeatures.stream(), Stream.of("degree"))
                 .map(NodeClassificationFeatureStep::of)
-                .collect(Collectors.toList())
         );
 
         var weights = Matrix.create(0.0, 2, dimensionOfNodeFeatures + 1);

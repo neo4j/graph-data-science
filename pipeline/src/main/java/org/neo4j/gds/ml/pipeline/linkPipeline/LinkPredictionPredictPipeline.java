@@ -21,18 +21,21 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.Pipeline;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class LinkPredictionPredictPipeline implements Pipeline<LinkFeatureStep> {
+public final class LinkPredictionPredictPipeline implements Pipeline<LinkFeatureStep> {
     public static final LinkPredictionPredictPipeline EMPTY = new LinkPredictionPredictPipeline(List.of(), List.of());
 
     private final List<ExecutableNodePropertyStep> nodePropertySteps;
     private final List<LinkFeatureStep> featureSteps;
 
-    public LinkPredictionPredictPipeline(
+    private LinkPredictionPredictPipeline(
         List<ExecutableNodePropertyStep> nodePropertySteps,
         List<LinkFeatureStep> featureSteps
     ) {
@@ -44,6 +47,16 @@ public class LinkPredictionPredictPipeline implements Pipeline<LinkFeatureStep> 
         return new LinkPredictionPredictPipeline(
             List.copyOf(pipeline.nodePropertySteps()),
             List.copyOf(pipeline.featureSteps())
+        );
+    }
+
+    public static LinkPredictionPredictPipeline from(
+        Stream<NodePropertyStep> nodePropertySteps,
+        Stream<LinkFeatureStep> linkFeatureSteps
+    ) {
+        return new LinkPredictionPredictPipeline(
+            nodePropertySteps.collect(Collectors.toList()),
+            linkFeatureSteps.collect(Collectors.toList())
         );
     }
 

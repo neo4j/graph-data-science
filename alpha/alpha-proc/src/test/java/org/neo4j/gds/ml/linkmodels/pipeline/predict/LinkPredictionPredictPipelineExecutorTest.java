@@ -64,6 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
@@ -127,9 +128,9 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new LinkPredictionPredictPipeline(
-                List.of(),
-                List.of(new L2FeatureStep(List.of("a", "b", "c")))
+            var pipeline = LinkPredictionPredictPipeline.from(
+                Stream.of(),
+                Stream.of(new L2FeatureStep(List.of("a", "b", "c")))
             );
 
             var modelData = ImmutableLogisticRegressionData.of(
@@ -175,9 +176,9 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new LinkPredictionPredictPipeline(
-                List.of(),
-                List.of(new L2FeatureStep(List.of("a", "b", "c")))
+            var pipeline = LinkPredictionPredictPipeline.from(
+                Stream.of(),
+                Stream.of(new L2FeatureStep(List.of("a", "b", "c")))
             );
 
             var root = new TreeNode<>(0);
@@ -220,12 +221,12 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new LinkPredictionPredictPipeline(
-                List.of(NodePropertyStepFactory.createNodePropertyStep(
+            var pipeline = LinkPredictionPredictPipeline.from(
+                Stream.of(NodePropertyStepFactory.createNodePropertyStep(
                     "degree",
                     Map.of("mutateProperty", "degree")
                 )),
-                List.of(new L2FeatureStep(List.of("a", "b", "c", "degree")))
+                Stream.of(new L2FeatureStep(List.of("a", "b", "c", "degree")))
             );
 
             var modelData = ImmutableLogisticRegressionData.of(
@@ -269,12 +270,12 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = new LinkPredictionPredictPipeline(
-                List.of(NodePropertyStepFactory.createNodePropertyStep(
+            var pipeline = LinkPredictionPredictPipeline.from(
+                Stream.of(NodePropertyStepFactory.createNodePropertyStep(
                     "degree",
                     Map.of("mutateProperty", "degree")
                 )),
-                List.of(new L2FeatureStep(List.of("a", "b", "c", "degree")))
+                Stream.of(new L2FeatureStep(List.of("a", "b", "c", "degree")))
             );
 
             var modelData = ImmutableLogisticRegressionData.of(
