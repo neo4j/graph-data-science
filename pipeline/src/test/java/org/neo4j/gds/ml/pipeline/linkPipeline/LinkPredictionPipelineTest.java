@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
@@ -89,46 +90,46 @@ class LinkPredictionPipelineTest {
 
     @Test
     void canSetParameterSpace() {
-        var lrConfig = TunableTrainerConfig.of(Map.of("penalty", 19), TrainingMethod.LogisticRegression);
-        var rfConfg = TunableTrainerConfig.of(
-            RandomForestTrainConfigImpl.builder()
-                .maxFeaturesRatio(0.5)
-                .numberOfDecisionTrees(1)
-                .minSplitSize(2)
-                .maxDepth(19)
-                .build().toMap(),
-            TrainingMethod.RandomForest
-        );
+        var lrConfig = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
+        var rfConfg = RandomForestTrainConfigImpl.builder()
+            .maxFeaturesRatio(0.5)
+            .numberOfDecisionTrees(1)
+            .minSplitSize(2)
+            .maxDepth(19)
+            .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(lrConfig));
-        pipeline.setTrainingParameterSpace(TrainingMethod.RandomForest, List.of(rfConfg));
+        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(lrConfig));
+        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.RandomForest, List.of(rfConfg));
 
         assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression))
-            .containsExactly(lrConfig);
+            .containsExactly(lrConfig.toTunableConfig());
 
         assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest))
-            .containsExactly(rfConfg);
+            .containsExactly(rfConfg.toTunableConfig());
     }
 
     @Test
     void overridesTheParameterSpace() {
-        var config1 = TunableTrainerConfig.of(Map.of("penalty", 19), TrainingMethod.LogisticRegression);
-        var config2 = TunableTrainerConfig.of(Map.of("penalty", 1337), TrainingMethod.LogisticRegression);
-        var config3 = TunableTrainerConfig.of(Map.of("penalty", 42), TrainingMethod.LogisticRegression);
+        var config1 = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
+        var config2 = LogisticRegressionTrainConfig.of(Map.of("penalty", 1337));
+        var config3 = LogisticRegressionTrainConfig.of(Map.of("penalty", 42));
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
+        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
             config1
         ));
-        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
+        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
             config2,
             config3
         ));
 
         var parameterSpace = pipeline.trainingParameterSpace();
 
-        assertThat(parameterSpace.get(TrainingMethod.LogisticRegression)).containsExactly(config2, config3);
+        assertThat(parameterSpace.get(TrainingMethod.LogisticRegression)).containsExactly(
+            config2.toTunableConfig(),
+            config3.toTunableConfig()
+        );
     }
 
     @Test
@@ -195,20 +196,19 @@ class LinkPredictionPipelineTest {
             var hadamardFeatureStep = new HadamardFeatureStep(List.of("a"));
             pipeline.addFeatureStep(hadamardFeatureStep);
 
-            pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-                TunableTrainerConfig.of(Map.of("penalty", 1000000), TrainingMethod.LogisticRegression),
-                TunableTrainerConfig.of(Map.of("penalty", 1), TrainingMethod.LogisticRegression)
+            pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
+                LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
+                LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
             ));
 
-            var randomForestTrainConfig = RandomForestTrainConfigImpl
-                .builder()
-                .maxDepth(2)
-                .maxFeaturesRatio(0.5)
-                .minSplitSize(2)
-                .numberOfDecisionTrees(1)
-                .build();
-            pipeline.setTrainingParameterSpace(TrainingMethod.RandomForest, List.of(
-                TunableTrainerConfig.of(randomForestTrainConfig.toMap(), TrainingMethod.RandomForest)
+            pipeline.setConcreteTrainingParameterSpace(TrainingMethod.RandomForest, List.of(
+                RandomForestTrainConfigImpl
+                    .builder()
+                    .maxDepth(2)
+                    .maxFeaturesRatio(0.5)
+                    .minSplitSize(2)
+                    .numberOfDecisionTrees(1)
+                    .build()
             ));
 
             var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
@@ -241,12 +241,13 @@ class LinkPredictionPipelineTest {
                             .trainingParameterSpace()
                             .get(TrainingMethod.LogisticRegression)
                             .stream()
-                            .map(tunableTrainerConfig -> tunableTrainerConfig.value)
+                            .map(TunableTrainerConfig::defaultFilledTunableConfig)
+                            .map(TunableTrainerConfig::toMap)
                             .collect(Collectors.toList()),
-                        TrainingMethod.RandomForest.name(),
-                        pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest)
+                        TrainingMethod.RandomForest.name(), pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest)
                             .stream()
-                            .map(tunableTrainerConfig -> tunableTrainerConfig.value)
+                            .map(TunableTrainerConfig::defaultFilledTunableConfig)
+                            .map(TunableTrainerConfig::toMap)
                             .collect(Collectors.toList())
                     ),
                       pipelineMap -> pipelineMap.get("trainingParameterSpace")

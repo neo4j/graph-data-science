@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.TimeUtil;
+import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 
@@ -131,8 +132,21 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
         this.trainingParameterSpace.put(method, trainingConfigs);
     }
 
-    public void addTrainerConfig(TrainingMethod method, TunableTrainerConfig trainingConfigs) {
-        this.trainingParameterSpace.get(method).add(trainingConfigs);
+    public void setConcreteTrainingParameterSpace(TrainingMethod method, List<TrainerConfig> trainingConfigs) {
+        var tunableTrainerConfigs = trainingConfigs
+            .stream()
+            .map(TrainerConfig::toTunableConfig)
+            .collect(Collectors.toList());
+
+        this.trainingParameterSpace.put(method, tunableTrainerConfigs);
+    }
+
+    public void addTrainerConfig(TrainingMethod method, TunableTrainerConfig trainingConfig) {
+        this.trainingParameterSpace.get(method).add(trainingConfig);
+    }
+
+    public void addTrainerConfig(TrainingMethod method, TrainerConfig trainingConfig) {
+        this.trainingParameterSpace.get(method).add(trainingConfig.toTunableConfig());
     }
 
     private void validateUniqueMutateProperty(NodePropertyStep step) {

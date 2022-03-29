@@ -22,11 +22,18 @@ package org.neo4j.gds.ml.models;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 
 public interface TrainerConfig extends ToMapConvertible {
 
     @Value.Derived
     @Configuration.Ignore
     String methodName();
+
+    @Value.Derived
+    @Configuration.Ignore
+    default TunableTrainerConfig toTunableConfig() {
+        return TunableTrainerConfig.of(toMap(), TrainingMethod.valueOf(methodName()));
+    }
 
 }

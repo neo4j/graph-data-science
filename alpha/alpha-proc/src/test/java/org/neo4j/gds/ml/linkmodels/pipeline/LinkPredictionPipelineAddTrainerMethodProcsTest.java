@@ -123,7 +123,6 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                     TrainingMethod.RandomForest.name(),
                     List.of(RandomForestTrainConfigImpl
                         .builder()
-                        .numberOfSamplesRatio(1.0)
                         .maxDepth(42)
                         .maxFeaturesRatio(0.5)
                         .numberOfDecisionTrees(10)

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.models.automl;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -64,4 +65,17 @@ public class TunableTrainerConfig {
         return method.name();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TunableTrainerConfig that = (TunableTrainerConfig) o;
+        return Objects.equals(value, that.value) &&
+               method == that.method;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value, method);
+    }
 }

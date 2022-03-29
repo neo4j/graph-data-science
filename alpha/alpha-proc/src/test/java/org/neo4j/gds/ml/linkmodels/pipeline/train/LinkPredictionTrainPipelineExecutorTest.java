@@ -49,7 +49,6 @@ import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -150,15 +149,9 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .testFraction(0.5)
             .build());
 
-        pipeline.setTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-            TunableTrainerConfig.of(
-                Map.of("patience", 5, "tolerance", 0.00001, "penalty", 100),
-                TrainingMethod.LogisticRegression
-            ),
-            TunableTrainerConfig.of(
-                Map.of("patience", 5, "tolerance", 0.00001, "penalty", 1),
-                TrainingMethod.LogisticRegression
-            )
+        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
+            LogisticRegressionTrainConfig.of(Map.of("patience", 5, "tolerance", 0.00001, "penalty", 100)),
+            LogisticRegressionTrainConfig.of(Map.of("patience", 5, "tolerance", 0.00001, "penalty", 1))
         ));
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
@@ -324,9 +317,9 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .testFraction(0.2)
             .build());
 
-        pipeline.setTrainingParameterSpace(
+        pipeline.setConcreteTrainingParameterSpace(
             TrainingMethod.LogisticRegression,
-            List.of(TunableTrainerConfig.of(Map.of("penalty", 1), TrainingMethod.LogisticRegression))
+            List.of(LogisticRegressionTrainConfig.of(Map.of("penalty", 1)))
         );
 
         pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
@@ -442,10 +435,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .build();
 
         LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.addTrainerConfig(
-            TrainingMethod.LogisticRegression,
-            TunableTrainerConfig.of(Map.of(), TrainingMethod.LogisticRegression)
-        );
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
 
         for (NodePropertyStep propertyStep : nodePropertySteps) {
             pipeline.addNodePropertyStep(propertyStep);
