@@ -144,4 +144,9 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
             lifeSupport.shutdown();
         }
     }
+
+    @Override
+    protected IdMappingType idMappingType() {
+        return IdMappingType.MAPPED;
+    }
 }
