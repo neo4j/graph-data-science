@@ -61,13 +61,13 @@ public final class TunableTrainerConfig {
 
     private static ConcreteParameter<?> parseParameterValue(String key, Object value) {
         if (value instanceof Integer) {
-            return IntegerParameter.of(key, (Integer) value);
+            return IntegerParameter.of((Integer) value);
         }
         if (value instanceof Long) {
-            return IntegerParameter.of(key, Math.toIntExact((Long) value));
+            return IntegerParameter.of(Math.toIntExact((Long) value));
         }
         if (value instanceof Double) {
-            return DoubleParameter.of(key, (Double) value);
+            return DoubleParameter.of((Double) value);
         }
         throw new IllegalArgumentException(formatWithLocale("Parameter `%s` must be numeric", key));
     }

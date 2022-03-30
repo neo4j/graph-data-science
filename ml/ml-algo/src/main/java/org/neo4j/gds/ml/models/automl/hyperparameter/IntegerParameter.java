@@ -23,7 +23,7 @@ import org.neo4j.gds.annotation.ValueClass;
 
 @ValueClass
 public interface IntegerParameter extends ConcreteParameter<Integer> {
-    static IntegerParameter of(String name, int value) {
-        return ImmutableIntegerParameter.of(name, value);
+    static IntegerParameter of(int value) {
+        return ImmutableIntegerParameter.of(value);
     }
 }

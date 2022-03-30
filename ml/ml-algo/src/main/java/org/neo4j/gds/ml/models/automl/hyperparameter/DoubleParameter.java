@@ -23,8 +23,8 @@ import org.neo4j.gds.annotation.ValueClass;
 
 @ValueClass
 public interface DoubleParameter extends ConcreteParameter<Double> {
-    static DoubleParameter of(String name, double value) {
-        return ImmutableDoubleParameter.of(name, value);
+    static DoubleParameter of(double value) {
+        return ImmutableDoubleParameter.of(value);
     }
 
 }

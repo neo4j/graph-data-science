@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.models.automl.hyperparameter;
 
 // dummy to illustrate the concept
-// will be filled in when hyperparameters are supported
-public interface HyperParameter {
-    String name();
+// will be filled in when hyper parameters are supported
+interface HyperParameter {
 }
