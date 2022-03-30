@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.io;
 import org.neo4j.common.Validator;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,6 +39,47 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
     private final Map<String, LongFunction<Object>> neoNodeProperties;
 
+    public enum IdMappingType implements IdMapFunction {
+        MAPPED {
+            @Override
+            public long getId(IdMap idMap, long id) {
+                return id;
+            }
+
+            @Override
+            public long highestId(IdMap idMap) {
+                return idMap.nodeCount();
+            }
+
+            @Override
+            public boolean contains(IdMap idMap, long id) {
+                return highestId(idMap) >= id;
+            }
+        },
+        ORIGINAL {
+            @Override
+            public long getId(IdMap idMap, long id) {
+                return idMap.toOriginalNodeId(id);
+            }
+
+            @Override
+            public long highestId(IdMap idMap) {
+                return idMap.highestNeoId();
+            }
+
+            @Override
+            public boolean contains(IdMap idMap, long id) {
+                return idMap.contains(id);
+            }
+        }
+    }
+
+    interface IdMapFunction {
+        long getId(IdMap idMap, long id);
+        long highestId(IdMap idMap);
+        boolean contains(IdMap idMap, long id);
+    }
+
     protected GraphStoreExporter(
         GraphStore graphStore,
         CONFIG config,
@@ -52,6 +94,8 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
     protected abstract void export(GraphStoreInput graphStoreInput);
 
+    protected abstract IdMappingType idMappingType();
+
     public ImportedProperties run() {
         var metaDataStore = MetaDataStore.of(graphStore);
         var nodeStore = NodeStore.of(graphStore, neoNodeProperties);
@@ -60,7 +104,8 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
             metaDataStore,
             nodeStore,
             relationshipStore,
-            config.batchSize()
+            config.batchSize(),
+            idMappingType()
         );
 
         export(graphStoreInput);
