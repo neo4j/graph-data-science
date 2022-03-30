@@ -34,11 +34,11 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class TunableTrainerConfig {
-    private final Map<String, ConcreteParameter<?>> concreteValues;
+    private final Map<String, ConcreteParameter<?>> concreteParameters;
     private final TrainingMethod method;
 
-    private TunableTrainerConfig(Map<String, ConcreteParameter<?>> concreteValues, TrainingMethod method) {
-        this.concreteValues = concreteValues;
+    private TunableTrainerConfig(Map<String, ConcreteParameter<?>> concreteParameters, TrainingMethod method) {
+        this.concreteParameters = concreteParameters;
         this.method = method;
     }
 
@@ -88,7 +88,7 @@ public final class TunableTrainerConfig {
     }
 
     public TrainerConfig materialize(HyperParameterValues hyperParameterValues) {
-        var materializedMap = concreteValues.entrySet().stream()
+        var materializedMap = concreteParameters.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> (Object) entry.getValue().value()
@@ -97,7 +97,7 @@ public final class TunableTrainerConfig {
     }
 
     public Map<String, Object> toMap() {
-        var result = concreteValues.entrySet().stream()
+        var result = concreteParameters.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> (Object) entry.getValue().value())
@@ -115,12 +115,12 @@ public final class TunableTrainerConfig {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TunableTrainerConfig that = (TunableTrainerConfig) o;
-        return Objects.equals(concreteValues, that.concreteValues) &&
+        return Objects.equals(concreteParameters, that.concreteParameters) &&
                method == that.method;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(concreteValues, method);
+        return Objects.hash(concreteParameters, method);
     }
 }
