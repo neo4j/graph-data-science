@@ -81,7 +81,10 @@ public final class ClassifierFactory {
             case LogisticRegression:
                 return LogisticRegressionData.memoryEstimation(isReduced, numberOfClasses, MemoryRange.of(featureDimension));
             case RandomForest:
-                return RandomForestData.memoryEstimation(numberOfTrainingSamples, RandomForestTrainConfig.of(trainerConfig.value));
+                return RandomForestData.memoryEstimation(
+                    numberOfTrainingSamples,
+                    (RandomForestTrainConfig) trainerConfig.materialize(HyperParameterValues.EMPTY)
+                );
             default:
                 throw new IllegalStateException("No such classifier.");
         }

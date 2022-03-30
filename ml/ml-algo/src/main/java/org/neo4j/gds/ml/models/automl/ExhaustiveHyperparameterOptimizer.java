@@ -37,9 +37,7 @@ public class ExhaustiveHyperparameterOptimizer implements HyperParameterOptimize
             .values()
             .stream()
             .flatMap(List::stream)
-            .map(tunableConfig ->
-                tunableConfig.trainingMethod().createConfig(tunableConfig.value)
-            )
+            .map(tunableConfig -> tunableConfig.materialize(HyperParameterValues.EMPTY))
             .collect(Collectors.toList())
             .iterator();
     }

@@ -86,14 +86,14 @@ public class TrainerFactory {
                     isReduced,
                     numberOfClasses,
                     featureDimension,
-                    (LogisticRegressionTrainConfig.of(config.value)).batchSize()
+                    ((LogisticRegressionTrainConfig) config.materialize(HyperParameterValues.EMPTY)).batchSize()
                 );
             case RandomForest: {
                 return ClassificationRandomForestTrainer.memoryEstimation(
                     numberOfTrainingExamples,
                     numberOfClasses,
                     featureDimension,
-                    RandomForestTrainConfig.of(config.value)
+                    ((RandomForestTrainConfig) config.materialize(HyperParameterValues.EMPTY))
                 );
             }
             default:

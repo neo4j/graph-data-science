@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.models.automl;
 
+import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.hyperparameter.ConcreteParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleParameter;
@@ -32,39 +33,92 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public final class TunableTrainerConfig {
-    public final Map<String, Object> value;
+    private final Map<String, ConcreteParameter<?>> concreteValues;
     private final TrainingMethod method;
 
-    private TunableTrainerConfig(Map<String, Object> value, TrainingMethod method) {
-        this.value = value;
+    private TunableTrainerConfig(Map<String, ConcreteParameter<?>> concreteValues, TrainingMethod method) {
+        this.concreteValues = concreteValues;
         this.method = method;
     }
 
     public static TunableTrainerConfig of(Map<String, Object> value, TrainingMethod method) {
-        return new TunableTrainerConfig(fillDefaults(value, method), method);
+        var parsedValue = parse(value, method);
+        var defaults = method.createConfig(Map.of()).toMap();
+        return new TunableTrainerConfig(fillDefaults(parsedValue, defaults), method);
     }
 
-    private static Map<String, Object> fillDefaults(Map<String, Object> value, TrainingMethod method) {
-        var defaultConfig = method.createConfig(Map.of()).toMap();
-        // for values that have type Optional<?>, defaultConfig will not contain the key so we need keys from both maps
+    private static TunableTrainerConfig parse(Map<String, Object> value, TrainingMethod trainingMethod) {
+        var valueMap = value.entrySet().stream()
+            .filter(entry -> !entry.getKey().equals("methodName"))
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> {
+                    var val = entry.getValue();
+                    if (val instanceof Integer) {
+                        return (ConcreteParameter<?>) IntegerParameter.of(entry.getKey(), (Integer) val);
+                    }
+                    if (val instanceof Long) {
+                        return (ConcreteParameter<?>) IntegerParameter.of(entry.getKey(), Math.toIntExact((Long) val));
+                    }
+                    if (val instanceof Double) {
+                        return (ConcreteParameter<?>) DoubleParameter.of(entry.getKey(), (Double) val);
+                    }
+                    throw new IllegalArgumentException(formatWithLocale("Parameter %s must be numeric", entry.getKey()));
+                }));
+        return new TunableTrainerConfig(valueMap, trainingMethod);
+    }
+
+    private static Map<String, ConcreteParameter<?>> fillDefaults(
+        TunableTrainerConfig tunableConfig,
+        Map<String, Object> defaults
+    ) {
+        // for values that have type Optional<?>, defaults will not contain the key so we need keys from both maps
         // if such keys are missing from the `value` map, then we also do not want to add them
-        return Stream.concat(defaultConfig.keySet().stream(), value.keySet().stream())
+        return Stream.concat(defaults.keySet().stream(), tunableConfig.concreteValues.keySet().stream())
             .distinct()
+            .filter(key -> !key.equals("methodName"))
             .collect(Collectors.toMap(
                 key -> key,
-                key -> value.getOrDefault(key, defaultConfig.get(key))
+                key -> {
+                    if (tunableConfig.concreteValues.containsKey(key)) {
+                        return tunableConfig.concreteValues.get(key);
+                    }
+                    var input = defaults.get(key);
+                    if (input instanceof Integer) {
+                        return ImmutableIntegerParameter.of(key, (Integer) input);
+                    } else if (input instanceof Double) {
+                        return ImmutableDoubleParameter.of(key, (Double) input);
+                    } else {
+                        throw new IllegalStateException(formatWithLocale(
+                            "Parameter %s has illegal type %s",
+                            key,
+                            input.getClass().getSimpleName()
+                        ));
+                    }
+                }
             ));
     }
 
+    public TrainerConfig materialize(HyperParameterValues hyperParameterValues) {
+        var materializedMap = concreteValues.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> (Object) entry.getValue().value()
+            ));
+        return trainingMethod().createConfig(materializedMap);
+    }
+
     public Map<String, Object> toMap() {
-        return value.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-                if (entry.getValue() instanceof Long) {
-                    return Math.toIntExact((Long) entry.getValue());
-                }
-                return entry.getValue();
-            }));
+        var result = concreteValues.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> (Object) entry.getValue().value())
+            );
+        result.put("methodName", trainingMethod().name());
+        return result;
     }
 
     public TrainingMethod trainingMethod() {
@@ -76,12 +130,12 @@ public final class TunableTrainerConfig {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TunableTrainerConfig that = (TunableTrainerConfig) o;
-        return Objects.equals(value, that.value) &&
+        return Objects.equals(concreteValues, that.concreteValues) &&
                method == that.method;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(value, method);
+        return Objects.hash(concreteValues, method);
     }
 }

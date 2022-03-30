@@ -200,8 +200,7 @@ public final class NodeClassificationTrain {
             .stream()
             .flatMap(List::stream)
             .map(tunableTrainerConfig -> {
-                var config = tunableTrainerConfig.trainingMethod().createConfig(
-                    tunableTrainerConfig.value);
+                var config = tunableTrainerConfig.materialize(HyperParameterValues.EMPTY);
                 var training = TrainerFactory.memoryEstimation(
                     tunableTrainerConfig,
                     trainSetSize,
