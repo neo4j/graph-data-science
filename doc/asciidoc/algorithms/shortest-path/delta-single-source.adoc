@@ -61,7 +61,7 @@ Note, that the value might vary depending on the graph topology and the value ra
 
 :algorithm-name: {algorithm}
 :graph-description: transport network
-:image-file: delta.svg
+:image-file: dijkstra.svg
 include::../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
