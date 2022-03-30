@@ -19,6 +19,6 @@
  */
 package org.neo4j.gds.ml.models.automl.hyperparameter;
 
-public interface ConcreteParameter<T> extends HyperParameter {
+public interface ConcreteParameter<T> {
     T value();
 }

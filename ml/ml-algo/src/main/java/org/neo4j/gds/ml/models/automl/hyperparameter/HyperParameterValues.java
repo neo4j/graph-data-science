@@ -23,17 +23,17 @@ import java.util.Map;
 
 public class HyperParameterValues {
     public static final HyperParameterValues EMPTY = new HyperParameterValues(Map.of());
-    public final Map<HyperParameter, Object> values;
+    public final Map<String, Object> values;
 
-    public HyperParameterValues(Map<HyperParameter, Object> values) {
+    public HyperParameterValues(Map<String, Object> values) {
         this.values = values;
     }
 
-    public Object get(HyperParameter parameter) {
+    public Object get(String parameter) {
         return values.get(parameter);
     }
 
-    public boolean containsKey(HyperParameter parameter) {
+    public boolean containsKey(String parameter) {
         return values.containsKey(parameter);
     }
 }
