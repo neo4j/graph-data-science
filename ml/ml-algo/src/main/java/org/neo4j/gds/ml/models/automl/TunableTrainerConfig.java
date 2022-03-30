@@ -24,8 +24,6 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.hyperparameter.ConcreteParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.HyperParameterValues;
-import org.neo4j.gds.ml.models.automl.hyperparameter.ImmutableDoubleParameter;
-import org.neo4j.gds.ml.models.automl.hyperparameter.ImmutableIntegerParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerParameter;
 
 import java.util.Map;
@@ -44,61 +42,48 @@ public final class TunableTrainerConfig {
         this.method = method;
     }
 
-    public static TunableTrainerConfig of(Map<String, Object> value, TrainingMethod method) {
-        var parsedValue = parse(value, method);
+    public static TunableTrainerConfig of(Map<String, Object> userInput, TrainingMethod method) {
         var defaults = method.createConfig(Map.of()).toMap();
-        return new TunableTrainerConfig(fillDefaults(parsedValue, defaults), method);
+        var inputWithDefaults = fillDefaults(userInput, defaults);
+        var parsedParameters = parse(inputWithDefaults);
+        return new TunableTrainerConfig(parsedParameters, method);
     }
 
-    private static TunableTrainerConfig parse(Map<String, Object> value, TrainingMethod trainingMethod) {
-        var valueMap = value.entrySet().stream()
-            .filter(entry -> !entry.getKey().equals("methodName"))
+    private static Map<String, ConcreteParameter<?>> parse(Map<String, Object> input) {
+        return input.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> {
                     var val = entry.getValue();
-                    if (val instanceof Integer) {
-                        return (ConcreteParameter<?>) IntegerParameter.of(entry.getKey(), (Integer) val);
-                    }
-                    if (val instanceof Long) {
-                        return (ConcreteParameter<?>) IntegerParameter.of(entry.getKey(), Math.toIntExact((Long) val));
-                    }
-                    if (val instanceof Double) {
-                        return (ConcreteParameter<?>) DoubleParameter.of(entry.getKey(), (Double) val);
-                    }
-                    throw new IllegalArgumentException(formatWithLocale("Parameter `%s` must be numeric", entry.getKey()));
+                    return parseParameterValue(entry.getKey(), val);
                 }));
-        return new TunableTrainerConfig(valueMap, trainingMethod);
     }
 
-    private static Map<String, ConcreteParameter<?>> fillDefaults(
-        TunableTrainerConfig tunableConfig,
+    private static ConcreteParameter<?> parseParameterValue(String key, Object value) {
+        if (value instanceof Integer) {
+            return IntegerParameter.of(key, (Integer) value);
+        }
+        if (value instanceof Long) {
+            return IntegerParameter.of(key, Math.toIntExact((Long) value));
+        }
+        if (value instanceof Double) {
+            return DoubleParameter.of(key, (Double) value);
+        }
+        throw new IllegalArgumentException(formatWithLocale("Parameter `%s` must be numeric", key));
+    }
+
+    private static Map<String, Object> fillDefaults(
+        Map<String, Object> userInput,
         Map<String, Object> defaults
-    ) {
+    ){
         // for values that have type Optional<?>, defaults will not contain the key so we need keys from both maps
         // if such keys are missing from the `value` map, then we also do not want to add them
-        return Stream.concat(defaults.keySet().stream(), tunableConfig.concreteValues.keySet().stream())
+        return Stream.concat(defaults.keySet().stream(), userInput.keySet().stream())
             .distinct()
             .filter(key -> !key.equals("methodName"))
             .collect(Collectors.toMap(
                 key -> key,
-                key -> {
-                    if (tunableConfig.concreteValues.containsKey(key)) {
-                        return tunableConfig.concreteValues.get(key);
-                    }
-                    var input = defaults.get(key);
-                    if (input instanceof Integer) {
-                        return ImmutableIntegerParameter.of(key, (Integer) input);
-                    } else if (input instanceof Double) {
-                        return ImmutableDoubleParameter.of(key, (Double) input);
-                    } else {
-                        throw new IllegalStateException(formatWithLocale(
-                            "Parameter `%s` has illegal type %s",
-                            key,
-                            input.getClass().getSimpleName()
-                        ));
-                    }
-                }
+                key -> userInput.getOrDefault(key, defaults.get(key))
             ));
     }
 
