@@ -19,6 +19,7 @@ This chapter is divided into the following sections:
 * <<algorithms-community>>
 * <<algorithms-similarity>>
 * <<algorithms-path-finding>>
+* <<node-embeddings>>
 * <<algorithms-linkprediction>>
 * <<algorithms-auxiliary>>
 * <<algorithms-pregel-api>>
@@ -32,6 +33,8 @@ include::algorithms-community-detection.adoc[leveloffset=+1]
 include::algorithms-similarity.adoc[leveloffset=+1]
 
 include::algorithms-path-finding.adoc[leveloffset=+1]
+
+include::../machine-learning/node-embeddings/node-embeddings.adoc[leveloffset=+1]
 
 include::algorithms-link-prediction.adoc[leveloffset=+1]
 

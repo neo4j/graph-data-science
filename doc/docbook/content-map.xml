@@ -216,6 +216,15 @@
             </d:tocentry>
         </d:tocentry>
 
+        <d:tocentry linkend="node-embeddings"><?dbhtml filename="machine-learning/node-embeddings/index.html"?>
+            <d:tocentry linkend="fastrp"><?dbhtml filename="machine-learning/node-embeddings/fastrp/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="graph-sage"><?dbhtml filename="machine-learning/node-embeddings/graph-sage/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="node2vec"><?dbhtml filename="machine-learning/node-embeddings/node2vec/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
         <d:tocentry linkend="algorithms-linkprediction">
             <?dbhtml filename="algorithms/linkprediction/index.html"?>
             <d:tocentry linkend="alpha-algorithms-linkprediction-adamic-adar">
@@ -268,6 +277,7 @@
         <d:tocentry linkend="ml-preprocessing"><?dbhtml filename="machine-learning/pre-processing/index.html"?>
         </d:tocentry>
 
+        <!-- This shows the node-embeddings twice in the table of contents (as graph-algos and machine-learning) -->
         <d:tocentry linkend="node-embeddings"><?dbhtml filename="machine-learning/node-embeddings/index.html"?>
             <d:tocentry linkend="fastrp"><?dbhtml filename="machine-learning/node-embeddings/fastrp/index.html"?>
             </d:tocentry>
