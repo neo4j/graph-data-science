@@ -1,0 +1,484 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.gds.compat._44drop010;
+
+import org.neo4j.configuration.BootloaderSettings;
+import org.neo4j.configuration.Config;
+import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.helpers.DatabaseNameValidator;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.gds.compat.CompatIndexQuery;
+import org.neo4j.gds.compat.CompatInput;
+import org.neo4j.gds.compat.CompositeNodeCursor;
+import org.neo4j.gds.compat.CustomAccessMode;
+import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
+import org.neo4j.gds.compat.Neo4jProxyApi;
+import org.neo4j.gds.compat.PropertyReference;
+import org.neo4j.gds.compat.StoreScan;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.config.Setting;
+import org.neo4j.internal.batchimport.AdditionalInitialIds;
+import org.neo4j.internal.batchimport.BatchImporter;
+import org.neo4j.internal.batchimport.BatchImporterFactory;
+import org.neo4j.internal.batchimport.Configuration;
+import org.neo4j.internal.batchimport.ImportLogic;
+import org.neo4j.internal.batchimport.IndexConfig;
+import org.neo4j.internal.batchimport.InputIterable;
+import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.batchimport.input.IdType;
+import org.neo4j.internal.batchimport.input.Input;
+import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
+import org.neo4j.internal.batchimport.input.ReadableGroups;
+import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.id.IdGeneratorFactory;
+import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.IndexQueryConstraints;
+import org.neo4j.internal.kernel.api.IndexReadSession;
+import org.neo4j.internal.kernel.api.NodeCursor;
+import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
+import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
+import org.neo4j.internal.kernel.api.PropertyCursor;
+import org.neo4j.internal.kernel.api.PropertyIndexQuery;
+import org.neo4j.internal.kernel.api.QueryContext;
+import org.neo4j.internal.kernel.api.Read;
+import org.neo4j.internal.kernel.api.RelationshipScanCursor;
+import org.neo4j.internal.kernel.api.Scan;
+import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
+import org.neo4j.internal.kernel.api.procs.FieldSignature;
+import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
+import org.neo4j.internal.kernel.api.procs.QualifiedName;
+import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.internal.recordstorage.RecordIdType;
+import org.neo4j.internal.schema.IndexOrder;
+import org.neo4j.io.fs.FileSystemAbstraction;
+import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.database.DatabaseIdRepository;
+import org.neo4j.kernel.database.NamedDatabaseId;
+import org.neo4j.kernel.database.NormalizedDatabaseName;
+import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
+import org.neo4j.kernel.impl.store.MetaDataStore;
+import org.neo4j.kernel.impl.store.RecordStore;
+import org.neo4j.kernel.impl.store.format.RecordFormats;
+import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
+import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
+import org.neo4j.logging.internal.LogService;
+import org.neo4j.memory.EmptyMemoryTracker;
+import org.neo4j.procedure.Mode;
+import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.storageengine.api.PropertySelection;
+import org.neo4j.values.storable.ValueGroup;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
+
+public final class Neo4jProxyImpl implements Neo4jProxyApi {
+
+    @Override
+    public GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
+        return new CompatGraphDatabaseAPIImpl(dbms);
+    }
+
+    @Override
+    public String validateExternalDatabaseName(String databaseName) {
+        var normalizedName = new NormalizedDatabaseName(databaseName);
+        DatabaseNameValidator.validateExternalDatabaseName(normalizedName);
+        return normalizedName.name();
+    }
+
+    @Override
+    public void cacheDatabaseId(DatabaseIdRepository.Caching databaseIdRepository, NamedDatabaseId namedDatabaseId) {
+        databaseIdRepository.getById(namedDatabaseId.databaseId());
+    }
+
+    @Override
+    public AccessMode accessMode(CustomAccessMode customAccessMode) {
+        return new CompatAccessModeImpl(customAccessMode);
+    }
+
+    @Override
+    public String username(AuthSubject subject) {
+        return subject.executingUser();
+    }
+
+    @Override
+    public SecurityContext securityContext(
+        String username,
+        AuthSubject authSubject,
+        AccessMode mode,
+        String databaseName
+    ) {
+        return new SecurityContext(
+            new CompatUsernameAuthSubjectImpl(username, authSubject),
+            mode,
+            // GDS is always operating from an embedded context
+            ClientConnectionInfo.EMBEDDED_CONNECTION,
+            databaseName
+        );
+    }
+
+    @Override
+    public long getHighestPossibleIdInUse(
+        RecordStore<? extends AbstractBaseRecord> recordStore,
+        KernelTransaction kernelTransaction
+    ) {
+        return recordStore.getHighestPossibleIdInUse(kernelTransaction.cursorContext());
+    }
+
+    @Override
+    public List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
+        KernelTransaction transaction,
+        int[] labelIds,
+        int batchSize
+    ) {
+        var read = transaction.dataRead();
+        return Arrays
+            .stream(labelIds)
+            .mapToObj(read::nodeLabelScan)
+            .map(scan -> scanToStoreScan(scan, batchSize))
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction
+            .cursors()
+            .allocatePropertyCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
+    }
+
+    @Override
+    public PropertyReference propertyReference(NodeCursor nodeCursor) {
+        return ReferencePropertyReference.of(nodeCursor.propertiesReference());
+    }
+
+    @Override
+    public PropertyReference propertyReference(RelationshipScanCursor relationshipScanCursor) {
+        return ReferencePropertyReference.of(relationshipScanCursor.propertiesReference());
+    }
+
+    @Override
+    public PropertyReference noPropertyReference() {
+        return ReferencePropertyReference.empty();
+    }
+
+    @Override
+    public void nodeProperties(
+        KernelTransaction kernelTransaction,
+        long nodeReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    ) {
+        var neoReference = ((ReferencePropertyReference) reference).reference;
+        kernelTransaction
+            .dataRead()
+            .nodeProperties(nodeReference, neoReference, PropertySelection.ALL_PROPERTIES, cursor);
+    }
+
+    @Override
+    public void relationshipProperties(
+        KernelTransaction kernelTransaction,
+        long relationshipReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    ) {
+        var neoReference = ((ReferencePropertyReference) reference).reference;
+        kernelTransaction
+            .dataRead()
+            .relationshipProperties(relationshipReference, neoReference, PropertySelection.ALL_PROPERTIES, cursor);
+    }
+
+    @Override
+    public NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction.cursors().allocateNodeCursor(kernelTransaction.cursorContext());
+    }
+
+    @Override
+    public RelationshipScanCursor allocateRelationshipScanCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction.cursors().allocateRelationshipScanCursor(kernelTransaction.cursorContext());
+    }
+
+    @Override
+    public NodeLabelIndexCursor allocateNodeLabelIndexCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction.cursors().allocateNodeLabelIndexCursor(kernelTransaction.cursorContext());
+    }
+
+    @Override
+    public NodeValueIndexCursor allocateNodeValueIndexCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction
+            .cursors()
+            .allocateNodeValueIndexCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
+    }
+
+    @Override
+    public boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
+        return NodeLabelIndexLookupImpl.hasNodeLabelIndex(kernelTransaction);
+    }
+
+    @Override
+    public StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
+        KernelTransaction transaction,
+        int labelId,
+        int batchSize
+    ) {
+        var read = transaction.dataRead();
+        return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
+    }
+
+    @Override
+    public <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
+        return new ScanBasedStoreScanImpl<>(scan, batchSize);
+    }
+
+    @Override
+    public CompatIndexQuery rangeIndexQuery(
+        int propertyKeyId,
+        double from,
+        boolean fromInclusive,
+        double to,
+        boolean toInclusive
+    ) {
+        return new CompatIndexQueryImpl(PropertyIndexQuery.range(propertyKeyId, from, fromInclusive, to, toInclusive));
+    }
+
+    @Override
+    public CompatIndexQuery rangeAllIndexQuery(int propertyKeyId) {
+        return new CompatIndexQueryImpl(PropertyIndexQuery.range(propertyKeyId, ValueGroup.NUMBER));
+    }
+
+    @Override
+    public void nodeIndexSeek(
+        Read dataRead,
+        IndexReadSession index,
+        NodeValueIndexCursor cursor,
+        IndexOrder indexOrder,
+        boolean needsValues,
+        CompatIndexQuery query
+    ) throws Exception {
+        var indexQueryConstraints = indexOrder == IndexOrder.NONE
+            ? IndexQueryConstraints.unordered(needsValues)
+            : IndexQueryConstraints.constrained(indexOrder, needsValues);
+
+        dataRead.nodeIndexSeek(
+            (QueryContext) dataRead,
+            index,
+            cursor,
+            indexQueryConstraints,
+            ((CompatIndexQueryImpl) query).indexQuery
+        );
+    }
+
+    @Override
+    public CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+        return new CompositeNodeCursorImpl(cursors, labelIds);
+    }
+
+    @Override
+    public BatchImporter instantiateBatchImporter(
+        BatchImporterFactory factory,
+        DatabaseLayout directoryStructure,
+        FileSystemAbstraction fileSystem,
+        PageCacheTracer pageCacheTracer,
+        int writeConcurrency,
+        Optional<Long> pageCacheMemory,
+        LogService logService,
+        ExecutionMonitor executionMonitor,
+        AdditionalInitialIds additionalInitialIds,
+        Config dbConfig,
+        RecordFormats recordFormats,
+        JobScheduler jobScheduler,
+        Collector badCollector
+    ) {
+        var importerConfig = new Configuration() {
+            @Override
+            public int maxNumberOfProcessors() {
+                return writeConcurrency;
+            }
+
+            @Override
+            public long pageCacheMemory() {
+                return pageCacheMemory.orElseGet(Configuration.super::pageCacheMemory);
+            }
+
+            @Override
+            public boolean highIO() {
+                return false;
+            }
+
+            @Override
+            public IndexConfig indexConfig() {
+                return IndexConfig.DEFAULT.withLabelIndex();
+            }
+        };
+        return factory.instantiate(
+            directoryStructure,
+            fileSystem,
+            pageCacheTracer,
+            importerConfig,
+            logService,
+            executionMonitor,
+            additionalInitialIds,
+            dbConfig,
+            recordFormats,
+            ImportLogic.NO_MONITOR,
+            jobScheduler,
+            badCollector,
+            TransactionLogInitializer.getLogFilesInitializer(),
+            new IndexImporterFactoryImpl(dbConfig),
+            EmptyMemoryTracker.INSTANCE
+        );
+    }
+
+    @Override
+    public Input batchInputFrom(CompatInput compatInput) {
+        return new InputFromCompatInput(compatInput);
+    }
+
+    @Override
+    public Setting<String> additionalJvm() {
+        return BootloaderSettings.additional_jvm;
+    }
+
+    @Override
+    public Setting<String> pageCacheMemory() {
+        return GraphDatabaseSettings.pagecache_memory;
+    }
+
+    @Override
+    public String pageCacheMemoryValue(String value) {
+        return value;
+    }
+
+    @Override
+    public ExecutionMonitor invisibleExecutionMonitor() {
+        return ExecutionMonitor.INVISIBLE;
+    }
+
+    @Override
+    public ProcedureSignature procedureSignature(
+        QualifiedName name,
+        List<FieldSignature> inputSignature,
+        List<FieldSignature> outputSignature,
+        Mode mode,
+        boolean admin,
+        String deprecated,
+        String[] allowed,
+        String description,
+        String warning,
+        boolean eager,
+        boolean caseInsensitive,
+        boolean systemProcedure,
+        boolean internal,
+        boolean allowExpiredCredentials
+    ) {
+        return new ProcedureSignature(
+            name,
+            inputSignature,
+            outputSignature,
+            mode,
+            admin,
+            deprecated,
+            allowed,
+            description,
+            warning,
+            eager,
+            caseInsensitive,
+            systemProcedure,
+            internal,
+            allowExpiredCredentials
+        );
+    }
+
+    @Override
+    public long getHighestPossibleNodeCount(
+        Read read, IdGeneratorFactory idGeneratorFactory
+    ) {
+        return countByIdGenerator(idGeneratorFactory, RecordIdType.NODE).orElseGet(read::nodesGetCount);
+    }
+
+    @Override
+    public long getHighestPossibleRelationshipCount(
+        Read read, IdGeneratorFactory idGeneratorFactory
+    ) {
+        return countByIdGenerator(idGeneratorFactory, RecordIdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
+    }
+
+    @Override
+    public String versionLongToString(long storeVersion) {
+        return MetaDataStore.versionLongToString(storeVersion);
+    }
+
+    private static final class InputFromCompatInput implements Input {
+        private final CompatInput delegate;
+
+        private InputFromCompatInput(CompatInput delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public InputIterable nodes(Collector badCollector) {
+            return delegate.nodes(badCollector);
+        }
+
+        @Override
+        public InputIterable relationships(Collector badCollector) {
+            return delegate.relationships(badCollector);
+        }
+
+        @Override
+        public IdType idType() {
+            return delegate.idType();
+        }
+
+        @Override
+        public ReadableGroups groups() {
+            return delegate.groups();
+        }
+
+        @Override
+        public Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) throws IOException {
+            return delegate.calculateEstimates((values, kernelTransaction) -> propertySizeCalculator.calculateSize(
+                values,
+                kernelTransaction.cursorContext(),
+                kernelTransaction.memoryTracker()
+            ));
+        }
+    }
+
+    @Override
+    public TestLog testLog() {
+        return new TestLogImpl();
+    }
+
+    @Override
+    public Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
+        return new VirtualRelationshipImpl(id, startNode, endNode, type);
+    }
+}
