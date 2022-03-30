@@ -66,7 +66,7 @@ public final class TunableTrainerConfig {
                     if (val instanceof Double) {
                         return (ConcreteParameter<?>) DoubleParameter.of(entry.getKey(), (Double) val);
                     }
-                    throw new IllegalArgumentException(formatWithLocale("Parameter %s must be numeric", entry.getKey()));
+                    throw new IllegalArgumentException(formatWithLocale("Parameter `%s` must be numeric", entry.getKey()));
                 }));
         return new TunableTrainerConfig(valueMap, trainingMethod);
     }
@@ -93,7 +93,7 @@ public final class TunableTrainerConfig {
                         return ImmutableDoubleParameter.of(key, (Double) input);
                     } else {
                         throw new IllegalStateException(formatWithLocale(
-                            "Parameter %s has illegal type %s",
+                            "Parameter `%s` has illegal type %s",
                             key,
                             input.getClass().getSimpleName()
                         ));
