@@ -44,7 +44,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, IdMapAndProperties> {
@@ -75,11 +74,13 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
                 Optional.of(dimensions.nodeCount())
             );
 
-        var labelInformationBuilder =
-            graphProjectConfig.nodeProjections().allProjections().size() == 1
-            && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
-                ? LabelInformation.emptyBuilder()
-                : LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping);
+        LabelInformation.Builder labelInformationBuilder;
+        if (graphProjectConfig.nodeProjections().allProjections().size() == 1) {
+            var singleLabel = graphProjectConfig.nodeProjections().projections().keySet().stream().findFirst().get();
+            labelInformationBuilder = LabelInformation.single(singleLabel);
+        } else {
+            labelInformationBuilder = LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping);
+        }
 
         var propertyMappings = IndexPropertyMappings.prepareProperties(
             graphProjectConfig,
