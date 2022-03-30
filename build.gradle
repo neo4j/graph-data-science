@@ -16,6 +16,7 @@ group = 'org.neo4j.gds'
 
 ext {
     distributionDir = "$buildDir/distributions"
+    cliDistributionDir = "$buildDir/distributions/estimation-cli"
     distributionLicenseFile = file('LICENSE.txt')
     publicDir = "${project.rootDir}"
 
