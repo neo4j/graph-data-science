@@ -17,9 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.models.automl;
+package org.neo4j.gds.ml.models.automl.hyperparameter;
 
-// dummy to illustrate the concept
-// will be filled in when hyperparameters are supported
-public class HyperParameter  {
+import org.neo4j.gds.annotation.ValueClass;
+
+@ValueClass
+public interface IntegerParameter extends ConcreteParameter<Integer> {
+    static IntegerParameter of(String name, int value) {
+        return ImmutableIntegerParameter.of(name, value);
+    }
 }

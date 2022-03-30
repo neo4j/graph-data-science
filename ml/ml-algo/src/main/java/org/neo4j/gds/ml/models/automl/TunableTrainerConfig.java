@@ -20,6 +20,12 @@
 package org.neo4j.gds.ml.models.automl;
 
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.hyperparameter.ConcreteParameter;
+import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleParameter;
+import org.neo4j.gds.ml.models.automl.hyperparameter.HyperParameterValues;
+import org.neo4j.gds.ml.models.automl.hyperparameter.ImmutableDoubleParameter;
+import org.neo4j.gds.ml.models.automl.hyperparameter.ImmutableIntegerParameter;
+import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerParameter;
 
 import java.util.Map;
 import java.util.Objects;
