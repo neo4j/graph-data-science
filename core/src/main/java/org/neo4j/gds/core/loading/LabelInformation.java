@@ -30,20 +30,20 @@ import java.util.Set;
 import java.util.function.LongUnaryOperator;
 
 public interface LabelInformation {
-    static LabelInformationBuilder emptyBuilder(NodeLabel singleLabel) {
-        return new EmptyLabelInformation.Builder(singleLabel);
+    static Builder single(NodeLabel singleLabel) {
+        return new SingleLabelInformation.Builder(singleLabel);
 
     }
 
-    static LabelInformationBuilder builder(long expectedCapacity) {
-        return LabelInformationImpl.Builder.of(expectedCapacity);
+    static Builder builder(long expectedCapacity) {
+        return MultiLabelInformation.Builder.of(expectedCapacity);
     }
 
-    static LabelInformationBuilder builder(
+    static Builder builder(
         long expectedCapacity,
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
     ) {
-        return LabelInformationImpl.Builder.of(expectedCapacity, labelTokenNodeLabelMapping);
+        return MultiLabelInformation.Builder.of(expectedCapacity, labelTokenNodeLabelMapping);
     }
 
     boolean isEmpty();
@@ -70,7 +70,7 @@ public interface LabelInformation {
         boolean accept(NodeLabel nodeLabel, BitSet bitSet);
     }
 
-    interface LabelInformationBuilder {
+    interface Builder {
         void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId);
 
         LabelInformation build(long nodeCount, LongUnaryOperator mappedIdFn);

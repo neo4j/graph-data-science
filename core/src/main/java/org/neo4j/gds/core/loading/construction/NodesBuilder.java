@@ -73,7 +73,7 @@ public final class NodesBuilder {
     private int nextLabelId;
     private final ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping;
     private final IdMapBuilder idMapBuilder;
-    private final LabelInformation.LabelInformationBuilder labelInformationBuilder;
+    private final LabelInformation.Builder labelInformationBuilder;
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final LongAdder importedNodes;

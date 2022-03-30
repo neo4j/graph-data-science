@@ -32,12 +32,12 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-final class EmptyLabelInformation implements LabelInformation {
+final class SingleLabelInformation implements LabelInformation {
 
     private final NodeLabel label;
     private final Set<NodeLabel> labelSet;
 
-    private EmptyLabelInformation(NodeLabel label) {
+    private SingleLabelInformation(NodeLabel label) {
         this.label = label;
         labelSet = Set.of(label);
     }
@@ -102,7 +102,7 @@ final class EmptyLabelInformation implements LabelInformation {
         }
     }
 
-    static final class Builder implements LabelInformationBuilder {
+    static final class Builder implements LabelInformation.Builder {
         private final NodeLabel label;
 
         Builder(NodeLabel label) {this.label = label;}
@@ -114,7 +114,7 @@ final class EmptyLabelInformation implements LabelInformation {
 
         @Override
         public LabelInformation build(long nodeCount, LongUnaryOperator mappedIdFn) {
-            return new EmptyLabelInformation(label);
+            return new SingleLabelInformation(label);
         }
     }
 }

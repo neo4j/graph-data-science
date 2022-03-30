@@ -41,18 +41,18 @@ import java.util.stream.StreamSupport;
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class LabelInformationImpl implements LabelInformation {
+public final class MultiLabelInformation implements LabelInformation {
 
     private static final List<NodeLabel> ALL_NODES_LABELS = List.of(NodeLabel.ALL_NODES);
     private static final Set<NodeLabel> ALL_NODES_LABEL_SET = Set.of(NodeLabel.ALL_NODES);
 
-    public static LabelInformationImpl from(Map<NodeLabel, BitSet> labelInformation) {
-        return new LabelInformationImpl(labelInformation);
+    public static MultiLabelInformation from(Map<NodeLabel, BitSet> labelInformation) {
+        return new MultiLabelInformation(labelInformation);
     }
 
     private final Map<NodeLabel, BitSet> labelInformation;
 
-    private LabelInformationImpl(Map<NodeLabel, BitSet> labelInformation) {
+    private MultiLabelInformation(Map<NodeLabel, BitSet> labelInformation) {
         this.labelInformation = labelInformation;
     }
 
@@ -76,8 +76,8 @@ public final class LabelInformationImpl implements LabelInformation {
     }
 
     @Override
-    public LabelInformationImpl filter(Collection<NodeLabel> nodeLabels) {
-        return new LabelInformationImpl(nodeLabels
+    public MultiLabelInformation filter(Collection<NodeLabel> nodeLabels) {
+        return new MultiLabelInformation(nodeLabels
             .stream()
             .collect(Collectors.toMap(nodeLabel -> nodeLabel, labelInformation::get)));
     }
@@ -152,7 +152,7 @@ public final class LabelInformationImpl implements LabelInformation {
         }
     }
 
-    public static final class Builder implements LabelInformationBuilder {
+    public static final class Builder implements LabelInformation.Builder {
         private final long expectedCapacity;
         private final Map<NodeLabel, HugeAtomicGrowingBitSet> labelInformation;
         private final List<NodeLabel> starNodeLabelMappings;
@@ -224,7 +224,7 @@ public final class LabelInformationImpl implements LabelInformation {
                 }));
         }
 
-        public LabelInformationImpl build(long nodeCount, LongUnaryOperator mappedIdFn) {
+        public MultiLabelInformation build(long nodeCount, LongUnaryOperator mappedIdFn) {
             var labelInformation = buildInner(nodeCount, mappedIdFn);
 
             // set the whole range for '*' projections
@@ -234,7 +234,7 @@ public final class LabelInformationImpl implements LabelInformation {
                 labelInformation.put(starLabel, bitSet);
             }
 
-            return new LabelInformationImpl(labelInformation);
+            return new MultiLabelInformation(labelInformation);
         }
     }
 }

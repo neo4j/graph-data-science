@@ -33,7 +33,7 @@ public final class HugeIdMapBuilderOps {
     static HugeIdMap build(
         HugeLongArray graphIds,
         long nodeCount,
-        LabelInformation.LabelInformationBuilder labelInformationBuilder,
+        LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency
     ) {

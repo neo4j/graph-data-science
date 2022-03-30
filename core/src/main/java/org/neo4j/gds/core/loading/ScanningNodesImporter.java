@@ -51,7 +51,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
     private final IndexPropertyMappings.LoadablePropertyMappings propertyMappings;
     private final TerminationFlag terminationFlag;
     private final IdMapBuilder idMapBuilder;
-    private final LabelInformation.LabelInformationBuilder labelInformationBuilder;
+    private final LabelInformation.Builder labelInformationBuilder;
     private final @Nullable NativeNodePropertyImporter nodePropertyImporter;
 
     @Builder.Factory
@@ -74,10 +74,10 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
                 Optional.of(dimensions.nodeCount())
             );
 
-        LabelInformation.LabelInformationBuilder labelInformationBuilder;
+        LabelInformation.Builder labelInformationBuilder;
         if (graphProjectConfig.nodeProjections().allProjections().size() == 1) {
             var singleLabel = graphProjectConfig.nodeProjections().projections().keySet().stream().findFirst().get();
-            labelInformationBuilder = LabelInformation.emptyBuilder(singleLabel);
+            labelInformationBuilder = LabelInformation.single(singleLabel);
         } else {
             labelInformationBuilder = LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping);
         }
@@ -116,7 +116,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
         IdMapBuilder idMapBuilder,
-        LabelInformation.LabelInformationBuilder labelInformationBuilder
+        LabelInformation.Builder labelInformationBuilder
     ) {
         super(
             scannerFactory,

@@ -34,13 +34,13 @@ public class NodeImporter {
     }
 
     private final IdMapBuilder idMapBuilder;
-    private final LabelInformation.LabelInformationBuilder labelInformationBuilder;
+    private final LabelInformation.Builder labelInformationBuilder;
     private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
     private final boolean importProperties;
 
     public NodeImporter(
         IdMapBuilder idMapBuilder,
-        LabelInformation.LabelInformationBuilder labelInformationBuilder,
+        LabelInformation.Builder labelInformationBuilder,
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
         boolean importProperties
     ) {
