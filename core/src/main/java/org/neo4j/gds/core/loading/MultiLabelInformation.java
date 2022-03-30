@@ -23,7 +23,9 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 
 import java.util.ArrayList;
@@ -150,6 +152,14 @@ public final class MultiLabelInformation implements LabelInformation {
                 labelSet()
             ));
         }
+    }
+
+    @Override
+    public PrimitiveLongIterator nodeIterator(Collection<NodeLabel> labels, long nodeCount) {
+        if (labels.contains(NodeLabel.ALL_NODES)) {
+            return new BatchNodeIterable.IdIterator(nodeCount);
+        }
+        return new BatchNodeIterable.BitSetIdIterator(unionBitSet(labels, nodeCount));
     }
 
     public static final class Builder implements LabelInformation.Builder {

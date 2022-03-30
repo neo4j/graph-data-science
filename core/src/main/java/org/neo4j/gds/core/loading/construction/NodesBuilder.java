@@ -248,13 +248,10 @@ public final class NodesBuilder {
     }
 
     private NodePropertiesFromStoreBuilder getOrCreatePropertyBuilder(String propertyKey) {
-        if (!propertyBuildersByPropertyKey.containsKey(propertyKey)) {
-            propertyBuildersByPropertyKey.put(
-                propertyKey,
-                NodePropertiesFromStoreBuilder.of(NO_PROPERTY_VALUE, concurrency)
-            );
-        }
-        return propertyBuildersByPropertyKey.get(propertyKey);
+        return propertyBuildersByPropertyKey.computeIfAbsent(
+            propertyKey,
+            __ -> NodePropertiesFromStoreBuilder.of(NO_PROPERTY_VALUE, concurrency)
+        );
     }
 
     private NodePropertiesFromStoreBuilder getPropertyBuilder(String propertyKey) {

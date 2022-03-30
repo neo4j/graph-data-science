@@ -28,10 +28,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
@@ -229,44 +226,10 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     protected GraphSchema computeGraphSchema(
         IdMapAndProperties idMapAndProperties, RelationshipsAndProperties relationshipsAndProperties
     ) {
-        var nodeSchemaBuilder = NodeSchema.builder();
-        storeConfig
-            .nodeProjections()
-            .projections()
-            .forEach((nodeLabel, nodeProjection) -> nodeProjection.properties().mappings().forEach(propertyMapping -> {
-                String propertyKey = propertyMapping.propertyKey();
-                NodeProperty nodeProperty = idMapAndProperties
-                    .properties()
-                    .nodeProperties()
-                    .get(propertyMapping.propertyKey());
-
-                nodeSchemaBuilder.addProperty(
-                    nodeLabel,
-                    propertyKey,
-                    nodeProperty.propertySchema()
-                );
-            }));
-        // in case there were no properties add all labels
-        idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
-
-        var relationshipSchemaBuilder = RelationshipSchema.builder();
-        storeConfig
-            .relationshipProjections()
-            .projections()
-            .forEach((relType, relProjection) -> relProjection.properties().forEach(propertyMapping -> {
-                String propertyKey = propertyMapping.propertyKey();
-                relationshipSchemaBuilder.addProperty(
-                    relType,
-                    propertyKey,
-                    relationshipsAndProperties.properties().get(relType).get(propertyKey).propertySchema()
-                );
-            }));
-        // in case there were no properties add all relationship types
-        relationshipsAndProperties.relationships().keySet().forEach(relationshipSchemaBuilder::addRelationshipType);
-
-        return GraphSchema.of(
-            nodeSchemaBuilder.build(),
-            relationshipSchemaBuilder.build()
+        return CSRGraphStoreUtil.computeGraphSchema(
+            idMapAndProperties,
+            (label) -> storeConfig.nodeProjections().projections().get(label).properties().propertyKeys(),
+            relationshipsAndProperties
         );
     }
 

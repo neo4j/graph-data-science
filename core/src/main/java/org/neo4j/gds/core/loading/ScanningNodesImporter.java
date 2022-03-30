@@ -207,13 +207,13 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             //   you need to add a check for the feature flag to IndexedNodePropertyImporter
             var concurrency = parallelIndexScan ? this.concurrency : 1;
 
-            var buildsByPropertyKey = new HashMap<PropertyMapping, NodePropertiesFromStoreBuilder>();
+            var buildersByPropertyKey = new HashMap<PropertyMapping, NodePropertiesFromStoreBuilder>();
             propertyMappings.indexedProperties()
                 .values()
                 .stream()
                 .flatMap(propertyMappings -> propertyMappings.mappings().stream())
                 .forEach(propertyMapping ->
-                    buildsByPropertyKey.put(propertyMapping.property(), NodePropertiesFromStoreBuilder.of(propertyMapping.property().defaultValue(), concurrency)));
+                    buildersByPropertyKey.put(propertyMapping.property(), NodePropertiesFromStoreBuilder.of(propertyMapping.property().defaultValue(), concurrency)));
 
             var indexScanningImporters = propertyMappings.indexedProperties()
                 .entrySet()
@@ -232,7 +232,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
                         progressTracker,
                         terminationFlag,
                         executorService,
-                        buildsByPropertyKey.get(mappingAndIndex.property())
+                        buildersByPropertyKey.get(mappingAndIndex.property())
                     ))
                 ).collect(Collectors.toList());
 
@@ -249,7 +249,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
                 }
             }
 
-            for (var entry : buildsByPropertyKey.entrySet()) {
+            for (var entry : buildersByPropertyKey.entrySet()) {
                 NodeProperties propertyValues = entry.getValue().build(idMap);
                 nodeProperties.put(entry.getKey(), propertyValues);
                 recordsImported += propertyValues.size();

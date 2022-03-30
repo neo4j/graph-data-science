@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
@@ -39,6 +40,7 @@ import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -208,19 +210,30 @@ public final class CSRGraphStoreUtil {
         IdMapAndProperties idMapAndProperties,
         RelationshipsAndProperties relationshipsAndProperties
     ) {
+        return computeGraphSchema(
+            idMapAndProperties,
+            (__) -> idMapAndProperties.properties().keySet(),
+            relationshipsAndProperties
+        );
+    }
+
+    public static GraphSchema computeGraphSchema(
+        IdMapAndProperties idMapAndProperties,
+        Function<NodeLabel, Collection<String>> propertiesByLabel,
+        RelationshipsAndProperties relationshipsAndProperties
+    ) {
+        var properties = idMapAndProperties.properties().nodeProperties();
+
         var nodeSchemaBuilder = NodeSchema.builder();
-        idMapAndProperties
-            .idMap()
-            .availableNodeLabels()
-            .forEach(label -> idMapAndProperties
-                .properties()
-                .nodeProperties()
-                .forEach((propertyKey, propertyValues) -> nodeSchemaBuilder.addProperty(
+        for (var label : idMapAndProperties.idMap().availableNodeLabels()) {
+            for (var propertyKey : propertiesByLabel.apply(label)) {
+                nodeSchemaBuilder.addProperty(
                     label,
                     propertyKey,
-                    propertyValues.propertySchema()
-                )));
-
+                    properties.get(propertyKey).propertySchema()
+                );
+            }
+        }
         idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
 
         var relationshipSchemaBuilder = RelationshipSchema.builder();
@@ -233,7 +246,6 @@ public final class CSRGraphStoreUtil {
                     propertyKey,
                     propertyValues.propertySchema()
                 )));
-
         relationshipsAndProperties.relationships().keySet().forEach(relationshipSchemaBuilder::addRelationshipType);
 
         return GraphSchema.of(
