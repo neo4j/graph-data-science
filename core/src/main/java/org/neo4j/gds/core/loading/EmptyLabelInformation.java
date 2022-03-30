@@ -69,7 +69,7 @@ final class EmptyLabelInformation implements LabelInformation {
 
     @Override
     public boolean hasLabel(long nodeId, NodeLabel nodeLabel) {
-        return nodeLabel == label;
+        return nodeLabel.equals(label);
     }
 
     @Override
@@ -91,7 +91,7 @@ final class EmptyLabelInformation implements LabelInformation {
     public void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels) {
         List<ElementIdentifier> invalidLabels = nodeLabels
             .stream()
-            .filter(filterLabel -> filterLabel != label)
+            .filter(filterLabel -> !filterLabel.equals(label))
             .collect(Collectors.toList());
         if (!invalidLabels.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
