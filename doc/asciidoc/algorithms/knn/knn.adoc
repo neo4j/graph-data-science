@@ -659,3 +659,4 @@ ORDER BY similarity DESCENDING, Person1, Person2
 |===
 
 Note that the two distinct maps in the query could be merged to a single one.
+--
