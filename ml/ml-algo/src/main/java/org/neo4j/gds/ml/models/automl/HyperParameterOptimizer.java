@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.ml.models.automl;
 
-import java.util.Optional;
+import org.neo4j.gds.ml.models.TrainerConfig;
 
-public interface HyperParameterOptimizer {
-    Optional<HyperParameterOptimizerResult> sample();
+import java.util.Iterator;
+
+public interface HyperParameterOptimizer extends Iterator<TrainerConfig> {
 }

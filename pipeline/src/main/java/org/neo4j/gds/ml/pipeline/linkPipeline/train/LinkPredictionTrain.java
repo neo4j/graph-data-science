@@ -192,11 +192,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         progressTracker.setVolume(pipeline.numberOfModelCandidates());
 
         var hyperParameterOptimizer = new ExhaustiveHyperparameterOptimizer(pipeline.trainingParameterSpace());
-        var candidate = hyperParameterOptimizer.sample();
-        while (candidate.isPresent()) {
-            var tunableTrainerConfig = candidate.get().config();
-            var trainingMethod = tunableTrainerConfig.trainingMethod();
-            var modelParams = trainingMethod.createConfig(tunableTrainerConfig.value);
+        while (hyperParameterOptimizer.hasNext()) {
+            var modelParams = hyperParameterOptimizer.next();
             var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
             var validationStatsBuilder = new LinkModelStatsBuilder(
                 modelParams,
@@ -237,7 +234,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
             });
 
-            candidate = hyperParameterOptimizer.sample();
             progressTracker.logProgress();
         }
 

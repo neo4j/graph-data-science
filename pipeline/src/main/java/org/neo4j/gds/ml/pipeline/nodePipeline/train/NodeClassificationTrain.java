@@ -425,12 +425,9 @@ public final class NodeClassificationTrain {
         progressTracker.beginSubTask();
 
         var hyperParameterOptimizer = new ExhaustiveHyperparameterOptimizer(pipeline.trainingParameterSpace());
-        var candidate = hyperParameterOptimizer.sample();
 
-        while (candidate.isPresent()) {
-            var tunableTrainerConfig = candidate.get().config();
-            var trainingMethod = tunableTrainerConfig.trainingMethod();
-            var modelParams = trainingMethod.createConfig(tunableTrainerConfig.value);
+        while (hyperParameterOptimizer.hasNext()) {
+            var modelParams = hyperParameterOptimizer.next();
             progressTracker.beginSubTask();
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
@@ -459,7 +456,6 @@ public final class NodeClassificationTrain {
                 validationStats.add(metric, validationStatsBuilder.build(metric));
                 trainStats.add(metric, trainStatsBuilder.build(metric));
             });
-            candidate = hyperParameterOptimizer.sample();
         }
         progressTracker.endSubTask();
 

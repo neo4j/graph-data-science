@@ -19,32 +19,37 @@
  */
 package org.neo4j.gds.ml.models.automl;
 
+import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 // this is temporary until we have a better optimizer
 public class ExhaustiveHyperparameterOptimizer implements HyperParameterOptimizer {
-    private final Iterator<TunableTrainerConfig> parameterSpaceIterator;
+    private final Iterator<TrainerConfig> parameterSpaceIterator;
 
     public ExhaustiveHyperparameterOptimizer(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace) {
         this.parameterSpaceIterator = parameterSpace
             .values()
             .stream()
             .flatMap(List::stream)
+            .map(tunableConfig ->
+                tunableConfig.trainingMethod().createConfig(tunableConfig.value)
+            )
             .collect(Collectors.toList())
             .iterator();
     }
 
     @Override
-    public Optional<HyperParameterOptimizerResult> sample() {
-        if (!parameterSpaceIterator.hasNext()) {
-            return Optional.empty();
-        }
-        return Optional.of(HyperParameterOptimizerResult.of(new HyperParameterValues(), parameterSpaceIterator.next()));
+    public boolean hasNext() {
+        return parameterSpaceIterator.hasNext();
+    }
+
+    @Override
+    public TrainerConfig next() {
+        return parameterSpaceIterator.next();
     }
 }
