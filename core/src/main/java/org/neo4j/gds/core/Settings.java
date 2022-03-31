@@ -70,6 +70,10 @@ public final class Settings {
         return GraphDatabaseSettings.neo4j_home;
     }
 
+    public static Setting<String> recordFormat() {
+        return GraphDatabaseSettings.record_format;
+    }
+
     public static Setting<Boolean> udc() {
         return newBuilder("dbms.udc.enabled", SettingValueParsers.BOOL, true).build();
     }

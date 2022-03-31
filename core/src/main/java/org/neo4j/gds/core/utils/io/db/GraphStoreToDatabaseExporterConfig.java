@@ -24,6 +24,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.io.GraphStoreExporterBaseConfig;
 
 import java.util.Optional;
@@ -48,6 +49,13 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
     @SuppressWarnings("immutables:untype")
     default Optional<Long> pageCacheMemory() {
         return Optional.empty();
+    }
+
+    @Value.Default
+    @Configuration.Ignore
+    @SuppressWarnings("immutables:untype")
+    default String recordFormat() {
+        return Settings.recordFormat().defaultValue();
     }
 
     @Value.Check
