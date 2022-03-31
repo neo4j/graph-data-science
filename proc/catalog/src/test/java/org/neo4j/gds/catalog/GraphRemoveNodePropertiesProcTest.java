@@ -22,9 +22,7 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjection;
@@ -121,50 +119,12 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("nodeProperties")
-    void removeNodePropertiesForLabel(List<String> nodeProperties, long propertyCount) {
-        assertCypherResult(
-            "CALL gds.graph.removeNodeProperties($graphName, $nodeProperties, ['A']) YIELD graphName, nodeProperties, propertiesRemoved",
-            Map.of("graphName", TEST_GRAPH_DIFFERENT_PROPERTIES, "nodeProperties", nodeProperties),
-            List.of(Map.of(
-                "graphName", TEST_GRAPH_DIFFERENT_PROPERTIES,
-                "nodeProperties", nodeProperties,
-                "propertiesRemoved", propertyCount
-            ))
-        );
-    }
-
-    @Test
-    void failToRemoveSharedPropertyForLabel() {
-        runQuery("CALL gds.degree.mutate($graphName, {mutateProperty: 'score'})", Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES));
-
-        assertError(
-            "CALL gds.graph.removeNodeProperties($graphName, ['score'], ['A']) YIELD graphName, nodeProperties, propertiesRemoved",
-            Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES),
-            "Cannot remove a shared node-property for a subset of node labels. `score` is shared by [A, B]. But only [A] was specified in `nodeLabels`"
-        );
-    }
-
-    @Test
-    void removeNodePropertiesForLabelSubset() {
-        assertCypherResult(
-            "CALL gds.graph.removeNodeProperties($graphName, ['nodeProp1', 'nodeProp2'])",
-            Map.of("graphName", TEST_GRAPH_DIFFERENT_PROPERTIES),
-            List.of(Map.of(
-                "graphName", TEST_GRAPH_DIFFERENT_PROPERTIES,
-                "nodeProperties", List.of("nodeProp1", "nodeProp2"),
-                "propertiesRemoved", 6L
-            ))
-        );
-    }
-
     @Test
     void shouldFailOnNonExistingNodeProperty() {
         assertError(
             "CALL gds.graph.removeNodeProperties($graphName, ['nodeProp1', 'nodeProp2', 'nodeProp3'])",
             Map.of("graphName", TEST_GRAPH_DIFFERENT_PROPERTIES),
-            "Expecting at least one node projection to contain property key(s) ['nodeProp1', 'nodeProp2', 'nodeProp3']."
+            "Could not find property key(s) ['nodeProp3']. Defined keys: ['nodeProp1', 'nodeProp2']"
         );
     }
     

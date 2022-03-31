@@ -22,7 +22,10 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
@@ -98,6 +101,20 @@ final class SingleLabelInformation implements LabelInformation {
                 "Specified labels %s do not correspond to any of the node projections %s.",
                 invalidLabels,
                 labelSet()
+            ));
+        }
+    }
+
+    @Override
+    public PrimitiveLongIterator nodeIterator(
+        Collection<NodeLabel> labels, long nodeCount
+    ) {
+        if (labels.size() == 1 && (labels.contains(label) || labels.contains(NodeLabel.ALL_NODES))) {
+            return new BatchNodeIterable.IdIterator(nodeCount);
+        } else {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Unknown labels: %s",
+                StringJoining.join(labels.stream().map(NodeLabel::name))
             ));
         }
     }

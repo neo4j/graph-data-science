@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.api;
 
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
@@ -44,6 +45,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
     ) {
         return CSRGraphStore.of(
             loadingContext.api().databaseId(),
+            computeGraphSchema(idMapAndProperties, relationshipsAndProperties),
             idMapAndProperties.idMap(),
             idMapAndProperties.properties(),
             relationshipsAndProperties.relationships(),
@@ -57,4 +59,6 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
         progressTracker.logMessage(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
     }
+
+    protected abstract GraphSchema computeGraphSchema(IdMapAndProperties idMapAndProperties, RelationshipsAndProperties relationshipsAndProperties);
 }

@@ -21,7 +21,6 @@ package org.neo4j.gds.catalog;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphRemoveNodePropertiesConfig;
@@ -35,7 +34,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphRemoveNodePropertiesProc extends CatalogProc {
@@ -45,7 +43,6 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
     public Stream<Result> run(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
-        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ProcPreconditions.check();
@@ -56,7 +53,6 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         GraphRemoveNodePropertiesConfig config = GraphRemoveNodePropertiesConfig.of(
             graphName,
             nodeProperties,
-            nodeLabels,
             cypherConfig
         );
         // validation
@@ -74,39 +70,11 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
 
     @NotNull
     private Long removeNodeProperties(GraphStore graphStore, GraphRemoveNodePropertiesConfig config) {
-        var selectedNodeLabels = config.validNodeLabels(graphStore).contains(NodeLabel.ALL_NODES) ?
-            graphStore.nodeLabels() :
-            config.validNodeLabels(graphStore);
+        var removedPropertiesCount = new MutableLong(0);
 
-        var propertiesPerLabel = graphStore.schema().nodeSchema().properties();
-        var allLabels = graphStore.schema().nodeSchema().availableLabels();
-        var propertiesToRemove = config.nodeProperties();
-
-        var removedPropertiesCount = new MutableLong(0L);
-
-        propertiesToRemove.forEach(property -> {
-            // find which labels share the same property instance
-            var labelsPerPropertyObject = allLabels.stream()
-                .filter(label -> propertiesPerLabel.get(label).containsKey(property))
-                .collect(Collectors.groupingBy(label -> graphStore.nodePropertyValues(label, property)));
-
-            // remove and count each property object only once
-            labelsPerPropertyObject.forEach((propertyObject, labels) -> {
-                // removed properties must be fully contained in the selectedNodeLabels
-                if (selectedNodeLabels.containsAll(labels)) {
-                    labels.forEach(label -> graphStore.removeNodeProperty(label, property));
-                    removedPropertiesCount.add(propertyObject.size());
-                } else if (labels.stream().noneMatch(selectedNodeLabels::contains)) {
-                    return;
-                } else {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "Cannot remove a shared node-property for a subset of node labels. `%s` is shared by %s. But only %s was specified in `nodeLabels`",
-                        property,
-                        labels.stream().map(NodeLabel::name).collect(Collectors.toList()),
-                        selectedNodeLabels.stream().map(NodeLabel::name).collect(Collectors.toList())
-                    ));
-                }
-            });
+        config.nodeProperties().forEach(propertyKey -> {
+            removedPropertiesCount.add(graphStore.nodePropertyValues(propertyKey).size());
+            graphStore.removeNodeProperty(propertyKey);
         });
 
         return removedPropertiesCount.longValue();

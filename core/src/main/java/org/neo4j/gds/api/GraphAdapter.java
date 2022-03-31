@@ -137,6 +137,11 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels) {
+        return graph.nodeIterator(labels);
+    }
+
+    @Override
     public GraphSchema schema() {
         return graph.schema();
     }

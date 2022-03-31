@@ -32,7 +32,6 @@ import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
 import java.util.Arrays;
-import java.util.Set;
 
 import static java.lang.Math.min;
 
@@ -51,7 +50,7 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
         super(NO_ID);
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
-        this.hasProperties = !graphStore.nodePropertyKeys().values().stream().allMatch(Set::isEmpty);
+        this.hasProperties = !graphStore.nodePropertyKeys().isEmpty();
         nodeLabelReadBuffer = new long[graphStore.nodeLabels().size()];
         nodeLabelCounter = new MutableInt();
     }

@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.api;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
+import java.util.Set;
 import java.util.function.LongPredicate;
 
 /**
@@ -35,4 +37,6 @@ public interface NodeIterator {
     void forEachNode(LongPredicate consumer);
 
     PrimitiveLongIterator nodeIterator();
+
+    PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels);
 }

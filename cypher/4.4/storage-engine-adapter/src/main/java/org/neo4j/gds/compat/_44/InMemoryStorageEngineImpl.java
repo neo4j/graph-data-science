@@ -46,7 +46,6 @@ import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -87,9 +86,7 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
 
             @Override
             public long properties() {
-                var properties = new HashSet<>();
-                graphStore.nodePropertyKeys().values().forEach(properties::addAll);
-                return properties.size() + graphStore.relationshipPropertyKeys().size();
+                return graphStore.nodePropertyKeys().size() + graphStore.relationshipPropertyKeys().size();
             }
 
             @Override

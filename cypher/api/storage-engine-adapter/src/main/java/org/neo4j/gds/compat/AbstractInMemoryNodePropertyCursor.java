@@ -78,7 +78,7 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
 
                     if (!propertySelection.isKeysOnly()) {
                         nodePropertyValues[propertyIndex] = graphStore
-                            .nodePropertyValues(label, nodePropertyKey)
+                            .nodePropertyValues(nodePropertyKey)
                             .value(nodeId);
                     }
 

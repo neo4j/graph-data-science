@@ -147,6 +147,11 @@ public class HugeIdMap implements IdMap {
     }
 
     @Override
+    public PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels) {
+        return labelInformation.nodeIterator(labels, nodeCount());
+    }
+
+    @Override
     public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
         return LazyBatchCollection.of(
             nodeCount(),

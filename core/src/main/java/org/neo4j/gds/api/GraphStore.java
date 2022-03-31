@@ -34,7 +34,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -56,7 +55,9 @@ public interface GraphStore {
 
     Set<String> nodePropertyKeys(NodeLabel label);
 
-    Map<NodeLabel, Set<String>> nodePropertyKeys();
+    Set<String> nodePropertyKeys();
+
+    boolean hasNodeProperty(String propertyKey);
 
     boolean hasNodeProperty(NodeLabel label, String propertyKey);
 
@@ -76,25 +77,21 @@ public interface GraphStore {
         return result;
     }
 
-    NodeProperty nodeProperty(NodeLabel label, String propertyKey);
-
     NodeProperty nodeProperty(String propertyKey);
 
-    ValueType nodePropertyType(NodeLabel label, String propertyKey);
+    ValueType nodePropertyType(String propertyKey);
 
     PropertyState nodePropertyState(String propertyKey);
 
     NodeProperties nodePropertyValues(String propertyKey);
 
-    NodeProperties nodePropertyValues(NodeLabel label, String propertyKey);
-
     void addNodeProperty(
-        NodeLabel nodeLabel,
+        Set<NodeLabel> nodeLabels,
         String propertyKey,
         NodeProperties propertyValues
     );
 
-    void removeNodeProperty(NodeLabel nodeLabel, String propertyKey);
+    void removeNodeProperty(String propertyKey);
 
     long relationshipCount();
 
@@ -119,7 +116,6 @@ public interface GraphStore {
 
         return result;
     }
-
 
     ValueType relationshipPropertyType(String propertyKey);
 

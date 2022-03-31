@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
@@ -166,7 +167,7 @@ class GraphStoreTest extends BaseTest {
         // add node properties
         ZonedDateTime initialTime = graphStore.modificationTime();
         Thread.sleep(42);
-        graphStore.addNodeProperty(ALL_NODES, "foo", new DoubleNullPropertyMap(42.0));
+        graphStore.addNodeProperty(Set.of(ALL_NODES), "foo", new DoubleNullPropertyMap(42.0));
         ZonedDateTime nodePropertyTime = graphStore.modificationTime();
 
         // add relationships
@@ -197,7 +198,7 @@ class GraphStoreTest extends BaseTest {
             .graphStore();
 
         assertTrue(graphStore.hasNodeProperty(Collections.singletonList(ALL_NODES), "nodeProp"));
-        graphStore.removeNodeProperty(ALL_NODES, "nodeProp");
+        graphStore.removeNodeProperty("nodeProp");
         assertFalse(graphStore.hasNodeProperty(Collections.singletonList(ALL_NODES), "nodeProp"));
     }
 

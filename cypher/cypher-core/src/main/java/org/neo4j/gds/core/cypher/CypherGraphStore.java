@@ -62,8 +62,8 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
     }
 
     @Override
-    public void removeNodeProperty(NodeLabel nodeLabel, String propertyKey) {
-        super.removeNodeProperty(nodeLabel, propertyKey);
+    public void removeNodeProperty(String propertyKey) {
+        super.removeNodeProperty(propertyKey);
         propertyRemovalCallback.accept(propertyKey);
     }
 

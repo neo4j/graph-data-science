@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
@@ -28,7 +27,6 @@ import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.NodePropertyStore;
 import org.neo4j.gds.api.PropertyState;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @ValueClass
@@ -36,25 +34,21 @@ public interface IdMapAndProperties {
 
     IdMap idMap();
 
-    Map<NodeLabel, NodePropertyStore> properties();
+    NodePropertyStore properties();
 
-    static IdMapAndProperties of(IdMap idMap, Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties) {
-        Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(properties.size());
-        properties.forEach((nodeLabel, propertyMap) -> {
-            NodePropertyStore.Builder builder = NodePropertyStore.builder();
-            propertyMap.forEach((propertyMapping, propertyValues) -> builder.putNodeProperty(
-                propertyMapping.propertyKey(),
-                NodeProperty.of(
-                    propertyMapping.propertyKey(),
-                    PropertyState.PERSISTENT,
-                    propertyValues,
-                    propertyMapping.defaultValue().isUserDefined()
-                        ? propertyMapping.defaultValue()
-                        : propertyValues.valueType().fallbackValue()
-                )
-            ));
-            nodePropertyStores.put(nodeLabel, builder.build());
-        });
-        return ImmutableIdMapAndProperties.of(idMap, nodePropertyStores);
+    static IdMapAndProperties of(IdMap idMap, Map<PropertyMapping, NodeProperties> properties) {
+        NodePropertyStore.Builder builder = NodePropertyStore.builder();
+        properties.forEach((mapping, nodeProperties) -> builder.putNodeProperty(
+            mapping.propertyKey(),
+            NodeProperty.of(
+                mapping.propertyKey(),
+                PropertyState.PERSISTENT,
+                nodeProperties,
+                mapping.defaultValue().isUserDefined()
+                    ? mapping.defaultValue()
+                    : nodeProperties.valueType().fallbackValue()
+            )
+        ));
+        return ImmutableIdMapAndProperties.of(idMap, builder.build());
     }
 }

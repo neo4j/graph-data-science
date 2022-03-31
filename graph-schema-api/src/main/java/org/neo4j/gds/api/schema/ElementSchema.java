@@ -58,6 +58,11 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFI
     }
 
     @Value.Default
+    default boolean hasProperty(ELEMENT_IDENTIFIER elementIdentifier, String propertyKey) {
+        return (!properties().get(elementIdentifier).isEmpty() && properties().get(elementIdentifier).containsKey(propertyKey));
+    }
+
+    @Value.Default
     default List<PROPERTY_SCHEMA> propertySchemasFor(ELEMENT_IDENTIFIER elementIdentifier) {
         var propertySchemaForTypes = filter(Set.of(elementIdentifier));
         return new ArrayList<>(propertySchemaForTypes.unionProperties().values());
@@ -90,7 +95,6 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFI
 
     /**
      * Returns a union of all properties in the given schema.
-     * If a property with the same key exists for more then one label, this method makes sure they have the same type.
      */
     @Value.Lazy
     default Map<String, PROPERTY_SCHEMA> unionProperties() {
@@ -101,18 +105,7 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFI
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 Map.Entry::getValue,
-                (leftSchema, rightSchema) -> {
-                    if (leftSchema.valueType() != rightSchema.valueType()) {
-                        throw new IllegalArgumentException(String.format(
-                            Locale.ENGLISH,
-                            "Combining schema entries with value type %s and %s is not supported.",
-                            leftSchema.valueType(),
-                            rightSchema.valueType()
-                        ));
-                    } else {
-                        return leftSchema;
-                    }
-                }
+                (leftSchema, rightSchema) -> leftSchema
             ));
     }
 

@@ -32,6 +32,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
@@ -89,12 +90,20 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
 
     @Override
     public final MemoryEstimation estimateMemoryUsageDuringLoading() {
-        return NativeFactory.getMemoryEstimation(buildEstimateNodeProjections(), buildEstimateRelationshipProjections(), true);
+        return NativeFactory.getMemoryEstimation(
+            buildEstimateNodeProjections(),
+            buildEstimateRelationshipProjections(),
+            true
+        );
     }
 
     @Override
     public MemoryEstimation estimateMemoryUsageAfterLoading() {
-        return NativeFactory.getMemoryEstimation(buildEstimateNodeProjections(), buildEstimateRelationshipProjections(), false);
+        return NativeFactory.getMemoryEstimation(
+            buildEstimateNodeProjections(),
+            buildEstimateRelationshipProjections(),
+            false
+        );
     }
 
     @Override
@@ -105,6 +114,16 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
             .nodeCount(getNodeEstimation().estimatedRows())
             .relCountUpperBound(getRelationshipEstimation().estimatedRows())
             .build();
+    }
+
+    @Override
+    protected GraphSchema computeGraphSchema(
+        IdMapAndProperties idMapAndProperties, RelationshipsAndProperties relationshipsAndProperties
+    ) {
+        return CSRGraphStoreUtil.computeGraphSchema(
+            idMapAndProperties,
+            relationshipsAndProperties
+        );
     }
 
     @Override

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.api;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
@@ -73,6 +74,29 @@ public interface BatchNodeIterable {
         @Override
         public long next() {
             return current++;
+        }
+    }
+
+    final class BitSetIdIterator implements PrimitiveLongIterator {
+        private final BitSet labelBitSet;
+
+        long position;
+
+        public BitSetIdIterator(BitSet labelBitSet) {
+            this.labelBitSet = labelBitSet;
+            this.position = labelBitSet.nextSetBit(0);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return position >= 0;
+        }
+
+        @Override
+        public long next() {
+            var tmp = this.position;
+            this.position = labelBitSet.nextSetBit(this.position + 1);
+            return tmp;
         }
     }
 }

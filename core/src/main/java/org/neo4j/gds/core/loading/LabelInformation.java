@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
 import java.util.List;
@@ -65,6 +66,8 @@ public interface LabelInformation {
     void forEachNodeLabel(long nodeId, IdMap.NodeLabelConsumer consumer);
 
     void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels);
+
+    PrimitiveLongIterator nodeIterator(Collection<NodeLabel> labels, long nodeCount);
 
     interface LabelInformationConsumer {
         boolean accept(NodeLabel nodeLabel, BitSet bitSet);

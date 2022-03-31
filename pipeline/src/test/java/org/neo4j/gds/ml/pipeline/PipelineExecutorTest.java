@@ -43,6 +43,7 @@ import org.neo4j.gds.nodeproperties.LongTestProperties;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -233,7 +234,7 @@ class PipelineExecutorTest {
             Collection<RelationshipType> relTypes
         ) {
             graphStore.addNodeProperty(
-                NODE_LABEL_N,
+                Set.of(NODE_LABEL_N),
                 PROPERTY,
                 new LongTestProperties(nodeId -> nodeId)
             );

@@ -45,6 +45,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -222,8 +223,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
         NodeProperties identityProperties = new IdentityProperties(expectedPropertyCount);
-        graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", identityProperties);
-        graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", identityProperties);
+        graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
 
         assertCypherResult(
             "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp3'])",
@@ -303,21 +303,5 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             "Could not find property key(s) ['newNodeProp3'] for label A. " +
             "Defined keys: ['newNodeProp1', 'newNodeProp2']."
         );
-    }
-
-    @Test
-    void writePropertyTwice() {
-        clearDb();
-        runQuery("CREATE (:A:B)");
-        runQuery("CALL gds.graph.project('myGraph', ['A','B'], '*')");
-
-        runQuery("CALL gds.pageRank.mutate('myGraph', {nodeLabels: ['A'], mutateProperty: 'score'})");
-        runQuery("CALL gds.degree.mutate('myGraph', {nodeLabels: ['B'], mutateProperty: 'score'})");
-
-        runQuery("CALL gds.graph.writeNodeProperties('myGraph', ['score'])");
-
-        // we write per node-label and as `B` > `A`
-        // the degree-score for label `B` is written at last and overwrites the pageRank-score of label `A`
-        assertCypherResult("MATCH (n) RETURN n.score AS score", List.of(Map.of("score", 0D)));
     }
 }

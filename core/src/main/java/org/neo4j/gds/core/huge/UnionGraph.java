@@ -116,6 +116,11 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
+    public PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels) {
+        return first.nodeIterator(labels);
+    }
+
+    @Override
     public NodeProperties nodeProperties(final String propertyKey) {
         return first.nodeProperties(propertyKey);
     }

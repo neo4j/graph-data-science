@@ -33,8 +33,10 @@ import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.ImmutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -93,6 +95,7 @@ public final class CypherAggregation extends BaseProc {
 
         private final ProgressTimer progressTimer;
         private final NamedDatabaseId databaseId;
+        private final ImmutableGraphSchema.Builder graphSchemaBuilder;
         private final String username;
 
         // #result() is called twice, we cache the result of the first call to return it again in the second invocation
@@ -112,6 +115,7 @@ public final class CypherAggregation extends BaseProc {
             this.databaseId = databaseId;
             this.username = username;
             this.relImporters = new HashMap<>();
+            this.graphSchemaBuilder = ImmutableGraphSchema.builder();
         }
 
         @UserAggregationUpdate
@@ -442,7 +446,7 @@ public final class CypherAggregation extends BaseProc {
             var nodes = buildNodesWithProperties(graphStoreBuilder);
             buildRelationshipsWithProperties(graphStoreBuilder, nodes);
 
-            var graphStore = graphStoreBuilder.build();
+            var graphStore = graphStoreBuilder.schema(graphSchemaBuilder.build()).build();
 
             var config = ImmutableGraphProjectFromCypherAggregation.builder()
                 .graphName(graphName)
@@ -473,13 +477,24 @@ public final class CypherAggregation extends BaseProc {
             graphStoreBuilder.nodes(nodes);
 
             var nodeSchema = maybeNodeProperties
-                .map(GraphAggregator::nodeSchemaWithProperties)
-                .orElseGet(() -> nodeSchemaWithoutProperties(nodes.availableNodeLabels()));
+                .map(nodeProperties -> GraphAggregator.nodeSchemaWithProperties(nodes.availableNodeLabels(), nodeProperties))
+                .orElseGet(() -> nodeSchemaWithoutProperties(nodes.availableNodeLabels()))
+                .unionProperties();
+
+            NodeSchema.Builder nodeSchemaBuilder = NodeSchema.builder();
+            nodes.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
+            nodeSchema.forEach((propertyKey, propertySchema) -> {
+                nodes.availableNodeLabels().forEach(label -> {
+                    nodeSchemaBuilder.addProperty(label, propertySchema.key(), propertySchema);
+                });
+            });
+
+            graphSchemaBuilder.nodeSchema(nodeSchemaBuilder.build());
 
             maybeNodeProperties.ifPresent(allNodeProperties -> {
                 CSRGraphStoreUtil.extractNodeProperties(
                     graphStoreBuilder,
-                    nodeSchema.properties()::get,
+                    nodeSchema::get,
                     allNodeProperties
                 );
             });
@@ -487,6 +502,8 @@ public final class CypherAggregation extends BaseProc {
         }
 
         private void buildRelationshipsWithProperties(GraphStoreBuilder graphStoreBuilder, PartialIdMap nodes) {
+            var relationshipSchemaBuilder = RelationshipSchema.builder();
+
             this.relImporters.forEach((relationshipType, relImporter) -> {
                 var allRelationships = relImporter.buildAll(Optional.of(nodes::toMappedNodeId));
                 var propertyStore = CSRGraphStoreUtil.buildRelationshipPropertyStore(
@@ -496,18 +513,24 @@ public final class CypherAggregation extends BaseProc {
 
                 var relType = relationshipType == null ? RelationshipType.ALL_RELATIONSHIPS : relationshipType;
 
+                propertyStore.relationshipProperties().forEach((propertyKey, relationshipProperties) -> {
+                    relationshipSchemaBuilder.addProperty(relType, propertyKey, relationshipProperties.propertySchema());
+                });
+
                 graphStoreBuilder.putRelationships(relType, allRelationships.get(0).topology());
                 graphStoreBuilder.putRelationshipPropertyStores(relType, propertyStore);
             });
+            graphSchemaBuilder.relationshipSchema(relationshipSchemaBuilder.build());
+
             // release all references to the builders
             // we are only be called once and don't support double invocations of `result` building
             this.relImporters.clear();
         }
 
-        private static NodeSchema nodeSchemaWithProperties(Map<NodeLabel, Map<String, NodeProperties>> nodeSchemaMap) {
+        private static NodeSchema nodeSchemaWithProperties(Iterable<NodeLabel> nodeLabels, Map<String, NodeProperties> propertyMap) {
             var nodeSchemaBuilder = NodeSchema.builder();
 
-            nodeSchemaMap.forEach((nodeLabel, propertyMap) -> {
+            nodeLabels.forEach((nodeLabel) -> {
                 propertyMap.forEach((propertyName, nodeProperties) -> {
                     nodeSchemaBuilder.addProperty(
                         nodeLabel,

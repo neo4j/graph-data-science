@@ -20,10 +20,10 @@
 package org.neo4j.gds.api.schema;
 
 import org.immutables.builder.Builder.AccessibleFields;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.RelationshipType;
 
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -53,11 +53,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
         Optional<String> maybeProperty
     ) {
         if (!properties().containsKey(relationshipType)) {
-            throw new IllegalArgumentException(String.format(
-                Locale.ENGLISH,
-                "Relationship schema does not contain relationship type '%s'",
-                relationshipType.name
-            ));
+           return RelationshipSchema.builder().build();
         }
 
         maybeProperty.ifPresent(property -> {
@@ -116,6 +112,11 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
 
         public Builder addRelationshipType(RelationshipType type) {
             this.properties.putIfAbsent(type, new LinkedHashMap<>());
+            return this;
+        }
+
+        public Builder removeRelationshipType(RelationshipType type) {
+            this.properties.remove(type);
             return this;
         }
     }

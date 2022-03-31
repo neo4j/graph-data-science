@@ -266,7 +266,7 @@ public final class GraphSageHelper {
         return features;
     }
 
-    public static Map<NodeLabel, Set<String>> propertyKeysPerNodeLabel(GraphSchema graphSchema) {
+    private static Map<NodeLabel, Set<String>> propertyKeysPerNodeLabel(GraphSchema graphSchema) {
         return graphSchema
             .nodeSchema()
             .properties()

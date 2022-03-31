@@ -172,21 +172,6 @@ class NodeSchemaTest {
         assertThat(unionPropertySchema).containsExactlyInAnyOrderEntriesOf(expectedUnionSchema);
     }
 
-    @Test
-    void testUnionPropertiesWithIncompatibleTypes() {
-        var label1 = NodeLabel.of("Foo");
-        var label2 = NodeLabel.of("Bar");
-
-        var nodeSchema = NodeSchema.builder()
-            .addProperty(label1, "foo", ValueType.DOUBLE)
-            .addProperty(label2, "foo", ValueType.LONG)
-            .build();
-
-        var exception = assertThrows(IllegalArgumentException.class, nodeSchema::unionProperties);
-
-        assertThat(exception).hasMessage("Combining schema entries with value type DOUBLE and LONG is not supported.");
-    }
-
     static Stream<Arguments> schemaAndHasProperties() {
         return Stream.of(
             Arguments.of(NodeSchema.builder().addLabel(NodeLabel.of("A")).build(), false),

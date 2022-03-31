@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyProperties;
@@ -37,11 +38,12 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.api.UnionNodeProperties;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ProcedureConstants;
@@ -63,7 +65,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -71,7 +72,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.NodeLabel.ALL_NODES;
+import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -84,21 +85,24 @@ public class CSRGraphStore implements GraphStore {
 
     private final IdMap nodes;
 
-    private final Map<NodeLabel, NodePropertyStore> nodeProperties;
-
     protected final Map<RelationshipType, Relationships.Topology> relationships;
 
     private final Map<RelationshipType, RelationshipPropertyStore> relationshipProperties;
 
     private final Set<Graph> createdGraphs;
 
+    private GraphSchema schema;
+
+    private NodePropertyStore nodeProperties;
+
     private ZonedDateTime modificationTime;
 
     @Builder.Factory
     public static CSRGraphStore of(
         NamedDatabaseId databaseId,
+        GraphSchema schema,
         IdMap nodes,
-        Map<NodeLabel, NodePropertyStore> nodePropertyStores,
+        @Nullable NodePropertyStore nodePropertyStore,
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
         int concurrency
@@ -110,8 +114,9 @@ public class CSRGraphStore implements GraphStore {
 
         return new CSRGraphStore(
             databaseId,
+            schema,
             nodes,
-            nodePropertyStores,
+            nodePropertyStore == null ? NodePropertyStore.empty() : nodePropertyStore,
             topologies,
             relationshipPropertyStores,
             concurrency
@@ -120,17 +125,20 @@ public class CSRGraphStore implements GraphStore {
 
     protected CSRGraphStore(
         NamedDatabaseId databaseId,
+        GraphSchema schema,
         IdMap nodes,
-        Map<NodeLabel, NodePropertyStore> nodeProperties,
+        NodePropertyStore nodeProperties,
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
         int concurrency
     ) {
         this.databaseId = databaseId;
-        this.nodes = nodes;
 
-        // make sure that the following maps are mutable
-        this.nodeProperties = new HashMap<>(nodeProperties);
+        this.schema = schema;
+
+        this.nodes = nodes;
+        this.nodeProperties = nodeProperties;
+
         this.relationships = new HashMap<>(relationships);
         this.relationshipProperties = new HashMap<>(relationshipProperties);
 
@@ -146,7 +154,7 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public GraphSchema schema() {
-        return GraphSchema.of(nodeSchema(), relationshipTypeSchema());
+        return schema;
     }
 
     @Override
@@ -166,104 +174,96 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public Set<String> nodePropertyKeys(NodeLabel label) {
-        return nodeProperties.getOrDefault(label, NodePropertyStore.empty()).keySet();
+        return schema().nodeSchema().properties().getOrDefault(label, Map.of()).keySet();
     }
 
     @Override
-    public Map<NodeLabel, Set<String>> nodePropertyKeys() {
-        return nodeLabels().stream().collect(Collectors.toMap(Function.identity(), this::nodePropertyKeys));
+    public Set<String> nodePropertyKeys() {
+        return nodeProperties.keySet();
     }
 
     @Override
-    public boolean hasNodeProperty(NodeLabel nodeLabel, String propertyKey) {
-        return nodeProperties.containsKey(nodeLabel) && nodeProperties.get(nodeLabel).containsKey(propertyKey);
+    public boolean hasNodeProperty(String propertyKey) {
+        return nodeProperties.containsKey(propertyKey);
+    }
+
+    @Override
+    public boolean hasNodeProperty(NodeLabel label, String propertyKey) {
+        return schema().nodeSchema().hasProperty(label, propertyKey);
     }
 
     @Override
     public boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey) {
         return labels
             .stream()
-            .allMatch(label -> nodeProperties.containsKey(label) && nodeProperties.get(label).containsKey(propertyKey));
+            .allMatch(label -> hasNodeProperty(label, propertyKey));
     }
 
     @Override
     public void addNodeProperty(
-        NodeLabel nodeLabel,
+        Set<NodeLabel> labels,
         String propertyKey,
         NodeProperties propertyValues
     ) {
-        if (!nodeLabels().contains(nodeLabel)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Adding '%s.%s' to the graph store failed. Node label '%s' does not exist in the store. Available node labels: %s",
-                nodeLabel.name,
-                propertyKey,
-                nodeLabel.name,
-                StringJoining.join(nodeLabels().stream().map(NodeLabel::name))
-            ));
-        }
-        updateGraphStore((graphStore) -> graphStore.nodeProperties.compute(nodeLabel, (k, nodePropertyStore) -> {
-            NodePropertyStore.Builder storeBuilder = NodePropertyStore.builder();
-            if (nodePropertyStore != null) {
-                storeBuilder.from(nodePropertyStore);
+        updateGraphStore((graphStore) -> {
+            if (graphStore.hasNodeProperty(propertyKey)) {
+                throw new UnsupportedOperationException(formatWithLocale("Node property %s already exists", propertyKey));
             }
-            return storeBuilder
+
+            graphStore.nodeProperties = NodePropertyStore.builder()
+                .from(graphStore.nodeProperties)
                 .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, PropertyState.TRANSIENT, propertyValues))
                 .build();
-        }));
-    }
 
-    @Override
-    public void removeNodeProperty(NodeLabel nodeLabel, String propertyKey) {
-        updateGraphStore(graphStore -> {
-            if (graphStore.nodeProperties.containsKey(nodeLabel)) {
-                NodePropertyStore updatedNodePropertyStore = NodePropertyStore.builder()
-                    .from(graphStore.nodeProperties.get(nodeLabel))
-                    .removeProperty(propertyKey)
-                    .build();
+            NodeSchema.Builder schemaBuilder = NodeSchema
+                .builder()
+                .from(schema().nodeSchema());
 
-                if (updatedNodePropertyStore.isEmpty()) {
-                    graphStore.nodeProperties.remove(nodeLabel);
-                } else {
-                    graphStore.nodeProperties.replace(nodeLabel, updatedNodePropertyStore);
-                }
-            }
+            labels.forEach(label -> schemaBuilder.addProperty(
+                label,
+                propertyKey,
+                PropertySchema.of(propertyKey,
+                    propertyValues.valueType(),
+                    propertyValues.valueType().fallbackValue(),
+                    PropertyState.TRANSIENT
+                )
+            ));
+
+            this.schema = GraphSchema.of(
+                schemaBuilder.build(),
+                schema().relationshipSchema()
+            );
         });
     }
 
     @Override
-    public NodeProperty nodeProperty(NodeLabel label, String propertyKey) {
-        return this.nodeProperties.getOrDefault(label, NodePropertyStore.empty()).get(propertyKey);
+    public void removeNodeProperty(String propertyKey) {
+        updateGraphStore(graphStore -> {
+            graphStore.nodeProperties = NodePropertyStore.builder()
+                .from(graphStore.nodeProperties)
+                .removeProperty(propertyKey)
+                .build();
+
+            NodeSchema.Builder nodeSchemaBuilder = NodeSchema
+                .builder()
+                .from(schema().nodeSchema())
+                .removeProperty(propertyKey);
+
+            this.schema = GraphSchema.of(
+                nodeSchemaBuilder.build(),
+                schema().relationshipSchema()
+            );
+        });
     }
 
     @Override
     public NodeProperty nodeProperty(String propertyKey) {
-        if (nodes.availableNodeLabels().size() > 1) {
-            var unionValues = new HashMap<NodeLabel, NodeProperties>();
-            var unionOrigin = PropertyState.PERSISTENT;
-
-            for (var labelAndPropertyStore : nodeProperties.entrySet()) {
-                var nodeLabel = labelAndPropertyStore.getKey();
-                var nodePropertyStore = labelAndPropertyStore.getValue();
-                if (nodePropertyStore.containsKey(propertyKey)) {
-                    var nodeProperty = nodePropertyStore.get(propertyKey);
-                    unionValues.put(nodeLabel, nodeProperty.values());
-                    unionOrigin = nodeProperty.propertyState();
-                }
-            }
-
-            return NodeProperty.of(
-                propertyKey,
-                unionOrigin,
-                new UnionNodeProperties(nodes, unionValues)
-            );
-        } else {
-            return nodeProperties.get(nodes.availableNodeLabels().iterator().next()).get(propertyKey);
-        }
+        return this.nodeProperties.get(propertyKey);
     }
 
     @Override
-    public ValueType nodePropertyType(NodeLabel label, String propertyKey) {
-        return nodeProperty(label, propertyKey).valueType();
+    public ValueType nodePropertyType(String propertyKey) {
+        return nodeProperty(propertyKey).valueType();
     }
 
     @Override
@@ -274,11 +274,6 @@ public class CSRGraphStore implements GraphStore {
     @Override
     public NodeProperties nodePropertyValues(String propertyKey) {
         return nodeProperty(propertyKey).values();
-    }
-
-    @Override
-    public NodeProperties nodePropertyValues(NodeLabel label, String propertyKey) {
-        return nodeProperty(label, propertyKey).values();
     }
 
     @Override
@@ -352,7 +347,12 @@ public class CSRGraphStore implements GraphStore {
     ) {
         updateGraphStore(graphStore -> {
             if (!hasRelationshipType(relationshipType)) {
+                RelationshipSchema.Builder relationshipSchemaBuilder = RelationshipSchema
+                    .builder()
+                    .from(schema().relationshipSchema());
+
                 graphStore.relationships.put(relationshipType, relationships.topology());
+                relationshipSchemaBuilder.addRelationshipType(relationshipType);
 
                 if (relationshipPropertyKey.isPresent()
                     && relationshipPropertyType.isPresent()
@@ -364,7 +364,24 @@ public class CSRGraphStore implements GraphStore {
                         relationships.properties().get(),
                         graphStore
                     );
+
+                    ValueType valueType = ValueTypes.fromNumberType(relationshipPropertyType.get());
+                    relationshipSchemaBuilder.addProperty(
+                        relationshipType,
+                        relationshipPropertyKey.get(),
+                        RelationshipPropertySchema.of(
+                            relationshipPropertyKey.get(),
+                            valueType,
+                            valueType.fallbackValue(),
+                            PropertyState.TRANSIENT,
+                            Aggregation.NONE
+                        ));
                 }
+
+                this.schema = GraphSchema.of(
+                    schema().nodeSchema(),
+                    relationshipSchemaBuilder.build()
+                );
             }
         });
     }
@@ -389,6 +406,17 @@ public class CSRGraphStore implements GraphStore {
                             property.values().elementCount()
                         ));
                 }
+
+                var relationshipSchema = RelationshipSchema
+                    .builder()
+                    .from(schema().relationshipSchema())
+                    .removeRelationshipType(relationshipType)
+                    .build();
+
+                this.schema = GraphSchema.of(
+                    schema().nodeSchema(),
+                    relationshipSchema
+                );
             })
         );
     }
@@ -629,31 +657,16 @@ public class CSRGraphStore implements GraphStore {
             return Collections.emptyMap();
         }
         if (labels.size() == 1 || schema().nodeSchema().containsOnlyAllNodesLabel()) {
-            return this.nodeProperties
-                .getOrDefault(labels.iterator().next(), NodePropertyStore.empty())
-                .nodePropertyValues();
+            return this.nodeProperties.nodePropertyValues();
         }
 
-        Map<String, Map<NodeLabel, NodeProperties>> invertedNodeProperties = new HashMap<>();
-        nodeProperties
-            .entrySet()
-            .stream()
-            .filter(entry -> labels.contains(entry.getKey()) || labels.contains(ALL_NODES))
-            .forEach(entry -> entry.getValue().nodeProperties()
-                .forEach((propertyKey, nodeProperty) -> invertedNodeProperties
-                    .computeIfAbsent(
-                        propertyKey,
-                        ignored -> new HashMap<>()
-                    )
-                    .put(entry.getKey(), nodeProperty.values())
-                ));
 
-        return invertedNodeProperties
-            .entrySet()
+        return schema().nodeSchema().filter(new HashSet<>(labels))
+            .allProperties()
             .stream()
-            .collect(Collectors.toMap(
-                Entry::getKey,
-                entry -> new UnionNodeProperties(nodes, entry.getValue())
+            .collect(toMap(
+                Function.identity(),
+                this::nodePropertyValues
             ));
     }
 
@@ -686,43 +699,6 @@ public class CSRGraphStore implements GraphStore {
                 }
             });
         });
-    }
-
-    private NodeSchema nodeSchema() {
-        NodeSchema.Builder nodePropsBuilder = NodeSchema.builder();
-
-        nodeProperties.forEach((label, propertyStore) ->
-            propertyStore.nodeProperties().forEach((propertyName, nodeProperty) ->
-                nodePropsBuilder.addProperty(
-                    label,
-                    propertyName,
-                    nodeProperty.propertySchema()
-                )
-            ));
-
-        for (NodeLabel nodeLabel : nodeLabels()) {
-            nodePropsBuilder.addLabel(nodeLabel);
-        }
-        return nodePropsBuilder.build();
-    }
-
-    private RelationshipSchema relationshipTypeSchema() {
-        RelationshipSchema.Builder relationshipPropsBuilder = RelationshipSchema.builder();
-
-        relationshipProperties.forEach((type, propertyStore) ->
-            propertyStore.relationshipProperties().forEach((propertyName, relationshipProperty) ->
-                relationshipPropsBuilder.addProperty(
-                    type,
-                    propertyName,
-                    relationshipProperty.propertySchema()
-                )
-            )
-        );
-
-        for (RelationshipType type : relationshipTypes()) {
-            relationshipPropsBuilder.addRelationshipType(type);
-        }
-        return relationshipPropsBuilder.build();
     }
 
 }

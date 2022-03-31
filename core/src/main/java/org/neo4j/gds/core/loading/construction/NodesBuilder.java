@@ -20,9 +20,7 @@
 package org.neo4j.gds.core.loading.construction;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
-import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.ObjectIntMap;
-import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
@@ -46,19 +44,17 @@ import org.neo4j.values.storable.Value;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.LongPredicate;
 
-import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
-import static org.neo4j.gds.core.GraphDimensions.IGNORE;
+import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -83,7 +79,7 @@ public final class NodesBuilder {
 
     private final Lock lock;
 
-    private final IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyToken;
+    private final ConcurrentMap<String, NodePropertiesFromStoreBuilder> propertyBuildersByPropertyKey;
     private final boolean hasProperties;
 
     NodesBuilder(
@@ -91,7 +87,7 @@ public final class NodesBuilder {
         int concurrency,
         ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping,
         IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping,
-        IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey,
+        ConcurrentMap<String, NodePropertiesFromStoreBuilder> propertyBuildersByPropertyKey,
         IdMapBuilder idMapBuilder,
         boolean hasLabelInformation,
         boolean hasProperties,
@@ -105,7 +101,7 @@ public final class NodesBuilder {
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.nextLabelId = 0;
         this.lock = new ReentrantLock(true);
-        this.buildersByLabelTokenAndPropertyToken = buildersByLabelTokenAndPropertyKey;
+        this.propertyBuildersByPropertyKey = propertyBuildersByPropertyKey;
         this.hasProperties = hasProperties;
         this.importedNodes = new LongAdder();
         this.nodeImporter = new NodeImporter(
@@ -118,7 +114,7 @@ public final class NodesBuilder {
         Function<NodeLabel, Integer> labelTokenIdFn = elementIdentifierLabelTokenMapping.isEmpty()
             ? this::getOrCreateLabelTokenId
             : this::getLabelTokenId;
-        BiFunction<Integer, String, NodePropertiesFromStoreBuilder> propertyBuilderFn = buildersByLabelTokenAndPropertyKey.isEmpty()
+        Function<String, NodePropertiesFromStoreBuilder> propertyBuilderFn = propertyBuildersByPropertyKey.isEmpty()
             ? this::getOrCreatePropertyBuilder
             : this::getPropertyBuilder;
         LongPredicate seenNodeIdPredicate = seenNodesPredicate(deduplicateIds, maxOriginalId);
@@ -134,8 +130,7 @@ public final class NodesBuilder {
                 hasLabelInformation,
                 hasProperties,
                 labelTokenIdFn,
-                propertyBuilderFn,
-                buildersByLabelTokenAndPropertyKey
+                propertyBuilderFn
             )
         );
     }
@@ -203,25 +198,18 @@ public final class NodesBuilder {
 
         var idMap = this.idMapBuilder.build(labelInformationBuilder, highestNeoId, concurrency);
 
-        Optional<Map<NodeLabel, Map<String, NodeProperties>>> nodeProperties = Optional.empty();
+        Optional<Map<String, NodeProperties>> nodeProperties = Optional.empty();
         if (hasProperties) {
             nodeProperties = Optional.of(buildProperties(idMap));
         }
         return ImmutableIdMapAndProperties.of(idMap, nodeProperties);
     }
 
-    private Map<NodeLabel, Map<String, NodeProperties>> buildProperties(IdMap idMap) {
-        Map<NodeLabel, Map<String, NodeProperties>> nodePropertiesByLabel = new HashMap<>();
-        for (IntObjectCursor<Map<String, NodePropertiesFromStoreBuilder>> propertyBuilderByLabelToken : this.buildersByLabelTokenAndPropertyToken) {
-            var nodeLabels = labelTokenNodeLabelMapping.get(propertyBuilderByLabelToken.key);
-            nodeLabels.forEach(nodeLabel ->
-                propertyBuilderByLabelToken.value.forEach((propertyKey, propertyBuilder) -> nodePropertiesByLabel
-                    .computeIfAbsent(nodeLabel, __ -> new HashMap<>())
-                    .put(propertyKey, propertyBuilder.build(idMap))
-                )
-            );
-        }
-        return nodePropertiesByLabel;
+    private Map<String, NodeProperties> buildProperties(IdMap idMap) {
+        return propertyBuildersByPropertyKey.entrySet().stream().collect(toMap(
+            Map.Entry::getKey,
+            e -> e.getValue().build(idMap)
+        ));
     }
 
     /**
@@ -259,35 +247,22 @@ public final class NodesBuilder {
         return elementIdentifierLabelTokenMapping.get(nodeLabel);
     }
 
-    private NodePropertiesFromStoreBuilder getOrCreatePropertyBuilder(int labelId, String propertyKey) {
-        if (!buildersByLabelTokenAndPropertyToken.containsKey(labelId)) {
-            buildersByLabelTokenAndPropertyToken.put(labelId, new HashMap<>());
-        }
-        var propertyBuildersByPropertyKey = buildersByLabelTokenAndPropertyToken.get(labelId);
-        if (!propertyBuildersByPropertyKey.containsKey(propertyKey)) {
-            propertyBuildersByPropertyKey.put(
-                propertyKey,
-                NodePropertiesFromStoreBuilder.of(NO_PROPERTY_VALUE, concurrency)
-            );
-        }
-        return propertyBuildersByPropertyKey.get(propertyKey);
+    private NodePropertiesFromStoreBuilder getOrCreatePropertyBuilder(String propertyKey) {
+        return propertyBuildersByPropertyKey.computeIfAbsent(
+            propertyKey,
+            __ -> NodePropertiesFromStoreBuilder.of(NO_PROPERTY_VALUE, concurrency)
+        );
     }
 
-    private NodePropertiesFromStoreBuilder getPropertyBuilder(int labelId, String propertyKey) {
-        if (buildersByLabelTokenAndPropertyToken.containsKey(labelId)) {
-            Map<String, NodePropertiesFromStoreBuilder> propertyBuildersByPropertyKey = buildersByLabelTokenAndPropertyToken.get(labelId);
-            if (propertyBuildersByPropertyKey.containsKey(propertyKey)) {
-                return propertyBuildersByPropertyKey.get(propertyKey);
-            }
-        }
-        return null;
+    private NodePropertiesFromStoreBuilder getPropertyBuilder(String propertyKey) {
+        return propertyBuildersByPropertyKey.get(propertyKey);
     }
 
     @ValueClass
     public interface IdMapAndProperties {
         IdMap idMap();
 
-        Optional<Map<NodeLabel, Map<String, NodeProperties>>> nodeProperties();
+        Optional<Map<String, NodeProperties>> nodeProperties();
     }
 
     private static class ThreadLocalBuilder implements AutoCloseable {
@@ -299,9 +274,8 @@ public final class NodesBuilder {
         private final LongPredicate seenNodeIdPredicate;
         private final NodesBatchBuffer buffer;
         private final Function<NodeLabel, Integer> labelTokenIdFn;
-        private final BiFunction<Integer, String, NodePropertiesFromStoreBuilder> propertyBuilderFn;
+        private final Function<String, NodePropertiesFromStoreBuilder> propertyBuilderFn;
         private final NodeImporter nodeImporter;
-        private final IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey;
         private final List<Map<String, Value>> batchNodeProperties;
 
         ThreadLocalBuilder(
@@ -312,8 +286,7 @@ public final class NodesBuilder {
             boolean hasLabelInformation,
             boolean hasProperties,
             Function<NodeLabel, Integer> labelTokenIdFn,
-            BiFunction<Integer, String, NodePropertiesFromStoreBuilder> propertyBuilderFn,
-            IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey
+            Function<String, NodePropertiesFromStoreBuilder> propertyBuilderFn
         ) {
             this.importedNodes = importedNodes;
             this.seenNodeIdPredicate = seenNodeIdPredicate;
@@ -327,7 +300,6 @@ public final class NodesBuilder {
                 .readProperty(hasProperties)
                 .build();
             this.nodeImporter = nodeImporter;
-            this.buildersByLabelTokenAndPropertyKey = buildersByLabelTokenAndPropertyKey;
             this.batchNodeProperties = new ArrayList<>(buffer.capacity());
         }
 
@@ -386,7 +358,6 @@ public final class NodesBuilder {
                         MutableInt importedProperties = new MutableInt(0);
                         properties.forEach((propertyKey, propertyValue) -> importedProperties.add(importProperty(
                             nodeReference,
-                            labelIds,
                             propertyKey,
                             propertyValue
                         )));
@@ -407,29 +378,13 @@ public final class NodesBuilder {
         @Override
         public void close() {}
 
-        private int importProperty(long neoNodeId, long[] labels, String propertyKey, Value value) {
+        private int importProperty(long neoNodeId, String propertyKey, Value value) {
             int propertiesImported = 0;
 
-            for (long label : labels) {
-                if (label == IGNORE || label == ANY_LABEL) {
-                    continue;
-                }
-
-                var nodePropertyBuilder = propertyBuilderFn.apply((int) label, propertyKey);
-                if (nodePropertyBuilder != null) {
-                    nodePropertyBuilder.set(neoNodeId, value);
-                    propertiesImported++;
-                }
-            }
-
-            if (buildersByLabelTokenAndPropertyKey.containsKey(ANY_LABEL)) {
-                var nodePropertiesBuilder = buildersByLabelTokenAndPropertyKey
-                    .get(ANY_LABEL)
-                    .get(propertyKey);
-                if (nodePropertiesBuilder != null) {
-                    nodePropertiesBuilder.set(neoNodeId, value);
-                    propertiesImported++;
-                }
+            var nodePropertyBuilder = propertyBuilderFn.apply(propertyKey);
+            if (nodePropertyBuilder != null) {
+                nodePropertyBuilder.set(neoNodeId, value);
+                propertiesImported++;
             }
 
             return propertiesImported;
