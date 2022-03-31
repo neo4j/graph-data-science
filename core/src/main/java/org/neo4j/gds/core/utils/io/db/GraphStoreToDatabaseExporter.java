@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
+import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Collectors;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.io.fs.FileSystemAbstraction;
@@ -134,7 +135,9 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
                 ));
             }
 
-            var collector = Collectors.badCollector(new LoggingOutputStream(log), UNLIMITED_TOLERANCE);
+            var collector = config.useBadCollector()
+                ? Collectors.badCollector(new LoggingOutputStream(log), UNLIMITED_TOLERANCE)
+                : Collector.EMPTY;
 
             var importer = Neo4jProxy.instantiateBatchImporter(
                 BatchImporterFactory.withHighestPriority(),
