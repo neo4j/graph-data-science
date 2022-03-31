@@ -357,6 +357,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
+        dbConfig.set(
+            GraphDatabaseSettings.record_format_created_db,
+            GraphDatabaseSettings.DatabaseRecordFormat.valueOf(recordFormats.name())
+        );
+
         return factory.instantiate(
             directoryStructure,
             fileSystem,
