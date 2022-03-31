@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline;
 
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
@@ -77,4 +79,7 @@ public final class LinkPredictionPredictPipeline implements Pipeline<LinkFeature
     public List<LinkFeatureStep> featureSteps() {
         return featureSteps;
     }
+
+    @Override
+    public void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
 }

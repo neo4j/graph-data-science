@@ -73,9 +73,7 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
     }
 
     @Override
-    public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {
-        super.validateBeforeExecution(graphStore, config);
-
+    public void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {
         if (featureSteps().isEmpty()) {
             throw new IllegalArgumentException(
                 "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.beta.pipeline.linkPrediction.addFeature`.");

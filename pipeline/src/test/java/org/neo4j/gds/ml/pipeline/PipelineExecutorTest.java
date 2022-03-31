@@ -47,6 +47,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -155,9 +156,9 @@ class PipelineExecutorTest {
     @Test
     void failOnInvalidGraphBeforeExecution() {
         var invalidGraphStore = GdlFactory.of("(), ()").build();
-        var pipeline = new LinkPredictionPredictPipeline(
-            List.of(),
-            List.of(new L2FeatureStep(List.of("a")))
+        var pipeline = LinkPredictionPredictPipeline.from(
+            Stream.of(),
+            Stream.of(new L2FeatureStep(List.of("a")))
         );
 
         var executor = new FailingPipelineExecutor(
@@ -343,6 +344,9 @@ class PipelineExecutorTest {
         public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
 
         @Override
+        public void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+
+        @Override
         public void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {}
     }
 
@@ -372,6 +376,9 @@ class PipelineExecutorTest {
 
         @Override
         public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+
+        @Override
+        public void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
 
         @Override
         public void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {}

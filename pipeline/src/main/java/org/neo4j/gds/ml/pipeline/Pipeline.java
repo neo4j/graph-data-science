@@ -47,7 +47,11 @@ public interface Pipeline<FEATURE_STEP extends FeatureStep> extends ToMapConvert
         if (!invalidProperties.isEmpty()) {
             throw Pipeline.missingNodePropertiesFromFeatureSteps(invalidProperties);
         }
+
+        specificValidateBeforeExecution(graphStore, config);
     }
+
+    void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config);
 
     default void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {
         Set<String> invalidProperties = featurePropertiesMissingFromGraph(graphStore, config);

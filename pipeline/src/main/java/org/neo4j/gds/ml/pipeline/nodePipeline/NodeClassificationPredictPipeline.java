@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline;
 
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
@@ -78,6 +80,9 @@ public final class NodeClassificationPredictPipeline implements Pipeline<NodeCla
     public List<NodeClassificationFeatureStep> featureSteps() {
         return featureSteps;
     }
+
+    @Override
+    public void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
 
     public List<String> featureProperties() {
         return featureSteps()
