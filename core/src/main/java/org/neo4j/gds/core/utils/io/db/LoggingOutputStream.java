@@ -47,6 +47,14 @@ public class LoggingOutputStream extends OutputStream {
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        if (!buffer.isEmpty()) {
+            flush();
+        }
+        super.close();
+    }
+
     public void flush () {
         var message = new String(buffer.toArray(), StandardCharsets.UTF_8);
         log.debug(message);
