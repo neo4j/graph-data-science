@@ -81,6 +81,8 @@ import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.internal.schema.SchemaDescriptors;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
+import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.context.EmptyVersionContextSupplier;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
@@ -90,11 +92,14 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.store.RecordStore;
+import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.transaction.log.EmptyLogTailMetadata;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
+import org.neo4j.logging.LogProvider;
 import org.neo4j.logging.internal.LogService;
+import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
@@ -109,6 +114,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
+import static org.neo4j.io.pagecache.context.EmptyVersionContextSupplier.EMPTY;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
@@ -537,7 +543,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             fs,
             pageCache,
             NullLogService.getInstance().getInternalLogProvider(),
-            PageCacheTracer.NULL
+            new CursorContextFactory(pageCacheTracer, EMPTY)
         );
     }
 }

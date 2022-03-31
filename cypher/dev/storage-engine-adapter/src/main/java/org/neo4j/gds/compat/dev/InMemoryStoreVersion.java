@@ -40,4 +40,9 @@ public class InMemoryStoreVersion extends AbstractInMemoryStoreVersion {
     public String formatFamilyName() {
         return getClass().getSimpleName();
     }
+
+    @Override
+    public boolean onlyForMigration() {
+        return false;
+    }
 }
