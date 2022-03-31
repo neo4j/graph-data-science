@@ -28,12 +28,10 @@ import org.neo4j.values.storable.Value;
 public class UpdatableFloatArrayNodeProperty implements UpdatableNodeProperty, FloatArrayNodeProperties {
 
     private final long nodeCount;
-    private final float[] defaultValue;
     private final HugeSparseFloatArrayList floatArrayList;
 
     public UpdatableFloatArrayNodeProperty(long nodeCount, float[] defaultValue) {
         this.nodeCount = nodeCount;
-        this.defaultValue = defaultValue;
         this.floatArrayList = HugeSparseFloatArrayList.of(defaultValue);
     }
 
