@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.traversal;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -357,26 +359,37 @@ class RandomWalkTest {
     }
 
     @Test
-    void testWithConfiguredStartNodes() {
-        var aId = idFunction.of("a");
-        var bId = idFunction.of("b");
+    void testWithConfiguredOffsetStartNodes() {
+        MutableLong ids = new MutableLong(42);
+        var gdl = GdlFactory.builder()
+            .nodeIdFunction(ids::getAndIncrement)
+            .gdlGraph(GDL)
+            .build();
+
+        var graphStore = gdl.build();
+
+        var aOriginalId = gdl.nodeId("a");
+        var bOriginalId = gdl.nodeId("b");
+
+        var aInternalId = graphStore.nodes().toMappedNodeId(aOriginalId);
+        var bInternalId = graphStore.nodes().toMappedNodeId(bOriginalId);
 
         var config = ImmutableNode2VecStreamConfig.builder()
-            .sourceNodes(List.of(aId, bId))
+            .sourceNodes(List.of(aOriginalId, bOriginalId))
             .walkLength(3)
             .concurrency(4)
             .walksPerNode(1)
             .build();
 
         var randomWalk = RandomWalk.create(
-            graph,
+            graphStore.getUnion(),
             config,
             ProgressTracker.NULL_TRACKER
         );
 
         assertThat(randomWalk.compute().collect(Collectors.toList()))
             .matches(walks -> walks.size() == 2)
-            .anyMatch(walk -> walk[0] == aId)
-            .anyMatch(walk -> walk[0] == bId);
+            .anyMatch(walk -> walk[0] == aInternalId)
+            .anyMatch(walk -> walk[0] == bInternalId);
     }
 }
