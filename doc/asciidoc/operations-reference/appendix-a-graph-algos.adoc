@@ -329,6 +329,6 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.influenceMaximization.greedy.stream`
 .1+<.^| <<algorithms-celf, Influence Maximization - CELF>>
 | `gds.alpha.influenceMaximization.celf.stream`
-.1+<.^| Conductance
+.1+<.^| <<alpha-algorithms-conductance, Conductance>>
 | `gds.alpha.conductance.stream`
 |===
