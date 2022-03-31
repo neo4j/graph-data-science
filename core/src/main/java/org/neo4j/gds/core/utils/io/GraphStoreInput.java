@@ -24,6 +24,7 @@ import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompatPropertySizeCalculator;
+import org.neo4j.gds.core.utils.io.GraphStoreExporter.IdMapFunction;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.cache.idmapping.string.LongEncoder;
@@ -50,6 +51,7 @@ public final class GraphStoreInput implements CompatInput {
     private final RelationshipStore relationshipStore;
 
     private final int batchSize;
+    private final IdMapFunction idMapFunction;
     private final IdMode idMode;
 
     enum IdMode implements IdVisitor {
@@ -105,7 +107,8 @@ public final class GraphStoreInput implements CompatInput {
         MetaDataStore metaDataStore,
         NodeStore nodeStore,
         RelationshipStore relationshipStore,
-        int batchSize
+        int batchSize,
+        GraphStoreExporter.IdMappingType idMappingType
     ) {
         // Neo reserves node id 2^32 - 1 for handling special internal cases.
         // If our id space is below that value, we can use actual mapping, i.e.,
@@ -119,17 +122,18 @@ public final class GraphStoreInput implements CompatInput {
         // prepared for more reserved ids. The only other option would
         // be to scan through all original ids in the id map and
         // perform individual checks with `IdValidator#isReservedId`.
-        if (nodeStore.idMap.highestNeoId() > IdValidator.INTEGER_MINUS_ONE && nodeStore.idMap.contains(IdValidator.INTEGER_MINUS_ONE)) {
+        if (idMappingType.highestId(nodeStore.idMap) >= IdValidator.INTEGER_MINUS_ONE
+            && idMappingType.contains(nodeStore.idMap, IdValidator.INTEGER_MINUS_ONE)) {
             try {
                 // We try to encode the highest mapped neo id in order to check if we
                 // exceed the limit. This is the encoder used when using IdType.INTEGER
-                new LongEncoder().encode(nodeStore.idMap.highestNeoId());
+                new LongEncoder().encode(idMappingType.highestId(nodeStore.idMap));
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException("The range of original ids specified in the graph exceeds the limit", e);
             }
-            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, batchSize, IdMode.MAPPING);
+            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, batchSize, idMappingType, IdMode.MAPPING);
         } else {
-            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, batchSize, IdMode.ACTUAL);
+            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, batchSize, idMappingType, IdMode.ACTUAL);
         }
     }
 
@@ -138,23 +142,25 @@ public final class GraphStoreInput implements CompatInput {
         NodeStore nodeStore,
         RelationshipStore relationshipStore,
         int batchSize,
+        IdMapFunction idMapFunction,
         IdMode idMode
     ) {
         this.metaDataStore = metaDataStore;
         this.nodeStore = nodeStore;
         this.relationshipStore = relationshipStore;
         this.batchSize = batchSize;
+        this.idMapFunction = idMapFunction;
         this.idMode = idMode;
     }
 
     @Override
     public InputIterable nodes(Collector badCollector) {
-        return () -> new NodeImporter(nodeStore, batchSize, idMode);
+        return () -> new NodeImporter(nodeStore, batchSize, idMode, idMapFunction);
     }
 
     @Override
     public InputIterable relationships(Collector badCollector) {
-        return () -> new RelationshipImporter(relationshipStore, batchSize, idMode);
+        return () -> new RelationshipImporter(relationshipStore, batchSize, idMode, idMapFunction);
     }
 
     @Override
@@ -191,12 +197,21 @@ public final class GraphStoreInput implements CompatInput {
 
         private final long nodeCount;
         private final int batchSize;
+        final IdVisitor idVisitor;
+        final IdMapFunction idMapFunction;
 
         private long id;
 
-        GraphImporter(long nodeCount, int batchSize) {
+        GraphImporter(
+            long nodeCount,
+            int batchSize,
+            IdVisitor idVisitor,
+            IdMapFunction idMapFunction
+        ) {
             this.nodeCount = nodeCount;
             this.batchSize = batchSize;
+            this.idVisitor = idVisitor;
+            this.idMapFunction = idMapFunction;
         }
 
         @Override
@@ -220,34 +235,40 @@ public final class GraphStoreInput implements CompatInput {
     static class NodeImporter extends GraphImporter {
 
         private final NodeStore nodeStore;
-        private final IdVisitor idVisitor;
 
-        NodeImporter(NodeStore nodeStore, int batchSize, IdVisitor idVisitor) {
-            super(nodeStore.nodeCount, batchSize);
+        NodeImporter(
+            NodeStore nodeStore,
+            int batchSize,
+            IdVisitor idVisitor,
+            IdMapFunction idMapFunction
+        ) {
+            super(nodeStore.nodeCount, batchSize, idVisitor, idMapFunction);
             this.nodeStore = nodeStore;
-            this.idVisitor = idVisitor;
         }
 
         @Override
         public InputChunk newChunk() {
-            return new NodeChunk(nodeStore, idVisitor);
+            return new NodeChunk(nodeStore, idVisitor, idMapFunction);
         }
     }
 
     static class RelationshipImporter extends GraphImporter {
 
         private final RelationshipStore relationshipStore;
-        private final IdVisitor idVisitor;
 
-        RelationshipImporter(RelationshipStore relationshipStore, int batchSize, IdVisitor idVisitor) {
-            super(relationshipStore.nodeCount, batchSize);
+        RelationshipImporter(
+            RelationshipStore relationshipStore,
+            int batchSize,
+            IdVisitor idVisitor,
+            IdMapFunction idMapFunction
+        ) {
+            super(relationshipStore.nodeCount, batchSize, idVisitor, idMapFunction);
             this.relationshipStore = relationshipStore;
-            this.idVisitor = idVisitor;
         }
 
         @Override
         public InputChunk newChunk() {
-            return new RelationshipChunk(relationshipStore.concurrentCopy(), idVisitor);
+            return new RelationshipChunk(relationshipStore.concurrentCopy(), idVisitor, idMapFunction);
         }
     }
 
@@ -278,18 +299,24 @@ public final class GraphStoreInput implements CompatInput {
 
         private final boolean hasLabels;
         private final boolean hasProperties;
+        private final IdMapFunction idMapFunction;
 
-        NodeChunk(NodeStore nodeStore, IdVisitor idVisitor) {
+        NodeChunk(
+            NodeStore nodeStore,
+            IdVisitor idVisitor,
+            IdMapFunction idMapFunction
+        ) {
             super(idVisitor);
             this.nodeStore = nodeStore;
             this.hasLabels = nodeStore.hasLabels();
             this.hasProperties = nodeStore.hasProperties();
+            this.idMapFunction = idMapFunction;
         }
 
         @Override
         public boolean next(InputEntityVisitor visitor) throws IOException {
             if (id < endId) {
-                idVisitor.visitNodeId(visitor, nodeStore.idMap.toOriginalNodeId(id));
+                idVisitor.visitNodeId(visitor, idMapFunction.getId(nodeStore.idMap, id));
 
                 if (hasLabels) {
                     String[] labels = nodeStore.labels(id);
@@ -338,7 +365,11 @@ public final class GraphStoreInput implements CompatInput {
         private final RelationshipStore relationshipStore;
         private final Map<RelationshipType, RelationshipConsumer> relationshipConsumers;
 
-        RelationshipChunk(RelationshipStore relationshipStore, IdVisitor idVisitor) {
+        RelationshipChunk(
+            RelationshipStore relationshipStore,
+            IdVisitor idVisitor,
+            IdMapFunction idMapFunction
+        ) {
             super(idVisitor);
             this.relationshipStore = relationshipStore;
 
@@ -352,7 +383,8 @@ public final class GraphStoreInput implements CompatInput {
                         relationshipStore.idMap(),
                         e.getKey().name,
                         e.getValue().propertyKeys(),
-                        idVisitor
+                        idVisitor,
+                        idMapFunction
                     )
                 ));
         }
@@ -379,18 +411,21 @@ public final class GraphStoreInput implements CompatInput {
             private final String relationshipType;
             private final String[] propertyKeys;
             private final IdVisitor idVisitor;
+            private final IdMapFunction idMapFunction;
             private InputEntityVisitor visitor;
 
             private RelationshipConsumer(
                 IdMap idMap,
                 String relationshipType,
                 String[] propertyKeys,
-                IdVisitor idVisitor
+                IdVisitor idVisitor,
+                IdMapFunction idMapFunction
             ) {
                 this.idMap = idMap;
                 this.relationshipType = relationshipType;
                 this.propertyKeys = propertyKeys;
                 this.idVisitor = idVisitor;
+                this.idMapFunction = idMapFunction;
             }
 
             private void setVisitor(InputEntityVisitor visitor) {
@@ -399,8 +434,8 @@ public final class GraphStoreInput implements CompatInput {
 
             @Override
             public boolean consume(long source, long target, double[] properties) {
-                idVisitor.visitSourceId(visitor, idMap.toOriginalNodeId(source));
-                idVisitor.visitTargetId(visitor, idMap.toOriginalNodeId(target));
+                idVisitor.visitSourceId(visitor, idMapFunction.getId(idMap, source));
+                idVisitor.visitTargetId(visitor, idMapFunction.getId(idMap, target));
                 visitor.type(relationshipType);
 
                 for (int propertyIdx = 0; propertyIdx < propertyKeys.length; propertyIdx++) {
