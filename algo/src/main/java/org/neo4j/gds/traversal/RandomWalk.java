@@ -22,6 +22,7 @@ package org.neo4j.gds.traversal;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.SourceNodesConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -90,7 +91,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
         NextNodeSupplier nextNodeSupplier = config.sourceNodes() == null || config.sourceNodes().isEmpty()
             ? new NextNodeSupplier.GraphNodeSupplier(graph.nodeCount())
-            : new NextNodeSupplier.ListNodeSupplier(config.sourceNodes());
+            : NextNodeSupplier.ListNodeSupplier.of(config, graph);
 
         var tasks = IntStream
             .range(0, config.concurrency())
@@ -275,11 +276,16 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             }
         }
 
-        class ListNodeSupplier implements NextNodeSupplier {
+        final class ListNodeSupplier implements NextNodeSupplier {
             private final List<Long> nodes;
             private final AtomicInteger nextIndex;
 
-            ListNodeSupplier(List<Long> nodes) {
+            static ListNodeSupplier of(SourceNodesConfig config, Graph graph) {
+                var mappedIds = config.sourceNodes().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
+                return new ListNodeSupplier(mappedIds);
+            }
+
+            private ListNodeSupplier(List<Long> nodes) {
                 this.nodes = nodes;
                 this.nextIndex = new AtomicInteger(0);
             }
