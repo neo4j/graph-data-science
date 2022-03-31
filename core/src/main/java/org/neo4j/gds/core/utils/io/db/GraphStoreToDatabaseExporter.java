@@ -95,6 +95,11 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         var lifeSupport = new LifeSupport();
 
         try {
+            if (config.force()) {
+                fs.deleteRecursively(databaseLayout.databaseDirectory());
+                fs.deleteRecursively(databaseLayout.getTransactionLogsDirectory());
+            }
+
             LogService logService;
             if (config.enableDebugLog()) {
                 var storeInternalLogPath = databaseConfig.get(Settings.storeInternalLogPath());
