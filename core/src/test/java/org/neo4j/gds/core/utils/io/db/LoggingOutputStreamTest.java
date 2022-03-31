@@ -35,12 +35,12 @@ class LoggingOutputStreamTest {
         var log = Neo4jProxy.testLog();
         var loggingOutputStream = new LoggingOutputStream(log);
 
-        var testString = "hello world";
+        var testString = "hello world" + System.lineSeparator() + "with new line";
         try (var writer = new PrintWriter(loggingOutputStream, false, StandardCharsets.UTF_8)) {
             writer.println(testString);
         }
 
-        assertThat(log.getMessages(TestLog.DEBUG)).contains(testString);
+        assertThat(log.getMessages(TestLog.DEBUG)).contains(testString.split(System.lineSeparator()));
     }
 
 }

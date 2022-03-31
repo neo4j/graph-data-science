@@ -19,45 +19,45 @@
  */
 package org.neo4j.gds.core.utils.io.db;
 
-import org.eclipse.collections.impl.list.mutable.primitive.ByteArrayList;
 import org.neo4j.logging.Log;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 
 public class LoggingOutputStream extends OutputStream {
 
     private final Log log;
-    private final ByteArrayList buffer;
+    private final int lineSeparatorLength;
+    private StringBuffer buffer;
 
     public LoggingOutputStream(Log log) {
         this.log = log;
-        this.buffer = new ByteArrayList();
+        this.lineSeparatorLength = System.lineSeparator().length();
+        this.buffer = new StringBuffer();
     }
 
     @Override
     public void write(int b) throws IOException {
-        var nextByte = (byte) (b & 0xff);
+        var nextByte = (char) (b & 0xff);
 
-        if ((char) nextByte == '\n') {
+        buffer.append(nextByte);
+        var lineSeparatorStartLocation = buffer.length() - lineSeparatorLength;
+        if (buffer.substring(lineSeparatorStartLocation).equals(System.lineSeparator())) {
+            buffer.delete(lineSeparatorStartLocation, buffer.length());
             flush();
-        } else {
-            buffer.add(nextByte);
         }
     }
 
     @Override
     public void close() throws IOException {
-        if (!buffer.isEmpty()) {
+        if (buffer.length() > 0) {
             flush();
         }
         super.close();
     }
 
     public void flush() {
-        var message = new String(buffer.toArray(), StandardCharsets.UTF_8);
-        log.debug(message);
-        buffer.clear();
+        log.debug(buffer.toString());
+        buffer = new StringBuffer();
     }
 }
