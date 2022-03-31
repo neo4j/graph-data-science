@@ -27,7 +27,8 @@ import java.util.stream.Collectors;
 
 public enum Neo4jVersion {
     V_4_3,
-    V_4_4;
+    V_4_4,
+    V_4_4_drop10;
 
     @Override
     public String toString() {
@@ -36,6 +37,8 @@ public enum Neo4jVersion {
                 return "4.3";
             case V_4_4:
                 return "4.4";
+            case V_4_4_drop10:
+                return "4.4.4-drop01.0";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
@@ -70,6 +73,9 @@ public enum Neo4jVersion {
     }
 
     static Neo4jVersion parse(String version) {
+        if ("4.4.4-drop01.0".equals(version) || "4.4.3-drop01.0".equals(version)) {
+            return Neo4jVersion.V_4_4_drop10;
+        }
         var majorVersion = Pattern.compile("[.-]")
             .splitAsStream(version)
             .limit(2)
