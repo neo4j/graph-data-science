@@ -26,7 +26,6 @@ import org.neo4j.gds.ml.models.automl.hyperparameter.HyperParameterValues;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 // this is temporary until we have a better optimizer
 public class ExhaustiveHyperparameterOptimizer implements HyperParameterOptimizer {
@@ -38,7 +37,6 @@ public class ExhaustiveHyperparameterOptimizer implements HyperParameterOptimize
             .stream()
             .flatMap(List::stream)
             .map(tunableConfig -> tunableConfig.materialize(HyperParameterValues.EMPTY))
-            .collect(Collectors.toList())
             .iterator();
     }
 

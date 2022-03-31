@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class TunableTrainerConfigTest {
     @Test
     void shouldProduceToMapLR() {
-        var userInput = Map.of("penalty", (Object) 0.1);
+        var userInput = Map.<String, Object>of("penalty", 0.1);
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.LogisticRegression);
         assertThat(config.toMap()).isEqualTo(Map.of(
             "batchSize", 100,
@@ -51,7 +51,7 @@ class TunableTrainerConfigTest {
 
     @Test
     void shouldMaterializeLRConfig() {
-        var userInput = Map.of("penalty", (Object) 0.1);
+        var userInput = Map.<String, Object>of("penalty", 0.1);
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.LogisticRegression);
         var trainerConfig = config.materialize(HyperParameterValues.EMPTY);
         assertThat(trainerConfig)
@@ -62,8 +62,8 @@ class TunableTrainerConfigTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldProduceToMapRF(boolean useLong) {
-        var value = useLong ? (Object) 5L : (Object) 5;
-        var userInput = Map.of("maxDepth", value);
+        var value = useLong ? 5L : 5;
+        var userInput = Map.<String, Object>of("maxDepth", value);
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
         assertThat(config.toMap()).isEqualTo(Map.of(
             "maxDepth", 5,
@@ -76,7 +76,7 @@ class TunableTrainerConfigTest {
 
     @Test
     void shouldMaterializeRFConfig() {
-        var userInput = Map.of("maxDepth", (Object) 5L);
+        var userInput = Map.<String, Object>of("maxDepth", 5L);
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
         var trainerConfig = config.materialize(HyperParameterValues.EMPTY);
         assertThat(trainerConfig)
@@ -86,7 +86,7 @@ class TunableTrainerConfigTest {
 
     @Test
     void failsOnIllegalParameterType() {
-        var userInput = Map.of("maxDepth", (Object) "foo");
+        var userInput = Map.<String, Object>of("maxDepth", "foo");
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
             .hasMessage("Parameter `maxDepth` must be numeric")
             .isInstanceOf(IllegalArgumentException.class);
