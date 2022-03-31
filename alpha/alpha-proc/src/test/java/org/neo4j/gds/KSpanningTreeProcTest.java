@@ -91,7 +91,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
         final HashMap<String, Integer> communities = new HashMap<>();
 
-        runQueryWithRowConsumer("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p", row -> {
+        runQueryWithRowConsumer("MATCH (n) WHERE n.partition IS NOT NULL RETURN n.name as name, n.partition as p", row -> {
             final String name = row.getString("name");
             final int p = row.getNumber("p").intValue();
             communities.put(name, p);
@@ -120,7 +120,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
         final HashMap<String, Integer> communities = new HashMap<>();
 
-        runQueryWithRowConsumer("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p", row -> {
+        runQueryWithRowConsumer("MATCH (n) WHERE n.partition IS NOT NULL RETURN n.name as name, n.partition as p", row -> {
             final String name = row.getString("name");
             final int p = row.getNumber("p").intValue();
             communities.put(name, p);

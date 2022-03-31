@@ -105,7 +105,7 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
         ));
 
         assertCypherResult(
-            "MATCH (n) WHERE exists(n.class) RETURN count(n) AS count",
+            "MATCH (n) WHERE n.class IS NOT NULL RETURN count(n) AS count",
             List.of(Map.of("count", 5L))
         );
     }

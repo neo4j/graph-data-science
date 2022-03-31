@@ -153,7 +153,7 @@ public class PregelProcTest extends BaseProcTest {
         runQuery(query);
 
         var validationQuery = formatWithLocale(
-            "MATCH (n:RealNode) RETURN n.%6$s%s AS long, n.%6$s%s AS double, n.%6$s%s AS long_array, n.%6$s%s AS double_array, exists(n.%6$s%s) AS exists",
+            "MATCH (n:RealNode) RETURN n.%6$s%s AS long, n.%6$s%s AS double, n.%6$s%s AS long_array, n.%6$s%s AS double_array, n.%6$s%s IS NOT NULL AS exists",
             CompositeTestAlgorithm.LONG_KEY,
             CompositeTestAlgorithm.DOUBLE_KEY,
             CompositeTestAlgorithm.LONG_ARRAY_KEY,

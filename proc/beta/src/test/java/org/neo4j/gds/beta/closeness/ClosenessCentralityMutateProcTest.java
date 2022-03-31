@@ -92,7 +92,7 @@ class ClosenessCentralityMutateProcTest extends ClosenessCentralityProcTest<Clos
         });
 
         assertCypherResult(
-            formatWithLocale("MATCH (n) WHERE exists(n.%s) RETURN count(n) AS count", MUTATE_PROPERTY),
+            formatWithLocale("MATCH (n) WHERE n.%s IS NOT NULL RETURN count(n) AS count", MUTATE_PROPERTY),
             List.of(Map.of("count", 0L))
         );
 

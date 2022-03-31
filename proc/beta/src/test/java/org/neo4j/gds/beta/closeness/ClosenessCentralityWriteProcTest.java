@@ -88,7 +88,7 @@ class ClosenessCentralityWriteProcTest extends ClosenessCentralityProcTest<Close
         });
 
         assertCypherResult(
-            formatWithLocale("MATCH (n) WHERE exists(n.%1$s) RETURN id(n) AS nodeId, n.%1$s AS %1$s", WRITE_PROPERTY),
+            formatWithLocale("MATCH (n) WHERE n.%1$s IS NOT NULL RETURN id(n) AS nodeId, n.%1$s AS %1$s", WRITE_PROPERTY),
             expectedCentralityResult
         );
     }
