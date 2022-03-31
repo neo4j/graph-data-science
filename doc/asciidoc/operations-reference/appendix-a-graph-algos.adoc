@@ -10,7 +10,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 .List of all production-quality algorithms in the GDS library. Functions are written in _italic_.
 [[table-product]]
 [role=procedure-listing]
-[opts=header,cols="1, 1"]
+[opts=header,cols="1, 2"]
 |===
 | Algorithm name | Operation
 .8+<.^|<<algorithms-label-propagation-syntax, Label Propagation>>
@@ -190,7 +190,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 .List of all beta algorithms in the GDS library. Functions are written in _italic_.
 [[table-beta]]
 [role=procedure-listing]
-[opts=header,cols="1, 1"]
+[opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
 .4+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
@@ -267,7 +267,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 .List of all alpha algorithms in the GDS library. Functions are written in _italic_.
 [[table-alpha]]
 [role=procedure-listing]
-[opts=header,cols="1, 1"]
+[opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation .1+<.^|<<alpha-algorithm-all-pairs-shortest-path, All Shortest Paths>>
 | `gds.alpha.allShortestPaths.stream`
