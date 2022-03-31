@@ -29,6 +29,7 @@ import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
+import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
@@ -66,7 +67,6 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
 public interface Neo4jProxyApi {
 
@@ -164,8 +164,7 @@ public interface Neo4jProxyApi {
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
         PageCacheTracer pageCacheTracer,
-        int writeConcurrency,
-        Optional<Long> pageCacheMemory,
+        Configuration configuration,
         LogService logService,
         ExecutionMonitor executionMonitor,
         AdditionalInitialIds additionalInitialIds,

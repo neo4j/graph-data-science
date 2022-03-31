@@ -45,7 +45,6 @@ import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.ImportLogic;
-import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.IdType;
@@ -99,7 +98,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
@@ -306,8 +304,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
         PageCacheTracer pageCacheTracer,
-        int writeConcurrency,
-        Optional<Long> pageCacheMemory,
+        Configuration configuration,
         LogService logService,
         ExecutionMonitor executionMonitor,
         AdditionalInitialIds additionalInitialIds,
@@ -316,32 +313,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
-        var importerConfig = new Configuration() {
-            @Override
-            public int maxNumberOfProcessors() {
-                return writeConcurrency;
-            }
-
-            @Override
-            public long pageCacheMemory() {
-                return pageCacheMemory.orElseGet(Configuration.super::pageCacheMemory);
-            }
-
-            @Override
-            public boolean highIO() {
-                return false;
-            }
-
-            @Override
-            public IndexConfig indexConfig() {
-                return IndexConfig.DEFAULT.withLabelIndex();
-            }
-        };
         return factory.instantiate(
             directoryStructure,
             fileSystem,
             pageCacheTracer,
-            importerConfig,
+            configuration,
             logService,
             executionMonitor,
             additionalInitialIds,

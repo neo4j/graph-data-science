@@ -26,6 +26,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.io.GraphStoreExporterBaseConfig;
+import org.neo4j.internal.batchimport.IndexConfig;
 
 import java.util.Optional;
 
@@ -64,6 +65,12 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
         return false;
     }
 
+    @Value.Default
+    @Configuration.Ignore
+    default boolean highIO() {
+        return false;
+    }
+
     @Value.Check
     default void validate() {
         Neo4jProxy.validateExternalDatabaseName(dbName());
@@ -75,5 +82,32 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
             return config.withString(DB_NAME_KEY, databaseName);
         }).orElse(config);
         return new GraphStoreToDatabaseExporterConfigImpl(normalizedConfig);
+    }
+
+    default org.neo4j.internal.batchimport.Configuration toBatchImporterConfig() {
+        var exportConfig = this;
+        return new org.neo4j.internal.batchimport.Configuration() {
+            @Override
+            public int batchSize() {
+                return exportConfig.batchSize();
+            }
+
+            @Override
+            public long pageCacheMemory() {
+                return exportConfig
+                    .pageCacheMemory()
+                    .orElseGet(org.neo4j.internal.batchimport.Configuration.super::pageCacheMemory);
+            }
+
+            @Override
+            public boolean highIO() {
+                return exportConfig.highIO();
+            }
+
+            @Override
+            public IndexConfig indexConfig() {
+                return IndexConfig.DEFAULT.withLabelIndex();
+            }
+        };
     }
 }
