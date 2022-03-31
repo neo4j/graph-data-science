@@ -523,4 +523,21 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public GdsDatabaseManagementServiceBuilder databaseManagementServiceBuilder(Path storeDir) {
         return new GdsDatabaseManagementServiceBuilderImpl(storeDir);
     }
+
+    @Override
+    public RecordFormats selectRecordFormatForStore(
+        DatabaseLayout databaseLayout,
+        FileSystemAbstraction fs,
+        PageCache pageCache,
+        LogProvider logProvider,
+        PageCacheTracer pageCacheTracer
+    ) {
+        return RecordFormatSelector.selectForStore(
+            (RecordDatabaseLayout) databaseLayout,
+            fs,
+            pageCache,
+            NullLogService.getInstance().getInternalLogProvider(),
+            PageCacheTracer.NULL
+        );
+    }
 }

@@ -51,6 +51,7 @@ import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.DatabaseIdRepository;
@@ -58,6 +59,7 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
+import org.neo4j.logging.LogProvider;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
@@ -210,4 +212,12 @@ public interface Neo4jProxyApi {
     Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type);
 
     GdsDatabaseManagementServiceBuilder databaseManagementServiceBuilder(Path storeDir);
+
+    RecordFormats selectRecordFormatForStore(
+        DatabaseLayout databaseLayout,
+        FileSystemAbstraction fs,
+        PageCache pageCache,
+        LogProvider logProvider,
+        PageCacheTracer pageCacheTracer
+    );
 }
