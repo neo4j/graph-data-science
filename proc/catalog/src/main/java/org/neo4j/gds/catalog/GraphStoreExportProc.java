@@ -76,7 +76,8 @@ public class GraphStoreExportProc extends BaseProc {
                     graphStore,
                     api,
                     exportConfig,
-                    neoNodeProperties(exportConfig, graphStore)
+                    neoNodeProperties(exportConfig, graphStore),
+                    log
                 );
 
                 var start = System.nanoTime();
