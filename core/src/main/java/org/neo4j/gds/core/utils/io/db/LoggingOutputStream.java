@@ -41,7 +41,7 @@ public class LoggingOutputStream extends OutputStream {
         var nextByte = (byte) (b & 0xff);
 
         if ((char) nextByte == '\n') {
-            flush ();
+            flush();
         } else {
             buffer.add(nextByte);
         }
@@ -55,7 +55,7 @@ public class LoggingOutputStream extends OutputStream {
         super.close();
     }
 
-    public void flush () {
+    public void flush() {
         var message = new String(buffer.toArray(), StandardCharsets.UTF_8);
         log.debug(message);
         buffer.clear();
