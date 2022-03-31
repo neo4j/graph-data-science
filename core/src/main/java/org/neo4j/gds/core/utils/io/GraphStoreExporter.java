@@ -48,7 +48,7 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
             @Override
             public long highestId(IdMap idMap) {
-                return idMap.nodeCount();
+                return idMap.nodeCount() - 1;
             }
 
             @Override
