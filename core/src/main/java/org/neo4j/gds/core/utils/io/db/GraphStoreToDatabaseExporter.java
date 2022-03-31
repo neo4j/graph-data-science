@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.io.NeoNodeProperties;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.batchimport.input.Collectors;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.Neo4jLayout;
@@ -37,6 +38,7 @@ import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.Level;
+import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLogProvider;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.NullLogService;
@@ -51,39 +53,45 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.internal.batchimport.input.BadCollector.UNLIMITED_TOLERANCE;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
 
 public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<GraphStoreToDatabaseExporterConfig> {
 
     private final Path neo4jHome;
     private final FileSystemAbstraction fs;
+    private final Log log;
 
     public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
         GraphDatabaseAPI api,
-        GraphStoreToDatabaseExporterConfig config
+        GraphStoreToDatabaseExporterConfig config,
+        Log log
     ) {
-        return of(graphStore, api, config, Optional.empty());
+        return of(graphStore, api, config, Optional.empty(), log);
     }
 
     public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
         GraphDatabaseAPI api,
         GraphStoreToDatabaseExporterConfig config,
-        Optional<NeoNodeProperties> neoNodeProperties
+        Optional<NeoNodeProperties> neoNodeProperties,
+        Log log
     ) {
-        return new GraphStoreToDatabaseExporter(graphStore, api, config, neoNodeProperties);
+        return new GraphStoreToDatabaseExporter(graphStore, api, config, neoNodeProperties, log);
     }
 
     private GraphStoreToDatabaseExporter(
         GraphStore graphStore,
         GraphDatabaseAPI api,
         GraphStoreToDatabaseExporterConfig config,
-        Optional<NeoNodeProperties> neoNodeProperties
+        Optional<NeoNodeProperties> neoNodeProperties,
+        Log log
     ) {
         super(graphStore, config, neoNodeProperties);
         this.neo4jHome = api.databaseLayout().getNeo4jLayout().homeDirectory();
         this.fs = api.getDependencyResolver().resolveDependency(FileSystemAbstraction.class);
+        this.log = log;
     }
 
     @Override
@@ -127,6 +135,10 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
                 ));
             }
 
+            var collector = config.useBadCollector()
+                ? Collectors.badCollector(new LoggingOutputStream(log), UNLIMITED_TOLERANCE)
+                : Collector.EMPTY;
+
             var importer = Neo4jProxy.instantiateBatchImporter(
                 BatchImporterFactory.withHighestPriority(),
                 databaseLayout,
@@ -139,7 +151,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
                 databaseConfig,
                 RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider()),
                 jobScheduler,
-                Collector.EMPTY
+                collector
             );
             importer.doImport(input);
         } catch (IOException e) {

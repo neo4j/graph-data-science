@@ -71,6 +71,12 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
         return false;
     }
 
+    @Value.Default
+    @Configuration.Ignore
+    default boolean useBadCollector() {
+        return false;
+    }
+
     @Value.Check
     default void validate() {
         Neo4jProxy.validateExternalDatabaseName(dbName());
