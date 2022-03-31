@@ -97,7 +97,6 @@ import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -203,8 +202,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
             databaseLayout,
             fileSystemAbstraction,
             pageCacheTracer,
-            configuration.maxNumberOfProcessors(),
-            Optional.of(configuration.pageCacheMemory()),
+            configuration,
             logService,
             Neo4jProxy.invisibleExecutionMonitor(),
             AdditionalInitialIds.EMPTY,
