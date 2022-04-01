@@ -23,11 +23,17 @@ import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.hyperparameter.ConcreteParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleParameter;
+import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleRangeParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.HyperParameterValues;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerParameter;
+import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,31 +41,110 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class TunableTrainerConfig {
     private final Map<String, ConcreteParameter<?>> concreteParameters;
+    private final Map<String, DoubleRangeParameter> doubleRanges;
+    private final Map<String, IntegerRangeParameter> integerRanges;
     private final TrainingMethod method;
 
-    private TunableTrainerConfig(Map<String, ConcreteParameter<?>> concreteParameters, TrainingMethod method) {
+    private TunableTrainerConfig(
+        Map<String, ConcreteParameter<?>> concreteParameters,
+        Map<String, DoubleRangeParameter> doubleRanges,
+        Map<String, IntegerRangeParameter> integerRanges,
+        TrainingMethod method
+    ) {
         this.concreteParameters = concreteParameters;
+        this.doubleRanges = doubleRanges;
+        this.integerRanges = integerRanges;
         this.method = method;
     }
 
     public static TunableTrainerConfig of(Map<String, Object> userInput, TrainingMethod method) {
+        validateMaps(userInput);
         var defaults = method.createConfig(Map.of()).toMap();
         var inputWithDefaults = fillDefaults(userInput, defaults);
-        var parsedParameters = parse(inputWithDefaults);
-        return new TunableTrainerConfig(parsedParameters, method);
+        var concreteParameters = parseConcreteParameters(inputWithDefaults);
+        var doubleRanges = parseDoubleRanges(userInput);
+        var integerRanges = parseIntegerRanges(userInput);
+        return new TunableTrainerConfig(concreteParameters, doubleRanges, integerRanges, method);
     }
 
-    private static Map<String, ConcreteParameter<?>> parse(Map<String, Object> input) {
-        return input.entrySet().stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> {
-                    var val = entry.getValue();
-                    return parseParameterValue(entry.getKey(), val);
-                }));
+    private static void validateMaps(Map<String, Object> input) {
+        var incorrectMaps = new ArrayList<String>();
+
+        input.forEach((key, value) -> {
+            if (value instanceof Map) {
+                if (!((Map<?, ?>) value).keySet().equals(Set.of("range"))) {
+                    incorrectMaps.add(key);
+                    return;
+                }
+                if (!(((Map<?, ?>) value).get("range") instanceof List)) {
+                    incorrectMaps.add(key);
+                    return;
+                }
+                var range = (List<?>) ((Map<?, ?>) value).get("range");
+                if (range.size() != 2) {
+                    incorrectMaps.add(key);
+                    return;
+                }
+                if (range.get(0) instanceof Double && range.get(1) instanceof Double) return;
+                if (range.get(0) instanceof Integer && range.get(1) instanceof Integer) return;
+                if (range.get(0) instanceof Long && range.get(1) instanceof Long) return;
+                incorrectMaps.add(key);
+            }
+        });
+        if (!incorrectMaps.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Map parameters must be of the form {range: {min, max}}, " +
+                "where both min and max are Float or Integer. Invalid keys: [%s]",
+                incorrectMaps.stream().map(s -> "`" + s + "`").collect(Collectors.joining(", "))
+            ));
+        }
     }
 
-    private static ConcreteParameter<?> parseParameterValue(String key, Object value) {
+    private static Map<String, DoubleRangeParameter> parseDoubleRanges(Map<String, Object> input) {
+        var result = new HashMap<String, DoubleRangeParameter>();
+
+        input.forEach((key, value) -> {
+            if (!(value instanceof Map)) return;
+            var range = (List<?>) ((Map<?, ?>) value).get("range");
+            if (range.get(0) instanceof Double && range.get(1) instanceof Double) {
+                result.put(key, DoubleRangeParameter.of((Double) range.get(0), (Double) range.get(1)));
+            }
+        });
+        return result;
+    }
+
+    private static Map<String, IntegerRangeParameter> parseIntegerRanges(Map<String, Object> input) {
+        var result = new HashMap<String, IntegerRangeParameter>();
+
+        input.forEach((key, value) -> {
+            if (!(value instanceof Map)) return;
+            var range = (List<?>) ((Map<?, ?>) value).get("range");
+            if (range.get(0) instanceof Integer && range.get(1) instanceof Integer) {
+                result.put(key, IntegerRangeParameter.of((Integer) range.get(0), (Integer) range.get(1)));
+            }
+            if (range.get(0) instanceof Long && range.get(1) instanceof Long) {
+                result.put(key,
+                    IntegerRangeParameter.of(
+                        Math.toIntExact((Long) range.get(0)),
+                        Math.toIntExact((Long) range.get(1))
+                    )
+                );
+            }
+        });
+        return result;
+    }
+
+    private static Map<String, ConcreteParameter<?>> parseConcreteParameters(Map<String, Object> input) {
+        var result = new HashMap<String, ConcreteParameter<?>>();
+        input.forEach((key, value) -> {
+                if (value instanceof Map) return;
+                result.put(key, parseConcreteParameter(key, value));
+            }
+        );
+        return result;
+    }
+
+    private static ConcreteParameter<?> parseConcreteParameter(String key, Object value) {
         if (value instanceof Integer) {
             return IntegerParameter.of((Integer) value);
         }
@@ -69,7 +154,7 @@ public final class TunableTrainerConfig {
         if (value instanceof Double) {
             return DoubleParameter.of((Double) value);
         }
-        throw new IllegalArgumentException(formatWithLocale("Parameter `%s` must be numeric", key));
+        throw new IllegalArgumentException(formatWithLocale("Parameter `%s` must be numeric or of the form {range: {min, max}}.", key));
     }
 
     private static Map<String, Object> fillDefaults(
@@ -88,20 +173,17 @@ public final class TunableTrainerConfig {
     }
 
     public TrainerConfig materialize(HyperParameterValues hyperParameterValues) {
-        var materializedMap = concreteParameters.entrySet().stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> (Object) entry.getValue().value()
-            ));
+        var materializedMap = new HashMap<String, Object>();
+        concreteParameters.forEach((key, value) -> materializedMap.put(key, value.value()));
+        materializedMap.putAll(hyperParameterValues.values);
         return trainingMethod().createConfig(materializedMap);
     }
 
     public Map<String, Object> toMap() {
-        var result = concreteParameters.entrySet().stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> (Object) entry.getValue().value())
-            );
+        var result = new HashMap<String, Object>();
+        concreteParameters.forEach((key, value) -> result.put(key, value.value()));
+        doubleRanges.forEach((key, value) -> result.put(key, value.toMap()));
+        integerRanges.forEach((key, value) -> result.put(key, value.toMap()));
         result.put("methodName", trainingMethod().name());
         return result;
     }

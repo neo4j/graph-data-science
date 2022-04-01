@@ -27,6 +27,7 @@ import org.neo4j.gds.ml.models.automl.hyperparameter.HyperParameterValues;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,6 +51,26 @@ class TunableTrainerConfigTest {
     }
 
     @Test
+    void shouldProduceToMapLRWithRanges() {
+        var userInput = Map.of(
+            "penalty", Map.of("range", List.of(0.1, 0.2)),
+            "patience", Map.of("range", List.of(42, 1337)),
+            "batchSize", 99
+        );
+        var config = TunableTrainerConfig.of(userInput, TrainingMethod.LogisticRegression);
+        assertThat(config.toMap()).isEqualTo(Map.of(
+            "batchSize", 99,
+            "learningRate", 0.001,
+            "maxEpochs", 100,
+            "methodName", "LogisticRegression",
+            "minEpochs", 1,
+            "patience", Map.of("range", List.of(42, 1337)),
+            "penalty", Map.of("range", List.of(0.1, 0.2)),
+            "tolerance", 0.001
+        ));
+    }
+
+    @Test
     void shouldMaterializeLRConfig() {
         var userInput = Map.<String, Object>of("penalty", 0.1);
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.LogisticRegression);
@@ -57,6 +78,20 @@ class TunableTrainerConfigTest {
         assertThat(trainerConfig)
             .usingRecursiveComparison()
             .isEqualTo(LogisticRegressionTrainConfigImpl.builder().penalty(0.1).build());
+    }
+
+    @Test
+    void shouldMaterializeLRConfigWithRanges() {
+        var userInput = Map.of(
+            "penalty", Map.of("range", List.of(0.1, 0.2)),
+            "patience", Map.of("range", List.of(42L, 1337L)),
+            "batchSize", 99
+        );
+        var config = TunableTrainerConfig.of(userInput, TrainingMethod.LogisticRegression);
+        var trainerConfig = config.materialize(new HyperParameterValues(Map.of("penalty", 0.1337, "patience", 999)));
+        assertThat(trainerConfig)
+            .usingRecursiveComparison()
+            .isEqualTo(LogisticRegressionTrainConfigImpl.builder().batchSize(99).penalty(0.1337).patience(999).build());
     }
 
     @ParameterizedTest
@@ -85,10 +120,77 @@ class TunableTrainerConfigTest {
     }
 
     @Test
-    void failsOnIllegalParameterType() {
+    void shouldMaterializeRFConfigWithRanges() {
+        var userInput = Map.of(
+            "maxDepth", 5L,
+            "maxFeaturesRatio", Map.of("range", List.of(0.1, 0.2)),
+            "numberOfDecisionTrees", Map.of("range", List.of(10, 100))
+        );
+        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
+        var trainerConfig = config.materialize(new HyperParameterValues(Map.of(
+            "maxFeaturesRatio", 0.1337,
+            "numberOfDecisionTrees", 55
+        )));
+        assertThat(trainerConfig)
+            .usingRecursiveComparison()
+            .isEqualTo(RandomForestTrainConfigImpl
+                .builder()
+                .maxDepth(5)
+                .maxFeaturesRatio(0.1337)
+                .numberOfDecisionTrees(55)
+                .build());
+    }
+
+    @Test
+    void failsOnNonMapNonNumericValue() {
         var userInput = Map.<String, Object>of("maxDepth", "foo");
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
-            .hasMessage("Parameter `maxDepth` must be numeric")
+            .hasMessage("Parameter `maxDepth` must be numeric or of the form {range: {min, max}}.")
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void failsOnIllegalMapKeys() {
+        var userInput = Map.<String, Object>of("maxDepth", Map.of("range", "foo", "bar", "bat"));
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
+            .hasMessage("Map parameters must be of the form {range: {min, max}}, " +
+                        "where both min and max are Float or Integer. Invalid keys: [`maxDepth`]")
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void failsOnIllegalMapValueType() {
+        var userInput = Map.<String, Object>of("maxDepth", Map.of("range", "foo"));
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
+            .hasMessage("Map parameters must be of the form {range: {min, max}}, " +
+                        "where both min and max are Float or Integer. Invalid keys: [`maxDepth`]")
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void failsOnIllegalRangeListSize() {
+        var userInput = Map.<String, Object>of("maxDepth", Map.of("range", List.of(1,2,3)));
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
+            .hasMessage("Map parameters must be of the form {range: {min, max}}, " +
+                        "where both min and max are Float or Integer. Invalid keys: [`maxDepth`]")
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void failsOnMixedRangeValueTypes() {
+        var userInput = Map.<String, Object>of("maxDepth", Map.of("range", List.of(1,2L)));
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
+            .hasMessage("Map parameters must be of the form {range: {min, max}}, " +
+                        "where both min and max are Float or Integer. Invalid keys: [`maxDepth`]")
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void failsOnIllegalRangeValueType() {
+        var userInput = Map.<String, Object>of("maxDepth", Map.of("range", List.of("foo", "bar")));
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
+            .hasMessage("Map parameters must be of the form {range: {min, max}}, " +
+                        "where both min and max are Float or Integer. Invalid keys: [`maxDepth`]")
             .isInstanceOf(IllegalArgumentException.class);
     }
 
