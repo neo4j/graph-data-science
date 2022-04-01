@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.traversal;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.PropertyProducer;
@@ -38,7 +38,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -360,19 +359,13 @@ class RandomWalkTest {
 
     @Test
     void testWithConfiguredOffsetStartNodes() {
-        MutableLong ids = new MutableLong(42);
-        var gdl = GdlFactory.builder()
-            .nodeIdFunction(ids::getAndIncrement)
-            .gdlGraph(GDL)
-            .build();
+        var graph = TestSupport.fromGdl(GDL, 42);
 
-        var graphStore = gdl.build();
+        var aOriginalId = graph.toOriginalNodeId("a");
+        var bOriginalId = graph.toOriginalNodeId("b");
 
-        var aOriginalId = gdl.nodeId("a");
-        var bOriginalId = gdl.nodeId("b");
-
-        var aInternalId = graphStore.nodes().toMappedNodeId(aOriginalId);
-        var bInternalId = graphStore.nodes().toMappedNodeId(bOriginalId);
+        var aInternalId = graph.toMappedNodeId(aOriginalId);
+        var bInternalId = graph.toMappedNodeId(bOriginalId);
 
         var config = ImmutableNode2VecStreamConfig.builder()
             .sourceNodes(List.of(aOriginalId, bOriginalId))
@@ -382,7 +375,7 @@ class RandomWalkTest {
             .build();
 
         var randomWalk = RandomWalk.create(
-            graphStore.getUnion(),
+            graph,
             config,
             ProgressTracker.NULL_TRACKER
         );
