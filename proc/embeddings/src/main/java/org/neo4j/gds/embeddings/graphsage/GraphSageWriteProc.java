@@ -49,7 +49,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.getNodePrope
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.injectRelationshipWeightPropertyFromModel;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.beta.graphSage.mutate", description = GRAPHSAGE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.beta.graphSage.write", description = GRAPHSAGE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSageResult, GraphSageWriteProc.GraphSageWriteResult, GraphSageWriteConfig> {
 
     @Procedure(name = "gds.beta.graphSage.write", mode = Mode.WRITE)

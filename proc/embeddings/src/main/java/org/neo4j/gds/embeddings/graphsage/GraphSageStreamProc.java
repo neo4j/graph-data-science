@@ -50,7 +50,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.getActualCon
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.injectRelationshipWeightPropertyFromModel;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.beta.graphSage.mutate", description = GRAPHSAGE_DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.beta.graphSage.stream", description = GRAPHSAGE_DESCRIPTION, executionMode = STREAM)
 public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSageResult, GraphSageStreamProc.GraphSageStreamResult, GraphSageStreamConfig> {
 
     @Description(GRAPHSAGE_DESCRIPTION)
