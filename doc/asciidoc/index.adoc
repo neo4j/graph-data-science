@@ -36,17 +36,6 @@ The manual covers the following areas:
 * <<appendix-a>> -- Reference of all procedures contained in the Neo4j Graph Data Science library.
 * <<appendix-b>> -- Additional resources - migration guide, books, etc - to help using the Neo4j Graph Data Science library.
 
-
-For further reading resources, we recommend studying the free Graph Algorithms book.
-
-====
-image::download_book.png[Graph Algorithms,200]
-
-Graph Algorithms: Practical Examples in Apache Spark and Neo4j, by Mark Needham & Amy E. Hodler and published by O'Reilly Media is available now.
-
-Download it for free at https://neo4j.com/graph-algorithms-book/[neo4j.com/graph-algorithms-book/].
-====
-
 include::introduction.adoc[leveloffset=+1]
 
 include::installation.adoc[leveloffset=+1]
