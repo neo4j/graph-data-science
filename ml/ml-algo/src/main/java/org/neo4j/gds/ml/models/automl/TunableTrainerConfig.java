@@ -178,6 +178,34 @@ public final class TunableTrainerConfig {
         return trainingMethod().createConfig(materializedMap);
     }
 
+    public List<TrainerConfig> materializeConcreteCube() {
+        var result = new ArrayList<TrainerConfig>();
+        var numberOfHyperParameters = doubleRanges.size() + integerRanges.size();
+        var doubleRangeKeys = new ArrayList<>(doubleRanges.keySet());
+        var integerRangeKeys = new ArrayList<>(integerRanges.keySet());
+        if (numberOfHyperParameters > 32)
+            throw new IllegalArgumentException("Currently at most 32 hyperparameters are supported");
+        for (int bitset = 0; bitset < Math.pow(2, numberOfHyperParameters); bitset++) {
+            var hyperParameterValues = new HashMap<String, Object>();
+            for (int parameterIdx = 0; parameterIdx < numberOfHyperParameters; parameterIdx++) {
+                boolean useMin = (bitset >> parameterIdx & 1) == 0;
+                if (parameterIdx < doubleRanges.size()) {
+                    var key = doubleRangeKeys.get(parameterIdx);
+                    var doubleRange = doubleRanges.get(key);
+                    var materializedValue = useMin ? doubleRange.min() : doubleRange.max();
+                    hyperParameterValues.put(key, materializedValue);
+                } else {
+                    var key = integerRangeKeys.get(parameterIdx - doubleRanges.size());
+                    var intRange = integerRanges.get(key);
+                    var materializedValue = useMin ? intRange.min() : intRange.max();
+                    hyperParameterValues.put(key, materializedValue);
+                }
+            }
+            result.add(materialize(hyperParameterValues));
+        }
+        return result;
+    }
+
     public Map<String, Object> toMap() {
         var result = new HashMap<String, Object>();
         concreteParameters.forEach((key, value) -> result.put(key, value.value()));

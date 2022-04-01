@@ -141,6 +141,45 @@ class TunableTrainerConfigTest {
     }
 
     @Test
+    void shouldMaterializeRFCube() {
+        var userInput = Map.of(
+            "maxDepth", 5L,
+            "maxFeaturesRatio", Map.of("range", List.of(0.1, 0.2)),
+            "numberOfDecisionTrees", Map.of("range", List.of(10, 100))
+        );
+        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
+        var trainerConfigs = config.materializeConcreteCube();
+        assertThat(trainerConfigs)
+            .usingRecursiveFieldByFieldElementComparator()
+            .containsExactlyInAnyOrder(
+                RandomForestTrainConfigImpl
+                    .builder()
+                    .maxDepth(5)
+                    .maxFeaturesRatio(0.1)
+                    .numberOfDecisionTrees(10)
+                    .build(),
+                RandomForestTrainConfigImpl
+                    .builder()
+                    .maxDepth(5)
+                    .maxFeaturesRatio(0.1)
+                    .numberOfDecisionTrees(100)
+                    .build(),
+                RandomForestTrainConfigImpl
+                    .builder()
+                    .maxDepth(5)
+                    .maxFeaturesRatio(0.2)
+                    .numberOfDecisionTrees(10)
+                    .build(),
+                RandomForestTrainConfigImpl
+                    .builder()
+                    .maxDepth(5)
+                    .maxFeaturesRatio(0.2)
+                    .numberOfDecisionTrees(100)
+                    .build()
+            );
+    }
+
+    @Test
     void failsOnNonMapNonNumericValue() {
         var userInput = Map.<String, Object>of("maxDepth", "foo");
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
