@@ -21,10 +21,10 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 
 import java.util.List;
 import java.util.Map;
