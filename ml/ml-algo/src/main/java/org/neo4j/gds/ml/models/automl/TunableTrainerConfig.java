@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.models.automl;
 
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.ParameterParser.RangeParameters;
 import org.neo4j.gds.ml.models.automl.hyperparameter.ConcreteParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleRangeParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
@@ -34,9 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.models.automl.ParameterParser.parseConcreteParameters;
-import static org.neo4j.gds.ml.models.automl.ParameterParser.parseDoubleRanges;
-import static org.neo4j.gds.ml.models.automl.ParameterParser.parseIntegerRanges;
-import static org.neo4j.gds.ml.models.automl.ParameterParser.validateSyntax;
+import static org.neo4j.gds.ml.models.automl.ParameterParser.parseRangeParameters;
 
 public final class TunableTrainerConfig {
     private final Map<String, ConcreteParameter<?>> concreteParameters;
@@ -57,13 +56,16 @@ public final class TunableTrainerConfig {
     }
 
     public static TunableTrainerConfig of(Map<String, Object> userInput, TrainingMethod method) {
-        validateSyntax(userInput);
+        RangeParameters rangeParameters = parseRangeParameters(userInput);
         var defaults = method.createConfig(Map.of()).toMap();
         var inputWithDefaults = fillDefaults(userInput, defaults);
         var concreteParameters = parseConcreteParameters(inputWithDefaults);
-        var doubleRanges = parseDoubleRanges(userInput);
-        var integerRanges = parseIntegerRanges(userInput);
-        var tunableTrainerConfig = new TunableTrainerConfig(concreteParameters, doubleRanges, integerRanges, method);
+        var tunableTrainerConfig = new TunableTrainerConfig(
+            concreteParameters,
+            rangeParameters.doubleRanges(),
+            rangeParameters.integerRanges(),
+            method
+        );
         // triggers validation for combinations of end endpoints of each range.
         tunableTrainerConfig.materializeConcreteCube();
         return tunableTrainerConfig;

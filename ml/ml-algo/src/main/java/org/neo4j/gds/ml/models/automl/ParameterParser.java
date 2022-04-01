@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.models.automl;
 
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.ml.models.automl.hyperparameter.ConcreteParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleRangeParameter;
@@ -26,6 +27,7 @@ import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +39,11 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 final class ParameterParser {
     private ParameterParser() {}
 
-    static void validateSyntax(Map<String, Object> input) {
+    static RangeParameters parseRangeParameters(
+        Map<String, Object> input
+    ) {
+        var doubleRanges = new HashMap<String, DoubleRangeParameter>();
+        var integerRanges = new HashMap<String, IntegerRangeParameter>();
         var incorrectMaps = new ArrayList<String>();
 
         input.forEach((key, value) -> {
@@ -55,9 +61,15 @@ final class ParameterParser {
                     incorrectMaps.add(key);
                     return;
                 }
-                if (range.get(0) instanceof Double && range.get(1) instanceof Double) return;
-                if (range.get(0) instanceof Integer && range.get(1) instanceof Integer) return;
-                if (range.get(0) instanceof Long && range.get(1) instanceof Long) return;
+                if (range.get(0) instanceof Double && range.get(1) instanceof Double) {
+                    doubleRanges.put(key, DoubleRangeParameter.of((Double) range.get(0), (Double) range.get(1)));
+                    return;
+                }
+                if ((range.get(0) instanceof Integer && range.get(1) instanceof Integer) ||
+                    (range.get(0) instanceof Long && range.get(1) instanceof Long)) {
+                    integerRanges.put(key, IntegerRangeParameter.of(toInt(range.get(0)), toInt(range.get(1))));
+                    return;
+                }
                 incorrectMaps.add(key);
             }
         });
@@ -68,40 +80,10 @@ final class ParameterParser {
                 incorrectMaps.stream().map(s -> "`" + s + "`").collect(Collectors.joining(", "))
             ));
         }
-    }
-
-    static Map<String, DoubleRangeParameter> parseDoubleRanges(Map<String, Object> input) {
-        var result = new HashMap<String, DoubleRangeParameter>();
-
-        input.forEach((key, value) -> {
-            if (!(value instanceof Map)) return;
-            var range = (List<?>) ((Map<?, ?>) value).get("range");
-            if (range.get(0) instanceof Double && range.get(1) instanceof Double) {
-                result.put(key, DoubleRangeParameter.of((Double) range.get(0), (Double) range.get(1)));
-            }
-        });
-        return result;
-    }
-
-    static Map<String, IntegerRangeParameter> parseIntegerRanges(Map<String, Object> input) {
-        var result = new HashMap<String, IntegerRangeParameter>();
-
-        input.forEach((key, value) -> {
-            if (!(value instanceof Map)) return;
-            var range = (List<?>) ((Map<?, ?>) value).get("range");
-            if (range.get(0) instanceof Integer && range.get(1) instanceof Integer) {
-                result.put(key, IntegerRangeParameter.of((Integer) range.get(0), (Integer) range.get(1)));
-            }
-            if (range.get(0) instanceof Long && range.get(1) instanceof Long) {
-                result.put(key,
-                    IntegerRangeParameter.of(
-                        Math.toIntExact((Long) range.get(0)),
-                        Math.toIntExact((Long) range.get(1))
-                    )
-                );
-            }
-        });
-        return result;
+        return ImmutableRangeParameters.of(
+            Collections.unmodifiableMap(doubleRanges),
+            Collections.unmodifiableMap(integerRanges)
+        );
     }
 
     static Map<String, ConcreteParameter<?>> parseConcreteParameters(Map<String, Object> input) {
@@ -111,7 +93,7 @@ final class ParameterParser {
                 result.put(key, parseConcreteParameter(key, value));
             }
         );
-        return result;
+        return Collections.unmodifiableMap(result);
     }
 
     private static ConcreteParameter<?> parseConcreteParameter(String key, Object value) {
@@ -125,5 +107,16 @@ final class ParameterParser {
             return DoubleParameter.of((Double) value);
         }
         throw new IllegalArgumentException(formatWithLocale("Parameter `%s` must be numeric or of the form {range: {min, max}}.", key));
+    }
+
+    private static int toInt(Object wholeNumber) {
+        if (wholeNumber instanceof Integer) return (int) wholeNumber;
+        return Math.toIntExact((Long) wholeNumber);
+    }
+
+    @ValueClass
+    interface RangeParameters {
+        Map<String, DoubleRangeParameter> doubleRanges();
+        Map<String, IntegerRangeParameter> integerRanges();
     }
 }
