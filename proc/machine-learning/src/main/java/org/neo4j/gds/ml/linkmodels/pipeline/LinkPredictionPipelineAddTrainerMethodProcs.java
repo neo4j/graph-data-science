@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
@@ -46,9 +46,8 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
 
-        var lrConfig = LogisticRegressionTrainConfig.of(config);
-
-        validateConfig(CypherMapWrapper.create(config), lrConfig.configKeys());
+        var allowedKeys = LogisticRegressionTrainConfig.of(Map.of()).configKeys();
+        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, config.keySet());
 
         pipeline.addTrainerConfig(
             TrainingMethod.LogisticRegression,
@@ -66,8 +65,8 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
 
-        var trainConfig = RandomForestTrainConfig.of(randomForestConfig);
-        validateConfig(CypherMapWrapper.create(randomForestConfig), trainConfig.configKeys());
+        var allowedKeys = RandomForestTrainConfig.of(Map.of()).configKeys();
+        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, randomForestConfig.keySet());
 
         pipeline.addTrainerConfig(
             TrainingMethod.RandomForest,
