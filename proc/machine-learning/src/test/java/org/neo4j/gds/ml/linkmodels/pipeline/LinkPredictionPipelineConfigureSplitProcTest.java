@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionAutoTuningConfig;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -53,7 +53,7 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 42, "trainFraction", 0.1),
-                "autoTuningConfig", LinkPredictionAutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "parameterSpace", DEFAULT_PARAM_SPACE
@@ -70,7 +70,7 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.5, "validationFolds", 3, "trainFraction", 0.1),
-                "autoTuningConfig", LinkPredictionAutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "parameterSpace", DEFAULT_PARAM_SPACE

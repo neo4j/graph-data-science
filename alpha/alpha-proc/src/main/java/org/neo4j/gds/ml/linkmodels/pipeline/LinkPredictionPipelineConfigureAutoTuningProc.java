@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionAutoTuningConfig;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,7 +41,7 @@ public class LinkPredictionPipelineConfigureAutoTuningProc extends BaseProc {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
 
         var cypherConfig = CypherMapWrapper.create(configMap);
-        var config = LinkPredictionAutoTuningConfig.of(cypherConfig);
+        var config = AutoTuningConfig.of(cypherConfig);
 
         cypherConfig.requireOnlyKeysFrom(config.configKeys());
 

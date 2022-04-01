@@ -23,8 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionAutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 
 import java.util.List;
@@ -63,7 +63,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
         assertCypherResult("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr'})",
             List.of(Map.of("name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
-                "autoTuningConfig", LinkPredictionAutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                 "nodePropertySteps", List.of(
                     Map.of(
                         "name", "gds.pageRank.mutate",
@@ -80,7 +80,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
         assertCypherResult("CALL gds.beta.pipeline.linkPrediction.addFeature('myPipeline', 'hadamard', {nodeProperties: ['pr']})",
             List.of(Map.of("name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
-                "autoTuningConfig", LinkPredictionAutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(
                     Map.of(
@@ -146,7 +146,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
         assertCypherResult("CALL gds.beta.pipeline.linkPrediction.addFeature('myPipeline', 'l2', {nodeProperties: ['pr']})",
             List.of(Map.of("name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
-                "autoTuningConfig", LinkPredictionAutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                 "nodePropertySteps", List.of(
                     Map.of(
                         "name", "gds.pageRank.mutate",
@@ -173,7 +173,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
         assertCypherResult("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr2'})",
             List.of(Map.of("name", "myPipeline",
                 "splitConfig",DEFAULT_SPLIT_CONFIG,
-                "autoTuningConfig", LinkPredictionAutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                 "nodePropertySteps", List.of(
                     Map.of(
                         "name", "gds.pageRank.mutate",

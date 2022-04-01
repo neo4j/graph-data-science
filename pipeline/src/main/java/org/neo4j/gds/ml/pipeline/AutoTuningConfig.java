@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.linkPipeline;
+package org.neo4j.gds.ml.pipeline;
 
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
@@ -33,9 +32,9 @@ import java.util.Map;
 
 @ValueClass
 @Configuration
-public interface LinkPredictionAutoTuningConfig extends ToMapConvertible {
+public interface AutoTuningConfig extends ToMapConvertible {
 
-    LinkPredictionAutoTuningConfig DEFAULT_CONFIG = LinkPredictionAutoTuningConfig.of(CypherMapWrapper.empty());
+    AutoTuningConfig DEFAULT_CONFIG = AutoTuningConfig.of(CypherMapWrapper.empty());
 
     @Value.Default
     @Configuration.IntegerRange(min = 1)
@@ -52,12 +51,7 @@ public interface LinkPredictionAutoTuningConfig extends ToMapConvertible {
         return Collections.emptyList();
     }
 
-    static LinkPredictionAutoTuningConfig of(CypherMapWrapper config) {
-        return new LinkPredictionAutoTuningConfigImpl(config);
-    }
-
-    @TestOnly
-    static ImmutableLinkPredictionSplitConfig.Builder builder() {
-        return ImmutableLinkPredictionSplitConfig.builder();
+    static AutoTuningConfig of(CypherMapWrapper config) {
+        return new AutoTuningConfigImpl(config);
     }
 }
