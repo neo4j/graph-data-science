@@ -145,9 +145,14 @@ allprojects { proj ->
             group 'license'
             description 'Checks dependency licenses against an allowlist'
             dependsOn tasks.downloadLicenses
+            // This netty dependency brought in by neo4j-ssl is missing license
+            // It's been fixed https://github.com/netty/netty-tcnative/pull/682
+            // Exclude it from checking until it's released and neo4j-ssl udated
+            def brokenNettyDependency = 'io.netty:netty-tcnative-classes:2.0.46.Final'
             doLast {
                 def allowListedNames = allowList.collect { it.name }
                 tasks.downloadLicenses.dependencyToLicenseJson().dependencies
+                    .findAll { dep -> !dep.name.equals(brokenNettyDependency)}
                     .findAll { dep -> allowListedNames.intersect(dep.licenses.collect { it.name }).isEmpty() }
                     .each { dep -> logger.error("In project ${proj.name}: Could not find an allowed license for dependency '$dep.name'. Details: ${dep.toMapString()}") }
                     .each { dep -> throw new GradleException("The dependency '$dep.name' has no allowed license") }
