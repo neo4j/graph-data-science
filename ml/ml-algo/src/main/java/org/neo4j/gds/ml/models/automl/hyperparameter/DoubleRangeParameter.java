@@ -27,13 +27,18 @@ import java.util.Map;
 
 @ValueClass
 public interface DoubleRangeParameter extends NumericalRangeParameter<Double> {
+    boolean logScale();
+
     static DoubleRangeParameter of(double min, double max) {
-        return ImmutableDoubleRangeParameter.of(min, max);
+        return of(min, max, false);
+    }
+
+    static DoubleRangeParameter of(double min, double max, boolean logScale) {
+        return ImmutableDoubleRangeParameter.of(min, max, logScale);
     }
 
     @Value.Derived
     default Map<String, Object> toMap() {
         return Map.of("range", List.of(min(), max()));
-
     }
 }

@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.ml.models.automl.TunableTrainerConfig.LOG_SCALE_PARAMETERS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class ParameterParser {
@@ -61,7 +62,8 @@ final class ParameterParser {
                     return;
                 }
                 if (range.get(0) instanceof Double && range.get(1) instanceof Double) {
-                    doubleRanges.put(key, DoubleRangeParameter.of((Double) range.get(0), (Double) range.get(1)));
+                    var logScale = LOG_SCALE_PARAMETERS.contains(key);
+                    doubleRanges.put(key, DoubleRangeParameter.of((Double) range.get(0), (Double) range.get(1), logScale));
                     return;
                 }
                 if ((range.get(0) instanceof Integer && range.get(1) instanceof Integer) ||

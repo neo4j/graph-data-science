@@ -39,9 +39,10 @@ import static org.neo4j.gds.ml.models.automl.ParameterParser.parseConcreteParame
 import static org.neo4j.gds.ml.models.automl.ParameterParser.parseRangeParameters;
 
 public final class TunableTrainerConfig {
+    static final List<String> LOG_SCALE_PARAMETERS = List.of("penalty", "learningRate", "tolerance");
     private final Map<String, ConcreteParameter<?>> concreteParameters;
-    private final Map<String, DoubleRangeParameter> doubleRanges;
-    private final Map<String, IntegerRangeParameter> integerRanges;
+    public final Map<String, DoubleRangeParameter> doubleRanges;
+    public final Map<String, IntegerRangeParameter> integerRanges;
     private final TrainingMethod method;
 
     private TunableTrainerConfig(
@@ -129,6 +130,10 @@ public final class TunableTrainerConfig {
 
     public TrainingMethod trainingMethod() {
         return method;
+    }
+
+    public boolean isConcrete() {
+        return doubleRanges.isEmpty() && integerRanges.isEmpty();
     }
 
     @Override
