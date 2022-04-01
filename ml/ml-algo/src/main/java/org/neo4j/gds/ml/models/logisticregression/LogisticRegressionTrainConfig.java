@@ -33,6 +33,7 @@ import java.util.Map;
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LogisticRegressionTrainConfig extends GradientDescentConfig, TrainerConfig {
+    LogisticRegressionTrainConfig DEFAULT = of(Map.of());
 
     @Value.Default
     @Configuration.DoubleRange(min = 0.0)
@@ -58,9 +59,5 @@ public interface LogisticRegressionTrainConfig extends GradientDescentConfig, Tr
     @Override
     default String methodName() {
         return TrainingMethod.LogisticRegression.name();
-    }
-
-    static LogisticRegressionTrainConfig defaultConfig() {
-        return LogisticRegressionTrainConfig.of(Map.of());
     }
 }

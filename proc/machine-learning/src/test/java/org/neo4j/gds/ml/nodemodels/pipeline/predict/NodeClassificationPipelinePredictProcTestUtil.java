@@ -110,7 +110,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 .build(),
             NodeClassificationPipelineModelInfo.builder()
                 .classes(modelData.classIdMap().originalIdsList())
-                .bestParameters(LogisticRegressionTrainConfig.of(Map.of()))
+                .bestParameters(LogisticRegressionTrainConfig.DEFAULT)
                 .metrics(Map.of())
                 .pipeline(pipeline)
                 .build()

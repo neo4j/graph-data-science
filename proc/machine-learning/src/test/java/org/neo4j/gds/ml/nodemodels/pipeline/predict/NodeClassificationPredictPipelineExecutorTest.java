@@ -322,7 +322,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .build(),
                 NodeClassificationPipelineModelInfo.builder()
                     .classes(modelData.classIdMap().originalIdsList())
-                    .bestParameters(LogisticRegressionTrainConfig.of(Map.of()))
+                    .bestParameters(LogisticRegressionTrainConfig.DEFAULT)
                     .metrics(Map.of())
                     .pipeline(pipeline)
                     .build()

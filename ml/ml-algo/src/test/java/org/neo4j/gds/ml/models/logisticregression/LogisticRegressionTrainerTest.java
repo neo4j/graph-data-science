@@ -51,7 +51,7 @@ class LogisticRegressionTrainerTest {
     void withBias() {
         var trainer = new LogisticRegressionTrainer(
             1,
-            LogisticRegressionTrainConfig.defaultConfig(),
+            LogisticRegressionTrainConfig.DEFAULT,
             fourClassIdMap(),
             true,
             TerminationFlag.RUNNING_TRUE,
@@ -91,7 +91,7 @@ class LogisticRegressionTrainerTest {
         labels.setAll(i -> i % 4);
         var trainer = new LogisticRegressionTrainer(
             4,
-            LogisticRegressionTrainConfig.defaultConfig(),
+            LogisticRegressionTrainConfig.DEFAULT,
             fourClassIdMap(),
             true,
             TerminationFlag.RUNNING_TRUE,
@@ -125,7 +125,7 @@ class LogisticRegressionTrainerTest {
     void usingStandardWeights() {
         var trainer = new LogisticRegressionTrainer(
             1,
-            LogisticRegressionTrainConfig.defaultConfig(),
+            LogisticRegressionTrainConfig.DEFAULT,
             fourClassIdMap(),
             false,
             TerminationFlag.RUNNING_TRUE,
@@ -205,7 +205,7 @@ class LogisticRegressionTrainerTest {
     void shouldHandleLargeValuedFeatures() {
         var trainer = new LogisticRegressionTrainer(
             1,
-            LogisticRegressionTrainConfig.defaultConfig(),
+            LogisticRegressionTrainConfig.DEFAULT,
             fourClassIdMap(),
             true,
             TerminationFlag.RUNNING_TRUE,

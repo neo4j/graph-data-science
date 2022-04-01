@@ -301,7 +301,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .graphName(GRAPH_NAME)
                     .negativeClassWeight(1.0)
                     .build(),
-                LinkPredictionModelInfo.of(LogisticRegressionTrainConfig.of(Map.of()), Map.of(), pipeline)
+                LinkPredictionModelInfo.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), pipeline)
             ));
 
             var log = Neo4jProxy.testLog();

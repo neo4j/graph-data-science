@@ -46,7 +46,7 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
 
-        var allowedKeys = LogisticRegressionTrainConfig.of(Map.of()).configKeys();
+        var allowedKeys = LogisticRegressionTrainConfig.DEFAULT.configKeys();
         ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, config.keySet());
 
         var tunableTrainerConfig = TunableTrainerConfig.of(config, TrainingMethod.LogisticRegression);
@@ -68,7 +68,7 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
 
-        var allowedKeys = RandomForestTrainConfig.of(Map.of()).configKeys();
+        var allowedKeys = RandomForestTrainConfig.DEFAULT.configKeys();
         ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, randomForestConfig.keySet());
 
         var tunableTrainerConfig = TunableTrainerConfig.of(randomForestConfig, TrainingMethod.RandomForest);

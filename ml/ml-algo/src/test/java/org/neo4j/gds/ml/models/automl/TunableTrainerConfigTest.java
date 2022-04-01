@@ -149,7 +149,7 @@ class TunableTrainerConfigTest {
         assertThat(trainerConfigs.size()).isEqualTo(1);
         assertThat(trainerConfigs.get(0))
             .usingRecursiveComparison()
-            .isEqualTo(RandomForestTrainConfig.of(Map.of()));
+            .isEqualTo(RandomForestTrainConfig.DEFAULT);
     }
 
     @Test

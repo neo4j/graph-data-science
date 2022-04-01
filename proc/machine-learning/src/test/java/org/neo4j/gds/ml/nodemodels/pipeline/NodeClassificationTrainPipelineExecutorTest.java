@@ -179,7 +179,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("array"));
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.defaultConfig());
+        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.DEFAULT);
 
         var metricSpecification = MetricSpecification.parse("F1(class=1)");
 
@@ -269,7 +269,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         return Stream.of(
             Arguments.of(
                 List.of(TrainingMethod.LogisticRegression),
-                List.of(LogisticRegressionTrainConfig.defaultConfig()),
+                List.of(LogisticRegressionTrainConfig.DEFAULT),
                 MemoryRange.of(31_742_464L, 31_774_424L)
             ),
             Arguments.of(
@@ -279,7 +279,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             ),
             Arguments.of(
                 List.of(TrainingMethod.LogisticRegression, TrainingMethod.RandomForest),
-                List.of(LogisticRegressionTrainConfig.defaultConfig(), RandomForestTrainConfigImpl.builder().build()),
+                List.of(LogisticRegressionTrainConfig.DEFAULT, RandomForestTrainConfigImpl.builder().build()),
                 MemoryRange.of(31_839_432L, 31_906_672L)
             )
         );

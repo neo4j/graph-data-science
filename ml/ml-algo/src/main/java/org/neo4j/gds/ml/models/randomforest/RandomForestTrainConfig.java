@@ -31,6 +31,7 @@ import java.util.Optional;
 
 @Configuration
 public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, TrainerConfig {
+    RandomForestTrainConfig DEFAULT = of(Map.of());
 
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     // Defaults to 1.0/sqrt(featureDimension) if not set explicitly.
