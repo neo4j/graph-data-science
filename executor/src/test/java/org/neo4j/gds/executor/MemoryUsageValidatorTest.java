@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
@@ -30,6 +31,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -74,6 +76,25 @@ class MemoryUsageValidatorTest extends BaseTest {
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
                 () -> 21
             ));
+    }
+
+    @Test
+    void shouldLogWhenFailing() {
+        var log = Neo4jProxy.testLog();
+        var dimensions = GraphDimensions.builder().nodeCount(1000).build();
+        var memoryTree = new TestTree("test", MemoryRange.of(42));
+        var memoryUsageValidator = new MemoryUsageValidator(log, db);
+        try {
+            memoryUsageValidator.tryValidateMemoryUsage(
+                TestConfig.of(CypherMapWrapper.empty()),
+                (config -> new MemoryTreeWithDimensions(memoryTree, dimensions)),
+                () -> 21
+            );
+        } catch (IllegalStateException ex) {
+            // do nothing
+        }
+        assertThat(log.getMessages(TestLog.INFO))
+            .contains("Procedure was blocked since minimum estimated memory (42 Bytes) exceeds current free memory (21 Bytes).");
     }
 
     @Configuration
