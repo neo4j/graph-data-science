@@ -240,6 +240,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     void failOnEmptySplitGraph(LinkPredictionSplitConfig splitConfig, String expectedError) {
         var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.setSplitConfig(splitConfig);
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar")));
 
         var linkPredictionTrainConfig = ImmutableLinkPredictionTrainConfig.builder()
             .modelName("foo")
@@ -271,6 +272,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         String createQuery = GdsCypher.call(graphName)
             .graphProject()
             .withAnyLabel()
+            .withNodeProperty("scalar")
             .withRelationshipType("_TEST_", "REL")
             .withRelationshipType("_TEST_COMPLEMENT_", "REL")
             .yields();
@@ -281,12 +283,12 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         var pipeline = new LinkPredictionTrainingPipeline();
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder().build());
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar")));
 
         var linkPredictionTrainConfig = ImmutableLinkPredictionTrainConfig.builder()
             .modelName("foo")
-            .graphName(GRAPH_NAME)
+            .graphName(graphName)
             .pipeline("bar")
-            .addNodeLabel(NODE_LABEL.name)
             .build();
 
         TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, caller -> {
