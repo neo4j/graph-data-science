@@ -31,8 +31,8 @@ public class JaccardSimilarityComputer implements MetricSimilarityComputer {
     @Override
     public double computeSimilarity(long[] vector1, long[] vector2) {
         long intersection = Intersections.intersection3(vector1, vector2);
-        double union = vector1.length + vector2.length - intersection;
-        double similarity = union == 0 ? 0 : intersection / union;
+        long union = vector1.length + vector2.length - intersection;
+        double similarity = union == 0 ? 0 : intersection / (double) union;
         return similarity >= similarityCutoff ? similarity : Double.NaN;
     }
 
