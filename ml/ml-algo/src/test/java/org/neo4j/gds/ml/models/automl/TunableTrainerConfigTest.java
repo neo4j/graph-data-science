@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.models.automl.hyperparameter.HyperParameterValues;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
 
@@ -74,7 +73,7 @@ class TunableTrainerConfigTest {
     void shouldMaterializeLRConfig() {
         var userInput = Map.<String, Object>of("penalty", 0.1);
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.LogisticRegression);
-        var trainerConfig = config.materialize(HyperParameterValues.EMPTY);
+        var trainerConfig = config.materialize(Map.of());
         assertThat(trainerConfig)
             .usingRecursiveComparison()
             .isEqualTo(LogisticRegressionTrainConfigImpl.builder().penalty(0.1).build());
@@ -88,7 +87,7 @@ class TunableTrainerConfigTest {
             "batchSize", 99
         );
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.LogisticRegression);
-        var trainerConfig = config.materialize(new HyperParameterValues(Map.of("penalty", 0.1337, "patience", 999)));
+        var trainerConfig = config.materialize(Map.of("penalty", 0.1337, "patience", 999));
         assertThat(trainerConfig)
             .usingRecursiveComparison()
             .isEqualTo(LogisticRegressionTrainConfigImpl.builder().batchSize(99).penalty(0.1337).patience(999).build());
@@ -113,7 +112,7 @@ class TunableTrainerConfigTest {
     void shouldMaterializeRFConfig() {
         var userInput = Map.<String, Object>of("maxDepth", 5L);
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
-        var trainerConfig = config.materialize(HyperParameterValues.EMPTY);
+        var trainerConfig = config.materialize(Map.of());
         assertThat(trainerConfig)
             .usingRecursiveComparison()
             .isEqualTo(RandomForestTrainConfigImpl.builder().maxDepth(5).build());
@@ -127,10 +126,10 @@ class TunableTrainerConfigTest {
             "numberOfDecisionTrees", Map.of("range", List.of(10, 100))
         );
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
-        var trainerConfig = config.materialize(new HyperParameterValues(Map.of(
+        var trainerConfig = config.materialize(Map.of(
             "maxFeaturesRatio", 0.1337,
             "numberOfDecisionTrees", 55
-        )));
+        ));
         assertThat(trainerConfig)
             .usingRecursiveComparison()
             .isEqualTo(RandomForestTrainConfigImpl

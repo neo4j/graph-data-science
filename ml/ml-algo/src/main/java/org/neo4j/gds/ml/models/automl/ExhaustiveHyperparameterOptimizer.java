@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.models.automl;
 
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.models.automl.hyperparameter.HyperParameterValues;
 
 import java.util.Iterator;
 import java.util.List;
@@ -36,7 +35,7 @@ public class ExhaustiveHyperparameterOptimizer implements HyperParameterOptimize
             .values()
             .stream()
             .flatMap(List::stream)
-            .map(tunableConfig -> tunableConfig.materialize(HyperParameterValues.EMPTY))
+            .map(tunableConfig -> tunableConfig.materialize(Map.of()))
             .iterator();
     }
 

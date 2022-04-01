@@ -24,7 +24,6 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.hyperparameter.ConcreteParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleRangeParameter;
-import org.neo4j.gds.ml.models.automl.hyperparameter.HyperParameterValues;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
 
@@ -172,10 +171,10 @@ public final class TunableTrainerConfig {
             ));
     }
 
-    public TrainerConfig materialize(HyperParameterValues hyperParameterValues) {
+    public TrainerConfig materialize(Map<String, Object> hyperParameterValues) {
         var materializedMap = new HashMap<String, Object>();
         concreteParameters.forEach((key, value) -> materializedMap.put(key, value.value()));
-        materializedMap.putAll(hyperParameterValues.values);
+        materializedMap.putAll(hyperParameterValues);
         return trainingMethod().createConfig(materializedMap);
     }
 
