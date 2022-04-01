@@ -50,8 +50,6 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
         ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, config.keySet());
 
         var tunableTrainerConfig = TunableTrainerConfig.of(config, TrainingMethod.LogisticRegression);
-        // triggers validation for combinations of end endpoints of each range.
-        tunableTrainerConfig.materializeConcreteCube();
         pipeline.addTrainerConfig(
             TrainingMethod.LogisticRegression,
             tunableTrainerConfig
@@ -72,8 +70,6 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
         ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, randomForestConfig.keySet());
 
         var tunableTrainerConfig = TunableTrainerConfig.of(randomForestConfig, TrainingMethod.RandomForest);
-        // triggers validation for combinations of end endpoints of each range.
-        tunableTrainerConfig.materializeConcreteCube();
         pipeline.addTrainerConfig(
             TrainingMethod.RandomForest,
             tunableTrainerConfig
