@@ -44,7 +44,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 
-@GdsCallable(name = "gds.beta.graphSage.mutate", description = GRAPHSAGE_DESCRIPTION, executionMode = TRAIN)
+@GdsCallable(name = "gds.beta.graphSage.train", description = GRAPHSAGE_DESCRIPTION, executionMode = TRAIN)
 public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig, TrainProc.TrainResult> {
 
     @Description(GRAPHSAGE_DESCRIPTION)
